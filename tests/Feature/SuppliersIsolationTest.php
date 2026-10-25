@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Feature;
 
 use App\Models\Center;
+use App\Models\PurchaseInvoice;
 use App\Models\Supplier;
 use App\Models\Tenant;
 use App\Models\User;
@@ -193,5 +194,170 @@ class SuppliersIsolationTest extends TestCase
             'tax_number' => '12345678901234a',
         ]);
         $response->assertSessionHasErrors(['tax_number']);
+    }
+
+    public function test_user_can_filter_suppliers_by_type(): void
+    {
+        $user = $this->createUserWithPermissions([
+            'purchasing.suppliers.view',
+        ]);
+
+        Supplier::create([
+            'tenant_id' => $user->tenant_id,
+            'center_id' => $user->current_center_id,
+            'name' => 'Parts Supplier Inc',
+            'type' => 'parts',
+            'contact_person' => 'Ali',
+        ]);
+
+        Supplier::create([
+            'tenant_id' => $user->tenant_id,
+            'center_id' => $user->current_center_id,
+            'name' => 'Services Provider Inc',
+            'type' => 'services',
+            'contact_person' => 'Khaled',
+        ]);
+
+        $response = $this->actingAs($user)->get('/app/purchasing/suppliers?type=parts');
+        $response->assertOk();
+    }
+
+    public function test_user_can_download_supplier_import_template(): void
+    {
+        $user = $this->createUserWithPermissions([
+            'purchasing.suppliers.create',
+        ]);
+
+        $response = $this->actingAs($user)->get('/app/purchasing/suppliers/import/template');
+        $response->assertOk();
+    }
+
+    public function test_user_can_record_supplier_payment_fifo(): void
+    {
+        $user = $this->createUserWithPermissions([
+            'purchasing.suppliers.view',
+            'purchasing.suppliers.update',
+        ]);
+
+        $supplier = Supplier::create([
+            'tenant_id' => $user->tenant_id,
+            'center_id' => $user->current_center_id,
+            'name' => 'Test Supplier Co',
+            'type' => 'parts',
+            'contact_person' => 'Saeed',
+        ]);
+
+        $inv1 = PurchaseInvoice::create([
+            'tenant_id' => $user->tenant_id,
+            'center_id' => $user->current_center_id,
+            'supplier_id' => $supplier->id,
+            'code' => 'PINV-001',
+            'status' => 'open',
+            'issue_date' => '2026-01-01',
+            'subtotal' => 100,
+            'tax_amount' => 15,
+            'total' => 115,
+            'balance' => 115,
+        ]);
+
+        $inv2 = PurchaseInvoice::create([
+            'tenant_id' => $user->tenant_id,
+            'center_id' => $user->current_center_id,
+            'supplier_id' => $supplier->id,
+            'code' => 'PINV-002',
+            'status' => 'open',
+            'issue_date' => '2026-01-10',
+            'subtotal' => 200,
+            'tax_amount' => 30,
+            'total' => 230,
+            'balance' => 230,
+        ]);
+
+        // Record a FIFO payment of 150 (should pay 115 on inv1 and 35 on inv2)
+        $response = $this->actingAs($user)->post("/app/purchasing/suppliers/{$supplier->id}/payments", [
+            'amount' => 150,
+            'payment_method' => 'transfer',
+            'payment_date' => '2026-01-15',
+            'reference' => 'TXN-9988',
+        ]);
+
+        $response->assertSessionHas('success');
+
+        // inv1 should be fully paid (balance 0)
+        $this->assertEquals(0, $inv1->fresh()->balance);
+        $this->assertEquals('paid', $inv1->fresh()->status);
+
+        // inv2 should have remaining balance of 230 - 35 = 195
+        $this->assertEquals(195, $inv2->fresh()->balance);
+        $this->assertEquals('open', $inv2->fresh()->status);
+    }
+
+    public function test_user_cannot_record_payment_exceeding_balance(): void
+    {
+        $user = $this->createUserWithPermissions([
+            'purchasing.suppliers.view',
+            'purchasing.suppliers.update',
+        ]);
+
+        $supplier = Supplier::create([
+            'tenant_id' => $user->tenant_id,
+            'center_id' => $user->current_center_id,
+            'name' => 'Supplier Balance Test',
+            'type' => 'parts',
+        ]);
+
+        $inv = PurchaseInvoice::create([
+            'tenant_id' => $user->tenant_id,
+            'center_id' => $user->current_center_id,
+            'supplier_id' => $supplier->id,
+            'code' => 'PINV-999',
+            'status' => 'open',
+            'issue_date' => '2026-01-01',
+            'subtotal' => 100,
+            'tax_amount' => 15,
+            'total' => 115,
+            'balance' => 115,
+        ]);
+
+        // Attempt to pay 200 on an invoice of 115
+        $response = $this->actingAs($user)->post("/app/purchasing/suppliers/{$supplier->id}/payments", [
+            'amount' => 200,
+            'payment_method' => 'cash',
+            'purchase_invoice_id' => $inv->id,
+        ]);
+
+        $response->assertSessionHas('error');
+        $this->assertEquals(115, $inv->fresh()->balance);
+
+        // Attempt to pay 200 FIFO when supplier balance is 115
+        $responseFifo = $this->actingAs($user)->post("/app/purchasing/suppliers/{$supplier->id}/payments", [
+            'amount' => 200,
+            'payment_method' => 'cash',
+        ]);
+
+        $responseFifo->assertSessionHas('error');
+    }
+
+    public function test_user_cannot_record_payment_when_no_debt(): void
+    {
+        $user = $this->createUserWithPermissions([
+            'purchasing.suppliers.view',
+            'purchasing.suppliers.update',
+        ]);
+
+        $supplier = Supplier::create([
+            'tenant_id' => $user->tenant_id,
+            'center_id' => $user->current_center_id,
+            'name' => 'Supplier Zero Balance',
+            'type' => 'parts',
+        ]);
+
+        // Supplier has no invoices or payments, balance = 0
+        $response = $this->actingAs($user)->post("/app/purchasing/suppliers/{$supplier->id}/payments", [
+            'amount' => 50,
+            'payment_method' => 'cash',
+        ]);
+
+        $response->assertSessionHas('error');
     }
 }

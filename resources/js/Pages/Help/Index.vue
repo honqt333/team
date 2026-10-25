@@ -30,6 +30,7 @@
                 </template>
                 <template #actions>
                     <a
+                        v-if="contactSupport.whatsapp_enabled !== false && contactSupport.whatsapp"
                         :href="`https://wa.me/${contactSupport.whatsapp.replace(/[^0-9]/g, '')}`"
                         target="_blank"
                         rel="noopener"
@@ -458,6 +459,7 @@
 
                     <div class="flex flex-wrap items-center gap-3">
                         <a
+                            v-if="contactSupport.whatsapp"
                             :href="`https://wa.me/${contactSupport.whatsapp.replace(/[^0-9]/g, '')}`"
                             target="_blank"
                             rel="noopener"
@@ -466,10 +468,27 @@
                             <span>واتساب الدعم الفوري</span>
                         </a>
                         <a
+                            v-if="contactSupport.phone"
+                            :href="`tel:${contactSupport.phone}`"
+                            class="px-5 py-3 rounded-xl bg-white/10 hover:bg-white/20 font-bold text-sm text-white transition-colors flex items-center gap-2 backdrop-blur"
+                        >
+                            <span>{{ contactSupport.phone }}</span>
+                        </a>
+                        <a
+                            v-if="contactSupport.email"
                             :href="`mailto:${contactSupport.email}`"
                             class="px-5 py-3 rounded-xl bg-white/10 hover:bg-white/20 font-bold text-sm text-white transition-colors flex items-center gap-2 backdrop-blur"
                         >
                             <span>{{ contactSupport.email }}</span>
+                        </a>
+                        <a
+                            v-if="contactSupport.ticket_url"
+                            :href="contactSupport.ticket_url"
+                            target="_blank"
+                            rel="noopener"
+                            class="px-5 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 font-bold text-sm text-white transition-colors flex items-center gap-2 shadow-lg shadow-indigo-600/30"
+                        >
+                            <span>فتح تذكرة دعم</span>
                         </a>
                     </div>
                 </div>
@@ -515,8 +534,40 @@
                         </button>
                     </div>
 
+                    <!-- Video Player or Placeholder -->
                     <div
-                        class="p-6 bg-black/60 flex flex-col items-center justify-center min-h-[340px] text-center"
+                        v-if="activeVideoEmbed"
+                        class="relative w-full aspect-video bg-black overflow-hidden flex items-center justify-center"
+                    >
+                        <iframe
+                            v-if="['youtube', 'vimeo', 'iframe'].includes(activeVideoEmbed.type)"
+                            :src="activeVideoEmbed.src"
+                            class="w-full h-full border-0"
+                            allow="
+                                accelerometer;
+                                autoplay;
+                                clipboard-write;
+                                encrypted-media;
+                                gyroscope;
+                                picture-in-picture;
+                                web-share;
+                            "
+                            allowfullscreen
+                        ></iframe>
+                        <video
+                            v-else-if="activeVideoEmbed.type === 'video'"
+                            controls
+                            autoplay
+                            class="w-full h-full"
+                            :src="activeVideoEmbed.src"
+                        >
+                            متصفحك لا يدعم تشغيل الفيديو.
+                        </video>
+                    </div>
+
+                    <div
+                        v-else
+                        class="p-8 bg-black/60 flex flex-col items-center justify-center min-h-[300px] text-center"
                     >
                         <div
                             class="w-16 h-16 rounded-full bg-sky-500/20 text-sky-400 flex items-center justify-center mb-4"
@@ -529,22 +580,65 @@
                             {{ activeVideo.title }}
                         </h4>
                         <p class="text-xs text-gray-400 max-w-md leading-relaxed mb-4">
-                            {{ activeVideo.description }}
+                            {{
+                                activeVideo.description ||
+                                'لم يتم إضافة رابط تشغيل مباشر لهذا الفيديو بعد.'
+                            }}
                         </p>
                         <span
-                            class="px-3 py-1 rounded-full text-xs font-mono bg-gray-800 text-sky-300"
+                            class="text-xs text-amber-400 bg-amber-500/10 border border-amber-500/30 px-3.5 py-1.5 rounded-full"
                         >
-                            المدة: {{ activeVideo.duration }}
+                            الفيديو قيد الإعداد أو يمكنك إضافة الرابط من لوحة إدارة النظام
                         </span>
                     </div>
 
-                    <div class="p-4 bg-gray-900 border-t border-gray-800 flex justify-end">
-                        <button
-                            @click="activeVideo = null"
-                            class="px-4 py-2 rounded-xl bg-gray-800 hover:bg-gray-700 text-white text-xs font-bold transition-colors"
-                        >
-                            {{ $t('common.close') }}
-                        </button>
+                    <!-- Bottom Details Bar -->
+                    <div
+                        class="p-4 bg-gray-900 border-t border-gray-800 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3"
+                    >
+                        <div class="flex items-center gap-3">
+                            <span
+                                class="px-2.5 py-1 rounded-lg text-xs font-mono bg-gray-800 text-sky-300 border border-gray-700"
+                            >
+                                المدة: {{ activeVideo.duration }}
+                            </span>
+                            <p
+                                v-if="activeVideo.description && activeVideoEmbed"
+                                class="text-xs text-gray-400 max-w-md line-clamp-1"
+                            >
+                                {{ activeVideo.description }}
+                            </p>
+                        </div>
+                        <div class="flex items-center gap-2 w-full sm:w-auto justify-end">
+                            <a
+                                v-if="activeVideo.video_url"
+                                :href="activeVideo.video_url"
+                                target="_blank"
+                                rel="noopener"
+                                class="px-3.5 py-2 rounded-xl bg-gray-800 hover:bg-gray-700 text-gray-200 text-xs font-semibold transition-colors inline-flex items-center gap-1.5"
+                            >
+                                <span>فتح المصدر</span>
+                                <svg
+                                    class="w-3.5 h-3.5 rtl:rotate-180"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2"
+                                        d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                                    />
+                                </svg>
+                            </a>
+                            <button
+                                @click="activeVideo = null"
+                                class="px-4 py-2 rounded-xl bg-sky-600 hover:bg-sky-500 text-white text-xs font-bold transition-colors shadow-sm"
+                            >
+                                {{ $t('common.close') }}
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -563,16 +657,38 @@ const props = defineProps({
         type: Object,
         default: () => ({
             whatsapp: '+966 555 785 658',
+            whatsapp_enabled: true,
             email: 'support@carag.sa',
             phone: '920000000',
             hours: 'السبت - الخميس: 8:00 ص - 10:00 م',
+            ticket_url: '',
         }),
+    },
+    quickStartItems: {
+        type: Array,
+        default: () => null,
+    },
+    videoTutorials: {
+        type: Array,
+        default: () => null,
+    },
+    categories: {
+        type: Array,
+        default: () => null,
+    },
+    topics: {
+        type: Array,
+        default: () => null,
+    },
+    faqs: {
+        type: Array,
+        default: () => null,
     },
 });
 
 const { t } = useI18n();
 const searchQuery = ref('');
-const activeCategory = ref('work_orders');
+const activeCategory = ref(props.categories?.[0]?.id || 'work_orders');
 const openedTopics = ref([1, 10]);
 const activeVideo = ref(null);
 
@@ -587,6 +703,56 @@ const toggleTopic = (id) => {
 const openVideo = (video) => {
     activeVideo.value = video;
 };
+
+const getVideoEmbed = (url) => {
+    if (!url || typeof url !== 'string') return null;
+    const trimmed = url.trim();
+
+    // YouTube: watch?v=ID, youtu.be/ID, embed/ID, shorts/ID, live/ID
+    const ytMatch = trimmed.match(
+        /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=|shorts\/|live\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/i
+    );
+    if (ytMatch && ytMatch[1]) {
+        return {
+            type: 'youtube',
+            src: `https://www.youtube-nocookie.com/embed/${ytMatch[1]}?autoplay=1&rel=0`,
+        };
+    }
+
+    // Vimeo: vimeo.com/ID
+    const vimeoMatch = trimmed.match(
+        /vimeo\.com\/(?:channels\/(?:\w+\/)?|groups\/[^\/]*\/videos\/|album\/\d+\/video\/|video\/|)(\d+)/i
+    );
+    if (vimeoMatch && vimeoMatch[1]) {
+        return {
+            type: 'vimeo',
+            src: `https://player.vimeo.com/video/${vimeoMatch[1]}?autoplay=1`,
+        };
+    }
+
+    // Direct video formats (.mp4, .webm, .ogg)
+    if (/\.(mp4|webm|ogg)($|\?)/i.test(trimmed)) {
+        return {
+            type: 'video',
+            src: trimmed,
+        };
+    }
+
+    // Already an embed or player URL
+    if (trimmed.includes('/embed/') || trimmed.includes('player.')) {
+        return {
+            type: 'iframe',
+            src: trimmed,
+        };
+    }
+
+    return null;
+};
+
+const activeVideoEmbed = computed(() => {
+    if (!activeVideo.value || !activeVideo.value.video_url) return null;
+    return getVideoEmbed(activeVideo.value.video_url);
+});
 
 // Icons as render functions
 const IconFileText = () =>
@@ -630,7 +796,7 @@ const IconUserCheck = () =>
     ]);
 
 // Quick-start items
-const quickStartItems = [
+const defaultQuickStartItems = [
     {
         title: 'فتح كرت عمل جديد',
         desc: 'خطوات استلام سيارة العميل، وإضافة الخدمات والقطع وتحديد تاريخ التسليم المتوقع.',
@@ -666,7 +832,7 @@ const quickStartItems = [
 ];
 
 // Video Tutorials
-const videoTutorials = [
+const defaultVideoTutorials = [
     {
         id: 'v1',
         title: 'جولة سريعة في النظام وضبط المركز',
@@ -718,7 +884,7 @@ const videoTutorials = [
 ];
 
 // Knowledge base categories
-const categories = [
+const defaultCategories = [
     { id: 'work_orders', name: 'كروت العمل والخدمات' },
     { id: 'workshop', name: 'لوحة الورشة والفنيين' },
     { id: 'portal', name: 'بوابة العميل الذكية' },
@@ -729,7 +895,7 @@ const categories = [
 ];
 
 // Topics
-const allTopics = [
+const defaultAllTopics = [
     // Work Orders
     {
         id: 1,
@@ -878,27 +1044,8 @@ const allTopics = [
     },
 ];
 
-// Computed filtered topics
-const filteredTopics = computed(() => {
-    let list = allTopics;
-    if (searchQuery.value.trim()) {
-        const q = searchQuery.value.toLowerCase().trim();
-        return list.filter(
-            (t) =>
-                t.title.toLowerCase().includes(q) ||
-                t.summary.toLowerCase().includes(q) ||
-                t.steps.some((s) => s.toLowerCase().includes(q))
-        );
-    }
-    return list.filter((t) => t.category === activeCategory.value);
-});
-
-const getTopicCount = (categoryId) => {
-    return allTopics.filter((t) => t.category === categoryId).length;
-};
-
 // FAQ List
-const faqs = [
+const defaultFaqs = [
     {
         q: 'هل يمكن تشغيل لوحة الورشة على شاشة تلفاز معلقة داخل المركز؟',
         a: 'نعم بالتأكيد! صُممت لوحة الورشة (/app/workshop) لتكون متجاوبة وتعمل بوضوح تام على الشاشات الكبيرة في صالة الصيانة وتتحدث فورياً.',
@@ -916,4 +1063,63 @@ const faqs = [
         a: 'يدخل العميل رقم جواله في بوابة العميل، ويصله الرمز السداسي عبر رسالة SMS فورية على هاتفه المسجل للدخول الآمن دون الحاجة لتذكر أي كلمة مرور.',
     },
 ];
+
+const iconMap = {
+    IconFileText,
+    IconActivity,
+    IconCheckCircle,
+    IconUserCheck,
+};
+
+const quickStartItems = computed(() => {
+    const list =
+        props.quickStartItems && props.quickStartItems.length > 0
+            ? props.quickStartItems
+            : defaultQuickStartItems;
+
+    return list.map((item) => ({
+        ...item,
+        icon:
+            typeof item.icon === 'string'
+                ? iconMap[item.icon] || IconFileText
+                : item.icon || IconFileText,
+    }));
+});
+
+const videoTutorials = computed(() => {
+    return props.videoTutorials && props.videoTutorials.length > 0
+        ? props.videoTutorials
+        : defaultVideoTutorials;
+});
+
+const categories = computed(() => {
+    return props.categories && props.categories.length > 0 ? props.categories : defaultCategories;
+});
+
+const allTopics = computed(() => {
+    return props.topics && props.topics.length > 0 ? props.topics : defaultAllTopics;
+});
+
+const faqs = computed(() => {
+    return props.faqs && props.faqs.length > 0 ? props.faqs : defaultFaqs;
+});
+
+// Computed filtered topics
+const filteredTopics = computed(() => {
+    let list = allTopics.value;
+    if (searchQuery.value.trim()) {
+        const q = searchQuery.value.toLowerCase().trim();
+        return list.filter(
+            (t) =>
+                t.title.toLowerCase().includes(q) ||
+                t.summary.toLowerCase().includes(q) ||
+                (Array.isArray(t.steps) && t.steps.some((s) => s.toLowerCase().includes(q)))
+        );
+    }
+    return list.filter((t) => t.category === activeCategory.value);
+});
+
+const getTopicCount = (categoryId) => {
+    return allTopics.value.filter((t) => t.category === categoryId).length;
+};
 </script>

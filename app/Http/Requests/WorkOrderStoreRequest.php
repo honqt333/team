@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Requests;
 
+use App\Models\Customer;
 use App\Models\Department;
 use App\Models\Vehicle;
 use App\Models\WorkOrder;
@@ -30,6 +31,22 @@ class WorkOrderStoreRequest extends FormRequest
                 Rule::exists('customers', 'id')
                     ->where('tenant_id', $tenantId)
                     ->whereNull('deleted_at'),
+                function ($attribute, $value, $fail) {
+                    if ($value && ! $this->boolean('allow_credit_override')) {
+                        $customer = Customer::find($value);
+
+                        if ($customer && (float) $customer->credit_limit > 0) {
+                            $balance = $customer->getOutstandingBalance();
+
+                            if ($balance >= (float) $customer->credit_limit) {
+                                $fail(__('work_orders.credit_limit_exceeded', [
+                                    'balance' => number_format($balance, 2),
+                                    'limit' => number_format((float) $customer->credit_limit, 2),
+                                ]));
+                            }
+                        }
+                    }
+                },
             ],
             'vehicle_id' => [
                 'required',
@@ -71,6 +88,7 @@ class WorkOrderStoreRequest extends FormRequest
             'initial_assessment' => ['nullable', 'string', 'max:5000'],
             'odometer' => ['nullable', 'integer', 'min:0'],
             'allow_lower_odometer' => ['nullable', 'boolean'],
+            'allow_credit_override' => ['nullable', 'boolean'],
             'contact_name' => ['nullable', 'string', 'max:255'],
             'contact_phone' => ['nullable', 'string', 'max:20'],
             'entry_date' => ['nullable', 'date'],

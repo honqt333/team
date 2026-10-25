@@ -51,15 +51,13 @@
                         :placeholder="$t('service_bays.code_placeholder')"
                         class="rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-3 py-2 text-sm"
                     />
-                    <select
+                    <SearchableSelect
                         v-model="form.type"
-                        class="rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-3 py-2 text-sm"
-                    >
-                        <option value="">{{ $t('service_bays.no_type') }}</option>
-                        <option v-for="(label, key) in types" :key="key" :value="key">
-                            {{ $t(`service_bays.types.${key}`) }}
-                        </option>
-                    </select>
+                        :options="typeOptions"
+                        option-label="label"
+                        option-value="value"
+                        :compact="true"
+                    />
                     <label class="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-200">
                         <input v-model="form.is_active" type="checkbox" class="rounded" />
                         {{ $t('service_bays.active') }}
@@ -174,13 +172,14 @@
 </template>
 
 <script setup>
-import { reactive, ref } from 'vue';
+import { reactive, ref, computed } from 'vue';
 import { router } from '@inertiajs/vue3';
 import axios from 'axios';
 import { useI18n } from 'vue-i18n';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import PageHeader from '@/Components/PageHeader.vue';
 import BackButton from '@/Components/BackButton.vue';
+import SearchableSelect from '@/Components/SearchableSelect.vue';
 
 const props = defineProps({
     bays: { type: Array, default: () => [] },
@@ -190,6 +189,14 @@ const { t } = useI18n();
 const busy = ref(false);
 
 const types = ['maintenance', 'polish', 'tires', 'electrical', 'wash', 'inspection', 'general'];
+
+const typeOptions = computed(() => [
+    { value: '', label: t('service_bays.no_type') },
+    ...types.map((key) => ({
+        value: key,
+        label: t(`service_bays.types.${key}`),
+    })),
+]);
 
 const form = reactive({
     id: null,

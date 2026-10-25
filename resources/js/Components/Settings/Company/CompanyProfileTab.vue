@@ -300,41 +300,25 @@
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                     {{ $t('company_profile.profile.country') }}
                 </label>
-                <select
+                <SearchableSelect
                     v-model="form.profile.country"
-                    class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:border-transparent font-medium"
-                >
-                    <option value="SA">
-                        🇸🇦 {{ $t('company_profile.profile.saudi_arabia') }} (SA)
-                    </option>
-                    <option value="AE">🇦🇪 الإمارات العربية المتحدة (AE)</option>
-                    <option value="KW">🇰🇼 الكويت (KW)</option>
-                    <option value="BH">🇧🇭 البحرين (BH)</option>
-                    <option value="OM">🇴🇲 عُمان (OM)</option>
-                    <option value="QA">🇶🇦 قطر (QA)</option>
-                    <option value="EG">🇪🇬 مصر (EG)</option>
-                    <option value="JO">🇯🇴 الأردن (JO)</option>
-                </select>
+                    :options="countryOptions"
+                    option-label="label"
+                    option-value="value"
+                    placeholder="اختر الدولة..."
+                />
             </div>
             <div>
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                     {{ $t('company_profile.profile.currency') }}
                 </label>
-                <select
+                <SearchableSelect
                     v-model="form.profile.currency"
-                    class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:border-transparent font-mono font-bold"
-                >
-                    <option value="SAR">SAR - ريال سعودي</option>
-                    <option value="AED">AED - درهم إماراتي</option>
-                    <option value="KWD">KWD - دينار كويتي</option>
-                    <option value="BHD">BHD - دينار بحريني</option>
-                    <option value="OMR">OMR - ريال عماني</option>
-                    <option value="QAR">QAR - ريال قطري</option>
-                    <option value="EGP">EGP - جنيه مصري</option>
-                    <option value="JOD">JOD - دينار أردني</option>
-                    <option value="USD">USD - US Dollar</option>
-                    <option value="EUR">EUR - Euro</option>
-                </select>
+                    :options="currencyOptions"
+                    option-label="label"
+                    option-value="value"
+                    placeholder="اختر العملة..."
+                />
             </div>
         </div>
 
@@ -351,6 +335,36 @@
 </template>
 
 <script setup>
+import { computed } from 'vue';
+import { useI18n } from 'vue-i18n';
+import SearchableSelect from '@/Components/SearchableSelect.vue';
+
+const { t } = useI18n();
+
+const countryOptions = computed(() => [
+    { value: 'SA', label: `🇸🇦 ${t('company_profile.profile.saudi_arabia')} (SA)` },
+    { value: 'AE', label: '🇦🇪 الإمارات العربية المتحدة (AE)' },
+    { value: 'KW', label: '🇰🇼 الكويت (KW)' },
+    { value: 'BH', label: '🇧🇭 البحرين (BH)' },
+    { value: 'OM', label: '🇴🇲 عُمان (OM)' },
+    { value: 'QA', label: '🇶🇦 قطر (QA)' },
+    { value: 'EG', label: '🇪🇬 مصر (EG)' },
+    { value: 'JO', label: '🇯🇴 الأردن (JO)' },
+]);
+
+const currencyOptions = computed(() => [
+    { value: 'SAR', label: 'SAR - ريال سعودي' },
+    { value: 'AED', label: 'AED - درهم إماراتي' },
+    { value: 'KWD', label: 'KWD - دينار كويتي' },
+    { value: 'BHD', label: 'BHD - دينار بحريني' },
+    { value: 'OMR', label: 'OMR - ريال عماني' },
+    { value: 'QAR', label: 'QAR - ريال قطري' },
+    { value: 'EGP', label: 'EGP - جنيه مصري' },
+    { value: 'JOD', label: 'JOD - دينار أردني' },
+    { value: 'USD', label: 'USD - US Dollar' },
+    { value: 'EUR', label: 'EUR - Euro' },
+]);
+
 defineProps({
     profile: Object,
     contact: Object,

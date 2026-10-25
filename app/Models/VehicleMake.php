@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
 class VehicleMake extends Model
@@ -42,7 +43,7 @@ class VehicleMake extends Model
     {
         $locale = app()->getLocale();
 
-        return $locale === 'en' ? ($this->name_en ?: $this->name_ar) : ($this->name_ar ?: $this->name_en);
+        return (string) ($locale === 'en' ? ($this->name_en ?: $this->name_ar) : ($this->name_ar ?: $this->name_en)) ?: '';
     }
 
     /**
@@ -99,6 +100,10 @@ class VehicleMake extends Model
      */
     public function scopeOrderedBySource($query)
     {
+        if (DB::getDriverName() === 'sqlite') {
+            return $query->orderByRaw("case source when 'center' then 1 when 'tenant' then 2 when 'system' then 3 else 4 end");
+        }
+
         return $query->orderByRaw("FIELD(source, 'center', 'tenant', 'system')");
     }
 

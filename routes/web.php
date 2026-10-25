@@ -76,6 +76,7 @@ use App\Http\Controllers\App\VehicleConditionCategoryController;
 use App\Http\Controllers\App\VehicleConditionItemController;
 use App\Http\Controllers\App\VehicleController;
 use App\Http\Controllers\App\VehicleMakeController;
+use App\Http\Controllers\App\VehicleMergeController;
 use App\Http\Controllers\App\VehicleMileageController;
 use App\Http\Controllers\App\VehicleModelController;
 use App\Http\Controllers\App\WorkOrderInspectionController;
@@ -117,6 +118,7 @@ use App\Http\Controllers\System\ContactMessageController;
 use App\Http\Controllers\System\DeveloperController;
 use App\Http\Controllers\System\DunningController;
 use App\Http\Controllers\System\GeneralSettingsController;
+use App\Http\Controllers\System\HelpSettingsController;
 use App\Http\Controllers\System\ImpersonationController;
 use App\Http\Controllers\System\IntegrationsController;
 use App\Http\Controllers\System\PaymentController;
@@ -349,6 +351,8 @@ Route::prefix('app')->middleware(['auth', 'verified', 'tenant.active', 'center.c
     Route::apiResource('vehicles', VehicleController::class);
     Route::get('/vehicles/{vehicle}/mileage-logs', [VehicleMileageController::class, 'index'])->name('vehicles.mileage-logs.index');
     Route::delete('/vehicles/{vehicle}/mileage-logs/{log}', [VehicleMileageController::class, 'destroy'])->name('vehicles.mileage-logs.destroy');
+    Route::get('/vehicles/{vehicle}/merge', [VehicleMergeController::class, 'mergeData'])->name('vehicles.merge-data');
+    Route::post('/vehicles/{source}/merge/{target}', [VehicleMergeController::class, 'executeMerge'])->name('vehicles.execute-merge');
 
     // Work Orders - Hub and Index
     Route::get('/work-orders/export', [WorkOrderController::class, 'export'])->name('work-orders.export');
@@ -474,8 +478,10 @@ Route::prefix('app')->middleware(['auth', 'verified', 'tenant.active', 'center.c
     Route::delete('/work-orders/{workOrder}/attachments/{attachment}', [WorkOrderMediaController::class, 'destroyAttachment'])->name('work-orders.attachments.destroy');
 
     // Quotes
+    Route::get('/quotes/export', [QuoteController::class, 'export'])->name('app.quotes.export');
     Route::get('/quotes', [QuoteController::class, 'index'])->name('app.quotes.index');
     Route::post('/quotes', [QuoteController::class, 'store'])->name('app.quotes.store');
+    Route::post('/quotes/{quote}/duplicate', [QuoteController::class, 'duplicate'])->name('app.quotes.duplicate');
     Route::put('/quotes/{quote}', [QuoteController::class, 'update'])->name('app.quotes.update');
     Route::delete('/quotes/{quote}', [QuoteController::class, 'destroy'])->name('app.quotes.destroy');
     Route::post('/quotes/{quote}/approve', [QuoteApprovalController::class, 'approve'])->name('app.quotes.approve');
@@ -693,6 +699,7 @@ Route::prefix('app')->middleware(['auth', 'verified', 'tenant.active', 'center.c
     Route::get('/api/quotes-index', [QuoteController::class, 'apiIndex'])->name('quotes.api.index');
     Route::get('/api/work-orders-index', [WorkOrderController::class, 'apiIndex'])->name('work-orders.api.index');
     Route::get('/api/customers/search', [App\Http\Controllers\Api\WorkOrderController::class, 'customerSearch']);
+    Route::get('/api/customers/{customer}/balance', [App\Http\Controllers\Api\WorkOrderController::class, 'customerBalance']);
     Route::get('/api/vehicles', [App\Http\Controllers\Api\WorkOrderController::class, 'customerVehicles']);
     Route::get('/api/vehicles/search', [App\Http\Controllers\Api\WorkOrderController::class, 'vehicleSearch']);
     Route::get('/api/work-orders', [App\Http\Controllers\Api\WorkOrderController::class, 'index']);
@@ -768,6 +775,8 @@ Route::prefix('app')->middleware(['auth', 'verified', 'tenant.active', 'center.c
         // Suppliers
         Route::get('/suppliers', [SuppliersController::class, 'index'])->name('suppliers.index');
         Route::get('/suppliers/export', [SuppliersController::class, 'export'])->name('suppliers.export');
+        Route::get('/suppliers/import/template', [SuppliersController::class, 'downloadTemplate'])->name('suppliers.import.template');
+        Route::post('/suppliers/import', [SuppliersController::class, 'import'])->name('suppliers.import');
 
         Route::post('/suppliers', [SuppliersController::class, 'store'])->name('suppliers.store');
         Route::get('/suppliers/{supplier}', [SuppliersController::class, 'show'])->name('suppliers.show');
@@ -775,6 +784,7 @@ Route::prefix('app')->middleware(['auth', 'verified', 'tenant.active', 'center.c
         Route::put('/suppliers/{supplier}', [SuppliersController::class, 'update'])->name('suppliers.update');
         Route::delete('/suppliers/{supplier}', [SuppliersController::class, 'destroy'])->name('suppliers.destroy');
         Route::patch('/suppliers/{supplier}/toggle', [SuppliersController::class, 'toggleActive'])->name('suppliers.toggle');
+        Route::post('/suppliers/{supplier}/payments', [SuppliersController::class, 'recordPayment'])->name('suppliers.payments.store');
         Route::get('/api/suppliers/search', [SuppliersController::class, 'search'])->name('suppliers.search');
 
         // Purchase Orders
@@ -1179,6 +1189,13 @@ Route::prefix('system')->middleware(['auth:web,admin', 'system.admin'])->group(f
     Route::get('/settings/website', [WebsiteSettingsController::class, 'index'])->name('system.settings.website');
     Route::put('/settings/website', [WebsiteSettingsController::class, 'update'])->name('system.settings.website.update');
     Route::post('/settings/website/upload-image', [WebsiteSettingsController::class, 'uploadImage'])->name('system.settings.website.upload-image');
+
+    // Help & Knowledge Base Settings
+    Route::get('/settings/help', [HelpSettingsController::class, 'index'])->name('system.settings.help');
+    Route::put('/settings/help', [HelpSettingsController::class, 'update'])->name('system.settings.help.update');
+    Route::post('/settings/help/reset', [HelpSettingsController::class, 'resetDefaults'])->name('system.settings.help.reset');
+    Route::post('/settings/help/fetch-video-meta', [HelpSettingsController::class, 'fetchVideoMeta'])->name('system.settings.help.fetch_video_meta');
+    Route::get('/help', fn () => redirect()->route('system.settings.help'))->name('system.help');
 
     // Contact Messages
     Route::get('/settings/contact-messages', [ContactMessageController::class, 'index'])->name('system.contact_messages.index');

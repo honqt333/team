@@ -30,10 +30,19 @@ return new class extends Migration
         // 1. Drop the original tenant_id + user_id FK constraints. We
         //    do this first so the columns can be made nullable without
         //    the FK complaining about NULLs.
-        Schema::table('internal_notifications', function (Blueprint $table) {
-            $table->dropForeign(['tenant_id']);
-            $table->dropForeign(['user_id']);
-        });
+        try {
+            Schema::table('internal_notifications', function (Blueprint $table) {
+                $table->dropForeign(['tenant_id']);
+            });
+        } catch (Throwable $e) {
+        }
+
+        try {
+            Schema::table('internal_notifications', function (Blueprint $table) {
+                $table->dropForeign(['user_id']);
+            });
+        } catch (Throwable $e) {
+        }
 
         // 2. Make tenant_id + user_id nullable.
         //    SQLite (used in-memory for tests) doesn't support
@@ -72,6 +81,9 @@ return new class extends Migration
             );
             DB::statement('DROP TABLE _internal_notifications_tmp');
             DB::statement('PRAGMA foreign_keys=ON');
+        } elseif ($driver === 'mysql') {
+            DB::statement('ALTER TABLE internal_notifications MODIFY COLUMN tenant_id BIGINT UNSIGNED NULL');
+            DB::statement('ALTER TABLE internal_notifications MODIFY COLUMN user_id BIGINT UNSIGNED NULL');
         } else {
             DB::statement('ALTER TABLE internal_notifications ALTER COLUMN tenant_id DROP NOT NULL');
             DB::statement('ALTER TABLE internal_notifications ALTER COLUMN user_id DROP NOT NULL');

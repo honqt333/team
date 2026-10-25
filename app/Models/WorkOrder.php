@@ -155,16 +155,20 @@ class WorkOrder extends Model
     public static function generateCode(int $tenantId, int $centerId): string
     {
         return DB::transaction(function () use ($tenantId, $centerId) {
+            $tenant = Tenant::find($tenantId);
+            $format = $tenant?->work_order_number_format ?: 'WO-{SEQ}';
+            $prefix = explode('{', $format)[0] ?: 'WO-';
+
             $maxNumber = 0;
             $rows = static::withoutGlobalScopes()
                 ->where('tenant_id', $tenantId)
                 ->where('center_id', $centerId)
-                ->where('code', 'like', 'WO-%')
+                ->where('code', 'like', $prefix.'%')
                 ->lockForUpdate()
                 ->pluck('code');
 
             foreach ($rows as $code) {
-                if (preg_match('/WO-(\d+)/', (string) $code, $matches)) {
+                if (preg_match('/(\d+)(?!.*\d)/', (string) $code, $matches)) {
                     $n = (int) $matches[1];
 
                     if ($n > $maxNumber) {
@@ -173,7 +177,13 @@ class WorkOrder extends Model
                 }
             }
 
-            return 'WO-'.str_pad((string) ($maxNumber + 1), 6, '0', STR_PAD_LEFT);
+            $nextNumber = $maxNumber + 1;
+
+            if ($tenant) {
+                return $tenant->formatDocumentCode('work_order', $centerId, $nextNumber);
+            }
+
+            return $prefix.str_pad((string) $nextNumber, 6, '0', STR_PAD_LEFT);
         });
     }
 

@@ -2,6 +2,7 @@
 import { ref, computed } from 'vue';
 import { Head, router, Link } from '@inertiajs/vue3';
 import SystemLayout from '@/Layouts/SystemLayout.vue';
+import SearchableSelect from '@/Components/SearchableSelect.vue';
 
 const props = defineProps({
     receipts: { type: Object, required: true }, // paginated
@@ -24,6 +25,13 @@ const statusLabels = {
     approved: { ar: 'موافق عليه', en: 'Approved' },
     rejected: { ar: 'مرفوض', en: 'Rejected' },
 };
+
+const statusOptions = computed(() => [
+    { value: 'all', label: locale.value === 'ar' ? 'جميع الحالات' : 'All statuses' },
+    { value: 'pending', label: locale.value === 'ar' ? 'قيد المراجعة' : 'Pending' },
+    { value: 'approved', label: locale.value === 'ar' ? 'موافق عليه' : 'Approved' },
+    { value: 'rejected', label: locale.value === 'ar' ? 'مرفوض' : 'Rejected' },
+]);
 
 function applyFilters() {
     router.get(
@@ -188,22 +196,16 @@ function getAmountBadge(receipt) {
                         class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                     />
                 </div>
-                <select
-                    v-model="status"
-                    @change="applyFilters"
-                    class="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                >
-                    <option value="all">
-                        {{ locale === 'ar' ? 'جميع الحالات' : 'All statuses' }}
-                    </option>
-                    <option value="pending">
-                        {{ locale === 'ar' ? 'قيد المراجعة' : 'Pending' }}
-                    </option>
-                    <option value="approved">
-                        {{ locale === 'ar' ? 'موافق عليه' : 'Approved' }}
-                    </option>
-                    <option value="rejected">{{ locale === 'ar' ? 'مرفوض' : 'Rejected' }}</option>
-                </select>
+                <div class="w-full sm:w-52">
+                    <SearchableSelect
+                        v-model="status"
+                        :options="statusOptions"
+                        option-label="label"
+                        option-value="value"
+                        :compact="true"
+                        @change="applyFilters"
+                    />
+                </div>
             </div>
 
             <!-- Receipts table -->

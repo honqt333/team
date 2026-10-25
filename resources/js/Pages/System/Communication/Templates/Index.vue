@@ -1,62 +1,188 @@
 <template>
-    <SystemLayout title="قوالب التواصل">
-        <template #header>
-            <div class="flex items-center justify-between">
-                <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
-                    قوالب التواصل
-                </h2>
-            </div>
-        </template>
+    <SystemLayout>
+        <Head :title="isAr ? 'قوالب التواصل' : 'Communication Templates'" />
 
-        <div class="py-12">
-            <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-                <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
-                    <div class="p-6">
-                        <div class="overflow-x-auto">
-                            <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                                <thead class="bg-gray-50 dark:bg-gray-700/50">
-                                    <tr>
-                                        <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle">الاسم</th>
-                                        <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle">الكود</th>
-                                        <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle">النوع</th>
-                                        <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle">الحالة</th>
-                                        <th scope="col" class="relative px-6 py-3 align-middle text-center">
-                                            <span class="sr-only">تحرير</span>
-                                        </th>
-                                    </tr>
-                                </thead>
-                                <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                                    <tr v-for="template in templates" :key="template.id">
-                                        <td class="px-6 py-4 whitespace-nowrap align-middle">
-                                            <div class="text-sm font-medium text-gray-900 dark:text-white">{{ template.name }}</div>
-                                            <div class="text-sm text-gray-500 dark:text-gray-400">{{ template.subject }}</div>
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400 font-mono align-middle">
-                                            {{ template.code }}
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap align-middle">
-                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-200">
-                                                {{ template.type === 'email' ? 'بريد إلكتروني' : 'رسالة نصية' }}
-                                            </span>
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap align-middle">
-                                            <span 
-                                                class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full"
-                                                :class="template.is_active ? 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-200' : 'bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-200'"
-                                            >
-                                                {{ template.is_active ? 'مفعل' : 'معطل' }}
-                                            </span>
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-left text-sm font-medium align-middle">
-                                            <Link :href="route('system.communication.templates.edit', template.id)" class="text-indigo-600 dark:text-indigo-400 hover:text-indigo-900">
-                                                تحرير
-                                            </Link>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
+        <div class="space-y-6">
+            <!-- Header Section -->
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <div>
+                    <h1
+                        class="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2.5"
+                    >
+                        <svg
+                            class="w-7 h-7 text-indigo-600 dark:text-indigo-400"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                            />
+                        </svg>
+                        <span>{{ isAr ? 'قوالب التواصل' : 'Communication Templates' }}</span>
+                    </h1>
+                    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                        {{
+                            isAr
+                                ? 'إدارة وتخصيص قوالب الرسائل البريدية والإشعارات الآلية للنظام.'
+                                : 'Manage and customize automated system email and notification templates.'
+                        }}
+                    </p>
+                </div>
+            </div>
+
+            <!-- Table Card -->
+            <div
+                class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden shadow-sm"
+            >
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700 text-sm">
+                        <thead class="bg-gray-50 dark:bg-gray-900/50">
+                            <tr>
+                                <th
+                                    scope="col"
+                                    class="px-6 py-3.5 text-start text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider"
+                                >
+                                    {{ isAr ? 'اسم القالب والعنوان' : 'Template Name & Subject' }}
+                                </th>
+                                <th
+                                    scope="col"
+                                    class="px-6 py-3.5 text-start text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider"
+                                >
+                                    {{ isAr ? 'الكود التعريفي' : 'Code' }}
+                                </th>
+                                <th
+                                    scope="col"
+                                    class="px-6 py-3.5 text-start text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider"
+                                >
+                                    {{ isAr ? 'النوع' : 'Type' }}
+                                </th>
+                                <th
+                                    scope="col"
+                                    class="px-6 py-3.5 text-start text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider"
+                                >
+                                    {{ isAr ? 'الحالة' : 'Status' }}
+                                </th>
+                                <th
+                                    scope="col"
+                                    class="px-6 py-3.5 text-end text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider"
+                                >
+                                    {{ isAr ? 'الإجراءات' : 'Actions' }}
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody
+                            class="divide-y divide-gray-200 dark:divide-gray-700 bg-white dark:bg-gray-800"
+                        >
+                            <tr
+                                v-for="template in templates"
+                                :key="template.id"
+                                class="hover:bg-gray-50/50 dark:hover:bg-gray-750 transition-colors"
+                            >
+                                <td class="px-6 py-4">
+                                    <div class="font-bold text-gray-900 dark:text-white">
+                                        {{ template.name }}
+                                    </div>
+                                    <div class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                                        {{ template.subject || '—' }}
+                                    </div>
+                                </td>
+                                <td
+                                    class="px-6 py-4 whitespace-nowrap text-xs text-gray-600 dark:text-gray-300 font-mono"
+                                >
+                                    <span class="px-2 py-1 rounded-md bg-gray-100 dark:bg-gray-700">
+                                        {{ template.code }}
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span
+                                        class="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-semibold rounded-full bg-blue-50 text-blue-700 border border-blue-200 dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-800"
+                                    >
+                                        {{
+                                            template.type === 'email'
+                                                ? isAr
+                                                    ? 'بريد إلكتروني'
+                                                    : 'Email'
+                                                : isAr
+                                                  ? 'رسالة نصية'
+                                                  : 'SMS'
+                                        }}
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span
+                                        class="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold rounded-full"
+                                        :class="
+                                            template.is_active
+                                                ? 'bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-300 dark:border-emerald-800'
+                                                : 'bg-rose-50 text-rose-700 border border-rose-200 dark:bg-rose-900/30 dark:text-rose-300 dark:border-rose-800'
+                                        "
+                                    >
+                                        <span
+                                            class="w-1.5 h-1.5 rounded-full"
+                                            :class="
+                                                template.is_active
+                                                    ? 'bg-emerald-500'
+                                                    : 'bg-rose-500'
+                                            "
+                                        ></span>
+                                        {{
+                                            template.is_active
+                                                ? isAr
+                                                    ? 'مفعل'
+                                                    : 'Active'
+                                                : isAr
+                                                  ? 'معطل'
+                                                  : 'Disabled'
+                                        }}
+                                    </span>
+                                </td>
+                                <td
+                                    class="px-6 py-4 whitespace-nowrap text-end text-sm font-medium"
+                                >
+                                    <Link
+                                        :href="
+                                            route(
+                                                'system.communication.templates.edit',
+                                                template.id
+                                            )
+                                        "
+                                        class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-bold text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50 dark:text-indigo-400 dark:hover:bg-indigo-950/40 transition-colors"
+                                    >
+                                        <svg
+                                            class="w-3.5 h-3.5"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            viewBox="0 0 24 24"
+                                        >
+                                            <path
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                stroke-width="2"
+                                                d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                                            />
+                                        </svg>
+                                        <span>{{ isAr ? 'تعديل' : 'Edit' }}</span>
+                                    </Link>
+                                </td>
+                            </tr>
+                            <tr v-if="!templates || templates.length === 0">
+                                <td
+                                    colspan="5"
+                                    class="px-6 py-12 text-center text-sm text-gray-500 dark:text-gray-400"
+                                >
+                                    {{
+                                        isAr
+                                            ? 'لا توجد قوالب تواصل مضافة حالياً.'
+                                            : 'No communication templates found.'
+                                    }}
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
@@ -64,10 +190,13 @@
 </template>
 
 <script setup>
-import { Link } from '@inertiajs/vue3';
+import { computed } from 'vue';
+import { Head, Link } from '@inertiajs/vue3';
 import SystemLayout from '@/Layouts/SystemLayout.vue';
 
 defineProps({
     templates: Array,
 });
+
+const isAr = computed(() => (document?.documentElement?.lang || 'ar') === 'ar');
 </script>

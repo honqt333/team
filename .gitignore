@@ -26,4 +26,6 @@ Thumbs.db
 # Local scratch files (created during ad-hoc debugging — never commit)
 scratch_test.php
 /scratch
+/storage/framework/cache/*
+!/storage/framework/cache/.gitignore
 

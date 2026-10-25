@@ -30,16 +30,16 @@
                 <label class="block text-sm font-medium text-gray-900 dark:text-white">
                     {{ $t('system.dunning.language_label') }}
                 </label>
-                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400 mb-2">
                     {{ $t('system.dunning.language_helper') }}
                 </p>
-                <select
+                <SearchableSelect
                     v-model="form.dunning_language"
-                    class="mt-2 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                >
-                    <option value="ar">العربية</option>
-                    <option value="en">English</option>
-                </select>
+                    :options="languageOptions"
+                    option-label="label"
+                    option-value="value"
+                    placeholder="اختر اللغة..."
+                />
             </div>
 
             <div class="flex justify-end">
@@ -58,10 +58,16 @@
 <script setup>
 import { ref } from 'vue';
 import { router } from '@inertiajs/vue3';
+import SearchableSelect from '@/Components/SearchableSelect.vue';
 
 const props = defineProps({
     tenant: { type: Object, required: true },
 });
+
+const languageOptions = [
+    { value: 'ar', label: 'العربية' },
+    { value: 'en', label: 'English' },
+];
 
 const form = ref({
     dunning_opted_out: !props.tenant.dunning_opted_out,

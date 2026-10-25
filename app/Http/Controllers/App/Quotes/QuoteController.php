@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\App\Quotes;
 
+use App\Exports\QuotesExport;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\QuoteRequest;
 use App\Models\Customer;
@@ -22,8 +23,11 @@ use App\Support\TenancyContext;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Inertia\Response;
+use Maatwebsite\Excel\Facades\Excel;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class QuoteController extends Controller
 {
@@ -240,6 +244,7 @@ class QuoteController extends Controller
             'vehicle_id' => $request->vehicle_id,
             'code' => Quote::generateCode($tenantId, $centerId),
             'status' => Quote::STATUS_DRAFT,
+            'valid_until' => $request->valid_until ?: now()->addDays(15)->toDateString(),
             'notes' => $request->notes,
             'customer_complaint' => $request->customer_complaint,
             'initial_assessment' => $request->initial_assessment,
@@ -334,6 +339,7 @@ class QuoteController extends Controller
             'customer_complaint' => $request->customer_complaint,
             'initial_assessment' => $request->initial_assessment,
             'odometer' => $request->odometer,
+            'valid_until' => $request->valid_until,
             'notes' => $request->notes,
         ]);
 
@@ -418,6 +424,86 @@ class QuoteController extends Controller
     }
 
     /**
+     * Export quotes to Excel.
+     */
+    public function export(Request $request): BinaryFileResponse
+    {
+        $this->authorize('viewAny', Quote::class);
+
+        return Excel::download(new QuotesExport, 'quotes_'.now()->format('Y-m-d_His').'.xlsx');
+    }
+
+    /**
+     * Duplicate an existing quote into a new draft quote.
+     */
+    public function duplicate(Quote $quote): RedirectResponse
+    {
+        $this->authorize('create', Quote::class);
+
+        $newQuote = DB::transaction(function () use ($quote) {
+            $user = auth()->user();
+            $quote->loadMissing(['lines', 'parts', 'departments']);
+
+            $newCode = Quote::generateCode($user->tenant_id, $user->current_center_id);
+
+            $cloned = $quote->replicate([
+                'code',
+                'uuid',
+                'status',
+                'sent_at',
+                'approved_at',
+                'rejected_at',
+                'converted_at',
+                'approved_by',
+                'converted_work_order_id',
+                'rejection_reason',
+                'signature_path',
+            ]);
+
+            $cloned->tenant_id = $user->tenant_id;
+            $cloned->center_id = $user->current_center_id;
+            $cloned->code = $newCode;
+            $cloned->status = Quote::STATUS_DRAFT;
+            $cloned->created_by = $user->id;
+            $cloned->valid_until = now()->addDays(15)->toDateString();
+            $cloned->save();
+
+            // Sync departments
+            $deptIds = $quote->departments->pluck('id')->toArray();
+
+            if (! empty($deptIds)) {
+                $cloned->departments()->sync($deptIds);
+            }
+
+            // Clone lines and map IDs for parts
+            $lineIdMap = [];
+
+            foreach ($quote->lines as $line) {
+                $newLine = $line->replicate();
+                $newLine->quote_id = $cloned->id;
+                $newLine->save();
+                $lineIdMap[$line->id] = $newLine->id;
+            }
+
+            // Clone parts
+            foreach ($quote->parts as $part) {
+                $newPart = $part->replicate();
+                $newPart->quote_id = $cloned->id;
+                $newPart->quote_line_id = $part->quote_line_id ? ($lineIdMap[$part->quote_line_id] ?? null) : null;
+                $newPart->save();
+            }
+
+            $cloned->recalculateTotals();
+            $cloned->save();
+
+            return $cloned;
+        });
+
+        return redirect()->route('app.quotes.show', $newQuote->id)
+            ->with('success', __('quotes.duplicated_success') ?? 'تم تكرار ونسخ عرض السعر بنجاح');
+    }
+
+    /**
      * Remove the specified quote.
      */
     public function destroy(Quote $quote): RedirectResponse
@@ -487,6 +573,8 @@ class QuoteController extends Controller
             $quote->recalculateTotals();
             $quote->save();
         }
+
+        $quote->append('signature_url');
 
         return Inertia::render('Quotes/Show', [
             'quote' => $quote,

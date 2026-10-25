@@ -52,6 +52,18 @@
                         option-value="value"
                         :placeholder="$t('system.tenants.all_statuses')"
                         compact
+                        @update:model-value="applyFilters"
+                    />
+
+                    <!-- Plan Filter -->
+                    <SearchableSelect
+                        v-model="planFilter"
+                        :options="planOptions"
+                        option-label="label"
+                        option-value="value"
+                        :placeholder="'جميع الباقات'"
+                        compact
+                        @update:model-value="applyFilters"
                     />
                 </div>
             </div>
@@ -73,6 +85,11 @@
                                     class="px-6 py-4 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle"
                                 >
                                     {{ $t('system.tenants.trade_name') }}
+                                </th>
+                                <th
+                                    class="px-6 py-4 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle"
+                                >
+                                    الباقة الحالية
                                 </th>
                                 <th
                                     class="px-6 py-4 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle"
@@ -127,6 +144,65 @@
                                     >
                                         {{ tenant.legal_name }}
                                     </div>
+                                </td>
+                                <td class="px-6 py-4 align-middle">
+                                    <div v-if="tenant.latest_subscription?.plan" class="space-y-1">
+                                        <div
+                                            class="flex items-center gap-1.5 font-semibold text-sm text-gray-900 dark:text-white"
+                                        >
+                                            <span
+                                                class="inline-block w-2 h-2 rounded-full"
+                                                :class="
+                                                    tenant.latest_subscription.status === 'active'
+                                                        ? 'bg-emerald-500'
+                                                        : ['trial', 'trialing'].includes(
+                                                                tenant.latest_subscription.status
+                                                            )
+                                                          ? 'bg-amber-500'
+                                                          : 'bg-gray-400'
+                                                "
+                                            ></span>
+                                            {{
+                                                tenant.latest_subscription.plan.name_ar ||
+                                                tenant.latest_subscription.plan.name_en
+                                            }}
+                                        </div>
+                                        <div class="text-xs text-gray-500 flex items-center gap-2">
+                                            <span>
+                                                {{
+                                                    tenant.latest_subscription.billing_cycle ===
+                                                    'yearly'
+                                                        ? 'سنوي'
+                                                        : 'شهري'
+                                                }}
+                                            </span>
+                                            <span class="text-gray-300 dark:text-gray-600">•</span>
+                                            <span
+                                                :class="
+                                                    tenant.latest_subscription.status === 'active'
+                                                        ? 'text-emerald-600 dark:text-emerald-400'
+                                                        : ['trial', 'trialing'].includes(
+                                                                tenant.latest_subscription.status
+                                                            )
+                                                          ? 'text-amber-600 dark:text-amber-400'
+                                                          : 'text-gray-500'
+                                                "
+                                            >
+                                                {{
+                                                    tenant.latest_subscription.status === 'active'
+                                                        ? 'نشط'
+                                                        : ['trial', 'trialing'].includes(
+                                                                tenant.latest_subscription.status
+                                                            )
+                                                          ? 'تجريبي'
+                                                          : 'منتهي'
+                                                }}
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <span v-else class="text-sm text-gray-400 italic">
+                                        بدون باقة
+                                    </span>
                                 </td>
                                 <td class="px-6 py-4 align-middle">
                                     <div
@@ -272,15 +348,26 @@ const { t } = useI18n();
 const props = defineProps({
     tenants: Object,
     filters: Object,
+    plans: { type: Array, default: () => [] },
 });
 
 const search = ref(props.filters?.search || '');
 const statusFilter = ref(props.filters?.status || '');
+const planFilter = ref(props.filters?.plan_id ? Number(props.filters.plan_id) : '');
 
 const statusOptions = computed(() => [
+    { value: '', label: t('system.tenants.all_statuses') },
     { value: 'active', label: t('system.status.active') },
     { value: 'trial', label: t('system.status.trial') },
     { value: 'suspended', label: t('system.status.suspended') },
+]);
+
+const planOptions = computed(() => [
+    { value: '', label: 'جميع الباقات' },
+    ...props.plans.map((p) => ({
+        value: p.id,
+        label: p.name_ar || p.name_en,
+    })),
 ]);
 
 let searchTimeout = null;
@@ -298,6 +385,7 @@ const applyFilters = () => {
         {
             search: search.value || undefined,
             status: statusFilter.value || undefined,
+            plan_id: planFilter.value || undefined,
         },
         {
             preserveState: true,

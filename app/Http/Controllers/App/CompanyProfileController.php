@@ -88,6 +88,20 @@ class CompanyProfileController extends Controller
             ],
             'numbering' => [
                 'invoice_number_format' => $tenant->invoice_number_format ?? 'INV-{CENTER}-{YYYY}-{SEQ}',
+                'work_order_number_format' => $tenant->work_order_number_format ?? 'WO-{SEQ}',
+                'quote_number_format' => $tenant->quote_number_format ?? 'QT-{SEQ}',
+            ],
+            'workflow' => [
+                'allow_lower_odometer' => (bool) $tenant->getWorkflowSetting('allow_lower_odometer', false),
+                'max_discount_percentage' => (int) $tenant->getWorkflowSetting('max_discount_percentage', 15),
+                'require_phone_on_creation' => (bool) $tenant->getWorkflowSetting('require_phone_on_creation', true),
+                'default_warranty_days' => (int) $tenant->getWorkflowSetting('default_warranty_days', 30),
+            ],
+            'notifications' => [
+                'work_order_created' => $tenant->getNotificationTemplate('work_order_created', 'مرحباً {customer_name}، تم استلام مركبتك {plate_number} برقم كرت صيانة #{code} في {center_name}.'),
+                'work_order_completed' => $tenant->getNotificationTemplate('work_order_completed', 'عزيزنا {customer_name}، اكتملت صيانة مركبتك {plate_number} (#{code}) وأصبحت جاهزة للاستلام في {center_name}.'),
+                'quote_shared' => $tenant->getNotificationTemplate('quote_shared', 'مرحباً {customer_name}، تفضل عرض السعر الخاص بمركبتك {plate_number} رقم {code}، يمكنك الاطلاع عليه هنا: {url}'),
+                'invoice_issued' => $tenant->getNotificationTemplate('invoice_issued', 'عزيزنا {customer_name}، تم إصدار الفاتورة الضريبية رقم {code} بمبلغ {total} ر.س لمركبتك {plate_number}.'),
             ],
             'admin_user' => [
                 'id' => $adminUser->id,
@@ -290,7 +304,7 @@ class CompanyProfileController extends Controller
     public function update(Request $request)
     {
         $request->validate([
-            'section' => 'required|in:profile,contact,address,vat,zatca,numbering',
+            'section' => 'required|in:profile,contact,address,vat,zatca,numbering,workflow,notifications',
             'data' => 'required|array',
         ]);
 
@@ -379,6 +393,30 @@ class CompanyProfileController extends Controller
             case 'numbering':
                 $tenant->update([
                     'invoice_number_format' => $data['invoice_number_format'] ?? 'INV-{CENTER}-{YYYY}-{SEQ}',
+                    'work_order_number_format' => $data['work_order_number_format'] ?? 'WO-{SEQ}',
+                    'quote_number_format' => $data['quote_number_format'] ?? 'QT-{SEQ}',
+                ]);
+                break;
+
+            case 'workflow':
+                $tenant->update([
+                    'workflow_settings' => [
+                        'allow_lower_odometer' => (bool) ($data['allow_lower_odometer'] ?? false),
+                        'max_discount_percentage' => (int) ($data['max_discount_percentage'] ?? 15),
+                        'require_phone_on_creation' => (bool) ($data['require_phone_on_creation'] ?? true),
+                        'default_warranty_days' => (int) ($data['default_warranty_days'] ?? 30),
+                    ],
+                ]);
+                break;
+
+            case 'notifications':
+                $tenant->update([
+                    'notification_templates' => [
+                        'work_order_created' => $data['work_order_created'] ?? '',
+                        'work_order_completed' => $data['work_order_completed'] ?? '',
+                        'quote_shared' => $data['quote_shared'] ?? '',
+                        'invoice_issued' => $data['invoice_issued'] ?? '',
+                    ],
                 ]);
                 break;
         }
@@ -443,29 +481,44 @@ class CompanyProfileController extends Controller
                 break;
 
             case 'numbering':
+                $formatValidator = function ($attribute, $value, $fail) {
+                    if (strpos((string) $value, '{SEQ}') === false) {
+                        $fail(__('company_profile.numbering.seq_required'));
+                    }
+                    $allowed = ['{SEQ}', '{YYYY}', '{YY}', '{MM}', '{DD}', '{CENTER}'];
+                    $cleaned = (string) $value;
+
+                    foreach ($allowed as $token) {
+                        $cleaned = str_replace($token, '', $cleaned);
+                    }
+
+                    if (preg_match('/\{[^}]+\}/', $cleaned)) {
+                        $fail(__('company_profile.numbering.invalid_tokens'));
+                    }
+                };
+
                 $rules = [
-                    'invoice_number_format' => [
-                        'required',
-                        'string',
-                        'max:100',
-                        function ($attribute, $value, $fail) {
-                            if (strpos($value, '{SEQ}') === false) {
-                                $fail(__('company_profile.numbering.seq_required'));
-                            }
-                            // Only allow specific tokens
-                            $allowed = ['{SEQ}', '{YYYY}', '{YY}', '{MM}', '{DD}', '{CENTER}'];
-                            $cleaned = $value;
+                    'invoice_number_format' => ['required', 'string', 'max:100', $formatValidator],
+                    'work_order_number_format' => ['nullable', 'string', 'max:100', $formatValidator],
+                    'quote_number_format' => ['nullable', 'string', 'max:100', $formatValidator],
+                ];
+                break;
 
-                            foreach ($allowed as $token) {
-                                $cleaned = str_replace($token, '', $cleaned);
-                            }
+            case 'workflow':
+                $rules = [
+                    'allow_lower_odometer' => 'boolean',
+                    'max_discount_percentage' => 'nullable|integer|min:0|max:100',
+                    'require_phone_on_creation' => 'boolean',
+                    'default_warranty_days' => 'nullable|integer|min:0|max:3650',
+                ];
+                break;
 
-                            // Check for remaining curly braces (invalid tokens)
-                            if (preg_match('/\{[^}]+\}/', $cleaned)) {
-                                $fail(__('company_profile.numbering.invalid_tokens'));
-                            }
-                        },
-                    ],
+            case 'notifications':
+                $rules = [
+                    'work_order_created' => 'nullable|string|max:1000',
+                    'work_order_completed' => 'nullable|string|max:1000',
+                    'quote_shared' => 'nullable|string|max:1000',
+                    'invoice_issued' => 'nullable|string|max:1000',
                 ];
                 break;
         }

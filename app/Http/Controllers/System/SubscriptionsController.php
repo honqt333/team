@@ -78,8 +78,7 @@ class SubscriptionsController extends Controller
                 ->get(['id', 'name_ar', 'name_en', 'slug', 'price_monthly', 'price_yearly', 'trial_days', 'is_featured']),
             'tenants' => Tenant::orderBy('trade_name')
                 ->get(['id', 'name', 'trade_name', 'status']),
-            'eligibleTenants' => Tenant::whereIn('status', ['trial', 'active', 'expired'])
-                ->orderBy('trade_name')
+            'eligibleTenants' => Tenant::orderBy('trade_name')
                 ->get(['id', 'name', 'trade_name']),
         ]);
     }
@@ -104,22 +103,25 @@ class SubscriptionsController extends Controller
         $validated = $request->validate([
             'tenant_id' => 'required|exists:tenants,id',
             'plan_id' => 'required|exists:plans,id',
-            'billing_cycle' => 'required|in:monthly,yearly',
+            'billing_cycle' => 'nullable|in:monthly,yearly',
             'promo_code' => 'nullable|string|exists:promo_codes,code',
         ]);
 
         $plan = Plan::findOrFail($validated['plan_id']);
-        $price = $validated['billing_cycle'] === 'yearly' ? $plan->price_yearly : $plan->price_monthly;
+        $price = (float) $plan->price_yearly;
 
-        // Calculate dates
+        // Calculate dates & determine if this is a trial plan
         $startDate = now();
-        $endDate = $validated['billing_cycle'] === 'yearly'
-            ? $startDate->copy()->addYear()
-            : $startDate->copy()->addMonth();
-
-        // Manual subscriptions created by admin are always active paid plans
         $status = 'active';
         $trialEndsAt = null;
+
+        if ($plan->slug === 'trial' || ($plan->trial_days > 0 && $price == 0.0)) {
+            $status = 'trialing';
+            $trialEndsAt = $startDate->copy()->addDays($plan->trial_days ?: 14);
+            $endDate = $trialEndsAt;
+        } else {
+            $endDate = $startDate->copy()->addYear();
+        }
 
         // Cancel/expire any existing active/trial/trialing subscriptions for this tenant
         Subscription::where('tenant_id', $validated['tenant_id'])
@@ -132,7 +134,7 @@ class SubscriptionsController extends Controller
             'tenant_id' => $validated['tenant_id'],
             'plan_id' => $validated['plan_id'],
             'status' => $status,
-            'billing_cycle' => $validated['billing_cycle'],
+            'billing_cycle' => 'yearly',
             'starts_at' => $startDate,
             'ends_at' => $endDate,
             'trial_ends_at' => $trialEndsAt,
@@ -143,9 +145,15 @@ class SubscriptionsController extends Controller
 
         // Update tenant status
         $subscription->tenant->update([
-            'status' => $status === 'trialing' ? 'trial' : 'active',
+            'status' => in_array($status, ['trial', 'trialing']) ? 'trial' : 'active',
             'trial_ends_at' => $trialEndsAt,
         ]);
+
+        if ($request->wantsJson() || $request->header('X-Inertia')) {
+            if (str_contains(url()->previous(), '/system/tenants/')) {
+                return back()->with('success', 'تم ربط وتفعيل الباقة بنجاح للمستأجر');
+            }
+        }
 
         return redirect()->route('system.subscriptions.index')
             ->with('success', 'تم إنشاء الاشتراك بنجاح');

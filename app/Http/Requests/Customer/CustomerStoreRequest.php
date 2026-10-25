@@ -33,7 +33,9 @@ class CustomerStoreRequest extends FormRequest
             ],
             'whatsapp' => ['nullable', 'string', 'max:20'],
             'email' => ['nullable', 'email', 'max:255'],
-            'tax_number' => ['required_if:type,company', 'nullable', 'regex:/^\d{15}$/', 'string'],
+            'tax_number' => ['nullable', 'string', 'regex:/^\d{15}$/'],
+            'credit_limit' => ['nullable', 'numeric', 'min:0'],
+            'payment_terms_days' => ['nullable', 'integer', 'min:0'],
             'address_line' => ['nullable', 'string', 'max:500'],
             'building_number' => ['nullable', 'string', 'max:20'],
             'postal_code' => ['nullable', 'string', 'max:10'],
@@ -51,7 +53,6 @@ class CustomerStoreRequest extends FormRequest
     {
         return [
             'contact_name.required_if' => 'اسم جهة الاتصال مطلوب للعملاء من نوع شركة.',
-            'tax_number.required_if' => 'الرقم الضريبي مطلوب للعملاء من نوع شركة.',
             'tax_number.regex' => 'الرقم الضريبي يجب أن يكون 15 رقماً.',
         ];
     }

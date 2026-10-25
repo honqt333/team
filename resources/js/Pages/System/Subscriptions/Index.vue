@@ -551,10 +551,7 @@ const planOptions = computed(() =>
     (props.plans || []).map((p) => ({ value: p.id, label: p.name_ar }))
 );
 
-const formBillingCycleOptions = computed(() => [
-    { value: 'monthly', label: t('system.subscriptions.monthly') },
-    { value: 'yearly', label: t('system.subscriptions.yearly') },
-]);
+const formBillingCycleOptions = computed(() => [{ value: 'yearly', label: 'سنوي (12 شهر)' }]);
 
 const props = defineProps({
     subscriptions: Object,
@@ -626,12 +623,13 @@ const showTenantDropdown = ref(false);
 const form = useForm({
     tenant_id: '',
     plan_id: '',
-    billing_cycle: 'monthly',
+    billing_cycle: 'yearly',
     promo_code: '',
 });
 
 const openModal = () => {
     form.reset();
+    form.billing_cycle = 'yearly';
     tenantSearch.value = '';
     showTenantDropdown.value = false;
     showModal.value = true;

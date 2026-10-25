@@ -1,104 +1,280 @@
 <template>
-    <SystemLayout title="تعديل قالب">
-        <template #header>
-            <div class="flex items-center justify-between">
-                <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
-                    تعديل قالب: {{ template.name }}
-                </h2>
-                <Link :href="route('system.communication.templates.index')" class="px-4 py-2 bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300 rounded-md text-sm font-medium hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
-                    عودة للقائمة
-                </Link>
+    <SystemLayout>
+        <Head :title="`${isAr ? 'تعديل قالب' : 'Edit Template'}: ${template.name}`" />
+
+        <div class="space-y-6">
+            <!-- Header Section -->
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <div>
+                    <div class="flex items-center gap-2">
+                        <Link
+                            :href="route('system.communication.templates.index')"
+                            class="inline-flex items-center text-xs font-bold text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                        >
+                            <svg
+                                class="w-4 h-4 me-1 rtl:rotate-180"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M15 19l-7-7 7-7"
+                                />
+                            </svg>
+                            <span>{{ isAr ? 'قوالب التواصل' : 'Communication Templates' }}</span>
+                        </Link>
+                    </div>
+                    <h1 class="text-2xl font-bold text-gray-900 dark:text-white mt-1">
+                        {{ isAr ? 'تعديل قالب' : 'Edit Template' }}: {{ template.name }}
+                    </h1>
+                </div>
+
+                <div class="flex items-center gap-2">
+                    <Link
+                        :href="route('system.communication.templates.index')"
+                        class="px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-xl text-xs font-bold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                    >
+                        {{ isAr ? 'إلغاء وعودة' : 'Cancel' }}
+                    </Link>
+                    <button
+                        type="button"
+                        @click="submit"
+                        :disabled="form.processing"
+                        class="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold shadow-md shadow-indigo-500/20 disabled:opacity-50 transition-all"
+                    >
+                        {{
+                            form.processing
+                                ? isAr
+                                    ? 'جاري الحفظ...'
+                                    : 'Saving...'
+                                : isAr
+                                  ? 'حفظ التعديلات'
+                                  : 'Save Changes'
+                        }}
+                    </button>
+                </div>
             </div>
-        </template>
 
-        <div class="py-12">
-            <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-                <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
-                    <form @submit.prevent="submit" class="p-6 space-y-6">
-                        <!-- Info Card -->
-                        <div class="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg flex gap-4 items-start">
-                            <div class="text-blue-600 dark:text-blue-400">
-                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                            </div>
-                            <div>
-                                <h4 class="font-semibold text-blue-900 dark:text-blue-100">معلومات القالب</h4>
-                                <p class="text-sm text-blue-700 dark:text-blue-300 mt-1">كود القالب: <span class="font-mono bg-blue-100 dark:bg-blue-900 px-1 rounded">{{ template.code }}</span></p>
-                                <p class="text-sm text-blue-700 dark:text-blue-300">النوع: {{ template.type }}</p>
-                            </div>
+            <!-- Info & Variables Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- Meta Info Card -->
+                <div
+                    class="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-200 dark:border-gray-700 space-y-3"
+                >
+                    <h3 class="text-xs font-bold uppercase tracking-wider text-gray-400">
+                        {{ isAr ? 'بيانات القالب' : 'Template Details' }}
+                    </h3>
+                    <div class="space-y-2 text-sm">
+                        <div class="flex items-center justify-between">
+                            <span class="text-gray-500 dark:text-gray-400">
+                                {{ isAr ? 'الكود التعريفي:' : 'Code:' }}
+                            </span>
+                            <span
+                                class="font-mono text-xs px-2 py-0.5 rounded bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200"
+                            >
+                                {{ template.code }}
+                            </span>
                         </div>
-
-                        <!-- Variables -->
-                        <div v-if="template.variables" class="bg-gray-50 dark:bg-gray-700/30 p-4 rounded-lg">
-                            <h4 class="font-medium text-gray-900 dark:text-white mb-2">المتغيرات المتاحة</h4>
-                            <div class="flex flex-wrap gap-2">
-                                <code 
-                                    v-for="variable in template.variables" 
-                                    :key="variable" 
-                                    class="bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded text-sm text-gray-600 dark:text-gray-300 font-mono border border-gray-200 dark:border-gray-600 cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-600"
-                                    @click="copyVariable(variable)"
-                                    title="انقر للنسخ"
-                                >
-                                    {{ variable }}
-                                </code>
-                            </div>
-                            <p class="text-xs text-gray-500 mt-2">انقر على المتغير لنسخه واستخدامه في المحتوى.</p>
+                        <div class="flex items-center justify-between">
+                            <span class="text-gray-500 dark:text-gray-400">
+                                {{ isAr ? 'النوع:' : 'Type:' }}
+                            </span>
+                            <span
+                                class="text-xs font-semibold px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300"
+                            >
+                                {{
+                                    template.type === 'email'
+                                        ? isAr
+                                            ? 'بريد إلكتروني'
+                                            : 'Email'
+                                        : isAr
+                                          ? 'رسالة نصية'
+                                          : 'SMS'
+                                }}
+                            </span>
                         </div>
+                    </div>
 
-                        <!-- Subject -->
-                        <div v-if="template.type === 'email'">
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">عنوان الرسالة (Subject)</label>
-                            <input 
-                                type="text" 
-                                v-model="form.subject"
-                                class="w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 focus:ring-indigo-500"
+                    <div class="pt-3 border-t border-gray-100 dark:border-gray-700">
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input
+                                type="checkbox"
+                                v-model="form.is_active"
+                                class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
                             />
-                            <p v-if="form.errors.subject" class="text-red-500 text-sm mt-1">{{ form.errors.subject }}</p>
+                            <span class="text-xs font-bold text-gray-700 dark:text-gray-300">
+                                {{ isAr ? 'تفعيل القالب في النظام' : 'Enable template' }}
+                            </span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Available Variables Card -->
+                <div
+                    class="md:col-span-2 bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-200 dark:border-gray-700"
+                >
+                    <h3 class="text-xs font-bold uppercase tracking-wider text-gray-400 mb-2">
+                        {{
+                            isAr
+                                ? 'المتغيرات المتاحة (انقر للنسخ)'
+                                : 'Available Variables (Click to copy)'
+                        }}
+                    </h3>
+                    <div
+                        v-if="template.variables && template.variables.length"
+                        class="flex flex-wrap gap-2"
+                    >
+                        <button
+                            v-for="variable in template.variables"
+                            :key="variable"
+                            type="button"
+                            @click="copyVariable(variable)"
+                            class="group relative inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-mono bg-gray-50 hover:bg-indigo-50 dark:bg-gray-700/50 dark:hover:bg-indigo-900/30 text-gray-700 hover:text-indigo-600 dark:text-gray-300 dark:hover:text-indigo-300 border border-gray-200 hover:border-indigo-300 dark:border-gray-600 dark:hover:border-indigo-700 transition-all cursor-pointer"
+                        >
+                            <span>{{ variable }}</span>
+                            <svg
+                                class="w-3 h-3 opacity-50 group-hover:opacity-100"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
+                                />
+                            </svg>
+                        </button>
+                    </div>
+                    <p v-else class="text-xs text-gray-500">
+                        {{
+                            isAr
+                                ? 'لا توجد متغيرات محددة لهذا القالب.'
+                                : 'No variables defined for this template.'
+                        }}
+                    </p>
+                </div>
+            </div>
+
+            <!-- Form Edit & Preview -->
+            <div
+                class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 overflow-hidden shadow-sm"
+            >
+                <!-- Tabs: Editor vs Live Preview -->
+                <div
+                    class="flex items-center border-b border-gray-200 dark:border-gray-700 px-6 pt-4 gap-4"
+                >
+                    <button
+                        type="button"
+                        @click="viewMode = 'edit'"
+                        :class="[
+                            'pb-3 text-xs font-bold border-b-2 transition-colors',
+                            viewMode === 'edit'
+                                ? 'border-indigo-600 text-indigo-600 dark:border-indigo-400 dark:text-indigo-400'
+                                : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400',
+                        ]"
+                    >
+                        {{ isAr ? 'محرر القالب' : 'Template Editor' }}
+                    </button>
+                    <button
+                        v-if="template.type === 'email'"
+                        type="button"
+                        @click="viewMode = 'preview'"
+                        :class="[
+                            'pb-3 text-xs font-bold border-b-2 transition-colors',
+                            viewMode === 'preview'
+                                ? 'border-indigo-600 text-indigo-600 dark:border-indigo-400 dark:text-indigo-400'
+                                : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400',
+                        ]"
+                    >
+                        {{ isAr ? 'معاينة العرض الحي' : 'Live Preview' }}
+                    </button>
+                </div>
+
+                <div class="p-6">
+                    <div v-show="viewMode === 'edit'" class="space-y-6">
+                        <!-- Subject (if email) -->
+                        <div v-if="template.type === 'email'">
+                            <label
+                                class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1.5"
+                            >
+                                {{ isAr ? 'عنوان الرسالة (Subject)' : 'Subject' }}
+                            </label>
+                            <input
+                                type="text"
+                                v-model="form.subject"
+                                class="w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-indigo-500"
+                            />
+                            <p v-if="form.errors.subject" class="text-rose-500 text-xs mt-1">
+                                {{ form.errors.subject }}
+                            </p>
                         </div>
 
-                        <!-- Content -->
+                        <!-- Content Textarea -->
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">المحتوى</label>
-                            <textarea 
+                            <div class="flex items-center justify-between mb-1.5">
+                                <label
+                                    class="block text-xs font-bold text-gray-700 dark:text-gray-300"
+                                >
+                                    {{ isAr ? 'محتوى الرسالة' : 'Content' }}
+                                </label>
+                                <span class="text-[11px] text-gray-400 font-mono">
+                                    {{
+                                        template.type === 'email' ? 'HTML Supported' : 'Plain Text'
+                                    }}
+                                </span>
+                            </div>
+                            <textarea
                                 v-model="form.content"
-                                rows="15"
-                                class="w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 focus:ring-indigo-500 font-mono"
+                                rows="16"
+                                class="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white text-sm font-mono focus:ring-2 focus:ring-indigo-500"
                                 dir="ltr"
                             ></textarea>
-                            <p class="text-xs text-gray-500 mt-1">يمكنك استخدام HTML لتنسيق محتوى البريد الإلكتروني.</p>
-                            <p v-if="form.errors.content" class="text-red-500 text-sm mt-1">{{ form.errors.content }}</p>
+                            <p v-if="form.errors.content" class="text-rose-500 text-xs mt-1">
+                                {{ form.errors.content }}
+                            </p>
                         </div>
+                    </div>
 
-                        <!-- Active Toggle -->
-                        <div class="flex items-center">
-                            <input 
-                                type="checkbox" 
-                                id="is_active" 
-                                v-model="form.is_active"
-                                class="rounded border-gray-300 text-indigo-600 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-                            >
-                            <label for="is_active" class="mr-2 block text-sm text-gray-900 dark:text-gray-300">
-                                تفعيل القالب
-                            </label>
+                    <!-- Live HTML Preview -->
+                    <div v-show="viewMode === 'preview'" class="space-y-3">
+                        <div
+                            class="p-3 bg-gray-100 dark:bg-gray-900 rounded-xl text-xs text-gray-600 dark:text-gray-300 font-mono"
+                        >
+                            <strong>{{ isAr ? 'العنوان:' : 'Subject:' }}</strong>
+                            {{ form.subject }}
                         </div>
+                        <div
+                            class="p-6 rounded-xl border border-gray-200 bg-white text-gray-900 shadow-inner overflow-auto max-h-[600px]"
+                            v-html="form.content"
+                        ></div>
+                    </div>
+                </div>
 
-                        <!-- Actions -->
-                        <div class="flex items-center justify-end border-t border-gray-200 dark:border-gray-700 pt-6">
-                            <button 
-                                type="button" 
-                                @click="resetToDefault"
-                                class="text-sm text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200 ml-4 hidden"
-                            >
-                                استعادة الافتراضي
-                            </button>
-                            <button 
-                                type="submit" 
-                                :disabled="form.processing"
-                                class="px-6 py-2 bg-indigo-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-indigo-700 active:bg-indigo-900 focus:outline-none focus:border-indigo-900 focus:ring ring-indigo-300 disabled:opacity-25 transition ease-in-out duration-150"
-                            >
-                                حفظ التغييرات
-                            </button>
-                        </div>
-                    </form>
+                <!-- Footer Save Bar -->
+                <div
+                    class="px-6 py-4 bg-gray-50 dark:bg-gray-900/50 border-t border-gray-200 dark:border-gray-700 flex justify-end gap-3"
+                >
+                    <button
+                        type="button"
+                        @click="submit"
+                        :disabled="form.processing"
+                        class="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold shadow-md shadow-indigo-500/20 disabled:opacity-50 transition-all"
+                    >
+                        {{
+                            form.processing
+                                ? isAr
+                                    ? 'جاري الحفظ...'
+                                    : 'Saving...'
+                                : isAr
+                                  ? 'حفظ التغييرات'
+                                  : 'Save Changes'
+                        }}
+                    </button>
                 </div>
             </div>
         </div>
@@ -106,16 +282,22 @@
 </template>
 
 <script setup>
-import { Link, useForm } from '@inertiajs/vue3';
+import { computed, ref } from 'vue';
+import { Head, Link, useForm } from '@inertiajs/vue3';
 import SystemLayout from '@/Layouts/SystemLayout.vue';
+import { useToast } from '@/Composables/useToast';
 
 const props = defineProps({
     template: Object,
 });
 
+const isAr = computed(() => (document?.documentElement?.lang || 'ar') === 'ar');
+const { success: toastSuccess } = useToast();
+const viewMode = ref('edit');
+
 const form = useForm({
-    subject: props.template.subject,
-    content: props.template.content,
+    subject: props.template.subject || '',
+    content: props.template.content || '',
     is_active: Boolean(props.template.is_active),
 });
 
@@ -125,10 +307,6 @@ const submit = () => {
 
 const copyVariable = (variable) => {
     navigator.clipboard.writeText(variable);
-    // Optional: Show toast
-};
-
-const resetToDefault = () => {
-    // Implement reset logic if needed
+    toastSuccess(isAr.value ? `تم نسخ ${variable}` : `Copied ${variable}`);
 };
 </script>

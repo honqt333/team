@@ -6,6 +6,7 @@ namespace Tests\Feature;
 
 use App\Models\Center;
 use App\Models\Customer;
+use App\Models\Invoice;
 use App\Models\Part;
 use App\Models\Payment;
 use App\Models\Service;
@@ -1337,5 +1338,57 @@ class WorkOrdersCrudTest extends TestCase
             'status' => 'in_progress',
         ]);
         $responseUpdate->assertStatus(403);
+    }
+
+    public function test_work_order_creation_checks_customer_credit_limit(): void
+    {
+        $user = $this->createUserWithPermissions(['crm.work_orders.create']);
+
+        // Create a customer with credit_limit of 1000
+        $customer = Customer::create([
+            'tenant_id' => $user->tenant_id,
+            'center_id' => $user->current_center_id,
+            'type' => 'company',
+            'name' => 'Tech Corp',
+            'phone' => '+966512345678',
+            'credit_limit' => 1000.00,
+        ]);
+
+        $vehicle = Vehicle::factory()->create([
+            'tenant_id' => $user->tenant_id,
+            'customer_id' => $customer->id,
+        ]);
+
+        // Create an unpaid invoice with total 1500 (exceeds 1000 limit)
+        $invoice = Invoice::create([
+            'tenant_id' => $user->tenant_id,
+            'center_id' => $user->current_center_id,
+            'customer_id' => $customer->id,
+            'invoice_number' => 'INV-TEST-001',
+            'issue_date' => now(),
+            'supply_date' => now(),
+            'status' => 'sent',
+            'total_incl_tax' => 1500.00,
+            'total_paid' => 0.00,
+        ]);
+
+        // Attempting to create work order without override should fail validation
+        $response = $this->actingAs($user)->postJson('/app/work-orders', [
+            'customer_id' => $customer->id,
+            'vehicle_id' => $vehicle->id,
+            'allow_credit_override' => false,
+        ]);
+
+        $response->assertStatus(422);
+        $response->assertJsonValidationErrors(['customer_id']);
+
+        // Attempting to create work order WITH override should succeed
+        $responseWithOverride = $this->actingAs($user)->postJson('/app/work-orders', [
+            'customer_id' => $customer->id,
+            'vehicle_id' => $vehicle->id,
+            'allow_credit_override' => true,
+        ]);
+
+        $responseWithOverride->assertStatus(201);
     }
 }

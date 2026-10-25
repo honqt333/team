@@ -78,7 +78,11 @@ class Service extends Model
     {
         $locale = app()->getLocale();
 
-        return $locale === 'en' ? ($this->name_en ?: $this->name_ar) : ($this->name_ar ?: $this->name_en);
+        if ($locale === 'en') {
+            return (string) ($this->name_en ?: $this->name_ar ?: $this->name ?? '');
+        }
+
+        return (string) ($this->name_ar ?: $this->name_en ?: $this->name ?? '');
     }
 
     /**
@@ -88,7 +92,11 @@ class Service extends Model
     {
         $locale = app()->getLocale();
 
-        return $locale === 'en' ? ($this->description_en ?: $this->description_ar) : ($this->description_ar ?: $this->description_en);
+        $desc = $locale === 'en'
+            ? ($this->description_en ?: $this->description_ar ?: $this->description ?? null)
+            : ($this->description_ar ?: $this->description_en ?: $this->description ?? null);
+
+        return $desc ? (string) $desc : null;
     }
 
     public function tenant(): BelongsTo

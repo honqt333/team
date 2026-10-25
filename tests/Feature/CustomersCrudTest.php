@@ -178,6 +178,44 @@ class CustomersCrudTest extends TestCase
         $response->assertRedirect();
     }
 
+    public function test_company_customer_can_be_created_without_tax_number(): void
+    {
+        $user = $this->createUserWithPermissions(['crm.customers.create']);
+
+        // Company with contact_name but without tax_number should succeed
+        $response = $this->actingAs($user)->postJson('/app/customers', [
+            'type' => 'company',
+            'name' => 'Al-Amal Co.',
+            'contact_name' => 'Ahmed Ali',
+            'phone' => '+966509988776',
+            'tax_number' => null,
+        ]);
+
+        $response->assertRedirect();
+        $this->assertDatabaseHas('customers', [
+            'name' => 'Al-Amal Co.',
+            'contact_name' => 'Ahmed Ali',
+            'tax_number' => null,
+        ]);
+    }
+
+    public function test_company_customer_with_invalid_tax_number_fails(): void
+    {
+        $user = $this->createUserWithPermissions(['crm.customers.create']);
+
+        // Company with invalid tax number length should fail validation
+        $response = $this->actingAs($user)->postJson('/app/customers', [
+            'type' => 'company',
+            'name' => 'Al-Amal Co.',
+            'contact_name' => 'Ahmed Ali',
+            'phone' => '+966509988775',
+            'tax_number' => '12345',
+        ]);
+
+        $response->assertStatus(422);
+        $response->assertJsonValidationErrors(['tax_number']);
+    }
+
     public function test_check_phone_endpoint_detects_duplicates(): void
     {
         $user = $this->createUserWithPermissions(['crm.customers.view']);

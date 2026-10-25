@@ -98,10 +98,10 @@ class InventoryMoveController extends Controller
         ]);
 
         $move = $this->inventoryService->receipt(
-            warehouseId: $validated['warehouse_id'],
-            partId: $validated['part_id'],
-            qty: $validated['qty'],
-            unitCost: $validated['unit_cost'],
+            warehouseId: (int) $validated['warehouse_id'],
+            partId: (int) $validated['part_id'],
+            qty: (float) $validated['qty'],
+            unitCost: (float) $validated['unit_cost'],
             userId: auth()->id(),
             notes: $validated['notes'] ?? null
         );
@@ -127,10 +127,10 @@ class InventoryMoveController extends Controller
         $allowNegative = auth()->user()->can('inventory.override_negative_stock');
 
         $move = $this->inventoryService->adjust(
-            warehouseId: $validated['warehouse_id'],
-            partId: $validated['part_id'],
-            qty: $validated['qty'],
-            unitCost: $validated['unit_cost'] ?? null,
+            warehouseId: (int) $validated['warehouse_id'],
+            partId: (int) $validated['part_id'],
+            qty: (float) $validated['qty'],
+            unitCost: isset($validated['unit_cost']) ? (float) $validated['unit_cost'] : null,
             userId: auth()->id(),
             notes: $validated['notes'],
             allowNegative: $allowNegative

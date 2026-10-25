@@ -7,6 +7,7 @@ namespace App\Http\Controllers\System;
 use App\Http\Controllers\Controller;
 use App\Models\AdminActivityLog;
 use App\Models\BankTransferReceipt;
+use App\Models\Billing\Plan;
 use App\Models\Billing\SubscriptionInvoice;
 use App\Models\Customer;
 use App\Models\Invoice;
@@ -34,11 +35,20 @@ class TenantsController extends Controller
     public function index(Request $request): Response
     {
         $query = Tenant::query()
-            ->withCount('centers', 'users');
+            ->withCount('centers', 'users')
+            ->with(['latestSubscription.plan']);
 
         // Filter by status
         if ($request->filled('status')) {
             $query->where('status', $request->status);
+        }
+
+        // Filter by plan
+        if ($request->filled('plan_id')) {
+            $query->whereHas('subscriptions', function ($q) use ($request) {
+                $q->where('plan_id', $request->plan_id)
+                    ->whereIn('status', ['active', 'trial', 'trialing']);
+            });
         }
 
         // Search by name
@@ -59,7 +69,8 @@ class TenantsController extends Controller
 
         return Inertia::render('System/Tenants/Index', [
             'tenants' => $tenants,
-            'filters' => $request->only(['status', 'search']),
+            'filters' => $request->only(['status', 'search', 'plan_id']),
+            'plans' => Plan::where('is_active', true)->orderBy('sort_order')->get(['id', 'name_ar', 'name_en']),
         ]);
     }
 
@@ -139,7 +150,8 @@ class TenantsController extends Controller
 
         try {
             $activityLog = AdminActivityLog::query()
-                ->where('tenant_id', $tenant->id)
+                ->where('model_type', Tenant::class)
+                ->where('model_id', $tenant->id)
                 ->orderByDesc('created_at')
                 ->limit(25)
                 ->get();
@@ -158,6 +170,7 @@ class TenantsController extends Controller
             'bankTransferReceipts' => $bankTransferReceipts,
             'healthScore' => $healthScore,
             'activityLog' => $activityLog,
+            'plans' => Plan::where('is_active', true)->orderBy('sort_order')->get(['id', 'name_ar', 'name_en', 'price_monthly', 'price_yearly', 'trial_days']),
         ]);
     }
 

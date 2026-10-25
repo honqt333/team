@@ -2,6 +2,7 @@
 import { computed, ref, watch } from 'vue';
 import { router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
+import SearchableSelect from '@/Components/SearchableSelect.vue';
 
 const { t } = useI18n();
 
@@ -22,6 +23,13 @@ const locale = computed(() => document.documentElement.lang || 'ar');
 const status = ref(props.filter.status || 'all');
 const search = ref(props.filter.search || '');
 const perPage = ref(props.filter.per_page || 20);
+
+const perPageOptions = [
+    { value: 10, label: '10' },
+    { value: 20, label: '20' },
+    { value: 50, label: '50' },
+    { value: 100, label: '100' },
+];
 
 watch(
     () => props.filter,
@@ -160,16 +168,16 @@ const statusChips = computed(() => [
                     class="w-full rounded-lg border-slate-200 dark:border-slate-600 dark:bg-slate-700 dark:text-white ps-9 pe-3 py-2 text-sm"
                 />
             </div>
-            <select
-                v-model.number="perPage"
-                @change="applyFilters"
-                class="rounded-lg border-slate-200 dark:border-slate-600 dark:bg-slate-700 dark:text-white px-3 py-2 text-sm"
-            >
-                <option :value="10">10</option>
-                <option :value="20">20</option>
-                <option :value="50">50</option>
-                <option :value="100">100</option>
-            </select>
+            <div class="w-24">
+                <SearchableSelect
+                    v-model="perPage"
+                    :options="perPageOptions"
+                    option-label="label"
+                    option-value="value"
+                    :compact="true"
+                    @change="applyFilters"
+                />
+            </div>
         </div>
 
         <!-- Summary line -->

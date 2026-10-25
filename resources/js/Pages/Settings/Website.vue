@@ -206,14 +206,14 @@
                         <label class="block text-sm font-medium mb-1">
                             {{ t('tenant_site.admin.fields.theme_key') }}
                         </label>
-                        <select
-                            v-model="form.theme_key"
-                            class="w-full md:w-1/2 rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-900"
-                        >
-                            <option v-for="opt in themeOptions" :key="opt.value" :value="opt.value">
-                                {{ isRtl ? opt.label_ar : opt.label_en }}
-                            </option>
-                        </select>
+                        <div class="w-full md:w-1/2">
+                            <SearchableSelect
+                                v-model="form.theme_key"
+                                :options="themeSelectOptions"
+                                option-label="label"
+                                option-value="value"
+                            />
+                        </div>
                         <p v-if="errors.theme_key" class="text-rose-500 text-sm mt-1">
                             {{ errors.theme_key }}
                         </p>
@@ -356,18 +356,14 @@
                         <label class="block text-sm font-medium mb-1">
                             {{ t('tenant_site.admin.fields.status') }}
                         </label>
-                        <select
-                            v-model="form.status"
-                            class="w-full md:w-1/2 rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-900"
-                        >
-                            <option value="draft">{{ t('tenant_site.admin.status.draft') }}</option>
-                            <option value="published">
-                                {{ t('tenant_site.admin.status.published') }}
-                            </option>
-                            <option value="unpublished">
-                                {{ t('tenant_site.admin.status.unpublished') }}
-                            </option>
-                        </select>
+                        <div class="w-full md:w-1/2">
+                            <SearchableSelect
+                                v-model="form.status"
+                                :options="statusOptions"
+                                option-label="label"
+                                option-value="value"
+                            />
+                        </div>
                         <p v-if="errors.status" class="text-rose-500 text-sm mt-1">
                             {{ errors.status }}
                         </p>
@@ -398,6 +394,7 @@
 import AppLayout from '@/Layouts/AppLayout.vue';
 import PageHeader from '@/Components/PageHeader.vue';
 import ColorField from '@/Components/ColorField.vue';
+import SearchableSelect from '@/Components/SearchableSelect.vue';
 import { useI18n } from 'vue-i18n';
 import { usePage } from '@inertiajs/vue3';
 import { useForm } from '@inertiajs/vue3';
@@ -423,6 +420,18 @@ const isRtl = computed(() => (page.props.locale || 'ar') === 'ar');
 const t = tRaw;
 
 const themeOptions = computed(() => props.theme_options);
+const themeSelectOptions = computed(() =>
+    themeOptions.value.map((opt) => ({
+        value: opt.value,
+        label: isRtl.value ? opt.label_ar : opt.label_en,
+    }))
+);
+
+const statusOptions = computed(() => [
+    { value: 'draft', label: t('tenant_site.admin.status.draft') },
+    { value: 'published', label: t('tenant_site.admin.status.published') },
+    { value: 'unpublished', label: t('tenant_site.admin.status.unpublished') },
+]);
 const socialLabels = {
     facebook: 'Facebook',
     twitter: 'X',

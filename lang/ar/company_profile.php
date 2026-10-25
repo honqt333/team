@@ -199,6 +199,19 @@ return [
         'setup_integration' => 'إعداد الربط مع زاتكا',
     ],
 
+    'tabs' => [
+        'profile' => 'البيانات الأساسية',
+        'contact' => 'التواصل والعنوان',
+        'vat' => 'الضرائب VAT',
+        'zatca' => 'ZATCA',
+        'numbering' => 'الترقيم والتسلسل',
+        'workflow' => 'سياسات العمل',
+        'notifications' => 'قوالب الرسائل',
+        'admin_user' => 'المستخدم الرئيسي',
+        'revenue_expenses' => 'الإيرادات والنفقات',
+        'invoices' => 'الفواتير',
+    ],
+
     // Subscription management (self-service)
     'subscription' => [
         'already_pending' => 'لديك طلب اشتراك قيد الانتظار لباقة ":plan". يُرجى إكمال عملية الدفع الحالية أو الانتظار قليلاً.',

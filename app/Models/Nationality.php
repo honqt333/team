@@ -29,7 +29,7 @@ class Nationality extends Model
     {
         $locale = app()->getLocale();
 
-        return $locale === 'en' ? ($this->name_en ?: $this->name_ar) : ($this->name_ar ?: $this->name_en);
+        return (string) ($locale === 'en' ? ($this->name_en ?: $this->name_ar) : ($this->name_ar ?: $this->name_en)) ?: '';
     }
 
     public function scopeActive($query)

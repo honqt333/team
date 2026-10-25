@@ -1,6 +1,7 @@
 <script setup>
 import { ref, computed, watch, onUnmounted } from 'vue';
 import { router, usePage } from '@inertiajs/vue3';
+import SearchableSelect from '@/Components/SearchableSelect.vue';
 
 const props = defineProps({
     // The setup payload from subscribe() — contains plan, billing_cycle,
@@ -42,6 +43,17 @@ const form = ref({
     // old behaviour for the single-invoice happy path).
     subscription_invoice_id: null,
 });
+
+const invoiceOptions = computed(() => [
+    {
+        value: null,
+        label: locale.value === 'ar' ? '— الأحدث تلقائياً —' : '— Most recent pending (default) —',
+    },
+    ...props.pendingInvoices.map((inv) => ({
+        value: inv.id,
+        label: `${inv.invoice_number || `#${inv.id}`} — ${Number(inv.amount).toFixed(2)} SAR (${new Date(inv.due_date).toLocaleDateString(locale.value === 'ar' ? 'ar-SA' : 'en-US')})`,
+    })),
+]);
 
 const fileInput = ref(null);
 const errors = ref({});
@@ -511,26 +523,12 @@ async function submit() {
             <label class="mb-1.5 block text-sm font-semibold text-slate-900 dark:text-white">
                 {{ locale === 'ar' ? 'الفاتورة' : 'Invoice' }}
             </label>
-            <select
+            <SearchableSelect
                 v-model="form.subscription_invoice_id"
-                class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-slate-600 dark:bg-slate-700 dark:text-white"
-            >
-                <option :value="null">
-                    {{
-                        locale === 'ar'
-                            ? '— الأحدث تلقائياً —'
-                            : '— Most recent pending (default) —'
-                    }}
-                </option>
-                <option v-for="inv in pendingInvoices" :key="inv.id" :value="inv.id">
-                    {{ inv.invoice_number || `#${inv.id}` }} —
-                    {{ Number(inv.amount).toFixed(2) }} SAR ({{
-                        new Date(inv.due_date).toLocaleDateString(
-                            locale === 'ar' ? 'ar-SA' : 'en-US'
-                        )
-                    }})
-                </option>
-            </select>
+                :options="invoiceOptions"
+                option-label="label"
+                option-value="value"
+            />
             <p class="mt-1 text-xs text-slate-500">
                 {{
                     locale === 'ar'

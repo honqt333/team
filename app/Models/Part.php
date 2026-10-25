@@ -111,6 +111,7 @@ class Part extends Model
 
         return $query->where(function ($q) use ($search) {
             $q->where('sku', 'like', "%{$search}%")
+                ->orWhere('barcode', 'like', "%{$search}%")
                 ->orWhere('name_ar', 'like', "%{$search}%")
                 ->orWhere('name_en', 'like', "%{$search}%");
         });
@@ -124,7 +125,7 @@ class Part extends Model
     {
         $locale = app()->getLocale();
 
-        return $locale === 'ar' ? $this->name_ar : ($this->name_en ?: $this->name_ar);
+        return (string) ($locale === 'ar' ? ($this->name_ar ?: $this->name_en) : ($this->name_en ?: $this->name_ar)) ?: '';
     }
 
     /**

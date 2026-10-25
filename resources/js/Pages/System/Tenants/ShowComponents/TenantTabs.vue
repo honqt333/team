@@ -131,6 +131,31 @@
             <!-- Subscriptions -->
             <div v-else-if="active === 'subscriptions'" class="space-y-3">
                 <div
+                    class="flex items-center justify-between pb-1 border-b border-gray-100 dark:border-gray-800"
+                >
+                    <p class="text-xs text-gray-500 font-medium">سجل اشتراكات وباقات المستأجر</p>
+                    <button
+                        type="button"
+                        @click="$emit('assign-plan')"
+                        class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white transition-colors shadow-sm"
+                    >
+                        <svg
+                            class="w-3.5 h-3.5"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M12 4v16m8-8H4"
+                            />
+                        </svg>
+                        تعيين باقة جديدة
+                    </button>
+                </div>
+                <div
                     v-if="!tenant.subscriptions || tenant.subscriptions.length === 0"
                     class="rounded-lg border border-dashed border-gray-300 p-6 text-center text-sm text-gray-500 dark:border-gray-700 dark:text-gray-400"
                 >
@@ -337,7 +362,7 @@ onMounted(async () => {
     }
 });
 
-defineEmits(['security']);
+defineEmits(['security', 'assign-plan']);
 
 const { t, locale } = useI18n();
 const active = ref('overview');

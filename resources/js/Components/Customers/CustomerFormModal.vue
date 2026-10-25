@@ -95,29 +95,94 @@
                     </p>
                 </div>
 
-                <div v-if="form.type === 'company'" class="md:col-span-2">
-                    <label
-                        class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5"
-                    >
-                        {{ $t('customers.form.tax_number') }}
-                    </label>
-                    <input
-                        type="text"
-                        v-model="form.tax_number"
-                        :placeholder="$t('customers.form.tax_placeholder')"
-                        class="w-full px-4 py-2.5 border rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:border-transparent transition-all"
-                        :class="
-                            form.errors.tax_number
-                                ? 'border-red-500 focus:ring-red-500'
-                                : 'border-gray-300 dark:border-gray-600 focus:ring-indigo-500'
-                        "
-                    />
-                    <p
-                        v-if="form.errors.tax_number"
-                        class="mt-1.5 text-sm text-red-600 dark:text-red-400"
-                    >
-                        {{ form.errors.tax_number }}
-                    </p>
+                <div
+                    v-if="form.type === 'company'"
+                    class="md:col-span-2 grid grid-cols-1 md:grid-cols-3 gap-4"
+                >
+                    <div>
+                        <label
+                            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5"
+                        >
+                            {{ $t('customers.form.tax_number') }}
+                        </label>
+                        <input
+                            type="text"
+                            v-model="form.tax_number"
+                            :placeholder="$t('customers.form.tax_placeholder')"
+                            class="w-full px-4 py-2.5 border rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:border-transparent transition-all"
+                            :class="
+                                form.errors.tax_number
+                                    ? 'border-red-500 focus:ring-red-500'
+                                    : 'border-gray-300 dark:border-gray-600 focus:ring-indigo-500'
+                            "
+                        />
+                        <p
+                            v-if="form.errors.tax_number"
+                            class="mt-1.5 text-sm text-red-600 dark:text-red-400"
+                        >
+                            {{ form.errors.tax_number }}
+                        </p>
+                    </div>
+
+                    <div>
+                        <label
+                            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5"
+                        >
+                            {{ $t('customers.form.credit_limit') }}
+                        </label>
+                        <input
+                            type="number"
+                            step="0.01"
+                            min="0"
+                            v-model="form.credit_limit"
+                            :placeholder="$t('customers.form.credit_limit_placeholder') || '0.00'"
+                            class="w-full px-4 py-2.5 border rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:border-transparent transition-all"
+                            :class="
+                                form.errors.credit_limit
+                                    ? 'border-red-500 focus:ring-red-500'
+                                    : 'border-gray-300 dark:border-gray-600 focus:ring-indigo-500'
+                            "
+                        />
+                        <p
+                            v-if="form.errors.credit_limit"
+                            class="mt-1.5 text-sm text-red-600 dark:text-red-400"
+                        >
+                            {{ form.errors.credit_limit }}
+                        </p>
+                    </div>
+
+                    <div>
+                        <label
+                            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5"
+                        >
+                            {{ $t('customers.form.payment_terms') }}
+                        </label>
+                        <div class="relative">
+                            <input
+                                type="number"
+                                min="0"
+                                v-model="form.payment_terms_days"
+                                :placeholder="'0'"
+                                class="w-full px-4 py-2.5 border rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:border-transparent transition-all pe-12"
+                                :class="
+                                    form.errors.payment_terms_days
+                                        ? 'border-red-500 focus:ring-red-500'
+                                        : 'border-gray-300 dark:border-gray-600 focus:ring-indigo-500'
+                                "
+                            />
+                            <span
+                                class="absolute inset-y-0 end-3 flex items-center text-xs text-gray-400 pointer-events-none"
+                            >
+                                {{ $t('common.days') || 'يوم' }}
+                            </span>
+                        </div>
+                        <p
+                            v-if="form.errors.payment_terms_days"
+                            class="mt-1.5 text-sm text-red-600 dark:text-red-400"
+                        >
+                            {{ form.errors.payment_terms_days }}
+                        </p>
+                    </div>
                 </div>
 
                 <div>
@@ -651,6 +716,8 @@ const form = useForm({
     email: '',
     notes: '',
     tax_number: '',
+    credit_limit: null,
+    payment_terms_days: 0,
     address_line: '',
     building_number: '',
     postal_code: '',
@@ -681,6 +748,15 @@ watch(
             form.email = newCustomer.email || '';
             form.notes = newCustomer.notes || '';
             form.tax_number = newCustomer.tax_number || '';
+            form.credit_limit =
+                newCustomer.credit_limit !== undefined && newCustomer.credit_limit !== null
+                    ? newCustomer.credit_limit
+                    : null;
+            form.payment_terms_days =
+                newCustomer.payment_terms_days !== undefined &&
+                newCustomer.payment_terms_days !== null
+                    ? newCustomer.payment_terms_days
+                    : 0;
             form.address_line = newCustomer.address_line || '';
             form.building_number = newCustomer.building_number || '';
             form.postal_code = newCustomer.postal_code || '';
@@ -1150,6 +1226,18 @@ const navigateToDuplicateCustomer = () => {
 function submitForm() {
     if (!props.customer && duplicateCustomer.value) {
         showDuplicateModal.value = true;
+        return;
+    }
+
+    if (
+        form.tax_number &&
+        form.tax_number.trim() !== '' &&
+        !/^\d{15}$/.test(form.tax_number.trim())
+    ) {
+        form.setError(
+            'tax_number',
+            t('validation.tax_number_invalid') || 'الرقم الضريبي يجب أن يكون 15 رقماً.'
+        );
         return;
     }
 

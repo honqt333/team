@@ -222,7 +222,7 @@ class PartsController extends Controller
     {
         $this->authorize('view', $part);
 
-        $part->load(['unit', 'category']);
+        $part->load(['unit', 'category', 'inventoryBalances.warehouse.center']);
         $tenantId = auth()->user()->tenant_id;
 
         $balances = $part->inventoryBalances()
@@ -265,14 +265,14 @@ class PartsController extends Controller
         }
 
         $currentBalances = $part->inventoryBalances()
-            ->whereIn('warehouse_id', collect($warehouseData)->pluck('warehouse_id'))
+            ->whereIn('warehouse_id', collect($warehouseData)->pluck('warehouse_id')->map(fn ($id) => (int) $id))
             ->get()
             ->keyBy('warehouse_id');
 
         foreach ($warehouseData as $whData) {
-            $warehouseId = $whData['warehouse_id'];
+            $warehouseId = (int) $whData['warehouse_id'];
             $currentBalance = $currentBalances->get($warehouseId);
-            $currentQty = $currentBalance?->qty_on_hand ?? 0;
+            $currentQty = (float) ($currentBalance?->qty_on_hand ?? 0);
             $initialStock = (float) ($whData['initial_stock'] ?? 0);
             $stockDifference = $initialStock - $currentQty;
 
@@ -295,18 +295,48 @@ class PartsController extends Controller
             // If stock changed, create receipt/adjustment
             // NOTE: No external document — this is a manual stock adjustment,
             // so reference is null (Part itself is not a polymorphic "document").
-            if ($stockDifference != 0) {
+            if ($stockDifference > 0 && $currentQty == 0.0) {
                 $this->inventoryService->receipt(
                     warehouseId: $warehouseId,
-                    partId: $part->id,
-                    qty: abs($stockDifference),
+                    partId: (int) $part->id,
+                    qty: $stockDifference,
+                    unitCost: (float) ($whData['cost_price'] ?? 0),
+                    userId: $userId,
+                    referenceType: null,
+                    referenceId: null,
+                    notes: 'رصيد افتتاحي',
+                );
+            } elseif ($stockDifference != 0) {
+                $this->inventoryService->adjust(
+                    warehouseId: $warehouseId,
+                    partId: (int) $part->id,
+                    qty: $stockDifference,
                     unitCost: (float) ($whData['cost_price'] ?? 0),
                     userId: $userId,
                     notes: $stockDifference > 0 ? 'تحديث رصيد افتتاحي' : 'تعديل رصيد',
-                    referenceType: null,
-                    referenceId: null,
                 );
             }
+        }
+
+        // Keep part's default_sale_price and min_qty in sync with warehouse balances
+        $partBalances = $part->inventoryBalances()->with('warehouse')->get();
+        $defaultWhBalance = $partBalances->first(fn ($b) => $b->warehouse?->is_default && (float) $b->sale_price > 0);
+        $firstWhBalance = $partBalances->first(fn ($b) => (float) $b->sale_price > 0);
+        $activeSalePrice = (float) ($defaultWhBalance?->sale_price ?? $firstWhBalance?->sale_price ?? 0);
+        $totalMinStock = (float) $partBalances->sum('min_stock');
+
+        $partUpdates = [];
+
+        if ($activeSalePrice > 0 && ((float) $part->default_sale_price <= 0)) {
+            $partUpdates['default_sale_price'] = $activeSalePrice;
+        }
+
+        if ($totalMinStock > 0 && ((float) $part->min_qty <= 0)) {
+            $partUpdates['min_qty'] = $totalMinStock;
+        }
+
+        if (! empty($partUpdates)) {
+            $part->update($partUpdates);
         }
     }
 
@@ -348,9 +378,21 @@ class PartsController extends Controller
             ->active()
             ->search($request->input('q'))
             ->with(['unit', 'purchaseUnit', 'inventoryBalances.warehouse'])
-            ->withSum('inventoryBalances', 'qty_on_hand')
-            ->when($request->boolean('hide_out_of_stock'), function ($query) {
-                $query->having('inventory_balances_sum_qty_on_hand', '>', 0);
+            ->when($request->filled('warehouse_id'), function ($query) use ($request) {
+                $query->withSum(['inventoryBalances' => function ($q) use ($request) {
+                    $q->where('warehouse_id', $request->input('warehouse_id'));
+                }], 'qty_on_hand');
+            }, function ($query) {
+                $query->withSum('inventoryBalances', 'qty_on_hand');
+            })
+            ->when($request->boolean('hide_out_of_stock'), function ($query) use ($request) {
+                $query->whereHas('inventoryBalances', function ($q) use ($request) {
+                    $q->where('qty_on_hand', '>', 0);
+
+                    if ($request->filled('warehouse_id')) {
+                        $q->where('warehouse_id', $request->input('warehouse_id'));
+                    }
+                });
             })
             ->limit(50)
             ->get();

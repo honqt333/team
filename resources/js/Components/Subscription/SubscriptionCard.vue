@@ -8,6 +8,8 @@ const props = defineProps({
     subscription: { type: Object, default: null },
 });
 
+const emit = defineEmits(['renew']);
+
 const locale = computed(() => document.documentElement.lang || 'ar');
 
 const statusConfig = {
@@ -94,6 +96,18 @@ const formatDate = (dateStr) => {
 const formatCurrency = (amount) => {
     return new Intl.NumberFormat('en-US', { maximumFractionDigits: 2 }).format(amount || 0);
 };
+
+const canRenew = computed(() => {
+    if (!props.subscription) return false;
+    const s = props.subscription.status;
+    if (['expired', 'cancelled', 'failed', 'trial', 'trialing'].includes(s)) {
+        return true;
+    }
+    if (s === 'active' && daysLeft.value !== null && daysLeft.value <= 30) {
+        return true;
+    }
+    return false;
+});
 </script>
 
 <template>
@@ -156,6 +170,53 @@ const formatCurrency = (amount) => {
                     }}
                 </p>
             </div>
+        </div>
+
+        <!-- Expired / Expiring Soon / Renewal Action Banner -->
+        <div
+            v-if="canRenew"
+            class="relative mt-4 flex flex-col sm:flex-row items-center justify-between gap-3 rounded-xl border border-amber-200 bg-amber-50/80 p-3.5 dark:border-amber-800/60 dark:bg-amber-900/20"
+        >
+            <div class="flex items-center gap-2.5 text-xs text-amber-800 dark:text-amber-300">
+                <svg
+                    class="h-5 w-5 flex-shrink-0 text-amber-600 dark:text-amber-400"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                >
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                    />
+                </svg>
+                <span>
+                    <strong v-if="subscription.status === 'expired'">اشتراكك منتهي حالياً.</strong>
+                    <strong v-else-if="daysLeft !== null && daysLeft <= 30">
+                        ينتهي اشتراكك قريباً (خلال {{ daysLeft }} يوم).
+                    </strong>
+                    <strong v-else-if="['trial', 'trialing'].includes(subscription.status)">
+                        أنت حالياً في الفترة التجريبية.
+                    </strong>
+                    يمكنك تجديد اشتراكك السنوي الآن للاستمرار بالتمتع بكافة الخدمات والتحديثات.
+                </span>
+            </div>
+            <button
+                type="button"
+                @click="emit('renew')"
+                class="w-full sm:w-auto flex-shrink-0 inline-flex items-center justify-center gap-1.5 rounded-lg bg-indigo-600 px-4 py-2 text-xs font-bold text-white shadow-sm hover:bg-indigo-700 transition-colors"
+            >
+                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                    />
+                </svg>
+                تجديد الاشتراك الآن
+            </button>
         </div>
 
         <!-- Auto-renew status -->

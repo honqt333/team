@@ -29,6 +29,8 @@ class InventoryMove extends Model
 
     public const TYPE_PURCHASE_RETURN = 'purchase_return';
 
+    public const TYPE_SALE = 'sale';
+
     protected $fillable = [
         'warehouse_id',
         'tenant_id',
@@ -148,6 +150,7 @@ class InventoryMove extends Model
     {
         return in_array($this->move_type, [
             self::TYPE_ISSUE_TO_WORKORDER,
+            self::TYPE_SALE,
             self::TYPE_ADJUSTMENT_OUT,
             self::TYPE_TRANSFER_OUT,
             self::TYPE_PURCHASE_RETURN,
@@ -163,6 +166,7 @@ class InventoryMove extends Model
         return match ($type) {
             self::TYPE_RECEIPT => 'استلام',
             self::TYPE_ISSUE_TO_WORKORDER => 'صرف لكرت عمل',
+            self::TYPE_SALE => 'بيع مباشر',
             self::TYPE_ADJUSTMENT_IN => 'تسوية زيادة',
             self::TYPE_ADJUSTMENT_OUT => 'تسوية نقص',
             self::TYPE_TRANSFER_OUT => 'تحويل صادر',

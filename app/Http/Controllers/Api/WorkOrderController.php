@@ -51,11 +51,37 @@ class WorkOrderController extends Controller
                 $q->orWhere('phone', 'like', "%{$query}%");
             }
         })
-            ->select('id', 'name', 'phone', 'type')
+            ->select('id', 'name', 'phone', 'type', 'credit_limit')
             ->limit(10)
             ->get();
 
+        $customers->each(function ($customer) {
+            $balance = $customer->getOutstandingBalance();
+            $creditLimit = (float) ($customer->credit_limit ?? 0);
+            $customer->balance = $balance;
+            $customer->credit_limit = $creditLimit;
+            $customer->is_credit_exceeded = $creditLimit > 0 && $balance >= $creditLimit;
+            $customer->available_credit = $creditLimit > 0 ? max(0.0, $creditLimit - $balance) : null;
+        });
+
         return response()->json($customers);
+    }
+
+    /**
+     * Get specific customer balance and credit terms.
+     */
+    public function customerBalance(Customer $customer): JsonResponse
+    {
+        $creditLimit = (float) ($customer->credit_limit ?? 0);
+        $balance = $customer->getOutstandingBalance();
+
+        return response()->json([
+            'customer_id' => $customer->id,
+            'balance' => $balance,
+            'credit_limit' => $creditLimit,
+            'is_credit_exceeded' => $creditLimit > 0 && $balance >= $creditLimit,
+            'available_credit' => $creditLimit > 0 ? max(0.0, $creditLimit - $balance) : null,
+        ]);
     }
 
     /**
@@ -123,6 +149,15 @@ class WorkOrderController extends Controller
 
             $vehicle->has_open_work_order = $openWorkOrder !== null;
             $vehicle->open_work_order = $openWorkOrder;
+
+            if ($vehicle->customer) {
+                $balance = $vehicle->customer->getOutstandingBalance();
+                $creditLimit = (float) ($vehicle->customer->credit_limit ?? 0);
+                $vehicle->customer->balance = $balance;
+                $vehicle->customer->credit_limit = $creditLimit;
+                $vehicle->customer->is_credit_exceeded = $creditLimit > 0 && $balance >= $creditLimit;
+                $vehicle->customer->available_credit = $creditLimit > 0 ? max(0.0, $creditLimit - $balance) : null;
+            }
         });
 
         return response()->json($vehicles);

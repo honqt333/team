@@ -199,6 +199,19 @@ return [
         'setup_integration' => 'Set up ZATCA integration',
     ],
 
+    'tabs' => [
+        'profile' => 'Company Profile',
+        'contact' => 'Contact & Address',
+        'vat' => 'VAT Settings',
+        'zatca' => 'ZATCA',
+        'numbering' => 'Numbering & Sequences',
+        'workflow' => 'Operations Policies',
+        'notifications' => 'Notification Templates',
+        'admin_user' => 'Main User',
+        'revenue_expenses' => 'Income & Expenses',
+        'invoices' => 'Invoices',
+    ],
+
     // Subscription management (self-service)
     'subscription' => [
         'already_pending' => 'You already have a pending subscription request for ":plan". Please complete the current payment or wait a moment.',

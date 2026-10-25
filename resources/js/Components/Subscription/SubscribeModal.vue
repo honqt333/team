@@ -30,7 +30,7 @@ const csrfToken = computed(
         document.querySelector('meta[name="csrf-token"]')?.content
 );
 
-const billingCycle = ref('monthly');
+const billingCycle = ref('yearly');
 const promoInput = ref('');
 const validPromo = ref(null);
 const selectedGateway = ref('');
@@ -46,7 +46,7 @@ watch(
     () => props.open,
     (isOpen) => {
         if (isOpen && props.plan) {
-            billingCycle.value = 'monthly';
+            billingCycle.value = 'yearly';
             promoInput.value = '';
             validPromo.value = null;
             const available = (props.enabledGateways || [])
@@ -194,22 +194,26 @@ async function subscribe() {
     }
 }
 
+async function cancelPendingAttempt() {
+    try {
+        await fetch('/app/settings/billing/cancel-pending', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': csrfToken.value || '',
+                Accept: 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+            },
+        });
+    } catch (e) {
+        // silent catch
+    }
+}
+
 async function close() {
     if (loading.value) return;
-    if (gatewayFormData.value || bankTransferResult.value) {
-        try {
-            await fetch('/app/settings/billing/cancel-pending', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': csrfToken.value || '',
-                    Accept: 'application/json',
-                    'X-Requested-With': 'XMLHttpRequest',
-                },
-            });
-        } catch (e) {
-            // silent catch
-        }
+    if (gatewayFormData.value || bankTransferResult.value || currentPaymentId.value) {
+        await cancelPendingAttempt();
     }
     bankTransferResult.value = null;
     gatewayFormData.value = null;
@@ -234,7 +238,7 @@ function onReceiptUploaded() {
  * `on_completed` fires mainly for 3DS failures / cancellations, so we
  * just close the modal here and let the redirect handle success.
  */
-function onGatewayCompleted(payment) {
+async function onGatewayCompleted(payment) {
     // The form's callback_url is the payment.callback route, so a successful
     // 3DS + payment will redirect the browser to /app/settings/billing/callback/{id}
     // and render the SubscriptionSuccess page. Closing the modal here for
@@ -243,12 +247,16 @@ function onGatewayCompleted(payment) {
         // Browser will navigate away — nothing to do.
         return;
     }
-    // User cancelled or 3DS failed — close and let them try again.
+    // User cancelled or 3DS failed — cancel pending attempt and reset
+    await cancelPendingAttempt();
     gatewayFormData.value = null;
+    currentPaymentId.value = null;
 }
 
-function cancelGatewayForm() {
+async function cancelGatewayForm() {
+    await cancelPendingAttempt();
     gatewayFormData.value = null;
+    currentPaymentId.value = null;
 }
 
 function onPromoApplied(data) {
@@ -397,60 +405,46 @@ const formatCurrency = (amount) => {
                 </div>
 
                 <div v-else class="space-y-6 p-6">
-                    <!-- Billing cycle selector -->
+                    <!-- Billing cycle: Annual only -->
                     <div>
                         <label
                             class="mb-2 block text-sm font-semibold text-slate-900 dark:text-white"
                         >
                             {{ t('subscription.billing_cycle', 'فترة الاشتراك') }}
                         </label>
-                        <div class="grid grid-cols-2 gap-2">
-                            <button
-                                type="button"
-                                @click="billingCycle = 'monthly'"
-                                :class="[
-                                    'rounded-lg border-2 p-3 text-center transition-all',
-                                    billingCycle === 'monthly'
-                                        ? 'border-indigo-600 bg-indigo-50/50 dark:border-indigo-400 dark:bg-indigo-900/20'
-                                        : 'border-slate-200 hover:border-slate-300 dark:border-slate-700 dark:hover:border-slate-600',
-                                ]"
-                            >
-                                <p class="text-sm font-semibold text-slate-900 dark:text-white">
-                                    {{ t('subscription.monthly', 'شهري') }}
-                                </p>
-                                <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">
-                                    {{ formatCurrency(plan?.price_monthly) }} SAR
-                                </p>
-                            </button>
-                            <button
-                                type="button"
-                                @click="billingCycle = 'yearly'"
-                                :class="[
-                                    'rounded-lg border-2 p-3 text-center transition-all relative',
-                                    billingCycle === 'yearly'
-                                        ? 'border-indigo-600 bg-indigo-50/50 dark:border-indigo-400 dark:bg-indigo-900/20'
-                                        : 'border-slate-200 hover:border-slate-300 dark:border-slate-700 dark:hover:border-slate-600',
-                                ]"
-                            >
-                                <span
-                                    v-if="plan?.yearly_discount"
-                                    class="absolute -top-2 right-3 rounded-full bg-emerald-500 px-2 py-0.5 text-[10px] font-bold text-white"
+                        <div
+                            class="rounded-xl border-2 border-indigo-600 bg-indigo-50/50 p-4 dark:border-indigo-400 dark:bg-indigo-900/20 flex items-center justify-between"
+                        >
+                            <div class="flex items-center gap-3">
+                                <div
+                                    class="w-10 h-10 rounded-lg bg-indigo-600 text-white flex items-center justify-center"
                                 >
-                                    {{
-                                        t(
-                                            'subscription.save_n_percent',
-                                            `وفر ${plan.yearly_discount}%`,
-                                            { percent: plan.yearly_discount }
-                                        )
-                                    }}
-                                </span>
-                                <p class="text-sm font-semibold text-slate-900 dark:text-white">
-                                    {{ t('subscription.yearly', 'سنوي') }}
-                                </p>
-                                <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">
-                                    {{ formatCurrency(plan?.price_yearly) }} SAR
-                                </p>
-                            </button>
+                                    <svg
+                                        class="w-5 h-5"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                                        />
+                                    </svg>
+                                </div>
+                                <div>
+                                    <p class="text-sm font-bold text-slate-900 dark:text-white">
+                                        اشتراك سنوي (12 شهر)
+                                    </p>
+                                    <p class="text-xs text-slate-500 dark:text-slate-400">
+                                        دورة الفوترة سنوية شاملة لكافة المزايا والتحديثات
+                                    </p>
+                                </div>
+                            </div>
+                            <span class="text-lg font-black text-indigo-600 dark:text-indigo-400">
+                                {{ formatCurrency(plan?.price_yearly) }} SAR
+                            </span>
                         </div>
                     </div>
 

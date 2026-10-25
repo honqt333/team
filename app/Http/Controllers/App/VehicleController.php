@@ -85,6 +85,18 @@ class VehicleController
             ->paginate(20)
             ->withQueryString();
 
+        $vehicles->getCollection()->each(function ($vehicle) {
+            if ($vehicle->customer) {
+                $customer = $vehicle->customer;
+                $creditLimit = (float) ($customer->credit_limit ?? 0);
+                $balance = $customer->getOutstandingBalance();
+                $customer->balance = $balance;
+                $customer->credit_limit = $creditLimit;
+                $customer->is_credit_exceeded = $creditLimit > 0 && $balance >= $creditLimit;
+                $customer->available_credit = $creditLimit > 0 ? max(0.0, $creditLimit - $balance) : null;
+            }
+        });
+
         return response()->json($vehicles);
     }
 
@@ -199,6 +211,16 @@ class VehicleController
             'model',
             'mileageLogs' => fn ($q) => $q->with('creator')->latest(),
         ]);
+
+        if ($vehicle->customer) {
+            $customer = $vehicle->customer;
+            $customerCreditLimit = (float) ($customer->credit_limit ?? 0);
+            $totalDue = $customer->getOutstandingBalance();
+            $customer->balance = $totalDue;
+            $customer->credit_limit = $customerCreditLimit;
+            $customer->is_credit_exceeded = $customerCreditLimit > 0 && $totalDue >= $customerCreditLimit;
+            $customer->available_credit = $customerCreditLimit > 0 ? max(0.0, $customerCreditLimit - $totalDue) : null;
+        }
 
         // Get all related data (bypassing center_scoped to support tenant-wide vehicle history)
         $workOrders = $vehicle->workOrders()

@@ -38,6 +38,10 @@ class Tenant extends Model
         'email',
         'logo_path',
         'invoice_number_format',
+        'work_order_number_format',
+        'quote_number_format',
+        'workflow_settings',
+        'notification_templates',
         'two_factor_enabled',
         'two_factor_enforcement',
         'sms_2fa_enabled',
@@ -69,6 +73,8 @@ class Tenant extends Model
             'two_factor_enabled' => 'boolean',
             'sms_2fa_enabled' => 'boolean',
             'print_settings' => 'array',
+            'workflow_settings' => 'array',
+            'notification_templates' => 'array',
             'dunning_opted_out' => 'boolean',
         ];
     }
@@ -108,6 +114,20 @@ class Tenant extends Model
         return $this->hasMany(Subscription::class);
     }
 
+    public function latestSubscription(): HasOne
+    {
+        return $this->hasOne(Subscription::class)->latestOfMany();
+    }
+
+    public function currentSubscription(): HasOne
+    {
+        return $this->hasOne(Subscription::class)->ofMany([
+            'id' => 'max',
+        ], function ($query) {
+            $query->whereIn('status', ['active', 'trial', 'trialing']);
+        });
+    }
+
     public function backups(): HasMany
     {
         return $this->hasMany(TenantBackup::class);
@@ -131,9 +151,43 @@ class Tenant extends Model
                     ->orWhere('ends_at', '>', now());
             })
             ->whereHas('plan', function ($query) {
-                $query->where('price_monthly', '>', 0);
+                $query->where('price_monthly', '>', 0)
+                    ->orWhere('price_yearly', '>', 0);
             })
             ->exists();
+    }
+
+    public function formatDocumentCode(string $type, int $centerId, int $seq, ?int $year = null): string
+    {
+        $year = $year ?? (int) now()->format('Y');
+
+        $format = match ($type) {
+            'invoice' => $this->invoice_number_format ?: 'INV-{CENTER}-{YYYY}-{SEQ}',
+            'work_order' => $this->work_order_number_format ?: 'WO-{SEQ}',
+            'quote' => $this->quote_number_format ?: 'QT-{SEQ}',
+            default => strtoupper($type).'-{SEQ}',
+        };
+
+        $replacements = [
+            '{CENTER}' => (string) $centerId,
+            '{YYYY}' => (string) $year,
+            '{YY}' => substr((string) $year, -2),
+            '{MM}' => now()->format('m'),
+            '{DD}' => now()->format('d'),
+            '{SEQ}' => str_pad((string) $seq, 6, '0', STR_PAD_LEFT),
+        ];
+
+        return str_replace(array_keys($replacements), array_values($replacements), $format);
+    }
+
+    public function getWorkflowSetting(string $key, mixed $default = null): mixed
+    {
+        return $this->workflow_settings[$key] ?? $default;
+    }
+
+    public function getNotificationTemplate(string $type, ?string $default = null): string
+    {
+        return $this->notification_templates[$type] ?? $default ?? '';
     }
 
     /**

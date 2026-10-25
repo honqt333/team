@@ -1,32 +1,45 @@
 <template>
-    <div class="print-container bg-white min-h-screen p-8 print:p-0 print:m-0 flex flex-col items-center" :dir="isRtl ? 'rtl' : 'ltr'">
+    <div
+        class="print-container bg-white min-h-screen p-8 print:p-0 print:m-0 flex flex-col items-center"
+        :dir="isRtl ? 'rtl' : 'ltr'"
+    >
         <!-- Print / Back Controls (hidden during print) -->
         <div class="fixed bottom-6 left-6 flex items-center gap-3 print:hidden z-50">
             <!-- Back Button -->
-            <button 
-                @click="goBack" 
+            <button
+                @click="goBack"
                 class="px-4 py-2.5 bg-white hover:bg-gray-50 text-gray-700 rounded-xl text-sm font-semibold transition-all border border-gray-200 shadow-lg flex items-center gap-2"
             >
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M10 19l-7-7m0 0l7-7m-7 7h18"
+                    />
                 </svg>
                 {{ $t('common.back') }}
             </button>
 
             <!-- Print Button -->
-            <button 
-                @click="printPage" 
+            <button
+                @click="printPage"
                 class="px-5 py-2.5 text-white rounded-xl text-sm font-semibold transition-all shadow-lg flex items-center gap-2"
                 :style="{ backgroundColor: visualSettings.primary_color || '#3b82f6' }"
             >
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 022 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 022 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"
+                    />
                 </svg>
                 {{ $t('common.print') }}
             </button>
         </div>
 
-        <PrintEngine 
+        <PrintEngine
             :documentType="'quotation'"
             :data="mappedPrintData"
             :centerData="mappedCenterData"
@@ -89,21 +102,31 @@ const getCenterAddress = (center) => {
 const mappedPrintData = computed(() => {
     let vehicleStr = '-';
     if (props.quote.vehicle) {
-        const make = props.quote.vehicle.make?.name_ar || props.quote.vehicle.make?.name_en || props.quote.vehicle.make || '';
-        const model = props.quote.vehicle.model?.name_ar || props.quote.vehicle.model?.name_en || props.quote.vehicle.model || '';
+        const make =
+            props.quote.vehicle.make?.name_ar ||
+            props.quote.vehicle.make?.name_en ||
+            props.quote.vehicle.make ||
+            '';
+        const model =
+            props.quote.vehicle.model?.name_ar ||
+            props.quote.vehicle.model?.name_en ||
+            props.quote.vehicle.model ||
+            '';
         vehicleStr = `${make} ${model}`.trim() || '-';
     }
 
-    const services = (props.quote.lines || []).map(line => {
+    const services = (props.quote.lines || []).map((line) => {
         let serviceName = '';
-        const isStandard = line.service && 
-            line.service.name_ar?.trim() !== 'أخرى' && 
+        const isStandard =
+            line.service &&
+            line.service.name_ar?.trim() !== 'أخرى' &&
             line.service.name_en?.trim().toLowerCase() !== 'other';
-            
+
         if (isStandard) {
-            serviceName = locale.value === 'ar' 
-                ? (line.service.name_ar || line.description) 
-                : (line.service.name_en || line.service.name_ar || line.description);
+            serviceName =
+                locale.value === 'ar'
+                    ? line.service.name_ar || line.description
+                    : line.service.name_en || line.service.name_ar || line.description;
         } else {
             serviceName = line.description || '';
         }
@@ -120,13 +143,13 @@ const mappedPrintData = computed(() => {
             tax_amount: Number(line.tax_amount || 0),
             total: Number(line.line_total || 0),
             line_total_excl_tax: Number(line.line_total_excl_tax || 0),
-            line_total_incl_tax: Number(line.line_total_incl_tax || 0)
+            line_total_incl_tax: Number(line.line_total_incl_tax || 0),
         };
     });
 
     const parts = (props.quote.parts || [])
-        .filter(part => !part.hide_on_print)
-        .map(part => ({
+        .filter((part) => !part.hide_on_print)
+        .map((part) => ({
             service_name: part.name || '—',
             description: part.part_number || part.part?.sku || 'NO-SKU',
             qty: Number(part.qty || 1),
@@ -138,21 +161,22 @@ const mappedPrintData = computed(() => {
             tax_amount: Number(part.tax_amount || 0),
             total: Number(part.total_incl_tax || part.total || 0),
             line_total_excl_tax: Number(part.total_excl_tax || 0),
-            line_total_incl_tax: Number(part.total_incl_tax || 0)
+            line_total_incl_tax: Number(part.total_incl_tax || 0),
         }));
-
 
     return {
         code: props.quote.code,
         created_at: props.quote.created_at,
         entry_date: props.quote.created_at,
+        valid_until: props.quote.valid_until,
         mileage: props.quote.odometer,
         odometer: props.quote.odometer ? Number(props.quote.odometer).toLocaleString() : '-',
         customer_complaint: props.quote.customer_complaint,
         customer: {
             name: props.quote.customer?.name || '—',
             phone: props.quote.customer?.phone || '',
-            address: props.quote.customer_address_snapshot || props.quote.customer?.address_line || '',
+            address:
+                props.quote.customer_address_snapshot || props.quote.customer?.address_line || '',
             tax_number: props.quote.customer_vat_snapshot || props.quote.customer?.tax_number || '',
         },
         vehicle: {
@@ -164,10 +188,14 @@ const mappedPrintData = computed(() => {
         pricing_mode_snapshot: props.quote.pricing_mode_snapshot || 'exclusive',
         total_excl_tax: Number(props.quote.total_excl_tax || 0),
         total_tax: props.quote.tax_enabled_snapshot ? Number(props.quote.total_tax || 0) : 0,
-        total_incl_tax: props.quote.tax_enabled_snapshot ? Number(props.quote.total_incl_tax || 0) : Number(props.quote.total_excl_tax || 0),
+        total_incl_tax: props.quote.tax_enabled_snapshot
+            ? Number(props.quote.total_incl_tax || 0)
+            : Number(props.quote.total_excl_tax || 0),
         total_paid: 0,
-        balance: props.quote.tax_enabled_snapshot ? Number(props.quote.total || 0) : Number(props.quote.total_excl_tax || 0),
-        items: [...services, ...parts]
+        balance: props.quote.tax_enabled_snapshot
+            ? Number(props.quote.total || 0)
+            : Number(props.quote.total_excl_tax || 0),
+        items: [...services, ...parts],
     };
 });
 
@@ -175,7 +203,9 @@ const mappedCenterData = computed(() => {
     const center = props.quote.center || {};
     const tenant = props.quote.tenant || page.props?.tenant || {};
     return {
-        name: isRtl.value ? (center.name_ar || center.name || tenant.name) : (center.name_en || center.name || tenant.name),
+        name: isRtl.value
+            ? center.name_ar || center.name || tenant.name
+            : center.name_en || center.name || tenant.name,
         tax_number: center.vat_number || tenant.vat_number,
         cr_number: tenant.cr_number,
         phone: center.phone || tenant.phone,
@@ -188,18 +218,37 @@ const mappedCenterData = computed(() => {
 
 const documentSettings = computed(() => {
     const tenantSettings = page.props?.tenant?.print_settings;
-    const docSettings = tenantSettings?.documents?.['quote'] || tenantSettings?.documents?.['quotation'] || {};
+    const docSettings =
+        tenantSettings?.documents?.['quote'] || tenantSettings?.documents?.['quotation'] || {};
     return {
         title_ar: docSettings.title_ar || 'عرض سعر / تقييم',
         title_en: docSettings.title_en || 'Price Quotation / Assessment',
-        terms: docSettings.terms || (page.props?.tenant?.invoice_terms ? [page.props.tenant.invoice_terms] : []),
+        terms:
+            docSettings.terms ||
+            (page.props?.tenant?.invoice_terms ? [page.props.tenant.invoice_terms] : []),
         print_terms: docSettings.print_terms !== false,
         show_stamp: docSettings.show_stamp !== false,
         show_customer_address: docSettings.show_customer_address !== false,
-        signatures: docSettings.signatures && docSettings.signatures.length > 0 ? docSettings.signatures : [
-            { name_ar: 'توقيع المستشار الفني', name_en: 'Service Advisor Signature' },
-            { name_ar: 'توقيع العميل للاعتماد', name_en: 'Customer Signature' }
-        ]
+        signatures:
+            docSettings.signatures && docSettings.signatures.length > 0
+                ? docSettings.signatures.map((s) => {
+                      if (
+                          isRtl.value
+                              ? s.name_ar?.includes('العميل')
+                              : s.name_en?.toLowerCase().includes('customer')
+                      ) {
+                          return { ...s, url: props.quote.signature_url || s.url };
+                      }
+                      return s;
+                  })
+                : [
+                      { name_ar: 'توقيع المستشار الفني', name_en: 'Service Advisor Signature' },
+                      {
+                          name_ar: 'توقيع العميل للاعتماد',
+                          name_en: 'Customer Signature',
+                          url: props.quote.signature_url,
+                      },
+                  ],
     };
 });
 
@@ -214,14 +263,21 @@ const visualSettings = computed(() => {
         show_qr_code: vis.show_qr_code !== false,
         primary_color: vis.primary_color || '#3b82f6',
         footer_text: vis.footer_text || props.quote.tenant?.print_settings?.footer_text || '',
-        stamp_url: center.stamp_url || vis.stamp_url || ''
+        stamp_url: center.stamp_url || vis.stamp_url || '',
     };
 });
 </script>
 
 <style>
 @media print {
-    @page { size: A4; margin: 0 1cm; }
-    body { -webkit-print-color-adjust: exact; print-color-adjust: exact; background: white; }
+    @page {
+        size: A4;
+        margin: 0 1cm;
+    }
+    body {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+        background: white;
+    }
 }
 </style>

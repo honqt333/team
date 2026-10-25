@@ -105,12 +105,27 @@ class SubscriptionPayment extends Model
             'gateway_response' => $response,
         ]);
 
-        if ($this->subscription && in_array($this->subscription->status, ['pending', 'pending_payment'])) {
-            $this->subscription->update(['status' => 'failed']);
+        if ($this->subscription && in_array($this->subscription->status, ['pending', 'pending_payment', 'failed'])) {
+            $sub = $this->subscription;
+            $hasPaid = $sub->payments()->where('id', '!=', $this->id)->where('status', 'paid')->exists();
+            $hasReceipts = $sub->receipts()->exists();
+
+            if (! $hasPaid && ! $hasReceipts) {
+                // Provisional subscription created for this failed checkout attempt —
+                // disassociate and delete so it doesn't pollute subscriptions history or hijack billing card.
+                $this->update([
+                    'subscription_id' => null,
+                    'subscription_invoice_id' => null,
+                ]);
+                $sub->invoices()->delete();
+                $sub->delete();
+            } else {
+                $sub->update(['status' => 'failed']);
+            }
         }
 
         if ($this->invoice && $this->invoice->status === 'pending') {
-            $this->invoice->update(['status' => 'cancelled']);
+            $this->invoice->delete();
         }
 
         return $this;

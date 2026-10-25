@@ -10,6 +10,7 @@ use App\Traits\HasQuoteRelations;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class Quote extends Model
@@ -68,6 +69,8 @@ class Quote extends Model
         'uuid',
         'rejection_reason',
         'show_packages_section',
+        'valid_until',
+        'signature_path',
     ];
 
     protected $casts = [
@@ -78,6 +81,7 @@ class Quote extends Model
         'approved_at' => 'datetime',
         'rejected_at' => 'datetime',
         'converted_at' => 'datetime',
+        'valid_until' => 'date',
         'tax_breakdown' => 'array', // JSON cast
         'show_packages_section' => 'boolean',
         'tax_enabled_snapshot' => 'boolean',
@@ -111,20 +115,35 @@ class Quote extends Model
     public static function generateCode(int $tenantId, int $centerId): string
     {
         return DB::transaction(function () use ($tenantId, $centerId) {
-            $lastQuote = static::withoutGlobalScopes()
+            $tenant = Tenant::find($tenantId);
+            $format = $tenant?->quote_number_format ?: 'QT-{SEQ}';
+            $prefix = explode('{', $format)[0] ?: 'QT-';
+
+            $maxNumber = 0;
+            $rows = static::withoutGlobalScopes()
                 ->where('tenant_id', $tenantId)
                 ->where('center_id', $centerId)
+                ->where('code', 'like', $prefix.'%')
                 ->lockForUpdate()
-                ->orderByDesc('id')
-                ->first();
+                ->pluck('code');
 
-            if ($lastQuote && preg_match('/QT-(\d+)/', $lastQuote->code, $matches)) {
-                $nextNumber = (int) $matches[1] + 1;
-            } else {
-                $nextNumber = 1;
+            foreach ($rows as $code) {
+                if (preg_match('/(\d+)(?!.*\d)/', (string) $code, $matches)) {
+                    $n = (int) $matches[1];
+
+                    if ($n > $maxNumber) {
+                        $maxNumber = $n;
+                    }
+                }
             }
 
-            return 'QT-'.str_pad((string) $nextNumber, 6, '0', STR_PAD_LEFT);
+            $nextNumber = $maxNumber + 1;
+
+            if ($tenant) {
+                return $tenant->formatDocumentCode('quote', $centerId, $nextNumber);
+            }
+
+            return $prefix.str_pad((string) $nextNumber, 6, '0', STR_PAD_LEFT);
         });
     }
 
@@ -170,6 +189,22 @@ class Quote extends Model
     public function canBeRejected(): bool
     {
         return in_array($this->status, [self::STATUS_DRAFT, self::STATUS_SENT]);
+    }
+
+    public function isExpired(): bool
+    {
+        return $this->valid_until !== null
+            && $this->valid_until->endOfDay()->isPast()
+            && in_array($this->status, [self::STATUS_DRAFT, self::STATUS_SENT]);
+    }
+
+    public function getSignatureUrlAttribute(): ?string
+    {
+        if (empty($this->signature_path)) {
+            return null;
+        }
+
+        return Storage::disk('public')->url($this->signature_path);
     }
 
     // ─────────────────────────────────────────────────────────────

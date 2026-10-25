@@ -231,11 +231,185 @@
             </div>
         </div>
     </div>
+
+    <!-- Assign Plan Modal -->
+    <div v-if="modals.assignPlan" class="fixed inset-0 z-50 overflow-y-auto">
+        <div class="flex items-center justify-center min-h-screen px-4">
+            <div class="fixed inset-0 bg-black/50" @click="$emit('close', 'assignPlan')"></div>
+            <div
+                class="relative bg-white dark:bg-gray-800 rounded-2xl p-6 max-w-lg w-full shadow-xl"
+            >
+                <div
+                    class="flex items-center justify-between mb-4 pb-3 border-b border-gray-100 dark:border-gray-700"
+                >
+                    <div>
+                        <h3
+                            class="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2"
+                        >
+                            <span
+                                class="p-1.5 rounded-lg bg-indigo-50 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400"
+                            >
+                                <svg
+                                    class="w-5 h-5"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2"
+                                        d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138z"
+                                    />
+                                </svg>
+                            </span>
+                            تعيين / ترقية باقة للمستأجر
+                        </h3>
+                        <p class="text-xs text-gray-500 mt-1">
+                            ربط المستأجر
+                            <strong>{{ tenant.trade_name || tenant.name }}</strong>
+                            بباقة جديدة وتفعيل الاشتراك فوراً.
+                        </p>
+                    </div>
+                    <button
+                        type="button"
+                        @click="$emit('close', 'assignPlan')"
+                        class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
+                    >
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M6 18L18 6M6 6l12 12"
+                            />
+                        </svg>
+                    </button>
+                </div>
+
+                <form @submit.prevent="submitAssignPlan" class="space-y-4">
+                    <!-- Plan Selection -->
+                    <div>
+                        <label
+                            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                        >
+                            اختر الباقة
+                            <span class="text-red-500">*</span>
+                        </label>
+                        <select
+                            v-model="local.assignPlanId"
+                            required
+                            class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-indigo-500"
+                        >
+                            <option value="" disabled>-- حدد الباقة --</option>
+                            <option v-for="plan in plans" :key="plan.id" :value="plan.id">
+                                {{ plan.name_ar || plan.name_en }} (الاشتراك السنوي:
+                                {{ plan.price_yearly }} ر.س)
+                            </option>
+                        </select>
+                    </div>
+
+                    <!-- Billing Cycle (Fixed Annual) -->
+                    <div>
+                        <label
+                            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                        >
+                            دورة الفوترة
+                        </label>
+                        <div
+                            class="flex items-center justify-between p-3 rounded-xl border border-indigo-200 dark:border-indigo-800 bg-indigo-50/50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-300"
+                        >
+                            <span class="font-bold text-sm flex items-center gap-2">
+                                <svg
+                                    class="w-4 h-4"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2"
+                                        d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                                    />
+                                </svg>
+                                اشتراك سنوي (12 شهر)
+                            </span>
+                            <span
+                                class="text-xs bg-indigo-600 text-white px-2 py-0.5 rounded-full font-medium"
+                            >
+                                سنوي
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Price Preview Card -->
+                    <div
+                        v-if="selectedPlanObj"
+                        class="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl border border-gray-200 dark:border-gray-600 space-y-2 text-xs"
+                    >
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-500">نوع الباقة:</span>
+                            <span class="font-bold text-gray-900 dark:text-white">
+                                {{ selectedPlanObj.name_ar || selectedPlanObj.name_en }}
+                            </span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-500">مدة الاشتراك:</span>
+                            <span class="font-semibold text-gray-900 dark:text-white">
+                                {{
+                                    selectedPlanObj.slug === 'trial'
+                                        ? `${selectedPlanObj.trial_days || 14} يوم (تجريبي)`
+                                        : 'سنة كاملة (12 شهر)'
+                                }}
+                            </span>
+                        </div>
+                        <div
+                            class="flex justify-between items-center text-sm pt-2 border-t border-gray-200 dark:border-gray-600 font-bold"
+                        >
+                            <span class="text-gray-700 dark:text-gray-300">المبلغ الإجمالي:</span>
+                            <span class="text-indigo-600 dark:text-indigo-400">
+                                {{ selectedPlanObj.price_yearly }} ر.س
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Notice -->
+                    <p
+                        class="text-xs text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 p-2.5 rounded-lg border border-amber-200 dark:border-amber-800"
+                    >
+                        * سيتم تفعيل الاشتراك مباشرة للمستأجر وتحديث حالته إلى (نشط)، مع أرشفة أي
+                        اشتراك سابق نشط.
+                    </p>
+
+                    <!-- Modal Actions -->
+                    <div class="flex gap-3 justify-end pt-2">
+                        <button
+                            type="button"
+                            @click="$emit('close', 'assignPlan')"
+                            class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg text-sm"
+                        >
+                            {{ $t('common.cancel') }}
+                        </button>
+                        <button
+                            type="submit"
+                            :disabled="!local.assignPlanId || local.isSubmitting"
+                            class="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-semibold disabled:opacity-50 transition-colors shadow-sm"
+                        >
+                            <span v-if="local.isSubmitting">جاري الحفظ...</span>
+                            <span v-else>تأكيد وتفعيل الباقة</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 </template>
 
 <script setup>
 import { reactive, watch, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { router } from '@inertiajs/vue3';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 
 const props = defineProps({
@@ -243,6 +417,7 @@ const props = defineProps({
     tenant: { type: Object, required: true },
     analytics: { type: Object, required: true },
     securityForm: { type: Object, required: true },
+    plans: { type: Array, default: () => [] },
 });
 
 const emit = defineEmits([
@@ -262,9 +437,26 @@ const local = reactive({
     suspendReason: '',
     extendDays: 14,
     deleteConfirmation: '',
+    assignPlanId: '',
+    assignBillingCycle: 'monthly',
+    isSubmitting: false,
+});
+
+const selectedPlanObj = computed(() => {
+    return (props.plans || []).find((p) => p.id === Number(local.assignPlanId));
 });
 
 // Reset scratch inputs when a modal closes so reopening starts fresh.
+watch(
+    () => props.modals.assignPlan,
+    (open) => {
+        if (open) {
+            local.assignPlanId = props.plans[0]?.id || '';
+            local.assignBillingCycle = 'monthly';
+            local.isSubmitting = false;
+        }
+    }
+);
 watch(
     () => props.modals.suspend,
     (open) => {
@@ -283,6 +475,29 @@ watch(
         if (!open) local.deleteConfirmation = '';
     }
 );
+
+const submitAssignPlan = () => {
+    if (!local.assignPlanId) return;
+    local.isSubmitting = true;
+    router.post(
+        '/system/subscriptions',
+        {
+            tenant_id: props.tenant.id,
+            plan_id: local.assignPlanId,
+            billing_cycle: local.assignBillingCycle,
+        },
+        {
+            preserveScroll: true,
+            onSuccess: () => {
+                local.isSubmitting = false;
+                emit('close', 'assignPlan');
+            },
+            onError: () => {
+                local.isSubmitting = false;
+            },
+        }
+    );
+};
 
 const emitSuspend = () => emit('confirm-suspend', local.suspendReason);
 const emitExtend = () => emit('confirm-extend', local.extendDays);

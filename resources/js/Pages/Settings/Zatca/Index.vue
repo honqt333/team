@@ -159,18 +159,13 @@
                         >
                             بيئة الربط (Environment)
                         </label>
-                        <select
+                        <SearchableSelect
                             v-model="csrForm.environment"
-                            class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-emerald-500"
-                        >
-                            <option value="simulation">
-                                بيئة المحاكاة والتجربة (Simulation Gateway)
-                            </option>
-                            <option value="production">
-                                البيئة الإنتاجية الحية (Production Gateway)
-                            </option>
-                            <option value="sandbox">بيئة المطورين (Developer Sandbox)</option>
-                        </select>
+                            :options="environmentOptions"
+                            option-label="label"
+                            option-value="value"
+                            placeholder="اختر بيئة الربط..."
+                        />
                     </div>
 
                     <div>
@@ -628,6 +623,13 @@ import { useForm, router } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import PageHeader from '@/Components/PageHeader.vue';
 import BackButton from '@/Components/BackButton.vue';
+import SearchableSelect from '@/Components/SearchableSelect.vue';
+
+const environmentOptions = [
+    { value: 'simulation', label: 'بيئة المحاكاة والتجربة (Simulation Gateway)' },
+    { value: 'production', label: 'البيئة الإنتاجية الحية (Production Gateway)' },
+    { value: 'sandbox', label: 'بيئة المطورين (Developer Sandbox)' },
+];
 
 const props = defineProps({
     tenant: {

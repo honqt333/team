@@ -9,6 +9,7 @@ use App\Models\Quote;
 use App\Services\NotificationService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -54,7 +55,10 @@ class PublicQuoteController extends Controller
                 'tax_rate_snapshot' => $quote->tax_rate_snapshot,
                 'currency_code' => $quote->currency_code,
                 'created_at' => $quote->created_at?->toDateString(),
-                'can_be_actioned' => in_array($quote->status, [Quote::STATUS_DRAFT, Quote::STATUS_SENT]),
+                'valid_until' => $quote->valid_until?->toDateString(),
+                'is_expired' => $quote->isExpired(),
+                'signature_url' => $quote->signature_url,
+                'can_be_actioned' => in_array($quote->status, [Quote::STATUS_DRAFT, Quote::STATUS_SENT]) && ! $quote->isExpired(),
                 'center' => $quote->center ? [
                     'id' => $quote->center->id,
                     'name' => $quote->center->name,
@@ -127,7 +131,7 @@ class PublicQuoteController extends Controller
     /**
      * Approve a quote via public link.
      */
-    public function approve(string $uuid): RedirectResponse
+    public function approve(Request $request, string $uuid): RedirectResponse
     {
         $quote = Quote::withoutGlobalScopes()
             ->where('uuid', $uuid)
@@ -137,9 +141,32 @@ class PublicQuoteController extends Controller
             return back()->with('error', 'لا يمكن الموافقة على هذا العرض.');
         }
 
+        if ($quote->isExpired()) {
+            return back()->with('error', 'عذراً، هذا العرض منتهي الصلاحية ولا يمكن اعتماده.');
+        }
+
+        $signaturePath = null;
+
+        if ($request->filled('signature')) {
+            $data = $request->input('signature');
+
+            if (preg_match('/^data:image\/(\w+);base64,/', $data, $type)) {
+                $data = substr($data, strpos($data, ',') + 1);
+                $type = strtolower($type[1]);
+                $decoded = base64_decode($data);
+
+                if ($decoded !== false) {
+                    $filename = 'signatures/quotes/'.$quote->id.'_'.time().'.'.$type;
+                    Storage::disk('public')->put($filename, $decoded);
+                    $signaturePath = $filename;
+                }
+            }
+        }
+
         $quote->update([
             'status' => Quote::STATUS_APPROVED,
             'approved_at' => now(),
+            'signature_path' => $signaturePath ?? $quote->signature_path,
         ]);
 
         // Notify the quote creator

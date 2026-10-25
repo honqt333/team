@@ -82,15 +82,39 @@ class BillingController extends Controller
             return $config && ($config['enabled'] ?? false);
         })->values()->all();
 
-        // Current subscription — include pending/pending_payment so the
-        // tenant sees their in-flight subscription instead of an empty card.
+        // Prioritized selection for Current Subscription:
+        // Priority 1: Valid active or trialing subscription (ends_at in future or null)
         $currentSubscription = $tenant->subscriptions()
-            ->whereIn('status', ['active', 'trial', 'trialing', 'cancelled', 'expired', 'pending', 'pending_payment'])
+            ->whereIn('status', ['active', 'trial', 'trialing'])
+            ->where(function ($q) {
+                $q->whereNull('ends_at')->orWhere('ends_at', '>', now());
+            })
             ->with('plan')
-            ->orderByDesc('created_at')
+            ->orderByDesc('ends_at')
             ->first();
 
-        // Build virtual trial if no real subscription
+        // Priority 2: In-flight subscription with an uploaded bank transfer receipt awaiting review
+        if (! $currentSubscription) {
+            $currentSubscription = $tenant->subscriptions()
+                ->whereIn('status', ['pending', 'pending_payment'])
+                ->whereHas('receipts', function ($q) {
+                    $q->where('status', 'pending');
+                })
+                ->with('plan')
+                ->latest()
+                ->first();
+        }
+
+        // Priority 3: Legitimate prior subscription (active/trial/paid) that expired or was cancelled
+        if (! $currentSubscription) {
+            $currentSubscription = $tenant->subscriptions()
+                ->whereIn('status', ['active', 'trial', 'trialing', 'cancelled', 'expired'])
+                ->with('plan')
+                ->latest()
+                ->first();
+        }
+
+        // Priority 4: Build virtual trial if no real subscription
         if (! $currentSubscription && $tenant->created_at) {
             $trialStarts = $tenant->created_at;
             $trialEnds = $tenant->trial_ends_at ?: $trialStarts->copy()->addDays(14);
@@ -122,22 +146,10 @@ class BillingController extends Controller
                 return $plan;
             });
 
-        // Subscription history — every subscription except the
-        // current one. The current (active, in-window) subscription
-        // is shown separately in the SubscriptionCard so it doesn't
-        // get duplicated in the table. Everything else — past active
-        // subscriptions that have since ended, in-flight pending /
-        // pending_payment attempts, trial periods, failed payment
-        // attempts, explicit cancels, admin-initiated refunds, and
-        // natural expirations — belongs in the history so the
-        // tenant has a complete chronological record of every
-        // subscription they've ever had.
-        //
-        // Note: the in-flight statuses (pending, pending_payment)
-        // ARE included here even though the "Current subscription"
-        // card may also show one. The card shows the most recent
-        // one; the table shows all earlier ones in case the tenant
-        // started a new attempt before an old one was cancelled.
+        // Subscription history — legitimate past subscriptions except the
+        // current one. Only subscriptions with paid payments, uploaded receipts,
+        // or trials are included. Provisional unconfirmed checkout attempts
+        // are excluded (they appear in recentPayments).
         $currentSubId = $currentSubscription && ! is_array($currentSubscription)
             ? $currentSubscription->id
             : null;
@@ -145,6 +157,11 @@ class BillingController extends Controller
         $subscriptionHistory = $tenant->subscriptions()
             ->with(['plan', 'invoices.payments'])
             ->when($currentSubId, fn ($q) => $q->where('id', '!=', $currentSubId))
+            ->where(function ($q) {
+                $q->whereHas('payments', fn ($p) => $p->where('status', 'paid'))
+                    ->orWhereHas('receipts')
+                    ->orWhereIn('status', ['trial', 'trialing']);
+            })
             ->orderByDesc('created_at')
             ->limit(50)
             ->get();

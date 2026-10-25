@@ -194,7 +194,7 @@ const props = defineProps({
 const form = useForm({
     tenant_id: '',
     plan_id: '',
-    billing_cycle: 'monthly',
+    billing_cycle: 'yearly',
     promo_code: '',
 });
 
@@ -205,10 +205,7 @@ const tenantOptions = computed(() =>
     }))
 );
 
-const billingCycleOptions = [
-    { value: 'monthly', label: 'شهري' },
-    { value: 'yearly', label: 'سنوي' },
-];
+const billingCycleOptions = [{ value: 'yearly', label: 'سنوي (12 شهر)' }];
 
 const submit = () => {
     form.post('/system/subscriptions', {

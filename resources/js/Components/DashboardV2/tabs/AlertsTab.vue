@@ -48,7 +48,7 @@ const ICONS = {
                 :title="$t('dashboard.low_stock_parts')"
                 :count="alerts.lowStock ?? 0"
                 :description="$t('dashboard.low_stock_parts_desc')"
-                href="/app/inventory/parts"
+                href="/app/inventory/stock?stock_status=low_stock"
                 :icon="ICONS.lowStock"
                 color="sky"
             />

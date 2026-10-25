@@ -44,6 +44,44 @@ const currentPlanId = computed(() => {
     return props.current_subscription?.plan_id ?? null;
 });
 
+const isSubscriptionExpired = computed(() => {
+    const status = props.current_subscription?.status;
+    if (['expired', 'cancelled', 'failed'].includes(status)) {
+        return true;
+    }
+    if (props.current_subscription?.ends_at) {
+        return new Date(props.current_subscription.ends_at) <= new Date();
+    }
+    return false;
+});
+
+const canRenewCurrent = computed(() => {
+    if (!props.current_subscription) return false;
+    if (isSubscriptionExpired.value) return true;
+    if (['trial', 'trialing'].includes(props.current_subscription.status)) return true;
+    if (props.current_subscription.ends_at) {
+        const diffDays = Math.ceil(
+            (new Date(props.current_subscription.ends_at) - new Date()) / (1000 * 60 * 60 * 24)
+        );
+        return diffDays <= 30;
+    }
+    return false;
+});
+
+const currentPlan = computed(() => {
+    if (!props.current_subscription?.plan_id) return null;
+    return (
+        props.available_plans.find((p) => p.id === props.current_subscription.plan_id) ||
+        props.current_subscription.plan
+    );
+});
+
+function handleRenewCurrent() {
+    if (currentPlan.value) {
+        openSubscribe(currentPlan.value);
+    }
+}
+
 const hasPendingSubscription = computed(() => {
     return ['pending', 'pending_payment'].includes(props.current_subscription?.status);
 });
@@ -70,7 +108,7 @@ onMounted(() => {
     const planId = params.get('plan');
     if (planId) {
         const plan = props.available_plans.find((p) => String(p.id) === planId);
-        if (plan && !currentPlanId.value) {
+        if (plan && (!currentPlanId.value || isSubscriptionExpired.value)) {
             openSubscribe(plan);
         }
     }
@@ -161,10 +199,13 @@ const noPlanLabel = () => t('system.billing.page.no_plan');
                 >
                     {{ t('system.billing.page.section_current') }}
                 </h2>
-                <SubscriptionCard :subscription="current_subscription" />
+                <SubscriptionCard
+                    :subscription="current_subscription"
+                    @renew="handleRenewCurrent"
+                />
             </section>
 
-            <!-- 2. Available plans (upgrade / downgrade) -->
+            <!-- 2. Available plans (upgrade / downgrade / renew) -->
             <section>
                 <div class="mb-3 flex items-center justify-between">
                     <h2
@@ -182,6 +223,8 @@ const noPlanLabel = () => t('system.billing.page.no_plan');
                         :key="plan.id"
                         :plan="plan"
                         :is-current="currentPlanId === plan.id"
+                        :is-expired="isSubscriptionExpired"
+                        :can-renew="canRenewCurrent && currentPlanId === plan.id"
                         :has-pending-subscription="hasPendingSubscription"
                         @subscribe="openSubscribe"
                     />

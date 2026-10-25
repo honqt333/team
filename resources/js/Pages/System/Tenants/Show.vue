@@ -18,6 +18,7 @@
             <TenantQuickActions
                 :tenant="tenant"
                 @impersonate="impersonateTenant"
+                @assign-plan="modals.assignPlan = true"
                 @suspend="modals.suspend = true"
                 @activate="activateTenant"
                 @extend-trial="modals.extend = true"
@@ -38,6 +39,7 @@
                 :activity-log="activityLog"
                 :recent-work-orders="recentWorkOrders"
                 @security="modals.security = true"
+                @assign-plan="modals.assignPlan = true"
             />
 
             <!-- Modals -->
@@ -46,6 +48,7 @@
                 :tenant="tenant"
                 :analytics="analytics"
                 :security-form="securityForm"
+                :plans="plans"
                 @close="closeModal"
                 @save-security="updateSecurity"
                 @confirm-suspend="suspendTenant"
@@ -77,9 +80,11 @@ const props = defineProps({
     bankTransferReceipts: { type: Array, default: () => [] },
     healthScore: { type: Object, default: null },
     activityLog: { type: Array, default: () => [] },
+    plans: { type: Array, default: () => [] },
 });
 
 const modals = reactive({
+    assignPlan: false,
     suspend: false,
     extend: false,
     delete: false,

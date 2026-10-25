@@ -6,8 +6,12 @@ namespace Tests\Feature;
 
 use App\Models\Center;
 use App\Models\Customer;
+use App\Models\Invoice;
+use App\Models\Quote;
 use App\Models\Tenant;
 use App\Models\User;
+use App\Models\Vehicle;
+use App\Models\WorkOrder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\PermissionRegistrar;
@@ -135,5 +139,180 @@ class VehiclesCrudTest extends TestCase
             'vin' => '1hgcr2f83ha123456', // Valid English letters & numbers
         ]);
         $response->assertRedirect();
+    }
+
+    public function test_vehicle_show_and_customer_balance_api_include_customer_balance_and_credit_limit(): void
+    {
+        $user = $this->createUserWithPermissions([
+            'crm.vehicles.view',
+        ]);
+
+        $customer = Customer::create([
+            'tenant_id' => $user->tenant_id,
+            'center_id' => $user->current_center_id,
+            'type' => 'company',
+            'name' => 'Al-Amal Transport',
+            'phone' => '+966500000001',
+            'credit_limit' => 2000.00,
+        ]);
+
+        $vehicle = Vehicle::create([
+            'tenant_id' => $user->tenant_id,
+            'center_id' => $user->current_center_id,
+            'customer_id' => $customer->id,
+            'plate_number' => 'AAA 1111',
+            'vin' => '1HGCR2F83HA111111',
+        ]);
+
+        Invoice::create([
+            'tenant_id' => $user->tenant_id,
+            'center_id' => $user->current_center_id,
+            'customer_id' => $customer->id,
+            'invoice_number' => 'INV-VEH-001',
+            'issue_date' => now(),
+            'supply_date' => now(),
+            'status' => 'valid',
+            'total_incl_tax' => 750.00,
+            'total_paid' => 0.00,
+        ]);
+
+        // 1. Check vehicle show endpoint loads customer balance
+        $response = $this->actingAs($user)->get("/app/vehicles/{$vehicle->id}");
+        $response->assertOk();
+        $response->assertInertia(fn ($page) => $page
+            ->component('Vehicles/Show')
+            ->has('vehicle')
+            ->where('customer.balance', fn ($v) => (float) $v === 750.0)
+            ->where('customer.credit_limit', fn ($v) => (float) $v === 2000.0)
+            ->where('customer.is_credit_exceeded', false)
+            ->where('customer.available_credit', fn ($v) => (float) $v === 1250.0)
+        );
+
+        // 2. Check customer balance API
+        $apiResponse = $this->actingAs($user)->getJson("/app/api/customers/{$customer->id}/balance");
+        $apiResponse->assertOk();
+        $apiResponse->assertJson([
+            'customer_id' => $customer->id,
+            'balance' => 750.0,
+            'credit_limit' => 2000.0,
+            'is_credit_exceeded' => false,
+            'available_credit' => 1250.0,
+        ]);
+    }
+
+    public function test_authorized_user_can_merge_vehicles(): void
+    {
+        $user = $this->createUserWithPermissions([
+            'crm.vehicles.view',
+            'crm.vehicles.update',
+        ]);
+
+        $customer = Customer::create([
+            'tenant_id' => $user->tenant_id,
+            'center_id' => $user->current_center_id,
+            'type' => 'individual',
+            'name' => 'Fahad Al-Harbi',
+            'phone' => '+966555555555',
+        ]);
+
+        $sourceVehicle = Vehicle::create([
+            'tenant_id' => $user->tenant_id,
+            'center_id' => $user->current_center_id,
+            'customer_id' => $customer->id,
+            'plate_number' => 'OLD 1111',
+            'make_other' => 'Toyota',
+            'vin' => 'SOURCEVIN12345678',
+            'odometer' => 50000,
+        ]);
+
+        $targetVehicle = Vehicle::create([
+            'tenant_id' => $user->tenant_id,
+            'center_id' => $user->current_center_id,
+            'customer_id' => $customer->id,
+            'plate_number' => 'NEW 2222',
+            'make_other' => 'Toyota',
+            'vin' => 'TARGETVIN12345678',
+            'odometer' => 45000,
+        ]);
+
+        // Create a work order for source vehicle
+        $workOrder = WorkOrder::create([
+            'tenant_id' => $user->tenant_id,
+            'center_id' => $user->current_center_id,
+            'customer_id' => $customer->id,
+            'vehicle_id' => $sourceVehicle->id,
+            'code' => 'WO-MERGE-01',
+            'status' => 'open',
+        ]);
+
+        // Create a quote for source vehicle
+        $quote = Quote::create([
+            'tenant_id' => $user->tenant_id,
+            'center_id' => $user->current_center_id,
+            'customer_id' => $customer->id,
+            'vehicle_id' => $sourceVehicle->id,
+            'code' => 'QT-000001',
+            'status' => 'draft',
+            'total_excl_tax' => 100,
+            'total_tax' => 15,
+            'total_incl_tax' => 115,
+        ]);
+
+        // 1. Test mergeData endpoint
+        $mergeDataResponse = $this->actingAs($user)->getJson("/app/vehicles/{$sourceVehicle->id}/merge");
+        $mergeDataResponse->assertOk();
+        $mergeDataResponse->assertJsonStructure([
+            'source' => ['id', 'plate_number', 'work_orders_count', 'quotes_count'],
+            'targets' => [
+                '*' => ['id', 'plate_number', 'is_same_customer', 'is_same_make'],
+            ],
+        ]);
+
+        // 2. Test cannot merge vehicle with itself
+        $selfMergeResponse = $this->actingAs($user)->post("/app/vehicles/{$sourceVehicle->id}/merge/{$sourceVehicle->id}");
+        $selfMergeResponse->assertSessionHas('error');
+
+        // 3. Test cannot merge vehicles of DIFFERENT customers
+        $otherCustomer = Customer::create([
+            'tenant_id' => $user->tenant_id,
+            'center_id' => $user->current_center_id,
+            'type' => 'individual',
+            'name' => 'Other Customer',
+            'phone' => '+966599999999',
+        ]);
+        $diffCustomerVehicle = Vehicle::create([
+            'tenant_id' => $user->tenant_id,
+            'center_id' => $user->current_center_id,
+            'customer_id' => $otherCustomer->id,
+            'plate_number' => 'DIFF 3333',
+            'make_other' => 'Toyota',
+        ]);
+        $diffCustomerMergeResponse = $this->actingAs($user)->post("/app/vehicles/{$sourceVehicle->id}/merge/{$diffCustomerVehicle->id}");
+        $diffCustomerMergeResponse->assertSessionHas('error');
+
+        // 4. Test cannot merge vehicles of DIFFERENT makes (even if same customer)
+        $diffMakeVehicle = Vehicle::create([
+            'tenant_id' => $user->tenant_id,
+            'center_id' => $user->current_center_id,
+            'customer_id' => $customer->id,
+            'plate_number' => 'DIFFMAKE 4444',
+            'make_other' => 'Hyundai',
+        ]);
+        $diffMakeMergeResponse = $this->actingAs($user)->post("/app/vehicles/{$sourceVehicle->id}/merge/{$diffMakeVehicle->id}");
+        $diffMakeMergeResponse->assertSessionHas('error');
+
+        // 5. Test successful merge between same-customer & same-make vehicles
+        $response = $this->actingAs($user)->post("/app/vehicles/{$sourceVehicle->id}/merge/{$targetVehicle->id}");
+        $response->assertRedirect(route('vehicles.show', $targetVehicle));
+
+        // Assert work order and quote were moved to target vehicle
+        $this->assertEquals($targetVehicle->id, $workOrder->fresh()->vehicle_id);
+        $this->assertEquals($targetVehicle->id, $quote->fresh()->vehicle_id);
+
+        // Assert odometer was updated to higher reading (50000)
+        $this->assertEquals(50000, $targetVehicle->fresh()->odometer);
+
+        // Assert source vehicle was soft-deleted
+        $this->assertSoftDeleted('vehicles', ['id' => $sourceVehicle->id]);
     }
 }

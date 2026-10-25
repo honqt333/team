@@ -17,7 +17,12 @@ class PlansController extends Controller
      */
     public function index(): Response
     {
-        $plans = Plan::orderBy('sort_order')->get();
+        $plans = Plan::withCount([
+            'subscriptions as active_subscribers_count' => function ($q) {
+                $q->whereIn('status', ['active', 'trial', 'trialing']);
+            },
+            'subscriptions as total_subscribers_count',
+        ])->orderBy('sort_order')->get();
 
         return Inertia::render('System/Plans/Index', [
             'plans' => $plans,
@@ -45,7 +50,7 @@ class PlansController extends Controller
             'slug' => 'required|string|max:255|unique:plans',
             'description_ar' => 'nullable|string',
             'description_en' => 'nullable|string',
-            'price_monthly' => 'required|numeric|min:0',
+            'price_monthly' => 'nullable|numeric|min:0',
             'price_yearly' => 'required|numeric|min:0',
             'trial_days' => 'required|integer|min:0',
             'features_ar' => 'nullable|array',
@@ -56,6 +61,7 @@ class PlansController extends Controller
             'sort_order' => 'integer',
         ]);
 
+        $validated['price_monthly'] = $validated['price_monthly'] ?? round(((float) $validated['price_yearly']) / 12, 2);
         $validated['name'] = $validated['name_ar'];
         $validated['features'] = [
             'ar' => array_values(array_filter($request->input('features_ar', []))),
@@ -88,7 +94,7 @@ class PlansController extends Controller
             'slug' => 'required|string|max:255|unique:plans,slug,'.$plan->id,
             'description_ar' => 'nullable|string',
             'description_en' => 'nullable|string',
-            'price_monthly' => 'required|numeric|min:0',
+            'price_monthly' => 'nullable|numeric|min:0',
             'price_yearly' => 'required|numeric|min:0',
             'trial_days' => 'required|integer|min:0',
             'features_ar' => 'nullable|array',
@@ -99,6 +105,7 @@ class PlansController extends Controller
             'sort_order' => 'integer',
         ]);
 
+        $validated['price_monthly'] = $validated['price_monthly'] ?? round(((float) $validated['price_yearly']) / 12, 2);
         $validated['name'] = $validated['name_ar'];
         $validated['features'] = [
             'ar' => array_values(array_filter($request->input('features_ar', []))),

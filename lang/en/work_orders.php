@@ -47,6 +47,10 @@ return [
     'add' => 'Add',
     'create' => 'Create',
     'all_loaded' => 'All Loaded',
+    'allow_credit_override' => 'Allow credit limit override and proceed',
+    'credit_limit_exceeded' => 'Customer credit limit exceeded. Outstanding: :balance SAR, Limit: :limit SAR.',
+    'credit_limit_warning_title' => 'Warning: Customer credit limit exceeded!',
+    'credit_limit_warning_desc' => 'The customer outstanding balance has reached or exceeded the approved credit limit. Please collect outstanding balances or enable override below.',
     'balance' => 'Balance',
     'closed_date' => 'Closed Date',
     'columns' => [

@@ -76,24 +76,48 @@
                             {{ plan.slug }}
                         </p>
 
-                        <!-- Pricing -->
+                        <!-- Subscribers Count -->
+                        <div
+                            class="mt-3 flex items-center gap-1.5 text-xs text-indigo-600 dark:text-indigo-400 font-medium bg-indigo-50 dark:bg-indigo-900/30 px-2.5 py-1 rounded-md w-fit"
+                        >
+                            <svg
+                                class="w-3.5 h-3.5"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
+                                />
+                            </svg>
+                            <span>{{ plan.active_subscribers_count || 0 }} مستأجر مشترك</span>
+                        </div>
+
+                        <!-- Pricing (Yearly Only) -->
                         <div class="mt-6">
                             <div class="flex items-baseline gap-2">
                                 <span class="text-3xl font-bold text-gray-900 dark:text-white">
-                                    {{ plan.price_monthly }}
+                                    {{ plan.price_yearly }}
                                 </span>
-                                <span class="text-gray-500">
-                                    {{ $t('system.plans.monthly_price') }}
+                                <span class="text-sm font-semibold text-gray-500">
+                                    ر.س / سنوياً
                                 </span>
                             </div>
-                            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                                {{ $t('system.plans.or') }} {{ plan.price_yearly }}
-                                {{ $t('system.plans.yearly_price') }}
-                                <span v-if="plan.yearly_discount > 0" class="text-emerald-600">
-                                    ({{
-                                        $t('system.plans.discount', { pct: plan.yearly_discount })
-                                    }})
-                                </span>
+                            <p
+                                v-if="Number(plan.price_yearly) > 0"
+                                class="text-xs text-gray-500 dark:text-gray-400 mt-1"
+                            >
+                                اشتراك سنوي شامل (يعادل {{ Math.round(plan.price_yearly / 12) }} ر.س
+                                / شهرياً)
+                            </p>
+                            <p
+                                v-else
+                                class="text-xs text-emerald-600 dark:text-emerald-400 mt-1 font-medium"
+                            >
+                                تجربة مجانية لمدة {{ plan.trial_days }} يوم
                             </p>
                         </div>
 

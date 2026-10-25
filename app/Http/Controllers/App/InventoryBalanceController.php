@@ -111,7 +111,10 @@ class InventoryBalanceController extends Controller
             ->selectRaw('
                 COUNT(*) as total_items,
                 SUM(CASE WHEN qty_on_hand > 0 THEN 1 ELSE 0 END) as in_stock,
-                SUM(CASE WHEN qty_on_hand > 0 AND parts.min_qty IS NOT NULL AND qty_on_hand <= parts.min_qty THEN 1 ELSE 0 END) as low_stock,
+                SUM(CASE WHEN (
+                    (inventory_balances.min_stock > 0 AND inventory_balances.qty_on_hand <= inventory_balances.min_stock)
+                    OR ((inventory_balances.min_stock IS NULL OR inventory_balances.min_stock <= 0) AND parts.min_qty > 0 AND inventory_balances.qty_on_hand <= parts.min_qty)
+                ) THEN 1 ELSE 0 END) as low_stock,
                 SUM(qty_on_hand * wac_cost) as stock_value
             ')
             ->first();

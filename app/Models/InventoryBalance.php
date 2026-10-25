@@ -77,7 +77,21 @@ class InventoryBalance extends Model
 
     public function scopeLowStock($query)
     {
-        return $query->whereRaw('qty_on_hand <= min_stock');
+        return $query->where(function ($q) {
+            $q->where(function ($sub) {
+                $sub->where('inventory_balances.min_stock', '>', 0)
+                    ->whereColumn('inventory_balances.qty_on_hand', '<=', 'inventory_balances.min_stock');
+            })->orWhere(function ($sub) {
+                $sub->where(function ($zeroMin) {
+                    $zeroMin->whereNull('inventory_balances.min_stock')
+                        ->orWhere('inventory_balances.min_stock', '<=', 0);
+                })
+                    ->whereHas('part', function ($pq) {
+                        $pq->where('min_qty', '>', 0)
+                            ->whereColumn('inventory_balances.qty_on_hand', '<=', 'parts.min_qty');
+                    });
+            });
+        });
     }
 
     // ─────────────────────────────────────────────────────────────

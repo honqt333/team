@@ -4,7 +4,7 @@ import { useI18n } from 'vue-i18n';
 import { useNumberFormat } from '@/Composables/useNumberFormat';
 
 const props = defineProps({
-    modelValue: [String, Number, null],
+    modelValue: [String, Number, Boolean, null],
     options: {
         type: Array,
         default: () => [],
@@ -48,7 +48,7 @@ const props = defineProps({
     disabled: {
         type: Boolean,
         default: false,
-    }
+    },
 });
 
 const emit = defineEmits(['update:modelValue', 'change', 'search']);
@@ -94,10 +94,11 @@ const filteredOptions = computed(() => {
     if (props.asyncSearch) return props.options; // Let parent handle filtering
     if (!searchQuery.value) return props.options;
     const query = searchQuery.value.toLowerCase();
-    return props.options.filter(option => {
+    return props.options.filter((option) => {
         if (typeof option === 'object' && option !== null) {
-            return Object.values(option).some(val => 
-                val !== null && val !== undefined && String(val).toLowerCase().includes(query)
+            return Object.values(option).some(
+                (val) =>
+                    val !== null && val !== undefined && String(val).toLowerCase().includes(query)
             );
         }
         const label = String(getOptionLabel(option)).toLowerCase();
@@ -114,7 +115,7 @@ watch(searchQuery, (val) => {
 
 // Selected option object
 const selectedOption = computed(() => {
-    return props.options.find(opt => getOptionValue(opt) === props.modelValue);
+    return props.options.find((opt) => getOptionValue(opt) === props.modelValue);
 });
 
 // Watch filtering to reset highlight
@@ -135,7 +136,7 @@ const inputValue = computed({
         searchQuery.value = toEnglish(val);
         if (!isOpen.value && !props.asyncSearch) isOpen.value = true;
         if (props.asyncSearch && val.length > 0) isOpen.value = true;
-    }
+    },
 });
 
 const handleClickOutside = (event) => {
@@ -158,11 +159,11 @@ const openDropdown = () => {
     if (searchQuery.value === '') {
         if (props.asyncSearch) emit('search', '');
     } else {
-        searchQuery.value = ''; 
+        searchQuery.value = '';
     }
     highlightedIndex.value = -1;
     nextTick(() => {
-        if(inputRef.value) inputRef.value.focus();
+        if (inputRef.value) inputRef.value.focus();
     });
 };
 
@@ -184,7 +185,7 @@ const selectOption = (option) => {
 
 const clearSelection = (e) => {
     if (props.disabled) return;
-    e.stopPropagation(); 
+    e.stopPropagation();
     emit('update:modelValue', null);
     emit('change', null);
 };
@@ -224,9 +225,9 @@ const handleKeydown = (e) => {
             if (highlightedIndex.value >= 0 && filteredOptions.value[highlightedIndex.value]) {
                 selectOption(filteredOptions.value[highlightedIndex.value]);
             } else if (filteredOptions.value.length > 0) {
-                // Determine if we should select the first one if none highlighted? 
+                // Determine if we should select the first one if none highlighted?
                 // Let's stick to explicit highlight or auto-highlight on search (handled in watch)
-                // If nothing highlighted but options exist, maybe select first? 
+                // If nothing highlighted but options exist, maybe select first?
                 // Currently watch filteredOptions sets index to 0 if searching.
             }
             break;
@@ -235,8 +236,8 @@ const handleKeydown = (e) => {
             closeDropdown();
             break;
         case 'Tab':
-             closeDropdown();
-             break;
+            closeDropdown();
+            break;
     }
 };
 
@@ -255,12 +256,16 @@ const scrollToHighlighted = () => {
 <template>
     <div ref="containerRef" class="relative">
         <label v-if="label" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-            {{ label }} <span v-if="required" class="text-red-500">*</span>
+            {{ label }}
+            <span v-if="required" class="text-red-500">*</span>
         </label>
-        
+
         <div class="relative">
             <!-- Selected Option Prefix -->
-            <div v-if="hasPrefix" class="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
+            <div
+                v-if="hasPrefix"
+                class="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none"
+            >
                 <slot name="prefix" :option="selectedOption"></slot>
             </div>
 
@@ -272,11 +277,17 @@ const scrollToHighlighted = () => {
                 :disabled="disabled"
                 class="w-full border rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-violet-500 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
                 :class="[
-                    compact 
-                        ? (hasPrefix ? 'ps-8 pe-2 py-1.5 text-xs' : 'px-2 py-1.5 text-xs') 
-                        : (hasPrefix ? 'ps-10 pe-4 py-2.5 text-sm' : 'px-4 py-2.5 text-sm'),
-                    error ? 'border-red-500 focus:border-red-500' : 'border-gray-300 dark:border-gray-600 focus:border-violet-500',
-                    { 'pr-10': selectedOption && !isOpen && !compact }
+                    compact
+                        ? hasPrefix
+                            ? 'ps-8 pe-2 py-1.5 text-xs'
+                            : 'px-2 py-1.5 text-xs'
+                        : hasPrefix
+                          ? 'ps-10 pe-4 py-2.5 text-sm'
+                          : 'px-4 py-2.5 text-sm',
+                    error
+                        ? 'border-red-500 focus:border-red-500'
+                        : 'border-gray-300 dark:border-gray-600 focus:border-violet-500',
+                    { 'pr-10': selectedOption && !isOpen && !compact },
                 ]"
                 @click="handleInputClick"
                 @focus="handleInputClick"
@@ -286,39 +297,61 @@ const scrollToHighlighted = () => {
 
             <!-- Icons -->
             <div class="absolute inset-y-0 end-0 flex items-center pe-3 pointer-events-none">
-                 <!-- Arrow Icon -->
-                <svg v-if="!selectedOption || isOpen" class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                <!-- Arrow Icon -->
+                <svg
+                    v-if="!selectedOption || isOpen"
+                    class="w-4 h-4 text-gray-500"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                >
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M19 9l-7 7-7-7"
+                    />
                 </svg>
             </div>
-             <!-- Clear Button (Only when selected and closed) -->
-            <div v-if="selectedOption && !isOpen && !required && !disabled" 
+            <!-- Clear Button (Only when selected and closed) -->
+            <div
+                v-if="selectedOption && !isOpen && !required && !disabled"
                 class="absolute inset-y-0 end-0 flex items-center pe-3 cursor-pointer group"
                 @click="clearSelection"
             >
-                <svg class="w-4 h-4 text-gray-400 group-hover:text-red-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                <svg
+                    class="w-4 h-4 text-gray-400 group-hover:text-red-500 transition-colors"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                >
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M6 18L18 6M6 6l12 12"
+                    />
                 </svg>
             </div>
         </div>
 
         <!-- Dropdown -->
-        <div 
+        <div
             v-if="isOpen"
             class="absolute z-50 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg max-h-60 overflow-y-auto"
         >
             <ul v-if="filteredOptions.length > 0" ref="optionsListRef" class="py-1">
-                <li 
-                    v-for="(option, index) in filteredOptions" 
+                <li
+                    v-for="(option, index) in filteredOptions"
                     :key="getOptionValue(option)"
                     @click="selectOption(option)"
                     @mousemove="highlightedIndex = index"
                     class="px-4 py-2 text-sm cursor-pointer flex items-center justify-between"
                     :class="[
-                        highlightedIndex === index 
-                            ? 'bg-violet-50 dark:bg-violet-900/50 text-violet-700 dark:text-violet-300' 
+                        highlightedIndex === index
+                            ? 'bg-violet-50 dark:bg-violet-900/50 text-violet-700 dark:text-violet-300'
                             : 'text-gray-700 dark:text-gray-300 hover:bg-violet-50 dark:hover:bg-violet-900/50 hover:text-violet-700 dark:hover:text-violet-300',
-                        {'font-medium': getOptionValue(option) === modelValue}
+                        { 'font-medium': getOptionValue(option) === modelValue },
                     ]"
                 >
                     <slot name="option" :option="option">
@@ -327,19 +360,33 @@ const scrollToHighlighted = () => {
                             <span>{{ getOptionLabel(option) }}</span>
                         </div>
                     </slot>
-                    <svg v-if="getOptionValue(option) === modelValue" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                    <svg
+                        v-if="getOptionValue(option) === modelValue"
+                        class="w-4 h-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M5 13l4 4L19 7"
+                        />
                     </svg>
                 </li>
             </ul>
-            <div v-else-if="!asyncSearch || (asyncSearch && searchQuery.length >= 2)" class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400 text-center">
+            <div
+                v-else-if="!asyncSearch || (asyncSearch && searchQuery.length >= 2)"
+                class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400 text-center"
+            >
                 {{ t('common.no_results') || 'No results found' }}
             </div>
             <div v-else class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400 text-center">
                 {{ t('inventory.parts.search') || 'Type to search...' }}
             </div>
         </div>
-        
+
         <p v-if="error" class="mt-1 text-xs text-red-500">{{ error }}</p>
     </div>
 </template>

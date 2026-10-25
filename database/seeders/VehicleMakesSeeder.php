@@ -7,6 +7,7 @@ namespace Database\Seeders;
 use App\Models\VehicleMake;
 use App\Models\VehicleModel;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Str;
 
 class VehicleMakesSeeder extends Seeder
 {
@@ -402,11 +403,20 @@ class VehicleMakesSeeder extends Seeder
         ];
 
         foreach ($makes as $makeName => $makeData) {
+            $slug = Str::slug($makeName);
+            $logoPath = null;
+            $files = glob(storage_path("app/public/makes/{$slug}-*.svg"));
+
+            if (! empty($files)) {
+                $logoPath = 'makes/'.basename($files[0]);
+            }
+
             $make = VehicleMake::updateOrCreate([
                 'name_en' => $makeName,
                 'source' => 'system',
             ], [
                 'name_ar' => $makeData['name_ar'],
+                'logo_path' => $logoPath,
                 'is_active' => true,
                 'tenant_id' => null,
                 'center_id' => null,

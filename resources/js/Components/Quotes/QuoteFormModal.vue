@@ -541,6 +541,71 @@
                             {{ toEnglish(lastVehicleOdometer) }} km
                         </div>
                     </div>
+
+                    <!-- Quote Validity Period / Expiry Date -->
+                    <div
+                        class="bg-gray-50 dark:bg-gray-900/50 rounded-xl p-4 border border-gray-200 dark:border-gray-700 space-y-3"
+                    >
+                        <div class="flex items-center justify-between">
+                            <label
+                                class="block text-sm font-medium text-gray-700 dark:text-gray-300"
+                            >
+                                {{
+                                    $t('quotes.valid_until') || 'صلاحية عرض السعر (تاريخ الانتهاء)'
+                                }}
+                            </label>
+                            <span class="text-xs text-gray-500">
+                                {{ $t('quotes.validity_hint') || 'فترة التزام الورشة بالأسعار' }}
+                            </span>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 items-center">
+                            <CustomDatePicker
+                                v-model="form.valid_until"
+                                :placeholder="$t('quotes.valid_until') || 'تاريخ انتهاء الصلاحية'"
+                                class="w-full"
+                            />
+
+                            <div class="flex items-center gap-1.5 flex-wrap">
+                                <button
+                                    type="button"
+                                    @click="setValidityDays(7)"
+                                    class="px-2.5 py-1.5 text-xs font-bold rounded-lg border transition-all"
+                                    :class="
+                                        isPresetActive(7)
+                                            ? 'bg-amber-500 text-white border-amber-500 shadow-sm'
+                                            : 'border-gray-200 dark:border-gray-700 hover:bg-white dark:hover:bg-gray-800 text-gray-600 dark:text-gray-300'
+                                    "
+                                >
+                                    7 أيام
+                                </button>
+                                <button
+                                    type="button"
+                                    @click="setValidityDays(15)"
+                                    class="px-2.5 py-1.5 text-xs font-bold rounded-lg border transition-all"
+                                    :class="
+                                        isPresetActive(15)
+                                            ? 'bg-amber-500 text-white border-amber-500 shadow-sm'
+                                            : 'border-gray-200 dark:border-gray-700 hover:bg-white dark:hover:bg-gray-800 text-gray-600 dark:text-gray-300'
+                                    "
+                                >
+                                    15 يوماً
+                                </button>
+                                <button
+                                    type="button"
+                                    @click="setValidityDays(30)"
+                                    class="px-2.5 py-1.5 text-xs font-bold rounded-lg border transition-all"
+                                    :class="
+                                        isPresetActive(30)
+                                            ? 'bg-amber-500 text-white border-amber-500 shadow-sm'
+                                            : 'border-gray-200 dark:border-gray-700 hover:bg-white dark:hover:bg-gray-800 text-gray-600 dark:text-gray-300'
+                                    "
+                                >
+                                    30 يوماً
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Tab 2: Customer Complaint -->
@@ -793,6 +858,12 @@ const showVehicleModal = ref(false);
 const showMileageModal = ref(false);
 
 // Form
+const defaultValidity = () => {
+    const d = new Date();
+    d.setDate(d.getDate() + 15);
+    return d.toISOString().split('T')[0];
+};
+
 const form = useForm({
     customer_id: props.quote?.customer_id || props.vehicle?.customer_id || '',
     vehicle_id: props.quote?.vehicle_id || props.vehicle?.id || '',
@@ -800,6 +871,9 @@ const form = useForm({
     customer_complaint: props.quote?.customer_complaint || '',
     initial_assessment: props.quote?.initial_assessment || '',
     odometer: props.quote?.odometer || '',
+    valid_until: props.quote?.valid_until
+        ? String(props.quote.valid_until).split('T')[0]
+        : defaultValidity(),
     allow_lower_odometer: false,
     departments: (() => {
         const depts = props.quote?.departments?.map((d) => d.id) || [];
@@ -812,6 +886,19 @@ const form = useForm({
     lines: [],
 });
 
+function setValidityDays(days) {
+    const d = new Date();
+    d.setDate(d.getDate() + days);
+    form.valid_until = d.toISOString().split('T')[0];
+}
+
+function isPresetActive(days) {
+    if (!form.valid_until) return false;
+    const d = new Date();
+    d.setDate(d.getDate() + days);
+    return form.valid_until === d.toISOString().split('T')[0];
+}
+
 // Watch for modal opening to reinitialize form values (for edit mode)
 watch(
     () => props.show,
@@ -823,6 +910,9 @@ watch(
             form.customer_complaint = props.quote.customer_complaint || '';
             form.initial_assessment = props.quote.initial_assessment || '';
             form.odometer = props.quote.odometer || '';
+            form.valid_until = props.quote.valid_until
+                ? String(props.quote.valid_until).split('T')[0]
+                : defaultValidity();
             form.allow_lower_odometer = false;
             const depts = props.quote.departments?.map((d) => d.id) || [];
             if (props.quote.show_packages_section) {

@@ -79,52 +79,56 @@
                         class="rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-3 py-1.5 text-sm"
                     />
                 </div>
-                <div>
+                <div class="min-w-[140px]">
                     <label
                         class="block text-[10px] font-bold uppercase text-gray-500 dark:text-gray-400 mb-1"
                     >
                         {{ $t('appointments.filter_status') }}
                     </label>
-                    <select
+                    <SearchableSelect
                         v-model="filters.status"
+                        :options="statusOptions"
+                        option-label="label"
+                        option-value="value"
+                        :placeholder="$t('appointments.all')"
+                        :label="''"
+                        :compact="true"
                         @change="reload"
-                        class="rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-3 py-1.5 text-sm"
-                    >
-                        <option value="">{{ $t('appointments.all') }}</option>
-                        <option v-for="s in statuses" :key="s" :value="s">
-                            {{ $t(`appointments.status.${s}`) }}
-                        </option>
-                    </select>
+                    />
                 </div>
-                <div>
+                <div class="min-w-[150px]">
                     <label
                         class="block text-[10px] font-bold uppercase text-gray-500 dark:text-gray-400 mb-1"
                     >
                         {{ $t('appointments.filter_bay') }}
                     </label>
-                    <select
+                    <SearchableSelect
                         v-model="filters.service_bay_id"
+                        :options="bayOptions"
+                        option-label="label"
+                        option-value="value"
+                        :placeholder="$t('appointments.all')"
+                        :label="''"
+                        :compact="true"
                         @change="reload"
-                        class="rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-3 py-1.5 text-sm"
-                    >
-                        <option value="">{{ $t('appointments.all') }}</option>
-                        <option v-for="b in bays" :key="b.id" :value="b.id">{{ b.name }}</option>
-                    </select>
+                    />
                 </div>
-                <div>
+                <div class="min-w-[150px]">
                     <label
                         class="block text-[10px] font-bold uppercase text-gray-500 dark:text-gray-400 mb-1"
                     >
                         {{ $t('appointments.filter_tech') }}
                     </label>
-                    <select
+                    <SearchableSelect
                         v-model="filters.assigned_user_id"
+                        :options="techOptions"
+                        option-label="label"
+                        option-value="value"
+                        :placeholder="$t('appointments.all')"
+                        :label="''"
+                        :compact="true"
                         @change="reload"
-                        class="rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-3 py-1.5 text-sm"
-                    >
-                        <option value="">{{ $t('appointments.all') }}</option>
-                        <option v-for="t in techs" :key="t.id" :value="t.id">{{ t.name }}</option>
-                    </select>
+                    />
                 </div>
                 <button
                     type="button"
@@ -305,15 +309,14 @@
                         >
                             {{ $t('appointments.bay') }}
                         </label>
-                        <select
+                        <SearchableSelect
                             v-model="form.service_bay_id"
-                            class="w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-3 py-2 text-sm"
-                        >
-                            <option value="">{{ $t('appointments.no_bay') }}</option>
-                            <option v-for="b in bays" :key="b.id" :value="b.id">
-                                {{ b.name }}
-                            </option>
-                        </select>
+                            :options="bayFormOptions"
+                            option-label="label"
+                            option-value="value"
+                            :placeholder="$t('appointments.no_bay')"
+                            :label="''"
+                        />
                     </div>
                     <div>
                         <label
@@ -321,15 +324,14 @@
                         >
                             {{ $t('appointments.tech') }}
                         </label>
-                        <select
+                        <SearchableSelect
                             v-model="form.assigned_user_id"
-                            class="w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-3 py-2 text-sm"
-                        >
-                            <option value="">{{ $t('appointments.no_tech') }}</option>
-                            <option v-for="t in techs" :key="t.id" :value="t.id">
-                                {{ t.name }}
-                            </option>
-                        </select>
+                            :options="techFormOptions"
+                            option-label="label"
+                            option-value="value"
+                            :placeholder="$t('appointments.no_tech')"
+                            :label="''"
+                        />
                     </div>
                     <div>
                         <label
@@ -460,12 +462,13 @@
 </template>
 
 <script setup>
-import { reactive, ref } from 'vue';
+import { reactive, ref, computed } from 'vue';
 import { Head, router } from '@inertiajs/vue3';
 import axios from 'axios';
 import { useI18n } from 'vue-i18n';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import PageHeader from '@/Components/PageHeader.vue';
+import SearchableSelect from '@/Components/SearchableSelect.vue';
 import { usePermission } from '@/Composables/usePermission';
 
 const props = defineProps({
@@ -497,6 +500,31 @@ const form = reactive({
 });
 
 const filters = reactive({ ...props.filters });
+
+const statusOptions = computed(() => [
+    { value: '', label: t('appointments.all') },
+    ...props.statuses.map((s) => ({ value: s, label: t(`appointments.status.${s}`) })),
+]);
+
+const bayOptions = computed(() => [
+    { value: '', label: t('appointments.all') },
+    ...props.bays.map((b) => ({ value: b.id, label: b.name })),
+]);
+
+const bayFormOptions = computed(() => [
+    { value: '', label: t('appointments.no_bay') },
+    ...props.bays.map((b) => ({ value: b.id, label: b.name })),
+]);
+
+const techOptions = computed(() => [
+    { value: '', label: t('appointments.all') },
+    ...props.techs.map((t) => ({ value: t.id, label: t.name })),
+]);
+
+const techFormOptions = computed(() => [
+    { value: '', label: t('appointments.no_tech') },
+    ...props.techs.map((t) => ({ value: t.id, label: t.name })),
+]);
 
 function reload() {
     const params = {};

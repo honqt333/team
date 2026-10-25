@@ -491,17 +491,12 @@
                                 >
                                     {{ t('system.company_settings.sections.vat.method') }}
                                 </label>
-                                <select
+                                <SearchableSelect
                                     v-model="form.subscription_vat_inclusive"
-                                    class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-sm focus:ring-indigo-500 focus:border-indigo-500"
-                                >
-                                    <option :value="false">
-                                        {{ t('system.company_settings.sections.vat.exclusive') }}
-                                    </option>
-                                    <option :value="true">
-                                        {{ t('system.company_settings.sections.vat.inclusive') }}
-                                    </option>
-                                </select>
+                                    :options="vatMethodOptions"
+                                    option-label="label"
+                                    option-value="value"
+                                />
                             </div>
                             <p class="md:col-span-2 text-xs text-gray-500 dark:text-gray-400">
                                 {{ t('system.company_settings.sections.vat.hint_enabled') }}
@@ -748,8 +743,14 @@ import { computed, ref } from 'vue';
 import { useForm } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import SystemLayout from '@/Layouts/SystemLayout.vue';
+import SearchableSelect from '@/Components/SearchableSelect.vue';
 
 const { t } = useI18n();
+
+const vatMethodOptions = computed(() => [
+    { value: false, label: t('system.company_settings.sections.vat.exclusive') },
+    { value: true, label: t('system.company_settings.sections.vat.inclusive') },
+]);
 
 const props = defineProps({
     settings: Object,

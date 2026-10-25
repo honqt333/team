@@ -44,17 +44,15 @@
                         >
                             {{ $t('communications.appointment_messages.filter_status') }}
                         </label>
-                        <select
+                        <SearchableSelect
                             v-model="filters.status"
-                            class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100 text-sm"
-                        >
-                            <option value="">
-                                {{ $t('communications.appointment_messages.filter_status') }}
-                            </option>
-                            <option v-for="s in statuses" :key="s" :value="s">
-                                {{ $t(`communications.appointment_messages.statuses.${s}`) }}
-                            </option>
-                        </select>
+                            :options="statusOptions"
+                            option-label="label"
+                            option-value="value"
+                            :placeholder="$t('communications.appointment_messages.filter_status')"
+                            :label="''"
+                            :compact="true"
+                        />
                     </div>
                     <div>
                         <label
@@ -62,17 +60,17 @@
                         >
                             {{ $t('communications.appointment_messages.filter_message_type') }}
                         </label>
-                        <select
+                        <SearchableSelect
                             v-model="filters.message_type"
-                            class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100 text-sm"
-                        >
-                            <option value="">
-                                {{ $t('communications.appointment_messages.filter_message_type') }}
-                            </option>
-                            <option v-for="m in messageTypes" :key="m" :value="m">
-                                {{ $t(`communications.appointment_messages.message_types.${m}`) }}
-                            </option>
-                        </select>
+                            :options="messageTypeOptions"
+                            option-label="label"
+                            option-value="value"
+                            :placeholder="
+                                $t('communications.appointment_messages.filter_message_type')
+                            "
+                            :label="''"
+                            :compact="true"
+                        />
                     </div>
                     <div>
                         <label
@@ -338,6 +336,7 @@ import { Head, router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import PageHeader from '@/Components/PageHeader.vue';
+import SearchableSelect from '@/Components/SearchableSelect.vue';
 import { useConfirm } from '@/Composables/useConfirm';
 
 const { t: $t } = useI18n();
@@ -367,6 +366,22 @@ const filters = reactive({
     date_to: props.filters.date_to ?? '',
     search: props.filters.search ?? '',
 });
+
+const statusOptions = computed(() => [
+    { value: '', label: $t('communications.appointment_messages.filter_status') },
+    ...props.statuses.map((s) => ({
+        value: s,
+        label: $t(`communications.appointment_messages.statuses.${s}`),
+    })),
+]);
+
+const messageTypeOptions = computed(() => [
+    { value: '', label: $t('communications.appointment_messages.filter_message_type') },
+    ...props.messageTypes.map((m) => ({
+        value: m,
+        label: $t(`communications.appointment_messages.message_types.${m}`),
+    })),
+]);
 
 /**
  * canRetry is a PROP from the server now

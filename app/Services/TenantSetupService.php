@@ -23,6 +23,14 @@ class TenantSetupService
         // Clear Spatie permissions cache to ensure newly migrated permissions are available
         app(PermissionRegistrar::class)->forgetCachedPermissions();
 
+        // Ensure all defined permissions exist in the database before syncing to roles
+        foreach (Permissions::all() as $permission) {
+            Permission::firstOrCreate([
+                'name' => $permission,
+                'guard_name' => 'web',
+            ]);
+        }
+
         // Define default roles with their permissions
         $roles = $this->getDefaultRoles();
 

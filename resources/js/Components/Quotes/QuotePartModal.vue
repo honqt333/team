@@ -1,13 +1,29 @@
 <template>
-    <BaseModal :show="show" @close="$emit('close')" size="lg" :overflow-visible="true" scroll-entire>
+    <BaseModal
+        :show="show"
+        @close="$emit('close')"
+        size="lg"
+        :overflow-visible="true"
+        scroll-entire
+    >
         <!-- Modern Header -->
         <template #title>
             <div class="flex items-center gap-4">
                 <div
-                    class="w-12 h-12 rounded-2xl bg-gradient-to-br from-gray-700 to-gray-900 flex items-center justify-center shadow-lg shadow-gray-900/20 transform -rotate-3 hover:rotate-0 transition-transform duration-300">
-                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                    class="w-12 h-12 rounded-2xl bg-gradient-to-br from-gray-700 to-gray-900 flex items-center justify-center shadow-lg shadow-gray-900/20 transform -rotate-3 hover:rotate-0 transition-transform duration-300"
+                >
+                    <svg
+                        class="w-6 h-6 text-white"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
+                        />
                     </svg>
                 </div>
                 <div>
@@ -16,7 +32,11 @@
                     </h3>
                     <div class="flex items-center gap-2 mt-0.5">
                         <span class="inline-flex w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                        <p class="text-xs font-semibold text-gray-500 dark:text-gray-400 capitalize">{{ $t(`quotes.parts.${form.source}`) }}</p>
+                        <p
+                            class="text-xs font-semibold text-gray-500 dark:text-gray-400 capitalize"
+                        >
+                            {{ $t(`quotes.parts.${form.source}`) }}
+                        </p>
                     </div>
                 </div>
             </div>
@@ -25,54 +45,96 @@
         <form @submit.prevent="submitForm" class="space-y-6">
             <!-- Part Source -->
             <div v-if="!part" class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                <button type="button" 
+                <button
+                    type="button"
                     :disabled="isReadOnly"
-                    @click="form.source = 'warehouse'" :class="[
-                    'flex items-center justify-center gap-2 p-3 rounded-xl border-2 transition-all font-bold text-xs',
-                    form.source === 'warehouse' ? 'border-emerald-500 bg-emerald-50/30 text-emerald-700 dark:text-emerald-400' : 'border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800',
-                    isReadOnly ? 'opacity-50 cursor-not-allowed' : ''
-                ]">
+                    @click="form.source = 'warehouse'"
+                    :class="[
+                        'flex items-center justify-center gap-2 p-3 rounded-xl border-2 transition-all font-bold text-xs',
+                        form.source === 'warehouse'
+                            ? 'border-emerald-500 bg-emerald-50/30 text-emerald-700 dark:text-emerald-400'
+                            : 'border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800',
+                        isReadOnly ? 'opacity-50 cursor-not-allowed' : '',
+                    ]"
+                >
                     🏭 {{ $t('quotes.parts.warehouse') }}
                 </button>
-                <button type="button" 
+                <button
+                    type="button"
                     :disabled="isReadOnly"
-                    @click="form.source = 'external'" :class="[
-                    'flex items-center justify-center gap-2 p-3 rounded-xl border-2 transition-all font-bold text-xs',
-                    form.source === 'external' ? 'border-blue-500 bg-blue-50/30 text-blue-700 dark:text-blue-400' : 'border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800',
-                    isReadOnly ? 'opacity-50 cursor-not-allowed' : ''
-                ]">
+                    @click="form.source = 'external'"
+                    :class="[
+                        'flex items-center justify-center gap-2 p-3 rounded-xl border-2 transition-all font-bold text-xs',
+                        form.source === 'external'
+                            ? 'border-blue-500 bg-blue-50/30 text-blue-700 dark:text-blue-400'
+                            : 'border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800',
+                        isReadOnly ? 'opacity-50 cursor-not-allowed' : '',
+                    ]"
+                >
                     🛒 {{ $t('quotes.parts.external') }}
                 </button>
-                <button type="button" 
+                <button
+                    type="button"
                     :disabled="isReadOnly"
-                    @click="form.source = 'customer'" :class="[
-                    'flex items-center justify-center gap-2 p-3 rounded-xl border-2 transition-all font-bold text-xs',
-                    form.source === 'customer' ? 'border-amber-500 bg-amber-50/30 text-amber-700 dark:text-amber-400' : 'border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800',
-                    isReadOnly ? 'opacity-50 cursor-not-allowed' : ''
-                ]">
+                    @click="form.source = 'customer'"
+                    :class="[
+                        'flex items-center justify-center gap-2 p-3 rounded-xl border-2 transition-all font-bold text-xs',
+                        form.source === 'customer'
+                            ? 'border-amber-500 bg-amber-50/30 text-amber-700 dark:text-amber-400'
+                            : 'border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800',
+                        isReadOnly ? 'opacity-50 cursor-not-allowed' : '',
+                    ]"
+                >
                     👤 {{ $t('quotes.parts.customer') }}
                 </button>
             </div>
 
             <!-- Content Container -->
             <div class="space-y-4">
-
                 <!-- Warehouse Search -->
                 <div v-if="form.source === 'warehouse' && !selectedPart">
-                    <label class="block text-[10px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-1.5 ms-1">
+                    <label
+                        class="block text-[10px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-1.5 ms-1"
+                    >
                         {{ $t('inventory.parts.search_label') }}
                     </label>
-                    <SearchableSelect v-model="form.part_id" :options="searchResults" :async-search="true" @search="handleAsyncSearch" @change="handlePartSelectChange" :placeholder="$t('inventory.parts.search')" class="w-full">
+                    <SearchableSelect
+                        v-model="form.part_id"
+                        :options="searchResults"
+                        :async-search="true"
+                        @search="handleAsyncSearch"
+                        @change="handlePartSelectChange"
+                        :placeholder="$t('inventory.parts.search')"
+                        class="w-full"
+                    >
                         <template #option="{ option }">
                             <div class="flex items-center justify-between w-full">
                                 <div>
-                                    <div class="font-bold text-gray-900 dark:text-white">{{ toEnglish(getName(option)) }}</div>
-                                    <div class="text-[10px] text-emerald-600 font-bold mt-0.5">{{ formatCurrency(option.default_sale_price) }}</div>
+                                    <div class="font-bold text-gray-900 dark:text-white">
+                                        {{ toEnglish(getName(option)) }}
+                                    </div>
+                                    <div class="text-[10px] text-emerald-600 font-bold mt-0.5">
+                                        {{ formatCurrency(option.default_sale_price) }}
+                                    </div>
                                 </div>
                                 <div class="text-right flex flex-col items-end">
-                                    <span class="text-[10px] font-mono text-gray-500">{{ toEnglish(option.sku || option.barcode || '---') }}</span>
-                                    <span class="text-[10px] font-bold mt-0.5" :class="Number(option.inventory_balances_sum_qty_on_hand) > 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-500 dark:text-red-400'">
-                                        {{ $t('inventory.stock.available') }}: {{ formatQuantity(option.inventory_balances_sum_qty_on_hand || 0) }}
+                                    <span class="text-[10px] font-mono text-gray-500">
+                                        {{ toEnglish(option.sku || option.barcode || '---') }}
+                                    </span>
+                                    <span
+                                        class="text-[10px] font-bold mt-0.5"
+                                        :class="
+                                            Number(option.inventory_balances_sum_qty_on_hand) > 0
+                                                ? 'text-emerald-600 dark:text-emerald-400'
+                                                : 'text-red-500 dark:text-red-400'
+                                        "
+                                    >
+                                        {{ $t('inventory.stock.available') }}:
+                                        {{
+                                            formatQuantity(
+                                                option.inventory_balances_sum_qty_on_hand || 0
+                                            )
+                                        }}
                                     </span>
                                 </div>
                             </div>
@@ -81,18 +143,42 @@
                 </div>
 
                 <!-- Selected Part Banner -->
-                <div v-if="selectedPart" class="flex items-center justify-between p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl">
+                <div
+                    v-if="selectedPart"
+                    class="flex items-center justify-between p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl"
+                >
                     <div class="flex items-center gap-3">
-                        <div class="w-9 h-9 rounded-xl bg-emerald-500 text-white flex items-center justify-center text-base shrink-0">📦</div>
+                        <div
+                            class="w-9 h-9 rounded-xl bg-emerald-500 text-white flex items-center justify-center text-base shrink-0"
+                        >
+                            📦
+                        </div>
                         <div>
-                            <p class="text-sm font-bold text-gray-900 dark:text-white">{{ toEnglish(getName(selectedPart)) }}</p>
-                            <p class="text-[10px] font-mono font-bold uppercase" :class="availableStock > 0 ? 'text-emerald-600' : 'text-red-500'">
-                                {{ $t('inventory.stock.available') }}: {{ formatQuantity(availableStock) }}
+                            <p class="text-sm font-bold text-gray-900 dark:text-white">
+                                {{ toEnglish(getName(selectedPart)) }}
+                            </p>
+                            <p
+                                class="text-[10px] font-mono font-bold uppercase"
+                                :class="availableStock > 0 ? 'text-emerald-600' : 'text-red-500'"
+                            >
+                                {{ $t('inventory.stock.available') }}:
+                                {{ formatQuantity(availableStock) }}
                             </p>
                         </div>
                     </div>
-                    <button type="button" @click="clearPartSelection" class="p-1.5 hover:bg-red-100 dark:hover:bg-red-900/30 rounded-lg text-gray-400 hover:text-red-500 transition-colors">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                    <button
+                        type="button"
+                        @click="clearPartSelection"
+                        class="p-1.5 hover:bg-red-100 dark:hover:bg-red-900/30 rounded-lg text-gray-400 hover:text-red-500 transition-colors"
+                    >
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M6 18L18 6M6 6l12 12"
+                            />
+                        </svg>
                     </button>
                 </div>
 
@@ -102,31 +188,66 @@
                     <div class="grid grid-cols-2 gap-4">
                         <!-- Part Number -->
                         <div class="space-y-1">
-                            <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400">{{ $t('inventory.parts.part_number') }}</label>
-                            <input type="text" v-model="form.part_number" dir="ltr" :disabled="isReadOnly || form.source === 'warehouse'"
-                                class="w-full px-4 py-3 border-2 border-gray-100 dark:border-gray-700 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 font-mono transition-all text-sm disabled:opacity-60" />
+                            <label
+                                class="block text-xs font-semibold text-gray-500 dark:text-gray-400"
+                            >
+                                {{ $t('inventory.parts.part_number') }}
+                            </label>
+                            <input
+                                type="text"
+                                v-model="form.part_number"
+                                dir="ltr"
+                                :disabled="isReadOnly || form.source === 'warehouse'"
+                                class="w-full px-4 py-3 border-2 border-gray-100 dark:border-gray-700 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 font-mono transition-all text-sm disabled:opacity-60"
+                            />
                         </div>
                         <!-- Inventory Unit -->
                         <div class="space-y-1">
-                            <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400">{{ $t('inventory.parts.unit') }}</label>
-                            <SearchableSelect v-model="form.unit_id" :options="unitOptions" option-label="label" :disabled="isReadOnly || form.source === 'warehouse'" option-value="value" :placeholder="$t('common.unit')" class="w-full" />
+                            <label
+                                class="block text-xs font-semibold text-gray-500 dark:text-gray-400"
+                            >
+                                {{ $t('inventory.parts.unit') }}
+                            </label>
+                            <SearchableSelect
+                                v-model="form.unit_id"
+                                :options="unitOptions"
+                                option-label="label"
+                                :disabled="isReadOnly || form.source === 'warehouse'"
+                                option-value="value"
+                                :placeholder="$t('common.unit')"
+                                class="w-full"
+                            />
                         </div>
                     </div>
 
                     <!-- Row 2: Part Name -->
                     <div class="space-y-1">
-                        <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400">{{ $t('inventory.parts.name') }} <span class="text-red-500">*</span></label>
-                        <input type="text" v-model="form.name" required :disabled="isReadOnly || form.source === 'warehouse'"
-                            class="w-full px-4 py-3 border-2 border-gray-100 dark:border-gray-700 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all text-sm font-bold disabled:opacity-60" />
+                        <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400">
+                            {{ $t('inventory.parts.name') }}
+                            <span class="text-red-500">*</span>
+                        </label>
+                        <input
+                            type="text"
+                            v-model="form.name"
+                            required
+                            :disabled="isReadOnly || form.source === 'warehouse'"
+                            class="w-full px-4 py-3 border-2 border-gray-100 dark:border-gray-700 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all text-sm font-bold disabled:opacity-60"
+                        />
                     </div>
                 </div>
 
                 <!-- Description / Notes -->
                 <div class="space-y-1">
-                    <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400">{{ $t('inventory.parts.description') }}</label>
-                    <textarea v-model="form.description" rows="3" :disabled="isReadOnly || form.source === 'warehouse'"
+                    <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400">
+                        {{ $t('inventory.parts.description') }}
+                    </label>
+                    <textarea
+                        v-model="form.description"
+                        rows="3"
+                        :disabled="isReadOnly || form.source === 'warehouse'"
                         class="w-full px-4 py-3 border-2 border-gray-100 dark:border-gray-700 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 resize-none transition-all text-sm disabled:opacity-60"
-                        :placeholder="$t('inventory.parts.description_placeholder')"></textarea>
+                        :placeholder="$t('inventory.parts.description_placeholder')"
+                    ></textarea>
                 </div>
 
                 <!-- Pricing Section -->
@@ -137,44 +258,131 @@
                         <div class="grid grid-cols-3 gap-4">
                             <!-- Price -->
                             <div class="space-y-1">
-                                <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400">{{ $t('work_orders.item.part_price') }} <span class="text-red-500">*</span></label>
-                                <input type="text" inputmode="decimal" v-model="form.unit_price" dir="ltr"
-                                    @input="form.unit_price = toEnglish($event.target.value).replace(/[^0-9.]/g, '')"
+                                <label
+                                    class="block text-xs font-semibold text-gray-500 dark:text-gray-400"
+                                >
+                                    {{ $t('work_orders.item.part_price') }}
+                                    <span class="text-red-500">*</span>
+                                </label>
+                                <input
+                                    type="text"
+                                    inputmode="decimal"
+                                    v-model="form.unit_price"
+                                    dir="ltr"
+                                    @input="
+                                        form.unit_price = toEnglish($event.target.value).replace(
+                                            /[^0-9.]/g,
+                                            ''
+                                        )
+                                    "
                                     :readonly="!isPriceEditable"
-                                    :class="['w-full px-4 py-3 border-2 rounded-xl text-center font-mono focus:ring-4 transition-all text-sm font-bold',
-                                        isPriceBelowMinimum ? 'border-red-400 bg-red-50 dark:bg-red-900/20 text-red-600 focus:ring-red-500/10 focus:border-red-500' : 'border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-emerald-500/10 focus:border-emerald-500',
-                                        (!isPriceEditable) ? 'opacity-60 cursor-not-allowed' : '']" />
-                                <p v-if="isPriceBelowMinimum" class="text-[10px] text-red-500 font-bold mt-1">
-                                    {{ $t('quotes.min_price_warning', { min: formatCurrency(selectedPartMinPrice) }) }}
+                                    :class="[
+                                        'w-full px-4 py-3 border-2 rounded-xl text-center font-mono focus:ring-4 transition-all text-sm font-bold',
+                                        isPriceBelowMinimum
+                                            ? 'border-red-400 bg-red-50 dark:bg-red-900/20 text-red-600 focus:ring-red-500/10 focus:border-red-500'
+                                            : 'border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-emerald-500/10 focus:border-emerald-500',
+                                        !isPriceEditable ? 'opacity-60 cursor-not-allowed' : '',
+                                    ]"
+                                />
+                                <p
+                                    v-if="isPriceBelowMinimum"
+                                    class="text-[10px] text-red-500 font-bold mt-1"
+                                >
+                                    {{
+                                        $t('quotes.min_price_warning', {
+                                            min: formatCurrency(selectedPartMinPrice),
+                                        })
+                                    }}
                                 </p>
-                                <p v-else-if="selectedPartMinPrice > 0" class="text-[10px] text-gray-400 mt-1">
-                                    {{ $t('inventory.parts.min_sale_price') }}: {{ formatCurrency(selectedPartMinPrice) }}
+                                <p
+                                    v-else-if="selectedPartMinPrice > 0"
+                                    class="text-[10px] text-gray-400 mt-1"
+                                >
+                                    {{ $t('inventory.parts.min_sale_price') }}:
+                                    {{ formatCurrency(selectedPartMinPrice) }}
                                 </p>
                             </div>
 
                             <!-- Discount -->
                             <div class="space-y-1">
                                 <div class="flex items-center justify-between mb-1">
-                                    <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400">{{ $t('quotes.service_modal.discount') }}</label>
+                                    <label
+                                        class="block text-xs font-semibold text-gray-500 dark:text-gray-400"
+                                    >
+                                        {{ $t('quotes.service_modal.discount') }}
+                                    </label>
                                     <div class="flex bg-gray-100 dark:bg-gray-700 p-0.5 rounded-lg">
-                                        <button type="button" @click="form.discount_type = 'fixed'" :class="['px-1.5 py-0.5 text-[9px] rounded font-bold transition-all', form.discount_type === 'fixed' ? 'bg-white dark:bg-gray-600 shadow-sm text-emerald-600' : 'text-gray-400']">{{ $t('common.currency') }}</button>
-                                        <button type="button" @click="form.discount_type = 'percentage'" :class="['px-1.5 py-0.5 text-[9px] rounded font-bold transition-all', form.discount_type === 'percentage' ? 'bg-white dark:bg-gray-600 shadow-sm text-emerald-600' : 'text-gray-400']">%</button>
+                                        <button
+                                            type="button"
+                                            @click="form.discount_type = 'fixed'"
+                                            :class="[
+                                                'px-1.5 py-0.5 text-[9px] rounded font-bold transition-all',
+                                                form.discount_type === 'fixed'
+                                                    ? 'bg-white dark:bg-gray-600 shadow-sm text-emerald-600'
+                                                    : 'text-gray-400',
+                                            ]"
+                                        >
+                                            {{ $t('common.currency') }}
+                                        </button>
+                                        <button
+                                            type="button"
+                                            @click="form.discount_type = 'percentage'"
+                                            :class="[
+                                                'px-1.5 py-0.5 text-[9px] rounded font-bold transition-all',
+                                                form.discount_type === 'percentage'
+                                                    ? 'bg-white dark:bg-gray-600 shadow-sm text-emerald-600'
+                                                    : 'text-gray-400',
+                                            ]"
+                                        >
+                                            %
+                                        </button>
                                     </div>
                                 </div>
-                                <input type="text" inputmode="decimal" v-model="form.discount_value" dir="ltr"
-                                    @input="form.discount_value = toEnglish($event.target.value).replace(/[^0-9.]/g, '')"
+                                <input
+                                    type="text"
+                                    inputmode="decimal"
+                                    v-model="form.discount_value"
+                                    dir="ltr"
+                                    @input="
+                                        form.discount_value = toEnglish(
+                                            $event.target.value
+                                        ).replace(/[^0-9.]/g, '')
+                                    "
                                     :readonly="form.include_in_package || isReadOnly"
-                                    :class="['w-full px-4 py-3 border-2 rounded-xl text-center font-mono focus:ring-4 transition-all text-sm font-bold',
-                                        isPriceBelowMinimum ? 'border-red-400 bg-red-50 dark:bg-red-900/20 text-red-600 focus:ring-red-500/10' : 'border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-emerald-500/10 focus:border-emerald-500',
-                                        (form.include_in_package || isReadOnly) ? 'opacity-60 cursor-not-allowed' : '']" />
+                                    :class="[
+                                        'w-full px-4 py-3 border-2 rounded-xl text-center font-mono focus:ring-4 transition-all text-sm font-bold',
+                                        isPriceBelowMinimum
+                                            ? 'border-red-400 bg-red-50 dark:bg-red-900/20 text-red-600 focus:ring-red-500/10'
+                                            : 'border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-emerald-500/10 focus:border-emerald-500',
+                                        form.include_in_package || isReadOnly
+                                            ? 'opacity-60 cursor-not-allowed'
+                                            : '',
+                                    ]"
+                                />
                             </div>
 
                             <!-- Qty -->
                             <div class="space-y-1">
-                                <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400">{{ $t('work_orders.item.qty') }} <span class="text-red-500">*</span></label>
-                                <input type="text" inputmode="decimal" v-model="form.qty" dir="ltr" :disabled="isReadOnly"
-                                    @input="form.qty = toEnglish($event.target.value).replace(/[^0-9.]/g, '')"
-                                    class="w-full px-4 py-3 border-2 border-gray-100 dark:border-gray-700 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white text-center font-mono focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all text-sm font-extrabold disabled:opacity-60" />
+                                <label
+                                    class="block text-xs font-semibold text-gray-500 dark:text-gray-400"
+                                >
+                                    {{ $t('work_orders.item.qty') }}
+                                    <span class="text-red-500">*</span>
+                                </label>
+                                <input
+                                    type="text"
+                                    inputmode="decimal"
+                                    v-model="form.qty"
+                                    dir="ltr"
+                                    :disabled="isReadOnly"
+                                    @input="
+                                        form.qty = toEnglish($event.target.value).replace(
+                                            /[^0-9.]/g,
+                                            ''
+                                        )
+                                    "
+                                    class="w-full px-4 py-3 border-2 border-gray-100 dark:border-gray-700 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white text-center font-mono focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all text-sm font-extrabold disabled:opacity-60"
+                                />
                             </div>
                         </div>
 
@@ -182,16 +390,38 @@
                         <div class="grid grid-cols-2 gap-4">
                             <!-- VAT (15%) -->
                             <div class="space-y-1">
-                                <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400">{{ $t('common.vat_with_rate', { rate: props.quote.tax_rate_snapshot || 15 }) }}</label>
-                                <input type="text" readonly :value="formatCurrency(vatAmount)" dir="ltr"
-                                    class="w-full px-4 py-3 border-2 border-gray-100 dark:border-gray-700 rounded-xl bg-gray-100 dark:bg-gray-900 text-gray-500 dark:text-gray-400 text-center font-mono text-sm font-bold cursor-not-allowed" />
+                                <label
+                                    class="block text-xs font-semibold text-gray-500 dark:text-gray-400"
+                                >
+                                    {{
+                                        $t('common.vat_with_rate', {
+                                            rate: props.quote.tax_rate_snapshot || 15,
+                                        })
+                                    }}
+                                </label>
+                                <input
+                                    type="text"
+                                    readonly
+                                    :value="formatCurrency(vatAmount)"
+                                    dir="ltr"
+                                    class="w-full px-4 py-3 border-2 border-gray-100 dark:border-gray-700 rounded-xl bg-gray-100 dark:bg-gray-900 text-gray-500 dark:text-gray-400 text-center font-mono text-sm font-bold cursor-not-allowed"
+                                />
                             </div>
 
                             <!-- Amount -->
                             <div class="space-y-1">
-                                <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400">{{ $t('work_orders.item.amount') }}</label>
-                                <input type="text" readonly :value="formatCurrency(grandTotalValue)" dir="ltr"
-                                    class="w-full px-4 py-3 border-2 border-gray-100 dark:border-gray-700 rounded-xl bg-gray-100 dark:bg-gray-900 text-gray-500 dark:text-gray-400 text-center font-mono text-sm font-bold cursor-not-allowed" />
+                                <label
+                                    class="block text-xs font-semibold text-gray-500 dark:text-gray-400"
+                                >
+                                    {{ $t('work_orders.item.amount') }}
+                                </label>
+                                <input
+                                    type="text"
+                                    readonly
+                                    :value="formatCurrency(grandTotalValue)"
+                                    dir="ltr"
+                                    class="w-full px-4 py-3 border-2 border-gray-100 dark:border-gray-700 rounded-xl bg-gray-100 dark:bg-gray-900 text-gray-500 dark:text-gray-400 text-center font-mono text-sm font-bold cursor-not-allowed"
+                                />
                             </div>
                         </div>
                     </div>
@@ -202,92 +432,212 @@
                         <div class="grid grid-cols-4 gap-3">
                             <!-- Price -->
                             <div class="space-y-1">
-                                <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400">{{ $t('work_orders.item.part_price') }} <span class="text-red-500">*</span></label>
-                                <input type="text" inputmode="decimal" v-model="form.unit_price" dir="ltr"
-                                    @input="form.unit_price = toEnglish($event.target.value).replace(/[^0-9.]/g, '')"
+                                <label
+                                    class="block text-xs font-semibold text-gray-500 dark:text-gray-400"
+                                >
+                                    {{ $t('work_orders.item.part_price') }}
+                                    <span class="text-red-500">*</span>
+                                </label>
+                                <input
+                                    type="text"
+                                    inputmode="decimal"
+                                    v-model="form.unit_price"
+                                    dir="ltr"
+                                    @input="
+                                        form.unit_price = toEnglish($event.target.value).replace(
+                                            /[^0-9.]/g,
+                                            ''
+                                        )
+                                    "
                                     :readonly="!isPriceEditable"
-                                    :class="['w-full px-3 py-3 border-2 rounded-xl text-center font-mono focus:ring-4 transition-all text-sm font-bold',
-                                        isPriceBelowMinimum ? 'border-red-400 bg-red-50 dark:bg-red-900/20 text-red-600 focus:ring-red-500/10 focus:border-red-500' : 'border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-emerald-500/10 focus:border-emerald-500',
-                                        (!isPriceEditable) ? 'opacity-60 cursor-not-allowed' : '']" />
-                                <p v-if="isPriceBelowMinimum" class="text-[10px] text-red-500 font-bold mt-1">
-                                    {{ $t('quotes.min_price_warning', { min: formatCurrency(selectedPartMinPrice) }) }}
+                                    :class="[
+                                        'w-full px-3 py-3 border-2 rounded-xl text-center font-mono focus:ring-4 transition-all text-sm font-bold',
+                                        isPriceBelowMinimum
+                                            ? 'border-red-400 bg-red-50 dark:bg-red-900/20 text-red-600 focus:ring-red-500/10 focus:border-red-500'
+                                            : 'border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-emerald-500/10 focus:border-emerald-500',
+                                        !isPriceEditable ? 'opacity-60 cursor-not-allowed' : '',
+                                    ]"
+                                />
+                                <p
+                                    v-if="isPriceBelowMinimum"
+                                    class="text-[10px] text-red-500 font-bold mt-1"
+                                >
+                                    {{
+                                        $t('quotes.min_price_warning', {
+                                            min: formatCurrency(selectedPartMinPrice),
+                                        })
+                                    }}
                                 </p>
-                                <p v-else-if="selectedPartMinPrice > 0" class="text-[10px] text-gray-400 mt-1">
-                                    {{ $t('inventory.parts.min_sale_price') }}: {{ formatCurrency(selectedPartMinPrice) }}
+                                <p
+                                    v-else-if="selectedPartMinPrice > 0"
+                                    class="text-[10px] text-gray-400 mt-1"
+                                >
+                                    {{ $t('inventory.parts.min_sale_price') }}:
+                                    {{ formatCurrency(selectedPartMinPrice) }}
                                 </p>
                             </div>
 
                             <!-- Discount -->
                             <div class="space-y-1">
                                 <div class="flex items-center justify-between mb-1">
-                                    <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400">{{ $t('quotes.service_modal.discount') }}</label>
+                                    <label
+                                        class="block text-xs font-semibold text-gray-500 dark:text-gray-400"
+                                    >
+                                        {{ $t('quotes.service_modal.discount') }}
+                                    </label>
                                     <div class="flex bg-gray-100 dark:bg-gray-700 p-0.5 rounded-lg">
-                                        <button type="button" @click="form.discount_type = 'fixed'" :class="['px-1.5 py-0.5 text-[9px] rounded font-bold transition-all', form.discount_type === 'fixed' ? 'bg-white dark:bg-gray-600 shadow-sm text-emerald-600' : 'text-gray-400']">{{ $t('common.currency') }}</button>
-                                        <button type="button" @click="form.discount_type = 'percentage'" :class="['px-1.5 py-0.5 text-[9px] rounded font-bold transition-all', form.discount_type === 'percentage' ? 'bg-white dark:bg-gray-600 shadow-sm text-emerald-600' : 'text-gray-400']">%</button>
+                                        <button
+                                            type="button"
+                                            @click="form.discount_type = 'fixed'"
+                                            :class="[
+                                                'px-1.5 py-0.5 text-[9px] rounded font-bold transition-all',
+                                                form.discount_type === 'fixed'
+                                                    ? 'bg-white dark:bg-gray-600 shadow-sm text-emerald-600'
+                                                    : 'text-gray-400',
+                                            ]"
+                                        >
+                                            {{ $t('common.currency') }}
+                                        </button>
+                                        <button
+                                            type="button"
+                                            @click="form.discount_type = 'percentage'"
+                                            :class="[
+                                                'px-1.5 py-0.5 text-[9px] rounded font-bold transition-all',
+                                                form.discount_type === 'percentage'
+                                                    ? 'bg-white dark:bg-gray-600 shadow-sm text-emerald-600'
+                                                    : 'text-gray-400',
+                                            ]"
+                                        >
+                                            %
+                                        </button>
                                     </div>
                                 </div>
-                                <input type="text" inputmode="decimal" v-model="form.discount_value" dir="ltr"
-                                    @input="form.discount_value = toEnglish($event.target.value).replace(/[^0-9.]/g, '')"
+                                <input
+                                    type="text"
+                                    inputmode="decimal"
+                                    v-model="form.discount_value"
+                                    dir="ltr"
+                                    @input="
+                                        form.discount_value = toEnglish(
+                                            $event.target.value
+                                        ).replace(/[^0-9.]/g, '')
+                                    "
                                     :readonly="form.include_in_package || isReadOnly"
-                                    :class="['w-full px-3 py-3 border-2 rounded-xl text-center font-mono focus:ring-4 transition-all text-sm font-bold',
-                                        isPriceBelowMinimum ? 'border-red-400 bg-red-50 dark:bg-red-900/20 text-red-600 focus:ring-red-500/10' : 'border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-emerald-500/10 focus:border-emerald-500',
-                                        (form.include_in_package || isReadOnly) ? 'opacity-60 cursor-not-allowed' : '']" />
+                                    :class="[
+                                        'w-full px-3 py-3 border-2 rounded-xl text-center font-mono focus:ring-4 transition-all text-sm font-bold',
+                                        isPriceBelowMinimum
+                                            ? 'border-red-400 bg-red-50 dark:bg-red-900/20 text-red-600 focus:ring-red-500/10'
+                                            : 'border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-emerald-500/10 focus:border-emerald-500',
+                                        form.include_in_package || isReadOnly
+                                            ? 'opacity-60 cursor-not-allowed'
+                                            : '',
+                                    ]"
+                                />
                             </div>
 
                             <!-- Qty -->
                             <div class="space-y-1">
-                                <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400">{{ $t('work_orders.item.qty') }} <span class="text-red-500">*</span></label>
-                                <input type="text" inputmode="decimal" v-model="form.qty" dir="ltr" :disabled="isReadOnly"
-                                    @input="form.qty = toEnglish($event.target.value).replace(/[^0-9.]/g, '')"
-                                    class="w-full px-3 py-3 border-2 border-gray-100 dark:border-gray-700 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white text-center font-mono focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all text-sm font-extrabold disabled:opacity-60" />
+                                <label
+                                    class="block text-xs font-semibold text-gray-500 dark:text-gray-400"
+                                >
+                                    {{ $t('work_orders.item.qty') }}
+                                    <span class="text-red-500">*</span>
+                                </label>
+                                <input
+                                    type="text"
+                                    inputmode="decimal"
+                                    v-model="form.qty"
+                                    dir="ltr"
+                                    :disabled="isReadOnly"
+                                    @input="
+                                        form.qty = toEnglish($event.target.value).replace(
+                                            /[^0-9.]/g,
+                                            ''
+                                        )
+                                    "
+                                    class="w-full px-3 py-3 border-2 border-gray-100 dark:border-gray-700 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white text-center font-mono focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all text-sm font-extrabold disabled:opacity-60"
+                                />
                             </div>
 
                             <!-- Amount -->
                             <div class="space-y-1">
-                                <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400">{{ $t('work_orders.item.amount') }}</label>
-                                <input type="text" readonly :value="formatCurrency(calculatedTotal)" dir="ltr"
-                                    class="w-full px-3 py-3 border-2 border-gray-100 dark:border-gray-700 rounded-xl bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-white text-center font-mono text-sm font-bold cursor-not-allowed" />
+                                <label
+                                    class="block text-xs font-semibold text-gray-500 dark:text-gray-400"
+                                >
+                                    {{ $t('work_orders.item.amount') }}
+                                </label>
+                                <input
+                                    type="text"
+                                    readonly
+                                    :value="formatCurrency(calculatedTotal)"
+                                    dir="ltr"
+                                    class="w-full px-3 py-3 border-2 border-gray-100 dark:border-gray-700 rounded-xl bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-white text-center font-mono text-sm font-bold cursor-not-allowed"
+                                />
                             </div>
                         </div>
 
                         <!-- Row: Toggle + Total -->
-                        <div class="space-y-3 bg-gray-50 dark:bg-gray-900/50 p-4 rounded-xl border-2 border-gray-100 dark:border-gray-800">
+                        <div
+                            class="space-y-3 bg-gray-50 dark:bg-gray-900/50 p-4 rounded-xl border-2 border-gray-100 dark:border-gray-800"
+                        >
                             <!-- Toggle switches -->
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <div class="flex items-center justify-between">
-                                    <span class="text-xs font-bold text-gray-700 dark:text-gray-300">{{ $t('work_orders.item.include_in_package') }}</span>
-                                    <button 
+                                    <span
+                                        class="text-xs font-bold text-gray-700 dark:text-gray-300"
+                                    >
+                                        {{ $t('work_orders.item.include_in_package') }}
+                                    </span>
+                                    <button
                                         dir="ltr"
-                                        type="button" 
+                                        type="button"
                                         @click="form.include_in_package = !form.include_in_package"
                                         :class="[
-                                            form.include_in_package ? 'bg-emerald-500' : 'bg-gray-200 dark:bg-gray-700',
-                                            'relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none'
+                                            form.include_in_package
+                                                ? 'bg-emerald-500'
+                                                : 'bg-gray-200 dark:bg-gray-700',
+                                            'relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none',
                                         ]"
                                     >
-                                        <span 
+                                        <span
                                             :class="[
-                                                form.include_in_package ? 'translate-x-5' : 'translate-x-0',
-                                                'pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out'
+                                                form.include_in_package
+                                                    ? 'translate-x-5'
+                                                    : 'translate-x-0',
+                                                'pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out',
                                             ]"
                                         />
                                     </button>
                                 </div>
-                                <div v-if="(form.quote_line_id || showToggles) && form.include_in_package" class="flex items-center justify-between">
-                                    <span class="text-xs font-bold text-gray-700 dark:text-gray-300">{{ $t('work_orders.item.hide_on_print') }}</span>
-                                    <button 
+                                <div
+                                    v-if="
+                                        (form.quote_line_id || showToggles) &&
+                                        form.include_in_package
+                                    "
+                                    class="flex items-center justify-between"
+                                >
+                                    <span
+                                        class="text-xs font-bold text-gray-700 dark:text-gray-300"
+                                    >
+                                        {{ $t('work_orders.item.hide_on_print') }}
+                                    </span>
+                                    <button
                                         dir="ltr"
-                                        type="button" 
+                                        type="button"
                                         @click="form.hide_on_print = !form.hide_on_print"
                                         :class="[
-                                            form.hide_on_print ? 'bg-emerald-500' : 'bg-gray-200 dark:bg-gray-700',
-                                            'relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none'
+                                            form.hide_on_print
+                                                ? 'bg-emerald-500'
+                                                : 'bg-gray-200 dark:bg-gray-700',
+                                            'relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none',
                                         ]"
                                     >
-                                        <span 
+                                        <span
                                             :class="[
-                                                form.hide_on_print ? 'translate-x-5' : 'translate-x-0',
-                                                'pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out'
+                                                form.hide_on_print
+                                                    ? 'translate-x-5'
+                                                    : 'translate-x-0',
+                                                'pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out',
                                             ]"
                                         />
                                     </button>
@@ -295,10 +645,21 @@
                             </div>
 
                             <!-- Total -->
-                            <div class="flex items-center gap-3 justify-between sm:justify-end pt-2 border-t border-gray-100 dark:border-gray-800">
-                                <span class="text-sm font-semibold text-gray-700 dark:text-gray-300">{{ $t('quotes.show.total') }}</span>
-                                <input type="text" readonly :value="formatCurrency(grandTotalValue)" dir="ltr"
-                                    class="w-28 px-3 py-1.5 border border-gray-200 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white text-center font-mono text-sm font-bold cursor-not-allowed" />
+                            <div
+                                class="flex items-center gap-3 justify-between sm:justify-end pt-2 border-t border-gray-100 dark:border-gray-800"
+                            >
+                                <span
+                                    class="text-sm font-semibold text-gray-700 dark:text-gray-300"
+                                >
+                                    {{ $t('quotes.show.total') }}
+                                </span>
+                                <input
+                                    type="text"
+                                    readonly
+                                    :value="formatCurrency(grandTotalValue)"
+                                    dir="ltr"
+                                    class="w-28 px-3 py-1.5 border border-gray-200 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white text-center font-mono text-sm font-bold cursor-not-allowed"
+                                />
                             </div>
                         </div>
                     </div>
@@ -306,47 +667,72 @@
 
                 <!-- Service Selector -->
                 <div v-if="showServiceSelect" class="space-y-1">
-                    <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400">{{ $t('quotes.service_modal.service') }}</label>
-                    <SearchableSelect v-model="form.quote_line_id" :options="serviceOptions" option-label="label" :disabled="isReadOnly" option-value="value" :placeholder="$t('common.none')" />
+                    <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400">
+                        {{ $t('quotes.service_modal.service') }}
+                    </label>
+                    <SearchableSelect
+                        v-model="form.quote_line_id"
+                        :options="serviceOptions"
+                        option-label="label"
+                        :disabled="isReadOnly"
+                        option-value="value"
+                        :placeholder="$t('common.none')"
+                    />
                 </div>
 
                 <!-- Case 1 (VAT enabled) bottom toggles -->
-                <div v-if="(form.quote_line_id || showToggles) && props.quote.tax_enabled_snapshot" class="grid grid-cols-1 sm:grid-cols-2 gap-4 px-2">
-                    <div class="flex items-center justify-between bg-gray-50 dark:bg-gray-900/50 p-3 rounded-xl border border-gray-100 dark:border-gray-800">
-                        <span class="text-xs font-semibold text-gray-700 dark:text-gray-300">{{ $t('work_orders.item.include_in_package') }}</span>
-                        <button 
+                <div
+                    v-if="(form.quote_line_id || showToggles) && props.quote.tax_enabled_snapshot"
+                    class="grid grid-cols-1 sm:grid-cols-2 gap-4 px-2"
+                >
+                    <div
+                        class="flex items-center justify-between bg-gray-50 dark:bg-gray-900/50 p-3 rounded-xl border border-gray-100 dark:border-gray-800"
+                    >
+                        <span class="text-xs font-semibold text-gray-700 dark:text-gray-300">
+                            {{ $t('work_orders.item.include_in_package') }}
+                        </span>
+                        <button
                             dir="ltr"
-                            type="button" 
+                            type="button"
                             @click="form.include_in_package = !form.include_in_package"
                             :class="[
-                                form.include_in_package ? 'bg-emerald-500' : 'bg-gray-200 dark:bg-gray-700',
-                                'relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none'
+                                form.include_in_package
+                                    ? 'bg-emerald-500'
+                                    : 'bg-gray-200 dark:bg-gray-700',
+                                'relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none',
                             ]"
                         >
-                            <span 
+                            <span
                                 :class="[
                                     form.include_in_package ? 'translate-x-5' : 'translate-x-0',
-                                    'pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out'
+                                    'pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out',
                                 ]"
                             />
                         </button>
                     </div>
 
-                    <div v-if="form.include_in_package" class="flex items-center justify-between bg-gray-50 dark:bg-gray-900/50 p-3 rounded-xl border border-gray-100 dark:border-gray-800">
-                        <span class="text-xs font-semibold text-gray-700 dark:text-gray-300">{{ $t('work_orders.item.hide_on_print') }}</span>
-                        <button 
+                    <div
+                        v-if="form.include_in_package"
+                        class="flex items-center justify-between bg-gray-50 dark:bg-gray-900/50 p-3 rounded-xl border border-gray-100 dark:border-gray-800"
+                    >
+                        <span class="text-xs font-semibold text-gray-700 dark:text-gray-300">
+                            {{ $t('work_orders.item.hide_on_print') }}
+                        </span>
+                        <button
                             dir="ltr"
-                            type="button" 
+                            type="button"
                             @click="form.hide_on_print = !form.hide_on_print"
                             :class="[
-                                form.hide_on_print ? 'bg-emerald-500' : 'bg-gray-200 dark:bg-gray-700',
-                                'relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none'
+                                form.hide_on_print
+                                    ? 'bg-emerald-500'
+                                    : 'bg-gray-200 dark:bg-gray-700',
+                                'relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none',
                             ]"
                         >
-                            <span 
+                            <span
                                 :class="[
                                     form.hide_on_print ? 'translate-x-5' : 'translate-x-0',
-                                    'pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out'
+                                    'pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out',
                                 ]"
                             />
                         </button>
@@ -358,14 +744,35 @@
         <!-- Footer -->
         <template #footer>
             <div class="flex items-center justify-between w-full">
-                <button type="button" @click="$emit('close')"
-                    class="px-6 py-2.5 text-xs font-bold text-gray-500 hover:text-red-500 transition-all uppercase tracking-widest">
+                <button
+                    type="button"
+                    @click="$emit('close')"
+                    class="px-6 py-2.5 text-xs font-bold text-gray-500 hover:text-red-500 transition-all uppercase tracking-widest"
+                >
                     {{ isReadOnly ? $t('common.close') : $t('common.cancel') }}
                 </button>
-                <button v-if="!isReadOnly" type="button" @click="submitForm"
-                    :disabled="form.processing || !form.name || !form.qty || (form.unit_price === '' || form.unit_price === null) || (form.source !== 'warehouse' && !form.unit_id) || isPriceBelowMinimum"
-                    class="px-10 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl font-black uppercase tracking-widest text-xs transition-all shadow-lg shadow-emerald-500/20 disabled:opacity-50">
-                    {{ form.processing ? $t('common.loading') : (part ? $t('common.save') : ($t('common.add'))) }}
+                <button
+                    v-if="!isReadOnly"
+                    type="button"
+                    @click="submitForm"
+                    :disabled="
+                        form.processing ||
+                        !form.name ||
+                        !form.qty ||
+                        form.unit_price === '' ||
+                        form.unit_price === null ||
+                        (form.source !== 'warehouse' && !form.unit_id) ||
+                        isPriceBelowMinimum
+                    "
+                    class="px-10 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl font-black uppercase tracking-widest text-xs transition-all shadow-lg shadow-emerald-500/20 disabled:opacity-50"
+                >
+                    {{
+                        form.processing
+                            ? $t('common.loading')
+                            : part
+                              ? $t('common.save')
+                              : $t('common.add')
+                    }}
                 </button>
             </div>
         </template>
@@ -441,35 +848,38 @@ const form = useForm({
 const stashedPrice = ref(0);
 const stashedDiscount = ref(0);
 
-watch(() => form.include_in_package, (newVal, oldVal) => {
-    if (!newVal) {
-        form.hide_on_print = false;
-    }
-    if (form.source === 'customer') {
-        form.unit_price = 0;
-        form.discount_value = 0;
-        stashedPrice.value = 0;
-        stashedDiscount.value = 0;
-        return;
-    }
-    // Only apply zeroing logic if it was explicitly toggled ON by user
-    // Now also checking props.showToggles for pending services
-    if (newVal && !oldVal && (form.quote_line_id || props.showToggles)) {
-        if (Number(form.unit_price) > 0) stashedPrice.value = form.unit_price;
-        if (Number(form.discount_value) > 0) stashedDiscount.value = form.discount_value;
-        
-        form.unit_price = 0;
-        form.discount_value = 0;
-    } else if (!newVal && oldVal && (form.quote_line_id || props.showToggles)) {
-        // Restore values when untoggling
-        if (Number(form.unit_price) === 0 && stashedPrice.value > 0) {
-            form.unit_price = stashedPrice.value;
+watch(
+    () => form.include_in_package,
+    (newVal, oldVal) => {
+        if (!newVal) {
+            form.hide_on_print = false;
         }
-        if (Number(form.discount_value) === 0 && stashedDiscount.value > 0) {
-            form.discount_value = stashedDiscount.value;
+        if (form.source === 'customer') {
+            form.unit_price = 0;
+            form.discount_value = 0;
+            stashedPrice.value = 0;
+            stashedDiscount.value = 0;
+            return;
+        }
+        // Only apply zeroing logic if it was explicitly toggled ON by user
+        // Now also checking props.showToggles for pending services
+        if (newVal && !oldVal && (form.quote_line_id || props.showToggles)) {
+            if (Number(form.unit_price) > 0) stashedPrice.value = form.unit_price;
+            if (Number(form.discount_value) > 0) stashedDiscount.value = form.discount_value;
+
+            form.unit_price = 0;
+            form.discount_value = 0;
+        } else if (!newVal && oldVal && (form.quote_line_id || props.showToggles)) {
+            // Restore values when untoggling
+            if (Number(form.unit_price) === 0 && stashedPrice.value > 0) {
+                form.unit_price = stashedPrice.value;
+            }
+            if (Number(form.discount_value) === 0 && stashedDiscount.value > 0) {
+                form.discount_value = stashedDiscount.value;
+            }
         }
     }
-});
+);
 
 // Computed
 const isReadOnly = computed(() => {
@@ -479,10 +889,17 @@ const isReadOnly = computed(() => {
 const activeBalance = computed(() => {
     if (!selectedPart.value) return null;
     const balances = selectedPart.value.inventory_balances || [];
-    return balances.find(b => b.warehouse && b.warehouse.center_id === props.quote?.center_id && b.warehouse.is_default)
-        || balances.find(b => b.warehouse && b.warehouse.center_id === props.quote?.center_id)
-        || balances[0]
-        || null;
+    return (
+        balances.find(
+            (b) =>
+                b.warehouse &&
+                b.warehouse.center_id === props.quote?.center_id &&
+                b.warehouse.is_default
+        ) ||
+        balances.find((b) => b.warehouse && b.warehouse.center_id === props.quote?.center_id) ||
+        balances[0] ||
+        null
+    );
 });
 
 const isPriceEditable = computed(() => {
@@ -532,8 +949,9 @@ const isPriceBelowMinimum = computed(() => {
     if (!selectedPart.value) return false;
     const minPrice = selectedPartMinPrice.value;
     if (minPrice <= 0) return false;
-    
-    const finalUnitPrice = (parseFloat(toEnglish(form.unit_price)) || 0) - currentDiscountAmount.value;
+
+    const finalUnitPrice =
+        (parseFloat(toEnglish(form.unit_price)) || 0) - currentDiscountAmount.value;
     return finalUnitPrice < minPrice;
 });
 
@@ -549,9 +967,9 @@ const vatAmount = computed(() => {
     const isInclusive = props.quote.pricing_mode_snapshot === 'inclusive';
     const rate = props.quote.tax_rate_snapshot || 15;
     const netAmount = calculatedTotal.value;
-    
+
     if (isInclusive) {
-        return netAmount - (netAmount / (1 + (rate / 100)));
+        return netAmount - netAmount / (1 + rate / 100);
     } else {
         return netAmount * (rate / 100);
     }
@@ -567,16 +985,16 @@ const grandTotalValue = computed(() => {
 
 // Options
 const serviceOptions = computed(() => {
-    return (props.quoteLines || []).map(line => ({
+    return (props.quoteLines || []).map((line) => ({
         value: line.id,
-        label: toEnglish(getName(line.service) || line.description || '')
+        label: toEnglish(getName(line.service) || line.description || ''),
     }));
 });
 
 const unitOptions = computed(() => {
-    return (props.units || []).map(unit => ({
+    return (props.units || []).map((unit) => ({
         value: unit.id,
-        label: toEnglish(getName(unit))
+        label: toEnglish(getName(unit)),
     }));
 });
 
@@ -586,23 +1004,27 @@ const availableStock = computed(() => {
 });
 
 // Methods
-const handleAsyncSearch = debounce(async (query) => {
+const fetchParts = async (query = '') => {
     try {
         const response = await axios.get(route('app.inventory.parts.search'), {
-            params: { 
+            params: {
                 q: query || '',
-                hide_out_of_stock: true
-            }
+                hide_out_of_stock: true,
+            },
         });
         searchResults.value = response.data;
     } catch (e) {
         searchResults.value = [];
     }
+};
+
+const handleAsyncSearch = debounce((query) => {
+    fetchParts(query);
 }, 300);
 
 const handlePartSelectChange = (partId) => {
     if (!partId) return;
-    const part = searchResults.value.find(p => p.id === partId);
+    const part = searchResults.value.find((p) => p.id === partId);
     if (part) selectPart(part);
 };
 
@@ -612,14 +1034,14 @@ function selectPart(part) {
     form.part_id = part.id;
     form.name = toEnglish(getName(part));
     form.part_number = toEnglish(part.sku || part.barcode || '');
-    
+
     // Check if there is an active warehouse balance
     if (activeBalance.value && parseFloat(activeBalance.value.sale_price) > 0) {
         form.unit_price = parseFloat(activeBalance.value.sale_price);
     } else {
         form.unit_price = parseFloat(part.default_sale_price) || 0;
     }
-    
+
     form.unit_id = part.unit_id;
     form.description = part.description || '';
     form.discount_type = 'fixed';
@@ -638,7 +1060,7 @@ function clearPartSelection() {
     form.description = '';
     form.discount_type = 'fixed';
     form.discount_value = 0;
-    if (form.source === 'warehouse') handleAsyncSearch(''); // Refresh default list
+    if (form.source === 'warehouse') fetchParts(''); // Refresh default list
 }
 
 function submitForm() {
@@ -652,16 +1074,20 @@ function submitForm() {
         const available = Number(selectedPart.value.inventory_balances_sum_qty_on_hand) || 0;
         const requested = Number(form.qty);
         if (requested > available) {
-            useToast().error(t('inventory.stock.insufficient_warning_with_qty', { 
-                requested: formatQuantity(requested), 
-                available: formatQuantity(available) 
-            }));
+            useToast().error(
+                t('inventory.stock.insufficient_warning_with_qty', {
+                    requested: formatQuantity(requested),
+                    available: formatQuantity(available),
+                })
+            );
             return;
         }
     }
 
     if (isPriceBelowMinimum.value) {
-        useToast().error(t('quotes.min_price_warning', { min: formatCurrency(selectedPartMinPrice.value) }));
+        useToast().error(
+            t('quotes.min_price_warning', { min: formatCurrency(selectedPartMinPrice.value) })
+        );
         return;
     }
 
@@ -670,78 +1096,85 @@ function submitForm() {
         emit('saved', { ...form.data(), total });
         return;
     }
-    const url = props.part 
+    const url = props.part
         ? route('app.quotes.parts.update', { quote: props.quote.id, quotePart: props.part.id })
         : route('app.quotes.parts.store', { quote: props.quote.id });
-    
+
     const method = props.part ? 'put' : 'post';
     form[method](url, { onSuccess: () => emit('saved') });
 }
 
 // Watchers
-watch(() => form.source, (newSource) => {
-    if (isPopulating.value) return; // Skip if we are just loading data
-    
-    // Clear stashes since source changed
-    stashedPrice.value = 0;
-    stashedDiscount.value = 0;
+watch(
+    () => form.source,
+    (newSource) => {
+        if (isPopulating.value) return; // Skip if we are just loading data
 
-    if (newSource === 'customer') {
-        form.unit_price = 0;
-        form.discount_value = 0;
+        // Clear stashes since source changed
+        stashedPrice.value = 0;
+        stashedDiscount.value = 0;
+
+        if (newSource === 'customer') {
+            form.unit_price = 0;
+            form.discount_value = 0;
+        }
+        if (newSource !== 'warehouse') clearPartSelection();
+        if (newSource === 'warehouse' && !selectedPart.value) fetchParts(''); // Pre-fetch
     }
-    if (newSource !== 'warehouse') clearPartSelection();
-    if (newSource === 'warehouse' && !selectedPart.value) handleAsyncSearch(''); // Pre-fetch
-});
+);
 
 // Enhanced Watcher for robust data population
-watch([() => props.show, () => props.part], ([isOpen, part]) => {
-    if (isOpen) {
-        isPopulating.value = true;
-        if (part) {
-            // Populate form explicitly for better reactivity
-            form.source = part.source || 'warehouse';
-            form.quote_line_id = part.quote_line_id;
-            form.part_id = part.part_id;
-            form.name = part.name || '';
-            form.part_number = part.part_number || '';
-            form.unit_id = part.unit_id;
-            form.description = part.description || '';
-            form.qty = part.qty || 1;
-            form.unit_price = part.unit_price || 0;
-            form.discount_type = 'fixed';
-            form.discount_value = part.discount ? (part.discount / (part.qty || 1)) : 0;
-            form.discount = part.discount || 0;
-            form.include_in_package = !!part.include_in_package;
-            form.hide_on_print = !!part.hide_on_print;
+watch(
+    [() => props.show, () => props.part],
+    ([isOpen, part]) => {
+        if (isOpen) {
+            isPopulating.value = true;
+            if (part) {
+                // Populate form explicitly for better reactivity
+                form.source = part.source || 'warehouse';
+                form.quote_line_id = part.quote_line_id;
+                form.part_id = part.part_id;
+                form.name = part.name || '';
+                form.part_number = part.part_number || '';
+                form.unit_id = part.unit_id;
+                form.description = part.description || '';
+                form.qty = part.qty || 1;
+                form.unit_price = part.unit_price || 0;
+                form.discount_type = 'fixed';
+                form.discount_value = part.discount ? part.discount / (part.qty || 1) : 0;
+                form.discount = part.discount || 0;
+                form.include_in_package = !!part.include_in_package;
+                form.hide_on_print = !!part.hide_on_print;
 
-            if (part.part) {
-                selectedPart.value = part.part;
+                if (part.part) {
+                    selectedPart.value = part.part;
+                } else {
+                    selectedPart.value = null;
+                }
             } else {
+                // Reset for new part
+                form.reset();
+                form.id = null;
+                form.source = 'warehouse';
+                form.quote_line_id = props.quoteLineId || null;
+                form.qty = 1;
+                form.unit_price = 0;
+                form.discount_type = 'fixed';
+                form.discount_value = 0;
+                form.discount = 0;
+                form.name = '';
+                form.part_id = null;
                 selectedPart.value = null;
+                partSearch.value = '';
+                if (form.source === 'warehouse') fetchParts('');
             }
-        } else {
-            // Reset for new part
-            form.reset();
-            form.id = null;
-            form.source = 'warehouse';
-            form.quote_line_id = props.quoteLineId || null;
-            form.qty = 1;
-            form.unit_price = 0;
-            form.discount_type = 'fixed';
-            form.discount_value = 0;
-            form.discount = 0;
-            form.name = '';
-            form.part_id = null;
-            selectedPart.value = null;
-            partSearch.value = '';
-            if (form.source === 'warehouse') handleAsyncSearch('');
+
+            // Use timeout to ensure reactivity settles before re-enabling watchers
+            setTimeout(() => {
+                isPopulating.value = false;
+            }, 100);
         }
-        
-        // Use timeout to ensure reactivity settles before re-enabling watchers
-        setTimeout(() => {
-            isPopulating.value = false;
-        }, 100);
-    }
-}, { immediate: true });
+    },
+    { immediate: true }
+);
 </script>

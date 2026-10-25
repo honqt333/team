@@ -24,29 +24,25 @@
                     <label class="mb-1 block text-xs font-medium text-gray-700 dark:text-gray-300">
                         {{ isAr ? 'الحالة' : 'Status' }}
                     </label>
-                    <select
+                    <SearchableSelect
                         v-model="filters.status"
-                        class="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                    >
-                        <option value="">{{ isAr ? 'الكل' : 'All' }}</option>
-                        <option value="sent">{{ isAr ? 'مُرسلة' : 'Sent' }}</option>
-                        <option value="failed">{{ isAr ? 'فشلت' : 'Failed' }}</option>
-                        <option value="skipped">{{ isAr ? 'متخطاة' : 'Skipped' }}</option>
-                    </select>
+                        :options="statusOptions"
+                        option-label="label"
+                        option-value="value"
+                        :compact="true"
+                    />
                 </div>
                 <div class="flex-1 min-w-[150px]">
                     <label class="mb-1 block text-xs font-medium text-gray-700 dark:text-gray-300">
                         {{ isAr ? 'المستوى' : 'Tier' }}
                     </label>
-                    <select
+                    <SearchableSelect
                         v-model="filters.tier"
-                        class="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                    >
-                        <option value="">{{ isAr ? 'الكل' : 'All' }}</option>
-                        <option v-for="(_, key) in tierDefinitions" :key="key" :value="key">
-                            {{ isAr ? 'المستوى' : 'Tier' }} {{ key.replace('tier_', '') }}
-                        </option>
-                    </select>
+                        :options="tierOptions"
+                        option-label="label"
+                        option-value="value"
+                        :compact="true"
+                    />
                 </div>
                 <button
                     @click="applyFilters"
@@ -169,6 +165,7 @@
 import { computed, ref } from 'vue';
 import { Head, Link, router } from '@inertiajs/vue3';
 import SystemLayout from '@/Layouts/SystemLayout.vue';
+import SearchableSelect from '@/Components/SearchableSelect.vue';
 
 const props = defineProps({
     logs: { type: Object, required: true },
@@ -181,6 +178,25 @@ const isAr = computed(() => (document?.documentElement?.lang || 'ar') === 'ar');
 const filters = ref({
     status: props.filters.status || '',
     tier: props.filters.tier || '',
+});
+
+const statusOptions = computed(() => [
+    { value: '', label: isAr.value ? 'الكل' : 'All' },
+    { value: 'sent', label: isAr.value ? 'مُرسلة' : 'Sent' },
+    { value: 'failed', label: isAr.value ? 'فشلت' : 'Failed' },
+    { value: 'skipped', label: isAr.value ? 'متخطاة' : 'Skipped' },
+]);
+
+const tierOptions = computed(() => {
+    const opts = [{ value: '', label: isAr.value ? 'الكل' : 'All' }];
+    const defs = props.tier_definitions || {};
+    for (const key of Object.keys(defs)) {
+        opts.push({
+            value: key,
+            label: (isAr.value ? 'المستوى ' : 'Tier ') + key.replace('tier_', ''),
+        });
+    }
+    return opts;
 });
 
 function applyFilters() {

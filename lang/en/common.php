@@ -83,6 +83,7 @@ return [
     ],
     'expand' => 'Expand',
     'export' => 'Export',
+    'export_excel' => 'Export Excel',
     'female' => 'Female',
     'fixed_amount' => 'Fixed Amount',
     'from' => 'From',

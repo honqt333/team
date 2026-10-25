@@ -4,13 +4,21 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\App;
 
+use App\Exports\SuppliersTemplateExport;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\App\Purchasing\SupplierRequest;
+use App\Imports\SuppliersImport;
 use App\Models\InventoryUnit;
+use App\Models\Payment;
+use App\Models\PurchaseInvoice;
 use App\Models\Supplier;
 use App\Models\Warehouse;
+use Exception;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
+use Maatwebsite\Excel\Facades\Excel;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
@@ -33,6 +41,7 @@ class SuppliersController extends Controller
             ->search($request->input('search'))
             ->when($request->input('status') === 'active', fn ($q) => $q->active())
             ->when($request->input('status') === 'inactive', fn ($q) => $q->where('is_active', false))
+            ->when($request->input('type'), fn ($q, $type) => $q->where('type', $type))
             ->withCount('purchaseOrders')
             ->orderBy('name');
 
@@ -47,7 +56,7 @@ class SuppliersController extends Controller
 
         return Inertia::render('Purchasing/Suppliers/Index', [
             'suppliers' => $suppliers,
-            'filters' => $request->only(['search', 'status']),
+            'filters' => $request->only(['search', 'status', 'type']),
         ]);
     }
 
@@ -183,6 +192,7 @@ class SuppliersController extends Controller
             ->search($request->input('search'))
             ->when($request->input('status') === 'active', fn ($q) => $q->active())
             ->when($request->input('status') === 'inactive', fn ($q) => $q->where('is_active', false))
+            ->when($request->input('type'), fn ($q, $type) => $q->where('type', $type))
             ->orderBy('name')
             ->get(['id', 'name', 'code', 'phone', 'email', 'type', 'tax_number', 'is_active']);
 
@@ -252,5 +262,172 @@ class SuppliersController extends Controller
         }, $filename, [
             'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
         ]);
+    }
+
+    /**
+     * Download supplier import Excel template.
+     */
+    public function downloadTemplate()
+    {
+        return Excel::download(
+            new SuppliersTemplateExport,
+            'suppliers_template.xlsx'
+        );
+    }
+
+    /**
+     * Import suppliers from XLSX/CSV.
+     */
+    public function import(Request $request): JsonResponse
+    {
+        $this->authorize('create', Supplier::class);
+
+        $file = $request->file('file');
+
+        if (! $file) {
+            return response()->json(['message' => 'لم يتم رفع ملف'], 400);
+        }
+
+        $extension = strtolower($file->getClientOriginalExtension());
+
+        if (! in_array($extension, ['xlsx', 'xls', 'csv'])) {
+            return response()->json(['message' => 'صيغة الملف غير مدعومة. الصيغ المدعومة: XLSX, XLS, CSV'], 400);
+        }
+
+        try {
+            $import = new SuppliersImport;
+            $import->import($file);
+
+            return response()->json([
+                'imported' => $import->getImportedCount(),
+                'errors' => $import->getImportErrors(),
+            ]);
+        } catch (Exception $e) {
+            Log::error('Supplier Import Error', [
+                'message' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+            ]);
+
+            return response()->json([
+                'message' => 'حدث خطأ أثناء الاستيراد: '.$e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * Record a payment (سند صرف) for a supplier.
+     * Can be applied to a specific purchase invoice or auto-allocated FIFO across open invoices.
+     */
+    public function recordPayment(Request $request, Supplier $supplier)
+    {
+        $this->authorize('update', $supplier);
+
+        $validated = $request->validate([
+            'amount' => 'required|numeric|min:0.01',
+            'payment_method' => 'required|string',
+            'payment_date' => 'nullable|date',
+            'purchase_invoice_id' => 'nullable|integer',
+            'reference' => 'nullable|string|max:100',
+            'notes' => 'nullable|string|max:500',
+        ]);
+
+        $amount = (float) $validated['amount'];
+        $paymentDate = $validated['payment_date'] ?? now();
+        $user = auth()->user();
+
+        // 1. If a specific invoice is targeted
+        if (! empty($validated['purchase_invoice_id'])) {
+            $invoice = $supplier->purchaseInvoices()
+                ->where('id', $validated['purchase_invoice_id'])
+                ->firstOrFail();
+
+            $invBalance = (float) $invoice->balance;
+
+            if ($invBalance <= 0.01) {
+                return back()->with('error', __('payments.errors.invoice_already_paid') ?? 'هذه الفاتورة مسددة بالكامل ولا يوجد متبقي لسداده.');
+            }
+
+            if ($amount > $invBalance + 0.009) {
+                return back()->with('error', __('payments.errors.amount_exceeds_invoice_balance', [
+                    'balance' => number_format($invBalance, 2),
+                ]) ?? ('المبلغ المدخل يتجاوز رصيد الفاتورة المتبقي ('.number_format($invBalance, 2).' ر.س)'));
+            }
+
+            Payment::create([
+                'tenant_id' => $user->tenant_id,
+                'center_id' => $invoice->center_id ?? $user->current_center_id,
+                'purchase_invoice_id' => $invoice->id,
+                'amount' => $amount,
+                'payment_date' => $paymentDate,
+                'payment_method' => $validated['payment_method'],
+                'reference' => $validated['reference'] ?? null,
+                'notes' => $validated['notes'] ?? null,
+                'received_by' => $user->id,
+                'type' => Payment::TYPE_PAYMENT,
+            ]);
+
+            $newBalance = max(0.0, (float) $invoice->balance - $amount);
+            $invoice->update([
+                'balance' => $newBalance,
+                'status' => $newBalance <= 0.01 ? PurchaseInvoice::STATUS_PAID : PurchaseInvoice::STATUS_OPEN,
+            ]);
+
+            return back()->with('success', __('payments.recorded') ?? 'تم تسجيل الدفعة بنجاح');
+        }
+
+        // 2. FIFO Auto-allocation across oldest open invoices
+        $supplierBalance = (float) $supplier->calculateBalance();
+
+        if ($supplierBalance <= 0.01) {
+            return back()->with('error', __('payments.errors.no_outstanding_balance') ?? 'لا توجد أي مديونية مستحقة للمورد لتسجيل دفعة.');
+        }
+
+        if ($amount > $supplierBalance + 0.009) {
+            return back()->with('error', __('payments.errors.amount_exceeds_supplier_balance', [
+                'balance' => number_format($supplierBalance, 2),
+            ]) ?? ('المبلغ المدخل يتجاوز إجمالي الرصيد المستحق للمورد ('.number_format($supplierBalance, 2).' ر.س)'));
+        }
+
+        $openInvoices = $supplier->purchaseInvoices()
+            ->where('balance', '>', 0.01)
+            ->whereNotIn('status', [PurchaseInvoice::STATUS_DRAFT, PurchaseInvoice::STATUS_CANCELLED])
+            ->orderBy('issue_date', 'asc')
+            ->orderBy('id', 'asc')
+            ->get();
+
+        $remainingToAllocate = $amount;
+
+        foreach ($openInvoices as $invoice) {
+            if ($remainingToAllocate <= 0) {
+                break;
+            }
+
+            $invBalance = (float) $invoice->balance;
+            $portion = min($remainingToAllocate, $invBalance);
+
+            Payment::create([
+                'tenant_id' => $user->tenant_id,
+                'center_id' => $invoice->center_id ?? $user->current_center_id,
+                'purchase_invoice_id' => $invoice->id,
+                'amount' => $portion,
+                'payment_date' => $paymentDate,
+                'payment_method' => $validated['payment_method'],
+                'reference' => $validated['reference'] ?? null,
+                'notes' => $validated['notes'] ?? null,
+                'received_by' => $user->id,
+                'type' => Payment::TYPE_PAYMENT,
+            ]);
+
+            $newInvBalance = max(0.0, $invBalance - $portion);
+            $invoice->update([
+                'balance' => $newInvBalance,
+                'status' => $newInvBalance <= 0.01 ? PurchaseInvoice::STATUS_PAID : PurchaseInvoice::STATUS_OPEN,
+            ]);
+
+            $remainingToAllocate -= $portion;
+        }
+
+        return back()->with('success', __('payments.recorded') ?? 'تم تسجيل الدفعة وتوزيعها على الفواتير بنجاح');
     }
 }

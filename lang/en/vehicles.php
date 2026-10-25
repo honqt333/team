@@ -1,76 +1,96 @@
 <?php
 
-return array (
-  'add' => 'Add',
-  'all_loaded' => 'All Loaded',
-  'create' => 
-  array (
+declare(strict_types=1);
+
+return [
+    'add' => 'Add',
+    'all_loaded' => 'All Loaded',
+    'create' => [
+        'title' => 'Title',
+    ],
+    'delete_confirm_message' => 'Delete Confirm Message',
+    'edit' => [
+        'title' => 'Title',
+    ],
+    'empty' => 'Empty',
+    'empty_hint' => 'Empty Hint',
+    'filter' => [
+        'all_makes' => 'All Makes',
+    ],
+    'form' => [
+        'color' => 'Color',
+        'customer' => 'Customer',
+        'details' => 'Details',
+        'make' => 'Make',
+        'make_other' => 'Make Other',
+        'model' => 'Model',
+        'model_other' => 'Model Other',
+        'notes' => 'Notes',
+        'odometer' => 'Odometer',
+        'odometer_placeholder' => 'Odometer Placeholder',
+        'plate' => 'Plate',
+        'plate_placeholder' => 'Plate Placeholder',
+        'vin' => 'Vin',
+        'vin_placeholder' => 'Vin Placeholder',
+        'year' => 'Year',
+    ],
+    'loading_all_printing' => 'Loading All Printing',
+    'mileage' => [
+        'confirm_delete_log' => 'Confirm Delete Log',
+        'difference' => 'Difference',
+        'history' => 'History',
+        'initial_log' => 'Initial Log',
+        'last_recorded' => 'Last Recorded',
+        'lower_warning' => 'Lower Warning',
+        'no_history' => 'No History',
+        'value' => 'Value',
+    ],
+    'plate' => [
+        'countries' => [
+            'other' => 'Other',
+            'sa' => 'Sa',
+        ],
+        'country' => 'Country',
+        'free_input' => 'Free Input',
+        'letters' => 'Letters',
+        'numbers' => 'Numbers',
+        'skip_format' => 'Skip Format',
+    ],
+    'quick_add_customer' => 'Quick Add Customer',
+    'search' => 'Search',
+    'merge' => [
+        'button' => 'Merge Vehicle',
+        'title' => 'Merge Vehicle Data',
+        'source_label' => 'Source Vehicle',
+        'search_target_placeholder' => 'Search by plate number, make, or customer name...',
+        'same_customer_only' => 'Same customer only',
+        'same_customer_badge' => 'Same Customer',
+        'no_targets_found' => 'No matching vehicles found for merge',
+        'source_deleted_title' => 'Source Vehicle (Will be deleted)',
+        'target_remains_title' => 'Target Vehicle (Will remain)',
+        'warning_notice' => 'All work orders, quotes, and mileage logs will be transferred to the target vehicle, and the source vehicle will be removed.',
+        'total_work_orders' => 'Total Work Orders After Merge',
+        'total_quotes' => 'Total Quotes After Merge',
+        'confirm_button' => 'Confirm & Merge',
+        'merging' => 'Merging...',
+        'cannot_merge_self' => 'You cannot merge a vehicle with itself',
+        'different_customers_error' => 'Merging vehicles of different customers is not allowed',
+        'different_makes_error' => 'Merging vehicles of different makes is not allowed',
+        'same_customer_rule_notice' => 'Merging is only allowed between vehicles registered under the same customer.',
+        'same_customer_and_make_notice' => 'Merging is only allowed between vehicles belonging to the same customer and of the same make.',
+        'same_make_badge' => 'Same Make',
+        'different_make_badge' => 'Different Make',
+        'cannot_merge_different_make' => 'Cannot merge this vehicle due to different make',
+        'no_targets_for_customer' => 'No other vehicles found for this customer to merge with.',
+        'success' => 'Vehicle merged successfully and all records transferred',
+    ],
+    'subtitle' => 'Subtitle',
     'title' => 'Title',
-  ),
-  'delete_confirm_message' => 'Delete Confirm Message',
-  'edit' => 
-  array (
-    'title' => 'Title',
-  ),
-  'empty' => 'Empty',
-  'empty_hint' => 'Empty Hint',
-  'filter' => 
-  array (
-    'all_makes' => 'All Makes',
-  ),
-  'form' => 
-  array (
-    'color' => 'Color',
-    'customer' => 'Customer',
-    'details' => 'Details',
-    'make' => 'Make',
-    'make_other' => 'Make Other',
-    'model' => 'Model',
-    'model_other' => 'Model Other',
-    'notes' => 'Notes',
-    'odometer' => 'Odometer',
-    'odometer_placeholder' => 'Odometer Placeholder',
-    'plate' => 'Plate',
-    'plate_placeholder' => 'Plate Placeholder',
-    'vin' => 'Vin',
-    'vin_placeholder' => 'Vin Placeholder',
-    'year' => 'Year',
-  ),
-  'loading_all_printing' => 'Loading All Printing',
-  'mileage' => 
-  array (
-    'confirm_delete_log' => 'Confirm Delete Log',
-    'difference' => 'Difference',
-    'history' => 'History',
-    'initial_log' => 'Initial Log',
-    'last_recorded' => 'Last Recorded',
-    'lower_warning' => 'Lower Warning',
-    'no_history' => 'No History',
-    'value' => 'Value',
-  ),
-  'plate' => 
-  array (
-    'countries' => 
-    array (
-      'other' => 'Other',
-      'sa' => 'Sa',
-    ),
-    'country' => 'Country',
-    'free_input' => 'Free Input',
-    'letters' => 'Letters',
-    'numbers' => 'Numbers',
-    'skip_format' => 'Skip Format',
-  ),
-  'quick_add_customer' => 'Quick Add Customer',
-  'search' => 'Search',
-  'subtitle' => 'Subtitle',
-  'title' => 'Title',
-  'total_count' => 'Total Count',
-  'validation' => 
-  array (
-    'plate_taken' => 'Plate Taken',
-    'plate_taken_desc' => 'Plate Taken Desc',
-    'plate_taken_title' => 'Plate Taken Title',
-  ),
-  'view_details' => 'View Details',
-);
+    'total_count' => 'Total Count',
+    'validation' => [
+        'plate_taken' => 'Plate Taken',
+        'plate_taken_desc' => 'Plate Taken Desc',
+        'plate_taken_title' => 'Plate Taken Title',
+    ],
+    'view_details' => 'View Details',
+];

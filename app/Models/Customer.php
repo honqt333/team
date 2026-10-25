@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\DB;
 
 class Customer extends Model
 {
@@ -51,6 +52,8 @@ class Customer extends Model
         'email',
         'notes',
         'tax_number',
+        'credit_limit',
+        'payment_terms_days',
         'address_line',
         'building_number',
         'postal_code',
@@ -90,5 +93,35 @@ class Customer extends Model
     public function invoices(): HasMany
     {
         return $this->hasMany(Invoice::class);
+    }
+
+    public function getOutstandingBalance(): float
+    {
+        $result = DB::table('invoices')
+            ->where('customer_id', $this->id)
+            ->whereNull('deleted_at')
+            ->whereNotIn('status', ['cancelled'])
+            ->selectRaw('COALESCE(SUM(total_incl_tax - total_paid), 0) as total_due')
+            ->first();
+
+        return (float) ($result?->total_due ?? 0.0);
+    }
+
+    public function isCreditLimitExceeded(?float $additionalAmount = 0.0): bool
+    {
+        if (! $this->credit_limit || (float) $this->credit_limit <= 0) {
+            return false;
+        }
+
+        return ($this->getOutstandingBalance() + ($additionalAmount ?? 0)) >= (float) $this->credit_limit;
+    }
+
+    public function getAvailableCredit(): ?float
+    {
+        if (! $this->credit_limit || (float) $this->credit_limit <= 0) {
+            return null;
+        }
+
+        return max(0.0, (float) $this->credit_limit - $this->getOutstandingBalance());
     }
 }

@@ -83,6 +83,7 @@ return [
     ],
     'expand' => 'توسيع',
     'export' => 'تصدير',
+    'export_excel' => 'تصدير إكسل',
     'female' => 'أنثى',
     'fixed_amount' => 'مبلغ ثابت',
     'from' => 'من',

@@ -7,6 +7,8 @@ namespace App\Http\Controllers\App;
 use App\Http\Controllers\Controller;
 use App\Models\Customer;
 use App\Models\Department;
+use App\Models\InventoryBalance;
+use App\Models\InventoryMove;
 use App\Models\InventoryUnit;
 use App\Models\Invoice;
 use App\Models\Payment;
@@ -18,12 +20,18 @@ use App\Models\VehicleColor;
 use App\Models\VehicleMake;
 use App\Models\VehicleModel;
 use App\Models\Warehouse;
+use App\Services\Inventory\InventoryService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 
 class PurchasingInvoicesController extends Controller
 {
+    public function __construct(
+        protected InventoryService $inventoryService
+    ) {}
+
     /**
      * Sales index for inventory/parts only (without services/labor)
      */
@@ -97,6 +105,8 @@ class PurchasingInvoicesController extends Controller
             'notes' => 'nullable|string',
             'items' => 'required|array|min:1',
             'items.*.part_id' => 'nullable|exists:parts,id',
+            'items.*.warehouse_id' => 'nullable|exists:warehouses,id',
+            'items.*.source' => 'nullable|string|in:warehouse,external,customer',
             'items.*.name' => 'required|string',
             'items.*.qty' => 'required|numeric|min:0.01',
             'items.*.unit_price' => 'required|numeric|min:0',
@@ -112,7 +122,48 @@ class PurchasingInvoicesController extends Controller
             'payments.*.type' => 'nullable|string|in:payment,refund',
         ]);
 
-        $invoice = DB::transaction(function () use ($validated, $tenantId, $centerId, $userId) {
+        $allowNegative = auth()->user()->can('inventory.override_negative_stock');
+
+        // Check stock availability for all warehouse items before proceeding
+        if (! $allowNegative) {
+            foreach ($validated['items'] as $item) {
+                $source = $item['source'] ?? 'warehouse';
+                $partId = $item['part_id'] ?? null;
+                $warehouseId = $item['warehouse_id'] ?? null;
+
+                if ($source === 'warehouse' && $partId) {
+                    if (! $warehouseId) {
+                        $warehouseId = Warehouse::where('center_id', $centerId)
+                            ->where('is_active', true)
+                            ->where('is_default', true)
+                            ->value('id') ?? Warehouse::where('center_id', $centerId)->where('is_active', true)->value('id');
+                    }
+
+                    if ($warehouseId) {
+                        $balance = InventoryBalance::query()
+                            ->withoutGlobalScopes()
+                            ->where('warehouse_id', $warehouseId)
+                            ->where('part_id', $partId)
+                            ->first();
+
+                        $onHand = (float) ($balance?->qty_on_hand ?? 0);
+
+                        if ($onHand < (float) $item['qty']) {
+                            throw ValidationException::withMessages([
+                                'items' => [
+                                    __('inventory.stock.insufficient_warning_with_qty', [
+                                        'available' => $onHand,
+                                        'requested' => $item['qty'],
+                                    ]).' ('.$item['name'].')',
+                                ],
+                            ]);
+                        }
+                    }
+                }
+            }
+        }
+
+        $invoice = DB::transaction(function () use ($validated, $tenantId, $centerId, $userId, $allowNegative) {
             $customer = Customer::find($validated['customer_id']);
 
             // Get tax settings for snapshots
@@ -179,7 +230,7 @@ class PurchasingInvoicesController extends Controller
                 'total_paid' => 0,
             ]);
 
-            // Create Invoice Lines
+            // Create Invoice Lines and Issue from Inventory
             foreach ($validated['items'] as $item) {
                 $lineTotalInclTax = $item['grand_total'];
                 $lineTotalExclTax = ($pricingMode === 'inclusive' && $taxEnabled)
@@ -192,12 +243,42 @@ class PurchasingInvoicesController extends Controller
                     'description' => $item['name'],
                     'qty' => $item['qty'],
                     'unit_price' => $item['unit_price'],
+                    'discount_value' => $item['discount'] ?? 0,
+                    'discount_amount' => $item['discount'] ?? 0,
                     'is_taxable' => $taxEnabled,
                     'tax_rate_snapshot' => $taxRate,
                     'tax_amount' => $item['tax_amount'],
                     'line_total_excl_tax' => $lineTotalExclTax,
                     'line_total_incl_tax' => $lineTotalInclTax,
                 ]);
+
+                // Auto-issue from inventory if part is from warehouse
+                $source = $item['source'] ?? 'warehouse';
+                $partId = $item['part_id'] ?? null;
+                $warehouseId = $item['warehouse_id'] ?? null;
+
+                if ($source === 'warehouse' && $partId) {
+                    if (! $warehouseId) {
+                        $warehouseId = Warehouse::where('center_id', $centerId)
+                            ->where('is_active', true)
+                            ->where('is_default', true)
+                            ->value('id') ?? Warehouse::where('center_id', $centerId)->where('is_active', true)->value('id');
+                    }
+
+                    if ($warehouseId) {
+                        $this->inventoryService->issue(
+                            warehouseId: (int) $warehouseId,
+                            partId: (int) $partId,
+                            qty: (float) $item['qty'],
+                            userId: $userId,
+                            referenceType: Invoice::class,
+                            referenceId: (int) $invoice->id,
+                            notes: 'بيع مباشر - فاتورة مبيعات #'.$invoiceNumber,
+                            allowNegative: $allowNegative,
+                            moveType: InventoryMove::TYPE_SALE
+                        );
+                    }
+                }
             }
 
             // Create Payments

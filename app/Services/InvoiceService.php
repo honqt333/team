@@ -7,6 +7,7 @@ namespace App\Services;
 use App\Models\CenterSequence;
 use App\Models\Invoice;
 use App\Models\InvoiceTemplate;
+use App\Models\Tenant;
 use App\Models\WorkOrder;
 use App\Models\WorkOrderItem;
 use App\Models\WorkOrderItemPart;
@@ -260,10 +261,12 @@ class InvoiceService
             $centerId = $invoice->center_id;
 
             // 1. Generate Sequential Number
-            // Format: INV-{Center}-{Year}-{Seq}
             $year = now()->year;
             $seq = CenterSequence::getNextValue($tenantId, $centerId, 'invoice', $year);
-            $invoiceNumber = sprintf('INV-%s-%s-%06d', $centerId, $year, $seq);
+            $tenant = Tenant::find($tenantId);
+            $invoiceNumber = $tenant
+                ? $tenant->formatDocumentCode('invoice', $centerId, $seq, $year)
+                : sprintf('INV-%s-%s-%06d', $centerId, $year, $seq);
 
             // 2. Generate ICV (Invoice Counter Value) for ZATCA
             // Must be strictly increasing per center (no gaps allowed in the chain)

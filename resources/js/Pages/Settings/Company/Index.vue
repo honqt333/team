@@ -1087,39 +1087,476 @@
                         </div>
                     </div>
 
-                    <!-- Numbering Tab (Hidden)
+                    <!-- Numbering Tab -->
                     <div v-if="activeTab === 'numbering'" class="space-y-6">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{
-                                $t('company_profile.numbering.format') }}</label>
-                            <input v-model="form.numbering.invoice_number_format" type="text"
-                                class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:border-transparent font-mono" />
-                            <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">{{
-                                $t('company_profile.numbering.tokens_hint') }}</p>
-                        </div>
-
-                        <div class="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                            <p class="text-sm text-gray-600 dark:text-gray-400">
-                                <span class="font-medium">{{ $t('company_profile.numbering.example') }}:</span>
-                                <code
-                                    class="mx-2 px-2 py-1 bg-gray-200 dark:bg-gray-600 rounded text-gray-800 dark:text-gray-200">{{ formatExample }}</code>
+                        <div class="border-b border-gray-100 dark:border-gray-700/60 pb-4">
+                            <h3
+                                class="text-base font-bold text-gray-900 dark:text-white flex items-center gap-2"
+                            >
+                                <svg
+                                    class="w-5 h-5 text-emerald-500"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2"
+                                        d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14"
+                                    />
+                                </svg>
+                                إعدادات الترقيم والتسلسل للمستندات
+                            </h3>
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                                تخصيص البادئة وصيغة الأرقام التسلسلية للفواتير وكروت العمل وعروض
+                                الأسعار.
                             </p>
                         </div>
 
-                        <div
-                            class="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
-                            <p class="text-sm text-blue-700 dark:text-blue-300">{{
-                                $t('company_profile.numbering.notice') }}</p>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <!-- Invoices -->
+                            <div
+                                class="p-5 bg-gray-50/70 dark:bg-gray-900/40 rounded-2xl border border-gray-200 dark:border-gray-700 space-y-3"
+                            >
+                                <label
+                                    class="block text-xs font-black uppercase tracking-wider text-gray-700 dark:text-gray-300"
+                                >
+                                    صيغة ترقيم الفواتير (Invoices)
+                                </label>
+                                <input
+                                    v-model="form.numbering.invoice_number_format"
+                                    type="text"
+                                    class="w-full px-3.5 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white font-mono text-sm focus:ring-2 focus:ring-emerald-500"
+                                />
+                                <div
+                                    class="text-[11px] text-gray-500 dark:text-gray-400 flex items-center justify-between"
+                                >
+                                    <span>المعاينة:</span>
+                                    <code
+                                        class="px-2 py-0.5 rounded bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 font-mono font-bold"
+                                    >
+                                        {{ invoiceExample }}
+                                    </code>
+                                </div>
+                            </div>
+
+                            <!-- Work Orders -->
+                            <div
+                                class="p-5 bg-gray-50/70 dark:bg-gray-900/40 rounded-2xl border border-gray-200 dark:border-gray-700 space-y-3"
+                            >
+                                <label
+                                    class="block text-xs font-black uppercase tracking-wider text-gray-700 dark:text-gray-300"
+                                >
+                                    صيغة ترقيم كروت الصيانة (Work Orders)
+                                </label>
+                                <input
+                                    v-model="form.numbering.work_order_number_format"
+                                    type="text"
+                                    class="w-full px-3.5 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white font-mono text-sm focus:ring-2 focus:ring-emerald-500"
+                                />
+                                <div
+                                    class="text-[11px] text-gray-500 dark:text-gray-400 flex items-center justify-between"
+                                >
+                                    <span>المعاينة:</span>
+                                    <code
+                                        class="px-2 py-0.5 rounded bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 font-mono font-bold"
+                                    >
+                                        {{ workOrderExample }}
+                                    </code>
+                                </div>
+                            </div>
+
+                            <!-- Quotes -->
+                            <div
+                                class="p-5 bg-gray-50/70 dark:bg-gray-900/40 rounded-2xl border border-gray-200 dark:border-gray-700 space-y-3"
+                            >
+                                <label
+                                    class="block text-xs font-black uppercase tracking-wider text-gray-700 dark:text-gray-300"
+                                >
+                                    صيغة ترقيم عروض الأسعار (Quotes)
+                                </label>
+                                <input
+                                    v-model="form.numbering.quote_number_format"
+                                    type="text"
+                                    class="w-full px-3.5 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white font-mono text-sm focus:ring-2 focus:ring-emerald-500"
+                                />
+                                <div
+                                    class="text-[11px] text-gray-500 dark:text-gray-400 flex items-center justify-between"
+                                >
+                                    <span>المعاينة:</span>
+                                    <code
+                                        class="px-2 py-0.5 rounded bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 font-mono font-bold"
+                                    >
+                                        {{ quoteExample }}
+                                    </code>
+                                </div>
+                            </div>
                         </div>
 
-                        <div class="flex justify-end pt-4">
-                            <button @click="saveSection('numbering')" :disabled="saving"
-                                class="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-lg transition-colors disabled:opacity-50">
+                        <!-- Tokens Guide -->
+                        <div
+                            class="p-4 bg-blue-50/60 dark:bg-blue-950/20 rounded-2xl border border-blue-200 dark:border-blue-800 space-y-2"
+                        >
+                            <p
+                                class="text-xs font-bold text-blue-900 dark:text-blue-300 flex items-center gap-1.5"
+                            >
+                                <svg
+                                    class="w-4 h-4 text-blue-600 shrink-0"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2"
+                                        d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                                    />
+                                </svg>
+                                الرموز المتاحة في صياغة الترقيم:
+                            </p>
+                            <div
+                                class="flex flex-wrap gap-2 text-xs text-blue-800 dark:text-blue-400"
+                            >
+                                <span
+                                    class="bg-white/80 dark:bg-gray-800 px-2 py-1 rounded-md border border-blue-200 dark:border-blue-800 font-mono"
+                                >
+                                    <strong class="text-blue-600">{SEQ}</strong>
+                                    : الرقم التسلسلي (إلزامي)
+                                </span>
+                                <span
+                                    class="bg-white/80 dark:bg-gray-800 px-2 py-1 rounded-md border border-blue-200 dark:border-blue-800 font-mono"
+                                >
+                                    <strong class="text-blue-600">{YYYY}</strong>
+                                    : السنة الحالية (4 أرقام)
+                                </span>
+                                <span
+                                    class="bg-white/80 dark:bg-gray-800 px-2 py-1 rounded-md border border-blue-200 dark:border-blue-800 font-mono"
+                                >
+                                    <strong class="text-blue-600">{YY}</strong>
+                                    : السنة (رقمين)
+                                </span>
+                                <span
+                                    class="bg-white/80 dark:bg-gray-800 px-2 py-1 rounded-md border border-blue-200 dark:border-blue-800 font-mono"
+                                >
+                                    <strong class="text-blue-600">{MM}</strong>
+                                    : الشهر الحالي
+                                </span>
+                                <span
+                                    class="bg-white/80 dark:bg-gray-800 px-2 py-1 rounded-md border border-blue-200 dark:border-blue-800 font-mono"
+                                >
+                                    <strong class="text-blue-600">{DD}</strong>
+                                    : اليوم
+                                </span>
+                                <span
+                                    class="bg-white/80 dark:bg-gray-800 px-2 py-1 rounded-md border border-blue-200 dark:border-blue-800 font-mono"
+                                >
+                                    <strong class="text-blue-600">{CENTER}</strong>
+                                    : رقم الفرع
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="flex justify-end pt-2">
+                            <button
+                                @click="saveSection('numbering')"
+                                :disabled="saving"
+                                class="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-xl transition-all shadow-sm hover:shadow-md disabled:opacity-50"
+                            >
                                 {{ saving ? $t('common.loading') : $t('common.save') }}
                             </button>
                         </div>
                     </div>
-                    -->
+
+                    <!-- Workflow / Operations Policies Tab -->
+                    <div v-if="activeTab === 'workflow'" class="space-y-6">
+                        <div class="border-b border-gray-100 dark:border-gray-700/60 pb-4">
+                            <h3
+                                class="text-base font-bold text-gray-900 dark:text-white flex items-center gap-2"
+                            >
+                                <svg
+                                    class="w-5 h-5 text-emerald-500"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2"
+                                        d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
+                                    />
+                                </svg>
+                                سياسات العمل والتشغيل
+                            </h3>
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                                تحديد القواعد التشغيلية وسماحيات الموظفين في كروت الصيانة والعملاء.
+                            </p>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <!-- Odometer Policy -->
+                            <div
+                                class="p-5 bg-gray-50/70 dark:bg-gray-900/40 rounded-2xl border border-gray-200 dark:border-gray-700 flex items-start justify-between gap-4"
+                            >
+                                <div>
+                                    <h4 class="text-sm font-bold text-gray-900 dark:text-white">
+                                        السماح بتسجيل قراءة عداد أقل من السابقة
+                                    </h4>
+                                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                                        عند التعطيل، يمنع النظام تحديث قراءة العداد إذا كانت أقل من
+                                        آخر قراءة مسجلة للسيارة لحماية سجل الصيانة من الأخطاء
+                                        البشرية.
+                                    </p>
+                                </div>
+                                <label
+                                    class="relative inline-flex items-center cursor-pointer shrink-0 mt-1"
+                                >
+                                    <input
+                                        type="checkbox"
+                                        v-model="form.workflow.allow_lower_odometer"
+                                        class="sr-only peer"
+                                    />
+                                    <div
+                                        class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-600"
+                                    ></div>
+                                </label>
+                            </div>
+
+                            <!-- Require Phone on Creation -->
+                            <div
+                                class="p-5 bg-gray-50/70 dark:bg-gray-900/40 rounded-2xl border border-gray-200 dark:border-gray-700 flex items-start justify-between gap-4"
+                            >
+                                <div>
+                                    <h4 class="text-sm font-bold text-gray-900 dark:text-white">
+                                        إلزامية رقم جوال العميل
+                                    </h4>
+                                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                                        اشتراط إدخال رقم هاتف صحيح للعميل عند فتح كرت صيانة جديد
+                                        لضمان إمكانية التواصل وإرسال الإشعارات.
+                                    </p>
+                                </div>
+                                <label
+                                    class="relative inline-flex items-center cursor-pointer shrink-0 mt-1"
+                                >
+                                    <input
+                                        type="checkbox"
+                                        v-model="form.workflow.require_phone_on_creation"
+                                        class="sr-only peer"
+                                    />
+                                    <div
+                                        class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-600"
+                                    ></div>
+                                </label>
+                            </div>
+
+                            <!-- Max Discount Percentage -->
+                            <div
+                                class="p-5 bg-gray-50/70 dark:bg-gray-900/40 rounded-2xl border border-gray-200 dark:border-gray-700 space-y-2"
+                            >
+                                <label
+                                    class="block text-sm font-bold text-gray-900 dark:text-white"
+                                >
+                                    الحد الأقصى للخصم المسموح به لموظف الاستقبال (%)
+                                </label>
+                                <p class="text-xs text-gray-500 dark:text-gray-400">
+                                    أقصى نسبة خصم يمكن للموظف تطبيقها على الفواتير وكروت العمل بدون
+                                    طلب موافقة من المدير.
+                                </p>
+                                <div class="flex items-center gap-3 pt-1">
+                                    <input
+                                        type="number"
+                                        min="0"
+                                        max="100"
+                                        v-model.number="form.workflow.max_discount_percentage"
+                                        class="w-32 px-3.5 py-2 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white font-mono font-bold text-sm focus:ring-2 focus:ring-emerald-500"
+                                    />
+                                    <span class="text-sm font-bold text-gray-500">%</span>
+                                </div>
+                            </div>
+
+                            <!-- Default Warranty Days -->
+                            <div
+                                class="p-5 bg-gray-50/70 dark:bg-gray-900/40 rounded-2xl border border-gray-200 dark:border-gray-700 space-y-2"
+                            >
+                                <label
+                                    class="block text-sm font-bold text-gray-900 dark:text-white"
+                                >
+                                    فترة الضمان الافتراضية لأعمال الصيانة (بالأيام)
+                                </label>
+                                <p class="text-xs text-gray-500 dark:text-gray-400">
+                                    الفترة الافتراضية لضمان أجور اليد والقطع الموضحة في تذييل سندات
+                                    وكروت الفحص المطبوعة.
+                                </p>
+                                <div class="flex items-center gap-3 pt-1">
+                                    <input
+                                        type="number"
+                                        min="0"
+                                        max="3650"
+                                        v-model.number="form.workflow.default_warranty_days"
+                                        class="w-32 px-3.5 py-2 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white font-mono font-bold text-sm focus:ring-2 focus:ring-emerald-500"
+                                    />
+                                    <span class="text-sm text-gray-500">يوم</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="flex justify-end pt-2">
+                            <button
+                                @click="saveSection('workflow')"
+                                :disabled="saving"
+                                class="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-xl transition-all shadow-sm hover:shadow-md disabled:opacity-50"
+                            >
+                                {{ saving ? $t('common.loading') : $t('common.save') }}
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Notification Templates Tab -->
+                    <div v-if="activeTab === 'notifications'" class="space-y-6">
+                        <div class="border-b border-gray-100 dark:border-gray-700/60 pb-4">
+                            <h3
+                                class="text-base font-bold text-gray-900 dark:text-white flex items-center gap-2"
+                            >
+                                <svg
+                                    class="w-5 h-5 text-emerald-500"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2"
+                                        d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
+                                    />
+                                </svg>
+                                قوالب إشعارات ورسائل العملاء (SMS & WhatsApp)
+                            </h3>
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                                تخصيص نصوص الرسائل التلقائية المرسلة للعملاء في مراحل الصيانة
+                                المختلفة.
+                            </p>
+                        </div>
+
+                        <!-- Variables Legend -->
+                        <div
+                            class="p-4 bg-emerald-50/60 dark:bg-emerald-950/20 rounded-2xl border border-emerald-200 dark:border-emerald-800 space-y-2"
+                        >
+                            <p class="text-xs font-bold text-emerald-900 dark:text-emerald-300">
+                                المتغيرات المتاحة للاستخدام داخل نصوص الرسائل:
+                            </p>
+                            <div class="flex flex-wrap gap-2 text-xs">
+                                <span
+                                    class="bg-white/80 dark:bg-gray-800 px-2 py-1 rounded-md border border-emerald-200 font-mono text-emerald-700 dark:text-emerald-300 font-bold"
+                                >
+                                    {customer_name}
+                                </span>
+                                <span
+                                    class="bg-white/80 dark:bg-gray-800 px-2 py-1 rounded-md border border-emerald-200 font-mono text-emerald-700 dark:text-emerald-300 font-bold"
+                                >
+                                    {plate_number}
+                                </span>
+                                <span
+                                    class="bg-white/80 dark:bg-gray-800 px-2 py-1 rounded-md border border-emerald-200 font-mono text-emerald-700 dark:text-emerald-300 font-bold"
+                                >
+                                    {code}
+                                </span>
+                                <span
+                                    class="bg-white/80 dark:bg-gray-800 px-2 py-1 rounded-md border border-emerald-200 font-mono text-emerald-700 dark:text-emerald-300 font-bold"
+                                >
+                                    {center_name}
+                                </span>
+                                <span
+                                    class="bg-white/80 dark:bg-gray-800 px-2 py-1 rounded-md border border-emerald-200 font-mono text-emerald-700 dark:text-emerald-300 font-bold"
+                                >
+                                    {total}
+                                </span>
+                                <span
+                                    class="bg-white/80 dark:bg-gray-800 px-2 py-1 rounded-md border border-emerald-200 font-mono text-emerald-700 dark:text-emerald-300 font-bold"
+                                >
+                                    {url}
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="space-y-4">
+                            <!-- 1. Work Order Created -->
+                            <div
+                                class="p-4 bg-gray-50/70 dark:bg-gray-900/40 rounded-2xl border border-gray-200 dark:border-gray-700 space-y-2"
+                            >
+                                <label
+                                    class="block text-sm font-bold text-gray-900 dark:text-white"
+                                >
+                                    رسالة استلام المركبة وفتح كرت العمل
+                                </label>
+                                <textarea
+                                    rows="2"
+                                    v-model="form.notifications.work_order_created"
+                                    class="w-full px-3.5 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-emerald-500"
+                                ></textarea>
+                            </div>
+
+                            <!-- 2. Work Order Completed -->
+                            <div
+                                class="p-4 bg-gray-50/70 dark:bg-gray-900/40 rounded-2xl border border-gray-200 dark:border-gray-700 space-y-2"
+                            >
+                                <label
+                                    class="block text-sm font-bold text-gray-900 dark:text-white"
+                                >
+                                    رسالة اكتمال الصيانة وجهوزية المركبة للاستلام
+                                </label>
+                                <textarea
+                                    rows="2"
+                                    v-model="form.notifications.work_order_completed"
+                                    class="w-full px-3.5 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-emerald-500"
+                                ></textarea>
+                            </div>
+
+                            <!-- 3. Quote Shared -->
+                            <div
+                                class="p-4 bg-gray-50/70 dark:bg-gray-900/40 rounded-2xl border border-gray-200 dark:border-gray-700 space-y-2"
+                            >
+                                <label
+                                    class="block text-sm font-bold text-gray-900 dark:text-white"
+                                >
+                                    رسالة مشاركة عرض السعر / التقييم للعميل
+                                </label>
+                                <textarea
+                                    rows="2"
+                                    v-model="form.notifications.quote_shared"
+                                    class="w-full px-3.5 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-emerald-500"
+                                ></textarea>
+                            </div>
+
+                            <!-- 4. Invoice Issued -->
+                            <div
+                                class="p-4 bg-gray-50/70 dark:bg-gray-900/40 rounded-2xl border border-gray-200 dark:border-gray-700 space-y-2"
+                            >
+                                <label
+                                    class="block text-sm font-bold text-gray-900 dark:text-white"
+                                >
+                                    رسالة إصدار الفاتورة الضريبية للعميل
+                                </label>
+                                <textarea
+                                    rows="2"
+                                    v-model="form.notifications.invoice_issued"
+                                    class="w-full px-3.5 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-emerald-500"
+                                ></textarea>
+                            </div>
+                        </div>
+
+                        <div class="flex justify-end pt-2">
+                            <button
+                                @click="saveSection('notifications')"
+                                :disabled="saving"
+                                class="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-xl transition-all shadow-sm hover:shadow-md disabled:opacity-50"
+                            >
+                                {{ saving ? $t('common.loading') : $t('common.save') }}
+                            </button>
+                        </div>
+                    </div>
 
                     <!-- Payment Tab (DEPRECATED — moved to /app/settings/billing) -->
                     <div v-if="activeTab === 'payment'" class="space-y-6">
@@ -2182,6 +2619,8 @@ const props = defineProps({
     vat: Object,
     zatca: Object,
     numbering: Object,
+    workflow: Object,
+    notifications: Object,
     admin_user: Object,
     branches: Array,
     company_transactions: {
@@ -2241,9 +2680,10 @@ const tabs = computed(() => [
     { id: 'contact', label: t('company_profile.tabs.contact') },
     { id: 'vat', label: t('company_profile.tabs.vat') },
     { id: 'zatca', label: t('company_profile.tabs.zatca') },
-    // numbering tab hidden by design decision
+    { id: 'numbering', label: t('company_profile.tabs.numbering') || 'الترقيم والتسلسل' },
+    { id: 'workflow', label: t('company_profile.tabs.workflow') || 'سياسات العمل' },
+    { id: 'notifications', label: t('company_profile.tabs.notifications') || 'قوالب الرسائل' },
     { id: 'admin_user', label: t('company_profile.tabs.admin_user') },
-    { id: 'payment', label: t('company_profile.tabs.payment') },
     { id: 'revenue_expenses', label: t('company_profile.tabs.revenue_expenses') },
     { id: 'invoices', label: t('company_profile.tabs.invoices') },
 ]);
@@ -2291,6 +2731,28 @@ const form = ref({
     numbering: {
         invoice_number_format:
             props.numbering?.invoice_number_format ?? 'INV-{CENTER}-{YYYY}-{SEQ}',
+        work_order_number_format: props.numbering?.work_order_number_format ?? 'WO-{SEQ}',
+        quote_number_format: props.numbering?.quote_number_format ?? 'QT-{SEQ}',
+    },
+    workflow: {
+        allow_lower_odometer: Boolean(props.workflow?.allow_lower_odometer ?? false),
+        max_discount_percentage: Number(props.workflow?.max_discount_percentage ?? 15),
+        require_phone_on_creation: Boolean(props.workflow?.require_phone_on_creation ?? true),
+        default_warranty_days: Number(props.workflow?.default_warranty_days ?? 30),
+    },
+    notifications: {
+        work_order_created:
+            props.notifications?.work_order_created ??
+            'مرحباً {customer_name}، تم استلام مركبتك {plate_number} برقم كرت صيانة #{code} في {center_name}.',
+        work_order_completed:
+            props.notifications?.work_order_completed ??
+            'عزيزنا {customer_name}، اكتملت صيانة مركبتك {plate_number} (#{code}) وأصبحت جاهزة للاستلام في {center_name}.',
+        quote_shared:
+            props.notifications?.quote_shared ??
+            'مرحباً {customer_name}، تفضل عرض السعر الخاص بمركبتك {plate_number} رقم {code}، يمكنك الاطلاع عليه هنا: {url}',
+        invoice_issued:
+            props.notifications?.invoice_issued ??
+            'عزيزنا {customer_name}، تم إصدار الفاتورة الضريبية رقم {code} بمبلغ {total} ر.س لمركبتك {plate_number}.',
     },
     admin_user: {
         email: props.admin_user?.email ?? '',
@@ -2335,17 +2797,26 @@ watch(
     }
 );
 
-const formatExample = computed(() => {
-    let example = form.value.numbering.invoice_number_format;
+function previewCode(fmt, fallbackPrefix) {
+    if (!fmt) return fallbackPrefix + '000001';
     const now = new Date();
-    example = example.replace('{SEQ}', '000001');
-    example = example.replace('{YYYY}', now.getFullYear().toString());
-    example = example.replace('{YY}', now.getFullYear().toString().slice(-2));
-    example = example.replace('{MM}', String(now.getMonth() + 1).padStart(2, '0'));
-    example = example.replace('{DD}', String(now.getDate()).padStart(2, '0'));
-    example = example.replace('{CENTER}', '1');
-    return example;
-});
+    return String(fmt)
+        .replace('{SEQ}', '000001')
+        .replace('{YYYY}', now.getFullYear().toString())
+        .replace('{YY}', now.getFullYear().toString().slice(-2))
+        .replace('{MM}', String(now.getMonth() + 1).padStart(2, '0'))
+        .replace('{DD}', String(now.getDate()).padStart(2, '0'))
+        .replace('{CENTER}', '1');
+}
+
+const invoiceExample = computed(() =>
+    previewCode(form.value.numbering.invoice_number_format, 'INV-')
+);
+const workOrderExample = computed(() =>
+    previewCode(form.value.numbering.work_order_number_format, 'WO-')
+);
+const quoteExample = computed(() => previewCode(form.value.numbering.quote_number_format, 'QT-'));
+const formatExample = computed(() => invoiceExample.value);
 
 function saveSection(section) {
     saving.value = true;

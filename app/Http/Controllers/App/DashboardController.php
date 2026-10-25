@@ -163,8 +163,6 @@ class DashboardController extends Controller
             ->count();
 
         $lowStockCount = Part::where('parts.tenant_id', $tenantId)
-            ->whereNotNull('parts.min_qty')
-            ->where('parts.min_qty', '>', 0)
             ->join('inventory_balances', function ($join) use ($centerId) {
                 $join->on('inventory_balances.part_id', '=', 'parts.id');
 
@@ -172,8 +170,21 @@ class DashboardController extends Controller
                     $join->where('inventory_balances.center_id', $centerId);
                 }
             })
-            ->whereColumn('parts.min_qty', '>', 'inventory_balances.qty_on_hand')
-            ->count();
+            ->where(function ($q) {
+                $q->where(function ($sub) {
+                    $sub->where('inventory_balances.min_stock', '>', 0)
+                        ->whereColumn('inventory_balances.qty_on_hand', '<=', 'inventory_balances.min_stock');
+                })->orWhere(function ($sub) {
+                    $sub->where(function ($zeroMin) {
+                        $zeroMin->whereNull('inventory_balances.min_stock')
+                            ->orWhere('inventory_balances.min_stock', '<=', 0);
+                    })
+                        ->where('parts.min_qty', '>', 0)
+                        ->whereColumn('inventory_balances.qty_on_hand', '<=', 'parts.min_qty');
+                });
+            })
+            ->distinct('parts.id')
+            ->count('parts.id');
 
         // ─── Recent Work Orders ────────────────────────────────────────────
         $recentWorkOrders = (clone $workOrdersBase)
