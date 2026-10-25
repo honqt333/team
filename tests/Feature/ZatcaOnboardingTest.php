@@ -16,17 +16,69 @@ class ZatcaOnboardingTest extends TestCase
 {
     use RefreshDatabase;
 
+    protected function enableTaxForTenant(Tenant $tenant): void
+    {
+        $tenant->taxSettings()->updateOrCreate(
+            ['tenant_id' => $tenant->id],
+            [
+                'vat_enabled' => true,
+                'tax_number' => '300000000000003',
+                'services_vat_rate' => 15,
+                'parts_vat_rate' => 15,
+            ]
+        );
+    }
+
     public function test_guest_is_redirected_to_login(): void
     {
         $response = $this->get('/app/settings/zatca');
         $response->assertRedirect('/login');
     }
 
-    public function test_authenticated_user_can_view_onboarding_wizard(): void
+    public function test_user_is_redirected_to_company_settings_if_vat_not_enabled(): void
     {
         app(PerformanceBaselineSeeder::class)->run();
 
         $tenant = Tenant::first();
+        // Ensure tax is not enabled
+        $tenant->taxSettings()->updateOrCreate(
+            ['tenant_id' => $tenant->id],
+            ['vat_enabled' => false, 'tax_number' => '']
+        );
+
+        $user = User::where('tenant_id', $tenant->id)->where('is_system_admin', true)->first();
+
+        $response = $this->actingAs($user)->get('/app/settings/zatca');
+
+        $response->assertRedirect(route('settings.company', ['tab' => 'vat']));
+        $response->assertSessionHas('error');
+    }
+
+    public function test_user_is_redirected_if_vat_number_invalid(): void
+    {
+        app(PerformanceBaselineSeeder::class)->run();
+
+        $tenant = Tenant::first();
+        // Tax enabled but invalid VAT number
+        $tenant->taxSettings()->updateOrCreate(
+            ['tenant_id' => $tenant->id],
+            ['vat_enabled' => true, 'tax_number' => '123456']
+        );
+
+        $user = User::where('tenant_id', $tenant->id)->where('is_system_admin', true)->first();
+
+        $response = $this->actingAs($user)->get('/app/settings/zatca');
+
+        $response->assertRedirect(route('settings.company', ['tab' => 'vat']));
+        $response->assertSessionHas('error');
+    }
+
+    public function test_authenticated_user_can_view_onboarding_wizard_when_tax_enabled(): void
+    {
+        app(PerformanceBaselineSeeder::class)->run();
+
+        $tenant = Tenant::first();
+        $this->enableTaxForTenant($tenant);
         $user = User::where('tenant_id', $tenant->id)->where('is_system_admin', true)->first();
 
         $response = $this->actingAs($user)->get('/app/settings/zatca');
@@ -44,6 +96,7 @@ class ZatcaOnboardingTest extends TestCase
         app(PerformanceBaselineSeeder::class)->run();
 
         $tenant = Tenant::first();
+        $this->enableTaxForTenant($tenant);
         $user = User::where('tenant_id', $tenant->id)->where('is_system_admin', true)->first();
 
         $response = $this->actingAs($user)->post('/app/settings/zatca/csr', [
@@ -67,6 +120,7 @@ class ZatcaOnboardingTest extends TestCase
         app(PerformanceBaselineSeeder::class)->run();
 
         $tenant = Tenant::first();
+        $this->enableTaxForTenant($tenant);
         $user = User::where('tenant_id', $tenant->id)->where('is_system_admin', true)->first();
 
         // Step 1 first
@@ -93,6 +147,7 @@ class ZatcaOnboardingTest extends TestCase
         app(PerformanceBaselineSeeder::class)->run();
 
         $tenant = Tenant::first();
+        $this->enableTaxForTenant($tenant);
         $user = User::where('tenant_id', $tenant->id)->where('is_system_admin', true)->first();
 
         // Step 1 CSR
@@ -119,6 +174,7 @@ class ZatcaOnboardingTest extends TestCase
         app(PerformanceBaselineSeeder::class)->run();
 
         $tenant = Tenant::first();
+        $this->enableTaxForTenant($tenant);
         $user = User::where('tenant_id', $tenant->id)->where('is_system_admin', true)->first();
 
         // Setup compliance state
@@ -145,6 +201,7 @@ class ZatcaOnboardingTest extends TestCase
         app(PerformanceBaselineSeeder::class)->run();
 
         $tenant = Tenant::first();
+        $this->enableTaxForTenant($tenant);
         $user = User::where('tenant_id', $tenant->id)->where('is_system_admin', true)->first();
 
         // Setup previous steps
@@ -167,6 +224,7 @@ class ZatcaOnboardingTest extends TestCase
         app(PerformanceBaselineSeeder::class)->run();
 
         $tenant = Tenant::first();
+        $this->enableTaxForTenant($tenant);
         $user = User::where('tenant_id', $tenant->id)->where('is_system_admin', true)->first();
 
         // Complete onboarding
@@ -194,6 +252,7 @@ class ZatcaOnboardingTest extends TestCase
         app(PerformanceBaselineSeeder::class)->run();
 
         $tenant = Tenant::first();
+        $this->enableTaxForTenant($tenant);
         $user = User::where('tenant_id', $tenant->id)->where('is_system_admin', true)->first();
 
         // Step 1: CSR in production mode
@@ -220,6 +279,7 @@ class ZatcaOnboardingTest extends TestCase
         app(PerformanceBaselineSeeder::class)->run();
 
         $tenant = Tenant::first();
+        $this->enableTaxForTenant($tenant);
         $user = User::where('tenant_id', $tenant->id)->where('is_system_admin', true)->first();
 
         // Step 1: CSR in production mode
@@ -244,6 +304,7 @@ class ZatcaOnboardingTest extends TestCase
         app(PerformanceBaselineSeeder::class)->run();
 
         $tenant = Tenant::first();
+        $this->enableTaxForTenant($tenant);
         $user = User::where('tenant_id', $tenant->id)->where('is_system_admin', true)->first();
 
         // Manually place a simulated compliance CSID while setting environment is production

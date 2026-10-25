@@ -23,9 +23,18 @@ class ZatcaOnboardingController extends Controller
     /**
      * Display the ZATCA Phase 2 Self-Onboarding Wizard.
      */
-    public function index(): Response
+    public function index(): Response|RedirectResponse
     {
         $tenant = auth()->user()->tenant;
+
+        $errors = $this->zatcaService->validatePrerequisites($tenant);
+
+        if (! empty($errors)) {
+            return redirect()
+                ->route('settings.company', ['tab' => 'vat'])
+                ->with('error', 'لا يمكن فتح معالج الربط والتكامل مع هيئة الزكاة (ZATCA): '.implode(' ', $errors));
+        }
+
         $setting = TenantZatcaSetting::firstOrCreate(
             ['tenant_id' => $tenant->id],
             ['onboarding_status' => TenantZatcaSetting::STATUS_NOT_STARTED]
@@ -60,12 +69,23 @@ class ZatcaOnboardingController extends Controller
     public function generateCsr(Request $request): RedirectResponse
     {
         $tenant = auth()->user()->tenant;
+
+        $errors = $this->zatcaService->validatePrerequisites($tenant);
+
+        if (! empty($errors)) {
+            return back()->withErrors(['error' => implode(' ', $errors)]);
+        }
+
         $environment = $request->input('environment', 'simulation');
         $egsSerial = $request->input('egs_serial_number');
 
-        $this->zatcaService->generateCsr($tenant, $environment, $egsSerial);
+        try {
+            $this->zatcaService->generateCsr($tenant, $environment, $egsSerial);
 
-        return back()->with('success', 'تم توليد ملف طلب الشهادة (CSR) والمفتاح الخاص بنجاح.');
+            return back()->with('success', 'تم توليد ملف طلب الشهادة (CSR) والمفتاح الخاص بنجاح.');
+        } catch (Throwable $e) {
+            return back()->withErrors(['error' => $e->getMessage()]);
+        }
     }
 
     /**
@@ -78,6 +98,12 @@ class ZatcaOnboardingController extends Controller
         ]);
 
         $tenant = auth()->user()->tenant;
+
+        $errors = $this->zatcaService->validatePrerequisites($tenant);
+
+        if (! empty($errors)) {
+            return back()->withErrors(['otp' => implode(' ', $errors)]);
+        }
 
         try {
             $this->zatcaService->requestComplianceCsid($tenant, $request->input('otp'));
@@ -95,6 +121,12 @@ class ZatcaOnboardingController extends Controller
     {
         $tenant = auth()->user()->tenant;
 
+        $errors = $this->zatcaService->validatePrerequisites($tenant);
+
+        if (! empty($errors)) {
+            return response()->json(['status' => 'error', 'message' => implode(' ', $errors)], 422);
+        }
+
         try {
             $result = $this->zatcaService->runComplianceChecks($tenant);
 
@@ -110,6 +142,12 @@ class ZatcaOnboardingController extends Controller
     public function requestProduction(): RedirectResponse
     {
         $tenant = auth()->user()->tenant;
+
+        $errors = $this->zatcaService->validatePrerequisites($tenant);
+
+        if (! empty($errors)) {
+            return back()->withErrors(['error' => implode(' ', $errors)]);
+        }
 
         try {
             $this->zatcaService->requestProductionCsid($tenant);

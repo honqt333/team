@@ -148,7 +148,7 @@
                         <input
                             type="text"
                             disabled
-                            :value="tenant.vat_number || '300000000000003'"
+                            :value="tenant.vat_number"
                             class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-700 dark:text-gray-300 text-sm font-mono font-bold"
                         />
                     </div>

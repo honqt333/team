@@ -25,13 +25,57 @@ class ZatcaOnboardingService
     ];
 
     /**
+     * Validate that the tenant meets all prerequisites for ZATCA Phase 2 onboarding.
+     *
+     * @return array<string> List of validation error messages, or empty if eligible.
+     */
+    public function validatePrerequisites(Tenant $tenant): array
+    {
+        $errors = [];
+        $taxSettings = $tenant->taxSettings;
+        $vatNumber = $taxSettings?->tax_number ?? $tenant->vat_number;
+
+        if (! ($taxSettings?->vat_enabled ?? false)) {
+            $errors[] = 'ضريبة القيمة المضافة غير مفعلة في النظام.';
+        }
+
+        if (empty($vatNumber)) {
+            $errors[] = 'الرقم الضريبي للمنشأة غير مسجل.';
+        } elseif (! preg_match('/^3[0-9]{13}3$/', (string) $vatNumber)) {
+            $errors[] = 'الرقم الضريبي غير صحيح (يجب أن يتكون من 15 رقماً ويبدأ وينتهي بالرقم 3).';
+        }
+
+        $companyName = $tenant->legal_name ?: $tenant->name;
+
+        if (empty($companyName)) {
+            $errors[] = 'اسم المنشأة غير مسجل.';
+        }
+
+        return $errors;
+    }
+
+    /**
+     * Check if tenant is eligible to start Phase 2 onboarding.
+     */
+    public function isEligibleForPhase2(Tenant $tenant): bool
+    {
+        return empty($this->validatePrerequisites($tenant));
+    }
+
+    /**
      * Step 1: Generate Private Key and CSR according to ZATCA standards.
      */
     public function generateCsr(Tenant $tenant, string $environment = 'simulation', ?string $egsSerial = null): TenantZatcaSetting
     {
+        $errors = $this->validatePrerequisites($tenant);
+
+        if (! empty($errors)) {
+            throw new InvalidArgumentException(implode(' ', $errors));
+        }
+
         $setting = TenantZatcaSetting::firstOrNew(['tenant_id' => $tenant->id]);
 
-        $vatNumber = $tenant->taxSettings?->tax_number ?? $tenant->vat_number ?? '300000000000003';
+        $vatNumber = $tenant->taxSettings?->tax_number ?? $tenant->vat_number;
         $companyName = $tenant->legal_name ?: $tenant->name ?: 'Carag Workshop';
         $serial = $egsSerial ?: ('1-CARAG|2-V2|3-'.Str::upper(Str::random(10)));
 

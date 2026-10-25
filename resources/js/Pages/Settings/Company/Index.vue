@@ -1008,6 +1008,93 @@
                             </div>
                         </div>
 
+                        <!-- Phase 2 Setup Locked (Prerequisites Not Met) -->
+                        <div
+                            v-else-if="!props.zatca?.is_eligible_for_phase2"
+                            class="p-6 rounded-2xl border border-amber-200 dark:border-amber-800 bg-amber-50/50 dark:bg-amber-950/20 shadow-sm"
+                        >
+                            <div
+                                class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6"
+                            >
+                                <div class="flex items-start gap-4">
+                                    <div
+                                        class="w-12 h-12 rounded-xl bg-amber-100 dark:bg-amber-900/50 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0"
+                                    >
+                                        <svg
+                                            class="w-6 h-6"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            viewBox="0 0 24 24"
+                                        >
+                                            <path
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                stroke-width="2"
+                                                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                                            />
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <div class="flex items-center gap-2">
+                                            <h3
+                                                class="text-lg font-bold text-gray-900 dark:text-white"
+                                            >
+                                                {{ $t('company_profile.zatca.phase2_title') }}
+                                            </h3>
+                                            <span
+                                                class="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-amber-100 text-amber-800 dark:bg-amber-900/60 dark:text-amber-300 border border-amber-200 dark:border-amber-800"
+                                            >
+                                                يتطلب إكمال إعدادات الضريبة أولاً
+                                            </span>
+                                        </div>
+                                        <p
+                                            class="text-sm text-gray-600 dark:text-gray-300 mt-1 max-w-xl"
+                                        >
+                                            لا يمكن بدء معالج الربط والتكامل مع منصة فاتورة (ZATCA)
+                                            إلا بعد تفعيل ضريبة القيمة المضافة وإدخال الرقم الضريبي
+                                            المعتمد (15 رقماً) للمنشأة.
+                                        </p>
+                                        <div
+                                            v-if="props.zatca?.eligibility_errors?.length"
+                                            class="mt-2.5 space-y-1"
+                                        >
+                                            <div
+                                                v-for="(err, eIdx) in props.zatca
+                                                    .eligibility_errors"
+                                                :key="eIdx"
+                                                class="flex items-center gap-1.5 text-xs text-amber-700 dark:text-amber-400 font-medium"
+                                            >
+                                                <span
+                                                    class="w-1.5 h-1.5 rounded-full bg-amber-500"
+                                                ></span>
+                                                <span>{{ err }}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <button
+                                    type="button"
+                                    @click="activeTab = 'vat'"
+                                    class="inline-flex items-center justify-center gap-2 px-6 py-3 bg-amber-600 hover:bg-amber-700 text-white font-semibold rounded-xl text-sm shadow-md shadow-amber-600/20 transition-all shrink-0"
+                                >
+                                    <span>الانتقال لإعدادات الضريبة والتفعيل</span>
+                                    <svg
+                                        class="w-4 h-4 rtl:rotate-180"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M14 5l7 7m0 0l-7 7m7-7H3"
+                                        />
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+
                         <!-- Phase 2 Setup Available (Not Active Yet) -->
                         <div
                             v-else
@@ -2657,7 +2744,18 @@ const props = defineProps({
     },
 });
 
-const activeTab = ref('profile');
+const getInitialTab = () => {
+    if (typeof window !== 'undefined') {
+        const urlParams = new URLSearchParams(window.location.search);
+        const tabParam = urlParams.get('tab');
+        if (tabParam) {
+            return tabParam;
+        }
+    }
+    return 'profile';
+};
+
+const activeTab = ref(getInitialTab());
 const saving = ref(false);
 const uploadingLogo = ref(false);
 const logoPreview = ref(null);

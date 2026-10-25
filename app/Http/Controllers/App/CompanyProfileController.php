@@ -16,6 +16,7 @@ use App\Models\TenantAddress;
 use App\Models\TenantTaxSetting;
 use App\Models\TenantZatcaSetting;
 use App\Services\Payment\PaymentManager;
+use App\Services\Zatca\ZatcaOnboardingService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
@@ -85,6 +86,8 @@ class CompanyProfileController extends Controller
                 'onboarding_status' => $tenant->zatcaSettings?->onboarding_status ?? 'not_started',
                 'environment' => $tenant->zatcaSettings?->environment ?? 'simulation',
                 'production_csid_expires_at' => $tenant->zatcaSettings?->production_csid_expires_at?->format('Y-m-d'),
+                'is_eligible_for_phase2' => app(ZatcaOnboardingService::class)->isEligibleForPhase2($tenant),
+                'eligibility_errors' => app(ZatcaOnboardingService::class)->validatePrerequisites($tenant),
             ],
             'numbering' => [
                 'invoice_number_format' => $tenant->invoice_number_format ?? 'INV-{CENTER}-{YYYY}-{SEQ}',
