@@ -1,10 +1,28 @@
 <template>
-    <BaseModal :show="show" @close="$emit('close')" size="lg" :overflow-visible="true" scroll-entire>
+    <BaseModal
+        :show="show"
+        @close="$emit('close')"
+        size="lg"
+        :overflow-visible="true"
+        scroll-entire
+    >
         <template #title>
             <div class="flex items-center gap-4">
-                <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center shadow-lg shadow-indigo-500/20 transform -rotate-3 hover:rotate-0 transition-transform duration-300">
-                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                <div
+                    class="w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center shadow-lg shadow-indigo-500/20 transform -rotate-3 hover:rotate-0 transition-transform duration-300"
+                >
+                    <svg
+                        class="w-6 h-6 text-white"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M12 4v16m8-8H4"
+                        />
                     </svg>
                 </div>
                 <div>
@@ -12,8 +30,12 @@
                         {{ $t('inventory.parts.issue_more') }}
                     </h3>
                     <div class="flex items-center gap-2 mt-0.5">
-                        <span class="inline-flex w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                        <p class="text-xs font-semibold text-gray-500 dark:text-gray-400 capitalize">
+                        <span
+                            class="inline-flex w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"
+                        ></span>
+                        <p
+                            class="text-xs font-semibold text-gray-500 dark:text-gray-400 capitalize"
+                        >
                             {{ part ? part.name : '' }}
                         </p>
                     </div>
@@ -25,35 +47,55 @@
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <!-- Part Name -->
                 <div>
-                    <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1">
+                    <label
+                        class="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1"
+                    >
                         {{ $t('inventory.parts.name') }}
                     </label>
-                    <input type="text" :value="part?.name || ''" disabled
-                        class="w-full px-4 py-2.5 border border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-900 text-gray-500 dark:text-gray-400 rounded-xl text-sm font-bold cursor-not-allowed" />
+                    <input
+                        type="text"
+                        :value="part?.name || ''"
+                        disabled
+                        class="w-full px-4 py-2.5 border border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-900 text-gray-500 dark:text-gray-400 rounded-xl text-sm font-bold cursor-not-allowed"
+                    />
                 </div>
 
                 <!-- Part Number -->
                 <div>
-                    <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1">
+                    <label
+                        class="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1"
+                    >
                         {{ $t('inventory.parts.part_number') }}
                     </label>
-                    <input type="text" :value="part?.part_number || ''" disabled
-                        class="w-full px-4 py-2.5 border border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-900 text-gray-500 dark:text-gray-400 rounded-xl text-sm font-bold cursor-not-allowed" />
+                    <input
+                        type="text"
+                        :value="part?.part_number || ''"
+                        disabled
+                        class="w-full px-4 py-2.5 border border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-900 text-gray-500 dark:text-gray-400 rounded-xl text-sm font-bold cursor-not-allowed"
+                    />
                 </div>
 
                 <!-- Description / Notes -->
                 <div>
-                    <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1">
+                    <label
+                        class="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1"
+                    >
                         {{ $t('inventory.parts.description') }}
                     </label>
-                    <input type="text" :value="part?.notes || ''" disabled
-                        class="w-full px-4 py-2.5 border border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-900 text-gray-500 dark:text-gray-400 rounded-xl text-sm font-bold cursor-not-allowed" />
+                    <input
+                        type="text"
+                        :value="part?.notes || ''"
+                        disabled
+                        class="w-full px-4 py-2.5 border border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-900 text-gray-500 dark:text-gray-400 rounded-xl text-sm font-bold cursor-not-allowed"
+                    />
                 </div>
             </div>
 
             <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
                 <!-- Issued Qty -->
-                <div class="p-4 bg-gray-50 dark:bg-gray-900/50 rounded-2xl border border-gray-150 dark:border-gray-800">
+                <div
+                    class="p-4 bg-gray-50 dark:bg-gray-900/50 rounded-2xl border border-gray-150 dark:border-gray-800"
+                >
                     <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">
                         {{ $t('inventory.parts.issued_qty') }}
                     </p>
@@ -63,7 +105,9 @@
                 </div>
 
                 <!-- Returned Qty -->
-                <div class="p-4 bg-gray-50 dark:bg-gray-900/50 rounded-2xl border border-gray-150 dark:border-gray-800">
+                <div
+                    class="p-4 bg-gray-50 dark:bg-gray-900/50 rounded-2xl border border-gray-150 dark:border-gray-800"
+                >
                     <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">
                         {{ $t('inventory.parts.returned_qty') }}
                     </p>
@@ -73,9 +117,11 @@
                 </div>
 
                 <!-- Current Qty on Card -->
-                <div class="p-4 bg-gray-50 dark:bg-gray-900/50 rounded-2xl border border-gray-150 dark:border-gray-800">
+                <div
+                    class="p-4 bg-gray-50 dark:bg-gray-900/50 rounded-2xl border border-gray-150 dark:border-gray-800"
+                >
                     <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">
-                        {{ $t('inventory.parts.current_card_qty') || 'الكمية الحالية بالكرت' }}
+                        {{ $t('inventory.parts.current_card_qty') }}
                     </p>
                     <p class="text-lg font-mono font-black text-indigo-600 dark:text-indigo-400">
                         {{ formatQuantity(part?.qty || 0) }}
@@ -83,8 +129,14 @@
                 </div>
 
                 <!-- Current Stock -->
-                <div class="p-4 rounded-2xl border transition-colors duration-300"
-                    :class="currentStock > 0 ? 'bg-emerald-500/5 border-emerald-500/20 text-emerald-700 dark:text-emerald-400' : 'bg-red-500/5 border-red-500/20 text-red-600 dark:text-red-400'">
+                <div
+                    class="p-4 rounded-2xl border transition-colors duration-300"
+                    :class="
+                        currentStock > 0
+                            ? 'bg-emerald-500/5 border-emerald-500/20 text-emerald-700 dark:text-emerald-400'
+                            : 'bg-red-500/5 border-red-500/20 text-red-600 dark:text-red-400'
+                    "
+                >
                     <p class="text-[10px] font-black opacity-60 uppercase tracking-widest mb-1">
                         {{ $t('inventory.stock.available') }}
                     </p>
@@ -95,18 +147,25 @@
             </div>
 
             <!-- Main Input: Issue More Qty -->
-            <div class="bg-indigo-500/5 dark:bg-indigo-500/10 border-2 border-indigo-500/20 rounded-2xl p-5 space-y-3">
+            <div
+                class="bg-indigo-500/5 dark:bg-indigo-500/10 border-2 border-indigo-500/20 rounded-2xl p-5 space-y-3"
+            >
                 <div class="flex items-center justify-between">
-                    <label class="block text-sm font-extrabold text-indigo-700 dark:text-indigo-400">
+                    <label
+                        class="block text-sm font-extrabold text-indigo-700 dark:text-indigo-400"
+                    >
                         {{ $t('inventory.parts.issue_more_qty') }}
                     </label>
-                    <span v-if="parseFloat(additionalQty) > currentStock" class="text-xs text-red-500 font-bold">
+                    <span
+                        v-if="parseFloat(additionalQty) > currentStock"
+                        class="text-xs text-red-500 font-bold"
+                    >
                         ⚠️ {{ $t('inventory.parts.insufficient_short') }}
                     </span>
                 </div>
-                <input 
-                    type="text" 
-                    inputmode="decimal" 
+                <input
+                    type="text"
+                    inputmode="decimal"
                     v-model="additionalQty"
                     dir="ltr"
                     @input="additionalQty = toEnglish($event.target.value).replace(/[^0-9.]/g, '')"
@@ -119,37 +178,69 @@
             <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-2">
                 <!-- Price -->
                 <div class="space-y-1">
-                    <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400">{{ $t('inventory.parts.unit_price') }}</label>
-                    <input type="text" readonly :value="formatCurrency(part?.unit_price || 0)" dir="ltr"
-                        class="w-full px-4 py-2.5 border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-500 dark:text-gray-400 text-center font-mono text-sm font-bold cursor-not-allowed rounded-xl" />
+                    <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400">
+                        {{ $t('inventory.parts.unit_price') }}
+                    </label>
+                    <input
+                        type="text"
+                        readonly
+                        :value="formatCurrency(part?.unit_price || 0)"
+                        dir="ltr"
+                        class="w-full px-4 py-2.5 border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-500 dark:text-gray-400 text-center font-mono text-sm font-bold cursor-not-allowed rounded-xl"
+                    />
                 </div>
 
                 <!-- Discount -->
                 <div class="space-y-1">
-                    <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400">{{ $t('inventory.parts.discount') }}</label>
-                    <input type="text" readonly :value="formatCurrency(part?.discount || 0)" dir="ltr"
-                        class="w-full px-4 py-2.5 border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-500 dark:text-gray-400 text-center font-mono text-sm font-bold cursor-not-allowed rounded-xl" />
+                    <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400">
+                        {{ $t('inventory.parts.discount') }}
+                    </label>
+                    <input
+                        type="text"
+                        readonly
+                        :value="formatCurrency(part?.discount || 0)"
+                        dir="ltr"
+                        class="w-full px-4 py-2.5 border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-500 dark:text-gray-400 text-center font-mono text-sm font-bold cursor-not-allowed rounded-xl"
+                    />
                 </div>
 
                 <!-- Total Qty (Calculated) -->
                 <div class="space-y-1">
-                    <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400">{{ $t('common.qty') }}</label>
-                    <input type="text" readonly :value="formatQuantity(calculatedQty)" dir="ltr"
-                        class="w-full px-4 py-2.5 border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-indigo-600 dark:text-indigo-400 text-center font-mono text-sm font-black cursor-not-allowed rounded-xl" />
+                    <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400">
+                        {{ $t('common.qty') }}
+                    </label>
+                    <input
+                        type="text"
+                        readonly
+                        :value="formatQuantity(calculatedQty)"
+                        dir="ltr"
+                        class="w-full px-4 py-2.5 border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-indigo-600 dark:text-indigo-400 text-center font-mono text-sm font-black cursor-not-allowed rounded-xl"
+                    />
                 </div>
 
                 <!-- Amount (Calculated Subtotal) -->
                 <div class="space-y-1">
-                    <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400">{{ $t('common.amount') }}</label>
-                    <input type="text" readonly :value="formatCurrency(calculatedAmount)" dir="ltr"
-                        class="w-full px-4 py-2.5 border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-500 dark:text-gray-400 text-center font-mono text-sm font-bold cursor-not-allowed rounded-xl" />
+                    <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400">
+                        {{ $t('common.amount') }}
+                    </label>
+                    <input
+                        type="text"
+                        readonly
+                        :value="formatCurrency(calculatedAmount)"
+                        dir="ltr"
+                        class="w-full px-4 py-2.5 border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-500 dark:text-gray-400 text-center font-mono text-sm font-bold cursor-not-allowed rounded-xl"
+                    />
                 </div>
             </div>
 
             <!-- Grand Total Summary Box -->
-            <div class="p-4 bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 border border-indigo-200 dark:border-indigo-800 rounded-2xl flex items-center justify-between shadow-sm">
+            <div
+                class="p-4 bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 border border-indigo-200 dark:border-indigo-800 rounded-2xl flex items-center justify-between shadow-sm"
+            >
                 <div class="space-y-0.5">
-                    <span class="text-xs font-black text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                    <span
+                        class="text-xs font-black text-gray-700 dark:text-gray-300 uppercase tracking-wider"
+                    >
                         {{ $t('common.total') }}
                     </span>
                     <p v-if="vatAmount > 0" class="text-[10px] font-bold text-gray-400">
@@ -169,12 +260,23 @@
 
         <template #footer>
             <div class="flex items-center justify-between w-full">
-                <button type="button" @click="$emit('close')"
-                    class="px-5 py-2.5 text-xs font-bold text-gray-500 hover:text-red-500 transition-all uppercase tracking-widest">
+                <button
+                    type="button"
+                    @click="$emit('close')"
+                    class="px-5 py-2.5 text-xs font-bold text-gray-500 hover:text-red-500 transition-all uppercase tracking-widest"
+                >
                     {{ $t('common.cancel') }}
                 </button>
-                <button type="button" @click="submitForm" :disabled="form.processing || parseFloat(additionalQty) <= 0 || parseFloat(additionalQty) > currentStock"
-                    class="px-10 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl font-black uppercase tracking-widest text-xs transition-all shadow-lg shadow-indigo-500/20 disabled:opacity-50">
+                <button
+                    type="button"
+                    @click="submitForm"
+                    :disabled="
+                        form.processing ||
+                        parseFloat(additionalQty) <= 0 ||
+                        parseFloat(additionalQty) > currentStock
+                    "
+                    class="px-10 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl font-black uppercase tracking-widest text-xs transition-all shadow-lg shadow-indigo-500/20 disabled:opacity-50"
+                >
                     {{ form.processing ? $t('common.loading') : $t('common.save') }}
                 </button>
             </div>
@@ -221,41 +323,48 @@ const form = useForm({
 });
 
 // Watch show and part to reset additional quantity and populate form
-watch([() => props.show, () => props.part], ([newShow, newPart]) => {
-    if (newShow && newPart) {
-        additionalQty.value = '0';
-        currentStock.value = 0;
-        
-        // Populate form fields
-        form.work_order_item_id = newPart.work_order_item_id;
-        form.part_id = newPart.part_id;
-        form.warehouse_id = newPart.warehouse_id;
-        form.name = newPart.name;
-        form.part_number = newPart.part_number;
-        form.source = newPart.source;
-        form.unit_id = newPart.unit_id;
-        form.unit_price = newPart.unit_price;
-        form.discount = newPart.discount;
-        form.include_in_package = newPart.include_in_package;
-        form.hide_on_print = newPart.hide_on_print;
-        form.notes = newPart.notes;
-        form.qty = newPart.qty;
+watch(
+    [() => props.show, () => props.part],
+    ([newShow, newPart]) => {
+        if (newShow && newPart) {
+            additionalQty.value = '0';
+            currentStock.value = 0;
 
-        fetchStock();
-    }
-}, { immediate: true, deep: true });
+            // Populate form fields
+            form.work_order_item_id = newPart.work_order_item_id;
+            form.part_id = newPart.part_id;
+            form.warehouse_id = newPart.warehouse_id;
+            form.name = newPart.name;
+            form.part_number = newPart.part_number;
+            form.source = newPart.source;
+            form.unit_id = newPart.unit_id;
+            form.unit_price = newPart.unit_price;
+            form.discount = newPart.discount;
+            form.include_in_package = newPart.include_in_package;
+            form.hide_on_print = newPart.hide_on_print;
+            form.notes = newPart.notes;
+            form.qty = newPart.qty;
+
+            fetchStock();
+        }
+    },
+    { immediate: true, deep: true }
+);
 
 async function fetchStock() {
     const partId = form.part_id || props.part?.part_id;
     const warehouseId = form.warehouse_id || props.part?.warehouse_id;
     if (!partId || !warehouseId) {
-        console.warn('Cannot fetch stock: partId or warehouseId is missing', { partId, warehouseId });
+        console.warn('Cannot fetch stock: partId or warehouseId is missing', {
+            partId,
+            warehouseId,
+        });
         return;
     }
     loadingStock.value = true;
     try {
         const response = await axios.get(route('app.inventory.stock.part', { part: partId }), {
-            params: { warehouse_id: warehouseId }
+            params: { warehouse_id: warehouseId },
         });
         currentStock.value = response.data.qty_on_hand || 0;
     } catch (e) {
@@ -286,9 +395,9 @@ const vatAmount = computed(() => {
     const isInclusive = props.workOrder.pricing_mode_snapshot === 'inclusive';
     const rate = props.workOrder.tax_rate_snapshot || 15;
     const netAmount = calculatedTotal.value;
-    
+
     if (isInclusive) {
-        return netAmount - (netAmount / (1 + (rate / 100)));
+        return netAmount - netAmount / (1 + rate / 100);
     } else {
         return netAmount * (rate / 100);
     }
@@ -296,7 +405,10 @@ const vatAmount = computed(() => {
 
 const grandTotalValue = computed(() => {
     const netAmount = calculatedTotal.value;
-    if (!props.workOrder?.tax_enabled_snapshot || props.workOrder.pricing_mode_snapshot === 'inclusive') {
+    if (
+        !props.workOrder?.tax_enabled_snapshot ||
+        props.workOrder.pricing_mode_snapshot === 'inclusive'
+    ) {
         return netAmount;
     }
     return netAmount + vatAmount.value;
@@ -308,13 +420,17 @@ function submitForm() {
 
     form.put(route('work-orders.parts.update', { workOrderPart: props.part.id }), {
         onSuccess: (page) => {
-            emit('saved', {
-                ...props.part,
-                qty: form.qty,
-                total: calculatedTotal.value,
-                grand_total: grandTotalValue.value
-            }, { close: true });
-        }
+            emit(
+                'saved',
+                {
+                    ...props.part,
+                    qty: form.qty,
+                    total: calculatedTotal.value,
+                    grand_total: grandTotalValue.value,
+                },
+                { close: true }
+            );
+        },
     });
 }
 </script>

@@ -974,11 +974,7 @@ const submit = () => {
             console.error('Validation: Full payment required for Cash orders.');
             // Since we have the error alert, we can manually push an error?
             // Using Inertia'ssetError
-            form.setError(
-                'payments',
-                t('purchasing.orders.errors.full_payment_required') ||
-                    'Full payment is required for Cash orders.'
-            );
+            form.setError('payments', t('purchasing.orders.errors.full_payment_required'));
             return;
         }
     } else {

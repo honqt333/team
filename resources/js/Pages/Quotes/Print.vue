@@ -90,11 +90,11 @@ const getCenterAddress = (center) => {
     if (!center || !center.address) return '';
     const addr = center.address;
     const parts = [
-        addr.building_number ? `${t('common.building') || 'مبنى'} ${addr.building_number}` : '',
-        addr.street ? `${t('common.street') || 'شارع'} ${addr.street}` : '',
-        addr.district ? `${t('common.district') || 'حي'} ${addr.district}` : '',
+        addr.building_number ? `${t('common.building')} ${addr.building_number}` : '',
+        addr.street ? `${t('common.street')} ${addr.street}` : '',
+        addr.district ? `${t('common.district')} ${addr.district}` : '',
         addr.city ? addr.city : '',
-        addr.postal_code ? `${t('common.postal_code') || 'الرمز البريدي'} ${addr.postal_code}` : '',
+        addr.postal_code ? `${t('common.postal_code')} ${addr.postal_code}` : '',
     ].filter(Boolean);
     return parts.join('، ');
 };

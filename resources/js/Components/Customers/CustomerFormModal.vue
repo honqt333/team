@@ -135,7 +135,7 @@
                             step="0.01"
                             min="0"
                             v-model="form.credit_limit"
-                            :placeholder="$t('customers.form.credit_limit_placeholder') || '0.00'"
+                            :placeholder="$t('customers.form.credit_limit_placeholder')"
                             class="w-full px-4 py-2.5 border rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:border-transparent transition-all"
                             :class="
                                 form.errors.credit_limit
@@ -173,7 +173,7 @@
                             <span
                                 class="absolute inset-y-0 end-3 flex items-center text-xs text-gray-400 pointer-events-none"
                             >
-                                {{ $t('common.days') || 'يوم' }}
+                                {{ $t('common.days') }}
                             </span>
                         </div>
                         <p
@@ -560,17 +560,14 @@
             <div class="flex items-center gap-3 text-amber-600 dark:text-amber-400">
                 <span class="text-2xl">⚠️</span>
                 <span>
-                    {{ $t('customers.validation.phone_taken_title') || 'العميل موجود مسبقاً!' }}
+                    {{ $t('customers.validation.phone_taken_title') }}
                 </span>
             </div>
         </template>
 
         <div class="space-y-4 p-1">
             <p class="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
-                {{
-                    $t('customers.validation.phone_taken_desc') ||
-                    'العميل الذي يحمل رقم الهاتف هذا مسجل مسبقاً بالنظام. يمكنك الضغط على بطاقة العميل أدناه للانتقال لملفه مباشرة:'
-                }}
+                {{ $t('customers.validation.phone_taken_desc') }}
             </p>
 
             <div
@@ -1197,14 +1194,10 @@ const checkPhoneExistence = async () => {
         if (response.data.exists) {
             duplicateCustomer.value = response.data.customer;
             showDuplicateModal.value = true;
-            form.errors.phone =
-                t('customers.validation.phone_taken') || 'رقم الهاتف هذا مسجل مسبقاً!';
+            form.errors.phone = t('customers.validation.phone_taken');
         } else {
             duplicateCustomer.value = null;
-            if (
-                form.errors.phone ===
-                (t('customers.validation.phone_taken') || 'رقم الهاتف هذا مسجل مسبقاً!')
-            ) {
+            if (form.errors.phone === t('customers.validation.phone_taken')) {
                 form.errors.phone = null;
             }
         }
@@ -1234,10 +1227,7 @@ function submitForm() {
         form.tax_number.trim() !== '' &&
         !/^\d{15}$/.test(form.tax_number.trim())
     ) {
-        form.setError(
-            'tax_number',
-            t('validation.tax_number_invalid') || 'الرقم الضريبي يجب أن يكون 15 رقماً.'
-        );
+        form.setError('tax_number', t('validation.tax_number_invalid'));
         return;
     }
 

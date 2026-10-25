@@ -380,10 +380,10 @@ const scrollToHighlighted = () => {
                 v-else-if="!asyncSearch || (asyncSearch && searchQuery.length >= 2)"
                 class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400 text-center"
             >
-                {{ t('common.no_results') || 'No results found' }}
+                {{ t('common.no_results') }}
             </div>
             <div v-else class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400 text-center">
-                {{ t('inventory.parts.search') || 'Type to search...' }}
+                {{ t('inventory.parts.search') }}
             </div>
         </div>
 

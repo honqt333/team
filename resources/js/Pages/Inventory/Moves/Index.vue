@@ -1008,7 +1008,7 @@ const getMoveTypeLabel = (type) => {
     const labels = {
         receipt: t('inventory.moves.types.receipt'),
         issue_to_workorder: t('inventory.moves.types.issue'),
-        sale: t('inventory.moves.types.sale') || 'بيع مباشر',
+        sale: t('inventory.moves.types.sale'),
         adjustment_in: t('inventory.moves.types.adjustment_in'),
         adjustment_out: t('inventory.moves.types.adjustment_out'),
         transfer_in: t('inventory.moves.types.transfer_in'),

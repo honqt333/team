@@ -22,10 +22,7 @@
                 </div>
                 <div>
                     <h2 class="text-base font-black text-gray-900 dark:text-white">
-                        {{
-                            $t('purchasing.suppliers.record_payment_title') ||
-                            'تسجيل سند صرف / دفعة للمورد'
-                        }}
+                        {{ $t('purchasing.suppliers.record_payment_title') }}
                     </h2>
                     <p class="text-xs text-gray-500 dark:text-gray-400">
                         {{ supplier?.name }} ({{ $t('purchasing.suppliers.balance') }}:
@@ -47,7 +44,7 @@
                 class="p-3.5 rounded-2xl bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700 space-y-2"
             >
                 <label class="block text-xs font-bold text-gray-700 dark:text-gray-300">
-                    {{ $t('purchasing.suppliers.payment_allocation') || 'طريقة تخصيص الدفعة' }}
+                    {{ $t('purchasing.suppliers.payment_allocation') }}
                     <span class="text-red-500">*</span>
                 </label>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -67,16 +64,10 @@
                         />
                         <div>
                             <p class="text-xs font-bold">
-                                {{
-                                    $t('purchasing.suppliers.auto_allocate') ||
-                                    'توزيع تلقائي على الفواتير'
-                                }}
+                                {{ $t('purchasing.suppliers.auto_allocate') }}
                             </p>
                             <p class="text-[10px] text-gray-500 dark:text-gray-400">
-                                {{
-                                    $t('purchasing.suppliers.auto_allocate_hint') ||
-                                    'سداد أقدم الفواتير المستحقة أولاً (FIFO)'
-                                }}
+                                {{ $t('purchasing.suppliers.auto_allocate_hint') }}
                             </p>
                         </div>
                     </label>
@@ -97,16 +88,10 @@
                         />
                         <div>
                             <p class="text-xs font-bold">
-                                {{
-                                    $t('purchasing.suppliers.specific_invoice') ||
-                                    'سداد فاتورة محددة'
-                                }}
+                                {{ $t('purchasing.suppliers.specific_invoice') }}
                             </p>
                             <p class="text-[10px] text-gray-500 dark:text-gray-400">
-                                {{
-                                    $t('purchasing.suppliers.specific_invoice_hint') ||
-                                    'اختيار فاتورة معينة وسدادها'
-                                }}
+                                {{ $t('purchasing.suppliers.specific_invoice_hint') }}
                             </p>
                         </div>
                     </label>
@@ -116,7 +101,7 @@
             <!-- Specific Invoice Selector -->
             <div v-if="allocationType === 'specific'" class="space-y-2">
                 <label class="block text-xs font-bold text-gray-700 dark:text-gray-300">
-                    {{ $t('purchasing.suppliers.select_invoice') || 'اختر الفاتورة المراد سدادها' }}
+                    {{ $t('purchasing.suppliers.select_invoice') }}
                     <span class="text-red-500">*</span>
                 </label>
 
@@ -139,10 +124,7 @@
                         />
                     </svg>
                     <span>
-                        {{
-                            $t('purchasing.suppliers.no_open_invoices') ||
-                            'لا توجد فواتير مفتوحة أو متبقي عليها رصيد لهذا المورد حالياً (جميع الفواتير مسددة بالكامل).'
-                        }}
+                        {{ $t('purchasing.suppliers.no_open_invoices') }}
                     </span>
                 </div>
 
@@ -152,7 +134,7 @@
                         :options="invoiceOptions"
                         option-label="label"
                         option-value="value"
-                        :placeholder="$t('common.select') || 'اختر فاتورة مستحقة...'"
+                        :placeholder="$t('common.select')"
                         @change="onInvoiceSelected"
                     />
 
@@ -162,13 +144,13 @@
                         class="p-2.5 rounded-xl bg-gray-50 dark:bg-gray-800/60 border border-gray-200 dark:border-gray-700 flex items-center justify-between text-xs"
                     >
                         <span class="text-gray-500 dark:text-gray-400">
-                            {{ $t('purchasing.invoices.total') || 'إجمالي الفاتورة' }}:
+                            {{ $t('purchasing.invoices.total') }}:
                             <strong class="font-mono text-gray-900 dark:text-white">
                                 {{ formatCurrency(selectedInvoice.total) }}
                             </strong>
                         </span>
                         <span class="font-bold text-amber-600 dark:text-amber-400">
-                            {{ $t('purchasing.invoices.remaining') || 'المتبقي للسداد' }}:
+                            {{ $t('purchasing.invoices.remaining') }}:
                             <strong class="font-mono">
                                 {{ formatCurrency(selectedInvoice.balance) }}
                             </strong>
@@ -186,7 +168,7 @@
                             <span class="text-red-500">*</span>
                         </label>
                         <span class="text-[11px] text-gray-500 dark:text-gray-400 font-mono">
-                            {{ $t('payments.form.max') || 'الحد الأقصى' }}:
+                            {{ $t('payments.form.max') }}:
                             <strong class="text-gray-900 dark:text-white font-bold">
                                 {{ formatCurrency(maxAllowedAmount) }}
                             </strong>
@@ -265,7 +247,7 @@
                 <!-- Reference / Cheque No / Transfer No -->
                 <div>
                     <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1.5">
-                        {{ $t('payments.form.reference') || 'رقم الحوالة / الشيك / المرجع' }}
+                        {{ $t('payments.form.reference') }}
                     </label>
                     <input
                         v-model="form.reference"
@@ -285,9 +267,7 @@
                     v-model="form.notes"
                     rows="2"
                     class="w-full px-4 py-2 text-sm rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all resize-none"
-                    :placeholder="
-                        $t('payments.form.notes_placeholder') || 'ملاحظات إضافية حول سند الصرف...'
-                    "
+                    :placeholder="$t('payments.form.notes_placeholder')"
                 ></textarea>
             </div>
 
@@ -337,8 +317,8 @@
                     <span>
                         {{
                             submitting
-                                ? $t('common.saving') || 'جاري التسجيل...'
-                                : $t('purchasing.suppliers.record_payment') || 'تأكيد وحفظ الدفعة'
+                                ? $t('common.saving')
+                                : $t('purchasing.suppliers.record_payment')
                         }}
                     </span>
                 </button>
@@ -437,12 +417,12 @@ const isOverAmount = computed(() => {
 });
 
 const paymentMethodOptions = computed(() => [
-    { value: 'transfer', label: t('payments.methods.transfer') || 'تحويل بنكي' },
-    { value: 'cash', label: t('payments.methods.cash') || 'نقدي' },
-    { value: 'mada', label: t('payments.methods.mada') || 'مدى' },
-    { value: 'visa', label: t('payments.methods.visa') || 'فيزا' },
-    { value: 'mastercard', label: t('payments.methods.mastercard') || 'ماستركارد' },
-    { value: 'other', label: t('payments.methods.other') || 'أخرى' },
+    { value: 'transfer', label: t('payments.methods.transfer') },
+    { value: 'cash', label: t('payments.methods.cash') },
+    { value: 'mada', label: t('payments.methods.mada') },
+    { value: 'visa', label: t('payments.methods.visa') },
+    { value: 'mastercard', label: t('payments.methods.mastercard') },
+    { value: 'other', label: t('payments.methods.other') },
 ]);
 
 function formatCurrency(val) {

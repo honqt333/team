@@ -48,7 +48,7 @@
                     :disabled="processing"
                     class="rounded-md bg-amber-600 px-4 py-2 text-sm font-semibold text-white hover:bg-amber-700 disabled:opacity-50"
                 >
-                    {{ processing ? '...' : $t('common.save') || 'Save' }}
+                    {{ processing ? '...' : $t('common.save') }}
                 </button>
             </div>
         </div>

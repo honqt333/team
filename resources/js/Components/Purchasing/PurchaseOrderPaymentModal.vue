@@ -4,7 +4,13 @@
             <div class="flex items-center gap-2">
                 <span class="text-2xl">💰</span>
                 <span class="text-lg font-bold text-gray-900 dark:text-white">
-                    {{ isEditing ? $t('payments.edit_payment') : (localPayment.type === 'bad_debt' ? ($t('payments.types.bad_debt') || 'ديون معدومة') : $t('payments.add_payment')) }}
+                    {{
+                        isEditing
+                            ? $t('payments.edit_payment')
+                            : localPayment.type === 'bad_debt'
+                              ? $t('payments.types.bad_debt')
+                              : $t('payments.add_payment')
+                    }}
                 </span>
             </div>
         </template>
@@ -13,19 +19,44 @@
             <!-- Operation Type Selector (Only if allowed) -->
             <div v-if="allowBadDebt" class="mb-4">
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    {{ $t('payments.form.type') }} <span class="text-red-500">*</span>
+                    {{ $t('payments.form.type') }}
+                    <span class="text-red-500">*</span>
                 </label>
                 <div class="flex gap-4">
                     <label class="flex items-center gap-2 cursor-pointer">
-                        <input type="radio" v-model="localPayment.type" value="payment" class="text-blue-600 focus:ring-blue-500 rounded-full" />
-                        <span class="text-sm font-semibold" :class="localPayment.type === 'payment' ? 'text-blue-700 dark:text-blue-400' : 'text-gray-600 dark:text-gray-400'">
+                        <input
+                            type="radio"
+                            v-model="localPayment.type"
+                            value="payment"
+                            class="text-blue-600 focus:ring-blue-500 rounded-full"
+                        />
+                        <span
+                            class="text-sm font-semibold"
+                            :class="
+                                localPayment.type === 'payment'
+                                    ? 'text-blue-700 dark:text-blue-400'
+                                    : 'text-gray-600 dark:text-gray-400'
+                            "
+                        >
                             {{ $t('payments.types.payment') }}
                         </span>
                     </label>
                     <label class="flex items-center gap-2 cursor-pointer">
-                        <input type="radio" v-model="localPayment.type" value="bad_debt" class="text-amber-600 focus:ring-amber-500 rounded-full" />
-                        <span class="text-sm font-semibold" :class="localPayment.type === 'bad_debt' ? 'text-amber-700 dark:text-amber-400' : 'text-gray-600 dark:text-gray-400'">
-                            {{ $t('payments.types.bad_debt') || 'ديون معدومة' }}
+                        <input
+                            type="radio"
+                            v-model="localPayment.type"
+                            value="bad_debt"
+                            class="text-amber-600 focus:ring-amber-500 rounded-full"
+                        />
+                        <span
+                            class="text-sm font-semibold"
+                            :class="
+                                localPayment.type === 'bad_debt'
+                                    ? 'text-amber-700 dark:text-amber-400'
+                                    : 'text-gray-600 dark:text-gray-400'
+                            "
+                        >
+                            {{ $t('payments.types.bad_debt') }}
                         </span>
                     </label>
                 </div>
@@ -36,16 +67,26 @@
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
                     {{ $t('payments.form.type') }}
                 </label>
-                <div class="w-full px-4 py-2.5 rounded-xl border bg-red-50 text-red-700 border-red-200 dark:bg-red-950/30 dark:border-red-900/40 dark:text-red-400 font-bold flex items-center justify-between">
+                <div
+                    class="w-full px-4 py-2.5 rounded-xl border bg-red-50 text-red-700 border-red-200 dark:bg-red-950/30 dark:border-red-900/40 dark:text-red-400 font-bold flex items-center justify-between"
+                >
                     <span>{{ $t('payments.types.refund') }}</span>
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 15v-1a4 4 0 00-4-4H8m0 0l3 3m-3-3l3-3m9 14V5a2 2 0 00-2-2H6a2 2 0 00-2 2v16l4-2 4 2 4-2 4 2z"></path></svg>
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M16 15v-1a4 4 0 00-4-4H8m0 0l3 3m-3-3l3-3m9 14V5a2 2 0 00-2-2H6a2 2 0 00-2 2v16l4-2 4 2 4-2 4 2z"
+                        ></path>
+                    </svg>
                 </div>
             </div>
 
             <!-- Payment Method -->
             <div v-if="localPayment.type !== 'bad_debt'">
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-                    {{ $t('payments.form.method') }} <span class="text-red-500">*</span>
+                    {{ $t('payments.form.method') }}
+                    <span class="text-red-500">*</span>
                 </label>
                 <SearchableSelect
                     v-model="localPayment.payment_method"
@@ -59,7 +100,8 @@
             <!-- Amount -->
             <div>
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-                    {{ $t('payments.form.amount') }} <span class="text-red-500">*</span>
+                    {{ $t('payments.form.amount') }}
+                    <span class="text-red-500">*</span>
                 </label>
                 <div class="relative">
                     <input
@@ -69,14 +111,23 @@
                         v-model="localPayment.amount"
                         @input="handleAmountInput"
                         class="w-full pr-20 pl-4 py-2.5 rounded-xl border bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-blue-500/20 shadow-sm transition-all"
-                        :class="parseFloat(localPayment.amount) > maxAmount ? 'border-red-500 focus:border-red-500' : 'border-gray-300 dark:border-gray-600 focus:border-blue-500 dark:focus:border-blue-500'"
+                        :class="
+                            parseFloat(localPayment.amount) > maxAmount
+                                ? 'border-red-500 focus:border-red-500'
+                                : 'border-gray-300 dark:border-gray-600 focus:border-blue-500 dark:focus:border-blue-500'
+                        "
                         :placeholder="$t('payments.form.amount_placeholder')"
                     />
-                    <div class="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none text-gray-400 text-sm font-medium">
+                    <div
+                        class="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none text-gray-400 text-sm font-medium"
+                    >
                         SAR
                     </div>
                 </div>
-                <p v-if="parseFloat(localPayment.amount) > maxAmount" class="mt-1.5 text-sm text-red-500">
+                <p
+                    v-if="parseFloat(localPayment.amount) > maxAmount"
+                    class="mt-1.5 text-sm text-red-500"
+                >
                     {{ $t('payments.amount_exceeds_balance') }}
                 </p>
             </div>
@@ -84,7 +135,8 @@
             <!-- Payment Date -->
             <div>
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-                    {{ $t('payments.form.date') }} <span class="text-red-500">*</span>
+                    {{ $t('payments.form.date') }}
+                    <span class="text-red-500">*</span>
                 </label>
                 <CustomDatePicker
                     v-model="localPayment.payment_date"
@@ -132,10 +184,20 @@
             <button
                 type="button"
                 @click="submit"
-                :disabled="parseFloat(localPayment.amount) > maxAmount || !localPayment.amount || parseFloat(localPayment.amount) <= 0"
+                :disabled="
+                    parseFloat(localPayment.amount) > maxAmount ||
+                    !localPayment.amount ||
+                    parseFloat(localPayment.amount) <= 0
+                "
                 class="px-6 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 shadow-lg shadow-blue-500/30 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
             >
-                {{ isEditing ? $t('common.save') : (localPayment.type === 'bad_debt' ? ($t('payments.types.bad_debt') || 'ديون معدومة') : $t('payments.add_payment')) }}
+                {{
+                    isEditing
+                        ? $t('common.save')
+                        : localPayment.type === 'bad_debt'
+                          ? $t('payments.types.bad_debt')
+                          : $t('payments.add_payment')
+                }}
             </button>
         </template>
     </BaseModal>
@@ -190,22 +252,26 @@ const paymentMethods = computed(() => [
     { value: 'other', label: t('payments.methods.other') },
 ]);
 
-watch(() => props.show, (newVal) => {
-    if (newVal) {
-        if (props.payment) {
-            localPayment.value = { ...props.payment };
-        } else {
-            localPayment.value = {
-                payment_method: 'cash',
-                type: props.defaultType,
-                amount: props.balance > 0 ? props.balance : '',
-                payment_date: new Date().toISOString().split('T')[0],
-                reference: '',
-                notes: '',
-            };
+watch(
+    () => props.show,
+    (newVal) => {
+        if (newVal) {
+            if (props.payment) {
+                localPayment.value = { ...props.payment };
+            } else {
+                localPayment.value = {
+                    payment_method: 'cash',
+                    type: props.defaultType,
+                    amount: props.balance > 0 ? props.balance : '',
+                    payment_date: new Date().toISOString().split('T')[0],
+                    reference: '',
+                    notes: '',
+                };
+            }
         }
-    }
-}, { immediate: true });
+    },
+    { immediate: true }
+);
 
 const handleAmountInput = (e) => {
     let cleanVal = toEnglish(e.target.value).replace(/[^\d.]/g, '');
@@ -221,7 +287,7 @@ const submit = () => {
     if (parseFloat(localPayment.value.amount) > maxAmount.value) {
         return;
     }
-    
+
     // Default payment_method to cash if bad_debt is chosen to satisfy backend requirements
     if (localPayment.value.type === 'bad_debt') {
         localPayment.value.payment_method = 'cash';

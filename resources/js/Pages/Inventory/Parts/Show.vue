@@ -323,7 +323,7 @@
                                 v-if="isLowStock"
                                 class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400"
                             >
-                                {{ $t('inventory.stock.status.low') || 'منخفض' }}
+                                {{ $t('inventory.stock.status.low') }}
                             </span>
                             <svg
                                 v-else-if="can('inventory.parts.edit')"
@@ -856,7 +856,7 @@ const getMoveTypeLabel = (type) => {
     const labels = {
         receipt: t('inventory.moves.types.receipt'),
         issue_to_workorder: t('inventory.moves.types.issue'),
-        sale: t('inventory.moves.types.sale') || 'بيع مباشر',
+        sale: t('inventory.moves.types.sale'),
         adjustment_in: t('inventory.moves.types.adjustment_in'),
         adjustment_out: t('inventory.moves.types.adjustment_out'),
         transfer_in: t('inventory.moves.types.transfer_in'),

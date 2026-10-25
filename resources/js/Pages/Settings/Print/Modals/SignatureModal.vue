@@ -303,10 +303,7 @@
                         <div v-else class="space-y-3">
                             <!-- Per-row action toolbar — saves a click vs hover-only icons -->
                             <p class="text-[10px] text-gray-400 font-bold">
-                                {{
-                                    $t('print_settings.library_manage_hint') ||
-                                    'اسحب لإعادة الترتيب · انقر ✎ لتعديل · ⊘ للحذف · 👁 للإخفاء'
-                                }}
+                                {{ $t('print_settings.library_manage_hint') }}
                             </p>
                             <div class="space-y-2">
                                 <div
@@ -338,7 +335,7 @@
                                         <!-- Drag handle -->
                                         <div
                                             class="flex items-center justify-center px-2 cursor-grab active:cursor-grabbing text-gray-300 hover:text-amber-500 border-e border-gray-100 dark:border-gray-800"
-                                            :title="$t('print_settings.drag_handle') || 'اسحب'"
+                                            :title="$t('print_settings.drag_handle')"
                                         >
                                             <svg
                                                 class="w-4 h-4"

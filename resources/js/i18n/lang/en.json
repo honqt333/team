@@ -1541,7 +1541,10 @@
       "total_value": "Total value",
       "value": "Total value",
       "wac": "Weighted Average Cost (WAC)",
-      "warehouses_stock": "Warehouse balance"
+      "warehouses_stock": "Warehouse balance",
+      "status": {
+        "low": "Low"
+      }
     },
     "title": "Inventory Management",
     "transfers": {
@@ -1977,7 +1980,8 @@
       "notes_placeholder": "Additional notes...",
       "reference": "Reference number",
       "reference_placeholder": "Receipt number or transaction number",
-      "type": "Operation type"
+      "type": "Operation type",
+      "max": "Maximum"
     },
     "methods": {
       "apple_pay": "Apple Pay",
@@ -2324,7 +2328,9 @@
       "date": "Invoice Date",
       "supplier_ref": "Supplier Ref",
       "title": "Purchase Invoices",
-      "created": "Created"
+      "created": "Created",
+      "total": "Invoice total",
+      "remaining": "Remaining to Pay"
     },
     "items": {
       "add": "Add Item",
@@ -2483,7 +2489,8 @@
       "print_statement": "Print Statement",
       "export_statement": "Export Statement",
       "updated": "Supplier updated successfully",
-      "deleted": "Supplier deleted successfully"
+      "deleted": "Supplier deleted successfully",
+      "no_open_invoices": "There are no open invoices for this supplier."
     },
     "title": "Store",
     "returns": {

@@ -1,32 +1,45 @@
 <template>
-    <div class="print-container bg-white min-h-screen p-8 print:p-0 print:m-0 flex flex-col items-center" :dir="isRtl ? 'rtl' : 'ltr'">
+    <div
+        class="print-container bg-white min-h-screen p-8 print:p-0 print:m-0 flex flex-col items-center"
+        :dir="isRtl ? 'rtl' : 'ltr'"
+    >
         <!-- Print / Back Controls (hidden during print) -->
         <div class="fixed bottom-6 left-6 flex items-center gap-3 print:hidden z-50">
             <!-- Back Button -->
-            <SecondaryButton 
-                @click="goBack" 
+            <SecondaryButton
+                @click="goBack"
                 class="px-4 py-2.5 bg-white hover:bg-gray-50 text-gray-700 rounded-xl text-sm font-semibold transition-all border border-gray-200 shadow-lg flex items-center gap-2"
             >
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M10 19l-7-7m0 0l7-7m-7 7h18"
+                    />
                 </svg>
                 {{ $t('common.back') }}
             </SecondaryButton>
 
             <!-- Print Button -->
-            <PrimaryButton 
-                @click="printPage" 
+            <PrimaryButton
+                @click="printPage"
                 class="px-5 py-2.5 text-white rounded-xl text-sm font-semibold transition-all shadow-lg flex items-center gap-2"
                 :style="{ backgroundColor: visualSettings.primary_color || '#3b82f6' }"
             >
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 022 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 022 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"
+                    />
                 </svg>
                 {{ $t('common.print') }}
             </PrimaryButton>
         </div>
 
-        <PrintEngine 
+        <PrintEngine
             :documentType="'purchase_invoice'"
             :data="mappedPrintData"
             :centerData="mappedCenterData"
@@ -78,11 +91,11 @@ onMounted(() => {
 const getFormattedAddress = (addr) => {
     if (!addr) return '';
     const parts = [
-        addr.building_number ? `${t('common.building') || 'مبنى'} ${addr.building_number}` : '',
-        addr.street ? `${t('common.street') || 'شارع'} ${addr.street}` : '',
-        addr.district ? `${t('common.district') || 'حي'} ${addr.district}` : '',
+        addr.building_number ? `${t('common.building')} ${addr.building_number}` : '',
+        addr.street ? `${t('common.street')} ${addr.street}` : '',
+        addr.district ? `${t('common.district')} ${addr.district}` : '',
         addr.city ? addr.city : '',
-        addr.postal_code ? `${t('common.postal_code') || 'الرمز البريدي'} ${addr.postal_code}` : '',
+        addr.postal_code ? `${t('common.postal_code')} ${addr.postal_code}` : '',
         addr.address_line ? addr.address_line : '',
     ].filter(Boolean);
     return parts.join('، ');
@@ -92,12 +105,12 @@ const getFormattedAddress = (addr) => {
 const getSupplierAddress = (supplier) => {
     if (!supplier) return '';
     const parts = [
-        supplier.building_number ? `${t('common.building') || 'مبنى'} ${supplier.building_number}` : '',
-        supplier.street ? `${t('common.street') || 'شارع'} ${supplier.street}` : '',
-        supplier.district ? `${t('common.district') || 'حي'} ${supplier.district}` : '',
+        supplier.building_number ? `${t('common.building')} ${supplier.building_number}` : '',
+        supplier.street ? `${t('common.street')} ${supplier.street}` : '',
+        supplier.district ? `${t('common.district')} ${supplier.district}` : '',
         supplier.city ? supplier.city : '',
-        supplier.postal_code ? `${t('common.postal_code') || 'الرمز البريدي'} ${supplier.postal_code}` : '',
-        supplier.address ? supplier.address : (supplier.address_line ? supplier.address_line : ''),
+        supplier.postal_code ? `${t('common.postal_code')} ${supplier.postal_code}` : '',
+        supplier.address ? supplier.address : supplier.address_line ? supplier.address_line : '',
     ].filter(Boolean);
     return parts.join('، ');
 };
@@ -134,15 +147,19 @@ const mappedPrintData = computed(() => {
     const isCompany = !!props.invoice.company_transaction;
     const companyTitle = props.invoice.company_transaction?.title;
 
-    const lines = (props.invoice.lines || []).map(line => ({
-        service_name: isCompany 
-            ? (props.invoice.company_transaction?.income_category 
-                ? (locale.value === 'ar' ? props.invoice.company_transaction.income_category.name_ar : props.invoice.company_transaction.income_category.name_en) 
-                : (companyTitle || '—')) 
-            : (line.part?.name || '—'),
-        description: isCompany 
-            ? (props.invoice.company_transaction?.income_category ? companyTitle : '') 
-            : (line.part?.sku || 'NO-SKU'),
+    const lines = (props.invoice.lines || []).map((line) => ({
+        service_name: isCompany
+            ? props.invoice.company_transaction?.income_category
+                ? locale.value === 'ar'
+                    ? props.invoice.company_transaction.income_category.name_ar
+                    : props.invoice.company_transaction.income_category.name_en
+                : companyTitle || '—'
+            : line.part?.name || '—',
+        description: isCompany
+            ? props.invoice.company_transaction?.income_category
+                ? companyTitle
+                : ''
+            : line.part?.sku || 'NO-SKU',
         qty: Number(line.qty || 1),
         unit_price: Number(line.unit_cost || 0),
         discount: 0,
@@ -150,7 +167,7 @@ const mappedPrintData = computed(() => {
         is_taxable: true,
         tax_rate_snapshot: Number(line.tax_rate || 0),
         tax_amount: Number(line.tax_amount || 0),
-        total: Number(line.total || 0)
+        total: Number(line.total || 0),
     }));
 
     return {
@@ -159,36 +176,62 @@ const mappedPrintData = computed(() => {
         entry_date: props.invoice.supply_date || props.invoice.issue_date,
         tax_enabled_snapshot: true,
         pricing_mode_snapshot: 'exclusive',
-        total_excl_tax: Number(calculatedInvoiceSubtotal.value || 0) - Number(props.invoice.discount_amount || 0),
+        total_excl_tax:
+            Number(calculatedInvoiceSubtotal.value || 0) -
+            Number(props.invoice.discount_amount || 0),
         total_tax: Number(calculatedInvoiceTaxAmount.value || 0),
         total_incl_tax: Number(calculatedInvoiceTotal.value || 0),
         total_paid: Number(calculatedInvoiceTotal.value || 0) - Number(props.invoice.balance || 0),
         balance: Number(props.invoice.balance || 0),
         discount_amount: Number(props.invoice.discount_amount || 0),
         customer: {
-            name: (isCompany ? (props.invoice.company_transaction?.contact?.name || props.invoice.supplier?.name) : props.invoice.supplier?.name) || '—',
-            phone: (isCompany ? (props.invoice.company_transaction?.contact?.phone || props.invoice.supplier?.phone) : props.invoice.supplier?.phone) || '',
-            address: getSupplierAddress(isCompany ? (props.invoice.company_transaction?.contact || props.invoice.supplier) : props.invoice.supplier),
-            tax_number: (isCompany ? (props.invoice.company_transaction?.contact?.tax_number || props.invoice.supplier?.tax_number) : props.invoice.supplier?.tax_number) || '',
+            name:
+                (isCompany
+                    ? props.invoice.company_transaction?.contact?.name ||
+                      props.invoice.supplier?.name
+                    : props.invoice.supplier?.name) || '—',
+            phone:
+                (isCompany
+                    ? props.invoice.company_transaction?.contact?.phone ||
+                      props.invoice.supplier?.phone
+                    : props.invoice.supplier?.phone) || '',
+            address: getSupplierAddress(
+                isCompany
+                    ? props.invoice.company_transaction?.contact || props.invoice.supplier
+                    : props.invoice.supplier
+            ),
+            tax_number:
+                (isCompany
+                    ? props.invoice.company_transaction?.contact?.tax_number ||
+                      props.invoice.supplier?.tax_number
+                    : props.invoice.supplier?.tax_number) || '',
         },
         is_company: isCompany,
-        items: lines
+        items: lines,
     };
 });
 
 const mappedCenterData = computed(() => {
     const isCompany = !!props.invoice.company_transaction;
-    const center = isCompany ? {} : (props.invoice.center || {});
+    const center = isCompany ? {} : props.invoice.center || {};
     const tenant = props.invoice.tenant || page.props?.tenant || {};
     return {
-        name: isRtl.value ? (tenant.trade_name || tenant.legal_name || tenant.name || center.name_ar || center.name) : (tenant.trade_name || tenant.legal_name || tenant.name || center.name_en || center.name),
+        name: isRtl.value
+            ? tenant.trade_name || tenant.legal_name || tenant.name || center.name_ar || center.name
+            : tenant.trade_name ||
+              tenant.legal_name ||
+              tenant.name ||
+              center.name_en ||
+              center.name,
         tax_number: tenant.vat_number || center.vat_number,
         cr_number: tenant.cr_number,
         phone: tenant.phone || center.phone,
         logo: tenant.logo_url || center.logo_invoice_url || center.logo_light_url || '',
         iban: tenant.iban || '',
-        address: isCompany ? getTenantAddress(tenant) : (getTenantAddress(tenant) || getCenterAddress(center) || ''),
-        stamp_url: isCompany ? '' : (center.stamp_url || ''),
+        address: isCompany
+            ? getTenantAddress(tenant)
+            : getTenantAddress(tenant) || getCenterAddress(center) || '',
+        stamp_url: isCompany ? '' : center.stamp_url || '',
     };
 });
 
@@ -204,8 +247,8 @@ const documentSettings = computed(() => {
         show_customer_address: true,
         signatures: [
             { name_ar: 'توقيع أمين المستودع', name_en: 'Storekeeper Signature' },
-            { name_ar: 'توقيع المدير المالي', name_en: 'Financial Manager Signature' }
-        ]
+            { name_ar: 'توقيع المدير المالي', name_en: 'Financial Manager Signature' },
+        ],
     };
 });
 
@@ -220,14 +263,21 @@ const visualSettings = computed(() => {
         show_qr_code: false,
         primary_color: vis.primary_color || '#3b82f6',
         footer_text: vis.footer_text || props.invoice.tenant?.print_settings?.footer_text || '',
-        stamp_url: ''
+        stamp_url: '',
     };
 });
 </script>
 
 <style>
 @media print {
-    @page { size: A4; margin: 0 1cm; }
-    body { -webkit-print-color-adjust: exact; print-color-adjust: exact; background: white; }
+    @page {
+        size: A4;
+        margin: 0 1cm;
+    }
+    body {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+        background: white;
+    }
 }
 </style>

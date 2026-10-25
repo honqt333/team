@@ -1,47 +1,100 @@
 <template>
     <Modal :show="show" @close="close">
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl overflow-hidden max-w-5xl w-full mx-auto">
+        <div
+            class="bg-white dark:bg-gray-800 rounded-lg shadow-xl overflow-hidden max-w-5xl w-full mx-auto"
+        >
             <!-- Header -->
-            <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 flex justify-between items-center">
+            <div
+                class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 flex justify-between items-center"
+            >
                 <h3 class="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                    <svg class="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                    <svg
+                        class="w-6 h-6 text-gray-500"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"
+                        />
                     </svg>
                     {{ $t('payments.title') }}
                 </h3>
                 <button @click="close" class="text-gray-400 hover:text-gray-500 transition-colors">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M6 18L18 6M6 6l12 12"
+                        />
                     </svg>
                 </button>
             </div>
 
             <!-- Summary Strip -->
-            <div class="px-6 py-4 bg-white dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700 flex flex-wrap justify-between items-center gap-4">
+            <div
+                class="px-6 py-4 bg-white dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700 flex flex-wrap justify-between items-center gap-4"
+            >
                 <div class="flex items-center gap-8 text-sm md:text-base">
                     <div class="flex items-center gap-2">
-                        <span class="text-gray-500 dark:text-gray-400 font-medium">{{ $t('work_orders.total') }}:</span>
-                        <span class="font-bold text-gray-900 dark:text-white" dir="ltr">{{ formatPrice(grandTotal) }}</span>
+                        <span class="text-gray-500 dark:text-gray-400 font-medium">
+                            {{ $t('work_orders.total') }}:
+                        </span>
+                        <span class="font-bold text-gray-900 dark:text-white" dir="ltr">
+                            {{ formatPrice(grandTotal) }}
+                        </span>
                     </div>
                     <div class="flex items-center gap-2">
-                        <span class="text-gray-500 dark:text-gray-400 font-medium">{{ $t('work_orders.paid') }}:</span>
-                        <span class="font-bold text-gray-900 dark:text-white" dir="ltr">{{ formatPrice(totalPaid) }}</span>
+                        <span class="text-gray-500 dark:text-gray-400 font-medium">
+                            {{ $t('work_orders.paid') }}:
+                        </span>
+                        <span class="font-bold text-gray-900 dark:text-white" dir="ltr">
+                            {{ formatPrice(totalPaid) }}
+                        </span>
                     </div>
                     <div v-if="badDebt > 0" class="flex items-center gap-2">
-                        <span class="text-amber-600 dark:text-amber-500 font-semibold">{{ $t('payments.types.bad_debt') || 'ديون معدومة' }}:</span>
-                        <span class="font-bold text-amber-600 dark:text-amber-500" dir="ltr">{{ formatPrice(badDebt) }}</span>
+                        <span class="text-amber-600 dark:text-amber-500 font-semibold">
+                            {{ $t('payments.types.bad_debt') }}:
+                        </span>
+                        <span class="font-bold text-amber-600 dark:text-amber-500" dir="ltr">
+                            {{ formatPrice(badDebt) }}
+                        </span>
                     </div>
                     <div class="flex items-center gap-2">
-                        <span class="text-gray-500 dark:text-gray-400 font-medium">{{ $t('work_orders.balance') }}:</span>
-                        <span class="font-bold" :class="balance > 0 ? 'text-red-600' : 'text-green-600'" dir="ltr">{{ formatPrice(balance) }}</span>
+                        <span class="text-gray-500 dark:text-gray-400 font-medium">
+                            {{ $t('work_orders.balance') }}:
+                        </span>
+                        <span
+                            class="font-bold"
+                            :class="balance > 0 ? 'text-red-600' : 'text-green-600'"
+                            dir="ltr"
+                        >
+                            {{ formatPrice(balance) }}
+                        </span>
                     </div>
                 </div>
 
                 <div class="flex items-center gap-3">
                     <!-- Search -->
-                     <div class="relative">
+                    <div class="relative">
                         <span class="absolute inset-y-0 left-0 flex items-center pl-3">
-                             <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                            <svg
+                                class="w-4 h-4 text-gray-400"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                                ></path>
+                            </svg>
                         </span>
                         <input
                             type="text"
@@ -58,7 +111,12 @@
                         :disabled="loading"
                     >
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M12 4v16m8-8H4"
+                            />
                         </svg>
                         {{ $t('payments.add_payment') }}
                     </button>
@@ -70,19 +128,37 @@
                 <table class="w-full text-sm text-right">
                     <thead class="bg-gray-50 dark:bg-gray-700/50 sticky top-0">
                         <tr>
-                            <th class="py-3 px-4 font-medium text-gray-500 dark:text-gray-400">#</th>
-                            <th class="py-3 px-4 font-medium text-gray-500 dark:text-gray-400">{{ $t('payments.form.method') }}</th>
-                            <th class="py-3 px-4 font-medium text-gray-500 dark:text-gray-400">{{ $t('payments.form.type') }}</th>
-                            <th class="py-3 px-4 font-medium text-gray-500 dark:text-gray-400">{{ $t('payments.form.date') }}</th>
-                            <th class="py-3 px-4 font-medium text-gray-500 dark:text-gray-400">{{ $t('payments.form.details') }}</th>
-                            <th class="py-3 px-4 font-medium text-gray-500 dark:text-gray-400">{{ $t('payments.form.amount') }}</th>
-                            <th class="py-3 px-4 font-medium text-gray-500 dark:text-gray-400">{{ $t('common.updated_by') }}</th>
-                            <th class="py-3 px-4 font-medium text-gray-500 dark:text-gray-400 text-center">{{ $t('common.actions') }}</th>
+                            <th class="py-3 px-4 font-medium text-gray-500 dark:text-gray-400">
+                                #
+                            </th>
+                            <th class="py-3 px-4 font-medium text-gray-500 dark:text-gray-400">
+                                {{ $t('payments.form.method') }}
+                            </th>
+                            <th class="py-3 px-4 font-medium text-gray-500 dark:text-gray-400">
+                                {{ $t('payments.form.type') }}
+                            </th>
+                            <th class="py-3 px-4 font-medium text-gray-500 dark:text-gray-400">
+                                {{ $t('payments.form.date') }}
+                            </th>
+                            <th class="py-3 px-4 font-medium text-gray-500 dark:text-gray-400">
+                                {{ $t('payments.form.details') }}
+                            </th>
+                            <th class="py-3 px-4 font-medium text-gray-500 dark:text-gray-400">
+                                {{ $t('payments.form.amount') }}
+                            </th>
+                            <th class="py-3 px-4 font-medium text-gray-500 dark:text-gray-400">
+                                {{ $t('common.updated_by') }}
+                            </th>
+                            <th
+                                class="py-3 px-4 font-medium text-gray-500 dark:text-gray-400 text-center"
+                            >
+                                {{ $t('common.actions') }}
+                            </th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
-                        <tr 
-                            v-for="(payment, index) in filteredPayments" 
+                        <tr
+                            v-for="(payment, index) in filteredPayments"
                             :key="payment.id"
                             class="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
                         >
@@ -90,43 +166,75 @@
                             <td class="py-3 px-4 font-medium text-gray-900 dark:text-white">
                                 {{ $t(`payments.methods.${payment.payment_method}`) }}
                             </td>
-                             <td class="py-3 px-4">
-                                <span class="px-2 py-1 rounded-full text-xs font-medium" :class="getTypeBadgeClass(payment.type)">
+                            <td class="py-3 px-4">
+                                <span
+                                    class="px-2 py-1 rounded-full text-xs font-medium"
+                                    :class="getTypeBadgeClass(payment.type)"
+                                >
                                     {{ $t(`payments.types.${payment.type}`) }}
                                 </span>
                             </td>
                             <td class="py-3 px-4 text-gray-500" dir="ltr">
                                 {{ formatDate(payment.payment_date) }}
                             </td>
-                             <td class="py-3 px-4 text-gray-500 truncate max-w-xs" :title="payment.notes">
+                            <td
+                                class="py-3 px-4 text-gray-500 truncate max-w-xs"
+                                :title="payment.notes"
+                            >
                                 {{ payment.notes || '-' }}
                             </td>
-                            <td class="py-3 px-4 font-bold" :class="payment.type === 'refund' ? 'text-red-600' : 'text-gray-900 dark:text-white'" dir="ltr">
+                            <td
+                                class="py-3 px-4 font-bold"
+                                :class="
+                                    payment.type === 'refund'
+                                        ? 'text-red-600'
+                                        : 'text-gray-900 dark:text-white'
+                                "
+                                dir="ltr"
+                            >
                                 {{ formatPrice(payment.amount) }}
                             </td>
                             <td class="py-3 px-4">
                                 <div v-if="payment.received_by" class="flex items-center gap-2">
-                                     <img 
+                                    <img
                                         v-if="payment.received_by?.avatar"
-                                        :src="payment.received_by.avatar" 
+                                        :src="payment.received_by.avatar"
                                         class="w-6 h-6 rounded-full"
                                     />
                                     <div class="text-xs">
-                                        <div class="text-gray-900 dark:text-white">{{ payment.received_by?.name }}</div>
-                                        <div class="text-gray-400" dir="ltr">{{ formatDateTime(payment.created_at) }}</div>
+                                        <div class="text-gray-900 dark:text-white">
+                                            {{ payment.received_by?.name }}
+                                        </div>
+                                        <div class="text-gray-400" dir="ltr">
+                                            {{ formatDateTime(payment.created_at) }}
+                                        </div>
                                     </div>
                                 </div>
                                 <span v-else>-</span>
                             </td>
                             <td class="py-3 px-4 text-center">
-                                 <a
-                                    :href="route('work-orders.print.payments', workOrderId) + '?payment=' + payment.id"
+                                <a
+                                    :href="
+                                        route('work-orders.print.payments', workOrderId) +
+                                        '?payment=' +
+                                        payment.id
+                                    "
                                     target="_blank"
                                     class="text-gray-500 hover:text-indigo-600 transition-colors"
                                     :title="$t('common.print')"
                                 >
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                                    <svg
+                                        class="w-5 h-5"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"
+                                        />
                                     </svg>
                                 </a>
                             </td>
@@ -146,7 +254,9 @@
             :show="showAddModal"
             :work-order-id="workOrderId"
             :balance="balance"
-            :allow-refund="payments.length > 0 && !hasInvoice && balance <= 0.01 && status !== 'done'"
+            :allow-refund="
+                payments.length > 0 && !hasInvoice && balance <= 0.01 && status !== 'done'
+            "
             :total-paid="totalPaid"
             @close="showAddModal = false"
             @saved="onPaymentSaved"
@@ -184,10 +294,11 @@ const loading = ref(false);
 const filteredPayments = computed(() => {
     if (!searchQuery.value) return props.payments;
     const query = searchQuery.value.toLowerCase();
-    return props.payments.filter(p => 
-        p.notes?.toLowerCase().includes(query) ||
-        p.reference?.toLowerCase().includes(query) ||
-        t(`payments.methods.${p.payment_method}`).toLowerCase().includes(query)
+    return props.payments.filter(
+        (p) =>
+            p.notes?.toLowerCase().includes(query) ||
+            p.reference?.toLowerCase().includes(query) ||
+            t(`payments.methods.${p.payment_method}`).toLowerCase().includes(query)
     );
 });
 
@@ -215,7 +326,7 @@ const formatDateTime = (date) => {
 };
 
 const getTypeBadgeClass = (type) => {
-    return type === 'refund' 
+    return type === 'refund'
         ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
         : 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400';
 };

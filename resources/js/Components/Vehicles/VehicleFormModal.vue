@@ -352,20 +352,14 @@
                 <div class="flex items-center gap-3 text-amber-600 dark:text-amber-400">
                     <span class="text-2xl">⚠️</span>
                     <span>
-                        {{
-                            $t('vehicles.validation.plate_taken_title') ||
-                            'رقم اللوحة موجود مسبقاً!'
-                        }}
+                        {{ $t('vehicles.validation.plate_taken_title') }}
                     </span>
                 </div>
             </template>
 
             <div class="space-y-4 p-1">
                 <p class="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
-                    {{
-                        $t('vehicles.validation.plate_taken_desc') ||
-                        'المركبة التي تحمل رقم اللوحة هذا مسجلة مسبقاً بالنظام. يمكنك الضغط على بطاقة المركبة أدناه للانتقال لملفها مباشرة:'
-                    }}
+                    {{ $t('vehicles.validation.plate_taken_desc') }}
                 </p>
 
                 <div
@@ -500,7 +494,7 @@
                         @click="navigateToDuplicateVehicle"
                         class="px-4 py-2 text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl transition-all shadow"
                     >
-                        {{ $t('vehicles.view_details') || 'عرض التفاصيل' }}
+                        {{ $t('vehicles.view_details') }}
                     </button>
                 </div>
             </template>
@@ -595,14 +589,10 @@ const checkPlateExistence = async () => {
         if (response.data.exists) {
             duplicateVehicle.value = response.data.vehicle;
             showDuplicateModal.value = true;
-            form.errors.plate_number =
-                t('vehicles.validation.plate_taken') || 'رقم اللوحة هذا مسجل مسبقاً!';
+            form.errors.plate_number = t('vehicles.validation.plate_taken');
         } else {
             duplicateVehicle.value = null;
-            if (
-                form.errors.plate_number ===
-                (t('vehicles.validation.plate_taken') || 'رقم اللوحة هذا مسجل مسبقاً!')
-            ) {
+            if (form.errors.plate_number === t('vehicles.validation.plate_taken')) {
                 form.errors.plate_number = null;
             }
         }

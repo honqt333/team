@@ -1,6 +1,6 @@
 <template>
     <div class="p-8 max-w-6xl mx-auto bg-white min-h-screen text-gray-900" dir="rtl">
-        <Head :title="$t('customers.print_title') || 'تقرير قائمة العملاء'" />
+        <Head :title="$t('customers.print_title')" />
 
         <!-- Print Controls -->
         <div

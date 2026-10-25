@@ -32,7 +32,7 @@
                     >
                         <!-- Export/Print/Import Group -->
                         <div class="flex items-center gap-1">
-                            <Tooltip :text="$t('common.import') || 'استيراد'">
+                            <Tooltip :text="$t('common.import')">
                                 <button
                                     @click="showImportModal = true"
                                     class="p-2.5 text-gray-500 hover:text-orange-600 hover:bg-white dark:hover:bg-gray-800 rounded-xl transition-all shadow-sm hover:shadow-md"
@@ -760,10 +760,10 @@ const statusOptions = computed(() => [
 const typeOptions = computed(() => [
     {
         value: '',
-        label: t('common.all') + ' (' + (t('purchasing.suppliers.type') || 'النوع') + ')',
+        label: t('common.all') + ' (' + t('purchasing.suppliers.type') + ')',
     },
-    { value: 'parts', label: t('purchasing.suppliers.type_parts') || 'قطع غيار' },
-    { value: 'services', label: t('purchasing.suppliers.type_services') || 'خدمات' },
+    { value: 'parts', label: t('purchasing.suppliers.type_parts') },
+    { value: 'services', label: t('purchasing.suppliers.type_services') },
 ]);
 
 const showCreateModal = ref(false);

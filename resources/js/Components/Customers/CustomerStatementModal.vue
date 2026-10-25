@@ -17,7 +17,7 @@
                     </div>
                     <div>
                         <h2 class="text-base font-black text-gray-900 dark:text-white">
-                            {{ $t('customers.statement.title') || 'كشف حساب مالي للعميل' }}
+                            {{ $t('customers.statement.title') }}
                         </h2>
                         <p class="text-xs text-gray-500 dark:text-gray-400">
                             {{ customer?.name }} ({{ customer?.phone }})
@@ -52,9 +52,7 @@
                     <span
                         class="text-[11px] font-bold text-blue-600 dark:text-blue-400 uppercase tracking-wider block"
                     >
-                        {{
-                            $t('customers.statement.total_invoiced') || 'إجمالي الفواتير والمبيعات'
-                        }}
+                        {{ $t('customers.statement.total_invoiced') }}
                     </span>
                     <span
                         class="text-xl font-black text-gray-900 dark:text-white font-mono mt-1 block"
@@ -69,7 +67,7 @@
                     <span
                         class="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider block"
                     >
-                        {{ $t('customers.statement.total_paid') || 'إجمالي المدفوعات المسددة' }}
+                        {{ $t('customers.statement.total_paid') }}
                     </span>
                     <span
                         class="text-xl font-black text-emerald-600 dark:text-emerald-400 font-mono mt-1 block"
@@ -94,7 +92,7 @@
                                 : 'text-gray-500'
                         "
                     >
-                        {{ $t('customers.statement.total_due') || 'الرصيد المتبقي المستحق' }}
+                        {{ $t('customers.statement.total_due') }}
                     </span>
                     <span
                         class="text-xl font-black font-mono mt-1 block"

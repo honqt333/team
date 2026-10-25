@@ -635,10 +635,8 @@
                                     <span
                                         class="text-[10px] font-bold text-red-600 dark:text-red-400"
                                     >
-                                        {{
-                                            $t('work_orders.remaining_dues_alert') ||
-                                            'المبالغ المستحقة للدفع'
-                                        }}: {{ formatCurrency(order.balance || 0) }}
+                                        {{ $t('work_orders.remaining_dues_alert') }}:
+                                        {{ formatCurrency(order.balance || 0) }}
                                     </span>
                                 </div>
                                 <div
@@ -653,7 +651,7 @@
                                     <span
                                         class="text-[10px] font-bold text-violet-600 dark:text-violet-400"
                                     >
-                                        {{ $t('invoices.deferred_invoice') || 'فاتورة آجلة' }}:
+                                        {{ $t('invoices.deferred_invoice') }}:
                                         {{ formatCurrency(order.balance || 0) }}
                                     </span>
                                 </div>
@@ -664,7 +662,7 @@
                                     <span
                                         class="text-[10px] font-bold text-amber-600 dark:text-amber-400"
                                     >
-                                        {{ $t('payments.types.bad_debt') || 'ديون معدومة' }}:
+                                        {{ $t('payments.types.bad_debt') }}:
                                         {{ formatCurrency(order.bad_debt || 0) }}
                                     </span>
                                 </div>
@@ -805,10 +803,7 @@
                                                     "
                                                     class="px-2 py-0.5 text-[10px] font-bold rounded-full bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-300"
                                                 >
-                                                    {{
-                                                        $t('work_orders.pending_payment_badge') ||
-                                                        'مستحق الدفع'
-                                                    }}
+                                                    {{ $t('work_orders.pending_payment_badge') }}
                                                 </span>
                                                 <span
                                                     v-if="
@@ -819,19 +814,14 @@
                                                     "
                                                     class="px-2 py-0.5 text-[10px] font-bold rounded-full bg-violet-100 text-violet-700 dark:bg-violet-900/50 dark:text-violet-300"
                                                 >
-                                                    {{
-                                                        $t('invoices.deferred_invoice') ||
-                                                        'فاتورة آجلة'
-                                                    }}
+                                                    {{ $t('invoices.deferred_invoice') }}
                                                 </span>
                                                 <span
                                                     v-if="(order.bad_debt || 0) > 0"
                                                     class="px-2 py-0.5 text-[10px] font-bold rounded-full bg-amber-100 text-amber-700 dark:bg-amber-900/50 dark:text-amber-300"
                                                 >
-                                                    {{
-                                                        $t('payments.types.bad_debt') ||
-                                                        'ديون معدومة'
-                                                    }}: {{ formatCurrency(order.bad_debt || 0) }}
+                                                    {{ $t('payments.types.bad_debt') }}:
+                                                    {{ formatCurrency(order.bad_debt || 0) }}
                                                 </span>
                                             </div>
                                         </td>
@@ -1210,7 +1200,7 @@
                                             <span
                                                 class="text-amber-600 dark:text-amber-400 font-medium"
                                             >
-                                                {{ $t('payments.types.bad_debt') || 'ديون معدومة' }}
+                                                {{ $t('payments.types.bad_debt') }}
                                             </span>
                                             <span
                                                 class="font-bold text-amber-600 dark:text-amber-400"
@@ -1986,11 +1976,11 @@ const tabs = computed(() => [
 
 async function deleteMileageLog(log) {
     const result = await confirm({
-        title: t('common.delete_confirm') || 'تأكيد الحذف',
+        title: t('common.delete_confirm'),
         message:
             t('vehicles.mileage.confirm_delete_log', { mileage: log.mileage }) ||
             `هل أنت متأكد من حذف قراءة العداد (${log.mileage} كم)؟`,
-        confirmText: t('common.delete') || 'حذف',
+        confirmText: t('common.delete'),
         type: 'danger',
     });
 

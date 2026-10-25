@@ -1541,7 +1541,10 @@
       "total_value": "إجمالي القيمة",
       "value": "إجمالي القيمة",
       "wac": "سعر الكلفة",
-      "warehouses_stock": "رصيد المستودعات"
+      "warehouses_stock": "رصيد المستودعات",
+      "status": {
+        "low": "منخفض"
+      }
     },
     "title": "إدارة المخزون",
     "transfers": {
@@ -1977,7 +1980,8 @@
       "notes_placeholder": "ملاحظات إضافية...",
       "reference": "رقم المرجع",
       "reference_placeholder": "رقم الإيصال أو رقم العملية",
-      "type": "نوع العملية"
+      "type": "نوع العملية",
+      "max": "الحد الأقصى"
     },
     "methods": {
       "apple_pay": "Apple Pay",
@@ -2324,7 +2328,9 @@
       "date": "تاريخ الفاتورة",
       "supplier_ref": "مرجع المورد",
       "title": "فواتير المشتريات",
-      "created": "تم الإنشاء"
+      "created": "تم الإنشاء",
+      "total": "إجمالي الفاتورة",
+      "remaining": "المتبقي للسداد"
     },
     "items": {
       "add": "إضافة صنف",
@@ -2483,7 +2489,8 @@
       "print_statement": "طباعة كشف الحساب",
       "export_statement": "تصدير كشف الحساب",
       "updated": "تم تحديث المورد بنجاح",
-      "deleted": "تم حذف المورد بنجاح"
+      "deleted": "تم حذف المورد بنجاح",
+      "no_open_invoices": "لا توجد فواتير مفتوحة لهذا المورد."
     },
     "title": "المتجر",
     "returns": {

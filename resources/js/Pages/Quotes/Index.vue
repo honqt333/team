@@ -52,7 +52,7 @@
                             </button>
                         </Tooltip>
 
-                        <Tooltip :text="$t('common.export_excel') || 'تصدير إكسل'">
+                        <Tooltip :text="$t('common.export_excel')">
                             <button
                                 @click="exportQuotes"
                                 class="p-2.5 text-gray-500 hover:text-emerald-600 hover:bg-white dark:hover:bg-gray-800 rounded-xl transition-all shadow-sm hover:shadow-md"

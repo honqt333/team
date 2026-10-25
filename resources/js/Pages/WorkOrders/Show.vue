@@ -339,29 +339,24 @@
         <!-- Hold Reason Modal -->
         <BaseModal :show="showHoldModal" @close="cancelHold" size="md">
             <template #title>
-                {{ $t('work_orders.actions.put_on_hold') || 'تعليق الكرت' }}
+                {{ $t('work_orders.actions.put_on_hold') }}
             </template>
 
             <div class="space-y-4 text-right">
                 <p class="text-sm text-gray-500 dark:text-gray-400">
-                    {{
-                        $t('work_orders.messages.hold_reason_prompt') ||
-                        'يرجى إدخال سبب تعليق الكرت.'
-                    }}
+                    {{ $t('work_orders.messages.hold_reason_prompt') }}
                 </p>
                 <div class="space-y-1">
                     <label
                         class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1"
                     >
-                        {{ $t('work_orders.hold_reason_label') || 'سبب التعليق' }}
+                        {{ $t('work_orders.hold_reason_label') }}
                     </label>
                     <textarea
                         v-model="holdReason"
                         required
                         rows="3"
-                        :placeholder="
-                            $t('work_orders.hold_reason_placeholder') || 'اكتب سبب التعليق...'
-                        "
+                        :placeholder="$t('work_orders.hold_reason_placeholder')"
                         class="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white px-3 py-2 text-sm focus:ring-2 focus:ring-amber-500 focus:border-amber-500 resize-none"
                     ></textarea>
                 </div>
@@ -381,7 +376,7 @@
                     :disabled="!holdReason.trim()"
                     class="px-5 py-2 text-sm font-semibold text-white bg-amber-500 hover:bg-amber-600 disabled:bg-gray-300 dark:disabled:bg-gray-700 disabled:text-gray-500 disabled:cursor-not-allowed rounded-xl transition-all shadow-sm"
                 >
-                    {{ $t('work_orders.actions.put_on_hold') || 'تعليق الكرت' }}
+                    {{ $t('work_orders.actions.put_on_hold') }}
                 </button>
             </template>
         </BaseModal>
@@ -389,7 +384,7 @@
         <!-- Vehicle Exit Modal -->
         <BaseModal :show="showExitModal" @close="cancelExit" size="md">
             <template #title>
-                {{ $t('work_orders.confirm_exit_title') || 'تسجيل خروج المركبة وإصدار الفاتورة' }}
+                {{ $t('work_orders.confirm_exit_title') }}
             </template>
 
             <div class="space-y-4 text-right">
@@ -402,7 +397,7 @@
                     <label
                         class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1"
                     >
-                        {{ $t('work_orders.exit_date_label') || 'تاريخ خروج المركبة' }}
+                        {{ $t('work_orders.exit_date_label') }}
                     </label>
                     <input
                         type="date"
@@ -417,7 +412,7 @@
                     <label
                         class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1"
                     >
-                        {{ $t('work_orders.balance') || 'المبلغ المتبقي' }}
+                        {{ $t('work_orders.balance') }}
                     </label>
                     <div
                         class="w-full bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white px-3 py-2 text-sm rounded-xl border border-gray-200 dark:border-gray-700 font-mono font-bold"
@@ -428,10 +423,7 @@
                         v-if="workOrderBalance > 0"
                         class="text-xs text-amber-500 dark:text-amber-400 font-bold mt-1"
                     >
-                        {{
-                            $t('work_orders.outstanding_balance_warning') ||
-                            'تنبيه: يوجد مبلغ متبقي غير مسدد سيتم ترحيله للفاتورة الصادرة.'
-                        }}
+                        {{ $t('work_orders.outstanding_balance_warning') }}
                     </p>
                 </div>
 
@@ -447,7 +439,7 @@
                             class="rounded border-gray-300 dark:border-gray-700 text-amber-500 focus:ring-amber-500 bg-white dark:bg-gray-900"
                         />
                         <span class="text-sm font-bold text-gray-700 dark:text-gray-300">
-                            {{ $t('work_orders.is_deferred_label') || 'إنشاء فاتورة آجلة' }}
+                            {{ $t('work_orders.is_deferred_label') }}
                         </span>
                     </label>
 
@@ -455,7 +447,7 @@
                         <label
                             class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1"
                         >
-                            {{ $t('work_orders.due_date_label') || 'تاريخ الدفع / الاستحقاق' }}
+                            {{ $t('work_orders.due_date_label') }}
                         </label>
                         <input
                             type="date"
@@ -472,14 +464,12 @@
                     <label
                         class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1"
                     >
-                        {{ $t('work_orders.exit_notes_label') || 'ملاحظات الخروج' }}
+                        {{ $t('work_orders.exit_notes_label') }}
                     </label>
                     <textarea
                         v-model="exitNotes"
                         rows="3"
-                        :placeholder="
-                            $t('work_orders.exit_notes_placeholder') || 'اكتب ملاحظات الخروج...'
-                        "
+                        :placeholder="$t('work_orders.exit_notes_placeholder')"
                         class="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 resize-none"
                     ></textarea>
                 </div>
@@ -525,7 +515,7 @@
                             />
                         </svg>
                     </div>
-                    {{ $t('invoices.create_deferred') || 'إنشاء فاتورة آجلة' }}
+                    {{ $t('invoices.create_deferred') }}
                 </div>
             </template>
 
@@ -535,7 +525,7 @@
                     class="bg-violet-50 dark:bg-violet-950/20 rounded-xl p-4 flex items-center justify-between"
                 >
                     <span class="text-sm font-bold text-violet-700 dark:text-violet-400">
-                        {{ $t('invoices.remaining_amount') || 'المبلغ المتبقي' }}
+                        {{ $t('invoices.remaining_amount') }}
                     </span>
                     <span
                         class="text-lg font-black text-violet-700 dark:text-violet-300 font-mono"
@@ -550,7 +540,7 @@
                     <label
                         class="block text-xs font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wider"
                     >
-                        {{ $t('invoices.due_date') || 'تاريخ الاستحقاق' }}
+                        {{ $t('invoices.due_date') }}
                         <span class="text-red-500 ms-0.5">*</span>
                     </label>
                     <input
@@ -567,15 +557,12 @@
                     <label
                         class="block text-xs font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wider"
                     >
-                        {{ $t('common.notes') || 'ملاحظات' }}
+                        {{ $t('common.notes') }}
                     </label>
                     <textarea
                         v-model="deferredNotes"
                         rows="3"
-                        :placeholder="
-                            $t('invoices.deferred_notes_placeholder') ||
-                            'ملاحظات على الفاتورة الآجلة...'
-                        "
+                        :placeholder="$t('invoices.deferred_notes_placeholder')"
                         class="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white px-3 py-2.5 text-sm focus:ring-2 focus:ring-violet-500 focus:border-violet-500 resize-none transition-colors"
                     ></textarea>
                 </div>
@@ -615,7 +602,7 @@
                             d="M4 12a8 8 0 018-8V0C5.373 0 22 6.477 22 12h-4z"
                         />
                     </svg>
-                    {{ $t('invoices.create_deferred') || 'إصدار فاتورة آجلة' }}
+                    {{ $t('invoices.create_deferred') }}
                 </button>
             </template>
         </BaseModal>

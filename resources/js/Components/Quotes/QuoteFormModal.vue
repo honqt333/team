@@ -550,19 +550,17 @@
                             <label
                                 class="block text-sm font-medium text-gray-700 dark:text-gray-300"
                             >
-                                {{
-                                    $t('quotes.valid_until') || 'صلاحية عرض السعر (تاريخ الانتهاء)'
-                                }}
+                                {{ $t('quotes.valid_until') }}
                             </label>
                             <span class="text-xs text-gray-500">
-                                {{ $t('quotes.validity_hint') || 'فترة التزام الورشة بالأسعار' }}
+                                {{ $t('quotes.validity_hint') }}
                             </span>
                         </div>
 
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 items-center">
                             <CustomDatePicker
                                 v-model="form.valid_until"
-                                :placeholder="$t('quotes.valid_until') || 'تاريخ انتهاء الصلاحية'"
+                                :placeholder="$t('quotes.valid_until')"
                                 class="w-full"
                             />
 

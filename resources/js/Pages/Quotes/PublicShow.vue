@@ -450,10 +450,7 @@
                         </div>
                         <div>
                             <h3 class="font-black text-gray-900 dark:text-white text-base">
-                                {{
-                                    t('quotes.public.approve_confirm_title') ||
-                                    'تأكيد الموافقة على عرض السعر'
-                                }}
+                                {{ t('quotes.public.approve_confirm_title') }}
                             </h3>
                             <p class="text-xs text-gray-500 dark:text-gray-400">
                                 الإجمالي:
@@ -473,19 +470,13 @@
 
                 <div class="p-6 space-y-4">
                     <p class="text-xs text-gray-600 dark:text-gray-300 leading-relaxed">
-                        {{
-                            t('quotes.public.approve_notice') ||
-                            'بالموافقة على عرض السعر، فإنك تعتمد الخدمات والقطع الموضحة وتفوض المركز بالبدء في تنفيذ العمل وفق الشروط والأسعار المحددة.'
-                        }}
+                        {{ t('quotes.public.approve_notice') }}
                     </p>
 
                     <!-- Signature Pad -->
                     <div class="space-y-1.5">
                         <label class="block text-xs font-bold text-gray-700 dark:text-gray-300">
-                            {{
-                                t('quotes.public.signature_label') ||
-                                'توقيع العميل للاعتماد (ارسم توقيعك باللمس أو الماوس):'
-                            }}
+                            {{ t('quotes.public.signature_label') }}
                         </label>
                         <div
                             class="rounded-2xl border-2 border-dashed border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-900/50 p-2 overflow-hidden"
@@ -531,9 +522,7 @@
                         </svg>
                         <span>
                             {{
-                                submitting
-                                    ? t('common.saving') || 'جاري الاعتماد...'
-                                    : t('quotes.public.confirm_approve') || 'تأكيد واعتماد العرض'
+                                submitting ? t('common.saving') : t('quotes.public.confirm_approve')
                             }}
                         </span>
                     </button>
@@ -613,11 +602,11 @@ const getCenterAddress = (center) => {
     if (!center || !center.address) return '';
     const addr = center.address;
     const parts = [
-        addr.building_number ? `${t('common.building') || 'مبنى'} ${addr.building_number}` : '',
-        addr.street ? `${t('common.street') || 'شارع'} ${addr.street}` : '',
-        addr.district ? `${t('common.district') || 'حي'} ${addr.district}` : '',
+        addr.building_number ? `${t('common.building')} ${addr.building_number}` : '',
+        addr.street ? `${t('common.street')} ${addr.street}` : '',
+        addr.district ? `${t('common.district')} ${addr.district}` : '',
         addr.city ? addr.city : '',
-        addr.postal_code ? `${t('common.postal_code') || 'الرمز البريدي'} ${addr.postal_code}` : '',
+        addr.postal_code ? `${t('common.postal_code')} ${addr.postal_code}` : '',
     ].filter(Boolean);
     return parts.join('، ');
 };

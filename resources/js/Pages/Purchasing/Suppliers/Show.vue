@@ -22,10 +22,7 @@
                         >
                             <Tooltip
                                 v-if="balance > 0.01"
-                                :text="
-                                    $t('purchasing.suppliers.record_payment') ||
-                                    'تسجيل سند صرف / دفعة'
-                                "
+                                :text="$t('purchasing.suppliers.record_payment')"
                             >
                                 <button
                                     v-if="can('purchasing.suppliers.update') || isAnyAdmin()"
@@ -46,10 +43,7 @@
                                         />
                                     </svg>
                                     <span class="hidden sm:inline">
-                                        {{
-                                            $t('purchasing.suppliers.record_payment') ||
-                                            'تسجيل دفعة'
-                                        }}
+                                        {{ $t('purchasing.suppliers.record_payment') }}
                                     </span>
                                 </button>
                             </Tooltip>
@@ -548,7 +542,7 @@
                                     <label
                                         class="text-xs font-bold text-gray-600 dark:text-gray-300"
                                     >
-                                        {{ $t('common.from') || 'من' }}:
+                                        {{ $t('common.from') }}:
                                     </label>
                                     <input
                                         type="date"
@@ -560,7 +554,7 @@
                                     <label
                                         class="text-xs font-bold text-gray-600 dark:text-gray-300"
                                     >
-                                        {{ $t('common.to') || 'إلى' }}:
+                                        {{ $t('common.to') }}:
                                     </label>
                                     <input
                                         type="date"
@@ -625,10 +619,7 @@
                                         />
                                     </svg>
                                     <span>
-                                        {{
-                                            $t('purchasing.suppliers.print_statement') ||
-                                            'طباعة كشف الحساب'
-                                        }}
+                                        {{ $t('purchasing.suppliers.print_statement') }}
                                     </span>
                                 </button>
                             </div>
@@ -643,10 +634,7 @@
                                 <span
                                     class="text-[10px] font-bold text-gray-500 uppercase tracking-wider block"
                                 >
-                                    {{
-                                        $t('purchasing.suppliers.opening_balance') ||
-                                        'الرصيد الافتتاحي'
-                                    }}
+                                    {{ $t('purchasing.suppliers.opening_balance') }}
                                 </span>
                                 <span class="text-base font-black font-mono mt-1 block" dir="ltr">
                                     {{ formatCurrency(statementLedger.openingBalance) }}
@@ -660,10 +648,7 @@
                                 <span
                                     class="text-[10px] font-bold text-blue-600 dark:text-blue-400 uppercase tracking-wider block"
                                 >
-                                    {{
-                                        $t('purchasing.suppliers.period_purchases') ||
-                                        'إجمالي الفواتير (+)'
-                                    }}
+                                    {{ $t('purchasing.suppliers.period_purchases') }}
                                 </span>
                                 <span
                                     class="text-base font-black text-blue-700 dark:text-blue-300 font-mono mt-1 block"
@@ -680,10 +665,7 @@
                                 <span
                                     class="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider block"
                                 >
-                                    {{
-                                        $t('purchasing.suppliers.period_payments') ||
-                                        'المدفوعات (-)'
-                                    }}
+                                    {{ $t('purchasing.suppliers.period_payments') }}
                                 </span>
                                 <span
                                     class="text-base font-black text-emerald-700 dark:text-emerald-300 font-mono mt-1 block"
@@ -700,9 +682,7 @@
                                 <span
                                     class="text-[10px] font-bold text-rose-600 dark:text-rose-400 uppercase tracking-wider block"
                                 >
-                                    {{
-                                        $t('purchasing.suppliers.period_returns') || 'المرتجعات (-)'
-                                    }}
+                                    {{ $t('purchasing.suppliers.period_returns') }}
                                 </span>
                                 <span
                                     class="text-base font-black text-rose-700 dark:text-rose-300 font-mono mt-1 block"
@@ -729,10 +709,7 @@
                                             : 'text-gray-500'
                                     "
                                 >
-                                    {{
-                                        $t('purchasing.suppliers.closing_balance') ||
-                                        'الرصيد النهائي'
-                                    }}
+                                    {{ $t('purchasing.suppliers.closing_balance') }}
                                 </span>
                                 <span
                                     class="text-base font-black font-mono mt-1 block"
@@ -759,34 +736,31 @@
                                     >
                                         <th class="py-3 px-4 text-center font-bold">#</th>
                                         <th class="py-3 px-4 text-center font-bold">
-                                            {{ $t('common.date') || 'التاريخ' }}
+                                            {{ $t('common.date') }}
                                         </th>
                                         <th class="py-3 px-4 text-center font-bold">
-                                            {{ $t('common.type') || 'نوع الحركة' }}
+                                            {{ $t('common.type') }}
                                         </th>
                                         <th class="py-3 px-4 text-center font-bold">
-                                            {{ $t('payments.reference') || 'المرجع / الكود' }}
+                                            {{ $t('payments.reference') }}
                                         </th>
                                         <th class="py-3 px-4 text-center font-bold">
-                                            {{ $t('common.notes') || 'البيان' }}
+                                            {{ $t('common.notes') }}
                                         </th>
                                         <th
                                             class="py-3 px-4 text-center font-bold text-blue-600 dark:text-blue-400"
                                         >
-                                            {{ $t('invoices.purchases.total') || 'فاتورة (+)' }}
+                                            {{ $t('invoices.purchases.total') }}
                                         </th>
                                         <th
                                             class="py-3 px-4 text-center font-bold text-emerald-600 dark:text-emerald-400"
                                         >
-                                            {{ $t('payments.title') || 'دفعة / مرتجع (-)' }}
+                                            {{ $t('payments.title') }}
                                         </th>
                                         <th
                                             class="py-3 px-4 text-center font-bold text-gray-900 dark:text-white"
                                         >
-                                            {{
-                                                $t('purchasing.suppliers.running_balance') ||
-                                                'الرصيد'
-                                            }}
+                                            {{ $t('purchasing.suppliers.running_balance') }}
                                         </th>
                                     </tr>
                                 </thead>
@@ -804,10 +778,7 @@
                                             <span
                                                 class="text-xs px-2 py-0.5 rounded bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300"
                                             >
-                                                {{
-                                                    $t('purchasing.suppliers.opening_balance') ||
-                                                    'رصيد افتتاحي سابق'
-                                                }}
+                                                {{ $t('purchasing.suppliers.opening_balance') }}
                                             </span>
                                         </td>
                                         <td class="py-3 px-4 text-center font-mono">—</td>
@@ -906,10 +877,7 @@
                                         class="text-center"
                                     >
                                         <td colspan="8" class="py-12 text-gray-400 text-sm">
-                                            {{
-                                                $t('common.no_data') ||
-                                                'لا توجد حركات مسجلة في هذه الفترة'
-                                            }}
+                                            {{ $t('common.no_data') }}
                                         </td>
                                     </tr>
                                 </tbody>
@@ -2121,7 +2089,7 @@ const stripeClass = (status) => {
 };
 
 const getOverdueLabel = (dueDate) => {
-    if (!dueDate) return t('invoices.due_amount') || 'المبلغ المستحق';
+    if (!dueDate) return t('invoices.due_amount');
     const today = new Date();
     const due = new Date(dueDate);
     const diffTime = today - due;
@@ -2183,14 +2151,14 @@ const PaymentIcon = () =>
 const tabs = computed(() => [
     {
         key: 'overview',
-        label: t('common.overview') || 'Overview',
+        label: t('common.overview'),
         count: null,
         icon: HomeIcon,
         activeColor: 'text-blue-600 dark:text-blue-400',
     },
     {
         key: 'statement',
-        label: t('purchasing.suppliers.statement_tab') || 'كشف الحساب',
+        label: t('purchasing.suppliers.statement_tab'),
         count: null,
         icon: StatementIcon,
         activeColor: 'text-amber-600 dark:text-amber-400',
@@ -2204,7 +2172,7 @@ const tabs = computed(() => [
     },
     {
         key: 'returns',
-        label: t('invoices.return_history') || t('invoices.return_invoice') || 'Returns',
+        label: t('invoices.return_history') || t('invoices.return_invoice'),
         count: props.counts.returns || 0,
         icon: ReturnIcon,
         activeColor: 'text-rose-600 dark:text-rose-400',

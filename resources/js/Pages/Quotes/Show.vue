@@ -92,7 +92,7 @@
                         </Tooltip>
 
                         <!-- Duplicate Quote -->
-                        <Tooltip :text="$t('quotes.actions.duplicate') || 'تكرار ونسخ عرض السعر'">
+                        <Tooltip :text="$t('quotes.actions.duplicate')">
                             <button
                                 @click="duplicateQuote"
                                 class="p-2.5 text-gray-500 hover:text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-900/20 rounded-xl transition-all"
@@ -142,7 +142,7 @@
                     </Tooltip>
 
                     <!-- Convert to Work Order (if already approved) -->
-                    <Tooltip :text="$t('quotes.actions.convert_to_work_order') || 'تحويل لأمر عمل'">
+                    <Tooltip :text="$t('quotes.actions.convert_to_work_order')">
                         <button
                             v-if="quote.status === 'approved'"
                             @click="approveQuote"
@@ -162,7 +162,7 @@
                                 />
                             </svg>
                             <span>
-                                {{ $t('quotes.actions.convert_to_work_order') || 'تحويل لأمر عمل' }}
+                                {{ $t('quotes.actions.convert_to_work_order') }}
                             </span>
                         </button>
                     </Tooltip>
@@ -244,7 +244,7 @@
                                         d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
                                     />
                                 </svg>
-                                {{ $t('quotes.status.expired') || 'منتهي الصلاحية' }} ({{
+                                {{ $t('quotes.status.expired') }} ({{
                                     formatDate(quote.valid_until)
                                 }})
                             </span>
@@ -252,7 +252,7 @@
                                 v-else-if="quote.valid_until"
                                 class="text-gray-500 dark:text-gray-400"
                             >
-                                {{ $t('quotes.valid_until') || 'صالح حتى' }}:
+                                {{ $t('quotes.valid_until') }}:
                                 <strong class="font-mono text-gray-900 dark:text-white">
                                     {{ formatDate(quote.valid_until) }}
                                 </strong>
@@ -669,10 +669,7 @@
                             </div>
                             <div>
                                 <p class="text-xs font-bold text-emerald-900 dark:text-emerald-300">
-                                    {{
-                                        $t('quotes.customer_signed') ||
-                                        'معتمد وموقع إلكترونياً من العميل'
-                                    }}
+                                    {{ $t('quotes.customer_signed') }}
                                 </p>
                                 <p
                                     v-if="quote.approved_at"
@@ -1582,7 +1579,7 @@ function shareQuote() {
 // Duplicate quote
 async function duplicateQuote() {
     const confirmed = await confirm({
-        title: t('quotes.actions.duplicate') || 'تكرار ونسخ عرض السعر',
+        title: t('quotes.actions.duplicate'),
         message:
             'هل أنت متأكد من رغبتك في نسخ وتكرار هذا العرض بجميع خدماته وقطعه لإنشاء عرض سعر جديد مسودة؟',
         confirmText: 'نعم، تكرار العرض',

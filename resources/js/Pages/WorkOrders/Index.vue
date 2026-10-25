@@ -7,9 +7,27 @@
                 :subtitle="pageSubtitle"
                 :totalCount="workOrders ? toEnglish(workOrders.total) : null"
                 :countLabel="$t('work_orders.total_count')"
-                :gradientFrom="statusFilter === 'closed' ? 'from-slate-600' : (statusFilter === 'open' ? 'from-blue-600' : 'from-indigo-600')"
-                :gradientTo="statusFilter === 'closed' ? 'to-slate-700' : (statusFilter === 'open' ? 'to-cyan-600' : 'to-purple-600')"
-                :glowFrom="statusFilter === 'closed' ? 'from-slate-500' : (statusFilter === 'open' ? 'from-blue-500' : 'from-indigo-500')"
+                :gradientFrom="
+                    statusFilter === 'closed'
+                        ? 'from-slate-600'
+                        : statusFilter === 'open'
+                          ? 'from-blue-600'
+                          : 'from-indigo-600'
+                "
+                :gradientTo="
+                    statusFilter === 'closed'
+                        ? 'to-slate-700'
+                        : statusFilter === 'open'
+                          ? 'to-cyan-600'
+                          : 'to-purple-600'
+                "
+                :glowFrom="
+                    statusFilter === 'closed'
+                        ? 'from-slate-500'
+                        : statusFilter === 'open'
+                          ? 'from-blue-500'
+                          : 'from-indigo-500'
+                "
             >
                 <template #back v-if="statusFilter">
                     <!-- Standard Back Button -->
@@ -17,70 +35,173 @@
                 </template>
 
                 <template #icon>
-                    <svg v-if="statusFilter === 'closed'" class="w-9 h-9 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    <svg
+                        v-if="statusFilter === 'closed'"
+                        class="w-9 h-9 text-white"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2.5"
+                            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                        />
                     </svg>
-                    <svg v-else-if="statusFilter === 'open'" class="w-9 h-9 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
+                    <svg
+                        v-else-if="statusFilter === 'open'"
+                        class="w-9 h-9 text-white"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2.5"
+                            d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"
+                        />
                     </svg>
-                    <svg v-else class="w-9 h-9 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                    <svg
+                        v-else
+                        class="w-9 h-9 text-white"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2.5"
+                            d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
+                        />
                     </svg>
                 </template>
 
                 <template #actions v-if="statusFilter">
                     <div class="flex items-center gap-4">
                         <!-- Actions Group -->
-                        <div class="flex items-center gap-1.5 p-1.5 bg-gray-50/50 dark:bg-gray-900/50 backdrop-blur-md rounded-2xl border border-gray-200/50 dark:border-gray-700/50 shadow-inner">
-                            <button v-if="can('crm.work_orders.export') || isAnyAdmin()" @click="exportWorkOrders"
-                                :disabled="exporting" :title="$t('common.export')"
-                                class="p-2.5 text-gray-500 hover:text-indigo-600 hover:bg-white dark:hover:bg-gray-800 rounded-xl transition-all shadow-sm hover:shadow-md disabled:opacity-50">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        <div
+                            class="flex items-center gap-1.5 p-1.5 bg-gray-50/50 dark:bg-gray-900/50 backdrop-blur-md rounded-2xl border border-gray-200/50 dark:border-gray-700/50 shadow-inner"
+                        >
+                            <button
+                                v-if="can('crm.work_orders.export') || isAnyAdmin()"
+                                @click="exportWorkOrders"
+                                :disabled="exporting"
+                                :title="$t('common.export')"
+                                class="p-2.5 text-gray-500 hover:text-indigo-600 hover:bg-white dark:hover:bg-gray-800 rounded-xl transition-all shadow-sm hover:shadow-md disabled:opacity-50"
+                            >
+                                <svg
+                                    class="w-5 h-5"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2.5"
+                                        d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                                    />
                                 </svg>
                             </button>
-                            <button v-if="can('crm.work_orders.print') || isAnyAdmin()" @click="printWorkOrders"
+                            <button
+                                v-if="can('crm.work_orders.print') || isAnyAdmin()"
+                                @click="printWorkOrders"
                                 :title="$t('common.print')"
-                                class="p-2.5 text-gray-500 hover:text-indigo-600 hover:bg-white dark:hover:bg-gray-800 rounded-xl transition-all shadow-sm hover:shadow-md">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                                class="p-2.5 text-gray-500 hover:text-indigo-600 hover:bg-white dark:hover:bg-gray-800 rounded-xl transition-all shadow-sm hover:shadow-md"
+                            >
+                                <svg
+                                    class="w-5 h-5"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2.5"
+                                        d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"
+                                    />
                                 </svg>
                             </button>
 
                             <div class="w-px h-8 bg-gray-200 dark:bg-gray-700 mx-1"></div>
 
                             <div class="flex gap-1.5">
-                                <button @click="viewMode = 'grid'" :title="$t('common.grid_view')"
+                                <button
+                                    @click="viewMode = 'grid'"
+                                    :title="$t('common.grid_view')"
                                     :class="[
                                         'p-2.5 rounded-xl transition-all shadow-sm',
                                         viewMode === 'grid'
                                             ? 'bg-indigo-600 text-white shadow-indigo-200 dark:shadow-none'
-                                            : 'text-gray-400 hover:text-gray-600 hover:bg-white dark:hover:bg-gray-800'
-                                    ]">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2z" />
+                                            : 'text-gray-400 hover:text-gray-600 hover:bg-white dark:hover:bg-gray-800',
+                                    ]"
+                                >
+                                    <svg
+                                        class="w-5 h-5"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2.5"
+                                            d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2z"
+                                        />
                                     </svg>
                                 </button>
-                                <button @click="viewMode = 'list'" :title="$t('common.list_view')"
+                                <button
+                                    @click="viewMode = 'list'"
+                                    :title="$t('common.list_view')"
                                     :class="[
                                         'p-2.5 rounded-xl transition-all shadow-sm',
                                         viewMode === 'list'
                                             ? 'bg-indigo-600 text-white shadow-indigo-200 dark:shadow-none'
-                                            : 'text-gray-400 hover:text-gray-600 hover:bg-white dark:hover:bg-gray-800'
-                                    ]">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 6h16M4 12h16M4 18h16" />
+                                            : 'text-gray-400 hover:text-gray-600 hover:bg-white dark:hover:bg-gray-800',
+                                    ]"
+                                >
+                                    <svg
+                                        class="w-5 h-5"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2.5"
+                                            d="M4 6h16M4 12h16M4 18h16"
+                                        />
                                     </svg>
                                 </button>
                             </div>
                         </div>
 
                         <!-- Create Button -->
-                        <button v-if="can('crm.work_orders.create') || isAnyAdmin()" @click="showCreateModal = true"
-                            class="flex items-center justify-center gap-3 px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-2xl font-black shadow-lg shadow-indigo-500/25 hover:shadow-indigo-500/40 hover:-translate-y-0.5 transition-all group/add">
-                            <div class="w-7 h-7 rounded-lg bg-white/20 flex items-center justify-center group-hover/add:rotate-90 transition-transform duration-300">
-                                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                        <button
+                            v-if="can('crm.work_orders.create') || isAnyAdmin()"
+                            @click="showCreateModal = true"
+                            class="flex items-center justify-center gap-3 px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-2xl font-black shadow-lg shadow-indigo-500/25 hover:shadow-indigo-500/40 hover:-translate-y-0.5 transition-all group/add"
+                        >
+                            <div
+                                class="w-7 h-7 rounded-lg bg-white/20 flex items-center justify-center group-hover/add:rotate-90 transition-transform duration-300"
+                            >
+                                <svg
+                                    class="w-5 h-5 text-white"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="3"
+                                        d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                                    />
                                 </svg>
                             </div>
                             <span class="tracking-tight">{{ $t('work_orders.hub.new_card') }}</span>
@@ -89,13 +210,27 @@
                 </template>
 
                 <template #filters v-if="statusFilter">
-                    <div class="grid grid-cols-2 md:grid-cols-3 lg:flex lg:flex-wrap items-end gap-3">
+                    <div
+                        class="grid grid-cols-2 md:grid-cols-3 lg:flex lg:flex-wrap items-end gap-3"
+                    >
                         <!-- Search -->
                         <div class="col-span-2 md:col-span-1 lg:w-48">
                             <div class="relative group">
-                                <div class="absolute inset-y-0 start-0 flex items-center ps-4 pointer-events-none group-focus-within:text-indigo-500 transition-colors">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                <div
+                                    class="absolute inset-y-0 start-0 flex items-center ps-4 pointer-events-none group-focus-within:text-indigo-500 transition-colors"
+                                >
+                                    <svg
+                                        class="w-5 h-5"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                                        />
                                     </svg>
                                 </div>
                                 <input
@@ -109,7 +244,9 @@
 
                         <!-- Date From -->
                         <div class="lg:w-36">
-                            <label class="block text-[10px] font-bold text-gray-500 dark:text-gray-400 mb-1 px-1 uppercase tracking-wider">
+                            <label
+                                class="block text-[10px] font-bold text-gray-500 dark:text-gray-400 mb-1 px-1 uppercase tracking-wider"
+                            >
                                 {{ $t('common.date_from') }}
                             </label>
                             <CustomDatePicker
@@ -121,7 +258,9 @@
 
                         <!-- Date To -->
                         <div class="lg:w-36">
-                            <label class="block text-[10px] font-bold text-gray-500 dark:text-gray-400 mb-1 px-1 uppercase tracking-wider">
+                            <label
+                                class="block text-[10px] font-bold text-gray-500 dark:text-gray-400 mb-1 px-1 uppercase tracking-wider"
+                            >
                                 {{ $t('common.date_to') }}
                             </label>
                             <CustomDatePicker
@@ -133,7 +272,9 @@
 
                         <!-- Customer Type Filter -->
                         <div class="lg:w-40">
-                            <label class="block text-[10px] font-bold text-gray-500 dark:text-gray-400 mb-1 px-1 uppercase tracking-wider">
+                            <label
+                                class="block text-[10px] font-bold text-gray-500 dark:text-gray-400 mb-1 px-1 uppercase tracking-wider"
+                            >
                                 {{ $t('work_orders.filters.customer_type') }}
                             </label>
                             <SearchableSelect
@@ -147,11 +288,23 @@
                             />
                         </div>
 
-                        <button @click="resetFilters"
+                        <button
+                            @click="resetFilters"
                             class="p-3 text-gray-500 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 transition-all shadow-sm"
-                            :title="$t('common.reset')">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                            :title="$t('common.reset')"
+                        >
+                            <svg
+                                class="w-5 h-5"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                                />
                             </svg>
                         </button>
                     </div>
@@ -160,19 +313,32 @@
 
             <!-- Dashboard / Quick Access View -->
             <div v-if="!statusFilter" class="space-y-8">
-
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <!-- New Card -->
                     <button
                         @click="showCreateModal = true"
                         class="group relative bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 rounded-3xl p-8 border-2 border-dashed border-indigo-200 dark:border-indigo-800 hover:border-indigo-400 dark:hover:border-indigo-600 hover:shadow-xl transition-all duration-300 text-center"
                     >
-                        <div class="w-20 h-20 mx-auto rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-500/30 group-hover:shadow-xl group-hover:scale-110 transition-all duration-300">
-                            <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                        <div
+                            class="w-20 h-20 mx-auto rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-500/30 group-hover:shadow-xl group-hover:scale-110 transition-all duration-300"
+                        >
+                            <svg
+                                class="w-10 h-10 text-white"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M12 4v16m8-8H4"
+                                />
                             </svg>
                         </div>
-                        <h3 class="mt-6 text-xl font-bold text-gray-900 dark:text-white group-hover:text-indigo-600 transition-colors">
+                        <h3
+                            class="mt-6 text-xl font-bold text-gray-900 dark:text-white group-hover:text-indigo-600 transition-colors"
+                        >
                             {{ $t('work_orders.hub.new_card') }}
                         </h3>
                         <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
@@ -185,22 +351,43 @@
                         :href="route('work-orders.index', { status: 'open' })"
                         class="group relative bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20 rounded-3xl p-8 border border-emerald-200 dark:border-emerald-800 hover:border-emerald-400 dark:hover:border-emerald-600 hover:shadow-xl transition-all duration-300 text-center"
                     >
-                        <div class="w-20 h-20 mx-auto rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-lg shadow-emerald-500/30 group-hover:shadow-xl group-hover:scale-110 transition-all duration-300">
-                            <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                        <div
+                            class="w-20 h-20 mx-auto rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-lg shadow-emerald-500/30 group-hover:shadow-xl group-hover:scale-110 transition-all duration-300"
+                        >
+                            <svg
+                                class="w-10 h-10 text-white"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+                                />
                             </svg>
                         </div>
-                        <h3 class="mt-6 text-xl font-bold text-gray-900 dark:text-white group-hover:text-emerald-600 transition-colors">
+                        <h3
+                            class="mt-6 text-xl font-bold text-gray-900 dark:text-white group-hover:text-emerald-600 transition-colors"
+                        >
                             {{ $t('work_orders.hub.open_cards') }}
                         </h3>
                         <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
                             {{ $t('work_orders.hub.open_cards_hint') }}
                         </p>
-                        <div v-if="counts?.open?.count > 0" class="absolute top-4 end-4 flex flex-col items-end gap-1">
-                            <span class="px-3 py-1 bg-emerald-500 text-white text-sm font-black rounded-full shadow-lg">
+                        <div
+                            v-if="counts?.open?.count > 0"
+                            class="absolute top-4 end-4 flex flex-col items-end gap-1"
+                        >
+                            <span
+                                class="px-3 py-1 bg-emerald-500 text-white text-sm font-black rounded-full shadow-lg"
+                            >
                                 {{ toEnglish(counts.open.count) }}
                             </span>
-                            <span class="px-2 py-0.5 bg-white/90 text-emerald-700 text-[10px] font-black rounded-lg shadow-sm border border-emerald-100">
+                            <span
+                                class="px-2 py-0.5 bg-white/90 text-emerald-700 text-[10px] font-black rounded-lg shadow-sm border border-emerald-100"
+                            >
                                 {{ formatNumber(counts.open.balance || 0) }}
                             </span>
                         </div>
@@ -211,22 +398,43 @@
                         :href="route('work-orders.index', { status: 'closed' })"
                         class="group relative bg-gradient-to-br from-slate-50 to-gray-100 dark:from-slate-900/20 dark:to-gray-800/20 rounded-3xl p-8 border border-slate-200 dark:border-slate-700 hover:border-slate-400 dark:hover:border-slate-600 hover:shadow-xl transition-all duration-300 text-center"
                     >
-                        <div class="w-20 h-20 mx-auto rounded-2xl bg-gradient-to-br from-slate-500 to-gray-600 flex items-center justify-center shadow-lg shadow-slate-500/30 group-hover:shadow-xl group-hover:scale-110 transition-all duration-300">
-                            <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        <div
+                            class="w-20 h-20 mx-auto rounded-2xl bg-gradient-to-br from-slate-500 to-gray-600 flex items-center justify-center shadow-lg shadow-slate-500/30 group-hover:shadow-xl group-hover:scale-110 transition-all duration-300"
+                        >
+                            <svg
+                                class="w-10 h-10 text-white"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                                />
                             </svg>
                         </div>
-                        <h3 class="mt-6 text-xl font-bold text-gray-900 dark:text-white group-hover:text-slate-600 transition-colors">
+                        <h3
+                            class="mt-6 text-xl font-bold text-gray-900 dark:text-white group-hover:text-slate-600 transition-colors"
+                        >
                             {{ $t('work_orders.hub.closed_cards') }}
                         </h3>
                         <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
                             {{ $t('work_orders.hub.closed_cards_hint') }}
                         </p>
-                        <div v-if="counts?.closed?.count > 0" class="absolute top-4 end-4 flex flex-col items-end gap-1">
-                            <span class="px-3 py-1 bg-slate-500 text-white text-sm font-black rounded-full shadow-lg">
+                        <div
+                            v-if="counts?.closed?.count > 0"
+                            class="absolute top-4 end-4 flex flex-col items-end gap-1"
+                        >
+                            <span
+                                class="px-3 py-1 bg-slate-500 text-white text-sm font-black rounded-full shadow-lg"
+                            >
                                 {{ toEnglish(counts.closed.count) }}
                             </span>
-                            <span class="px-2 py-0.5 bg-white/90 text-slate-700 text-[10px] font-black rounded-lg shadow-sm border border-slate-100">
+                            <span
+                                class="px-2 py-0.5 bg-white/90 text-slate-700 text-[10px] font-black rounded-lg shadow-sm border border-slate-100"
+                            >
                                 {{ formatNumber(counts.closed.balance || 0) }}
                             </span>
                         </div>
@@ -236,423 +444,738 @@
 
             <!-- List/Grid View Section (visible only when status filter is active) -->
             <div v-if="statusFilter" class="space-y-6">
-
                 <!-- Filter Tabs (for open and closed status) -->
-                <div v-if="statusFilter === 'open' || statusFilter === 'closed'" class="flex flex-wrap gap-3">
-                <button
-                    v-for="tab in filterTabs"
-                    :key="tab.key"
-                    @click="setSubFilter(tab.key)"
-                    :class="[
-                        'relative flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-200',
-                        currentSubFilter === tab.key
-                            ? 'text-white shadow-lg'
-                            : 'bg-white dark:bg-gray-800 hover:shadow-md border border-gray-200 dark:border-gray-700'
-                    ]"
-                    :style="currentSubFilter === tab.key ? `background: linear-gradient(135deg, ${tab.gradientFrom}, ${tab.gradientTo})` : ''"
+                <div
+                    v-if="statusFilter === 'open' || statusFilter === 'closed'"
+                    class="flex flex-wrap gap-3"
                 >
-                    <!-- Icon -->
-                    <div :class="[
-                        'w-8 h-8 rounded-lg flex items-center justify-center',
-                        currentSubFilter === tab.key
-                            ? 'bg-white/20'
-                            : tab.bgColor
-                    ]">
-                        <component 
-                            :is="tab.icon" 
+                    <button
+                        v-for="tab in filterTabs"
+                        :key="tab.key"
+                        @click="setSubFilter(tab.key)"
+                        :class="[
+                            'relative flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-200',
+                            currentSubFilter === tab.key
+                                ? 'text-white shadow-lg'
+                                : 'bg-white dark:bg-gray-800 hover:shadow-md border border-gray-200 dark:border-gray-700',
+                        ]"
+                        :style="
+                            currentSubFilter === tab.key
+                                ? `background: linear-gradient(135deg, ${tab.gradientFrom}, ${tab.gradientTo})`
+                                : ''
+                        "
+                    >
+                        <!-- Icon -->
+                        <div
                             :class="[
-                                'w-4 h-4',
-                                currentSubFilter === tab.key ? 'text-white' : tab.iconColor
-                            ]" 
-                        />
-                    </div>
-                    
-                    <!-- Label & Count -->
-                    <div class="flex items-center gap-2">
-                        <span :class="[
-                            'font-medium text-sm',
-                            currentSubFilter === tab.key ? 'text-white' : 'text-gray-700 dark:text-gray-300'
-                        ]">
-                            {{ tab.label }}
-                        </span>
-                        <span :class="[
-                            'px-2 py-0.5 rounded-full text-xs font-bold',
-                            currentSubFilter === tab.key 
-                                ? 'bg-white/20 text-white' 
-                                : tab.bgColor + ' ' + tab.iconColor
-                        ]">
-                            {{ toEnglish(tab.count) }}
-                        </span>
-                    </div>
-                    
-                    <!-- Selected Check -->
-                    <svg v-if="currentSubFilter === tab.key" class="w-4 h-4 text-white/80" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
-                    </svg>
-                </button>
+                                'w-8 h-8 rounded-lg flex items-center justify-center',
+                                currentSubFilter === tab.key ? 'bg-white/20' : tab.bgColor,
+                            ]"
+                        >
+                            <component
+                                :is="tab.icon"
+                                :class="[
+                                    'w-4 h-4',
+                                    currentSubFilter === tab.key ? 'text-white' : tab.iconColor,
+                                ]"
+                            />
+                        </div>
+
+                        <!-- Label & Count -->
+                        <div class="flex items-center gap-2">
+                            <span
+                                :class="[
+                                    'font-medium text-sm',
+                                    currentSubFilter === tab.key
+                                        ? 'text-white'
+                                        : 'text-gray-700 dark:text-gray-300',
+                                ]"
+                            >
+                                {{ tab.label }}
+                            </span>
+                            <span
+                                :class="[
+                                    'px-2 py-0.5 rounded-full text-xs font-bold',
+                                    currentSubFilter === tab.key
+                                        ? 'bg-white/20 text-white'
+                                        : tab.bgColor + ' ' + tab.iconColor,
+                                ]"
+                            >
+                                {{ toEnglish(tab.count) }}
+                            </span>
+                        </div>
+
+                        <!-- Selected Check -->
+                        <svg
+                            v-if="currentSubFilter === tab.key"
+                            class="w-4 h-4 text-white/80"
+                            fill="currentColor"
+                            viewBox="0 0 20 20"
+                        >
+                            <path
+                                fill-rule="evenodd"
+                                d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                clip-rule="evenodd"
+                            />
+                        </svg>
+                    </button>
                 </div>
 
                 <!-- Loading State -->
                 <div v-if="!workOrders" class="flex flex-col items-center justify-center py-16">
-                <div class="relative">
-                    <div class="w-12 h-12 border-4 border-indigo-200 dark:border-indigo-900 rounded-full"></div>
-                    <div class="absolute top-0 left-0 w-12 h-12 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
+                    <div class="relative">
+                        <div
+                            class="w-12 h-12 border-4 border-indigo-200 dark:border-indigo-900 rounded-full"
+                        ></div>
+                        <div
+                            class="absolute top-0 left-0 w-12 h-12 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin"
+                        ></div>
+                    </div>
+                    <p class="mt-4 text-gray-500 dark:text-gray-400">{{ $t('common.loading') }}</p>
                 </div>
-                <p class="mt-4 text-gray-500 dark:text-gray-400">{{ $t('common.loading') }}</p>
-            </div>
 
-            <!-- Empty State -->
-            <div v-else-if="workOrders.data.length === 0" class="bg-white dark:bg-gray-800 rounded-2xl p-12 text-center border border-gray-200 dark:border-gray-700">
-                <div class="w-16 h-16 mx-auto rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center mb-4">
-                    <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
-                    </svg>
-                </div>
-                <p class="text-lg font-medium text-gray-900 dark:text-white mb-1">{{ $t('work_orders.empty') }}</p>
-                <p class="text-gray-500 dark:text-gray-400 mb-6">{{ $t('work_orders.empty_hint') }}</p>
-                <button
-                    @click="showCreateModal = true"
-                    class="inline-flex items-center gap-2 px-5 py-2.5 bg-indigo-600 text-white rounded-xl font-medium hover:bg-indigo-700 transition-colors"
-                >
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-                    </svg>
-                    {{ $t('work_orders.add') }}
-                </button>
-            </div>
-
-            <!-- Grid View: Modern Beautiful Cards -->
-            <div v-else-if="viewMode === 'grid'" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4">
+                <!-- Empty State -->
                 <div
-                    v-for="order in allWorkOrders"
-                    :key="order.id"
-                    @click="router.visit(route('work-orders.show', order.id))"
-                    class="group relative bg-white dark:bg-gray-800 rounded-3xl border border-gray-100 dark:border-gray-700/50 hover:border-indigo-400/50 dark:hover:border-indigo-500/50 hover:shadow-2xl hover:shadow-indigo-500/10 hover:-translate-y-1.5 cursor-pointer transition-all duration-500 overflow-hidden flex flex-col"
+                    v-else-if="workOrders.data.length === 0"
+                    class="bg-white dark:bg-gray-800 rounded-2xl p-12 text-center border border-gray-200 dark:border-gray-700"
                 >
-                    <!-- Top Accent / Status Gradient Line -->
-                    <div class="h-1.5 w-full bg-gradient-to-r" :class="getStatusGradient(order.status)"></div>
-
-                    <!-- Card Header: Code & Status -->
-                    <div class="px-4 py-3">
-                        <div class="flex items-center justify-between mb-2">
-                            <div class="flex flex-col gap-0.5">
-                                <div class="flex items-center gap-2">
-                                    <span class="text-[10px] font-black text-gray-400 dark:text-gray-500 tracking-widest uppercase">#{{ toEnglish(order.code || order.id) }}</span>
-                                </div>
-                                <div v-if="order.entry_date" class="text-[9px] font-bold text-slate-400">
-                                    {{ formatDate(order.entry_date) }}
-                                </div>
-                            </div>
-                            <div class="flex items-center gap-1.5">
-                                <div v-if="order.status === 'done' && (order.balance || 0) > 0" class="px-2 py-0.5 rounded-full text-[9px] font-bold bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-300 animate-pulse border border-red-200 dark:border-red-800">
-                                    {{ $t('work_orders.pending_payment_badge') || 'مستحق الدفع' }}
-                                </div>
-                                <div :class="['px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider shadow-sm', getStatusClass(order.status)]">
-                                    {{ $t(`work_orders.status.${order.status}`) }}
-                                </div>
-                            </div>
-                        </div>
+                    <div
+                        class="w-16 h-16 mx-auto rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center mb-4"
+                    >
+                        <svg
+                            class="w-8 h-8 text-gray-400"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="1.5"
+                                d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+                            />
+                        </svg>
                     </div>
-
-                    <!-- Main Vehicle Info Section -->
-                    <div class="px-4 py-3 flex-1">
-                        <!-- Saudi Plate Component & Brand Logo -->
-                        <div class="flex items-center justify-center gap-3 mb-4">
-                            <!-- Manufacturer Logo -->
-                            <Tooltip :text="order.vehicle?.make?.name || ''" v-if="order.vehicle?.make?.logo_path">
-                                <div class="w-10 h-10 flex items-center justify-center p-1 bg-white dark:bg-gray-700/50 rounded-xl border border-gray-100 dark:border-gray-600 shadow-sm transition-transform hover:scale-110 cursor-pointer">
-                                    <img :src="`/storage/${order.vehicle.make.logo_path}`" class="w-full h-full object-contain filter dark:brightness-110" alt="Brand" />
-                                </div>
-                            </Tooltip>
-                            
-                            <!-- Saudi Plate -->
-                            <SaudiPlateDisplay :plate-number="order.vehicle?.plate_number" size="sm" />
-                        </div>
-
-                        <!-- Outstanding Balance Notice -->
-                        <div v-if="order.status === 'done' && (order.balance || 0) > 0 && (!order.invoice || isInvoiceOverdue(order))" class="mb-4 p-2 rounded-xl bg-red-50 dark:bg-red-950/20 border border-red-100 dark:border-red-900/50 text-center shadow-sm">
-                            <span class="text-xs font-bold text-red-600 dark:text-red-400">
-                                {{ $t('work_orders.remaining_dues_alert') || 'المبالغ المستحقة للدفع' }}: {{ formatNumber(order.balance || 0) }}
-                            </span>
-                        </div>
-
-                        <!-- Deferred Invoice Notice -->
-                        <div v-if="order.status === 'done' && (order.balance || 0) > 0 && order.invoice && !isInvoiceOverdue(order)" class="mb-4 p-2 rounded-xl bg-violet-50 dark:bg-violet-950/20 border border-violet-100 dark:border-violet-900/50 text-center shadow-sm">
-                            <span class="text-xs font-bold text-violet-600 dark:text-violet-400">
-                                {{ $t('invoices.deferred_invoice') || 'فاتورة آجلة' }}: {{ formatNumber(order.balance || 0) }}
-                            </span>
-                        </div>
-
-                        <!-- Bad Debt Notice -->
-                        <div v-if="(order.bad_debt || 0) > 0" class="mb-4 p-2 rounded-xl bg-amber-50 dark:bg-amber-950/20 border border-amber-100 dark:border-amber-900/50 text-center shadow-sm">
-                            <span class="text-xs font-bold text-amber-600 dark:text-amber-400">
-                                {{ $t('payments.types.bad_debt') || 'ديون معدومة' }}: {{ formatNumber(order.bad_debt || 0) }}
-                            </span>
-                        </div>
-
-                        <!-- Vehicle Name & Customer -->
-                        <div class="space-y-3">
-                            <div class="text-center">
-                                <div class="flex flex-col items-center justify-center gap-1 mb-1">
-                                    <Tooltip :text="getVehicleName(order.vehicle)">
-                                        <h3 class="text-sm font-black text-gray-900 dark:text-white leading-tight group-hover:text-indigo-600 transition-colors cursor-pointer line-clamp-1">
-                                            {{ getVehicleName(order.vehicle) }}
-                                        </h3>
-                                    </Tooltip>
-                                    <!-- Vehicle Color Badge -->
-                                    <div v-if="order.vehicle?.color" 
-                                        class="flex items-center gap-1.5 px-2 py-0.5 text-[9px] font-bold bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 rounded-md border border-slate-200 dark:border-slate-600 cursor-default">
-                                        <span class="w-2 h-2 rounded-full border border-gray-300 dark:border-gray-600 shadow-sm" :style="{ backgroundColor: getColorHex(order.vehicle.color) }"></span>
-                                        {{ order.vehicle.color }}
-                                    </div>
-                                </div>
-                                <div class="flex items-center justify-center gap-1.5">
-                                    <div class="w-4 h-4 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center">
-                                        <svg class="w-2.5 h-2.5 text-slate-500" fill="currentColor" viewBox="0 0 20 20">
-                                            <path d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" />
-                                        </svg>
-                                    </div>
-                                    <Tooltip :text="$t('common.customer')">
-                                        <span class="text-xs font-bold text-slate-500 dark:text-slate-400 truncate max-w-[120px] cursor-pointer">
-                                            {{ order.customer?.name || $t('common.unknown') }}
-                                        </span>
-                                    </Tooltip>
-                                </div>
-                            </div>
-
-                            <!-- Financial Metrics Grid -->
-                            <div class="grid grid-cols-3 gap-1 py-2 border-y border-gray-50 dark:border-gray-700/50">
-                                <!-- Total -->
-                                <Tooltip :text="$t('work_orders.invoice_total')" class="flex-1">
-                                    <div class="group/stat flex flex-col items-center justify-center border-e border-gray-100 dark:border-gray-700/50 cursor-pointer transition-colors hover:bg-slate-50 dark:hover:bg-slate-700/30 rounded-lg py-1 w-full h-full">
-                                        <span class="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-tighter">{{ $t('work_orders.total') }}</span>
-                                        <span class="text-[11px] font-black text-slate-700 dark:text-slate-300">{{ formatNumber(order.total || 0) }}</span>
-                                    </div>
-                                </Tooltip>
-                                <!-- Paid -->
-                                <Tooltip :text="$t('work_orders.paid')" class="flex-1">
-                                    <div class="group/stat flex flex-col items-center justify-center border-e border-gray-100 dark:border-gray-700/50 cursor-pointer transition-colors hover:bg-emerald-50 dark:hover:bg-emerald-900/10 rounded-lg py-1 w-full h-full">
-                                        <span class="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-tighter">{{ $t('work_orders.paid') }}</span>
-                                        <span class="text-[11px] font-black text-emerald-600 dark:text-emerald-400">{{ formatNumber((order.total_paid || 0) - (order.bad_debt || 0)) }}</span>
-                                    </div>
-                                </Tooltip>
-                                <!-- Balance -->
-                                <Tooltip :text="$t('work_orders.remaining')" class="flex-1">
-                                    <div class="group/stat flex flex-col items-center justify-center cursor-pointer transition-colors hover:bg-red-50 dark:hover:bg-red-900/10 rounded-lg py-1 w-full h-full">
-                                        <span class="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-tighter">{{ $t('work_orders.remaining') }}</span>
-                                        <span class="text-[11px] font-black" :class="(order.balance || 0) > 0 ? 'text-red-600 dark:text-red-400' : 'text-slate-400'">
-                                            {{ formatNumber(order.balance || 0) }}
-                                        </span>
-                                    </div>
-                                </Tooltip>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Footer: Status/Date -->
-                    <div class="px-5 py-4 bg-slate-50/50 dark:bg-gray-900/30 border-t border-gray-100 dark:border-gray-700/50 flex items-center justify-between mt-auto">
-                        <span class="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">
-                            {{ getDateLabel(order) }}
-                        </span>
-                        <div class="flex items-center gap-1.5 px-2.5 py-1 text-[11px] font-bold rounded-lg border shadow-sm" :class="getDateClass(order)">
-                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                            </svg>
-                            {{ formatDate(getDisplayDate(order)) }}
-                        </div>
-                    </div>
-
-                    <!-- View Details Arrow (Hover Only) -->
-                    <div class="absolute top-1/2 -end-4 group-hover:end-4 opacity-0 group-hover:opacity-100 transition-all duration-500" @click.stop>
-                        <div class="w-10 h-10 rounded-2xl bg-indigo-500 text-white flex items-center justify-center shadow-lg shadow-indigo-500/30">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7" /></svg>
-                        </div>
-                    </div>
+                    <p class="text-lg font-medium text-gray-900 dark:text-white mb-1">
+                        {{ $t('work_orders.empty') }}
+                    </p>
+                    <p class="text-gray-500 dark:text-gray-400 mb-6">
+                        {{ $t('work_orders.empty_hint') }}
+                    </p>
+                    <button
+                        @click="showCreateModal = true"
+                        class="inline-flex items-center gap-2 px-5 py-2.5 bg-indigo-600 text-white rounded-xl font-medium hover:bg-indigo-700 transition-colors"
+                    >
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M12 4v16m8-8H4"
+                            />
+                        </svg>
+                        {{ $t('work_orders.add') }}
+                    </button>
                 </div>
-            </div>
 
-            <!-- List View -->
-            <div v-else class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
-                <div class="overflow-x-auto">
-                    <table class="min-w-full">
-                        <thead>
-                            <tr class="bg-gray-50 dark:bg-gray-900/50">
-                                <!-- # (Index) -->
-                                <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider w-12 align-middle">
-                                    #
-                                </th>
-                                <!-- رقم كرت الصيانة -->
-                                <th 
-                                    @click="toggleSort('code')"
-                                    class="px-4 py-3 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors group align-middle text-center"
-                                >
-                                    <div class="flex items-center gap-1.5">
-                                        {{ $t('work_orders.columns.code') }}
-                                        <SortIcon :active="sortColumn === 'code'" :direction="sortDirection" />
+                <!-- Grid View: Modern Beautiful Cards -->
+                <div
+                    v-else-if="viewMode === 'grid'"
+                    class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4"
+                >
+                    <div
+                        v-for="order in allWorkOrders"
+                        :key="order.id"
+                        @click="router.visit(route('work-orders.show', order.id))"
+                        class="group relative bg-white dark:bg-gray-800 rounded-3xl border border-gray-100 dark:border-gray-700/50 hover:border-indigo-400/50 dark:hover:border-indigo-500/50 hover:shadow-2xl hover:shadow-indigo-500/10 hover:-translate-y-1.5 cursor-pointer transition-all duration-500 overflow-hidden flex flex-col"
+                    >
+                        <!-- Top Accent / Status Gradient Line -->
+                        <div
+                            class="h-1.5 w-full bg-gradient-to-r"
+                            :class="getStatusGradient(order.status)"
+                        ></div>
+
+                        <!-- Card Header: Code & Status -->
+                        <div class="px-4 py-3">
+                            <div class="flex items-center justify-between mb-2">
+                                <div class="flex flex-col gap-0.5">
+                                    <div class="flex items-center gap-2">
+                                        <span
+                                            class="text-[10px] font-black text-gray-400 dark:text-gray-500 tracking-widest uppercase"
+                                        >
+                                            #{{ toEnglish(order.code || order.id) }}
+                                        </span>
                                     </div>
-                                </th>
-                                <!-- تاريخ الانتهاء المتوقع -->
-                                <th 
-                                    @click="toggleSort('expected_end_date')"
-                                    class="px-4 py-3 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors align-middle text-center"
-                                >
-                                    <div class="flex items-center gap-1.5">
-                                        {{ $t('work_orders.columns.expected_end') }}
-                                        <SortIcon :active="sortColumn === 'expected_end_date'" :direction="sortDirection" />
+                                    <div
+                                        v-if="order.entry_date"
+                                        class="text-[9px] font-bold text-slate-400"
+                                    >
+                                        {{ formatDate(order.entry_date) }}
                                     </div>
-                                </th>
-                                <!-- المركبة -->
-                                <th 
-                                    @click="toggleSort('vehicle')"
-                                    class="px-4 py-3 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors align-middle text-center"
-                                >
-                                    <div class="flex items-center gap-1.5">
-                                        {{ $t('work_orders.columns.vehicle') }}
-                                        <SortIcon :active="sortColumn === 'vehicle'" :direction="sortDirection" />
+                                </div>
+                                <div class="flex items-center gap-1.5">
+                                    <div
+                                        v-if="order.status === 'done' && (order.balance || 0) > 0"
+                                        class="px-2 py-0.5 rounded-full text-[9px] font-bold bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-300 animate-pulse border border-red-200 dark:border-red-800"
+                                    >
+                                        {{ $t('work_orders.pending_payment_badge') }}
                                     </div>
-                                </th>
-                                <!-- اسم المسؤول -->
-                                <th 
-                                    @click="toggleSort('contact_name')"
-                                    class="px-4 py-3 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors align-middle text-center"
-                                >
-                                    <div class="flex items-center gap-1.5">
-                                        {{ $t('work_orders.columns.contact_name') }}
-                                        <SortIcon :active="sortColumn === 'contact_name'" :direction="sortDirection" />
+                                    <div
+                                        :class="[
+                                            'px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider shadow-sm',
+                                            getStatusClass(order.status),
+                                        ]"
+                                    >
+                                        {{ $t(`work_orders.status.${order.status}`) }}
                                     </div>
-                                </th>
-                                <!-- الخدمات (عدد) -->
-                                <th 
-                                    @click="toggleSort('services_count')"
-                                    class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors align-middle"
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Main Vehicle Info Section -->
+                        <div class="px-4 py-3 flex-1">
+                            <!-- Saudi Plate Component & Brand Logo -->
+                            <div class="flex items-center justify-center gap-3 mb-4">
+                                <!-- Manufacturer Logo -->
+                                <Tooltip
+                                    :text="order.vehicle?.make?.name || ''"
+                                    v-if="order.vehicle?.make?.logo_path"
                                 >
-                                    <div class="flex items-center justify-center gap-1.5">
-                                        {{ $t('work_orders.columns.services') }}
-                                        <SortIcon :active="sortColumn === 'services_count'" :direction="sortDirection" />
+                                    <div
+                                        class="w-10 h-10 flex items-center justify-center p-1 bg-white dark:bg-gray-700/50 rounded-xl border border-gray-100 dark:border-gray-600 shadow-sm transition-transform hover:scale-110 cursor-pointer"
+                                    >
+                                        <img
+                                            :src="`/storage/${order.vehicle.make.logo_path}`"
+                                            class="w-full h-full object-contain filter dark:brightness-110"
+                                            alt="Brand"
+                                        />
                                     </div>
-                                </th>
-                                <!-- مبلغ الفاتورة -->
-                                <th 
-                                    @click="toggleSort('total')"
-                                    class="px-4 py-3 text-end text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors align-middle text-center"
-                                >
-                                    <div class="flex items-center justify-end gap-1.5">
-                                        {{ $t('work_orders.columns.total') }}
-                                        <SortIcon :active="sortColumn === 'total'" :direction="sortDirection" />
-                                    </div>
-                                </th>
-                                <!-- المبلغ المدفوع -->
-                                <th 
-                                    @click="toggleSort('paid')"
-                                    class="px-4 py-3 text-end text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors align-middle text-center"
-                                >
-                                    <div class="flex items-center justify-end gap-1.5">
-                                        {{ $t('work_orders.columns.paid') }}
-                                        <SortIcon :active="sortColumn === 'paid'" :direction="sortDirection" />
-                                    </div>
-                                </th>
-                                <!-- الباقي -->
-                                <th 
-                                    @click="toggleSort('balance')"
-                                    class="px-4 py-3 text-end text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors align-middle text-center"
-                                >
-                                    <div class="flex items-center justify-end gap-1.5">
-                                        {{ $t('work_orders.columns.balance') }}
-                                        <SortIcon :active="sortColumn === 'balance'" :direction="sortDirection" />
-                                    </div>
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
-                            <tr
-                                v-for="(order, index) in sortedWorkOrders"
-                                :key="order.id"
-                                @click="router.visit(route('work-orders.show', order.id))"
-                                class="hover:bg-gray-50 dark:hover:bg-gray-900/50 cursor-pointer transition-colors"
+                                </Tooltip>
+
+                                <!-- Saudi Plate -->
+                                <SaudiPlateDisplay
+                                    :plate-number="order.vehicle?.plate_number"
+                                    size="sm"
+                                />
+                            </div>
+
+                            <!-- Outstanding Balance Notice -->
+                            <div
+                                v-if="
+                                    order.status === 'done' &&
+                                    (order.balance || 0) > 0 &&
+                                    (!order.invoice || isInvoiceOverdue(order))
+                                "
+                                class="mb-4 p-2 rounded-xl bg-red-50 dark:bg-red-950/20 border border-red-100 dark:border-red-900/50 text-center shadow-sm"
                             >
-                                <!-- # -->
-                                <td class="px-4 py-3 text-center text-sm text-gray-500 dark:text-gray-400 font-medium align-middle">
-                                    {{ toEnglish(index + 1) }}
-                                </td>
-                                <!-- رقم الكرت -->
-                                <td class="px-4 py-3 align-middle">
-                                    <div class="flex flex-col gap-1">
-                                        <span class="font-mono font-semibold text-indigo-600 dark:text-indigo-400">#{{ toEnglish(order.code || order.id) }}</span>
-                                        <div class="flex flex-wrap gap-1">
-                                            <span :class="['px-1.5 py-0.5 rounded text-[9px] font-black uppercase tracking-wider', getStatusClass(order.status)]">
-                                                {{ $t(`work_orders.status.${order.status}`) }}
-                                            </span>
-                                            <span v-if="order.status === 'done' && (order.balance || 0) > 0 && (!order.invoice || isInvoiceOverdue(order))" class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-300">
-                                                {{ $t('work_orders.pending_payment_badge') || 'مستحق الدفع' }}
-                                            </span>
-                                            <span v-if="order.status === 'done' && (order.balance || 0) > 0 && order.invoice && !isInvoiceOverdue(order)" class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-violet-100 text-violet-700 dark:bg-violet-900/50 dark:text-violet-300">
-                                                {{ $t('invoices.deferred_invoice') || 'فاتورة آجلة' }}
-                                            </span>
-                                            <span v-if="(order.bad_debt || 0) > 0" class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-amber-100 text-amber-700 dark:bg-amber-900/50 dark:text-amber-300">
-                                                {{ $t('payments.types.bad_debt') || 'ديون معدومة' }}: {{ formatNumber(order.bad_debt) }}
-                                            </span>
+                                <span class="text-xs font-bold text-red-600 dark:text-red-400">
+                                    {{ $t('work_orders.remaining_dues_alert') }}:
+                                    {{ formatNumber(order.balance || 0) }}
+                                </span>
+                            </div>
+
+                            <!-- Deferred Invoice Notice -->
+                            <div
+                                v-if="
+                                    order.status === 'done' &&
+                                    (order.balance || 0) > 0 &&
+                                    order.invoice &&
+                                    !isInvoiceOverdue(order)
+                                "
+                                class="mb-4 p-2 rounded-xl bg-violet-50 dark:bg-violet-950/20 border border-violet-100 dark:border-violet-900/50 text-center shadow-sm"
+                            >
+                                <span
+                                    class="text-xs font-bold text-violet-600 dark:text-violet-400"
+                                >
+                                    {{ $t('invoices.deferred_invoice') }}:
+                                    {{ formatNumber(order.balance || 0) }}
+                                </span>
+                            </div>
+
+                            <!-- Bad Debt Notice -->
+                            <div
+                                v-if="(order.bad_debt || 0) > 0"
+                                class="mb-4 p-2 rounded-xl bg-amber-50 dark:bg-amber-950/20 border border-amber-100 dark:border-amber-900/50 text-center shadow-sm"
+                            >
+                                <span class="text-xs font-bold text-amber-600 dark:text-amber-400">
+                                    {{ $t('payments.types.bad_debt') }}:
+                                    {{ formatNumber(order.bad_debt || 0) }}
+                                </span>
+                            </div>
+
+                            <!-- Vehicle Name & Customer -->
+                            <div class="space-y-3">
+                                <div class="text-center">
+                                    <div
+                                        class="flex flex-col items-center justify-center gap-1 mb-1"
+                                    >
+                                        <Tooltip :text="getVehicleName(order.vehicle)">
+                                            <h3
+                                                class="text-sm font-black text-gray-900 dark:text-white leading-tight group-hover:text-indigo-600 transition-colors cursor-pointer line-clamp-1"
+                                            >
+                                                {{ getVehicleName(order.vehicle) }}
+                                            </h3>
+                                        </Tooltip>
+                                        <!-- Vehicle Color Badge -->
+                                        <div
+                                            v-if="order.vehicle?.color"
+                                            class="flex items-center gap-1.5 px-2 py-0.5 text-[9px] font-bold bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 rounded-md border border-slate-200 dark:border-slate-600 cursor-default"
+                                        >
+                                            <span
+                                                class="w-2 h-2 rounded-full border border-gray-300 dark:border-gray-600 shadow-sm"
+                                                :style="{
+                                                    backgroundColor: getColorHex(
+                                                        order.vehicle.color
+                                                    ),
+                                                }"
+                                            ></span>
+                                            {{ order.vehicle.color }}
                                         </div>
                                     </div>
-                                </td>
-                                <!-- تاريخ الانتهاء -->
-                                <td class="px-4 py-3 align-middle">
-                                    <span 
-                                        class="inline-flex items-center gap-1.5 px-2 py-1 text-xs font-medium rounded-lg"
-                                        :class="getDateClass(order)"
-                                    >
-                                        <svg v-if="isOverdue(order)" class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
-                                            <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
-                                        </svg>
-                                        {{ formatDate(order.expected_end_date) }}
-                                    </span>
-                                </td>
-                                <!-- المركبة -->
-                                <td class="px-4 py-3 align-middle">
-                                    <div class="flex items-center gap-2">
-                                        <SaudiPlateDisplay :plate-number="order.vehicle?.plate_number" size="sm" />
-                                        <span class="text-xs text-gray-500 dark:text-gray-400 truncate max-w-[120px]">
-                                            {{ getVehicleName(order.vehicle) }}
-                                        </span>
+                                    <div class="flex items-center justify-center gap-1.5">
+                                        <div
+                                            class="w-4 h-4 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center"
+                                        >
+                                            <svg
+                                                class="w-2.5 h-2.5 text-slate-500"
+                                                fill="currentColor"
+                                                viewBox="0 0 20 20"
+                                            >
+                                                <path
+                                                    d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
+                                                />
+                                            </svg>
+                                        </div>
+                                        <Tooltip :text="$t('common.customer')">
+                                            <span
+                                                class="text-xs font-bold text-slate-500 dark:text-slate-400 truncate max-w-[120px] cursor-pointer"
+                                            >
+                                                {{ order.customer?.name || $t('common.unknown') }}
+                                            </span>
+                                        </Tooltip>
                                     </div>
-                                </td>
-                                <!-- المسؤول -->
-                                <td class="px-4 py-3 text-sm text-gray-700 dark:text-gray-300 align-middle">
-                                    {{ order.contact_name || order.customer?.name || '-' }}
-                                </td>
-                                <!-- الخدمات -->
-                                <td class="px-4 py-3 text-center align-middle">
-                                    <span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 text-sm font-bold">
-                                        {{ toEnglish(order.items_count || 0) }}
-                                    </span>
-                                </td>
-                                <!-- مبلغ الفاتورة -->
-                                <td class="px-4 py-3 text-end font-semibold text-gray-900 dark:text-white align-middle">
-                                    {{ formatNumber(order.total || 0) }}
-                                </td>
-                                <!-- المدفوع -->
-                                <td class="px-4 py-3 text-end font-medium text-green-600 dark:text-green-400 align-middle">
-                                    {{ formatNumber((order.total_paid || 0) - (order.bad_debt || 0)) }}
-                                </td>
-                                <!-- الباقي -->
-                                <td class="px-4 py-3 text-end font-bold align-middle" :class="getBalanceColor(order)">
-                                    {{ formatNumber(order.balance || 0) }}
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
+                                </div>
+
+                                <!-- Financial Metrics Grid -->
+                                <div
+                                    class="grid grid-cols-3 gap-1 py-2 border-y border-gray-50 dark:border-gray-700/50"
+                                >
+                                    <!-- Total -->
+                                    <Tooltip :text="$t('work_orders.invoice_total')" class="flex-1">
+                                        <div
+                                            class="group/stat flex flex-col items-center justify-center border-e border-gray-100 dark:border-gray-700/50 cursor-pointer transition-colors hover:bg-slate-50 dark:hover:bg-slate-700/30 rounded-lg py-1 w-full h-full"
+                                        >
+                                            <span
+                                                class="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-tighter"
+                                            >
+                                                {{ $t('work_orders.total') }}
+                                            </span>
+                                            <span
+                                                class="text-[11px] font-black text-slate-700 dark:text-slate-300"
+                                            >
+                                                {{ formatNumber(order.total || 0) }}
+                                            </span>
+                                        </div>
+                                    </Tooltip>
+                                    <!-- Paid -->
+                                    <Tooltip :text="$t('work_orders.paid')" class="flex-1">
+                                        <div
+                                            class="group/stat flex flex-col items-center justify-center border-e border-gray-100 dark:border-gray-700/50 cursor-pointer transition-colors hover:bg-emerald-50 dark:hover:bg-emerald-900/10 rounded-lg py-1 w-full h-full"
+                                        >
+                                            <span
+                                                class="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-tighter"
+                                            >
+                                                {{ $t('work_orders.paid') }}
+                                            </span>
+                                            <span
+                                                class="text-[11px] font-black text-emerald-600 dark:text-emerald-400"
+                                            >
+                                                {{
+                                                    formatNumber(
+                                                        (order.total_paid || 0) -
+                                                            (order.bad_debt || 0)
+                                                    )
+                                                }}
+                                            </span>
+                                        </div>
+                                    </Tooltip>
+                                    <!-- Balance -->
+                                    <Tooltip :text="$t('work_orders.remaining')" class="flex-1">
+                                        <div
+                                            class="group/stat flex flex-col items-center justify-center cursor-pointer transition-colors hover:bg-red-50 dark:hover:bg-red-900/10 rounded-lg py-1 w-full h-full"
+                                        >
+                                            <span
+                                                class="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-tighter"
+                                            >
+                                                {{ $t('work_orders.remaining') }}
+                                            </span>
+                                            <span
+                                                class="text-[11px] font-black"
+                                                :class="
+                                                    (order.balance || 0) > 0
+                                                        ? 'text-red-600 dark:text-red-400'
+                                                        : 'text-slate-400'
+                                                "
+                                            >
+                                                {{ formatNumber(order.balance || 0) }}
+                                            </span>
+                                        </div>
+                                    </Tooltip>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Footer: Status/Date -->
+                        <div
+                            class="px-5 py-4 bg-slate-50/50 dark:bg-gray-900/30 border-t border-gray-100 dark:border-gray-700/50 flex items-center justify-between mt-auto"
+                        >
+                            <span
+                                class="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest"
+                            >
+                                {{ getDateLabel(order) }}
+                            </span>
+                            <div
+                                class="flex items-center gap-1.5 px-2.5 py-1 text-[11px] font-bold rounded-lg border shadow-sm"
+                                :class="getDateClass(order)"
+                            >
+                                <svg
+                                    class="w-3.5 h-3.5"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2"
+                                        d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                                    />
+                                </svg>
+                                {{ formatDate(getDisplayDate(order)) }}
+                            </div>
+                        </div>
+
+                        <!-- View Details Arrow (Hover Only) -->
+                        <div
+                            class="absolute top-1/2 -end-4 group-hover:end-4 opacity-0 group-hover:opacity-100 transition-all duration-500"
+                            @click.stop
+                        >
+                            <div
+                                class="w-10 h-10 rounded-2xl bg-indigo-500 text-white flex items-center justify-center shadow-lg shadow-indigo-500/30"
+                            >
+                                <svg
+                                    class="w-6 h-6"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2.5"
+                                        d="M9 5l7 7-7 7"
+                                    />
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-            </div>
+
+                <!-- List View -->
+                <div
+                    v-else
+                    class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden"
+                >
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full">
+                            <thead>
+                                <tr class="bg-gray-50 dark:bg-gray-900/50">
+                                    <!-- # (Index) -->
+                                    <th
+                                        class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider w-12 align-middle"
+                                    >
+                                        #
+                                    </th>
+                                    <!-- رقم كرت الصيانة -->
+                                    <th
+                                        @click="toggleSort('code')"
+                                        class="px-4 py-3 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors group align-middle text-center"
+                                    >
+                                        <div class="flex items-center gap-1.5">
+                                            {{ $t('work_orders.columns.code') }}
+                                            <SortIcon
+                                                :active="sortColumn === 'code'"
+                                                :direction="sortDirection"
+                                            />
+                                        </div>
+                                    </th>
+                                    <!-- تاريخ الانتهاء المتوقع -->
+                                    <th
+                                        @click="toggleSort('expected_end_date')"
+                                        class="px-4 py-3 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors align-middle text-center"
+                                    >
+                                        <div class="flex items-center gap-1.5">
+                                            {{ $t('work_orders.columns.expected_end') }}
+                                            <SortIcon
+                                                :active="sortColumn === 'expected_end_date'"
+                                                :direction="sortDirection"
+                                            />
+                                        </div>
+                                    </th>
+                                    <!-- المركبة -->
+                                    <th
+                                        @click="toggleSort('vehicle')"
+                                        class="px-4 py-3 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors align-middle text-center"
+                                    >
+                                        <div class="flex items-center gap-1.5">
+                                            {{ $t('work_orders.columns.vehicle') }}
+                                            <SortIcon
+                                                :active="sortColumn === 'vehicle'"
+                                                :direction="sortDirection"
+                                            />
+                                        </div>
+                                    </th>
+                                    <!-- اسم المسؤول -->
+                                    <th
+                                        @click="toggleSort('contact_name')"
+                                        class="px-4 py-3 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors align-middle text-center"
+                                    >
+                                        <div class="flex items-center gap-1.5">
+                                            {{ $t('work_orders.columns.contact_name') }}
+                                            <SortIcon
+                                                :active="sortColumn === 'contact_name'"
+                                                :direction="sortDirection"
+                                            />
+                                        </div>
+                                    </th>
+                                    <!-- الخدمات (عدد) -->
+                                    <th
+                                        @click="toggleSort('services_count')"
+                                        class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors align-middle"
+                                    >
+                                        <div class="flex items-center justify-center gap-1.5">
+                                            {{ $t('work_orders.columns.services') }}
+                                            <SortIcon
+                                                :active="sortColumn === 'services_count'"
+                                                :direction="sortDirection"
+                                            />
+                                        </div>
+                                    </th>
+                                    <!-- مبلغ الفاتورة -->
+                                    <th
+                                        @click="toggleSort('total')"
+                                        class="px-4 py-3 text-end text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors align-middle text-center"
+                                    >
+                                        <div class="flex items-center justify-end gap-1.5">
+                                            {{ $t('work_orders.columns.total') }}
+                                            <SortIcon
+                                                :active="sortColumn === 'total'"
+                                                :direction="sortDirection"
+                                            />
+                                        </div>
+                                    </th>
+                                    <!-- المبلغ المدفوع -->
+                                    <th
+                                        @click="toggleSort('paid')"
+                                        class="px-4 py-3 text-end text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors align-middle text-center"
+                                    >
+                                        <div class="flex items-center justify-end gap-1.5">
+                                            {{ $t('work_orders.columns.paid') }}
+                                            <SortIcon
+                                                :active="sortColumn === 'paid'"
+                                                :direction="sortDirection"
+                                            />
+                                        </div>
+                                    </th>
+                                    <!-- الباقي -->
+                                    <th
+                                        @click="toggleSort('balance')"
+                                        class="px-4 py-3 text-end text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors align-middle text-center"
+                                    >
+                                        <div class="flex items-center justify-end gap-1.5">
+                                            {{ $t('work_orders.columns.balance') }}
+                                            <SortIcon
+                                                :active="sortColumn === 'balance'"
+                                                :direction="sortDirection"
+                                            />
+                                        </div>
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+                                <tr
+                                    v-for="(order, index) in sortedWorkOrders"
+                                    :key="order.id"
+                                    @click="router.visit(route('work-orders.show', order.id))"
+                                    class="hover:bg-gray-50 dark:hover:bg-gray-900/50 cursor-pointer transition-colors"
+                                >
+                                    <!-- # -->
+                                    <td
+                                        class="px-4 py-3 text-center text-sm text-gray-500 dark:text-gray-400 font-medium align-middle"
+                                    >
+                                        {{ toEnglish(index + 1) }}
+                                    </td>
+                                    <!-- رقم الكرت -->
+                                    <td class="px-4 py-3 align-middle">
+                                        <div class="flex flex-col gap-1">
+                                            <span
+                                                class="font-mono font-semibold text-indigo-600 dark:text-indigo-400"
+                                            >
+                                                #{{ toEnglish(order.code || order.id) }}
+                                            </span>
+                                            <div class="flex flex-wrap gap-1">
+                                                <span
+                                                    :class="[
+                                                        'px-1.5 py-0.5 rounded text-[9px] font-black uppercase tracking-wider',
+                                                        getStatusClass(order.status),
+                                                    ]"
+                                                >
+                                                    {{ $t(`work_orders.status.${order.status}`) }}
+                                                </span>
+                                                <span
+                                                    v-if="
+                                                        order.status === 'done' &&
+                                                        (order.balance || 0) > 0 &&
+                                                        (!order.invoice || isInvoiceOverdue(order))
+                                                    "
+                                                    class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-300"
+                                                >
+                                                    {{ $t('work_orders.pending_payment_badge') }}
+                                                </span>
+                                                <span
+                                                    v-if="
+                                                        order.status === 'done' &&
+                                                        (order.balance || 0) > 0 &&
+                                                        order.invoice &&
+                                                        !isInvoiceOverdue(order)
+                                                    "
+                                                    class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-violet-100 text-violet-700 dark:bg-violet-900/50 dark:text-violet-300"
+                                                >
+                                                    {{ $t('invoices.deferred_invoice') }}
+                                                </span>
+                                                <span
+                                                    v-if="(order.bad_debt || 0) > 0"
+                                                    class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-amber-100 text-amber-700 dark:bg-amber-900/50 dark:text-amber-300"
+                                                >
+                                                    {{ $t('payments.types.bad_debt') }}:
+                                                    {{ formatNumber(order.bad_debt) }}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <!-- تاريخ الانتهاء -->
+                                    <td class="px-4 py-3 align-middle">
+                                        <span
+                                            class="inline-flex items-center gap-1.5 px-2 py-1 text-xs font-medium rounded-lg"
+                                            :class="getDateClass(order)"
+                                        >
+                                            <svg
+                                                v-if="isOverdue(order)"
+                                                class="w-3.5 h-3.5"
+                                                fill="currentColor"
+                                                viewBox="0 0 20 20"
+                                            >
+                                                <path
+                                                    fill-rule="evenodd"
+                                                    d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
+                                                    clip-rule="evenodd"
+                                                />
+                                            </svg>
+                                            {{ formatDate(order.expected_end_date) }}
+                                        </span>
+                                    </td>
+                                    <!-- المركبة -->
+                                    <td class="px-4 py-3 align-middle">
+                                        <div class="flex items-center gap-2">
+                                            <SaudiPlateDisplay
+                                                :plate-number="order.vehicle?.plate_number"
+                                                size="sm"
+                                            />
+                                            <span
+                                                class="text-xs text-gray-500 dark:text-gray-400 truncate max-w-[120px]"
+                                            >
+                                                {{ getVehicleName(order.vehicle) }}
+                                            </span>
+                                        </div>
+                                    </td>
+                                    <!-- المسؤول -->
+                                    <td
+                                        class="px-4 py-3 text-sm text-gray-700 dark:text-gray-300 align-middle"
+                                    >
+                                        {{ order.contact_name || order.customer?.name || '-' }}
+                                    </td>
+                                    <!-- الخدمات -->
+                                    <td class="px-4 py-3 text-center align-middle">
+                                        <span
+                                            class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 text-sm font-bold"
+                                        >
+                                            {{ toEnglish(order.items_count || 0) }}
+                                        </span>
+                                    </td>
+                                    <!-- مبلغ الفاتورة -->
+                                    <td
+                                        class="px-4 py-3 text-end font-semibold text-gray-900 dark:text-white align-middle"
+                                    >
+                                        {{ formatNumber(order.total || 0) }}
+                                    </td>
+                                    <!-- المدفوع -->
+                                    <td
+                                        class="px-4 py-3 text-end font-medium text-green-600 dark:text-green-400 align-middle"
+                                    >
+                                        {{
+                                            formatNumber(
+                                                (order.total_paid || 0) - (order.bad_debt || 0)
+                                            )
+                                        }}
+                                    </td>
+                                    <!-- الباقي -->
+                                    <td
+                                        class="px-4 py-3 text-end font-bold align-middle"
+                                        :class="getBalanceColor(order)"
+                                    >
+                                        {{ formatNumber(order.balance || 0) }}
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
 
                 <!-- Infinite Scroll Sentinel -->
                 <div ref="loadMoreSentinel" class="py-6 flex justify-center w-full">
-                    <div v-if="loadingMore" class="flex items-center gap-2 text-gray-500 dark:text-gray-400">
-                        <svg class="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    <div
+                        v-if="loadingMore"
+                        class="flex items-center gap-2 text-gray-500 dark:text-gray-400"
+                    >
+                        <svg
+                            class="animate-spin h-5 w-5"
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                        >
+                            <circle
+                                class="opacity-25"
+                                cx="12"
+                                cy="12"
+                                r="10"
+                                stroke="currentColor"
+                                stroke-width="4"
+                            ></circle>
+                            <path
+                                class="opacity-75"
+                                fill="currentColor"
+                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                            ></path>
                         </svg>
                         <span class="text-sm font-medium">{{ $t('common.loading') }}</span>
                     </div>
-                    <div v-else-if="allWorkOrders.length >= (workOrders?.total || 0) && (workOrders?.total || 0) > 0" class="text-sm text-gray-400 dark:text-gray-600">
+                    <div
+                        v-else-if="
+                            allWorkOrders.length >= (workOrders?.total || 0) &&
+                            (workOrders?.total || 0) > 0
+                        "
+                        class="text-sm text-gray-400 dark:text-gray-600"
+                    >
                         {{ $t('work_orders.all_loaded') }}
                     </div>
                 </div>
@@ -670,25 +1193,45 @@
             @close="showCreateModal = false"
             @saved="handleSaved"
         />
-        
+
         <!-- Print Section (Teleported to body for printing) -->
         <Teleport to="body">
             <div class="print-section hidden">
-                <PrintHeader :title="statusFilter ? $t('work_orders.list.' + statusFilter + '_title') : $t('work_orders.title')" />
+                <PrintHeader
+                    :title="
+                        statusFilter
+                            ? $t('work_orders.list.' + statusFilter + '_title')
+                            : $t('work_orders.title')
+                    "
+                />
 
                 <!-- Table -->
                 <table class="print-table">
                     <thead>
                         <tr>
                             <th class="align-middle text-center">#</th>
-                            <th class="align-middle text-center">{{ $t('work_orders.columns.code') }}</th>
+                            <th class="align-middle text-center">
+                                {{ $t('work_orders.columns.code') }}
+                            </th>
                             <th class="align-middle text-center">{{ $t('common.date') }}</th>
-                            <th class="align-middle text-center">{{ $t('work_orders.columns.vehicle') }}</th>
-                            <th class="align-middle text-center">{{ $t('work_orders.columns.customer') }}</th>
-                            <th class="align-middle text-center">{{ $t('work_orders.columns.status') }}</th>
-                            <th class="align-middle text-center">{{ $t('work_orders.columns.total') }}</th>
-                            <th class="align-middle text-center">{{ $t('work_orders.columns.paid') }}</th>
-                            <th class="align-middle text-center">{{ $t('work_orders.columns.balance') }}</th>
+                            <th class="align-middle text-center">
+                                {{ $t('work_orders.columns.vehicle') }}
+                            </th>
+                            <th class="align-middle text-center">
+                                {{ $t('work_orders.columns.customer') }}
+                            </th>
+                            <th class="align-middle text-center">
+                                {{ $t('work_orders.columns.status') }}
+                            </th>
+                            <th class="align-middle text-center">
+                                {{ $t('work_orders.columns.total') }}
+                            </th>
+                            <th class="align-middle text-center">
+                                {{ $t('work_orders.columns.paid') }}
+                            </th>
+                            <th class="align-middle text-center">
+                                {{ $t('work_orders.columns.balance') }}
+                            </th>
                         </tr>
                     </thead>
                     <tbody>
@@ -696,7 +1239,9 @@
                             <td class="align-middle">{{ toEnglish(index + 1) }}</td>
                             <td class="align-middle">{{ toEnglish(order.code) }}</td>
                             <td class="align-middle">{{ formatDate(order.entry_date) }}</td>
-                            <td dir="ltr" class="text-left font-sans align-middle">{{ toEnglish(order.vehicle?.plate_number) || '-' }}</td>
+                            <td dir="ltr" class="text-left font-sans align-middle">
+                                {{ toEnglish(order.vehicle?.plate_number) || '-' }}
+                            </td>
                             <td class="align-middle">{{ order.customer?.name || '-' }}</td>
                             <td class="align-middle">
                                 <span class="print-badge">
@@ -705,11 +1250,13 @@
                             </td>
                             <td class="align-middle">{{ formatNumber(order.total || 0) }}</td>
                             <td class="align-middle">{{ formatNumber(order.paid_amount || 0) }}</td>
-                            <td class="align-middle">{{ formatNumber((order.total || 0) - (order.paid_amount || 0)) }}</td>
+                            <td class="align-middle">
+                                {{ formatNumber((order.total || 0) - (order.paid_amount || 0)) }}
+                            </td>
                         </tr>
                     </tbody>
                 </table>
-                
+
                 <div class="mt-8 text-center text-xs text-gray-400">
                     {{ $page.props.auth.user.name }}
                 </div>
@@ -793,12 +1340,16 @@ const props = defineProps({
 
 const pageTitle = computed(() => {
     if (!props.statusFilter) return t('work_orders.hub.title');
-    return props.statusFilter === 'closed' ? t('work_orders.list.closed_title') : t('work_orders.list.open_title');
+    return props.statusFilter === 'closed'
+        ? t('work_orders.list.closed_title')
+        : t('work_orders.list.open_title');
 });
 
 const pageSubtitle = computed(() => {
     if (!props.statusFilter) return t('work_orders.hub.subtitle');
-    return props.statusFilter === 'closed' ? t('work_orders.list.closed_subtitle') : t('work_orders.list.open_subtitle');
+    return props.statusFilter === 'closed'
+        ? t('work_orders.list.closed_subtitle')
+        : t('work_orders.list.open_subtitle');
 });
 
 // Infinite Scroll Refs
@@ -809,12 +1360,15 @@ const loadMoreSentinel = ref(null);
 let observer = null;
 
 // Watch props change (filters, etc)
-watch(() => props.workOrders, (newVal) => {
-    if (newVal) {
-        allWorkOrders.value = newVal.data;
-        nextPageUrl.value = newVal.next_page_url;
+watch(
+    () => props.workOrders,
+    (newVal) => {
+        if (newVal) {
+            allWorkOrders.value = newVal.data;
+            nextPageUrl.value = newVal.next_page_url;
+        }
     }
-});
+);
 
 // Load more data
 const loadMore = async () => {
@@ -825,10 +1379,10 @@ const loadMore = async () => {
         const url = new URL(nextPageUrl.value);
         // Map to API endpoint
         const apiUrl = url.toString().replace('/app/work-orders', '/app/api/work-orders-index');
-        
+
         const response = await axios.get(apiUrl);
         const data = response.data;
-        
+
         allWorkOrders.value.push(...data.data);
         nextPageUrl.value = data.next_page_url;
     } catch (e) {
@@ -840,19 +1394,22 @@ const loadMore = async () => {
 
 // Intersection Observer Setup
 onMounted(() => {
-    observer = new IntersectionObserver((entries) => {
-        if (entries[0].isIntersecting && nextPageUrl.value) {
-            loadMore();
+    observer = new IntersectionObserver(
+        (entries) => {
+            if (entries[0].isIntersecting && nextPageUrl.value) {
+                loadMore();
+            }
+        },
+        {
+            root: null,
+            threshold: 0.1,
         }
-    }, {
-        root: null,
-        threshold: 0.1,
-    });
+    );
 
     if (loadMoreSentinel.value) {
         observer.observe(loadMoreSentinel.value);
     }
-    
+
     // Check sentinel ref changes
     watch(loadMoreSentinel, (el) => {
         if (observer) observer.disconnect();
@@ -865,109 +1422,121 @@ onUnmounted(() => {
 });
 
 // Icons for filter tabs
-const IconOpen = { template: `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>` };
-const IconDraft = { template: `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>` };
-const IconOverdue = { template: `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>` };
-const IconPending = { template: `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>` };
-const IconDone = { template: `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>` };
-const IconBadDebt = { template: `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>` };
+const IconOpen = {
+    template: `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>`,
+};
+const IconDraft = {
+    template: `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>`,
+};
+const IconOverdue = {
+    template: `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>`,
+};
+const IconPending = {
+    template: `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>`,
+};
+const IconDone = {
+    template: `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>`,
+};
+const IconBadDebt = {
+    template: `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>`,
+};
 
 const filterTabs = computed(() => {
     if (props.statusFilter === 'closed') {
         return [
-            { 
-                key: 'closed', 
-                label: t('work_orders.filters.closed_cards'), 
-                icon: IconDone, 
-                iconColor: 'text-slate-500', 
+            {
+                key: 'closed',
+                label: t('work_orders.filters.closed_cards'),
+                icon: IconDone,
+                iconColor: 'text-slate-500',
                 bgColor: 'bg-slate-100 dark:bg-slate-900/30',
                 gradientFrom: '#64748b',
                 gradientTo: '#475569',
-                count: props.filterCounts.closed || 0 
+                count: props.filterCounts.closed || 0,
             },
-            { 
-                key: 'credit_invoices', 
-                label: t('work_orders.filters.credit_invoices'), 
-                icon: IconPending, 
-                iconColor: 'text-orange-500', 
+            {
+                key: 'credit_invoices',
+                label: t('work_orders.filters.credit_invoices'),
+                icon: IconPending,
+                iconColor: 'text-orange-500',
                 bgColor: 'bg-orange-100 dark:bg-orange-900/30',
                 gradientFrom: '#f97316',
                 gradientTo: '#ea580c',
-                count: props.filterCounts.credit_invoices || 0 
+                count: props.filterCounts.credit_invoices || 0,
             },
-            { 
-                key: 'bad_debts', 
-                label: t('work_orders.filters.bad_debts'), 
-                icon: IconBadDebt, 
-                iconColor: 'text-red-600', 
+            {
+                key: 'bad_debts',
+                label: t('work_orders.filters.bad_debts'),
+                icon: IconBadDebt,
+                iconColor: 'text-red-600',
                 bgColor: 'bg-red-100 dark:bg-red-900/30',
                 gradientFrom: '#dc2626',
                 gradientTo: '#b91c1c',
-                count: props.filterCounts.bad_debts || 0 
+                count: props.filterCounts.bad_debts || 0,
             },
-            { 
-                key: 'cancelled', 
-                label: t('work_orders.filters.cancelled_cards'), 
-                icon: IconDraft, 
-                iconColor: 'text-gray-500', 
+            {
+                key: 'cancelled',
+                label: t('work_orders.filters.cancelled_cards'),
+                icon: IconDraft,
+                iconColor: 'text-gray-500',
                 bgColor: 'bg-gray-100 dark:bg-gray-900/30',
                 gradientFrom: '#9ca3af',
                 gradientTo: '#6b7280',
-                count: props.filterCounts.cancelled || 0 
+                count: props.filterCounts.cancelled || 0,
             },
         ];
     }
 
     return [
-        { 
-            key: 'in_progress', 
-            label: t('work_orders.filters.open'), 
-            icon: IconOpen, 
-            iconColor: 'text-blue-500', 
+        {
+            key: 'in_progress',
+            label: t('work_orders.filters.open'),
+            icon: IconOpen,
+            iconColor: 'text-blue-500',
             bgColor: 'bg-blue-100 dark:bg-blue-900/30',
             gradientFrom: '#3b82f6',
             gradientTo: '#2563eb',
-            count: props.filterCounts.open || 0 
+            count: props.filterCounts.open || 0,
         },
-        { 
-            key: 'draft', 
-            label: t('work_orders.filters.draft'), 
-            icon: IconDraft, 
-            iconColor: 'text-slate-500', 
+        {
+            key: 'draft',
+            label: t('work_orders.filters.draft'),
+            icon: IconDraft,
+            iconColor: 'text-slate-500',
             bgColor: 'bg-slate-100 dark:bg-slate-900/30',
             gradientFrom: '#64748b',
             gradientTo: '#475569',
-            count: props.filterCounts.draft || 0 
+            count: props.filterCounts.draft || 0,
         },
-        { 
-            key: 'overdue', 
-            label: t('work_orders.filters.overdue'), 
-            icon: IconOverdue, 
-            iconColor: 'text-red-500', 
+        {
+            key: 'overdue',
+            label: t('work_orders.filters.overdue'),
+            icon: IconOverdue,
+            iconColor: 'text-red-500',
             bgColor: 'bg-red-100 dark:bg-red-900/30',
             gradientFrom: '#ef4444',
             gradientTo: '#dc2626',
-            count: props.filterCounts.overdue || 0 
+            count: props.filterCounts.overdue || 0,
         },
-        { 
-            key: 'pending_payment', 
-            label: t('work_orders.filters.pending_payment'), 
-            icon: IconPending, 
-            iconColor: 'text-amber-500', 
+        {
+            key: 'pending_payment',
+            label: t('work_orders.filters.pending_payment'),
+            icon: IconPending,
+            iconColor: 'text-amber-500',
             bgColor: 'bg-amber-100 dark:bg-amber-900/30',
             gradientFrom: '#f59e0b',
             gradientTo: '#d97706',
-            count: props.filterCounts.pending_payment || 0 
+            count: props.filterCounts.pending_payment || 0,
         },
-        { 
-            key: 'completed', 
-            label: t('work_orders.filters.completed') || 'مكتمل', 
-            icon: IconDone, 
-            iconColor: 'text-emerald-500', 
+        {
+            key: 'completed',
+            label: t('work_orders.filters.completed'),
+            icon: IconDone,
+            iconColor: 'text-emerald-500',
             bgColor: 'bg-emerald-100 dark:bg-emerald-900/30',
             gradientFrom: '#10b981',
             gradientTo: '#059669',
-            count: props.filterCounts.completed || 0 
+            count: props.filterCounts.completed || 0,
         },
     ];
 });
@@ -976,7 +1545,6 @@ const currentSubFilter = computed(() => {
     if (props.subFilter) return props.subFilter;
     return props.statusFilter === 'closed' ? 'closed' : 'in_progress';
 });
-
 
 const resetFilters = () => {
     searchQuery.value = '';
@@ -1015,18 +1583,22 @@ const debounce = (fn, delay) => {
 
 // Apply filters
 function applyFilters() {
-    router.get(route('work-orders.index'), { 
-        status: props.statusFilter,
-        sub_filter: props.subFilter,
-        search: searchQuery.value,
-        date_from: dateFrom.value,
-        date_to: dateTo.value,
-        customer_type: customerTypeFilter.value,
-    }, {
-        preserveState: true,
-        preserveScroll: true,
-        replace: true,
-    });
+    router.get(
+        route('work-orders.index'),
+        {
+            status: props.statusFilter,
+            sub_filter: props.subFilter,
+            search: searchQuery.value,
+            date_from: dateFrom.value,
+            date_to: dateTo.value,
+            customer_type: customerTypeFilter.value,
+        },
+        {
+            preserveState: true,
+            preserveScroll: true,
+            replace: true,
+        }
+    );
 }
 
 // Watch filters and apply with debounce
@@ -1045,16 +1617,16 @@ async function printWorkOrders() {
             try {
                 const url = new URL(nextPageUrl.value, window.location.origin);
                 const page = url.searchParams.get('page') || 2;
-                
+
                 const params = new URLSearchParams();
                 params.set('page', page);
                 if (searchQuery.value) params.set('search', searchQuery.value);
                 if (props.statusFilter) params.set('status', props.statusFilter);
                 if (props.subFilter) params.set('sub_filter', props.subFilter);
-                
+
                 const response = await axios.get('/app/api/work-orders-index?' + params.toString());
                 const data = response.data;
-                
+
                 if (data.data && Array.isArray(data.data)) {
                     allWorkOrders.value.push(...data.data);
                 }
@@ -1064,11 +1636,11 @@ async function printWorkOrders() {
                 break;
             }
         }
-        
+
         // Allow DOM to update
-        await new Promise(resolve => setTimeout(resolve, 100));
+        await new Promise((resolve) => setTimeout(resolve, 100));
     }
-    
+
     // Trigger print
     window.print();
 }
@@ -1084,7 +1656,7 @@ async function exportWorkOrders() {
         if (dateFrom.value) params.append('date_from', dateFrom.value);
         if (dateTo.value) params.append('date_to', dateTo.value);
         if (customerTypeFilter.value) params.append('customer_type', customerTypeFilter.value);
-        
+
         window.location.href = `${route('work-orders.export')}?${params.toString()}`;
     } finally {
         setTimeout(() => {
@@ -1094,17 +1666,20 @@ async function exportWorkOrders() {
 }
 
 function setSubFilter(filter) {
-    router.get(route('work-orders.index'), { 
-        status: props.statusFilter,
-        sub_filter: filter,
-        search: searchQuery.value 
-    }, {
-        preserveState: true,
-        preserveScroll: true,
-        replace: true,
-    });
+    router.get(
+        route('work-orders.index'),
+        {
+            status: props.statusFilter,
+            sub_filter: filter,
+            search: searchQuery.value,
+        },
+        {
+            preserveState: true,
+            preserveScroll: true,
+            replace: true,
+        }
+    );
 }
-
 
 watch(viewMode, (newMode) => {
     localStorage.setItem('workOrdersViewMode', newMode);
@@ -1136,11 +1711,11 @@ function calculateTotal(items) {
 
 function formatDate(dateString) {
     if (!dateString) return '-';
-    return new Date(dateString).toLocaleDateString('en-GB', { 
+    return new Date(dateString).toLocaleDateString('en-GB', {
         year: 'numeric',
         month: '2-digit',
         day: '2-digit',
-        numberingSystem: 'latn'
+        numberingSystem: 'latn',
     });
 }
 
@@ -1195,22 +1770,31 @@ function formatCurrency(value) {
 }
 
 function formatCurrencyValue(value) {
-    return parseFloat(value || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    return parseFloat(value || 0).toLocaleString('en-US', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+    });
 }
-
-
 
 function getColorHex(colorName) {
     if (!colorName) return '#e2e8f0';
     const colors = {
-        'أبيض': '#ffffff', 'White': '#ffffff',
-        'أسود': '#000000', 'Black': '#000000',
-        'فضي': '#c0c0c0', 'Silver': '#c0c0c0',
-        'رمادي': '#808080', 'Gray': '#808080',
-        'أحمر': '#ff0000', 'Red': '#ff0000',
-        'أزرق': '#0000ff', 'Blue': '#0000ff',
-        'أصفر': '#ffff00', 'Yellow': '#ffff00',
-        'أخضر': '#008000', 'Green': '#008000',
+        أبيض: '#ffffff',
+        White: '#ffffff',
+        أسود: '#000000',
+        Black: '#000000',
+        فضي: '#c0c0c0',
+        Silver: '#c0c0c0',
+        رمادي: '#808080',
+        Gray: '#808080',
+        أحمر: '#ff0000',
+        Red: '#ff0000',
+        أزرق: '#0000ff',
+        Blue: '#0000ff',
+        أصفر: '#ffff00',
+        Yellow: '#ffff00',
+        أخضر: '#008000',
+        Green: '#008000',
     };
     return colors[colorName] || '#e2e8f0';
 }
@@ -1250,10 +1834,10 @@ function toggleSort(column) {
 // Sorted work orders based on selected column
 const sortedWorkOrders = computed(() => {
     if (!sortColumn.value) return allWorkOrders.value;
-    
+
     const sorted = [...allWorkOrders.value].sort((a, b) => {
         let valA, valB;
-        
+
         switch (sortColumn.value) {
             case 'code':
                 valA = a.code || a.id || 0;
@@ -1290,20 +1874,20 @@ const sortedWorkOrders = computed(() => {
             default:
                 return 0;
         }
-        
+
         // String comparison
         if (typeof valA === 'string') {
             const compare = valA.localeCompare(valB, 'ar');
             return sortDirection.value === 'asc' ? compare : -compare;
         }
-        
+
         // Number comparison
         if (sortDirection.value === 'asc') {
             return valA - valB;
         }
         return valB - valA;
     });
-    
+
     return sorted;
 });
 

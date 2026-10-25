@@ -383,7 +383,7 @@
                                                 >
                                                     {{ customer.payment_terms_days }}
                                                 </strong>
-                                                {{ $t('common.days') || 'يوم' }}
+                                                {{ $t('common.days') }}
                                             </span>
                                         </div>
                                     </div>
@@ -1196,10 +1196,8 @@
                                     <span
                                         class="text-[10px] font-bold text-red-600 dark:text-red-400"
                                     >
-                                        {{
-                                            $t('work_orders.remaining_dues_alert') ||
-                                            'المبالغ المستحقة للدفع'
-                                        }}: {{ formatPrice(order.balance || 0) }}
+                                        {{ $t('work_orders.remaining_dues_alert') }}:
+                                        {{ formatPrice(order.balance || 0) }}
                                     </span>
                                 </div>
                                 <div
@@ -1214,7 +1212,7 @@
                                     <span
                                         class="text-[10px] font-bold text-violet-600 dark:text-violet-400"
                                     >
-                                        {{ $t('invoices.deferred_invoice') || 'فاتورة آجلة' }}:
+                                        {{ $t('invoices.deferred_invoice') }}:
                                         {{ formatPrice(order.balance || 0) }}
                                     </span>
                                 </div>
@@ -1225,7 +1223,7 @@
                                     <span
                                         class="text-[10px] font-bold text-amber-600 dark:text-amber-400"
                                     >
-                                        {{ $t('payments.types.bad_debt') || 'ديون معدومة' }}:
+                                        {{ $t('payments.types.bad_debt') }}:
                                         {{ formatPrice(order.bad_debt || 0) }}
                                     </span>
                                 </div>
@@ -1386,10 +1384,7 @@
                                                     "
                                                     class="px-2 py-0.5 text-[10px] font-bold rounded-full bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-300"
                                                 >
-                                                    {{
-                                                        $t('work_orders.pending_payment_badge') ||
-                                                        'مستحق الدفع'
-                                                    }}
+                                                    {{ $t('work_orders.pending_payment_badge') }}
                                                 </span>
                                                 <span
                                                     v-if="
@@ -1400,19 +1395,14 @@
                                                     "
                                                     class="px-2 py-0.5 text-[10px] font-bold rounded-full bg-violet-100 text-violet-700 dark:bg-violet-900/50 dark:text-violet-300"
                                                 >
-                                                    {{
-                                                        $t('invoices.deferred_invoice') ||
-                                                        'فاتورة آجلة'
-                                                    }}
+                                                    {{ $t('invoices.deferred_invoice') }}
                                                 </span>
                                                 <span
                                                     v-if="(order.bad_debt || 0) > 0"
                                                     class="px-2 py-0.5 text-[10px] font-bold rounded-full bg-amber-100 text-amber-700 dark:bg-amber-900/50 dark:text-amber-300"
                                                 >
-                                                    {{
-                                                        $t('payments.types.bad_debt') ||
-                                                        'ديون معدومة'
-                                                    }}: {{ formatPrice(order.bad_debt || 0) }}
+                                                    {{ $t('payments.types.bad_debt') }}:
+                                                    {{ formatPrice(order.bad_debt || 0) }}
                                                 </span>
                                             </div>
                                         </td>
@@ -1816,42 +1806,37 @@
                                         <th
                                             class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase whitespace-nowrap align-middle"
                                         >
-                                            {{ $t('invoices.invoice_number') || 'رقم الفاتورة' }}
+                                            {{ $t('invoices.invoice_number') }}
                                         </th>
                                         <th
                                             class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase whitespace-nowrap align-middle"
                                         >
-                                            {{
-                                                $t('invoices.columns.issue_date') || 'تاريخ الإصدار'
-                                            }}
+                                            {{ $t('invoices.columns.issue_date') }}
                                         </th>
                                         <th
                                             class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase whitespace-nowrap align-middle"
                                         >
-                                            {{
-                                                $t('invoices.columns.source') ||
-                                                'أمر العمل / المصدر'
-                                            }}
+                                            {{ $t('invoices.columns.source') }}
                                         </th>
                                         <th
                                             class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase whitespace-nowrap align-middle"
                                         >
-                                            {{ $t('invoices.columns.status') || 'الحالة' }}
+                                            {{ $t('invoices.columns.status') }}
                                         </th>
                                         <th
                                             class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase whitespace-nowrap align-middle"
                                         >
-                                            {{ $t('invoices.columns.total') || 'الإجمالي' }}
+                                            {{ $t('invoices.columns.total') }}
                                         </th>
                                         <th
                                             class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase whitespace-nowrap align-middle"
                                         >
-                                            {{ $t('invoices.columns.paid') || 'المدفوع' }}
+                                            {{ $t('invoices.columns.paid') }}
                                         </th>
                                         <th
                                             class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase whitespace-nowrap align-middle"
                                         >
-                                            {{ $t('invoices.columns.balance') || 'المتبقي' }}
+                                            {{ $t('invoices.columns.balance') }}
                                         </th>
                                     </tr>
                                 </thead>
@@ -1886,10 +1871,7 @@
                                                         size="sm"
                                                     />
                                                     <span class="text-xs text-gray-500">
-                                                        {{
-                                                            $t('work_orders.work_order') ||
-                                                            'أمر عمل'
-                                                        }}:
+                                                        {{ $t('work_orders.work_order') }}:
                                                         <span
                                                             class="font-semibold text-amber-600 dark:text-amber-400"
                                                         >
@@ -1960,7 +1942,7 @@
                                 </svg>
                             </div>
                             <p class="text-gray-500 dark:text-gray-400 mb-4">
-                                {{ $t('invoices.no_invoices') || 'لا توجد فواتير للعميل' }}
+                                {{ $t('invoices.no_invoices') }}
                             </p>
                         </div>
                     </div>

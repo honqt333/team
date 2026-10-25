@@ -31,16 +31,10 @@
                         </div>
                         <div>
                             <h2 class="text-xl font-bold text-gray-900 dark:text-white">
-                                {{
-                                    $t('purchasing.suppliers.import_title') ||
-                                    'استيراد الموردين من إكسل'
-                                }}
+                                {{ $t('purchasing.suppliers.import_title') }}
                             </h2>
                             <p class="text-sm text-gray-500 dark:text-gray-400">
-                                {{
-                                    $t('purchasing.suppliers.import_subtitle') ||
-                                    'إضافة قائمة موردين جماعية عبر ملف XLSX / CSV'
-                                }}
+                                {{ $t('purchasing.suppliers.import_subtitle') }}
                             </p>
                         </div>
                     </div>
@@ -75,28 +69,19 @@
                                 d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
                             />
                         </svg>
-                        {{ $t('customers.import.instructions_title') || 'تعليمات الاستيراد' }}
+                        {{ $t('customers.import.instructions_title') }}
                     </h3>
                     <ol
                         class="text-sm text-orange-800 dark:text-orange-200 space-y-1.5 list-decimal list-inside"
                     >
                         <li>
-                            {{
-                                $t('customers.import.step_1') ||
-                                'قم بتحميل النموذج المخصص وتعبئة بيانات الموردين'
-                            }}
+                            {{ $t('customers.import.step_1') }}
                         </li>
                         <li>
-                            {{
-                                $t('customers.import.step_2') ||
-                                'تأكد من إدخال اسم المورد والشخص المسؤول بشكل صحيح'
-                            }}
+                            {{ $t('customers.import.step_2') }}
                         </li>
                         <li>
-                            {{
-                                $t('customers.import.step_3') ||
-                                'احفظ الملف بصيغة XLSX ثم ارفعه هنا للبدء في الاستيراد'
-                            }}
+                            {{ $t('customers.import.step_3') }}
                         </li>
                     </ol>
                 </div>
@@ -106,15 +91,15 @@
                     class="mb-6 p-4 rounded-2xl bg-amber-50 dark:bg-amber-900/20 border border-amber-100 dark:border-amber-800/30"
                 >
                     <h4 class="font-bold text-amber-900 dark:text-amber-300 mb-2 text-sm">
-                        {{ $t('customers.import.required_fields') || 'الحقول الأساسية' }}
+                        {{ $t('customers.import.required_fields') }}
                     </h4>
                     <div class="text-sm text-amber-800 dark:text-amber-200 space-y-1">
                         <p>
-                            <strong>{{ $t('purchasing.suppliers.name') || 'اسم المورد' }}</strong>
-                            - {{ $t('customers.import.required') || 'مطلوب وإلزامي' }}
+                            <strong>{{ $t('purchasing.suppliers.name') }}</strong>
+                            - {{ $t('customers.import.required') }}
                         </p>
                         <p>
-                            <strong>{{ $t('purchasing.suppliers.type') || 'النوع' }}</strong>
+                            <strong>{{ $t('purchasing.suppliers.type') }}</strong>
                             - parts (قطع غيار) أو services (خدمات)
                         </p>
                     </div>
@@ -133,7 +118,7 @@
                             d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
                         />
                     </svg>
-                    {{ $t('purchasing.suppliers.download_template') || 'تحميل نموذج إكسل الفارغ' }}
+                    {{ $t('purchasing.suppliers.download_template') }}
                 </a>
 
                 <!-- File Upload Area -->
@@ -175,16 +160,10 @@
                             </svg>
                         </div>
                         <p class="text-gray-600 dark:text-gray-400">
-                            {{
-                                $t('customers.import.drag_drop') ||
-                                'اسحب وأفلت الملف هنا، أو انقر للاختيار'
-                            }}
+                            {{ $t('customers.import.drag_drop') }}
                         </p>
                         <p class="text-xs text-gray-400 dark:text-gray-500">
-                            {{
-                                $t('customers.import.supported_formats') ||
-                                'الصيغ المدعومة: XLSX, XLS, CSV'
-                            }}
+                            {{ $t('customers.import.supported_formats') }}
                         </p>
                     </div>
 
@@ -215,7 +194,7 @@
                             @click.stop="removeFile"
                             class="text-xs text-red-500 hover:text-red-700 font-bold"
                         >
-                            {{ $t('common.delete') || 'إزالة الملف' }}
+                            {{ $t('common.delete') }}
                         </button>
                     </div>
                 </div>
@@ -268,7 +247,7 @@
                         @click="close"
                         class="px-5 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 text-sm font-bold transition-all"
                     >
-                        {{ $t('common.cancel') || 'إلغاء' }}
+                        {{ $t('common.cancel') }}
                     </button>
                     <button
                         type="button"
@@ -299,8 +278,8 @@
                         <span>
                             {{
                                 uploading
-                                    ? $t('common.uploading') || 'جاري الرفع...'
-                                    : $t('customers.import.start_import') || 'بدء الاستيراد'
+                                    ? $t('common.uploading')
+                                    : $t('customers.import.start_import')
                             }}
                         </span>
                     </button>
