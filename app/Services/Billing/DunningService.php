@@ -11,6 +11,7 @@ use App\Models\Billing\SubscriptionInvoice;
 use App\Models\Tenant;
 use App\Services\Invoice\SubscriptionInvoiceService;
 use App\Services\Messaging\SmsService;
+use App\Services\Messaging\WhatsappService;
 use App\Services\NotificationService;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Carbon;
@@ -52,13 +53,14 @@ class DunningService
      * an un-sent (or un-attempted) active tier ready to fire.
      *
      * Returned as a Collection of:
-     *   ['invoice' => SubscriptionInvoice, 'tier_key' => 'tier_1']
+     *   ['invoice' => SubscriptionInvoice, 'tier_key' => 'tier_1',
+     *    'config' => DunningConfig, 'days_overdue' => int]
      *
      * This is the candidate list the cron iterates over. The
      * dispatcher below turns each entry into one or more send
      * jobs (one per channel in the tier's channel matrix).
      *
-     * @return array<int, array{invoice: SubscriptionInvoice, tier_key: string}>
+     * @return array<int, array{invoice: SubscriptionInvoice, tier_key: string, config: DunningConfig, days_overdue: int}>
      */
     public function findCandidates(): array
     {
@@ -509,11 +511,19 @@ EOT;
         }
 
         // WhatsApp gateway comes from the tenant's integration
-        // settings. For Phase 6 we just throw if no integration is
-        // configured; the dispatcher will mark this as failed and
-        // continue to the next channel.
-        $sms = app(SmsService::class);
-        $sms->sendWhatsApp($tenant->phone, $message['body']);
+        // settings. WhatsappService::sendText() throws when no
+        // active integration is configured; the dispatcher will
+        // mark this as failed and continue to the next channel.
+        //
+        // Note: this previously resolved SmsService and called
+        // SmsService::sendWhatsApp(), which does not exist —
+        // SmsService only exposes send(). The resulting Error was
+        // caught by the dispatcher's `catch (Throwable)`, so the
+        // WhatsApp channel was silently recorded as FAILED and
+        // retried, and no reminder was ever delivered over
+        // WhatsApp. The tenant was never notified by this channel.
+        $whatsapp = app(WhatsappService::class);
+        $whatsapp->sendText($tenant->phone, $message['body'], $tenant->id);
     }
 
     /**

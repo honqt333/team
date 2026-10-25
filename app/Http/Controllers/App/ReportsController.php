@@ -260,15 +260,21 @@ class ReportsController extends Controller
             $query->whereBetween('payment_date', [$from, $to]);
         }
 
-        if (! empty($method) && $method !== 'all') {
+        // $method, $type and $customerId were normalised to non-empty
+        // strings ('all' fallback) a few lines above, so the empty()
+        // guards that used to sit in front of these comparisons were
+        // always true and could never filter anything out. Dropping
+        // them is behaviour-preserving and lets PHPStan verify the
+        // remaining conditions.
+        if ($method !== 'all') {
             $query->where('payment_method', $method);
         }
 
-        if (! empty($type) && $type !== 'all') {
+        if ($type !== 'all') {
             $query->where('type', $type);
         }
 
-        if (! empty($customerId) && $customerId !== 'all') {
+        if ($customerId !== 'all') {
             $query->where(function ($q) use ($customerId) {
                 $q->whereHas('invoice', fn ($iq) => $iq->where('customer_id', $customerId))
                     ->orWhereHas('workOrder', fn ($wq) => $wq->where('customer_id', $customerId));

@@ -122,7 +122,7 @@ class CustomerPortalOtpService
         if ($phone === null) {
             // Even malformed input consumes a rate slot so
             // attackers can't probe with garbage.
-            $this->hitPhoneLimit($tenant, $phoneInput ?? 'invalid');
+            $this->hitPhoneLimit($tenant, $phoneInput);
             $this->hitIpLimit($ip);
 
             return OtpRequestResult::noCustomer();

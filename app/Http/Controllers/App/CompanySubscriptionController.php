@@ -367,7 +367,7 @@ class CompanySubscriptionController extends Controller
             // Some gateways (e.g. Tabby, Tamara) return a "soft" failure
             // without throwing — they return form_data with status=rejected
             // or no payment_id at all. Treat that as a failure too.
-            if (! is_array($formData) || empty($formData)) {
+            if (empty($formData)) {
                 DB::rollBack();
 
                 return response()->json([

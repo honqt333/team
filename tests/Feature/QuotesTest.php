@@ -66,12 +66,23 @@ class QuotesTest extends TestCase
             'min_price' => 80,
         ]);
 
-        // Create permissions
-        Permission::create(['name' => 'quotes.view', 'guard_name' => 'web']);
-        Permission::create(['name' => 'quotes.create', 'guard_name' => 'web']);
-        Permission::create(['name' => 'quotes.update', 'guard_name' => 'web']);
-        Permission::create(['name' => 'quotes.delete', 'guard_name' => 'web']);
-        Permission::create(['name' => 'quotes.approve', 'guard_name' => 'web']);
+        // Create permissions.
+        //
+        // These permissions are already seeded by the
+        // 2026_10_22_190500_seed_missing_crm_and_website_permissions
+        // migration (it seeds every entry of Permissions::all() via
+        // Permission::firstOrCreate). Using Permission::create() here
+        // therefore threw PermissionAlreadyExists and took down all
+        // seven tests in this file — the whole quote -> approval ->
+        // work order path was left untested.
+        //
+        // firstOrCreate keeps the test self-contained: it works both
+        // when the migration has seeded the row and when it has not.
+        Permission::firstOrCreate(['name' => 'quotes.view', 'guard_name' => 'web']);
+        Permission::firstOrCreate(['name' => 'quotes.create', 'guard_name' => 'web']);
+        Permission::firstOrCreate(['name' => 'quotes.update', 'guard_name' => 'web']);
+        Permission::firstOrCreate(['name' => 'quotes.delete', 'guard_name' => 'web']);
+        Permission::firstOrCreate(['name' => 'quotes.approve', 'guard_name' => 'web']);
 
         // Set the team id for permissions based on the user's tenant
         app(PermissionRegistrar::class)->setPermissionsTeamId($this->tenant->id);
