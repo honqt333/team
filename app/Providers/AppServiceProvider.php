@@ -13,6 +13,7 @@ use App\Models\Department;
 use App\Models\HR\Attendance;
 use App\Models\HR\Employee;
 use App\Models\HR\EmployeeContract;
+use App\Models\HR\EmployeeDocument;
 use App\Models\HR\Leave;
 use App\Models\HR\Payroll;
 use App\Models\Integration\Integration;
@@ -42,6 +43,7 @@ use App\Policies\CustomerPolicy;
 use App\Policies\DepartmentPolicy;
 use App\Policies\EmployeeContractPolicy;
 use App\Policies\HR\AttendancePolicy;
+use App\Policies\HR\EmployeeDocumentPolicy;
 use App\Policies\HR\EmployeePolicy;
 use App\Policies\LeavePolicy;
 use App\Policies\PaymentPolicy;
@@ -200,6 +202,7 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(Employee::class, EmployeePolicy::class);
         Gate::policy(Attendance::class, AttendancePolicy::class);
         Gate::policy(EmployeeContract::class, EmployeeContractPolicy::class);
+        Gate::policy(EmployeeDocument::class, EmployeeDocumentPolicy::class);
 
         // Purchasing Policies
         // PurchaseInvoicePolicy covers both PurchaseInvoice and PurchaseReturnInvoice

@@ -875,6 +875,7 @@ Route::prefix('app')->middleware(['auth', 'verified', 'tenant.active', 'center.c
 
         // Documents
         Route::post('/employees/{employee}/documents', [EmployeeDocumentsController::class, 'store'])->name('employees.documents.store');
+        Route::get('/documents/{document}/download', [EmployeeDocumentsController::class, 'download'])->name('documents.download');
         Route::delete('/documents/{document}', [EmployeeDocumentsController::class, 'destroy'])->name('documents.destroy');
 
         // Contracts

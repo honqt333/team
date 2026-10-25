@@ -7,41 +7,162 @@ namespace App\Http\Controllers\App\HR;
 use App\Http\Controllers\Controller;
 use App\Models\HR\Employee;
 use App\Models\HR\EmployeeDocument;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
-/** @bypass-authorization-scanner - Protected at route middleware level (auth + center.context + EnsureTwoFactorEnabled) */
 class EmployeeDocumentsController extends Controller
 {
+    use AuthorizesRequests;
+
+    /**
+     * The disk employee documents are stored on.
+     *
+     * These files are private HR records (contracts, national IDs,
+     * medical certificates, visa copies). They must NOT live on the
+     * 'public' disk: that disk is symlinked to public/storage and
+     * served directly by Apache, which means a stored .php file would
+     * be executed by the web server and a stored .html file would run
+     * script in the browser of anyone holding the URL — no Laravel
+     * route, no session, no permission check involved.
+     *
+     * The 'local' disk is rooted at storage/app/private and is not
+     * reachable over HTTP, so every read has to go through an
+     * authorized controller action (see download()).
+     */
+    private const DISK = 'local';
+
+    /**
+     * Directory (on the private disk) where employee documents live.
+     */
+    private const DIRECTORY = 'employee-documents';
+
+    /**
+     * Allowed file types for an employee document.
+     *
+     * Employee documents are scanned IDs, contracts and certificates —
+     * documents and images, never executables or scripts. The list is
+     * deliberately narrow: the mime type is validated by Laravel (it
+     * inspects the file contents, not the client-supplied name) and
+     * the extension is then normalised to the detected type so a
+     * file named "evil.php" can never keep the .php extension.
+     */
+    private const ALLOWED_MIMES = [
+        'pdf',
+        'jpeg',
+        'jpg',
+        'png',
+        'webp',
+    ];
+
+    /**
+     * Maximum upload size in kilobytes (10 MB).
+     */
+    private const MAX_KILOBYTES = 10240;
+
+    /**
+     * Store a new document for an employee.
+     */
     public function store(Request $request, Employee $employee)
     {
-        $request->validate([
+        $this->authorize('create', EmployeeDocument::class);
+
+        $validated = $request->validate([
             'title' => 'required|string|max:255',
             'type' => 'required|string',
-            'file' => 'required|file|max:10240', // 10MB
+            'file' => 'required|file|mimes:'.implode(',', self::ALLOWED_MIMES).'|max:'.self::MAX_KILOBYTES,
             'expiry_date' => 'nullable|date',
             'notes' => 'nullable|string',
         ]);
 
-        $path = $request->file('file')->store('employee-documents', 'public');
+        $file = $request->file('file');
+
+        // Store on the private disk under a tenant-scoped path so one
+        // tenant can never guess or enumerate another tenant's files.
+        $path = $file->store(
+            self::DIRECTORY.'/'.$employee->tenant_id.'/'.$employee->id,
+            self::DISK
+        );
 
         $employee->documents()->create([
             'tenant_id' => $employee->tenant_id,
-            'title' => $request->title,
-            'type' => $request->type,
+            'title' => $validated['title'],
+            'type' => $validated['type'],
             'file_path' => $path,
-            'expiry_date' => $request->expiry_date,
-            'notes' => $request->notes,
+            'expiry_date' => $validated['expiry_date'] ?? null,
+            'notes' => $validated['notes'] ?? null,
         ]);
 
         return back()->with('success', __('common.saved_success'));
     }
 
+    /**
+     * Download a document.
+     *
+     * The file is streamed through this authorized action with
+     * Content-Disposition: attachment so the browser never renders it
+     * inline (which would turn an uploaded .html into stored XSS in
+     * the application's own origin), plus X-Content-Type-Options:
+     * nosniff so the browser cannot be talked into treating a PDF as
+     * HTML.
+     */
+    public function download(EmployeeDocument $document): StreamedResponse
+    {
+        $this->authorize('view', $document);
+
+        if (! $document->file_path || ! Storage::disk(self::DISK)->exists($document->file_path)) {
+            abort(404, __('hr.documents.not_found'));
+        }
+
+        $filename = $this->downloadFilename($document);
+
+        return Storage::disk(self::DISK)->download($document->file_path, $filename, [
+            'Content-Type' => 'application/octet-stream',
+            'X-Content-Type-Options' => 'nosniff',
+            'Cache-Control' => 'private, no-store',
+        ]);
+    }
+
+    /**
+     * Delete a document and its stored file.
+     */
     public function destroy(EmployeeDocument $document)
     {
-        Storage::disk('public')->delete($document->file_path);
+        $this->authorize('delete', $document);
+
+        if ($document->file_path) {
+            Storage::disk(self::DISK)->delete($document->file_path);
+        }
+
         $document->delete();
 
         return back()->with('success', __('common.deleted_success'));
+    }
+
+    /**
+     * Build a safe download filename.
+     *
+     * The stored path is generated by Laravel and is already safe, but
+     * the title is user input, so it is sanitised here: no directory
+     * separators, no control characters, and a bounded length.
+     */
+    private function downloadFilename(EmployeeDocument $document): string
+    {
+        $base = pathinfo((string) $document->file_path, PATHINFO_FILENAME);
+        $title = preg_replace('/[^\p{L}\p{N}._-]+/u', '-', (string) $document->title);
+        $title = trim((string) $title, '-.');
+
+        if ($title === '') {
+            $title = $base;
+        }
+
+        // Keep the extension of the stored file so the browser gets a
+        // sensible name (e.g. "iqama.pdf" rather than "iqama").
+        $extension = pathinfo((string) $document->file_path, PATHINFO_EXTENSION);
+
+        $name = mb_substr($title, 0, 120);
+
+        return $extension !== '' ? $name.'.'.$extension : $name;
     }
 }
