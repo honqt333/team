@@ -7,6 +7,7 @@ namespace Tests\Feature;
 use App\Models\Center;
 use App\Models\Customer;
 use App\Models\Department;
+use App\Models\Service;
 use App\Models\Tenant;
 use App\Models\User;
 use App\Models\Vehicle;
@@ -459,6 +460,42 @@ class WorkshopBoardTest extends TestCase
                 ->where('columns.in_progress.0.id', $datedNear->id)
                 ->where('columns.in_progress.1.id', $datedFar->id)
                 ->where('columns.in_progress.2.id', $undated->id)
+        );
+    }
+
+    public function test_board_eager_loads_service_and_department_with_bilingual_names(): void
+    {
+        $user = $this->createUserWithPermissions(['crm.work_orders.view']);
+        $workOrder = $this->createWorkOrder($user);
+        [$customer, $vehicle, $department] = $this->createFixtures($user);
+
+        $service = Service::create([
+            'tenant_id' => $user->tenant_id,
+            'center_id' => $user->current_center_id,
+            'department_id' => $department->id,
+            'name_ar' => 'خدمة صيانة فرامل',
+            'name_en' => 'Brake Maintenance Service',
+            'base_price' => 150,
+            'type' => 'internal',
+            'is_active' => true,
+        ]);
+
+        $item = $this->addItem($workOrder, WorkOrderItem::STATUS_IN_PROGRESS, [
+            'service_id' => $service->id,
+            'department_id' => $department->id,
+            'title' => 'فرامل أمامية',
+        ]);
+
+        $response = $this->actingAs($user)->get('/app/workshop');
+
+        $expectedServiceName = app()->getLocale() === 'ar' ? 'خدمة صيانة فرامل' : 'Brake Maintenance Service';
+        $expectedDepartmentName = app()->getLocale() === 'ar' ? 'قسم الورشة' : 'Workshop';
+        $response->assertStatus(200);
+        $response->assertInertia(
+            fn ($page) => $page
+                ->where('columns.in_progress.0.id', $item->id)
+                ->where('columns.in_progress.0.service_name', $expectedServiceName)
+                ->where('columns.in_progress.0.department_name', $expectedDepartmentName)
         );
     }
 }

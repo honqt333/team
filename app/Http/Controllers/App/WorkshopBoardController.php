@@ -75,8 +75,8 @@ class WorkshopBoardController extends Controller
                 'workOrder:id,tenant_id,center_id,code,status,expected_end_date,entry_date,hold_reason,customer_id,vehicle_id',
                 'workOrder.customer:id,tenant_id,center_id,name',
                 'workOrder.vehicle:id,tenant_id,center_id,plate_number,customer_id,make_id,model_id,year',
-                'service:id,tenant_id,center_id,name,department_id',
-                'department:id,tenant_id,center_id,name',
+                'service:id,tenant_id,center_id,name_ar,name_en,department_id',
+                'department:id,tenant_id,center_id,name_ar,name_en',
                 'technicians:id,name',
                 'laborEntries' => fn ($q) => $q->with('user:id,name'),
             ])
