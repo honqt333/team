@@ -62,6 +62,30 @@ class VehicleController
         $vehicles = Vehicle::query()
             ->where('tenant_id', $user->tenant_id)
             ->with(['customer', 'make', 'model'])
+            // Compute the customer's outstanding balance as a correlated
+            // subquery in the MAIN query instead of calling
+            // Customer::getOutstandingBalance() once per vehicle inside
+            // the loop below. The old approach issued one extra
+            // aggregate query per row (N+1): 20 vehicles on a page = 21
+            // queries instead of 2.
+            //
+            // The subquery mirrors getOutstandingBalance() exactly:
+            //   - excludes cancelled invoices
+            //   - excludes soft-deleted invoices
+            //   - sums (total_incl_tax - total_paid)
+            // withoutGlobalScope('center_scoped') is required for the
+            // same reason as in CustomerController::buildCustomerQuery():
+            // a balance is a tenant-wide figure, so invoices from every
+            // center of the tenant must be included.
+            ->select('vehicles.*')
+            ->selectSub(
+                Invoice::query()
+                    ->withoutGlobalScope('center_scoped')
+                    ->whereColumn('invoices.customer_id', 'vehicles.customer_id')
+                    ->whereNotIn('status', ['cancelled'])
+                    ->selectRaw('COALESCE(SUM(total_incl_tax - total_paid), 0)'),
+                'customer_balance'
+            )
             ->when($request->search, function ($query, $search) {
                 $arabicToEnglish = [
                     'أ' => 'A', 'ب' => 'B', 'ح' => 'J', 'د' => 'D', 'ر' => 'R', 'س' => 'S',
@@ -89,7 +113,11 @@ class VehicleController
             if ($vehicle->customer) {
                 $customer = $vehicle->customer;
                 $creditLimit = (float) ($customer->credit_limit ?? 0);
-                $balance = $customer->getOutstandingBalance();
+                // The balance was already computed by the correlated
+                // subquery in the main query (see apiIndex). Reading it
+                // from there instead of calling getOutstandingBalance()
+                // keeps this endpoint at a constant number of queries.
+                $balance = (float) ($vehicle->customer_balance ?? 0);
                 $customer->balance = $balance;
                 $customer->credit_limit = $creditLimit;
                 $customer->is_credit_exceeded = $creditLimit > 0 && $balance >= $creditLimit;

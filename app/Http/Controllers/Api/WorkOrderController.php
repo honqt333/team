@@ -6,6 +6,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Customer;
+use App\Models\Invoice;
 use App\Models\Vehicle;
 use App\Models\WorkOrder;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
@@ -118,6 +119,18 @@ class WorkOrderController extends Controller
         $plateTerms = $this->getPlateSearchTerms($query);
 
         $vehicles = Vehicle::with(['customer', 'make', 'model'])
+            // Fetch the customer's outstanding balance with a correlated
+            // subquery instead of calling getOutstandingBalance() once
+            // per vehicle inside the loop below (N+1).
+            ->select('vehicles.*')
+            ->selectSub(
+                Invoice::query()
+                    ->withoutGlobalScope('center_scoped')
+                    ->whereColumn('invoices.customer_id', 'vehicles.customer_id')
+                    ->whereNotIn('status', ['cancelled'])
+                    ->selectRaw('COALESCE(SUM(total_incl_tax - total_paid), 0)'),
+                'customer_balance'
+            )
             ->where(function ($q) use ($query, $normalizedQuery, $phoneSuffix, $plateTerms) {
                 // Plate number search (strip spaces/hyphens on DB side and match terms)
                 $q->where(function ($pq) use ($plateTerms) {
@@ -141,17 +154,28 @@ class WorkOrderController extends Controller
             ->limit(10)
             ->get();
 
-        // Check for open work orders and attach info
-        $vehicles->each(function ($vehicle) {
-            $openWorkOrder = WorkOrder::where('vehicle_id', $vehicle->id)
-                ->whereIn('status', ['draft', 'open', 'in_progress'])
-                ->first(['id', 'code', 'status']);
+        // Fetch every open work order for the matched vehicles in ONE
+        // query instead of one query per vehicle (N+1).
+        $vehicleIds = $vehicles->pluck('id')->all();
+
+        $openWorkOrdersByVehicle = WorkOrder::query()
+            ->whereIn('vehicle_id', $vehicleIds)
+            ->whereIn('status', ['draft', 'open', 'in_progress'])
+            ->orderBy('id')
+            ->get(['id', 'code', 'status', 'vehicle_id'])
+            ->groupBy('vehicle_id');
+
+        // Attach the open work order info and the credit figures.
+        $vehicles->each(function ($vehicle) use ($openWorkOrdersByVehicle) {
+            $openWorkOrder = $openWorkOrdersByVehicle->get($vehicle->id)?->first();
 
             $vehicle->has_open_work_order = $openWorkOrder !== null;
             $vehicle->open_work_order = $openWorkOrder;
 
             if ($vehicle->customer) {
-                $balance = $vehicle->customer->getOutstandingBalance();
+                // The balance was already computed by the correlated
+                // subquery in the main query (see vehicleSearch).
+                $balance = (float) ($vehicle->customer_balance ?? 0);
                 $creditLimit = (float) ($vehicle->customer->credit_limit ?? 0);
                 $vehicle->customer->balance = $balance;
                 $vehicle->customer->credit_limit = $creditLimit;
