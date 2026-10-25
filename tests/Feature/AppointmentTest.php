@@ -456,6 +456,34 @@ class AppointmentTest extends TestCase
             ->assertStatus(403);
     }
 
+    public function test_authorized_user_can_view_appointments_index_with_bilingual_services(): void
+    {
+        $owner = $this->createUserWithPermissions(['crm.appointments.manage']);
+        [$customer, $vehicle, $bay, $tech] = $this->buildFixture($owner);
+
+        $service = Service::create([
+            'tenant_id' => $owner->tenant_id,
+            'center_id' => $owner->current_center_id,
+            'name_ar' => 'تغيير زيت وفلتر',
+            'name_en' => 'Oil & Filter Change',
+            'base_price' => 200,
+            'duration_value' => 45,
+            'duration_unit' => 'minute',
+            'type' => 'internal',
+            'is_active' => true,
+        ]);
+
+        $response = $this->actingAs($owner)->get('/app/appointments');
+
+        $response->assertStatus(200);
+        $response->assertInertia(fn ($page) => $page
+            ->component('Appointments/Index')
+            ->has('services', 1)
+            ->where('services.0.id', $service->id)
+            ->where('services.0.duration_value', 45)
+        );
+    }
+
     public function test_bay_from_other_center_is_rejected(): void
     {
         $owner = $this->createUserWithPermissions(['crm.appointments.manage']);

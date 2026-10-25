@@ -47,7 +47,7 @@ class AppointmentController extends Controller
                 'vehicle:id,plate_number,customer_id',
                 'serviceBay:id,name',
                 'assignedUser:id,name',
-                'services:id,name,base_price',
+                'services:id,name_ar,name_en,base_price',
             ]);
 
         if ($date = $request->query('date')) {
@@ -84,11 +84,12 @@ class AppointmentController extends Controller
             ->get(['id', 'name'])
             ->map(fn ($u) => ['id' => $u->id, 'name' => $u->name]);
 
+        $nameCol = app()->getLocale() === 'en' ? 'name_en' : 'name_ar';
         $services = Service::query()
             ->where('center_id', $centerId)
             ->where('is_active', true)
-            ->orderBy('name')
-            ->get(['id', 'name', 'base_price', 'duration_value', 'duration_unit']);
+            ->orderBy($nameCol)
+            ->get(['id', 'name_ar', 'name_en', 'base_price', 'duration_value', 'duration_unit']);
 
         return Inertia::render('Appointments/Index', [
             'appointments' => $appointments,
