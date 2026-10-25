@@ -87,6 +87,14 @@ return [
             'cancel_failed' => 'لم نتمكن من إلغاء هذا الموعد. حاول مرة أخرى أو تواصل مع الفرع.',
         ],
     ],
+    'otp' => [
+        // OTP body delivered via the SystemSmsOtpChannel.
+        // The channel calls __('customer_portal.otp.body', ['code' => $code]),
+        // so this key MUST live at this exact path — a flat
+        // 'otp.body' key inside the 'sms' array does not resolve
+        // and the customer would receive the raw key string.
+        'body' => 'رمز التحقق الخاص بك في :site_name هو: :code. ينتهي خلال 10 دقائق.',
+    ],
     'booking' => [
         'title' => 'احجز موعداً',
         'subtitle' => 'اختر الفرع والمركبة والخدمات التي تحتاجها، والوقت المناسب لك.',
@@ -151,7 +159,6 @@ return [
         'reminder_24h' => 'تذكير: موعدك في :site_name (:branch_name) غداً الساعة :time. المرجع: :ref.',
         'reminder_2h' => 'تذكير: موعدك في :site_name (:branch_name) يبدأ اليوم الساعة :time. المرجع: :ref.',
         'otp' => 'رمز التحقق الخاص بك في :site_name هو: :code. ينتهي خلال 10 دقائق.',
-        'otp.body' => 'رمز التحقق الخاص بك في :site_name هو: :code. ينتهي خلال 10 دقائق.',
         'site_name_fallback' => 'مركز الخدمة',
     ],
 ];

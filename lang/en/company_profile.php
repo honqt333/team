@@ -223,6 +223,7 @@ return [
         'gateway_rejected' => 'The payment gateway rejected the request. Please try again or use a different payment method.',
         'gateway_unavailable' => 'The payment gateway is currently unavailable. Please try again shortly.',
         'payment_in_progress' => 'You already have an in-flight payment for ":plan" — complete it or cancel before starting a new one.',
+        'payment_initiated' => 'Your subscription payment has been initiated. Complete the payment steps to finish.',
         'pending_status' => 'Pending request',
         'promo_exhausted' => 'This promo code has reached its maximum usage',
         'promo_invalid' => 'Invalid or expired promo code',

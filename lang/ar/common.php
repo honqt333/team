@@ -156,6 +156,7 @@ return [
     'saved_successfully' => 'تم الحفظ بنجاح',
     'saving' => 'جاري الحفظ...',
     'search' => 'بحث',
+    'secure_payment_note' => 'الدفع آمن ومشفر (PCI DSS)',
     'search_permissions' => 'البحث في الصلاحيات',
     'select' => 'اختيار',
     'select_all' => 'تحديد الكل',

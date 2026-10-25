@@ -156,6 +156,7 @@ return [
     'saved_successfully' => 'Saved successfully',
     'saving' => 'Saving...',
     'search' => 'Search',
+    'secure_payment_note' => 'Secure, encrypted payment (PCI DSS)',
     'search_permissions' => 'Search permissions',
     'select' => 'Select',
     'select_all' => 'Select All',

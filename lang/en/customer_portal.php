@@ -87,6 +87,14 @@ return [
             'cancel_failed' => 'We could not cancel this appointment. Please try again or contact the center.',
         ],
     ],
+    'otp' => [
+        // OTP body delivered via the SystemSmsOtpChannel.
+        // The channel calls __('customer_portal.otp.body', ['code' => $code]),
+        // so this key MUST live at this exact path — a flat
+        // 'otp.body' key inside the 'sms' array does not resolve
+        // and the customer would receive the raw key string.
+        'body' => 'Your verification code at :site_name is: :code. It expires in 10 minutes.',
+    ],
     'booking' => [
         'title' => 'Book an appointment',
         'subtitle' => 'Pick a branch, a vehicle, the services you need, and a time that works for you.',
@@ -159,7 +167,6 @@ return [
         // local $code variable that is unset immediately
         // after the channel returns.
         'otp' => 'Your :site_name verification code is: :code. The code expires in 10 minutes.',
-        'otp.body' => 'Your :site_name verification code is: :code. The code expires in 10 minutes.',
         'site_name_fallback' => 'the service center',
     ],
 ];

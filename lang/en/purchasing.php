@@ -19,6 +19,8 @@ return [
     ],
     'invoices' => [
         'auto_generated_from_grn' => 'Auto-generated from GRN: :code',
+        'remaining' => 'Remaining to Pay',
+        'total' => 'Invoice Total',
         'code' => 'Code',
         'created' => 'Created',
         'date' => 'Date',
@@ -133,6 +135,7 @@ return [
         'empty' => 'Empty',
         'iban' => 'IBAN',
         'invoices' => 'Invoices',
+        'no_open_invoices' => 'There are no open invoices for this supplier.',
         'map' => [
             'click_hint' => 'Click Hint',
         ],

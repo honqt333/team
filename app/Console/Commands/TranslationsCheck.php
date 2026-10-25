@@ -20,6 +20,9 @@ use RecursiveIteratorIterator;
  *   php artisan translations:check --fix            # print a stub for missing keys (do not write)
  *   php artisan translations:check --strict         # exit 1 on any missing key
  *   php artisan translations:check --vue             # also scan Vue i18n JSON files
+ *   php artisan translations:check --source=php      # only count lang/{en,ar}/*.php as definitions
+ *   php artisan translations:check --source=vue      # only count resources/js/i18n/lang/*.json
+ *   php artisan translations:check --source=both     # count both (default)
  */
 class TranslationsCheck extends Command
 {
@@ -30,6 +33,7 @@ class TranslationsCheck extends Command
                             {--strict : Exit with code 1 when missing keys are found}
                             {--vue : Also scan Vue i18n JSON files (resources/js/i18n/lang/*.json)}
                             {--vue-only : Only check Vue i18n JSON files}
+                            {--source= : Which definition sources count as "defined" (php|vue|both). Default: both}
                             {--no-placeholders : Skip the AR-placeholder value check}';
 
     protected $description = 'Scan codebase for translation key usages and report keys that are not yet defined in lang/{en,ar}/*.php. Also flags AR placeholder values like "[AR] foo.bar".';
@@ -54,6 +58,41 @@ class TranslationsCheck extends Command
         'storage/logs', 'public/build', 'bootstrap/cache',
     ];
 
+    /**
+     * Which definition sources count as "defined" for the missing-key
+     * comparison: 'php', 'vue', or 'both' (default).
+     */
+    private string $source = 'both';
+
+    /**
+     * Should lang/{en,ar}/*.php count as a definition source?
+     */
+    private function usePhpSource(): bool
+    {
+        return $this->source === 'php' || $this->source === 'both';
+    }
+
+    /**
+     * Should resources/js/i18n/lang/*.json count as a definition source?
+     */
+    private function useVueSource(): bool
+    {
+        return $this->source === 'vue' || $this->source === 'both';
+    }
+
+    /**
+     * Human-readable description of the active definition sources, so the
+     * reported "missing" number is self-documenting.
+     */
+    private function describeSource(): string
+    {
+        return match ($this->source) {
+            'php' => 'lang/{en,ar}/*.php',
+            'vue' => 'resources/js/i18n/lang/*.json',
+            default => 'lang/{en,ar}/*.php + resources/js/i18n/lang/*.json',
+        };
+    }
+
     public function handle(): int
     {
         $base = base_path();
@@ -64,6 +103,19 @@ class TranslationsCheck extends Command
         $withVue = (bool) $this->option('vue');
         $vueOnly = (bool) $this->option('vue-only');
         $skipPlaceholders = (bool) $this->option('no-placeholders');
+        $source = strtolower((string) $this->option('source'));
+
+        if (! in_array($source, ['php', 'vue', 'both'], true)) {
+            $source = 'both';
+        }
+
+        // --vue-only implies the Vue JSON files are the only source
+        // that matters for the missing-key comparison.
+        if ($vueOnly) {
+            $source = 'vue';
+        }
+
+        $this->source = $source;
 
         $locales = $filterLocale ? [$filterLocale] : ['en', 'ar'];
 
@@ -181,7 +233,23 @@ class TranslationsCheck extends Command
             $missing[$locale] = [];
 
             foreach ($usages as $key => $files) {
-                if (! isset($definedKeys[$locale][$key])) {
+                // A key counts as DEFINED when it exists in any of the
+                // selected definition sources. The Vue i18n JSON files
+                // (resources/js/i18n/lang/*.json) are a first-class
+                // source of truth for keys consumed by $t() in Vue
+                // components — ignoring them produced ~700 false
+                // positives (every Vue-only key was reported missing).
+                $defined = false;
+
+                if ($this->usePhpSource()) {
+                    $defined = $defined || isset($definedKeys[$locale][$key]);
+                }
+
+                if ($this->useVueSource()) {
+                    $defined = $defined || isset($vueDefined[$locale][$key]);
+                }
+
+                if (! $defined) {
                     $missing[$locale][$key] = $files;
                 }
             }
@@ -282,6 +350,7 @@ class TranslationsCheck extends Command
         } else {
             $this->info('Translation check complete.');
             $this->line('  Total usages found: '.count($usages));
+            $this->line('  Definition sources: '.$this->describeSource());
             $this->line('  Total missing keys: '.$totalMissing);
 
             if (! $skipPlaceholders) {

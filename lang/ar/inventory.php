@@ -161,6 +161,9 @@ return [
     ],
     'stock' => [
         'available' => 'متاح',
+        'status' => [
+            'low' => 'منخفض',
+        ],
         'avg_cost' => 'متوسط التكلفة',
         'current_stock' => 'المخزون الحالي',
         'empty' => 'لا توجد أرصدة',
