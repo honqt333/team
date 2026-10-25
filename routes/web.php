@@ -1286,8 +1286,12 @@ Route::middleware('web')->group(function () {
 });
 
 // Stop Impersonation (accessible from anywhere when impersonating)
+// Accepts either guard: the 'web' guard holds the tenant user we are
+// impersonating, while the 'admin' guard still holds the system admin.
+// Allowing both means the operator can always get back out, even if
+// the tenant staff session expired while impersonating.
 Route::post('/impersonate/stop', [ImpersonationController::class, 'stop'])
     ->name('impersonate.stop')
-    ->middleware(['web', 'auth']);
+    ->middleware(['web', 'auth:web,admin']);
 
 require __DIR__.'/auth.php';

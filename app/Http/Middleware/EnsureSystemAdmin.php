@@ -28,16 +28,22 @@ class EnsureSystemAdmin
      */
     public function handle(Request $request, Closure $next): Response
     {
-        // Automatically stop impersonation if returning to system routes
+        // Automatically stop impersonation if returning to system routes.
+        //
+        // 'impersonating_from' holds the id of the system admin who
+        // started the impersonation. A system admin lives on the
+        // 'admin' guard (AdminUser), so we restore it there — looking
+        // the id up in the tenants `users` table would never find it.
         if ($request->hasSession() && $request->session()->has('impersonating_from')) {
-            $originalUserId = $request->session()->get('impersonating_from');
-            $originalUser = User::find($originalUserId);
+            $originalAdminId = $request->session()->get('impersonating_from');
+            $originalAdmin = AdminUser::find($originalAdminId);
 
-            if ($originalUser && ($originalUser->is_system_admin || $originalUser instanceof AdminUser)) {
-                Auth::login($originalUser);
+            if ($originalAdmin) {
+                Auth::guard('admin')->login($originalAdmin);
+                Auth::guard('web')->logout();
                 $request->session()->forget('impersonating_from');
                 $request->session()->forget('impersonating_tenant');
-                $request->setUserResolver(fn () => $originalUser);
+                $request->setUserResolver(fn () => $originalAdmin);
             }
         }
 

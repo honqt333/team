@@ -6,6 +6,7 @@ namespace App\Http\Controllers\System;
 
 use App\Http\Controllers\Controller;
 use App\Models\AdminActivityLog;
+use App\Models\AdminUser;
 use App\Models\Tenant;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
@@ -34,33 +35,44 @@ class ImpersonationController extends Controller
             return back()->with('error', 'لا يوجد مستخدمين لهذا المستأجر');
         }
 
-        $originalId = Auth::id();
+        // The system admin lives on the 'admin' guard (AdminUser), NOT
+        // the default 'web' guard. Reading Auth::id() here used to
+        // return the web guard's id, which is null for a system admin —
+        // so the original identity was never stored and the admin
+        // could not be restored on stop().
         $originalAdmin = Auth::guard('admin')->user();
 
-        // Store original user ID for returning later
-        Session::put('impersonating_from', $originalId);
+        if (! $originalAdmin) {
+            // Defensive: without an admin identity there is nothing to
+            // return to, so refuse to start rather than trapping the
+            // operator inside the tenant account.
+            abort(403, 'لا يمكن بدء الانتحال بدون حساب مدير النظام');
+        }
+
+        // Store the original ADMIN identity so we can restore it later.
+        Session::put('impersonating_from', $originalAdmin->id);
         Session::put('impersonating_tenant', $tenant->id);
 
         // Audit log: record who started impersonating, when, from which IP.
         // Stored against the original admin so the trail is preserved even
         // after we switch the auth context.
-        if ($originalAdmin) {
-            AdminActivityLog::create([
-                'admin_user_id' => $originalAdmin->id,
-                'action' => 'impersonate_start',
-                'model_type' => Tenant::class,
-                'model_id' => $tenant->id,
-                'changes' => [
-                    'target_user_id' => $tenantUser->id,
-                    'target_user_email' => $tenantUser->email,
-                ],
-                'ip_address' => $request->ip(),
-                'user_agent' => $request->userAgent(),
-            ]);
-        }
+        AdminActivityLog::create([
+            'admin_user_id' => $originalAdmin->id,
+            'action' => 'impersonate_start',
+            'model_type' => Tenant::class,
+            'model_id' => $tenant->id,
+            'changes' => [
+                'target_user_id' => $tenantUser->id,
+                'target_user_email' => $tenantUser->email,
+            ],
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+        ]);
 
-        // Login as the tenant user
-        Auth::login($tenantUser);
+        // Log in as the tenant user on the 'web' guard. The tenant's
+        // staff session lives there; the admin session stays intact so
+        // stop() can put it back.
+        Auth::guard('web')->login($tenantUser);
 
         return redirect('/dashboard')->with('success', "أنت الآن داخل حساب: {$tenant->trade_name}");
     }
@@ -70,7 +82,7 @@ class ImpersonationController extends Controller
      */
     public function stop(Request $request): RedirectResponse
     {
-        $originalUserId = Session::get('impersonating_from');
+        $originalAdminId = Session::get('impersonating_from');
         $impersonatedTenantId = Session::get('impersonating_tenant');
 
         // Audit log BEFORE we lose the impersonation context.
@@ -83,29 +95,34 @@ class ImpersonationController extends Controller
                 'model_type' => Tenant::class,
                 'model_id' => $impersonatedTenantId,
                 'changes' => [
-                    'original_user_id' => $originalUserId,
+                    'original_admin_user_id' => $originalAdminId,
                 ],
                 'ip_address' => $request->ip(),
                 'user_agent' => $request->userAgent(),
             ]);
         }
 
-        if (! $originalUserId) {
-            Session::forget(['impersonating_from', 'impersonating_tenant']);
+        // Drop the tenant staff session — we are leaving the tenant.
+        Auth::guard('web')->logout();
 
-            return redirect('/dashboard');
-        }
-
-        // Restore original admin
-        $originalUser = User::find($originalUserId);
-
-        if ($originalUser) {
-            Auth::login($originalUser);
-        }
-
-        // Clear impersonation session
+        // Clear impersonation session.
         Session::forget('impersonating_from');
         Session::forget('impersonating_tenant');
+
+        if (! $originalAdminId) {
+            // Nothing to restore (e.g. the session was lost). The admin
+            // guard may still be signed in — if so, go back to /system.
+            return Auth::guard('admin')->check()
+                ? redirect('/system')->with('success', 'تم العودة للوحة النظام')
+                : redirect('/login');
+        }
+
+        // Restore the original system admin on the 'admin' guard.
+        $originalAdmin = AdminUser::find($originalAdminId);
+
+        if ($originalAdmin) {
+            Auth::guard('admin')->login($originalAdmin);
+        }
 
         return redirect('/system')->with('success', 'تم العودة للوحة النظام');
     }
@@ -123,6 +140,8 @@ class ImpersonationController extends Controller
      */
     public static function impersonatedTenantId(): ?int
     {
-        return Session::get('impersonating_tenant');
+        $id = Session::get('impersonating_tenant');
+
+        return $id === null ? null : (int) $id;
     }
 }
