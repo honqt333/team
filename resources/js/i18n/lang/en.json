@@ -1280,7 +1280,8 @@
         "show_token": "View the API key",
         "subtitle": "Managing attendance and departure devices",
         "title": "Fingerprint devices",
-        "token_copied": "The API key has been copied"
+        "token_copied": "The API key has been copied",
+        "token_rotate_confirm": "A new API key will be generated and the current one will be revoked. Do you want to continue?"
       },
       "calculation_base": "Basis of calculation",
       "calculation_bases": {

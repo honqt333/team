@@ -42,9 +42,7 @@ class BiometricAttendanceController extends Controller
         }
 
         // Find device by token
-        $device = BiometricDevice::where('api_token', $token)
-            ->where('is_active', true)
-            ->first();
+        $device = BiometricDevice::findByToken($token);
 
         if (! $device) {
             return response()->json([
@@ -158,9 +156,7 @@ class BiometricAttendanceController extends Controller
             ], 401);
         }
 
-        $device = BiometricDevice::where('api_token', $token)
-            ->where('is_active', true)
-            ->first();
+        $device = BiometricDevice::findByToken($token);
 
         if (! $device) {
             return response()->json([
@@ -254,9 +250,7 @@ class BiometricAttendanceController extends Controller
             return response()->json(['success' => false, 'error' => 'missing_token'], 401);
         }
 
-        $device = BiometricDevice::where('api_token', $token)
-            ->where('is_active', true)
-            ->first();
+        $device = BiometricDevice::findByToken($token);
 
         if (! $device) {
             return response()->json(['success' => false, 'error' => 'invalid_token'], 401);

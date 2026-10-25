@@ -1280,7 +1280,8 @@
         "show_token": "عرض مفتاح الـ API",
         "subtitle": "إدارة أجهزة الحضور والانصراف",
         "title": "أجهزة البصمة",
-        "token_copied": "تم نسخ مفتاح الـ API"
+        "token_copied": "تم نسخ مفتاح الـ API",
+        "token_rotate_confirm": "سيتم إنشاء مفتاح جديد وإلغاء المفتاح الحالي. هل تريد المتابعة؟"
       },
       "calculation_base": "أساس الاحتساب",
       "calculation_bases": {

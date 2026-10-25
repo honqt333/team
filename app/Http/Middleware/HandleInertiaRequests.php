@@ -83,6 +83,11 @@ class HandleInertiaRequests extends Middleware
                 'success' => fn () => $request->session()->get('success'),
                 'error' => fn () => $request->session()->get('error'),
                 'new_service_id' => fn () => $request->session()->get('new_service_id'),
+                // The biometric device token is issued once and is
+                // never stored in recoverable form (it is hashed at
+                // rest), so it is flashed to the page that asked for
+                // it and nowhere else.
+                'new_device_token' => fn () => $request->session()->get('new_device_token'),
             ],
             'customer' => fn () => $request->session()->get('customer'),
             'vehicle' => fn () => $request->session()->get('vehicle'),

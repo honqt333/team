@@ -307,6 +307,7 @@ return [
             'subtitle' => 'Manage attendance devices',
             'title' => 'Biometric Devices',
             'token_copied' => 'Token copied',
+            'token_rotate_confirm' => 'A new token will be generated and the current one will be revoked. Continue?',
         ],
         'calculation_base' => 'Calculation Base',
         'calculation_bases' => [

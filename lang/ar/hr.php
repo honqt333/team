@@ -307,6 +307,7 @@ return [
             'subtitle' => 'ربط وإدارة أجهزة الحضور والانصراف',
             'title' => 'أجهزة البصمة',
             'token_copied' => 'تم نسخ الرمز',
+            'token_rotate_confirm' => 'سيتم إنشاء رمز جديد وإلغاء الرمز الحالي. هل تريد المتابعة؟',
         ],
         'calculation_base' => 'أساس الاحتساب',
         'calculation_bases' => [

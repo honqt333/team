@@ -77,14 +77,27 @@ class BiometricDeviceController extends Controller
             ->with('new_device_token', $newToken);
     }
 
+    /**
+     * Issue a fresh token for the device and return it once.
+     *
+     * The token is stored as a hash (see the 2026_10_25_191000
+     * migration), so it cannot be read back from the database — that
+     * is the whole point of hashing it. The previous implementation of
+     * this endpoint returned the stored plaintext, which meant the
+     * secret was sitting in the database in recoverable form.
+     *
+     * Asking for the token therefore rotates it: the old token stops
+     * working immediately and the new one is returned exactly once,
+     * for the operator to copy into the device.
+     */
     public function showToken(BiometricDevice $biometricDevice)
     {
         if ($biometricDevice->tenant_id !== auth()->user()->tenant_id) {
             abort(403);
         }
 
-        return response()->json([
-            'token' => $biometricDevice->api_token,
-        ]);
+        return back()
+            ->with('success', __('common.saved_success'))
+            ->with('new_device_token', $biometricDevice->regenerateToken());
     }
 }

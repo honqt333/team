@@ -925,7 +925,11 @@ Route::prefix('app')->middleware(['auth', 'verified', 'tenant.active', 'center.c
         Route::put('/settings/biometric-devices/{biometricDevice}', [BiometricDeviceController::class, 'update'])->name('settings.biometric-devices.update');
         Route::delete('/settings/biometric-devices/{biometricDevice}', [BiometricDeviceController::class, 'destroy'])->name('settings.biometric-devices.destroy');
         Route::post('/settings/biometric-devices/{biometricDevice}/regenerate-token', [BiometricDeviceController::class, 'regenerateToken'])->name('settings.biometric-devices.regenerate-token');
-        Route::get('/settings/biometric-devices/{biometricDevice}/token', [BiometricDeviceController::class, 'showToken'])->name('settings.biometric-devices.show-token');
+        // POST, not GET: the endpoint issues a fresh token and revokes
+        // the previous one, so it must not be a safe/idempotent method
+        // (a GET could be triggered by a prefetch, a crawler, or a
+        // cached page and would silently rotate the credential).
+        Route::post('/settings/biometric-devices/{biometricDevice}/token', [BiometricDeviceController::class, 'showToken'])->name('settings.biometric-devices.show-token');
 
         // Shifts
         Route::post('/settings/shifts', [ShiftController::class, 'store'])->name('settings.shifts.store');
