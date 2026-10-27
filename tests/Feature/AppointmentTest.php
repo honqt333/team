@@ -606,6 +606,19 @@ class AppointmentTest extends TestCase
         $this->assertNull(ServiceBay::find($bay->id));
     }
 
+    public function test_service_bays_index_can_be_accessed_via_both_routes(): void
+    {
+        $owner = $this->createUserWithPermissions(['crm.appointments.manage']);
+
+        $response1 = $this->actingAs($owner)->get('/app/service-bays');
+        $response1->assertStatus(200);
+        $response1->assertInertia(fn ($page) => $page->component('Settings/Centers/ServiceBays'));
+
+        $response2 = $this->actingAs($owner)->get('/app/settings/service-bays');
+        $response2->assertStatus(200);
+        $response2->assertInertia(fn ($page) => $page->component('Settings/Centers/ServiceBays'));
+    }
+
     // ==================== P1 hardening tests ====================
 
     /**

@@ -361,8 +361,10 @@ Route::prefix('app')->middleware(['auth', 'verified', 'tenant.active', 'center.c
     Route::get('/workshop', [WorkshopBoardController::class, 'index'])->name('app.workshop.index');
 
     // Phase 4: Service Bays (settings + admin)
+    Route::get('/service-bays', [ServiceBayController::class, 'index'])->name('service-bays.direct-index');
     Route::get('/settings/service-bays', [ServiceBayController::class, 'index'])->name('service-bays.index');
     Route::post('/service-bays', [ServiceBayController::class, 'store'])->name('service-bays.store');
+    Route::post('/settings/service-bays', [ServiceBayController::class, 'store']);
     Route::put('/service-bays/{serviceBay}', [ServiceBayController::class, 'update'])->name('service-bays.update');
     Route::delete('/service-bays/{serviceBay}', [ServiceBayController::class, 'destroy'])->name('service-bays.destroy');
 
