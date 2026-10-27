@@ -1250,7 +1250,13 @@
       "total_salaries": "إجمالي الرواتب",
       "cannot_delete_item": "لا يمكن حذف موظف من مسير معتمد",
       "cannot_regenerate": "لا يمكن إعادة إنشاء مسير معتمد أو مدفوع",
-      "regenerated_successfully": "تم إعادة احتساب الرواتب بنجاح"
+      "regenerated_successfully": "تم إعادة احتساب الرواتب بنجاح",
+      "print_payslip": "قسيمة الراتب",
+      "payslip_details": "تفاصيل قسيمة الراتب",
+      "earnings": "الاستحقاقات",
+      "total_earnings": "إجمالي الاستحقاقات",
+      "amount": "المبلغ",
+      "print_footer": "تم إصدار هذه القسيمة إلكترونياً من نظام خدمة برو"
     },
     "settings": {
       "allowances": {
@@ -3021,7 +3027,14 @@
       }
     },
     "subtitle": "إدارة إعدادات النظام والتهيئة",
-    "title": "الإعدادات"
+    "title": "الإعدادات",
+    "print": {
+      "signatures": {
+        "title": "مكتبة التواقيع",
+        "subtitle": "كل التواقيع المحفوظة لكل أنواع المستندات",
+        "no_signatures": "لا توجد تواقيع محفوظة"
+      }
+    }
   },
   "suppliers": {
     "tax_number": "الرقم الضريبي"

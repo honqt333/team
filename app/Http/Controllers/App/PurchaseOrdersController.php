@@ -10,6 +10,7 @@ use App\Models\PurchaseOrder;
 use App\Models\Supplier;
 use App\Models\Warehouse;
 use App\Services\Purchasing\PurchasingService;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -58,22 +59,23 @@ class PurchaseOrdersController extends Controller
         ]);
     }
 
-    public function create()
+    /**
+     * Create a purchase order.
+     *
+     * The form is a modal on the orders index page
+     * (Pages/Purchasing/Orders/Index.vue), which posts to the same
+     * store() endpoint. This action used to render a standalone
+     * "Purchasing/Orders/Form" page that never existed as a Vue file,
+     * so the route returned HTTP 500 with "Unable to locate file in
+     * Vite manifest". Nothing in the UI linked to it.
+     *
+     * It now redirects to the index page that hosts the form.
+     */
+    public function create(): RedirectResponse
     {
         $this->authorize('create', PurchaseOrder::class);
 
-        $user = auth()->user();
-
-        $suppliers = Supplier::forTenant($user->tenant_id)->forCenter($user->current_center_id)->active()->get(['id', 'name', 'code']);
-        $warehouse = Warehouse::forCenter($user->current_center_id)->default()->first();
-
-        return Inertia::render('Purchasing/Orders/Form', [
-            'order' => null,
-            'suppliers' => $suppliers,
-            'warehouses' => Warehouse::forCenter($user->current_center_id)->active()->get(['id', 'name']),
-            'defaultWarehouse' => $warehouse,
-            'units' => InventoryUnit::where('is_active', true)->get(['id', 'name_ar', 'name_en']),
-        ]);
+        return redirect()->route('app.purchasing.orders.index');
     }
 
     public function store(Request $request)

@@ -7,6 +7,7 @@ namespace App\Http\Controllers\System;
 use App\Http\Controllers\Controller;
 use App\Models\AdminActivityLog;
 use App\Models\AdminUser;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
@@ -45,12 +46,21 @@ class AdminUsersController extends Controller
 
     /**
      * Show create form.
+     *
+     * Creating an admin user is handled by a modal on the index page
+     * (System/AdminUsers/Index.vue), which posts to the same store()
+     * endpoint. This action used to render a standalone
+     * "System/AdminUsers/Create" page, but that Vue file never
+     * existed, so the route returned HTTP 500 with "Unable to locate
+     * file in Vite manifest". Nothing linked to it either.
+     *
+     * It now redirects to the page that actually hosts the form, so
+     * the route stays usable (a bookmark or a direct visit lands
+     * somewhere that works) instead of erroring.
      */
-    public function create(): Response
+    public function create(): RedirectResponse
     {
-        return Inertia::render('System/AdminUsers/Create', [
-            'permissions' => AdminUser::getAvailablePermissions(),
-        ]);
+        return redirect()->route('system.admin-users.index');
     }
 
     /**
@@ -81,19 +91,18 @@ class AdminUsersController extends Controller
 
     /**
      * Show edit form.
+     *
+     * Editing an admin user is handled by a modal on the index page
+     * (System/AdminUsers/Index.vue), which puts to the same update()
+     * endpoint. This action used to render a standalone
+     * "System/AdminUsers/Edit" page that never existed as a Vue
+     * file, so the route returned HTTP 500.
+     *
+     * It now redirects to the index page that hosts the form.
      */
-    public function edit(AdminUser $adminUser): Response
+    public function edit(AdminUser $adminUser): RedirectResponse
     {
-        $recentActivity = $adminUser->activityLogs()
-            ->latest()
-            ->limit(20)
-            ->get();
-
-        return Inertia::render('System/AdminUsers/Edit', [
-            'admin' => $adminUser,
-            'permissions' => AdminUser::getAvailablePermissions(),
-            'recentActivity' => $recentActivity,
-        ]);
+        return redirect()->route('system.admin-users.index');
     }
 
     /**

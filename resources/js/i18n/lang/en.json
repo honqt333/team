@@ -1017,10 +1017,10 @@
       "deactivate": "Disable",
       "default_shift": "Virtual shift",
       "default_shift_hint": "Used when there is no weekly or daily scheduling",
-      "department": "Section",
+      "department": "Department",
       "departments": "Departments",
       "employee": "Employee",
-      "employee_number": "Job number",
+      "employee_number": "Employee number",
       "employee_type": "Employee type",
       "gender": "Sex",
       "genders": {
@@ -1250,7 +1250,13 @@
       "total_salaries": "Total salaries",
       "cannot_delete_item": "Cannot delete item from approved payroll",
       "cannot_regenerate": "Cannot regenerate approved or paid payroll",
-      "regenerated_successfully": "Payroll recalculated successfully"
+      "regenerated_successfully": "Payroll recalculated successfully",
+      "print_payslip": "Payslip",
+      "payslip_details": "Payslip details",
+      "earnings": "Earnings",
+      "total_earnings": "Total earnings",
+      "amount": "Amount",
+      "print_footer": "This payslip was issued electronically by Khidmh Pro"
     },
     "settings": {
       "allowances": {
@@ -3021,7 +3027,14 @@
       }
     },
     "subtitle": "Manage system settings and configuration",
-    "title": "Settings"
+    "title": "Settings",
+    "print": {
+      "signatures": {
+        "title": "Signature library",
+        "subtitle": "Every saved signature, grouped by document type",
+        "no_signatures": "No signatures saved"
+      }
+    }
   },
   "suppliers": {
     "tax_number": "Tax Number"

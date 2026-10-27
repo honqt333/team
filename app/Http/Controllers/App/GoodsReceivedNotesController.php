@@ -9,6 +9,7 @@ use App\Models\GoodsReceivedNote;
 use App\Models\PurchaseOrder;
 use App\Services\Purchasing\PurchasingService;
 use Exception;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -20,28 +21,21 @@ class GoodsReceivedNotesController extends Controller
 
     /**
      * Create GRN for a purchase order.
+     *
+     * A GRN is created from the "Receive" modal on the purchase order
+     * page (Components/Purchasing/GrnModal.vue), which posts to the
+     * same store() endpoint. This action used to render a standalone
+     * "Purchasing/GRN/Form" page that never existed as a Vue file, and
+     * it had no route registered — unreachable dead code.
+     *
+     * It now redirects to the purchase order that the GRN is for, so
+     * that adding a route for it later cannot reintroduce a 500.
      */
-    public function create(PurchaseOrder $purchaseOrder)
+    public function create(PurchaseOrder $purchaseOrder): RedirectResponse
     {
         $this->authorize('create', GoodsReceivedNote::class);
 
-        $purchaseOrder->load(['items.part', 'supplier', 'warehouse']);
-
-        // Prepare items with pending quantities
-        $pendingItems = $purchaseOrder->items->map(fn ($item) => [
-            'purchase_order_item_id' => $item->id,
-            'part_id' => $item->part_id,
-            'part' => $item->part,
-            'qty_ordered' => $item->qty_ordered,
-            'qty_received' => $item->qty_received,
-            'qty_pending' => $item->qty_pending,
-            'unit_cost' => $item->unit_cost,
-        ])->filter(fn ($item) => $item['qty_pending'] > 0);
-
-        return Inertia::render('Purchasing/GRN/Form', [
-            'purchaseOrder' => $purchaseOrder,
-            'pendingItems' => $pendingItems->values(),
-        ]);
+        return redirect()->route('app.purchasing.orders.show', $purchaseOrder);
     }
 
     /**

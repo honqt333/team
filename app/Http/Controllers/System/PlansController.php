@@ -6,6 +6,7 @@ namespace App\Http\Controllers\System;
 
 use App\Http\Controllers\Controller;
 use App\Models\Billing\Plan;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -31,12 +32,20 @@ class PlansController extends Controller
 
     /**
      * Show the form for creating a new plan.
+     *
+     * The plan form is a modal on the plans index page
+     * (Pages/System/Plans/Index.vue), which posts to the same
+     * store() endpoint. This action used to render a standalone
+     * "System/Plans/Form" page that never existed as a Vue file.
+     *
+     * It had no route registered either, so it was unreachable dead
+     * code. The action is kept and pointed at the index page that
+     * actually hosts the form, so that adding a route for it later
+     * cannot reintroduce a 500.
      */
-    public function create(): Response
+    public function create(): RedirectResponse
     {
-        return Inertia::render('System/Plans/Form', [
-            'plan' => null,
-        ]);
+        return redirect()->route('system.plans.index');
     }
 
     /**
@@ -75,12 +84,14 @@ class PlansController extends Controller
 
     /**
      * Show the form for editing the specified plan.
+     *
+     * Like create(), the edit form is a modal on the index page. See
+     * the note on create() for why this no longer renders a
+     * standalone page.
      */
-    public function edit(Plan $plan): Response
+    public function edit(Plan $plan): RedirectResponse
     {
-        return Inertia::render('System/Plans/Form', [
-            'plan' => $plan,
-        ]);
+        return redirect()->route('system.plans.index');
     }
 
     /**

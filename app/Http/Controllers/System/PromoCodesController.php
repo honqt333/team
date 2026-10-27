@@ -7,6 +7,7 @@ namespace App\Http\Controllers\System;
 use App\Http\Controllers\Controller;
 use App\Models\Billing\Plan;
 use App\Models\Billing\PromoCode;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -37,14 +38,19 @@ class PromoCodesController extends Controller
 
     /**
      * Show the form for creating a new promo code.
+     *
+     * The promo code form is a modal on the index page
+     * (Pages/System/PromoCodes/Index.vue), which posts to the same
+     * store() endpoint. This action used to render a standalone
+     * "System/PromoCodes/Form" page that never existed as a Vue
+     * file, and it had no route registered — unreachable dead code.
+     *
+     * It now redirects to the index page that actually hosts the
+     * form, so adding a route for it later cannot reintroduce a 500.
      */
-    public function create(): Response
+    public function create(): RedirectResponse
     {
-        return Inertia::render('System/PromoCodes/Form', [
-            'promoCode' => null,
-            'plans' => Plan::where('is_active', true)->get(['id', 'name_ar', 'name_en']),
-            'generatedCode' => PromoCode::generateCode(),
-        ]);
+        return redirect()->route('system.promo-codes.index');
     }
 
     /**
@@ -80,13 +86,14 @@ class PromoCodesController extends Controller
 
     /**
      * Show the form for editing the specified promo code.
+     *
+     * Like create(), the edit form is a modal on the index page. See
+     * the note on create() for why this no longer renders a
+     * standalone page.
      */
-    public function edit(PromoCode $promoCode): Response
+    public function edit(PromoCode $promoCode): RedirectResponse
     {
-        return Inertia::render('System/PromoCodes/Form', [
-            'promoCode' => $promoCode,
-            'plans' => Plan::where('is_active', true)->get(['id', 'name_ar', 'name_en']),
-        ]);
+        return redirect()->route('system.promo-codes.index');
     }
 
     /**
