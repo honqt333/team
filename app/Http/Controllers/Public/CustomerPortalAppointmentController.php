@@ -444,7 +444,9 @@ class CustomerPortalAppointmentController extends Controller
             ->whereKey($id)
             ->with([
                 'center:id,name,name_ar,name_en',
-                'vehicle:id,plate_number,make,model,year',
+                'vehicle:id,plate_number,make_id,model_id,make_other,model_other,year',
+                'vehicle.make:id,name',
+                'vehicle.model:id,name',
                 'services:id,name_ar,name_en',
             ])
             ->first();
@@ -464,8 +466,8 @@ class CustomerPortalAppointmentController extends Controller
                 'source' => $appointment->source,
                 'center_name' => $appointment->center?->display_name,
                 'vehicle_label' => trim(implode(' · ', array_filter([
-                    $appointment->vehicle?->make,
-                    $appointment->vehicle?->model,
+                    $appointment->vehicle?->display_make ?? $appointment->vehicle?->make?->name,
+                    $appointment->vehicle?->display_model ?? $appointment->vehicle?->model?->name,
                     $appointment->vehicle?->year,
                     $appointment->vehicle?->plate_number,
                 ]))),

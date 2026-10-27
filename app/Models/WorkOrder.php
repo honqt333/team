@@ -19,7 +19,7 @@ class WorkOrder extends Model
     use CenterScoped, HasFactory, HasTaxSnapshot, SoftDeletes;
     use HasWorkOrderOperations, HasWorkOrderRelations;
 
-    protected $appends = [];
+    protected $appends = ['work_order_number'];
 
     /**
      * Fields hidden from JSON serialization.
@@ -148,6 +148,14 @@ class WorkOrder extends Model
         'tax_breakdown' => 'array', 'reception_signed_at' => 'datetime', 'delivery_signed_at' => 'datetime',
         'show_packages_section' => 'boolean', 'tax_enabled_snapshot' => 'boolean',
     ];
+
+    /**
+     * Alias for code as work_order_number for parity and serialization.
+     */
+    public function getWorkOrderNumberAttribute(): ?string
+    {
+        return $this->code;
+    }
 
     /**
      * Generate a sequential code for the work order.

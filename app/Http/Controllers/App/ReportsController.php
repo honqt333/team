@@ -71,9 +71,11 @@ class ReportsController extends Controller
                 'center:id,name',
                 'invoice:id,invoice_number,customer_id,status,total_amount',
                 'invoice.customer:id,name,phone',
-                'workOrder:id,work_order_number,customer_id,vehicle_id,status',
+                'workOrder:id,code,customer_id,vehicle_id,status',
                 'workOrder.customer:id,name,phone',
-                'workOrder.vehicle:id,plate_number,make,model,year',
+                'workOrder.vehicle:id,plate_number,make_id,model_id,make_other,model_other,year',
+                'workOrder.vehicle.make:id,name',
+                'workOrder.vehicle.model:id,name',
                 'purchaseInvoice:id,invoice_number,supplier_id',
                 'purchaseInvoice.supplier:id,name',
                 'receivedBy:id,name',
@@ -150,9 +152,11 @@ class ReportsController extends Controller
                 'center:id,name',
                 'invoice:id,invoice_number,customer_id',
                 'invoice.customer:id,name,phone',
-                'workOrder:id,work_order_number,customer_id,vehicle_id',
+                'workOrder:id,code,customer_id,vehicle_id',
                 'workOrder.customer:id,name,phone',
-                'workOrder.vehicle:id,plate_number,make,model,year',
+                'workOrder.vehicle:id,plate_number,make_id,model_id,make_other,model_other,year',
+                'workOrder.vehicle.make:id,name',
+                'workOrder.vehicle.model:id,name',
                 'purchaseInvoice:id,invoice_number,supplier_id',
                 'purchaseInvoice.supplier:id,name',
                 'receivedBy:id,name',
@@ -197,7 +201,7 @@ class ReportsController extends Controller
                         ?? $payment->purchaseInvoice?->invoice_number
                         ?? '—';
 
-                    $woNo = $payment->workOrder?->work_order_number ?? '—';
+                    $woNo = $payment->workOrder?->code ?? $payment->workOrder?->work_order_number ?? '—';
                     $plate = $payment->workOrder?->vehicle?->plate_number ?? '—';
 
                     $typeLabel = match ($payment->type) {
@@ -293,7 +297,7 @@ class ReportsController extends Controller
                             });
                     })
                     ->orWhereHas('workOrder', function ($wq) use ($search) {
-                        $wq->where('work_order_number', 'like', "%{$search}%")
+                        $wq->where('code', 'like', "%{$search}%")
                             ->orWhereHas('customer', function ($cq) use ($search) {
                                 $cq->where('name', 'like', "%{$search}%")
                                     ->orWhere('phone', 'like', "%{$search}%");

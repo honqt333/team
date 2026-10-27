@@ -5,10 +5,13 @@ declare(strict_types=1);
 namespace Tests\Feature;
 
 use App\Models\Center;
+use App\Models\Customer;
 use App\Models\Invoice;
 use App\Models\Payment;
 use App\Models\Tenant;
 use App\Models\User;
+use App\Models\Vehicle;
+use App\Models\WorkOrder;
 use Database\Seeders\PerformanceBaselineSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -102,5 +105,56 @@ class PaymentsReportTest extends TestCase
             ->where('filters.method', 'all')
             ->where('filters.type', 'all')
         );
+    }
+
+    public function test_payments_report_loads_work_order_and_vehicle_without_column_errors(): void
+    {
+        app(PerformanceBaselineSeeder::class)->run();
+
+        $tenant = Tenant::first();
+        $user = User::where('tenant_id', $tenant->id)->where('is_system_admin', true)->first();
+        $center = Center::where('tenant_id', $tenant->id)->first();
+        $customer = Customer::where('tenant_id', $tenant->id)->first();
+
+        $vehicle = Vehicle::create([
+            'tenant_id' => $tenant->id,
+            'center_id' => $center->id,
+            'customer_id' => $customer->id,
+            'plate_number' => 'ABC 789',
+            'year' => 2024,
+        ]);
+
+        $workOrder = WorkOrder::create([
+            'tenant_id' => $tenant->id,
+            'center_id' => $center->id,
+            'customer_id' => $customer->id,
+            'vehicle_id' => $vehicle->id,
+            'code' => 'WO-000099',
+            'status' => 'open',
+        ]);
+
+        Payment::create([
+            'tenant_id' => $tenant->id,
+            'center_id' => $center->id,
+            'work_order_id' => $workOrder->id,
+            'amount' => 500.00,
+            'payment_date' => now(),
+            'payment_method' => 'cash',
+            'type' => 'payment',
+            'reference' => 'REC-WO-099',
+        ]);
+
+        $response = $this->actingAs($user)->get('/app/reports/payments?search=WO-000099&range=all');
+
+        $response->assertStatus(200);
+        $response->assertInertia(fn ($page) => $page
+            ->component('Reports/Payments')
+            ->has('payments.data', 1)
+            ->where('payments.data.0.work_order.code', 'WO-000099')
+            ->where('payments.data.0.work_order.work_order_number', 'WO-000099')
+        );
+
+        $csvResponse = $this->actingAs($user)->get('/app/reports/payments/export?search=WO-000099&range=all');
+        $csvResponse->assertStatus(200);
     }
 }
