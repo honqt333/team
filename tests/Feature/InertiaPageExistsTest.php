@@ -32,6 +32,13 @@ use Tests\TestCase;
  * those routes, and invisible to the linters because a missing Vue
  * file is not a PHP error.
  *
+ * A TENTH case slipped through afterwards: `System/Analytics/Reports`
+ * was rendered from an inline closure in routes/web.php rather than
+ * from a controller, so a scanner that only walks app/ never sees it.
+ * The page stayed permanently white ("Page not found:
+ * ./Pages/System/Analytics/Reports.vue") while this test still
+ * passed. The scanner now covers routes/ as well.
+ *
  * WHAT THIS TEST DOES
  *
  * It scans every Inertia::render() call in app/ and asserts that the
@@ -66,6 +73,28 @@ class InertiaPageExistsTest extends TestCase
             )) {
                 foreach ($matches[1] as $page) {
                     $pages[$page][] = $file->getPathname();
+                }
+            }
+        }
+
+        // The route files render pages too — inline closures in
+        // routes/web.php are a common way to serve a standalone page.
+        //
+        // SCANNING app/ ONLY IS NOT ENOUGH: `System/Analytics/Reports`
+        // was rendered from an inline closure in routes/web.php, had no
+        // Vue file, and produced a permanently white page that this
+        // test passed straight through. The route directory has to be
+        // scanned as well.
+        foreach (glob(base_path('routes/*.php')) ?: [] as $routeFile) {
+            $source = file_get_contents($routeFile);
+
+            if (preg_match_all(
+                "/Inertia::render\(\s*'([A-Za-z0-9_\\\\\/]+)'/",
+                $source,
+                $matches
+            )) {
+                foreach ($matches[1] as $page) {
+                    $pages[$page][] = $routeFile;
                 }
             }
         }

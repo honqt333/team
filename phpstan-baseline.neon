@@ -691,6 +691,12 @@ parameters:
 			path: /Users/ahmad/Herd/carag-v2/app/Http/Controllers/App/Quotes/QuoteServiceController.php
 
 		-
+			message: '#^Using nullsafe property access "\?\-\>code" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: /Users/ahmad/Herd/carag-v2/app/Http/Controllers/App/ReportsController.php
+
+		-
 			message: '#^Using nullsafe property access "\?\-\>invoice_number" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
 			identifier: nullsafe.neverNull
 			count: 2
@@ -945,6 +951,18 @@ parameters:
 		-
 			message: '#^Parameter \#1 \$callback of method Illuminate\\Database\\Eloquent\\Collection\<int,Illuminate\\Database\\Eloquent\\Model\>\:\:map\(\) expects callable\(Illuminate\\Database\\Eloquent\\Model, int\)\: array\{id\: int, plate_number\: string, label\: string\}, Closure\(App\\Models\\Vehicle\)\: array\{id\: int, plate_number\: string, label\: string\} given\.$#'
 			identifier: argument.type
+			count: 1
+			path: /Users/ahmad/Herd/carag-v2/app/Http/Controllers/Public/CustomerPortalAppointmentController.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>display_make" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: /Users/ahmad/Herd/carag-v2/app/Http/Controllers/Public/CustomerPortalAppointmentController.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>display_model" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
 			count: 1
 			path: /Users/ahmad/Herd/carag-v2/app/Http/Controllers/Public/CustomerPortalAppointmentController.php
 
