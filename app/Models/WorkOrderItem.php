@@ -251,11 +251,15 @@ class WorkOrderItem extends Model
 
     public function getPartsTotalAttribute(): float
     {
-        return $this->parts->sum('total');
+        $sum = $this->relationLoaded('parts')
+            ? $this->parts->sum('total')
+            : $this->parts()->sum('total');
+
+        return (float) ($sum ?? 0);
     }
 
     public function getGrandTotalAttribute(): float
     {
-        return $this->total + $this->parts_total;
+        return (float) $this->total + $this->parts_total;
     }
 }

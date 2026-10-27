@@ -8,6 +8,7 @@ use App\Models\Center;
 use App\Models\Customer;
 use App\Models\Quote;
 use App\Models\QuoteLine;
+use App\Models\QuotePart;
 use App\Models\Service;
 use App\Models\Tenant;
 use App\Models\User;
@@ -350,5 +351,57 @@ class QuotesTest extends TestCase
 
         $line->discount_value = 25;
         $line->save();
+    }
+
+    public function test_quote_line_parts_total_accessor_returns_float(): void
+    {
+        $quote = Quote::create([
+            'tenant_id' => $this->tenant->id,
+            'center_id' => $this->center->id,
+            'customer_id' => $this->customer->id,
+            'vehicle_id' => $this->vehicle->id,
+            'code' => 'QT-000007',
+            'status' => Quote::STATUS_DRAFT,
+            'created_by' => $this->user->id,
+        ]);
+
+        $line = QuoteLine::create([
+            'quote_id' => $quote->id,
+            'tenant_id' => $this->tenant->id,
+            'center_id' => $this->center->id,
+            'description' => 'Test Service Line',
+            'qty' => 1,
+            'unit_price' => 100,
+            'line_total' => 100,
+        ]);
+
+        // When no parts exist, query builder sum returns 0.0 float
+        $this->assertSame(0.0, $line->parts_total);
+        $this->assertIsFloat($line->parts_total);
+
+        // Add quote part with total
+        QuotePart::create([
+            'quote_id' => $quote->id,
+            'quote_line_id' => $line->id,
+            'tenant_id' => $this->tenant->id,
+            'center_id' => $this->center->id,
+            'source' => QuotePart::SOURCE_WAREHOUSE,
+            'name' => 'Oil Filter',
+            'qty' => 1,
+            'unit_price' => 75.50,
+            'total' => 75.50,
+        ]);
+
+        // Fresh instance without eager loading relation
+        $freshLine = QuoteLine::find($line->id);
+        $this->assertFalse($freshLine->relationLoaded('parts'));
+        $this->assertSame(75.5, $freshLine->parts_total);
+        $this->assertIsFloat($freshLine->parts_total);
+
+        // Instance with eager loaded relation
+        $eagerLoadedLine = QuoteLine::with('parts')->find($line->id);
+        $this->assertTrue($eagerLoadedLine->relationLoaded('parts'));
+        $this->assertSame(75.5, $eagerLoadedLine->parts_total);
+        $this->assertIsFloat($eagerLoadedLine->parts_total);
     }
 }

@@ -139,8 +139,11 @@ class QuoteLine extends Model
      */
     public function getPartsTotalAttribute(): float
     {
-        return $this->parts()
-            ->sum('total') ?: 0;
+        $sum = $this->relationLoaded('parts')
+            ? $this->parts->sum('total')
+            : $this->parts()->sum('total');
+
+        return (float) ($sum ?? 0);
     }
 
     /**
