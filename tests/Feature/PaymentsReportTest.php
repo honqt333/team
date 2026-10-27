@@ -11,6 +11,8 @@ use App\Models\Payment;
 use App\Models\Tenant;
 use App\Models\User;
 use App\Models\Vehicle;
+use App\Models\VehicleMake;
+use App\Models\VehicleModel;
 use App\Models\WorkOrder;
 use Database\Seeders\PerformanceBaselineSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -116,10 +118,31 @@ class PaymentsReportTest extends TestCase
         $center = Center::where('tenant_id', $tenant->id)->first();
         $customer = Customer::where('tenant_id', $tenant->id)->first();
 
+        $make = VehicleMake::create([
+            'tenant_id' => $tenant->id,
+            'center_id' => $center->id,
+            'name_ar' => 'تويوتا',
+            'name_en' => 'Toyota',
+            'source' => 'system',
+            'is_active' => true,
+        ]);
+
+        $model = VehicleModel::create([
+            'tenant_id' => $tenant->id,
+            'center_id' => $center->id,
+            'make_id' => $make->id,
+            'name_ar' => 'كامري',
+            'name_en' => 'Camry',
+            'source' => 'system',
+            'is_active' => true,
+        ]);
+
         $vehicle = Vehicle::create([
             'tenant_id' => $tenant->id,
             'center_id' => $center->id,
             'customer_id' => $customer->id,
+            'make_id' => $make->id,
+            'model_id' => $model->id,
             'plate_number' => 'ABC 789',
             'year' => 2024,
         ]);

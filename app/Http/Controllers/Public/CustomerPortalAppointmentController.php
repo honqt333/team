@@ -445,8 +445,8 @@ class CustomerPortalAppointmentController extends Controller
             ->with([
                 'center:id,name,name_ar,name_en',
                 'vehicle:id,plate_number,make_id,model_id,make_other,model_other,year',
-                'vehicle.make:id,name',
-                'vehicle.model:id,name',
+                'vehicle.make:id,name_ar,name_en',
+                'vehicle.model:id,name_ar,name_en',
                 'services:id,name_ar,name_en',
             ])
             ->first();
