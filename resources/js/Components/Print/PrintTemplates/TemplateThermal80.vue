@@ -1057,12 +1057,11 @@ const totals = computed(() => {
 
 function formatSignatureUrl(url) {
     if (!url) return '';
-    if (
-        url.startsWith('http://') ||
-        url.startsWith('https://') ||
-        url.startsWith('data:') ||
-        url.startsWith('/storage/')
-    ) {
+    if (url.startsWith('data:')) return url;
+    if (url.includes('/storage/')) {
+        return '/storage/' + url.split('/storage/')[1];
+    }
+    if (url.startsWith('http://') || url.startsWith('https://')) {
         return url;
     }
     return '/storage/' + url.replace(/^\/+/, '');

@@ -10,7 +10,6 @@ use App\Traits\HasQuoteRelations;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class Quote extends Model
@@ -222,7 +221,7 @@ class Quote extends Model
             return null;
         }
 
-        return Storage::disk('public')->url($this->signature_path);
+        return '/storage/'.ltrim($this->signature_path, '/');
     }
 
     // ─────────────────────────────────────────────────────────────
