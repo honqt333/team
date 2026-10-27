@@ -61,8 +61,10 @@
                             class="w-full h-full object-contain"
                         />
                     </div>
-                    <div v-else class="text-center">
-                        <span class="text-lg font-black tracking-wider text-black">CARAG</span>
+                    <div v-else class="text-center py-1">
+                        <span class="text-base font-black tracking-wide text-black">
+                            {{ companyInfo.name }}
+                        </span>
                     </div>
                     <h2 class="text-sm font-black uppercase tracking-wider text-black">
                         تقرير دليل العملاء (Customers Directory)

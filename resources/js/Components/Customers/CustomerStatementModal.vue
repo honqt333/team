@@ -44,8 +44,8 @@
         </template>
 
         <div class="space-y-6 statement-content">
-            <!-- Screen Summary Cards -->
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 print:hidden">
+            <!-- Screen Summary Cards (Hidden during Print) -->
+            <div class="screen-only grid grid-cols-1 sm:grid-cols-3 gap-3 print:hidden">
                 <div
                     class="p-4 rounded-2xl bg-blue-50/50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800/40"
                 >
@@ -107,43 +107,43 @@
                 </div>
             </div>
 
-            <!-- AUDIT_STANDARDS.md Section 5: Standard Official Print Header -->
-            <div class="print-header-area hidden print:block border-b-2 border-gray-800 pb-4 mb-4">
+            <!-- AUDIT_STANDARDS.md Section 5: Standard Official Print Header (Visible ONLY during Print) -->
+            <div
+                class="print-header-area print-only hidden print:block border-b-2 border-gray-800 pb-4 mb-4"
+            >
                 <div class="grid grid-cols-3 items-center text-xs">
                     <!-- Column 1: Workshop / Center Info -->
                     <div class="text-start space-y-1">
                         <h2 class="text-base font-black text-black">
-                            {{
-                                $page.props.tenant?.trade_name ||
-                                $page.props.tenant?.name ||
-                                'Carag'
-                            }}
+                            {{ companyInfo.name }}
                         </h2>
-                        <p v-if="$page.props.center?.name" class="font-bold text-gray-700">
-                            الفرع: {{ $page.props.center?.name }}
+                        <p v-if="companyInfo.branch" class="font-bold text-gray-700">
+                            الفرع: {{ companyInfo.branch }}
                         </p>
-                        <p v-if="$page.props.tenant?.tax_number" class="text-gray-600">
+                        <p v-if="companyInfo.tax_number" class="text-gray-600">
                             الرقم الضريبي:
                             <span class="font-mono font-bold">
-                                {{ $page.props.tenant?.tax_number }}
+                                {{ companyInfo.tax_number }}
                             </span>
                         </p>
-                        <p v-if="$page.props.tenant?.cr_number" class="text-gray-600">
+                        <p v-if="companyInfo.cr_number" class="text-gray-600">
                             السجل التجاري:
-                            <span class="font-mono">{{ $page.props.tenant?.cr_number }}</span>
+                            <span class="font-mono">{{ companyInfo.cr_number }}</span>
                         </p>
                     </div>
 
                     <!-- Column 2 (Center): Logo & Statement Title -->
                     <div class="text-center flex flex-col items-center justify-center">
                         <img
-                            v-if="$page.props.tenant?.logo_path"
-                            :src="'/storage/' + $page.props.tenant?.logo_path"
+                            v-if="companyInfo.logo"
+                            :src="companyInfo.logo"
                             alt="Logo"
                             class="h-14 w-auto object-contain mx-auto mb-1"
                         />
-                        <div v-else class="text-center">
-                            <span class="text-lg font-black tracking-wider text-black">CARAG</span>
+                        <div v-else class="text-center py-1">
+                            <span class="text-base font-black tracking-wide text-black">
+                                {{ companyInfo.name }}
+                            </span>
                         </div>
                         <span class="text-sm font-black text-black uppercase tracking-wider">
                             كشف حساب عميل (Statement of Account)
@@ -294,7 +294,7 @@
 
             <!-- Print Footer -->
             <div
-                class="print-footer-area hidden print:block pt-6 mt-8 border-t border-gray-300 text-xs text-gray-600"
+                class="print-footer-area print-only hidden print:block pt-6 mt-8 border-t border-gray-300 text-xs text-gray-600"
             >
                 <div class="flex items-center justify-between">
                     <div>
@@ -322,7 +322,10 @@
 
 <script setup>
 import { computed } from 'vue';
+import { usePage } from '@inertiajs/vue3';
 import BaseModal from '@/Components/BaseModal.vue';
+
+const page = usePage();
 
 const props = defineProps({
     show: {
@@ -348,6 +351,28 @@ const props = defineProps({
 });
 
 defineEmits(['close']);
+
+const companyInfo = computed(() => {
+    const center = page.props.center || {};
+    const tenant = page.props.tenant || {};
+    return {
+        name:
+            center.name_ar ||
+            center.name ||
+            tenant.trade_name ||
+            tenant.legal_name ||
+            tenant.name ||
+            'خدمة برو',
+        branch: center.name || center.name_ar || '',
+        tax_number: tenant.vat_number || tenant.tax_number || center.vat_number || '',
+        cr_number: tenant.cr_number || center.cr_number || '',
+        logo:
+            center.logo_invoice_url ||
+            center.logo_light_url ||
+            tenant.logo_url ||
+            (tenant.logo_path ? '/storage/' + tenant.logo_path : ''),
+    };
+});
 
 const formatMoney = (val) => {
     const num = Number(val) || 0;
@@ -376,40 +401,58 @@ const handlePrint = () => {
 
 <style scoped>
 @media print {
+    /* 1. Hide entire page background */
     body * {
-        visibility: hidden;
+        visibility: hidden !important;
     }
+
+    /* 2. Show only statement container */
     .statement-content,
     .statement-content * {
-        visibility: visible;
+        visibility: visible !important;
     }
+
+    /* 3. Strictly hide screen summary cards so they never duplicate with print banner */
+    .screen-only,
+    .screen-only * {
+        display: none !important;
+        visibility: hidden !important;
+    }
+
+    /* 4. Strictly show print header and banner */
+    .print-only {
+        display: block !important;
+        visibility: visible !important;
+    }
+
     .statement-content {
         position: absolute;
         left: 0;
         top: 0;
         width: 100%;
+        margin: 0;
         padding: 20px;
+        background: white !important;
+        color: black !important;
     }
-    .print-header-area {
-        display: block !important;
-    }
-    .print-footer-area {
-        display: block !important;
-    }
+
     table {
         width: 100% !important;
         border-collapse: collapse !important;
         font-size: 11px !important;
     }
+
     th,
     td {
         border: 1px solid #d1d5db !important;
-        padding: 5px !important;
+        padding: 6px !important;
         text-align: center !important;
     }
+
     th {
         background-color: #f3f4f6 !important;
         color: #111827 !important;
+        font-weight: bold !important;
     }
 }
 </style>

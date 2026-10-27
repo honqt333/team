@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\App;
 
+use App\Enums\PaymentType;
 use App\Http\Requests\Customer\CustomerStoreRequest;
 use App\Http\Requests\Customer\CustomerUpdateRequest;
 use App\Models\Center;
@@ -103,7 +104,7 @@ class CustomerController
             'customers' => $customers,
             'filters' => request()->only(['search', 'type', 'date_from', 'date_to']),
             'companyInfo' => [
-                'name' => $tenant->trade_name ?? $tenant->name ?? 'Carag Workshop',
+                'name' => $center?->name_ar ?? $center?->name ?? $tenant->trade_name ?? $tenant->name ?? 'خدمة برو',
                 'vat_number' => $tenant->vat_number ?? '',
                 'cr_number' => $tenant->cr_number ?? '',
                 'logo_path' => $tenant->logo_path ?? '',
@@ -190,7 +191,11 @@ class CustomerController
 
         // Calculate Customer Financial Summary & Balance Due
         $totalInvoiced = (float) $invoices->whereNotIn('status', ['cancelled', 'draft'])->sum('total_incl_tax');
-        $totalPaid = (float) $payments->where('type', '!=', 'refund')->sum('amount') - (float) $payments->where('type', 'refund')->sum('amount');
+        $totalPaid = (float) $payments->reduce(function ($carry, $pay) {
+            $isRefund = $pay->type === PaymentType::REFUND || $pay->type === 'refund' || ($pay->type instanceof PaymentType && $pay->type->value === 'refund');
+
+            return $isRefund ? ($carry - (float) $pay->amount) : ($carry + (float) $pay->amount);
+        }, 0.0);
         $totalDue = (float) $invoices->whereNotIn('status', ['cancelled'])->sum(fn ($inv) => max(0, (float) $inv->total_incl_tax - (float) $inv->total_paid));
 
         $financialSummary = [
@@ -222,7 +227,7 @@ class CustomerController
         }
 
         foreach ($payments as $pay) {
-            $isRefund = $pay->type === 'refund';
+            $isRefund = $pay->type === PaymentType::REFUND || $pay->type === 'refund' || ($pay->type instanceof PaymentType && $pay->type->value === 'refund');
             $ledgerEntries->push([
                 'id' => 'pay-'.$pay->id,
                 'date' => $pay->payment_date ? Carbon::parse($pay->payment_date)->format('Y-m-d H:i') : $pay->created_at->format('Y-m-d H:i'),
@@ -238,7 +243,7 @@ class CustomerController
             ]);
         }
 
-        $sortedLedger = $ledgerEntries->sortBy('sort_date')->values();
+        $sortedLedger = $ledgerEntries->unique('id')->sortBy('sort_date')->values();
         $runningBalance = 0.0;
         $ledger = $sortedLedger->map(function ($entry) use (&$runningBalance) {
             $runningBalance += ($entry['debit'] - $entry['credit']);
