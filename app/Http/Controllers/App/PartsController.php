@@ -119,6 +119,10 @@ class PartsController extends Controller
         $warehouseData = $validated['warehouse_data'] ?? [];
         unset($validated['warehouse_data']);
 
+        if (empty($validated['purchase_conversion_factor']) || (float) $validated['purchase_conversion_factor'] <= 0) {
+            $validated['purchase_conversion_factor'] = 1.0;
+        }
+
         // Create part
         $part = Part::create($validated);
 
@@ -193,6 +197,12 @@ class PartsController extends Controller
         if (array_key_exists('warehouse_data', $validated)) {
             $warehouseData = $validated['warehouse_data'] ?? [];
             unset($validated['warehouse_data']);
+        }
+
+        if (array_key_exists('purchase_conversion_factor', $validated)) {
+            $validated['purchase_conversion_factor'] = (! empty($validated['purchase_conversion_factor']) && (float) $validated['purchase_conversion_factor'] > 0)
+                ? (float) $validated['purchase_conversion_factor']
+                : 1.0;
         }
 
         // Update part

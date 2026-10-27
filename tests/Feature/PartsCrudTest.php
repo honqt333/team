@@ -101,6 +101,28 @@ class PartsCrudTest extends TestCase
     }
 
     /** @test */
+    public function it_handles_null_purchase_conversion_factor_by_defaulting_to_one()
+    {
+        $this->actingAs($this->user);
+
+        $response = $this->put(route('app.inventory.parts.update', $this->part->id), [
+            'sku' => 'TEST-001',
+            'name_ar' => 'مستشعر فلتر معدل',
+            'name_en' => 'Filter Sensor Edited',
+            'unit_id' => $this->baseUnit->id,
+            'purchase_unit_id' => $this->purchaseUnit->id,
+            'purchase_conversion_factor' => null,
+            'is_active' => true,
+        ]);
+
+        $response->assertRedirect(route('app.inventory.parts.index'));
+
+        $this->part->refresh();
+        $this->assertEquals($this->purchaseUnit->id, $this->part->purchase_unit_id);
+        $this->assertEquals(1.0, (float) $this->part->purchase_conversion_factor);
+    }
+
+    /** @test */
     public function it_updates_part_and_converts_stock_qty_on_direct_purchase_invoice()
     {
         Permission::findOrCreate('purchasing.invoices.create', 'web');

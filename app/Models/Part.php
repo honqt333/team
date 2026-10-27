@@ -15,6 +15,17 @@ class Part extends Model
 {
     use HasFactory, SoftDeletes, TenantScoped;
 
+    protected static function boot(): void
+    {
+        parent::boot();
+
+        static::saving(function (Part $part) {
+            if (empty($part->purchase_conversion_factor) || (float) $part->purchase_conversion_factor <= 0) {
+                $part->purchase_conversion_factor = 1.0;
+            }
+        });
+    }
+
     protected $fillable = [
         'tenant_id',
         'sku',
@@ -54,6 +65,16 @@ class Part extends Model
         'reorder_qty' => 'decimal:3',
         'purchase_conversion_factor' => 'decimal:4',
     ];
+
+    /**
+     * Ensure purchase_conversion_factor is never null or non-positive.
+     */
+    public function setPurchaseConversionFactorAttribute($value): void
+    {
+        $this->attributes['purchase_conversion_factor'] = (empty($value) || (float) $value <= 0)
+            ? 1.0
+            : (float) $value;
+    }
 
     // ─────────────────────────────────────────────────────────────
     // Relationships
