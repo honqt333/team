@@ -150,13 +150,19 @@ class PublicQuoteController extends Controller
         if ($request->filled('signature')) {
             $data = $request->input('signature');
 
-            if (preg_match('/^data:image\/(\w+);base64,/', $data, $type)) {
-                $data = substr($data, strpos($data, ',') + 1);
-                $type = strtolower($type[1]);
-                $decoded = base64_decode($data);
+            if (preg_match('/^data:image\/([a-zA-Z0-9_\-\+]+);base64,/', $data, $typeMatch)) {
+                $raw = substr($data, strpos($data, ',') + 1);
+                $ext = strtolower($typeMatch[1]);
+
+                if (str_contains($ext, 'svg')) {
+                    $ext = 'svg';
+                } elseif (! in_array($ext, ['png', 'jpg', 'jpeg', 'webp'])) {
+                    $ext = 'png';
+                }
+                $decoded = base64_decode($raw);
 
                 if ($decoded !== false) {
-                    $filename = 'signatures/quotes/'.$quote->id.'_'.time().'.'.$type;
+                    $filename = 'signatures/quotes/'.$quote->id.'_'.time().'.'.$ext;
                     Storage::disk('public')->put($filename, $decoded);
                     $signaturePath = $filename;
                 }

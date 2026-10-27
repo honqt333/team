@@ -87,6 +87,10 @@ class Quote extends Model
         'tax_enabled_snapshot' => 'boolean',
     ];
 
+    protected $appends = [
+        'signature_url',
+    ];
+
     // ─────────────────────────────────────────────────────────────
     // Relationships
     // ─────────────────────────────────────────────────────────────

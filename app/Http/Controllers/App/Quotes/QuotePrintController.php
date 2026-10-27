@@ -34,6 +34,8 @@ class QuotePrintController extends Controller
             'createdByUser',
         ]);
 
+        $quote->append('signature_url');
+
         return Inertia::render('Quotes/Print', [
             'quote' => $quote,
         ]);

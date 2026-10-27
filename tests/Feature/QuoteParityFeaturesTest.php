@@ -14,6 +14,7 @@ use App\Models\Service;
 use App\Models\Tenant;
 use App\Models\User;
 use App\Models\Vehicle;
+use App\Services\QuoteConversionService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Storage;
 use Spatie\Permission\Models\Permission;
@@ -256,5 +257,73 @@ class QuoteParityFeaturesTest extends TestCase
         $quote->refresh();
         $this->assertNotEquals(Quote::STATUS_APPROVED, $quote->status);
         $this->assertNull($quote->signature_path);
+    }
+
+    public function test_quote_conversion_copies_customer_signature_to_work_order(): void
+    {
+        Storage::fake('public');
+
+        $quote = Quote::create([
+            'tenant_id' => $this->tenant->id,
+            'center_id' => $this->center->id,
+            'created_by' => $this->user->id,
+            'code' => 'QT-400001',
+            'customer_id' => $this->customer->id,
+            'vehicle_id' => $this->vehicle->id,
+            'status' => Quote::STATUS_APPROVED,
+            'signature_path' => 'signatures/quotes/test_sig.png',
+            'approved_at' => now(),
+            'subtotal' => 100,
+            'total' => 100,
+        ]);
+
+        QuoteLine::create([
+            'quote_id' => $quote->id,
+            'tenant_id' => $this->tenant->id,
+            'center_id' => $this->center->id,
+            'description' => 'Test Service',
+            'qty' => 1,
+            'unit_price' => 100,
+            'line_total' => 100,
+        ]);
+
+        $conversionService = app(QuoteConversionService::class);
+        $workOrder = $conversionService->convert($quote, $this->user);
+
+        $this->assertNotNull($workOrder);
+        $this->assertEquals('signatures/quotes/test_sig.png', $workOrder->reception_signature);
+        $this->assertNotNull($workOrder->reception_signed_at);
+    }
+
+    public function test_staff_can_save_customer_signature_directly_on_quote(): void
+    {
+        Storage::fake('public');
+        $this->actingAsWithTeam($this->user);
+
+        $quote = Quote::create([
+            'tenant_id' => $this->tenant->id,
+            'center_id' => $this->center->id,
+            'created_by' => $this->user->id,
+            'code' => 'QT-500001',
+            'customer_id' => $this->customer->id,
+            'vehicle_id' => $this->vehicle->id,
+            'status' => Quote::STATUS_DRAFT,
+            'subtotal' => 100,
+            'total' => 100,
+        ]);
+
+        $dummySignature = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=';
+
+        $response = $this->post(route('app.quotes.signature.store', $quote->id), [
+            'signature' => $dummySignature,
+        ]);
+
+        $response->assertRedirect();
+        $response->assertSessionHas('success');
+
+        $quote->refresh();
+        $this->assertNotNull($quote->signature_path);
+        Storage::disk('public')->assertExists($quote->signature_path);
+        $this->assertNotNull($quote->signature_url);
     }
 }

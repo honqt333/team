@@ -24,6 +24,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use Inertia\Response;
 use Maatwebsite\Excel\Facades\Excel;
@@ -588,5 +589,56 @@ class QuoteController extends Controller
             'modelsByMake' => $modelsByMake,
             'inventoryUnits' => $inventoryUnits,
         ]);
+    }
+
+    /**
+     * Store or update customer digital signature on quote.
+     */
+    public function saveSignature(Request $request, Quote $quote): RedirectResponse
+    {
+        $this->authorize('update', $quote);
+
+        $request->validate([
+            'signature' => 'required|string',
+        ]);
+
+        $signatureData = $request->input('signature');
+
+        if (preg_match('/^data:image\/([a-zA-Z0-9_\-\+]+);base64,/', $signatureData, $typeMatch)) {
+            $raw = substr($signatureData, strpos($signatureData, ',') + 1);
+            $ext = strtolower($typeMatch[1]);
+
+            if (str_contains($ext, 'svg')) {
+                $ext = 'svg';
+            } elseif (! in_array($ext, ['png', 'jpg', 'jpeg', 'webp'])) {
+                $ext = 'png';
+            }
+            $decoded = base64_decode($raw);
+
+            if ($decoded !== false) {
+                if ($quote->signature_path) {
+                    Storage::disk('public')->delete($quote->signature_path);
+                }
+
+                $filename = 'signatures/quotes/'.$quote->id.'_'.time().'.'.$ext;
+                Storage::disk('public')->put($filename, $decoded);
+
+                $quote->update([
+                    'signature_path' => $filename,
+                ]);
+
+                // Sync to converted work order if already converted
+                if ($quote->converted_work_order_id && $quote->convertedWorkOrder) {
+                    $quote->convertedWorkOrder->update([
+                        'reception_signature' => $filename,
+                        'reception_signed_at' => $quote->convertedWorkOrder->reception_signed_at ?? now(),
+                    ]);
+                }
+
+                return back()->with('success', 'تم حفظ توقيع العميل بنجاح.');
+            }
+        }
+
+        return back()->with('error', 'صيغة التوقيع غير صالحة.');
     }
 }

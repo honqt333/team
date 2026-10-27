@@ -1278,22 +1278,30 @@
                         :class="isRtl ? 'self-end' : 'self-start'"
                     >
                         <img
-                            :src="sig.url"
+                            :src="formatSignatureUrl(sig.url)"
                             :alt="isRtl ? sig.name_ar || sig.name_en : sig.name_en || sig.name_ar"
                             class="max-h-16 max-w-[160px] object-contain"
                         />
                     </div>
-                    <!-- 2) Client signature from the work-order reception/delivery flow -->
+                    <!-- 2) Client signature from quote or work-order reception/delivery flow -->
                     <div
                         v-else-if="
                             isClientSignature(isRtl ? sig.name_ar : sig.name_en || sig.name_ar) &&
-                            (data.reception_signature || data.delivery_signature)
+                            (data.signature_url ||
+                                data.customer_signature ||
+                                data.reception_signature ||
+                                data.delivery_signature)
                         "
                         class="h-16 flex items-center justify-center mb-2"
                     >
                         <img
                             :src="
-                                '/storage/' + (data.reception_signature || data.delivery_signature)
+                                formatSignatureUrl(
+                                    data.signature_url ||
+                                        data.customer_signature ||
+                                        data.reception_signature ||
+                                        data.delivery_signature
+                                )
                             "
                             class="max-h-full max-w-[120px] object-contain"
                         />
@@ -1724,8 +1732,8 @@ function getDocTypeTitle(type) {
 function getDocumentTitle() {
     const taxActive = isTaxEnabled();
     let title = isRtl.value
-        ? (props.documentSettings?.title_ar || getDocTypeTitle(props.documentType))
-        : (props.documentSettings?.title_en || getDocTypeTitle(props.documentType));
+        ? props.documentSettings?.title_ar || getDocTypeTitle(props.documentType)
+        : props.documentSettings?.title_en || getDocTypeTitle(props.documentType);
 
     title = String(title || '');
 
@@ -1895,11 +1903,28 @@ const totals = computed(() => {
     };
 });
 
+function formatSignatureUrl(url) {
+    if (!url) return '';
+    if (
+        url.startsWith('http://') ||
+        url.startsWith('https://') ||
+        url.startsWith('data:') ||
+        url.startsWith('/storage/')
+    ) {
+        return url;
+    }
+    return '/storage/' + url.replace(/^\/+/, '');
+}
+
 function isClientSignature(name) {
     if (!name) return false;
     const n = name.toLowerCase();
     return (
-        n.includes('عميل') || n.includes('العميل') || n.includes('customer') || n.includes('client')
+        n.includes('عميل') ||
+        n.includes('العميل') ||
+        n.includes('زبون') ||
+        n.includes('customer') ||
+        n.includes('client')
     );
 }
 

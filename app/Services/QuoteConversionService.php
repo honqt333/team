@@ -62,6 +62,9 @@ class QuoteConversionService
                 'pricing_mode_snapshot' => $quote->pricing_mode_snapshot,
                 'tax_rate_snapshot' => $quote->tax_rate_snapshot,
                 'currency_code' => $quote->currency_code,
+                // Copy customer signature from quote
+                'reception_signature' => $quote->signature_path,
+                'reception_signed_at' => $quote->signature_path ? ($quote->approved_at ?? now()) : null,
             ]);
 
             // Sync departments from quote

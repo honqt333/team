@@ -10,6 +10,7 @@ use App\Services\NotificationService;
 use App\Services\QuoteConversionService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Throwable;
 
 class QuoteApprovalController extends Controller
@@ -34,11 +35,37 @@ class QuoteApprovalController extends Controller
             abort(400, 'Cannot approve an empty quote.');
         }
 
+        // Handle optional customer signature on approval
+        $signaturePath = null;
+
+        if ($request->filled('signature')) {
+            $data = $request->input('signature');
+
+            if (preg_match('/^data:image\/([a-zA-Z0-9_\-\+]+);base64,/', $data, $typeMatch)) {
+                $raw = substr($data, strpos($data, ',') + 1);
+                $ext = strtolower($typeMatch[1]);
+
+                if (str_contains($ext, 'svg')) {
+                    $ext = 'svg';
+                } elseif (! in_array($ext, ['png', 'jpg', 'jpeg', 'webp'])) {
+                    $ext = 'png';
+                }
+                $decoded = base64_decode($raw);
+
+                if ($decoded !== false) {
+                    $filename = 'signatures/quotes/'.$quote->id.'_'.time().'.'.$ext;
+                    Storage::disk('public')->put($filename, $decoded);
+                    $signaturePath = $filename;
+                }
+            }
+        }
+
         // First, mark as approved
         $quote->update([
             'status' => Quote::STATUS_APPROVED,
             'approved_at' => now(),
             'approved_by' => auth()->id(),
+            'signature_path' => $signaturePath ?? $quote->signature_path,
         ]);
 
         // Then convert to work order

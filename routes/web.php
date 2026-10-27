@@ -487,6 +487,7 @@ Route::prefix('app')->middleware(['auth', 'verified', 'tenant.active', 'center.c
     Route::put('/quotes/{quote}', [QuoteController::class, 'update'])->name('app.quotes.update');
     Route::delete('/quotes/{quote}', [QuoteController::class, 'destroy'])->name('app.quotes.destroy');
     Route::post('/quotes/{quote}/approve', [QuoteApprovalController::class, 'approve'])->name('app.quotes.approve');
+    Route::post('/quotes/{quote}/signature', [QuoteController::class, 'saveSignature'])->name('app.quotes.signature.store');
     Route::post('/quotes/{quote}/reject', [QuoteApprovalController::class, 'reject'])->name('app.quotes.reject');
     Route::get('/quotes/search', [QuoteController::class, 'search'])->name('app.quotes.search');
     Route::get('/quotes/{quote}', [QuoteController::class, 'show'])->name('app.quotes.show');

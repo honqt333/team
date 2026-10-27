@@ -679,11 +679,42 @@
                                 </p>
                             </div>
                         </div>
-                        <img
-                            :src="quote.signature_url"
-                            alt="Customer Signature"
-                            class="h-9 max-w-[130px] object-contain bg-white rounded-lg border border-emerald-100 p-1 shadow-xs shrink-0"
-                        />
+                        <div class="flex items-center gap-2">
+                            <img
+                                :src="quote.signature_url"
+                                alt="Customer Signature"
+                                class="h-9 max-w-[130px] object-contain bg-white rounded-lg border border-emerald-100 p-1 shadow-xs shrink-0 cursor-pointer"
+                                @click="openSignatureModal"
+                                title="انقر لتعديل التوقيع"
+                            />
+                            <button
+                                v-if="quote.status !== 'converted'"
+                                type="button"
+                                @click="openSignatureModal"
+                                class="text-[11px] text-emerald-700 hover:text-emerald-800 dark:text-emerald-300 underline font-medium"
+                            >
+                                تغيير
+                            </button>
+                        </div>
+                    </div>
+                    <!-- Customer Signature Button (if NOT signed yet) -->
+                    <div
+                        v-else
+                        class="mt-3 p-3 bg-gray-50 dark:bg-gray-700/30 border border-dashed border-gray-200 dark:border-gray-700 rounded-xl flex items-center justify-between"
+                    >
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs text-gray-500 dark:text-gray-400">
+                                لم يتم توقيع العميل بعد
+                            </span>
+                        </div>
+                        <button
+                            type="button"
+                            @click="openSignatureModal"
+                            class="px-3 py-1.5 text-xs font-bold bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-900/30 dark:hover:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400 rounded-lg transition-all flex items-center gap-1.5"
+                        >
+                            <span>✍️</span>
+                            <span>توقيع العميل</span>
+                        </button>
                     </div>
                 </div>
             </div>
@@ -1159,6 +1190,49 @@
             @close="showShareModal = false"
             @print="printQuote"
         />
+
+        <!-- Customer Signature Modal -->
+        <Modal :show="showSignatureModal" @close="showSignatureModal = false" max-width="md">
+            <div class="p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h3
+                        class="text-base font-bold text-gray-900 dark:text-white flex items-center gap-2"
+                    >
+                        <span>✍️</span>
+                        <span>توقيع العميل واعتماد عرض السعر</span>
+                    </h3>
+                    <button
+                        type="button"
+                        @click="showSignatureModal = false"
+                        class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
+                    >
+                        ✕
+                    </button>
+                </div>
+                <p class="text-xs text-gray-500 dark:text-gray-400 mb-3">
+                    يمكن للعميل التوقيع مباشرة في المساحة أدناه لاعتماد عرض السعر.
+                </p>
+                <div
+                    class="rounded-xl border border-dashed border-gray-300 dark:border-gray-600 p-2 bg-gray-50 dark:bg-gray-900/50"
+                >
+                    <SignaturePad v-model="signatureData" />
+                </div>
+                <div class="mt-6 flex justify-end gap-3">
+                    <SecondaryButton
+                        @click="showSignatureModal = false"
+                        :disabled="isSavingSignature"
+                    >
+                        {{ $t('common.cancel') }}
+                    </SecondaryButton>
+                    <PrimaryButton
+                        @click="saveQuoteSignature"
+                        :disabled="!signatureData || isSavingSignature"
+                    >
+                        {{ isSavingSignature ? $t('common.saving') : $t('common.save') }}
+                    </PrimaryButton>
+                </div>
+            </div>
+        </Modal>
     </AppLayout>
 </template>
 
@@ -1181,6 +1255,10 @@ import QuotePartModal from '@/Components/Quotes/QuotePartModal.vue';
 import QuoteShareModal from '@/Components/Quotes/QuoteShareModal.vue';
 import QuoteApprovalModal from '@/Components/Quotes/QuoteApprovalModal.vue';
 import ConfirmModal from '@/Components/ConfirmModal.vue';
+import Modal from '@/Components/Modal.vue';
+import PrimaryButton from '@/Components/PrimaryButton.vue';
+import SecondaryButton from '@/Components/SecondaryButton.vue';
+import SignaturePad from '@/Components/Common/SignaturePad.vue';
 import PartsDisplay from '@/Components/Common/PartsDisplay.vue';
 import Tooltip from '@/Components/Tooltip.vue';
 import SaudiPlateDisplay from '@/Components/Vehicles/SaudiPlateDisplay.vue';
@@ -1251,6 +1329,9 @@ const showEditModal = ref(false);
 const showPartModal = ref(false);
 const showShareModal = ref(false);
 const showApprovalModal = ref(false);
+const showSignatureModal = ref(false);
+const signatureData = ref(null);
+const isSavingSignature = ref(false);
 const editingLine = ref(null);
 const editingPart = ref(null);
 const activeDepartmentId = ref(null);
@@ -1293,6 +1374,31 @@ const submitApproval = () => {
         {
             onSuccess: () => successToast(t('quotes.messages.approved_success')),
             onError: (err) => errorToast(err.message || t('common.error')),
+        }
+    );
+};
+
+const openSignatureModal = () => {
+    signatureData.value = null;
+    showSignatureModal.value = true;
+};
+
+const saveQuoteSignature = () => {
+    if (!signatureData.value) return;
+    isSavingSignature.value = true;
+    router.post(
+        route('app.quotes.signature.store', props.quote.id),
+        { signature: signatureData.value },
+        {
+            preserveScroll: true,
+            onSuccess: () => {
+                showSignatureModal.value = false;
+                successToast('تم حفظ توقيع العميل بنجاح');
+            },
+            onError: (err) => errorToast(err.message || 'حدث خطأ أثناء حفظ التوقيع'),
+            onFinish: () => {
+                isSavingSignature.value = false;
+            },
         }
     );
 };
