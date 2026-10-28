@@ -14,12 +14,19 @@ class PromoCodeUsage extends Model
 {
     use HasFactory, TenantScoped;
 
+    /**
+     * The columns the table really has.
+     *
+     * `discount_type` and `discount_value` were part of the original
+     * migration, but the table was recreated later (the subscription
+     * tables were rebuilt to repair a broken foreign key) and those two
+     * columns were not carried over. They were listed here all the same,
+     * which is why writing a usage failed with "no such column".
+     */
     protected $fillable = [
         'promo_code_id',
         'tenant_id',
         'subscription_id',
-        'discount_type',
-        'discount_value',
         'discount_amount',
         'used_at',
     ];
@@ -27,7 +34,6 @@ class PromoCodeUsage extends Model
     protected function casts(): array
     {
         return [
-            'discount_value' => 'decimal:2',
             'discount_amount' => 'decimal:2',
             'used_at' => 'datetime',
         ];

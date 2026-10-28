@@ -4,12 +4,13 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Public;
 
+use App\Exceptions\InvalidQuoteSignatureException;
 use App\Http\Controllers\Controller;
 use App\Models\Quote;
 use App\Services\NotificationService;
+use App\Services\QuoteSignatureStorage;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -148,24 +149,16 @@ class PublicQuoteController extends Controller
         $signaturePath = null;
 
         if ($request->filled('signature')) {
-            $data = $request->input('signature');
-
-            if (preg_match('/^data:image\/([a-zA-Z0-9_\-\+]+);base64,/', $data, $typeMatch)) {
-                $raw = substr($data, strpos($data, ',') + 1);
-                $ext = strtolower($typeMatch[1]);
-
-                if (str_contains($ext, 'svg')) {
-                    $ext = 'svg';
-                } elseif (! in_array($ext, ['png', 'jpg', 'jpeg', 'webp'])) {
-                    $ext = 'png';
-                }
-                $decoded = base64_decode($raw);
-
-                if ($decoded !== false) {
-                    $filename = 'signatures/quotes/'.$quote->id.'_'.time().'.'.$ext;
-                    Storage::disk('public')->put($filename, $decoded);
-                    $signaturePath = $filename;
-                }
+            // The signature is written to the public disk, so it has to
+            // be an inert image: the type is taken from the bytes and
+            // active formats (SVG) are refused.
+            try {
+                $signaturePath = app(QuoteSignatureStorage::class)
+                    ->store((string) $request->input('signature'), $quote);
+            } catch (InvalidQuoteSignatureException $e) {
+                return back()
+                    ->withInput()
+                    ->withErrors(['signature' => __('quotes.signature_invalid')]);
             }
         }
 

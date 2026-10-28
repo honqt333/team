@@ -10,6 +10,7 @@ use App\Models\Billing\Subscription;
 use App\Models\Center;
 use App\Models\Tenant;
 use App\Models\User;
+use App\Services\Billing\PromoCodeValidator;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -25,6 +26,10 @@ use Spatie\Permission\PermissionRegistrar;
 
 class RegisteredUserController extends Controller
 {
+    public function __construct(
+        protected PromoCodeValidator $promoValidator
+    ) {}
+
     /**
      * Display the registration view.
      */
@@ -70,7 +75,35 @@ class RegisteredUserController extends Controller
             }
         }
 
-        $user = DB::transaction(function () use ($request) {
+        // The promo code is checked BEFORE anything is created: a code
+        // that cannot be used must not leave a half-registered tenant
+        // behind, and the customer must be told instead of believing a
+        // discount was applied.
+        $promoCheck = null;
+
+        if ($request->filled('promo_code')) {
+            $promoCheck = $this->promoValidator->check((string) $request->input('promo_code'));
+
+            if (! $promoCheck->isValid()) {
+                throw ValidationException::withMessages([
+                    'promo_code' => $this->promoValidator->messageFor($promoCheck),
+                ]);
+            }
+        }
+
+        // A code that gives trial DAYS is the one kind that can be
+        // applied to a free trial. A code that discounts a paid plan
+        // has nothing to discount here — it stays valid and is used
+        // when the tenant subscribes.
+        $extraTrialDays = 0;
+
+        if ($promoCheck?->isValid() && $promoCheck->promo->discount_type === 'trial_days') {
+            $extraTrialDays = (int) $promoCheck->promo->discount_value;
+        }
+
+        $trialDays = 14 + $extraTrialDays;
+
+        $user = DB::transaction(function () use ($request, $promoCheck, $extraTrialDays, $trialDays) {
             $ownerName = $request->first_name.' '.$request->last_name;
             $phone = '+966'.ltrim($request->phone, '0');
 
@@ -79,7 +112,7 @@ class RegisteredUserController extends Controller
                 'name' => $request->company_name,
                 'slug' => Str::slug($request->company_name).'-'.Str::random(6),
                 'status' => 'trial',
-                'trial_ends_at' => now()->addDays(14),
+                'trial_ends_at' => now()->addDays($trialDays),
                 // Company Profile - all same as company_name initially
                 'legal_name' => $request->company_name,
                 'legal_name_en' => $request->company_name,
@@ -93,17 +126,28 @@ class RegisteredUserController extends Controller
             $trialPlan = Plan::where('slug', 'trial')->first();
 
             if ($trialPlan) {
-                Subscription::create([
+                $subscription = Subscription::create([
                     'tenant_id' => $tenant->id,
                     'plan_id' => $trialPlan->id,
                     'status' => 'trialing',
                     'billing_cycle' => 'yearly',
                     'starts_at' => now(),
-                    'ends_at' => now()->addDays(14),
-                    'trial_ends_at' => now()->addDays(14),
+                    'ends_at' => now()->addDays($trialDays),
+                    'trial_ends_at' => now()->addDays($trialDays),
                     'price' => 0.00,
+                    'promo_code' => $promoCheck?->promo?->code,
                     'auto_renew' => false,
                 ]);
+
+                if ($promoCheck?->isValid() && $extraTrialDays > 0) {
+                    // The use of the code is recorded, so its limits
+                    // (how many times it may be used) count.
+                    $this->promoValidator->recordUsage(
+                        $promoCheck->promo,
+                        $tenant->id,
+                        $subscription->id
+                    );
+                }
             }
 
             // 2. Create Default Center (Main Branch) with same data
@@ -141,12 +185,6 @@ class RegisteredUserController extends Controller
             // 5. Assign Super Admin role (roles are seeded in Tenant::booted)
             $user->assignRole('super_admin');
 
-            // 6. Store promo code for future use (optional)
-            if ($request->promo_code) {
-                // TODO: Validate and apply promo code
-                // PromoCode::apply($tenant, $request->promo_code);
-            }
-
             return $user;
         });
 
@@ -156,6 +194,14 @@ class RegisteredUserController extends Controller
 
         // Clear phone verification session
         session()->forget(['phone_verified', 'verified_phone_number', 'phone_verification_number']);
+
+        if ($promoCheck?->isValid()) {
+            $message = $extraTrialDays > 0
+                ? __('company_profile.subscription.promo_trial_days_applied', ['days' => $extraTrialDays])
+                : __('company_profile.subscription.promo_valid_for_plan');
+
+            return redirect(route('dashboard', absolute: false))->with('success', $message);
+        }
 
         return redirect(route('dashboard', absolute: false));
     }

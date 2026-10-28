@@ -88,6 +88,7 @@ return [
             'unpublished' => 'Unpublished',
         ],
         'errors' => [
+            'image_type' => 'Unsupported image type. Allowed: PNG, JPG or WebP.',
             'color_invalid' => 'The color must be a valid hex value (e.g. #4f46e5).',
             'social_url_invalid' => 'The :field URL must start with http:// or https://.',
         ],

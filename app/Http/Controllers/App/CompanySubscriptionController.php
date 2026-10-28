@@ -9,12 +9,12 @@ use App\Exceptions\PaymentMismatchException;
 use App\Http\Controllers\Controller;
 use App\Models\BankTransferReceipt;
 use App\Models\Billing\Plan;
-use App\Models\Billing\PromoCode;
 use App\Models\Billing\Subscription;
 use App\Models\Billing\SubscriptionInvoice;
 use App\Models\Billing\SubscriptionPayment;
 use App\Models\PaymentSettings;
 use App\Services\Billing\PaymentCompletionService;
+use App\Services\Billing\PromoCodeValidator;
 use App\Services\Payment\PaymentManager;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -27,7 +27,8 @@ class CompanySubscriptionController extends Controller
 {
     public function __construct(
         protected PaymentManager $paymentManager,
-        protected PaymentCompletionService $paymentCompletion
+        protected PaymentCompletionService $paymentCompletion,
+        protected PromoCodeValidator $promoValidator
     ) {}
 
     /**
@@ -65,20 +66,11 @@ class CompanySubscriptionController extends Controller
         $promo = null;
 
         if (! empty($validated['promo_code'])) {
-            $promo = PromoCode::where('code', $validated['promo_code'])
-                ->where('is_active', true)
-                ->first();
-
-            if ($promo) {
-                $usage = $promo->usages()->where('tenant_id', auth()->user()->tenant_id)->count();
-
-                if ($usage < ($promo->max_uses_per_tenant ?? 999)) {
-                    $discount = $promo->discount_type === 'percentage'
-                        ? $basePrice * ((float) $promo->discount_value / 100)
-                        : (float) $promo->discount_value;
-                    $discount = min($discount, $basePrice);
-                }
-            }
+            // One set of rules for every place a promo code is used, so
+            // the price shown here is the price that is charged.
+            $check = $this->promoValidator->check($validated['promo_code'], auth()->user()->tenant_id);
+            $promo = $check->promo;
+            $discount = $this->promoValidator->discountFor($check, $basePrice);
         }
 
         $subtotal = $basePrice - $discount;
@@ -120,31 +112,16 @@ class CompanySubscriptionController extends Controller
             'code' => 'required|string',
         ]);
 
-        $promo = PromoCode::where('code', $validated['code'])
-            ->where('is_active', true)
-            ->where(function ($q) {
-                $q->whereNull('starts_at')->orWhere('starts_at', '<=', now());
-            })
-            ->where(function ($q) {
-                $q->whereNull('expires_at')->orWhere('expires_at', '>=', now());
-            })
-            ->first();
+        $check = $this->promoValidator->check($validated['code'], auth()->user()->tenant_id);
 
-        if (! $promo) {
+        if (! $check->isValid()) {
             return response()->json([
                 'valid' => false,
-                'message' => __('company_profile.subscription.promo_invalid'),
+                'message' => $this->promoValidator->messageFor($check),
             ], 422);
         }
 
-        $usage = $promo->usages()->where('tenant_id', auth()->user()->tenant_id)->count();
-
-        if ($usage >= ($promo->max_uses_per_tenant ?? 999)) {
-            return response()->json([
-                'valid' => false,
-                'message' => __('company_profile.subscription.promo_exhausted'),
-            ], 422);
-        }
+        $promo = $check->promo;
 
         return response()->json([
             'valid' => true,
@@ -214,20 +191,9 @@ class CompanySubscriptionController extends Controller
         $promo = null;
 
         if (! empty($validated['promo_code'])) {
-            $promo = PromoCode::where('code', $validated['promo_code'])
-                ->where('is_active', true)
-                ->first();
-
-            if ($promo) {
-                $usage = $promo->usages()->where('tenant_id', $tenant->id)->count();
-
-                if ($usage < ($promo->max_uses_per_tenant ?? 999)) {
-                    $discount = $promo->discount_type === 'percentage'
-                        ? $basePrice * ((float) $promo->discount_value / 100)
-                        : (float) $promo->discount_value;
-                    $discount = min($discount, $basePrice);
-                }
-            }
+            $check = $this->promoValidator->check($validated['promo_code'], $tenant->id);
+            $promo = $check->promo;
+            $discount = $this->promoValidator->discountFor($check, $basePrice);
         }
 
         $subtotal = $basePrice - $discount;
@@ -268,6 +234,14 @@ class CompanySubscriptionController extends Controller
                 'promo_code' => $promo?->code,
                 'auto_renew' => true,
             ]);
+
+            if ($promo) {
+                // The use of the code is recorded with the subscription,
+                // so the limits on the code (how many times it may be
+                // used, how many times one tenant may use it) actually
+                // count. Without this row they never did.
+                $this->promoValidator->recordUsage($promo, $tenant->id, $subscription->id, $discount);
+            }
 
             // Create subscription invoice
             $invoice = SubscriptionInvoice::create([
@@ -806,22 +780,12 @@ class CompanySubscriptionController extends Controller
 
         // Apply promo (mirrors subscribe() logic)
         $discount = 0;
+        $promo = null;
 
         if (! empty($validated['promo_code'])) {
-            $promo = PromoCode::where('code', $validated['promo_code'])
-                ->where('is_active', true)
-                ->first();
-
-            if ($promo) {
-                $usage = $promo->usages()->where('tenant_id', $tenant->id)->count();
-
-                if ($usage < ($promo->max_uses_per_tenant ?? 999)) {
-                    $discount = $promo->discount_type === 'percentage'
-                        ? $basePrice * ((float) $promo->discount_value / 100)
-                        : (float) $promo->discount_value;
-                    $discount = min($discount, $basePrice);
-                }
-            }
+            $check = $this->promoValidator->check($validated['promo_code'], $tenant->id);
+            $promo = $check->promo;
+            $discount = $this->promoValidator->discountFor($check, $basePrice);
         }
 
         $subtotal = $basePrice - $discount;
@@ -834,7 +798,7 @@ class CompanySubscriptionController extends Controller
         $total = $vatCalc['total'];
 
         try {
-            return DB::transaction(function () use ($request, $tenant, $plan, $validated, $basePrice, $discount, $subtotal, $total) {
+            return DB::transaction(function () use ($request, $tenant, $plan, $validated, $basePrice, $discount, $subtotal, $total, $promo) {
                 // 1. Subscription (status=pending_payment, awaiting admin
                 //    approval of the receipt)
                 $previousActive = Subscription::where('tenant_id', $tenant->id)
@@ -859,6 +823,10 @@ class CompanySubscriptionController extends Controller
                     'promo_code' => $validated['promo_code'] ?? null,
                     'auto_renew' => true,
                 ]);
+
+                if ($promo) {
+                    $this->promoValidator->recordUsage($promo, $tenant->id, $subscription->id, $discount);
+                }
 
                 // 2. Invoice
                 $invoice = SubscriptionInvoice::create([

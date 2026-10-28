@@ -12,6 +12,7 @@ return [
     'validity_hint' => 'Price commitment period',
     'duplicated_success' => 'Quote duplicated successfully',
     'customer_signed' => 'Signed & approved by customer',
+    'signature_invalid' => 'Invalid signature: only a PNG, JPG or WebP image is accepted.',
     'add' => 'Add',
     'all_loaded' => 'All Loaded',
     'allow_lower_odometer' => 'Allow Lower Odometer',

@@ -221,11 +221,7 @@
                                     {{ $t('appointments.check_in') }}
                                 </button>
                                 <button
-                                    v-if="
-                                        appt.status !== 'cancelled' &&
-                                        appt.status !== 'converted' &&
-                                        appt.status !== 'no_show'
-                                    "
+                                    v-if="canMarkNoShow(appt)"
                                     type="button"
                                     @click="markNoShow(appt)"
                                     :disabled="busy"
@@ -470,6 +466,7 @@ import AppLayout from '@/Layouts/AppLayout.vue';
 import PageHeader from '@/Components/PageHeader.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 import { usePermission } from '@/Composables/usePermission';
+import { canMarkNoShow } from '@/Utils/appointments';
 
 const props = defineProps({
     appointments: { type: Array, default: () => [] },
@@ -595,6 +592,15 @@ async function markNoShow(appt) {
     try {
         await axios.post(route('appointments.no-show', { appointment: appt.id }));
         router.reload();
+    } catch (e) {
+        // The server refuses the transition from a state that is already
+        // past the point of no return. Say so, instead of leaving the
+        // button looking broken.
+        if (e.response?.data?.code) {
+            alert(t(`messages.${e.response.data.code}`) + ': ' + (e.response.data.error || ''));
+        } else {
+            alert(e.message);
+        }
     } finally {
         busy.value = false;
     }

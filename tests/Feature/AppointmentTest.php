@@ -366,6 +366,41 @@ class AppointmentTest extends TestCase
         $this->assertSame('duplicate', $appt3->cancellation_reason);
     }
 
+    /**
+     * An appointment that was already checked in cannot be turned into a
+     * no-show: the server refuses the transition. The button on the page
+     * used to be shown for it anyway, and the 422 it produced was never
+     * displayed — the button simply did nothing (audit finding #59).
+     */
+    public function test_an_appointment_that_was_checked_in_cannot_be_marked_no_show(): void
+    {
+        $owner = $this->createUserWithPermissions(['crm.appointments.manage']);
+        [$customer, $vehicle, $bay, $tech] = $this->buildFixture($owner);
+
+        $start = Carbon::now()->addDay();
+        $appt = $this->scheduler->create(
+            $start, $start->copy()->addMinutes(30),
+            $customer, $vehicle, $bay, $tech, []
+        );
+
+        $this->scheduler->checkIn($appt);
+        $appt->refresh();
+        $this->assertSame(Appointment::STATUS_CHECKED_IN, $appt->status);
+
+        $response = $this->actingAs($owner)
+            ->postJson(route('appointments.no-show', $appt->id));
+
+        $response->assertStatus(422);
+        $this->assertSame('invalid_transition_no_show', $response->json('code'));
+
+        $appt->refresh();
+        $this->assertSame(
+            Appointment::STATUS_CHECKED_IN,
+            $appt->status,
+            'A refused transition must not change the appointment.'
+        );
+    }
+
     // ==================== Conversion to work order ====================
 
     public function test_convert_appointment_creates_a_work_order_with_services(): void

@@ -88,6 +88,7 @@ return [
             'unpublished' => 'غير منشور',
         ],
         'errors' => [
+            'image_type' => 'نوع الصورة غير مدعوم. المسموح: PNG أو JPG أو WebP.',
             'color_invalid' => 'يجب أن يكون اللون قيمة ست عشرية صحيحة (مثال: #4f46e5).',
             'social_url_invalid' => 'يجب أن يبدأ الرابط في حقل :field بـ http:// أو https://.',
         ],

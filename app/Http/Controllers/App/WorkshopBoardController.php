@@ -153,20 +153,21 @@ class WorkshopBoardController extends Controller
                 // Sentinel used only by the in-PHP sort below; the
                 // frontend ignores it.
                 '_sort_due_at' => $dueDate?->timestamp,
+                '_sort_started_at' => $item->started_at?->timestamp,
             ];
         }
 
         // Sort each column: dated items ascending by due date, then
         // undated items (NULL sentinel) last. Items with the same due
-        // date break the tie on started_at (oldest first) for stable
-        // ordering.
+        // date break the tie on started_at (oldest first), and cards
+        // that have not started yet come after the ones that have.
         foreach ($columns as $status => $cards) {
             usort($cards, function (array $a, array $b) {
                 $aTs = $a['_sort_due_at'];
                 $bTs = $b['_sort_due_at'];
 
                 if ($aTs === null && $bTs === null) {
-                    return 0;
+                    return $this->compareStartedAt($a, $b);
                 }
 
                 if ($aTs === null) {
@@ -177,12 +178,19 @@ class WorkshopBoardController extends Controller
                     return -1; // undated -> after
                 }
 
-                return $aTs <=> $bTs;
+                if ($aTs !== $bTs) {
+                    return $aTs <=> $bTs;
+                }
+
+                // Same due date: the work that started first comes
+                // first, so the priority a supervisor reads does not
+                // change between two loads of the same board.
+                return $this->compareStartedAt($a, $b);
             });
 
-            // Strip the sort helper before sending to Inertia.
+            // Strip the sort helpers before sending to Inertia.
             $columns[$status] = array_map(
-                fn (array $card) => Arr::except($card, ['_sort_due_at']),
+                fn (array $card) => Arr::except($card, ['_sort_due_at', '_sort_started_at']),
                 $cards
             );
         }
@@ -216,6 +224,32 @@ class WorkshopBoardController extends Controller
      * tiny. The Vue side always renders a "see all" link to
      * /app/appointments for the complete view.
      */
+    /**
+     * Compare two cards by the moment the work started.
+     *
+     * The oldest start comes first; a card that has not started yet
+     * comes after the ones that have.
+     */
+    private function compareStartedAt(array $a, array $b): int
+    {
+        $aStart = $a['_sort_started_at'];
+        $bStart = $b['_sort_started_at'];
+
+        if ($aStart === null && $bStart === null) {
+            return 0;
+        }
+
+        if ($aStart === null) {
+            return 1; // not started -> after
+        }
+
+        if ($bStart === null) {
+            return -1; // not started -> after
+        }
+
+        return $aStart <=> $bStart;
+    }
+
     private function loadTodayAppointments(int $tenantId, int $centerId): array
     {
         $start = now()->startOfDay();

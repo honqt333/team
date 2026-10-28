@@ -17,10 +17,12 @@ use App\Models\TenantTaxSetting;
 use App\Models\TenantZatcaSetting;
 use App\Services\Payment\PaymentManager;
 use App\Services\Zatca\ZatcaOnboardingService;
+use App\Support\Media\ImageType;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -258,19 +260,30 @@ class CompanyProfileController extends Controller
 
         $tenant = auth()->user()->tenant;
 
-        // Delete old logo if exists
+        // The extension of an uploaded file is chosen by the client, so
+        // it is never used: the type is read from the bytes and the
+        // extension written to disk comes from that. The file is served
+        // from the public disk, so only inert raster types are accepted.
+        $file = $request->file('logo');
+        $binary = (string) file_get_contents($file->getRealPath());
+        $extension = ImageType::extensionFor($binary);
+
+        if ($extension === null) {
+            throw ValidationException::withMessages([
+                'logo' => __('company_profile.logo.error_type'),
+            ]);
+        }
+
+        // Delete old logo only once the new one is known to be good — a
+        // rejected upload must not leave the tenant without a logo.
         if ($tenant->logo_path && Storage::exists($tenant->logo_path)) {
             Storage::delete($tenant->logo_path);
         }
 
-        // Store new logo
-        $file = $request->file('logo');
-        $extension = $file->getClientOriginalExtension();
-        $path = $file->storeAs(
-            "tenants/{$tenant->id}",
-            "logo.{$extension}",
-            'public'
-        );
+        $directory = "tenants/{$tenant->id}";
+        $path = "{$directory}/logo.".time().'.'.$extension;
+
+        Storage::disk('public')->put($path, $binary);
 
         $tenant->update(['logo_path' => $path]);
 

@@ -6,6 +6,7 @@ namespace App\Http\Controllers\App;
 
 use App\Http\Controllers\Controller;
 use App\Models\TenantWebsite;
+use App\Support\Media\ImageType;
 use App\Support\TenantWebsite\ThemeRegistry;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -13,6 +14,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -212,7 +214,7 @@ class TenantWebsiteSettingsController extends Controller
 
             'theme_key' => ['required', 'string', Rule::in($allowedKeys)],
 
-            'logo' => ['nullable', 'image', 'mimes:png,jpg,jpeg,webp,svg', 'max:4096'],
+            'logo' => ['nullable', 'image', 'mimes:png,jpg,jpeg,webp', 'max:4096'],
             'cover' => ['nullable', 'image', 'mimes:png,jpg,jpeg,webp', 'max:4096'],
         ], [], [
             'theme_key' => __('tenant_site.admin.fields.theme_key'),
@@ -222,16 +224,36 @@ class TenantWebsiteSettingsController extends Controller
     /**
      * Store an image under tenants/{tenantId}/website/.
      * Deletes the old file if present.
+     *
+     * The extension of an uploaded file is chosen by the client, so it is
+     * never used here: the type is read from the bytes, and the extension
+     * written to disk comes from that. SVG is refused — it is served
+     * straight from the public disk, and it can carry scripts.
      */
     private function storeImage(UploadedFile $file, int $tenantId, string $slot, ?string $oldPath): string
     {
+        $binary = (string) file_get_contents($file->getRealPath());
+
+        $extension = ImageType::extensionFor($binary);
+
+        if ($extension === null) {
+            throw ValidationException::withMessages([
+                $slot => __('tenant_site.admin.errors.image_type'),
+            ]);
+        }
+
+        // The old file is only removed once the new one is known to be
+        // good — a rejected upload must not leave the tenant without a
+        // logo.
         if ($oldPath && Storage::disk('public')->exists($oldPath)) {
             Storage::disk('public')->delete($oldPath);
         }
 
-        $extension = $file->getClientOriginalExtension();
         $filename = $slot.'_'.time().'.'.$extension;
+        $directory = "tenants/{$tenantId}/website";
 
-        return $file->storeAs("tenants/{$tenantId}/website", $filename, 'public');
+        Storage::disk('public')->put("{$directory}/{$filename}", $binary);
+
+        return "{$directory}/{$filename}";
     }
 }

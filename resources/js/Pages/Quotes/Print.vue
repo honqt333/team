@@ -55,6 +55,7 @@ import { computed, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { usePage, router } from '@inertiajs/vue3';
 import PrintEngine from '@/Components/Print/PrintEngine.vue';
+import { buildPrintSignatures } from '@/Utils/printSignatures';
 
 const props = defineProps({
     quote: Object,
@@ -201,17 +202,6 @@ const mappedPrintData = computed(() => {
     };
 });
 
-const isCustomerSig = (s) => {
-    const text = `${s?.name_ar || ''} ${s?.name_en || ''} ${s?.name || ''}`.toLowerCase();
-    return (
-        text.includes('عميل') ||
-        text.includes('العميل') ||
-        text.includes('زبون') ||
-        text.includes('customer') ||
-        text.includes('client')
-    );
-};
-
 const mappedCenterData = computed(() => {
     const center = props.quote.center || {};
     const tenant = props.quote.tenant || page.props?.tenant || {};
@@ -242,40 +232,7 @@ const documentSettings = computed(() => {
         print_terms: docSettings.print_terms !== false,
         show_stamp: docSettings.show_stamp !== false,
         show_customer_address: docSettings.show_customer_address !== false,
-        signatures: (() => {
-            const list =
-                docSettings.signatures && docSettings.signatures.length > 0
-                    ? docSettings.signatures.map((s) => {
-                          if (isCustomerSig(s)) {
-                              return { ...s, url: props.quote.signature_url || s.url, show: true };
-                          }
-                          return s;
-                      })
-                    : [
-                          {
-                              name_ar: 'توقيع المستشار الفني',
-                              name_en: 'Service Advisor Signature',
-                              show: true,
-                          },
-                          {
-                              name_ar: 'توقيع العميل للاعتماد',
-                              name_en: 'Customer Signature',
-                              url: props.quote.signature_url,
-                              show: true,
-                          },
-                      ];
-
-            if (props.quote.signature_url && !list.some((s) => isCustomerSig(s) && s.url)) {
-                list.push({
-                    name_ar: 'توقيع العميل للاعتماد',
-                    name_en: 'Customer Signature',
-                    url: props.quote.signature_url,
-                    show: true,
-                });
-            }
-
-            return list;
-        })(),
+        signatures: buildPrintSignatures(docSettings, props.quote.signature_url),
     };
 });
 

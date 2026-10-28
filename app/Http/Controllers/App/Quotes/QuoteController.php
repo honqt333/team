@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\App\Quotes;
 
+use App\Exceptions\InvalidQuoteSignatureException;
 use App\Exports\QuotesExport;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\QuoteRequest;
@@ -19,6 +20,7 @@ use App\Models\VehicleMake;
 use App\Models\VehicleMileageLog;
 use App\Models\VehicleModel;
 use App\Services\NotificationService;
+use App\Services\QuoteSignatureStorage;
 use App\Support\TenancyContext;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -602,43 +604,33 @@ class QuoteController extends Controller
             'signature' => 'required|string',
         ]);
 
-        $signatureData = $request->input('signature');
+        $signatureData = (string) $request->input('signature');
 
-        if (preg_match('/^data:image\/([a-zA-Z0-9_\-\+]+);base64,/', $signatureData, $typeMatch)) {
-            $raw = substr($signatureData, strpos($signatureData, ',') + 1);
-            $ext = strtolower($typeMatch[1]);
-
-            if (str_contains($ext, 'svg')) {
-                $ext = 'svg';
-            } elseif (! in_array($ext, ['png', 'jpg', 'jpeg', 'webp'])) {
-                $ext = 'png';
-            }
-            $decoded = base64_decode($raw);
-
-            if ($decoded !== false) {
-                if ($quote->signature_path) {
-                    Storage::disk('public')->delete($quote->signature_path);
-                }
-
-                $filename = 'signatures/quotes/'.$quote->id.'_'.time().'.'.$ext;
-                Storage::disk('public')->put($filename, $decoded);
-
-                $quote->update([
-                    'signature_path' => $filename,
-                ]);
-
-                // Sync to converted work order if already converted
-                if ($quote->converted_work_order_id && $quote->convertedWorkOrder) {
-                    $quote->convertedWorkOrder->update([
-                        'reception_signature' => $filename,
-                        'reception_signed_at' => $quote->convertedWorkOrder->reception_signed_at ?? now(),
-                    ]);
-                }
-
-                return back()->with('success', 'تم حفظ توقيع العميل بنجاح.');
-            }
+        // The signature is written to the public disk, so it has to be an
+        // inert image: the type is taken from the bytes and active
+        // formats (SVG) are refused.
+        try {
+            $filename = app(QuoteSignatureStorage::class)->store($signatureData, $quote);
+        } catch (InvalidQuoteSignatureException $e) {
+            return back()->with('error', __('quotes.signature_invalid'));
         }
 
-        return back()->with('error', 'صيغة التوقيع غير صالحة.');
+        if ($quote->signature_path) {
+            Storage::disk('public')->delete($quote->signature_path);
+        }
+
+        $quote->update([
+            'signature_path' => $filename,
+        ]);
+
+        // Sync to converted work order if already converted
+        if ($quote->converted_work_order_id && $quote->convertedWorkOrder) {
+            $quote->convertedWorkOrder->update([
+                'reception_signature' => $filename,
+                'reception_signed_at' => $quote->convertedWorkOrder->reception_signed_at ?? now(),
+            ]);
+        }
+
+        return back()->with('success', 'تم حفظ توقيع العميل بنجاح.');
     }
 }

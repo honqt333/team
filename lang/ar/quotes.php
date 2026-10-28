@@ -12,6 +12,7 @@ return [
     'validity_hint' => 'فترة التزام الورشة بالأسعار',
     'duplicated_success' => 'تم نسخ وتكرار عرض السعر بنجاح',
     'customer_signed' => 'تم اعتماد وتوقيع العميل إلكترونياً',
+    'signature_invalid' => 'صيغة التوقيع غير صالحة: يُقبل ملف صورة (PNG أو JPG أو WebP) فقط.',
     'add' => 'إضافة عرض سعر',
     'all_loaded' => 'تم تحميل الكل',
     'allow_lower_odometer' => 'السماح بقراءة عداد أقل',

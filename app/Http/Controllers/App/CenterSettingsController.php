@@ -270,9 +270,11 @@ class CenterSettingsController extends Controller
         $type = $request->input('type');
         $pathField = "logo_{$type}_path";
 
-        // Delete old logo if exists
+        // Delete old logo if exists. The file lives on the public disk —
+        // the default disk is 'local', so the delete has to name the disk
+        // it was written to or the old logo is never removed.
         if ($center->$pathField) {
-            Storage::delete($center->$pathField);
+            Storage::disk('public')->delete($center->$pathField);
         }
 
         $path = $request->file('logo')->store("centers/{$center->id}/logos", 'public');
@@ -296,7 +298,7 @@ class CenterSettingsController extends Controller
         $pathField = "logo_{$type}_path";
 
         if ($center->$pathField) {
-            Storage::delete($center->$pathField);
+            Storage::disk('public')->delete($center->$pathField);
             $center->update([$pathField => null]);
         }
 

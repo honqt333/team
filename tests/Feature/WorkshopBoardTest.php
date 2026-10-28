@@ -148,6 +148,73 @@ class WorkshopBoardTest extends TestCase
         ], $overrides));
     }
 
+    /**
+     * Two cards with the same due date must have a defined order: the
+     * one whose work started earlier comes first. Without a tie-break
+     * the order was whatever the query happened to return, so the
+     * priority a supervisor reads could change between two loads of the
+     * same board (audit finding #60).
+     */
+    public function test_cards_with_the_same_due_date_are_ordered_by_when_the_work_started(): void
+    {
+        $user = $this->createUserWithPermissions(['crm.work_orders.view']);
+        $workOrder = $this->createWorkOrder($user);
+
+        $dueDate = now()->addDay()->toDateString();
+
+        // Created in the "wrong" order on purpose: the card that started
+        // LATER is created first.
+        $later = $this->addItem($workOrder, WorkOrderItem::STATUS_IN_PROGRESS, [
+            'due_date' => $dueDate,
+            'started_at' => now()->subMinutes(10),
+        ]);
+
+        $earlier = $this->addItem($workOrder, WorkOrderItem::STATUS_IN_PROGRESS, [
+            'due_date' => $dueDate,
+            'started_at' => now()->subHours(3),
+        ]);
+
+        $response = $this->actingAs($user)->get('/app/workshop');
+
+        $response->assertStatus(200);
+        $response->assertInertia(
+            fn ($page) => $page
+                ->where('columns.in_progress.0.id', $earlier->id)
+                ->where('columns.in_progress.1.id', $later->id)
+        );
+    }
+
+    /**
+     * A card that has not started yet comes after the ones that have,
+     * even when they share the due date.
+     */
+    public function test_cards_that_have_not_started_come_last(): void
+    {
+        $user = $this->createUserWithPermissions(['crm.work_orders.view']);
+        $workOrder = $this->createWorkOrder($user);
+
+        $dueDate = now()->addDay()->toDateString();
+
+        $notStarted = $this->addItem($workOrder, WorkOrderItem::STATUS_PENDING, [
+            'due_date' => $dueDate,
+            'started_at' => null,
+        ]);
+
+        $started = $this->addItem($workOrder, WorkOrderItem::STATUS_PENDING, [
+            'due_date' => $dueDate,
+            'started_at' => now()->subHour(),
+        ]);
+
+        $response = $this->actingAs($user)->get('/app/workshop');
+
+        $response->assertStatus(200);
+        $response->assertInertia(
+            fn ($page) => $page
+                ->where('columns.pending.0.id', $started->id)
+                ->where('columns.pending.1.id', $notStarted->id)
+        );
+    }
+
     public function test_authorized_user_can_view_workshop_board(): void
     {
         $user = $this->createUserWithPermissions(['crm.work_orders.view']);
