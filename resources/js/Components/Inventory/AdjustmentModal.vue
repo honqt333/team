@@ -4,7 +4,8 @@
             <!-- Part Selection -->
             <div>
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    {{ $t('inventory.parts.name') }} <span class="text-red-500">*</span>
+                    {{ $t('inventory.parts.name') }}
+                    <span class="text-red-500">*</span>
                 </label>
                 <SearchableSelect
                     v-model="form.part_id"
@@ -18,20 +19,41 @@
                     <template #option="{ option }">
                         <div class="flex items-center justify-between w-full">
                             <div>
-                                <div class="font-bold text-gray-900 dark:text-white text-start">{{ toEnglish(getName(option)) }}</div>
-                                <div class="text-[10px] text-emerald-600 font-bold mt-0.5 text-start">{{ formatCurrency(option.default_sale_price) }}</div>
+                                <div class="font-bold text-gray-900 dark:text-white text-start">
+                                    {{ toEnglish(getName(option)) }}
+                                </div>
+                                <div
+                                    class="text-[10px] text-emerald-600 font-bold mt-0.5 text-start"
+                                >
+                                    {{ formatCurrency(option.default_sale_price) }}
+                                </div>
                             </div>
                             <div class="text-right flex flex-col items-end">
-                                <span class="text-[10px] font-mono text-gray-500">{{ toEnglish(option.sku || option.barcode || '---') }}</span>
-                                <span class="text-[10px] font-bold mt-0.5" :class="Number(option.inventory_balances_sum_qty_on_hand) > 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-500 dark:text-red-400'">
-                                    {{ $t('inventory.stock.available') }}: {{ formatQuantity(option.inventory_balances_sum_qty_on_hand || 0) }}
+                                <span class="text-[10px] font-mono text-gray-500">
+                                    {{ toEnglish(option.sku || option.barcode || '---') }}
+                                </span>
+                                <span
+                                    class="text-[10px] font-bold mt-0.5"
+                                    :class="
+                                        Number(option.inventory_balances_sum_qty_on_hand) > 0
+                                            ? 'text-emerald-600 dark:text-emerald-400'
+                                            : 'text-red-500 dark:text-red-400'
+                                    "
+                                >
+                                    {{ $t('inventory.stock.available') }}:
+                                    {{
+                                        formatQuantity(
+                                            option.inventory_balances_sum_qty_on_hand || 0
+                                        )
+                                    }}
                                 </span>
                             </div>
                         </div>
                     </template>
                 </SearchableSelect>
                 <p v-if="selectedPart" class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                    {{ $t('inventory.stock.available') }}: {{ formatQuantity(selectedPart.inventory_balances_sum_qty_on_hand || 0) }}
+                    {{ $t('inventory.stock.available') }}:
+                    {{ formatQuantity(selectedPart.inventory_balances_sum_qty_on_hand || 0) }}
                 </p>
                 <p v-if="errors.part_id" class="mt-1 text-sm text-red-500">{{ errors.part_id }}</p>
             </div>
@@ -39,36 +61,61 @@
             <!-- Adjustment Type Selection -->
             <div>
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    {{ $t('inventory.moves.adjustment_type') }} <span class="text-red-500">*</span>
+                    {{ $t('inventory.moves.adjustment_type') }}
+                    <span class="text-red-500">*</span>
                 </label>
                 <div class="flex items-center gap-3">
-                    <button 
+                    <button
                         type="button"
                         @click="adjustmentType = 'increase'"
                         :class="[
                             'flex-1 py-2.5 rounded-lg font-medium transition-colors',
-                            adjustmentType === 'increase' 
-                                ? 'bg-green-600 text-white shadow-md' 
-                                : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+                            adjustmentType === 'increase'
+                                ? 'bg-green-600 text-white shadow-md'
+                                : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600',
                         ]"
                     >
                         <span class="flex items-center justify-center gap-2">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 4v16m8-8H4"/></svg>
+                            <svg
+                                class="w-4 h-4"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="3"
+                                    d="M12 4v16m8-8H4"
+                                />
+                            </svg>
                             {{ $t('inventory.moves.adjustment_in') }}
                         </span>
                     </button>
-                    <button 
+                    <button
                         type="button"
                         @click="adjustmentType = 'decrease'"
                         :class="[
                             'flex-1 py-2.5 rounded-lg font-medium transition-colors',
-                            adjustmentType === 'decrease' 
-                                ? 'bg-red-600 text-white shadow-md' 
-                                : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+                            adjustmentType === 'decrease'
+                                ? 'bg-red-600 text-white shadow-md'
+                                : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600',
                         ]"
                     >
                         <span class="flex items-center justify-center gap-2">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M20 12H4"/></svg>
+                            <svg
+                                class="w-4 h-4"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="3"
+                                    d="M20 12H4"
+                                />
+                            </svg>
                             {{ $t('inventory.moves.adjustment_out') }}
                         </span>
                     </button>
@@ -78,7 +125,8 @@
             <!-- Quantity Input -->
             <div>
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    {{ $t('inventory.stock.qty') }} <span class="text-red-500">*</span>
+                    {{ $t('inventory.stock.qty') }}
+                    <span class="text-red-500">*</span>
                 </label>
                 <input
                     v-model="form.qty"
@@ -89,13 +137,16 @@
                     class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-yellow-500 font-mono shadow-sm"
                     placeholder="0.000"
                 />
-                <p v-if="errors.qty" class="mt-1 text-sm text-red-500 font-medium">{{ errors.qty }}</p>
+                <p v-if="errors.qty" class="mt-1 text-sm text-red-500 font-medium">
+                    {{ errors.qty }}
+                </p>
             </div>
 
             <!-- Notes (Required for adjustments) -->
             <div>
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    {{ $t('common.notes') }} <span class="text-red-500">*</span>
+                    {{ $t('common.notes') }}
+                    <span class="text-red-500">*</span>
                 </label>
                 <textarea
                     v-model="form.notes"
@@ -130,6 +181,9 @@
 </template>
 
 <script setup>
+import { useI18n } from 'vue-i18n';
+const { t } = useI18n();
+
 import { ref, reactive, watch, computed } from 'vue';
 import { router } from '@inertiajs/vue3';
 import { useToast } from '@/Composables/useToast';
@@ -175,28 +229,36 @@ const handleInput = (event, field) => {
 };
 
 const selectedPart = computed(() => {
-    return parts.value.find(p => p.id === form.part_id);
+    return parts.value.find((p) => p.id === form.part_id);
 });
 
-watch(() => props.warehouseId, (val) => {
-    form.warehouse_id = val;
-});
-
-watch(() => props.show, (val) => {
-    if (val) {
-        // Reset form when modal opens
-        form.part_id = null;
-        form.qty = null;
-        form.notes = '';
-        adjustmentType.value = 'increase';
-        Object.keys(errors).forEach(key => delete errors[key]);
-        loadParts();
+watch(
+    () => props.warehouseId,
+    (val) => {
+        form.warehouse_id = val;
     }
-});
+);
+
+watch(
+    () => props.show,
+    (val) => {
+        if (val) {
+            // Reset form when modal opens
+            form.part_id = null;
+            form.qty = null;
+            form.notes = '';
+            adjustmentType.value = 'increase';
+            Object.keys(errors).forEach((key) => delete errors[key]);
+            loadParts();
+        }
+    }
+);
 
 async function loadParts() {
     try {
-        const response = await axios.get(route('app.inventory.parts.search'), { params: { q: '' } });
+        const response = await axios.get(route('app.inventory.parts.search'), {
+            params: { q: '' },
+        });
         parts.value = response.data;
     } catch (e) {
         console.error('Failed to load parts', e);
@@ -205,7 +267,9 @@ async function loadParts() {
 
 async function searchParts(query) {
     try {
-        const response = await axios.get(route('app.inventory.parts.search'), { params: { q: query } });
+        const response = await axios.get(route('app.inventory.parts.search'), {
+            params: { q: query },
+        });
         parts.value = response.data;
     } catch (e) {
         console.error('Search failed', e);
@@ -214,28 +278,32 @@ async function searchParts(query) {
 
 function submit() {
     processing.value = true;
-    Object.keys(errors).forEach(key => delete errors[key]);
+    Object.keys(errors).forEach((key) => delete errors[key]);
 
     // Calculate qty with sign based on adjustment type
     const qty = adjustmentType.value === 'decrease' ? -Math.abs(form.qty) : Math.abs(form.qty);
 
-    router.post(route('app.inventory.moves.adjustment'), {
-        ...form,
-        qty,
-    }, {
-        preserveScroll: true,
-        onSuccess: () => {
-            success('تم تسجيل التسوية بنجاح');
-            emit('saved');
-            emit('close');
+    router.post(
+        route('app.inventory.moves.adjustment'),
+        {
+            ...form,
+            qty,
         },
-        onError: (errs) => {
-            Object.assign(errors, errs);
-            showError('حدث خطأ أثناء الحفظ');
-        },
-        onFinish: () => {
-            processing.value = false;
-        },
-    });
+        {
+            preserveScroll: true,
+            onSuccess: () => {
+                success(t('inventory.moves.adjustment_created'));
+                emit('saved');
+                emit('close');
+            },
+            onError: (errs) => {
+                Object.assign(errors, errs);
+                showError(t('common.error_while_saving'));
+            },
+            onFinish: () => {
+                processing.value = false;
+            },
+        }
+    );
 }
 </script>

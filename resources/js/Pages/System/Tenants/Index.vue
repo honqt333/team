@@ -89,7 +89,7 @@
                                 <th
                                     class="px-6 py-4 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle"
                                 >
-                                    الباقة الحالية
+                                    {{ $t('system.tenants.current_plan') }}
                                 </th>
                                 <th
                                     class="px-6 py-4 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle"
@@ -169,12 +169,7 @@
                                         </div>
                                         <div class="text-xs text-gray-500 flex items-center gap-2">
                                             <span>
-                                                {{
-                                                    tenant.latest_subscription.billing_cycle ===
-                                                    'yearly'
-                                                        ? 'سنوي'
-                                                        : 'شهري'
-                                                }}
+                                                {{ $t('hr.leaves.types.annual') }}
                                             </span>
                                             <span class="text-gray-300 dark:text-gray-600">•</span>
                                             <span
@@ -188,20 +183,12 @@
                                                           : 'text-gray-500'
                                                 "
                                             >
-                                                {{
-                                                    tenant.latest_subscription.status === 'active'
-                                                        ? 'نشط'
-                                                        : ['trial', 'trialing'].includes(
-                                                                tenant.latest_subscription.status
-                                                            )
-                                                          ? 'تجريبي'
-                                                          : 'منتهي'
-                                                }}
+                                                {{ $t('system.status.active') }}
                                             </span>
                                         </div>
                                     </div>
                                     <span v-else class="text-sm text-gray-400 italic">
-                                        بدون باقة
+                                        {{ $t('system.tenants.no_plan') }}
                                     </span>
                                 </td>
                                 <td class="px-6 py-4 align-middle">
@@ -363,7 +350,7 @@ const statusOptions = computed(() => [
 ]);
 
 const planOptions = computed(() => [
-    { value: '', label: 'جميع الباقات' },
+    { value: '', label: t('system.subscriptions.all_plans') },
     ...props.plans.map((p) => ({
         value: p.id,
         label: p.name_ar || p.name_en,

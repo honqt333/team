@@ -1142,7 +1142,7 @@ const formatCurrency = (val) => {
     return (
         num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) +
         ' ' +
-        (locale.value === 'ar' ? 'ر.س' : 'SAR')
+        t('common.currency')
     );
 };
 

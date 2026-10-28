@@ -6,14 +6,10 @@
             <div class="flex items-center justify-between flex-wrap gap-2">
                 <div>
                     <h1 class="text-2xl font-bold text-gray-900 dark:text-white">
-                        {{ locale === 'ar' ? 'كل الإشعارات' : 'All notifications' }}
+                        {{ $t('system.notifications.all_title') }}
                     </h1>
                     <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                        {{
-                            locale === 'ar'
-                                ? 'كل الإشعارات مرتبة من الأحدث للأقدم'
-                                : 'All notifications, newest first'
-                        }}
+                        {{ $t('system.notifications.all_subtitle') }}
                     </p>
                 </div>
                 <button
@@ -21,7 +17,7 @@
                     @click="markAllRead"
                     class="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200"
                 >
-                    {{ locale === 'ar' ? 'تعليم الكل كمقروء' : 'Mark all as read' }}
+                    {{ $t('notifications.mark_all_read') }}
                 </button>
             </div>
 
@@ -82,7 +78,7 @@
                     v-if="!(notifications.data || []).length"
                     class="p-12 text-center text-sm text-gray-500 dark:text-gray-400"
                 >
-                    {{ locale === 'ar' ? 'لا توجد إشعارات' : 'No notifications' }}
+                    {{ $t('notifications.empty') }}
                 </div>
             </div>
 
@@ -107,6 +103,9 @@
 </template>
 
 <script setup>
+import { useI18n } from 'vue-i18n';
+const { t } = useI18n();
+
 import { computed, ref } from 'vue';
 import { Head, router } from '@inertiajs/vue3';
 import SystemLayout from '@/Layouts/SystemLayout.vue';

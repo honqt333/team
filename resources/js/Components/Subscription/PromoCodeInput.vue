@@ -1,4 +1,7 @@
 <script setup>
+import { useI18n } from 'vue-i18n';
+const { t } = useI18n();
+
 import { ref, computed } from 'vue';
 import { router } from '@inertiajs/vue3';
 
@@ -37,7 +40,7 @@ async function apply() {
             emit('cleared');
         }
     } catch (e) {
-        error.value = locale.value === 'ar' ? 'حدث خطأ في التحقق' : 'Validation error';
+        error.value = t('subscription.promo_verify_error');
     } finally {
         loading.value = false;
     }
@@ -53,7 +56,7 @@ function clear() {
 <template>
     <div class="space-y-2">
         <label class="text-sm font-semibold text-slate-900 dark:text-white">
-            {{ locale === 'ar' ? 'كود الخصم (اختياري)' : 'Promo code (optional)' }}
+            {{ $t('subscription.promo_code_label') }}
         </label>
 
         <!-- Applied state -->
@@ -132,7 +135,7 @@ function clear() {
                           8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                     />
                 </svg>
-                <span v-else>{{ locale === 'ar' ? 'تطبيق' : 'Apply' }}</span>
+                <span v-else>{{ $t('common.apply') }}</span>
             </button>
         </div>
 

@@ -286,17 +286,18 @@
                             v-if="workOrder.invoice"
                             class="text-gray-500 dark:text-gray-400 text-[11px] block mt-0.5"
                         >
-                            تجاوز تاريخ استحقاق الفاتورة الآجلة رقم
+                            {{ $t('work_orders.financial.overdue_invoice_prefix') }}
                             <span class="font-mono" dir="ltr">
                                 #{{ workOrder.invoice.invoice_number }}
                             </span>
-                            (تاريخ الاستحقاق: {{ formatDate(workOrder.invoice.due_date) }})
+                            {{ $t('common.due_date_label') }}
+                            {{ formatDate(workOrder.invoice.due_date) }})
                         </span>
                         <span
                             v-else
                             class="text-gray-500 dark:text-gray-400 text-[11px] block mt-0.5"
                         >
-                            يرجى تسجيل الدفعة أو إصدار فاتورة آجلة لتسوية رصيد هذا الكرت.
+                            {{ $t('work_orders.financial.settle_balance_hint') }}
                         </span>
                     </div>
                 </div>

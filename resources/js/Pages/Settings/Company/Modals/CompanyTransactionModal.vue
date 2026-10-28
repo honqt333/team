@@ -4,18 +4,31 @@
         <div class="absolute inset-0 bg-black/50" @click="$emit('close')"></div>
 
         <!-- Modal -->
-        <div class="relative bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-lg mx-4 overflow-hidden">
+        <div
+            class="relative bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-lg mx-4 overflow-hidden"
+        >
             <!-- Header -->
-            <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+            <div
+                class="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-700"
+            >
                 <h3 class="text-lg font-bold text-gray-900 dark:text-white">
-                    {{ transaction ? $t('company_profile.transactions.edit') : $t('company_profile.transactions.add') }}
+                    {{
+                        transaction
+                            ? $t('company_profile.transactions.edit')
+                            : $t('company_profile.transactions.add')
+                    }}
                 </h3>
                 <button
                     @click="$emit('close')"
                     class="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
                 >
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M6 18L18 6M6 6l12 12"
+                        />
                     </svg>
                 </button>
             </div>
@@ -24,8 +37,11 @@
             <form @submit.prevent="submit" class="p-6 space-y-4 max-h-[80vh] overflow-y-auto">
                 <!-- Title -->
                 <div>
-                    <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">
-                        {{ $t('company_profile.transactions.form.title') }} <span class="text-red-500">*</span>
+                    <label
+                        class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1"
+                    >
+                        {{ $t('company_profile.transactions.form.title') }}
+                        <span class="text-red-500">*</span>
                     </label>
                     <input
                         v-model="form.title"
@@ -34,14 +50,19 @@
                         class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
                         :placeholder="$t('company_profile.transactions.form.title_placeholder')"
                     />
-                    <p v-if="form.errors.title" class="mt-1 text-sm text-red-500">{{ form.errors.title }}</p>
+                    <p v-if="form.errors.title" class="mt-1 text-sm text-red-500">
+                        {{ form.errors.title }}
+                    </p>
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <!-- Transaction Date -->
                     <div>
-                        <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">
-                            {{ $t('company_profile.transactions.form.date') }} <span class="text-red-500">*</span>
+                        <label
+                            class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1"
+                        >
+                            {{ $t('company_profile.transactions.form.date') }}
+                            <span class="text-red-500">*</span>
                         </label>
                         <input
                             v-model="form.transaction_date"
@@ -49,7 +70,9 @@
                             required
                             class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
                         />
-                        <p v-if="form.errors.transaction_date" class="mt-1 text-sm text-red-500">{{ form.errors.transaction_date }}</p>
+                        <p v-if="form.errors.transaction_date" class="mt-1 text-sm text-red-500">
+                            {{ form.errors.transaction_date }}
+                        </p>
                     </div>
 
                     <!-- Transaction Type -->
@@ -92,7 +115,9 @@
                             option-label="label"
                             option-value="value"
                             :label="$t('company_profile.transactions.form.linked_to')"
-                            :placeholder="$t('company_profile.transactions.form.linked_to_placeholder')"
+                            :placeholder="
+                                $t('company_profile.transactions.form.linked_to_placeholder')
+                            "
                             :error="form.errors.contact_id"
                         />
                     </div>
@@ -100,8 +125,11 @@
 
                 <!-- Value/Amount -->
                 <div>
-                    <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">
-                        {{ $t('company_profile.transactions.form.amount') }} <span class="text-red-500">*</span>
+                    <label
+                        class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1"
+                    >
+                        {{ $t('company_profile.transactions.form.amount') }}
+                        <span class="text-red-500">*</span>
                     </label>
                     <input
                         v-model="form.amount"
@@ -112,11 +140,16 @@
                         class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:border-transparent font-mono"
                         placeholder="0.00"
                     />
-                    <p v-if="form.errors.amount" class="mt-1 text-sm text-red-500">{{ form.errors.amount }}</p>
+                    <p v-if="form.errors.amount" class="mt-1 text-sm text-red-500">
+                        {{ form.errors.amount }}
+                    </p>
                 </div>
 
                 <!-- Is Taxable Toggle (Only visible if tax is enabled) -->
-                <div v-if="vatEnabled" class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                <div
+                    v-if="vatEnabled"
+                    class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg"
+                >
                     <label class="text-sm font-semibold text-gray-700 dark:text-gray-300">
                         {{ $t('company_profile.transactions.form.is_taxable') }}
                     </label>
@@ -125,7 +158,7 @@
                         @click="form.is_taxable = !form.is_taxable"
                         :class="[
                             'relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2',
-                            form.is_taxable ? 'bg-emerald-600' : 'bg-gray-300 dark:bg-gray-600'
+                            form.is_taxable ? 'bg-emerald-600' : 'bg-gray-300 dark:bg-gray-600',
                         ]"
                         role="switch"
                         :aria-checked="form.is_taxable"
@@ -133,16 +166,23 @@
                         <span
                             :class="[
                                 'pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out',
-                                form.is_taxable ? 'ltr:translate-x-5 rtl:-translate-x-5' : 'translate-x-0'
+                                form.is_taxable
+                                    ? 'ltr:translate-x-5 rtl:-translate-x-5'
+                                    : 'translate-x-0',
                             ]"
                         />
                     </button>
                 </div>
 
                 <!-- Tax Details (Visible if taxable is checked) -->
-                <div v-if="vatEnabled && form.is_taxable" class="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-emerald-500/5 border border-emerald-500/10 rounded-lg">
+                <div
+                    v-if="vatEnabled && form.is_taxable"
+                    class="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-emerald-500/5 border border-emerald-500/10 rounded-lg"
+                >
                     <div>
-                        <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 mb-1">
+                        <label
+                            class="block text-xs font-bold text-gray-500 dark:text-gray-400 mb-1"
+                        >
                             {{ $t('company_profile.transactions.form.vat_amount') }} (15%)
                         </label>
                         <input
@@ -153,7 +193,9 @@
                         />
                     </div>
                     <div>
-                        <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 mb-1">
+                        <label
+                            class="block text-xs font-bold text-gray-500 dark:text-gray-400 mb-1"
+                        >
                             {{ $t('company_profile.transactions.form.total_amount') }}
                         </label>
                         <input
@@ -166,20 +208,37 @@
                 </div>
 
                 <!-- Notice warning about auto-generated invoices on approval -->
-                <div v-if="form.is_taxable" class="p-3 bg-amber-500/10 border border-amber-500/20 rounded-lg text-xs text-amber-700 dark:text-amber-400 flex items-start gap-2">
-                    <svg class="w-4 h-4 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                <div
+                    v-if="form.is_taxable"
+                    class="p-3 bg-amber-500/10 border border-amber-500/20 rounded-lg text-xs text-amber-700 dark:text-amber-400 flex items-start gap-2"
+                >
+                    <svg
+                        class="w-4 h-4 shrink-0 mt-0.5"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                        />
                     </svg>
                     <span>
-                        {{ form.transaction_type === 'revenue' 
-                            ? $t('company_profile.transactions.form.sales_invoice_notice') 
-                            : $t('company_profile.transactions.form.purchase_invoice_notice') }}
+                        {{
+                            form.transaction_type === 'revenue'
+                                ? $t('company_profile.transactions.form.sales_invoice_notice')
+                                : $t('company_profile.transactions.form.purchase_invoice_notice')
+                        }}
                     </span>
                 </div>
 
                 <!-- Notes -->
                 <div>
-                    <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                    <label
+                        class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1"
+                    >
                         {{ $t('company_profile.transactions.form.notes') }}
                     </label>
                     <textarea
@@ -187,11 +246,15 @@
                         rows="3"
                         class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
                     ></textarea>
-                    <p v-if="form.errors.notes" class="mt-1 text-sm text-red-500">{{ form.errors.notes }}</p>
+                    <p v-if="form.errors.notes" class="mt-1 text-sm text-red-500">
+                        {{ form.errors.notes }}
+                    </p>
                 </div>
 
                 <!-- Actions -->
-                <div class="flex items-center justify-end gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
+                <div
+                    class="flex items-center justify-end gap-3 pt-4 border-t border-gray-200 dark:border-gray-700"
+                >
                     <button
                         type="button"
                         @click="$emit('close')"
@@ -226,7 +289,7 @@ const props = defineProps({
     transaction: Object,
     incomeCategories: Array,
     vatEnabled: Boolean,
-    centerId: [Number, String]
+    centerId: [Number, String],
 });
 
 const emit = defineEmits(['close', 'saved']);
@@ -256,63 +319,71 @@ const transactionTypeOptions = [
 
 // Filter categories based on transaction type
 const filteredCategories = computed(() => {
-    return props.incomeCategories.filter(cat => cat.transaction_type === form.transaction_type);
+    return props.incomeCategories.filter((cat) => cat.transaction_type === form.transaction_type);
 });
 
 const filteredCategoryOptions = computed(() => {
-    return filteredCategories.value.map(cat => ({
+    return filteredCategories.value.map((cat) => ({
         value: cat.id,
-        label: cat.name
+        label: cat.name,
     }));
 });
 
 // Initialize in edit mode
-watch(() => props.show, (newVal) => {
-    if (newVal) {
-        if (props.transaction) {
-            form.title = props.transaction.title;
-            form.transaction_date = props.transaction.transaction_date;
-            form.transaction_type = props.transaction.transaction_type;
-            form.income_category_id = props.transaction.income_category_id;
-            form.amount = props.transaction.amount;
-            form.is_taxable = !!props.transaction.is_taxable;
-            form.tax_amount = props.transaction.tax_amount;
-            form.total_amount = props.transaction.total_amount;
-            form.contact_type = props.transaction.contact_type;
-            form.contact_id = props.transaction.contact_id;
-            form.notes = props.transaction.notes || '';
-            form.center_id = props.transaction.center_id || props.centerId || null;
+watch(
+    () => props.show,
+    (newVal) => {
+        if (newVal) {
+            if (props.transaction) {
+                form.title = props.transaction.title;
+                form.transaction_date = props.transaction.transaction_date;
+                form.transaction_type = props.transaction.transaction_type;
+                form.income_category_id = props.transaction.income_category_id;
+                form.amount = props.transaction.amount;
+                form.is_taxable = !!props.transaction.is_taxable;
+                form.tax_amount = props.transaction.tax_amount;
+                form.total_amount = props.transaction.total_amount;
+                form.contact_type = props.transaction.contact_type;
+                form.contact_id = props.transaction.contact_id;
+                form.notes = props.transaction.notes || '';
+                form.center_id = props.transaction.center_id || props.centerId || null;
 
-            if (props.transaction.contact) {
-                const contact = props.transaction.contact;
-                const type = props.transaction.contact_type;
-                const key = `${type}-${contact.id}`;
-                const label = `${contact.name} (${contact.phone || ''}) - ${type === 'customer' ? 'عميل' : 'مورد'}`;
-                
-                searchResults.value = [{
-                    value: key,
-                    label,
-                    type,
-                    id: contact.id
-                }];
-                selectedContactKey.value = key;
+                if (props.transaction.contact) {
+                    const contact = props.transaction.contact;
+                    const type = props.transaction.contact_type;
+                    const key = `${type}-${contact.id}`;
+                    const label = `${contact.name} (${contact.phone || ''}) - ${t('customers.total_count')}`;
+
+                    searchResults.value = [
+                        {
+                            value: key,
+                            label,
+                            type,
+                            id: contact.id,
+                        },
+                    ];
+                    selectedContactKey.value = key;
+                } else {
+                    selectedContactKey.value = null;
+                }
             } else {
+                form.reset();
+                form.transaction_date = new Date().toISOString().substr(0, 10);
+                form.center_id = props.centerId || null;
                 selectedContactKey.value = null;
+                searchResults.value = [];
             }
-        } else {
-            form.reset();
-            form.transaction_date = new Date().toISOString().substr(0, 10);
-            form.center_id = props.centerId || null;
-            selectedContactKey.value = null;
-            searchResults.value = [];
         }
     }
-});
+);
 
 // Reset income category if transaction type changes
-watch(() => form.transaction_type, () => {
-    form.income_category_id = '';
-});
+watch(
+    () => form.transaction_type,
+    () => {
+        form.income_category_id = '';
+    }
+);
 
 // Watch to calculate VAT and Total
 watch([() => form.amount, () => form.is_taxable], () => {
@@ -354,7 +425,7 @@ const handleAsyncSearch = debounce(async (query) => {
     if (!query) return;
     try {
         const response = await axios.get('/app/settings/company/contacts/search', {
-            params: { search: query }
+            params: { search: query },
         });
         searchResults.value = response.data;
     } catch (e) {
@@ -366,15 +437,15 @@ function submit() {
     form.clearErrors();
 
     if (form.is_taxable && !form.contact_id) {
-        form.setError('contact_id', 'يجب تحديد العميل/المورد عند تفعيل خاضع للضريبة لضمان التوافق مع الفوترة الضريبية');
+        form.setError('contact_id', t('company_profile.transactions.taxable_partner_hint'));
         // Scroll to error if needed
         return;
     }
 
-    const url = props.transaction 
-        ? `/app/settings/company/transactions/${props.transaction.id}` 
+    const url = props.transaction
+        ? `/app/settings/company/transactions/${props.transaction.id}`
         : '/app/settings/company/transactions';
-    
+
     const method = props.transaction ? 'put' : 'post';
 
     form[method](url, {

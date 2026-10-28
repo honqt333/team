@@ -35,6 +35,9 @@
 </template>
 
 <script setup>
+import { useI18n } from 'vue-i18n';
+const { t } = useI18n();
+
 import { computed } from 'vue';
 
 const props = defineProps({
@@ -54,7 +57,7 @@ const base = computed(() => {
 });
 
 const options = computed(() => [
-    { value: 'ar', label: 'العربية', href: `${base.value}?lang=ar` },
+    { value: 'ar', label: t('common.lang.ar'), href: `${base.value}?lang=ar` },
     { value: 'en', label: 'English', href: `${base.value}?lang=en` },
 ]);
 </script>

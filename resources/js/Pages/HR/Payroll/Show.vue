@@ -277,6 +277,9 @@
 </template>
 
 <script setup>
+import { useI18n } from 'vue-i18n';
+const { t } = useI18n();
+
 import { ref, computed } from 'vue';
 import { Link, router } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
@@ -303,19 +306,14 @@ const totalNet = computed(
 );
 
 function regeneratePayroll() {
-    if (
-        !confirm(
-            'هل أنت متأكد من إعادة إنشاء المسيّرة؟ سيتم حذف جميع البيانات الحالية وإعادة حسابها.'
-        )
-    )
-        return;
+    if (!confirm(t('hr.payroll.recreate_confirm'))) return;
 
     processing.value = true;
     router.put(
         route('app.hr.payroll.regenerate', props.payrollRun.id),
         {},
         {
-            onSuccess: () => success('تم إعادة إنشاء المسيّرة بنجاح'),
+            onSuccess: () => success(t('hr.payroll.recreated')),
             onFinish: () => (processing.value = false),
         }
     );
@@ -327,17 +325,17 @@ function approvePayroll() {
         route('app.hr.payroll.approve', props.payrollRun.id),
         {},
         {
-            onSuccess: () => success('تمت الموافقة على المسيّرة'),
+            onSuccess: () => success(t('hr.payroll.approved_successfully')),
             onFinish: () => (processing.value = false),
         }
     );
 }
 
 function deleteItem(item) {
-    if (!confirm('هل أنت متأكد من استبعاد هذا الموظف من المسيّرة؟')) return;
+    if (!confirm(t('hr.payroll.exclude_employee_confirm'))) return;
 
     router.delete(route('app.hr.payroll.items.destroy', [props.payrollRun.id, item.id]), {
-        onSuccess: () => success('تم استبعاد الموظف بنجاح'),
+        onSuccess: () => success(t('hr.payroll.employee_excluded')),
     });
 }
 
@@ -347,7 +345,7 @@ function markAsPaid() {
         route('app.hr.payroll.mark-paid', props.payrollRun.id),
         {},
         {
-            onSuccess: () => success('تم تسجيل المسيّرة كمدفوعة'),
+            onSuccess: () => success(t('hr.payroll.marked_paid')),
             onFinish: () => (processing.value = false),
         }
     );

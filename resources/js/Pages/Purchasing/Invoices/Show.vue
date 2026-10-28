@@ -211,7 +211,8 @@
                                 <span class="text-sm font-semibold leading-relaxed" dir="auto">
                                     {{
                                         isCompany
-                                            ? getTenantAddress(tenant) || 'المكتب الرئيسي للشركة'
+                                            ? getTenantAddress(tenant) ||
+                                              $t('common.company_head_office')
                                             : getCenterAddress(invoice.center) || $t('common.na')
                                     }}
                                 </span>
@@ -226,15 +227,7 @@
                             <p
                                 class="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-2"
                             >
-                                {{
-                                    isCompany
-                                        ? invoice.company_transaction?.contact_type === 'customer'
-                                            ? locale === 'ar'
-                                                ? 'العميل'
-                                                : 'Customer'
-                                            : $t('common.supplier')
-                                        : $t('common.supplier')
-                                }}
+                                {{ $t('common.customer') }}
                             </p>
                             <div class="flex items-center gap-4">
                                 <div
@@ -749,13 +742,7 @@
                                 <th
                                     class="px-6 py-4 text-center text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest align-middle"
                                 >
-                                    {{
-                                        isCompany
-                                            ? locale === 'ar'
-                                                ? 'البند'
-                                                : 'Item'
-                                            : $t('inventory.parts.title_singular')
-                                    }}
+                                    {{ $t('purchasing.line_item') }}
                                 </th>
                                 <th
                                     class="px-6 py-4 text-center text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest align-middle"

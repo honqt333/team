@@ -1,4 +1,7 @@
 <script setup>
+import { useI18n } from 'vue-i18n';
+const { t } = useI18n();
+
 import { computed } from 'vue';
 
 const props = defineProps({
@@ -37,15 +40,15 @@ const isDisabled = computed(() => {
 
 const buttonLabel = computed(() => {
     if (props.hasPendingSubscription) {
-        return locale.value === 'ar' ? 'طلب قيد المراجعة' : 'Pending request';
+        return t('subscription.pending_request');
     }
     if (props.isCurrent) {
         if (props.isExpired || props.canRenew) {
-            return locale.value === 'ar' ? 'تجديد الاشتراك' : 'Renew subscription';
+            return t('subscription.renew_subscription');
         }
-        return locale.value === 'ar' ? 'باقتك الحالية' : 'Your current plan';
+        return t('subscription.your_current_plan');
     }
-    return locale.value === 'ar' ? 'اشترك الآن' : 'Subscribe now';
+    return t('subscription.subscribe_now');
 });
 
 const formatCurrency = (amount) => {
@@ -72,25 +75,25 @@ const formatCurrency = (amount) => {
             v-if="isCurrent && isExpired"
             class="absolute -top-3 start-6 rounded-full bg-rose-600 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-white shadow"
         >
-            {{ locale === 'ar' ? 'باقتك المنتهية' : 'Expired plan' }}
+            {{ $t('subscription.your_expired_plan') }}
         </span>
         <span
             v-else-if="isCurrent"
             class="absolute -top-3 start-6 rounded-full bg-indigo-600 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-white shadow"
         >
-            {{ locale === 'ar' ? 'باقتك الحالية' : 'Current plan' }}
+            {{ $t('subscription.your_current_plan') }}
         </span>
         <span
             v-else-if="hasPendingSubscription"
             class="absolute -top-3 start-6 rounded-full bg-amber-500 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-white shadow"
         >
-            {{ locale === 'ar' ? 'طلب قيد المراجعة' : 'Pending request' }}
+            {{ $t('subscription.pending_request') }}
         </span>
         <span
             v-else-if="plan.is_featured"
             class="absolute -top-3 start-6 rounded-full bg-amber-500 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-white shadow"
         >
-            {{ locale === 'ar' ? 'الأكثر شعبية' : 'Most popular' }}
+            {{ $t('subscription.most_popular') }}
         </span>
 
         <!-- Header -->
@@ -107,25 +110,17 @@ const formatCurrency = (amount) => {
                         {{ formatCurrency(plan.price_yearly) }}
                     </span>
                     <span class="text-xs font-semibold text-slate-500 dark:text-slate-400">
-                        {{ locale === 'ar' ? 'ر.س / سنوياً' : 'SAR / yearly' }}
+                        {{ $t('system.plans.yearly_price') }}
                     </span>
                 </div>
                 <div
                     class="mt-1 flex items-baseline gap-1 text-xs text-slate-500 dark:text-slate-400"
                 >
                     <span v-if="Number(plan.price_yearly) > 0">
-                        {{
-                            locale === 'ar'
-                                ? 'اشتراك سنوي شامل لكافة المزايا'
-                                : 'Annual subscription with all features'
-                        }}
+                        {{ $t('subscription.annual_all_features') }}
                     </span>
                     <span v-else>
-                        {{
-                            locale === 'ar'
-                                ? 'تجربة مجانية لفترة محدودة'
-                                : 'Limited-time free trial'
-                        }}
+                        {{ $t('subscription.free_trial_limited') }}
                     </span>
                 </div>
             </div>
@@ -157,7 +152,7 @@ const formatCurrency = (amount) => {
                 </li>
             </ul>
             <p v-else class="mt-5 text-xs italic text-slate-400">
-                {{ locale === 'ar' ? 'لا توجد ميزات مسجلة' : 'No features listed' }}
+                {{ $t('subscription.no_features_listed') }}
             </p>
         </div>
 

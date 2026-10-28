@@ -110,10 +110,10 @@
                 </div>
                 <div>
                     <p class="font-black text-sm">
-                        عذراً، انتهت فترة صلاحية هذا العرض ({{ quote.valid_until }})
+                        {{ $t('quotes.expired_prefix') }}{{ quote.valid_until }})
                     </p>
                     <p class="text-xs opacity-80 mt-0.5">
-                        يرجى التواصل مع إدارة الورشة لمراجعة الأسعار وتحديث عرض السعر.
+                        {{ $t('quotes.expired_hint') }}
                     </p>
                 </div>
             </div>
@@ -203,7 +203,7 @@
                             "
                             class="text-[11px] opacity-75 mt-1 font-mono"
                         >
-                            صالح حتى: {{ quote.valid_until }}
+                            {{ $t('quotes.valid_until') }} {{ quote.valid_until }}
                         </p>
                     </div>
                 </div>
@@ -214,7 +214,7 @@
                     class="flex items-center gap-2 bg-white/70 dark:bg-gray-800/80 p-2 rounded-xl border border-emerald-200/60 shadow-xs self-start sm:self-auto"
                 >
                     <span class="text-[11px] font-bold text-emerald-800 dark:text-emerald-300">
-                        التوقيع المعتمد:
+                        {{ $t('quotes.approved_signature') }}
                     </span>
                     <img
                         :src="quote.signature_url"
@@ -310,7 +310,7 @@
                             </svg>
                         </div>
                         <span class="text-xs font-black text-emerald-700 dark:text-emerald-300">
-                            واتساب
+                            {{ $t('customers.quick.whatsapp') }}
                         </span>
                     </a>
                     <!-- Call -->
@@ -453,7 +453,7 @@
                                 {{ t('quotes.public.approve_confirm_title') }}
                             </h3>
                             <p class="text-xs text-gray-500 dark:text-gray-400">
-                                الإجمالي:
+                                {{ $t('common.total_label') }}
                                 <strong class="font-mono text-gray-900 dark:text-white">
                                     {{ formatCurrency(quote.total) }}
                                 </strong>
@@ -712,7 +712,7 @@ const documentSettings = computed(() => {
     const docSettings =
         tenantSettings?.documents?.['quote'] || tenantSettings?.documents?.['quotation'] || {};
     return {
-        title_ar: docSettings.title_ar || 'عرض سعر / تقييم',
+        title_ar: docSettings.title_ar || t('quotes.quotation_or_estimate'),
         title_en: docSettings.title_en || 'Price Quotation / Assessment',
         terms:
             docSettings.terms ||

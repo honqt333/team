@@ -3,14 +3,14 @@
         class="rounded-xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-700 dark:bg-gray-800"
     >
         <h3 class="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">
-            {{ isAr ? 'الملخص المالي' : 'Financial Summary' }}
+            {{ $t('purchasing.orders.financial_summary') }}
         </h3>
 
         <dl class="mt-4 space-y-3 text-sm">
             <!-- Subtotal -->
             <div class="flex items-center justify-between">
                 <dt class="text-gray-600 dark:text-gray-400">
-                    {{ isAr ? 'المجموع الفرعي' : 'Subtotal' }}
+                    {{ $t('inventory.moves.columns.subtotal') }}
                 </dt>
                 <dd class="font-mono tabular-nums text-gray-900 dark:text-white">
                     {{ formatMoney(invoice.subtotal) }}
@@ -20,7 +20,7 @@
             <!-- Discount (only if > 0) -->
             <div v-if="hasDiscount" class="flex items-center justify-between">
                 <dt class="text-emerald-600 dark:text-emerald-400">
-                    {{ isAr ? 'الخصم' : 'Discount' }}
+                    {{ $t('common.discount') }}
                 </dt>
                 <dd class="font-mono tabular-nums text-emerald-600 dark:text-emerald-400">
                     − {{ formatMoney(invoice.discount) }}
@@ -30,7 +30,7 @@
             <!-- VAT -->
             <div class="flex items-center justify-between">
                 <dt class="text-gray-600 dark:text-gray-400">
-                    {{ isAr ? 'ضريبة القيمة المضافة' : 'VAT' }}
+                    {{ $t('invoices.tax') }}
                     <span class="text-xs text-gray-400">({{ vatRate }}%)</span>
                 </dt>
                 <dd class="font-mono tabular-nums text-gray-900 dark:text-white">
@@ -44,7 +44,7 @@
             <!-- Grand total -->
             <div class="flex items-baseline justify-between">
                 <dt class="text-sm font-bold uppercase text-gray-700 dark:text-gray-300">
-                    {{ isAr ? 'الإجمالي' : 'Total' }}
+                    {{ $t('common.total') }}
                 </dt>
                 <dd
                     class="font-mono text-2xl font-bold tabular-nums text-indigo-600 dark:text-indigo-400"
@@ -66,6 +66,9 @@
 </template>
 
 <script setup>
+import { useI18n } from 'vue-i18n';
+const { t } = useI18n();
+
 import { computed } from 'vue';
 
 const props = defineProps({

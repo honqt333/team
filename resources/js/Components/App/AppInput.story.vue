@@ -1,4 +1,7 @@
 <script setup>
+import { useI18n } from 'vue-i18n';
+const { t } = useI18n();
+
 /**
  * AppInput Story — visual reference for AppInput variants.
  * Companion to AppInput.vue. Not yet a real Histoire story —
@@ -13,7 +16,7 @@ const amount = ref(0);
 const password = ref('');
 const plate = ref('');
 const errorName = ref(null);
-const hintEmail = ref('نستخدم هذا البريد لإرسال إشعارات الفاتورة فقط.');
+const hintEmail = ref(t('common.email_invoice_notifications_only'));
 </script>
 
 <template>

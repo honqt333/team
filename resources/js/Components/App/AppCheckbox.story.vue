@@ -1,4 +1,7 @@
 <script setup>
+import { useI18n } from 'vue-i18n';
+const { t } = useI18n();
+
 /**
  * AppCheckbox Story — visual reference.
  */
@@ -8,7 +11,7 @@ import AppCheckbox from './AppCheckbox.vue';
 const agreed = ref(false);
 const notify = ref(true);
 const acceptTerms = ref(false);
-const errorTerms = ref('يجب الموافقة للمتابعة');
+const errorTerms = ref(t('common.approval_required'));
 </script>
 
 <template>
@@ -44,9 +47,9 @@ const errorTerms = ref('يجب الموافقة للمتابعة');
         <section class="space-y-3 max-w-md">
             <h2 class="app-display text-xl font-semibold">With default slot</h2>
             <AppCheckbox v-model="agreed">
-                <span class="font-semibold">أتعهد بصحة البيانات</span>
+                <span class="font-semibold">{{ $t('common.attest_data_accuracy') }}</span>
                 <span class="block text-xs text-[var(--color-text-muted)]">
-                    هذا الإقرار يُستخدم لأغراض قانونية فقط
+                    {{ $t('common.declaration_legal_only') }}
                 </span>
             </AppCheckbox>
         </section>

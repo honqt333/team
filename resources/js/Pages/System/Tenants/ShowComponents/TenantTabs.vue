@@ -133,7 +133,9 @@
                 <div
                     class="flex items-center justify-between pb-1 border-b border-gray-100 dark:border-gray-800"
                 >
-                    <p class="text-xs text-gray-500 font-medium">سجل اشتراكات وباقات المستأجر</p>
+                    <p class="text-xs text-gray-500 font-medium">
+                        {{ $t('system.tenants.subscriptions_log') }}
+                    </p>
                     <button
                         type="button"
                         @click="$emit('assign-plan')"
@@ -152,7 +154,7 @@
                                 d="M12 4v16m8-8H4"
                             />
                         </svg>
-                        تعيين باقة جديدة
+                        {{ $t('system.tenants.assign_new_plan') }}
                     </button>
                 </div>
                 <div

@@ -1979,7 +1979,7 @@ async function deleteMileageLog(log) {
         title: t('common.delete_confirm'),
         message:
             t('vehicles.mileage.confirm_delete_log', { mileage: log.mileage }) ||
-            `هل أنت متأكد من حذف قراءة العداد (${log.mileage} كم)؟`,
+            t('vehicles.delete_reading_confirm'),
         confirmText: t('common.delete'),
         type: 'danger',
     });

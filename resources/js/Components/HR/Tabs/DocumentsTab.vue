@@ -294,7 +294,7 @@ function submit() {
 }
 
 function deleteDocument(id) {
-    if (confirm('هل أنت متأكد من حذف هذه الوثيقة؟')) {
+    if (confirm(t('hr.documents.delete_confirm'))) {
         router.delete(route('app.hr.documents.destroy', id), {
             onSuccess: () => success(),
         });

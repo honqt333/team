@@ -435,10 +435,10 @@ const formatCurrency = (amount) => {
                                 </div>
                                 <div>
                                     <p class="text-sm font-bold text-slate-900 dark:text-white">
-                                        اشتراك سنوي (12 شهر)
+                                        {{ $t('subscription.annual_subscription_12_months') }}
                                     </p>
                                     <p class="text-xs text-slate-500 dark:text-slate-400">
-                                        دورة الفوترة سنوية شاملة لكافة المزايا والتحديثات
+                                        {{ $t('subscription.annual_cycle_desc') }}
                                     </p>
                                 </div>
                             </div>

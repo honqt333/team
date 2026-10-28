@@ -100,7 +100,7 @@
                         </p>
                         <p>
                             <strong>{{ $t('purchasing.suppliers.type') }}</strong>
-                            - parts (قطع غيار) أو services (خدمات)
+                            {{ $t('purchasing.import.file_hint') }}
                         </p>
                     </div>
                 </div>
@@ -221,7 +221,9 @@
                                     d="M5 13l4 4L19 7"
                                 />
                             </svg>
-                            تم استيراد {{ importResults.imported }} مورد بنجاح!
+                            {{ $t('purchasing.import.success_prefix') }}
+                            {{ importResults.imported }}
+                            {{ $t('purchasing.import.success_suffix') }}
                         </p>
                     </div>
 
@@ -230,7 +232,7 @@
                         class="p-4 rounded-2xl bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-800/30 max-h-40 overflow-y-auto"
                     >
                         <p class="text-red-800 dark:text-red-300 font-bold mb-2">
-                            تنبيهات وأخطاء أثناء الاستيراد:
+                            {{ $t('purchasing.import.warnings_title') }}
                         </p>
                         <ul
                             class="text-xs text-red-700 dark:text-red-300 space-y-1 list-disc list-inside"
@@ -290,6 +292,9 @@
 </template>
 
 <script setup>
+import { useI18n } from 'vue-i18n';
+const { t } = useI18n();
+
 import { ref } from 'vue';
 import axios from 'axios';
 import { useToast } from '@/Composables/useToast';
@@ -356,13 +361,13 @@ const uploadFile = async () => {
 
         importResults.value = response.data;
         if (response.data.imported > 0) {
-            showSuccess(`تم استيراد ${response.data.imported} مورد بنجاح`);
+            showSuccess(t('purchasing.import.success_prefix'));
             emit('imported');
         } else if (response.data.errors?.length > 0) {
-            showError('لم يتم استيراد أي مورد، يرجى مراجعة الأخطاء');
+            showError(t('purchasing.import.nothing_imported'));
         }
     } catch (error) {
-        showError(error.response?.data?.message || 'حدث خطأ أثناء رفع واستيراد الملف');
+        showError(error.response?.data?.message || t('purchasing.import.upload_error'));
     } finally {
         uploading.value = false;
     }

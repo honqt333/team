@@ -1,4 +1,6 @@
 <script setup>
+const { t } = useI18n();
+
 import AuthLayout from '@/Layouts/AuthLayout.vue';
 import InputError from '@/Components/InputError.vue';
 import { Head, Link, useForm } from '@inertiajs/vue3';
@@ -29,17 +31,17 @@ const submit = () => {
 
         <!-- Title -->
         <h2 class="text-2xl font-bold text-gray-900 dark:text-white text-center mb-4 font-cairo">
-            {{ isRTL ? 'نسيت كلمة المرور' : 'Forgot Password' }}
+            {{ $t('auth.forgot_password') }}
         </h2>
 
         <p class="text-sm text-gray-600 dark:text-gray-400 text-center mb-6">
-            {{ isRTL 
-                ? 'أدخل بريدك الإلكتروني المسجل وسنرسل لك رابط لإعادة تعيين كلمة المرور'
-                : 'Enter your registered email and we will send you a password reset link'
-            }}
+            {{ $t('auth.forgot_password_hint') }}
         </p>
 
-        <div v-if="status" class="mb-4 p-3 rounded-xl bg-green-50 dark:bg-green-900/30 text-sm font-medium text-green-600 dark:text-green-400 text-center">
+        <div
+            v-if="status"
+            class="mb-4 p-3 rounded-xl bg-green-50 dark:bg-green-900/30 text-sm font-medium text-green-600 dark:text-green-400 text-center"
+        >
             {{ status }}
         </div>
 
@@ -47,7 +49,7 @@ const submit = () => {
             <!-- Email -->
             <div>
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    {{ isRTL ? 'البريد الإلكتروني' : 'Email Address' }}
+                    {{ $t('center_settings.contact.email') }}
                 </label>
                 <input
                     type="email"
@@ -69,12 +71,23 @@ const submit = () => {
             >
                 <span v-if="form.processing" class="flex items-center justify-center gap-2">
                     <svg class="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24">
-                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        <circle
+                            class="opacity-25"
+                            cx="12"
+                            cy="12"
+                            r="10"
+                            stroke="currentColor"
+                            stroke-width="4"
+                        ></circle>
+                        <path
+                            class="opacity-75"
+                            fill="currentColor"
+                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                        ></path>
                     </svg>
-                    {{ isRTL ? 'جاري الإرسال...' : 'Sending...' }}
+                    {{ $t('system.invoice_show.sending') }}
                 </span>
-                <span v-else>{{ isRTL ? 'إرسال' : 'Send Reset Link' }}</span>
+                <span v-else>{{ $t('inventory.transfers.send') }}</span>
             </button>
 
             <!-- Back to Login -->
@@ -83,7 +96,7 @@ const submit = () => {
                     :href="route('login')"
                     class="text-sm font-medium text-violet-600 hover:text-violet-500 dark:text-violet-400"
                 >
-                    {{ isRTL ? 'العودة لتسجيل الدخول' : 'Back to Login' }}
+                    {{ $t('auth.back_to_login') }}
                 </Link>
             </div>
         </form>

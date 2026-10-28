@@ -551,7 +551,9 @@ const planOptions = computed(() =>
     (props.plans || []).map((p) => ({ value: p.id, label: p.name_ar }))
 );
 
-const formBillingCycleOptions = computed(() => [{ value: 'yearly', label: 'سنوي (12 شهر)' }]);
+const formBillingCycleOptions = computed(() => [
+    { value: 'yearly', label: t('subscription.yearly_12_months') },
+]);
 
 const props = defineProps({
     subscriptions: Object,

@@ -56,6 +56,9 @@
 </template>
 
 <script setup>
+import { useI18n } from 'vue-i18n';
+const { t } = useI18n();
+
 import { ref } from 'vue';
 import { router } from '@inertiajs/vue3';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
@@ -65,7 +68,7 @@ const props = defineProps({
 });
 
 const languageOptions = [
-    { value: 'ar', label: 'العربية' },
+    { value: 'ar', label: t('common.lang.ar') },
     { value: 'en', label: 'English' },
 ];
 

@@ -93,7 +93,10 @@
                                     d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
                                 />
                             </svg>
-                            <span>{{ plan.active_subscribers_count || 0 }} مستأجر مشترك</span>
+                            <span>
+                                {{ plan.active_subscribers_count || 0 }}
+                                {{ $t('system.plans.subscribed_tenant') }}
+                            </span>
                         </div>
 
                         <!-- Pricing (Yearly Only) -->
@@ -103,21 +106,23 @@
                                     {{ plan.price_yearly }}
                                 </span>
                                 <span class="text-sm font-semibold text-gray-500">
-                                    ر.س / سنوياً
+                                    {{ $t('system.plans.yearly_price') }}
                                 </span>
                             </div>
                             <p
                                 v-if="Number(plan.price_yearly) > 0"
                                 class="text-xs text-gray-500 dark:text-gray-400 mt-1"
                             >
-                                اشتراك سنوي شامل (يعادل {{ Math.round(plan.price_yearly / 12) }} ر.س
-                                / شهرياً)
+                                {{ $t('system.plans.annual_includes') }}
+                                {{ Math.round(plan.price_yearly / 12) }}
+                                {{ $t('system.plans.sar_per_month') }}
                             </p>
                             <p
                                 v-else
                                 class="text-xs text-emerald-600 dark:text-emerald-400 mt-1 font-medium"
                             >
-                                تجربة مجانية لمدة {{ plan.trial_days }} يوم
+                                {{ $t('system.plans.free_trial_for') }} {{ plan.trial_days }}
+                                {{ $t('common.day') }}
                             </p>
                         </div>
 

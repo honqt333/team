@@ -1085,7 +1085,7 @@ const sortedParts = computed(() => {
 });
 
 const computedCategories = computed(() => {
-    const allOption = { id: '', name: locale.value === 'ar' ? 'جميع التصنيفات' : 'All Categories' };
+    const allOption = { id: '', name: t('inventory.all_categories') };
     const cats = props.categories.map((cat) => ({
         ...cat,
         name: locale.value === 'ar' ? cat.name_ar : cat.name_en || cat.name_ar,

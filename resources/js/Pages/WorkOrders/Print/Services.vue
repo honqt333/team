@@ -1,32 +1,45 @@
 <template>
-    <div class="print-container bg-white min-h-screen p-8 print:p-0 print:m-0 flex flex-col items-center" :dir="isRtl ? 'rtl' : 'ltr'">
+    <div
+        class="print-container bg-white min-h-screen p-8 print:p-0 print:m-0 flex flex-col items-center"
+        :dir="isRtl ? 'rtl' : 'ltr'"
+    >
         <!-- Print / Back Controls (hidden during print) -->
         <div class="fixed bottom-6 left-6 flex items-center gap-3 print:hidden z-50">
             <!-- Back Button -->
-            <button 
-                @click="goBack" 
+            <button
+                @click="goBack"
                 class="px-4 py-2.5 bg-white hover:bg-gray-50 text-gray-700 rounded-xl text-sm font-semibold transition-all border border-gray-200 shadow-lg flex items-center gap-2"
             >
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M10 19l-7-7m0 0l7-7m-7 7h18"
+                    />
                 </svg>
                 {{ $t('common.back') }}
             </button>
 
             <!-- Print Button -->
-            <button 
-                @click="printPage" 
+            <button
+                @click="printPage"
                 class="px-5 py-2.5 text-white rounded-xl text-sm font-semibold transition-all shadow-lg flex items-center gap-2"
                 :style="{ backgroundColor: visualSettings.primary_color || '#3b82f6' }"
             >
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 022 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 022 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"
+                    />
                 </svg>
                 {{ $t('work_orders.print_view.print_btn') }}
             </button>
         </div>
 
-        <PrintEngine 
+        <PrintEngine
             documentType="work_order"
             :data="mappedData"
             :centerData="mappedCenterData"
@@ -38,6 +51,8 @@
 </template>
 
 <script setup>
+const { t } = useI18n();
+
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { usePage, router } from '@inertiajs/vue3';
@@ -69,7 +84,8 @@ const goBack = () => {
 };
 const printPage = () => window.print();
 
-const formatNumber = (num) => new Intl.NumberFormat(isRtl.value ? 'ar-SA-u-nu-latn' : 'en-US').format(num || 0);
+const formatNumber = (num) =>
+    new Intl.NumberFormat(isRtl.value ? 'ar-SA-u-nu-latn' : 'en-US').format(num || 0);
 
 const calculateItemDueDate = (item, fallbackStart) => {
     if (item.due_date) return item.due_date;
@@ -79,10 +95,10 @@ const calculateItemDueDate = (item, fallbackStart) => {
     if (isNaN(startDate.getTime())) return null;
     const val = parseInt(item.duration_value);
     if (isNaN(val) || val <= 0) return start;
-    
+
     const unit = item.duration_unit || 'minutes';
     if (unit === 'days') startDate.setDate(startDate.getDate() + val);
-    else if (unit === 'weeks') startDate.setDate(startDate.getDate() + (val * 7));
+    else if (unit === 'weeks') startDate.setDate(startDate.getDate() + val * 7);
     else if (unit === 'months') startDate.setMonth(startDate.getMonth() + val);
     else if (unit === 'years') startDate.setFullYear(startDate.getFullYear() + val);
     else {
@@ -92,20 +108,24 @@ const calculateItemDueDate = (item, fallbackStart) => {
 };
 
 const mappedData = computed(() => {
-    const make = props.workOrder.vehicle?.make?.name_ar || props.workOrder.vehicle?.make?.name_en || '';
-    const model = props.workOrder.vehicle?.model?.name_ar || props.workOrder.vehicle?.model?.name_en || '';
+    const make =
+        props.workOrder.vehicle?.make?.name_ar || props.workOrder.vehicle?.make?.name_en || '';
+    const model =
+        props.workOrder.vehicle?.model?.name_ar || props.workOrder.vehicle?.model?.name_en || '';
     const vehicleStr = `${make} ${model}`.trim() || '-';
 
-    const items = (props.workOrder.items || []).map(item => {
+    const items = (props.workOrder.items || []).map((item) => {
         let serviceName = '';
-        const isStandard = item.service && 
-            item.service.name_ar?.trim() !== 'أخرى' && 
+        const isStandard =
+            item.service &&
+            item.service.name_ar?.trim() !== 'أخرى' &&
             item.service.name_en?.trim().toLowerCase() !== 'other';
-            
+
         if (isStandard) {
-            serviceName = locale.value === 'ar' 
-                ? (item.service.name_ar || item.title) 
-                : (item.service.name_en || item.service.name_ar || item.title);
+            serviceName =
+                locale.value === 'ar'
+                    ? item.service.name_ar || item.title
+                    : item.service.name_en || item.service.name_ar || item.title;
         } else {
             serviceName = item.title || '';
         }
@@ -113,18 +133,23 @@ const mappedData = computed(() => {
         return {
             service_name: serviceName,
             description: '',
-            technicians: (item.technicians || []).map(t => {
-                if (t.employee) {
-                    return locale.value === 'ar' 
-                        ? (t.employee.name_ar || t.employee.name_en || t.name) 
-                        : (t.employee.name_en || t.employee.name_ar || t.name);
-                }
-                return t.name;
-            }).filter(Boolean),
+            technicians: (item.technicians || [])
+                .map((t) => {
+                    if (t.employee) {
+                        return locale.value === 'ar'
+                            ? t.employee.name_ar || t.employee.name_en || t.name
+                            : t.employee.name_en || t.employee.name_ar || t.name;
+                    }
+                    return t.name;
+                })
+                .filter(Boolean),
             status: item.status || null,
             started_at: item.started_at || null,
-            due_date: calculateItemDueDate(item, props.workOrder.entry_date || props.workOrder.created_at),
-            is_part: false
+            due_date: calculateItemDueDate(
+                item,
+                props.workOrder.entry_date || props.workOrder.created_at
+            ),
+            is_part: false,
         };
     });
 
@@ -151,7 +176,7 @@ const mappedData = computed(() => {
             plate: props.workOrder.vehicle?.plate_number,
             color: props.workOrder.vehicle?.color,
         },
-        items: items
+        items: items,
     };
 });
 
@@ -159,7 +184,9 @@ const mappedCenterData = computed(() => {
     const center = props.workOrder.center || {};
     const tenant = props.workOrder.tenant || page.props.tenant || {};
     return {
-        name: isRtl.value ? (center.name_ar || center.name || tenant.name) : (center.name_en || center.name || tenant.name),
+        name: isRtl.value
+            ? center.name_ar || center.name || tenant.name
+            : center.name_en || center.name || tenant.name,
         tax_number: center.vat_number || tenant.vat_number,
         cr_number: tenant.cr_number,
         phone: center.phone || tenant.phone,
@@ -173,17 +200,17 @@ const mappedCenterData = computed(() => {
 const documentSettings = computed(() => {
     const tenantSettings = page.props.tenant?.print_settings;
     const docSettings = tenantSettings?.documents?.['work_order'] || {};
-    
-    let titleAr = docSettings.title_ar || 'كرت صيانة';
+
+    let titleAr = docSettings.title_ar || t('work_orders.work_order_label');
     let titleEn = docSettings.title_en || 'Work Order';
-    
+
     if (props.printedDepartment) {
         titleAr = `${titleAr} - ${props.printedDepartment.name_ar}`;
         titleEn = `${titleEn} - ${props.printedDepartment.name_en}`;
     }
 
     if (props.printedTechnician) {
-        titleAr = `${titleAr} - فني: ${props.printedTechnician.name_ar}`;
+        titleAr = t('work_orders.technician_label');
         titleEn = `${titleEn} - Tech: ${props.printedTechnician.name_en}`;
     }
 
@@ -194,11 +221,14 @@ const documentSettings = computed(() => {
         print_terms: docSettings.print_terms !== false,
         show_stamp: docSettings.show_stamp !== false,
         show_customer_address: docSettings.show_customer_address !== false,
-        signatures: docSettings.signatures && docSettings.signatures.length > 0 ? docSettings.signatures : [
-            { name_ar: 'توقيع المدير', name_en: 'Manager Signature' },
-            { name_ar: 'توقيع الفني', name_en: 'Technician Signature' },
-            { name_ar: 'توقيع العميل', name_en: 'Customer Signature' }
-        ]
+        signatures:
+            docSettings.signatures && docSettings.signatures.length > 0
+                ? docSettings.signatures
+                : [
+                      { name_ar: 'توقيع المدير', name_en: 'Manager Signature' },
+                      { name_ar: 'توقيع الفني', name_en: 'Technician Signature' },
+                      { name_ar: 'توقيع العميل', name_en: 'Customer Signature' },
+                  ],
     };
 });
 
@@ -213,16 +243,25 @@ const visualSettings = computed(() => {
         show_qr_code: vis.show_qr_code !== false,
         primary_color: vis.primary_color || '#fbbf24',
         footer_text: vis.footer_text || '',
-        stamp_url: center.stamp_url || vis.stamp_url || ''
+        stamp_url: center.stamp_url || vis.stamp_url || '',
     };
 });
 </script>
 
 <style>
 @media print {
-    @page { size: A4; margin: 1cm; }
-    body { -webkit-print-color-adjust: exact; print-color-adjust: exact; background-color: white !important; }
-    .print-container { padding: 0; }
+    @page {
+        size: A4;
+        margin: 1cm;
+    }
+    body {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+        background-color: white !important;
+    }
+    .print-container {
+        padding: 0;
+    }
     .print-container,
     .print-container * {
         visibility: visible !important;

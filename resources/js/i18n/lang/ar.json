@@ -19,7 +19,19 @@
     "resend_cooldown": "يرجى الانتظار :seconds ثانية قبل إعادة الإرسال",
     "throttle": "محاولات تسجيل دخول كثيرة جداً. يرجى المحاولة مرة أخرى بعد :seconds ثانية.",
     "verification_unavailable": "خدمة التحقق غير متاحة حالياً",
-    "verify_phone_first": "يرجى التحقق من رقم الهاتف أولاً"
+    "verify_phone_first": "يرجى التحقق من رقم الهاتف أولاً",
+    "admin_panel": "لوحة الإدارة",
+    "admin_login_hint": "دخول مخصص للوحة إدارة النظام",
+    "login": "تسجيل الدخول",
+    "create_account": "إنشاء حساب",
+    "forgot_password_link": "هل نسيت كلمة المرور؟",
+    "forgot_password": "نسيت كلمة المرور",
+    "forgot_password_hint": "أدخل بريدك الإلكتروني المسجل وسنرسل لك رابط لإعادة تعيين كلمة المرور",
+    "back_to_login": "العودة لتسجيل الدخول",
+    "reset_password": "إعادة تعيين كلمة المرور",
+    "email_verification": "تفعيل البريد الإلكتروني",
+    "verify_email_thanks": "شكراً لتسجيلك! يرجى تأكيد بريدك الإلكتروني بالنقر على الرابط المرسل.",
+    "new_activation_link_sent": "تم إرسال رابط تفعيل جديد!"
   },
   "center_settings": {
     "address": {
@@ -329,7 +341,40 @@
     "deleted": "تم الحذف",
     "deleted_successfully": "تم الحذف بنجاح",
     "saved_successfully": "تم الحفظ بنجاح",
-    "updated": "تم التحديث"
+    "updated": "تم التحديث",
+    "additional_details": "تفاصيل إضافية",
+    "save_and_close": "حفظ وإغلاق",
+    "open_customers_list": "فتح قائمة العملاء",
+    "open_external_link": "فتح رابط خارجي",
+    "full_width_button": "زر بعرض كامل",
+    "approval_required": "يجب الموافقة للمتابعة",
+    "attest_data_accuracy": "أتعهد بصحة البيانات",
+    "declaration_legal_only": "هذا الإقرار يُستخدم لأغراض قانونية فقط",
+    "email_invoice_notifications_only": "نستخدم هذا البريد لإرسال إشعارات الفاتورة فقط.",
+    "city_riyadh": "الرياض",
+    "city_dammam": "الدمام",
+    "item_generic": "عنصر",
+    "company": "الشركة",
+    "day_sunday": "الأحد",
+    "day_monday": "الاثنين",
+    "day_tuesday": "الثلاثاء",
+    "day_wednesday": "الأربعاء",
+    "day_thursday": "الخميس",
+    "day_friday": "الجمعة",
+    "day_saturday": "السبت",
+    "error_while_saving": "حدث خطأ أثناء الحفظ",
+    "percent_sign": "%",
+    "base_label": "(الأساس:",
+    "plus_tax_label": "+ الضريبة:",
+    "net_amount_after_offset": "المبلغ الصافي بعد المقاصة",
+    "due_date_label": "(تاريخ الاستحقاق:",
+    "main_branch": "الفرع الرئيسي",
+    "service_team_center": "مركز فريق الخدمة",
+    "company_head_office": "المكتب الرئيسي للشركة",
+    "saved": "تم الحفظ.",
+    "total_label": "الإجمالي:",
+    "price_in_sar": "{min_price} ر.س",
+    "credit_card": "بطاقة ائتمان"
   },
   "company_profile": {
     "address": {
@@ -544,7 +589,11 @@
         "total": "المبلغ الإجمالي",
         "updated_by": "قام بالتحديث",
         "vat": "ضريبة القيمة المضافة VAT"
-      }
+      },
+      "subtitle": "إدارة الإيرادات والمصروفات الخاصة بالإدارة والشركة",
+      "empty": "لا توجد معاملات مسجلة حالياً",
+      "supplier_role": "مورد",
+      "taxable_partner_hint": "يجب تحديد العميل/المورد عند تفعيل خاضع للضريبة لضمان التوافق مع الفوترة الضريبية"
     },
     "vat": {
       "click_for_details": "اضغط للمزيد من التفاصيل",
@@ -975,7 +1024,9 @@
         "draft": "مسودة",
         "expired": "منتهي"
       },
-      "title": "عقود العمل"
+      "title": "عقود العمل",
+      "delete_confirm": "هل أنت متأكد من حذف هذا العقد؟",
+      "document_body": "عقد عمل\n\nإنه في يوم"
     },
     "documents": {
       "add": "إضافة وثيقة",
@@ -992,7 +1043,8 @@
         "license": "رخصة قيادة",
         "other": "أخرى",
         "passport": "جواز سفر"
-      }
+      },
+      "delete_confirm": "هل أنت متأكد من حذف هذه الوثيقة؟"
     },
     "employees": {
       "activate": "تفعيل",
@@ -1170,7 +1222,11 @@
         "bank_info": "معلومات البنك",
         "payment_history": "سجل العمليات",
         "salaries": "الرواتب والبدلات"
-      }
+      },
+      "select_start_month": "يرجى تحديد شهر البداية",
+      "select_end_month": "يرجى تحديد شهر النهاية",
+      "select_flexible_allowance": "يرجى تحديد المبلغ للبدل المرن",
+      "select_flexible_deduction": "يرجى تحديد المبلغ للحسم المرن"
     },
     "leaves": {
       "add": "إضافة إجازة",
@@ -1256,7 +1312,14 @@
       "earnings": "الاستحقاقات",
       "total_earnings": "إجمالي الاستحقاقات",
       "amount": "المبلغ",
-      "print_footer": "تم إصدار هذه القسيمة إلكترونياً من نظام خدمة برو"
+      "print_footer": "تم إصدار هذه القسيمة إلكترونياً من نظام خدمة برو",
+      "return_it": "أعده",
+      "approve_it": "اعتمده",
+      "finance_manager": "المدير المالي",
+      "recreate_confirm": "هل أنت متأكد من إعادة إنشاء المسيّرة؟ سيتم حذف جميع البيانات الحالية وإعادة حسابها.",
+      "recreated": "تم إعادة إنشاء المسيّرة بنجاح",
+      "exclude_employee_confirm": "هل أنت متأكد من استبعاد هذا الموظف من المسيّرة؟",
+      "employee_excluded": "تم استبعاد الموظف بنجاح"
     },
     "settings": {
       "allowances": {
@@ -1342,13 +1405,16 @@
       "types": {
         "fixed": "ثابت",
         "percentage": "نسبة مئوية"
-      }
+      },
+      "arabic_required": "(العربية) *"
     },
     "subtitle": "إدارة الموظفين والرواتب والحضور",
     "title": "الموارد البشرية",
     "shifts": {
       "cannot_delete_in_use": "لا يمكن حذف وردية مستخدمة من قبل موظفين"
-    }
+    },
+    "payslip_title": "كشف راتب",
+    "arabic_suffix": "(العربية)"
   },
   "inventory": {
     "hub": {
@@ -1521,7 +1587,8 @@
       "units": {
         "title": "وحدات المخزون",
         "unit": "وحدة"
-      }
+      },
+      "arabic_suffix": "(عربي)"
     },
     "stock": {
       "available": "المتوفر",
@@ -1603,7 +1670,12 @@
       "select": "اختر المستودع",
       "single": "المستودع",
       "title": "المستودعات"
-    }
+    },
+    "all_categories": "جميع التصنيفات",
+    "total_branches_warehouses": "إجمالي الفروع / المستودعات",
+    "print_coming_soon": "سيتم إضافة ميزة الطباعة قريباً",
+    "spare_part": "قطعة غيار",
+    "part_number_label": "رمز القطعة:"
   },
   "invoices": {
     "all_statuses": "جميع الحالات",
@@ -1770,6 +1842,14 @@
       "credit_note": "إشعار دائن",
       "debit_note": "إشعار مدين",
       "invoice": "فاتورة"
+    },
+    "timeline": {
+      "issued": "تم إصدار الفاتورة",
+      "overdue": "تجاوز تاريخ الاستحقاق",
+      "overdue_action": "الفاتورة متأخرة — يلزم إجراء",
+      "payment_received": "تم استلام الدفع",
+      "cancelled": "تم إلغاء الفاتورة",
+      "send_receipt_hint": "أرسل الإيصال من صفحة الإيصالات البنكية"
     }
   },
   "landing": {
@@ -1790,7 +1870,12 @@
     "uptime": "استقرار",
     "version_2_coming_soon": "الإصدار 2.0 — قريباً",
     "with_intelligence": "بذكاء حقيقي",
-    "yearly": "سنوي"
+    "yearly": "سنوي",
+    "dark_mode": "الوضع الداكن",
+    "light_mode": "الوضع الفاتح",
+    "certified_quality_desc": "نلتزم بأعلى معايير الجودة في صيانة وإصلاح مركبتك باستخدام قطع غيار أصلية وأجهزة فحص حديثة.",
+    "fast_turnaround_desc": "فريق متخصص يضمن إنجاز خدمتك في الوقت المحدد دون تأخير، مع متابعة دقيقة لكل خطوة.",
+    "reliable_warranty_desc": "نقدم ضمانًا على الخدمات والقطع المستبدلة لراحة بالك وثقة كاملة في كل صيانة."
   },
   "messages": {
     "cannot_cancel_has_technicians_or_parts": "لا يمكن إلغاء كرت العمل لوجود موظفين معينين أو قطع غيار أو دفعات مسجلة عليه.",
@@ -1928,7 +2013,15 @@
     "vehicles": "المركبات",
     "website": "الموقع",
     "work_orders": "كروت العمل",
-    "help": "المساعدة والشروحات"
+    "help": "المساعدة والشروحات",
+    "cloud_service_system": "نظام إدارة مراكز الخدمة السحابي",
+    "landing": {
+      "work_orders": "إدارة أوامر العمل بسهولة",
+      "inventory_tracking": "تتبع المخزون والقطع",
+      "financial_reports": "تقارير مالية متكاملة"
+    },
+    "day_suffix": "د",
+    "year_suffix": "س"
   },
   "notifications": {
     "days_ago": "قبل {count} يوم",
@@ -2279,7 +2372,15 @@
     "save_signature": "حفظ التوقيع",
     "documents": "المستندات",
     "library_manage_hint": "اسحب لإعادة الترتيب · انقر ✎ لتعديل · ⊘ للحذف · 👁 للإخفاء",
-    "drag_handle": "اسحب"
+    "drag_handle": "اسحب",
+    "click_to_choose_file": "اضغط لاختيار ملف",
+    "hidden": "مخفي",
+    "delete_signature_confirm": "هل تريد حذف التوقيع \"{name_en}\"؟ لا يمكن التراجع.",
+    "official_signatures": "التوقيعات الرسمية",
+    "name_arabic": "الاسم (عربي)",
+    "visible": "ظهور",
+    "no_signatures": "لا توجد توقيعات بعد",
+    "add_signature_new": "إضافة توقيع جديد"
   },
   "profile": {
     "info": {
@@ -2298,7 +2399,12 @@
       "info": "الملف الشخصي",
       "password": "كلمة المرور",
       "security": "الأمان"
-    }
+    },
+    "information_subtitle": "تحديث معلومات حسابك وعنوان بريدك الإلكتروني.",
+    "sms_2fa_required": "مطلوب لاستخدام المصادقة الثنائية عبر SMS",
+    "email_not_verified": "بريدك الإلكتروني غير مفعّل.",
+    "resend_activation_link": "اضغط هنا لإعادة إرسال رابط التفعيل.",
+    "new_activation_link_sent": "تم إرسال رابط تفعيل جديد إلى بريدك الإلكتروني."
   },
   "purchasing": {
     "grn": {
@@ -2502,7 +2608,19 @@
     "returns": {
       "created": "تم إنشاء مرتجع الشراء"
     },
-    "tax_number": "الرقم الضريبي"
+    "tax_number": "الرقم الضريبي",
+    "import": {
+      "file_hint": "- parts (قطع غيار) أو services (خدمات)",
+      "success_prefix": "تم استيراد",
+      "success_suffix": "مورد بنجاح!",
+      "warnings_title": "تنبيهات وأخطاء أثناء الاستيراد:",
+      "nothing_imported": "لم يتم استيراد أي مورد، يرجى مراجعة الأخطاء",
+      "upload_error": "حدث خطأ أثناء رفع واستيراد الملف"
+    },
+    "remaining_label": "— متبقي:",
+    "payment_exceeds_max": "لا يمكن أن يتجاوز مبلغ الدفعة إجمالي المطلوب ({formatCurrency(maxAllowedAmount)})",
+    "days_overdue": "ايام تجاوز تاريخ الاستحقاق",
+    "line_item": "البند"
   },
   "quotes": {
     "actions": {
@@ -2789,7 +2907,11 @@
     "title": "التقييمات",
     "total_count": "تقييم",
     "view_open_quote": "عرض التقييم",
-    "cannot_remove_package_department_with_items": "لا يمكن حذف قسم الباقة لوجود عناصر مرتبطة"
+    "cannot_remove_package_department_with_items": "لا يمكن حذف قسم الباقة لوجود عناصر مرتبطة",
+    "quotation_or_estimate": "عرض سعر / تقييم",
+    "expired_prefix": "عذراً، انتهت فترة صلاحية هذا العرض (",
+    "expired_hint": "يرجى التواصل مع إدارة الورشة لمراجعة الأسعار وتحديث عرض السعر.",
+    "approved_signature": "التوقيع المعتمد:"
   },
   "reports": {
     "cash_flow": "حركة الصندوق",
@@ -3034,7 +3156,12 @@
         "subtitle": "كل التواقيع المحفوظة لكل أنواع المستندات",
         "no_signatures": "لا توجد تواقيع محفوظة"
       }
-    }
+    },
+    "integrations": {
+      "coming_soon": "قريباً.. متجر الإضافات والتكاملات",
+      "description": "ستتمكن هنا من تفعيل بوابات الدفع الإلكتروني، خدمات رسائل الواتساب والـ SMS، خدمات الدفع بالتقسيط (تابي/تمارا)، والربط مع خرائط جوجل وغيرها من الخدمات."
+    },
+    "all_transaction_types": "كل أنواع المعاملات"
   },
   "suppliers": {
     "tax_number": "الرقم الضريبي"
@@ -3289,7 +3416,8 @@
     "vehicle_customer_mismatch": "المركبة المختارة لا تنتمي للعميل المحدد.",
     "vehicle_has_open_work_order": "توجد بالفعل كرت عمل مفتوح لهذه المركبة. يرجى إغلاقها أولاً.",
     "vehicle_required": "المركبة مطلوبة.",
-    "vin_invalid": "يجب أن يتكون رقم الهيكل من حروف وأرقام إنجليزية فقط."
+    "vin_invalid": "يجب أن يتكون رقم الهيكل من حروف وأرقام إنجليزية فقط.",
+    "fix_the_following": "يرجى تصحيح الأخطاء التالية:"
   },
   "vehicles": {
     "add": "إضافة مركبة",
@@ -3391,7 +3519,8 @@
       "cannot_merge_different_make": "لا يمكن دمج هذه المركبة لاختلاف الماركة",
       "no_targets_for_customer": "لا توجد مركبات أخرى مسجلة لنفس هذا العميل لإتمام عملية الدمج.",
       "success": "تم دمج المركبة ونقل كافة سجلاتها بنجاح"
-    }
+    },
+    "delete_reading_confirm": "هل أنت متأكد من حذف قراءة العداد ("
   },
   "work_orders": {
     "allow_credit_override": "السماح بالاستثناء وتجاوز الحد الائتماني",
@@ -3829,7 +3958,18 @@
         "tenant_required": "تتبّع استخدام الذكاء الاصطناعي يتطلب وجود مستأجر نشط.",
         "unavailable": "خدمة الاقتراحات غير متاحة حالياً. حاول لاحقاً."
       }
-    }
+    },
+    "credit_note": {
+      "no_cash_movement_hint": "💡 لن يُسجل أي خصم أو صرف من الخزينة؛ سيبقى الإشعار الدائن كالتزام مستحق للعميل في حسابه.",
+      "load_error": "حدث خطأ أثناء تحميل بيانات الإرجاع"
+    },
+    "financial": {
+      "overdue_invoice_prefix": "تجاوز تاريخ استحقاق الفاتورة الآجلة رقم",
+      "settle_balance_hint": "يرجى تسجيل الدفعة أو إصدار فاتورة آجلة لتسوية رصيد هذا الكرت."
+    },
+    "payments_and_receipts": "سندات الدفع والمدفوعات",
+    "technician_label": "- فني:",
+    "work_order_label": "كرت صيانة"
   },
   "pagination": {
     "previous": "&laquo; السابق",
@@ -3922,7 +4062,9 @@
       "title": "الإشعارات",
       "mark_all_read": "تعليم الكل كمقروء",
       "empty": "لا توجد إشعارات",
-      "view_all": "عرض الكل"
+      "view_all": "عرض الكل",
+      "all_title": "كل الإشعارات",
+      "all_subtitle": "كل الإشعارات مرتبة من الأحدث للأقدم"
     },
     "dunning": {
       "preferences_title": "إعدادات التذكير",
@@ -4309,7 +4451,12 @@
         "enforcement_disabled": "غير ملزم (اختياري)",
         "enforcement_optional": "اختياري (ينصح به)",
         "enforcement_required": "إلزامي (للمستخدمين الجدد)"
-      }
+      },
+      "current_plan": "الباقة الحالية",
+      "no_plan": "بدون باقة",
+      "assign_plan": "تعيين / تغيير الباقة",
+      "subscriptions_log": "سجل اشتراكات وباقات المستأجر",
+      "assign_new_plan": "تعيين باقة جديدة"
     },
     "subscriptions": {
       "title": "الاشتراكات",
@@ -4392,7 +4539,11 @@
         "feature_placeholder_en": "ميزة إنجليزية :n",
         "add_feature_ar": "+ إضافة ميزة بالعربية",
         "add_feature_en": "+ إضافة ميزة بالإنجليزية"
-      }
+      },
+      "subscribed_tenant": "مستأجر مشترك",
+      "annual_includes": "اشتراك سنوي شامل (يعادل",
+      "sar_per_month": "ر.س / شهرياً)",
+      "free_trial_for": "تجربة مجانية لمدة"
     },
     "promo_codes": {
       "title": "الرموز الترويجية",
@@ -4451,7 +4602,10 @@
       "website_title": "إعدادات الموقع",
       "contact_messages_title": "رسائل الزوار",
       "save": "حفظ الإعدادات",
-      "saved": "تم تحديث الإعدادات بنجاح"
+      "saved": "تم تحديث الإعدادات بنجاح",
+      "enable_sms_2fa": "تفعيل رسائل SMS (2FA)",
+      "enable_sms_2fa_hint": "تفعيل خيار إرسال رموز التحقق عبر الرسائل النصية لكافة النظام.",
+      "enable_sms_2fa_warning": "تحذير: هذا الخيار قد يترتب عليه تكاليف إضافية (رصيد SMS)."
     },
     "integrations": {
       "title": "التكاملات",
@@ -4921,6 +5075,40 @@
         "locale_en": "en-US",
         "no_plan": "—"
       }
+    },
+    "activity_log": {
+      "subtitle": "تتبع جميع إجراءات المسؤولين"
+    },
+    "analytics": {
+      "tenant_analytics": "تحليلات المستأجرين",
+      "kpis_subtitle": "مؤشرات الأداء الرئيسية للدفع والاشتراكات (آخر 30 يوم)",
+      "best_plans": "أفضل الباقات",
+      "payment_methods_distribution": "توزيع طرق الدفع (90 يوم)",
+      "stable_vs_last_month": "مستقر مقارنة بالشهر الماضي",
+      "rose": "ارتفع",
+      "fell": "انخفض",
+      "reports_subtitle": "تقارير وتصديرات بيانات المستأجرين والشركات",
+      "bank_transfer_receipts_desc": "سجل كامل لإيصالات التحويل البنكي مع المبالغ والحالات.",
+      "tenants_report": "تقرير المستأجرين",
+      "tenants_report_desc": "قائمة المستأجرين والباقات والاشتراكات وحالة كل اشتراك.",
+      "aging_report": "تقرير أعمار الديون",
+      "aging_report_desc": "المستحقات المتأخرة موزعة على فترات الاستحقاق."
+    },
+    "communication": {
+      "templates_subtitle": "إدارة وتخصيص قوالب الرسائل البريدية والإشعارات الآلية للنظام.",
+      "template_name": "اسم القالب والعنوان",
+      "template_code": "الكود التعريفي",
+      "templates_empty": "لا توجد قوالب تواصل مضافة حالياً."
+    },
+    "payment": {
+      "failed_message": "عذراً، لم نتمكن من إتمام عملية الدفع",
+      "attempt_details": "تفاصيل المحاولة",
+      "transaction_number": "رقم العملية",
+      "retry": "إعادة المحاولة",
+      "back_to_subscriptions": "العودة للاشتراكات",
+      "support_hint": "إذا استمرت المشكلة، تواصل مع الدعم الفني",
+      "success_title": "تم الدفع بنجاح! 🎉",
+      "success_message": "تم تفعيل الاشتراك وسيتم إرسال الفاتورة على البريد الإلكتروني"
     }
   },
   "subscription": {
@@ -4976,7 +5164,32 @@
     "vat_label": "ضريبة القيمة المضافة ({rate}٪)",
     "total": "الإجمالي",
     "bank_accounts": "الحسابات البنكية",
-    "continue_to_payment": "متابعة الدفع"
+    "continue_to_payment": "متابعة الدفع",
+    "pending_request": "طلب قيد المراجعة",
+    "renew_subscription": "تجديد الاشتراك",
+    "your_current_plan": "باقتك الحالية",
+    "your_expired_plan": "باقتك المنتهية",
+    "most_popular": "الأكثر شعبية",
+    "annual_all_features": "اشتراك سنوي شامل لكافة المزايا",
+    "free_trial_limited": "تجربة مجانية لفترة محدودة",
+    "no_features_listed": "لا توجد ميزات مسجلة",
+    "expired_notice": "اشتراكك منتهي حالياً.",
+    "expiring_soon": "ينتهي اشتراكك قريباً (خلال",
+    "days_suffix": "يوم).",
+    "on_trial_notice": "أنت حالياً في الفترة التجريبية.",
+    "renew_now_hint": "يمكنك تجديد اشتراكك السنوي الآن للاستمرار بالتمتع بكافة الخدمات والتحديثات.",
+    "renew_now": "تجديد الاشتراك الآن",
+    "select_payment_method": "اختر وسيلة الدفع المتاحة",
+    "no_payment_methods": "لا تتوفر وسائل دفع مفعلة حالياً. يرجى التواصل مع الإدارة.",
+    "promo_verify_error": "حدث خطأ في التحقق",
+    "promo_code_label": "كود الخصم (اختياري)",
+    "annual_subscription_12_months": "اشتراك سنوي (12 شهر)",
+    "annual_cycle_desc": "دورة الفوترة سنوية شاملة لكافة المزايا والتحديثات",
+    "annual_subscription": "اشتراك سنوي",
+    "monthly_subscription": "اشتراك شهري",
+    "subscription": "اشتراك",
+    "view_plans": "عرض الاشتراكات",
+    "yearly_12_months": "سنوي (12 شهر)"
   },
   "subscription_history": {
     "placeholder": "سيتم عرض سجل الاشتراكات هنا بمجرد رفع المكوّن.",
@@ -5166,6 +5379,25 @@
         "published": "منشور",
         "unpublished": "غير منشور"
       }
+    },
+    "general": {
+      "visual_identity": "الهوية البصرية والعلامة التجارية",
+      "main_logo": "شعار المنصة الرئيسي",
+      "browse_files": "تصفح الملفات",
+      "logo_hint": "مستحسن: PNG بخلفية شفافة (أقصى حجم 2MB)",
+      "favicon": "أيقونة المتصفح (Favicon)",
+      "update_favicon": "تحديث الأيقونة",
+      "brand_color": "لون العلامة التجارية"
+    },
+    "pages": {
+      "legal_documents": "الوثائق القانونية",
+      "privacy": "سياسة الخصوصية",
+      "subpages": "إنشاء صفحات فرعية",
+      "subpages_hint": "صفحات ثابتة إضافية مثل \"نبذة عنا\" أو \"سياسة الاستبدال\"",
+      "add_page": "إضافة صفحة جديدة",
+      "page_slug": "رابط الصفحة (Slug)",
+      "page_title": "عنوان الصفحة",
+      "no_subpages": "لا توجد صفحات فرعية"
     }
   },
   "customer_portal": {
@@ -5484,5 +5716,13 @@
     "support_always_here": "دعم فني متاح دائماً",
     "need_more_help": "هل تحتاج لمساعدة إضافية؟",
     "support_desc": "فريق خدمة العملاء جاهز للرد على استفساراتكم ومساعدتكم في أي وقت"
+  },
+  "security": {
+    "enter_recovery_code": "أدخل رمز الاسترداد للدخول",
+    "recovery_code": "رمز الاسترداد",
+    "verifying": "جاري التحقق...",
+    "use_email_code": "استخدام رمز البريد الإلكتروني",
+    "enter_authenticator_code": "أدخل رمز التحقق من تطبيق المصادقة",
+    "use_verification_code": "استخدام رمز التحقق"
   }
 }

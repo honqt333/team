@@ -395,7 +395,9 @@
                                     {{ balance.warehouse?.name }}
                                 </div>
                                 <div class="text-xs text-gray-500 dark:text-gray-400">
-                                    {{ balance.warehouse?.center?.name || 'الفرع الرئيسي' }}
+                                    {{
+                                        balance.warehouse?.center?.name || $t('common.main_branch')
+                                    }}
                                 </div>
                                 <div
                                     class="text-[11px] flex flex-wrap items-center gap-x-3 gap-y-1 mt-1.5"
@@ -827,7 +829,7 @@ const minStock = computed(() => {
 
 const minStockWarehouseLabel = computed(() => {
     if (props.balances.length > 1 && totalWarehouseMinStock.value > 0) {
-        return 'إجمالي الفروع / المستودعات';
+        return t('inventory.total_branches_warehouses');
     }
     if (props.balances.length === 1 && Number(props.balances[0]?.min_stock) > 0) {
         return props.balances[0].warehouse?.name;
@@ -883,7 +885,7 @@ const getAllMoveTypeBadgeClass = (type) => {
 };
 
 const printBarcode = () => {
-    alert('سيتم إضافة ميزة الطباعة قريباً');
+    alert(t('inventory.print_coming_soon'));
 };
 // Helper to check if move involves sales logic
 const isSalesMove = (move) => {

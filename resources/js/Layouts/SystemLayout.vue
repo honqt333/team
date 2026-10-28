@@ -545,6 +545,8 @@
 </template>
 
 <script setup>
+const { t } = useI18n();
+
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue';
 import { usePage, router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
@@ -686,10 +688,10 @@ function formatNotifTime(iso) {
     if (!iso) return '';
     const d = new Date(iso);
     const diffMin = Math.round((Date.now() - d.getTime()) / 60000);
-    if (diffMin < 1) return locale.value === 'ar' ? 'الآن' : 'just now';
-    if (diffMin < 60) return `${diffMin} ${locale.value === 'ar' ? 'د' : 'm'}`;
+    if (diffMin < 1) return t('notifications.just_now');
+    if (diffMin < 60) return `${diffMin} ${t('nav.day_suffix')}`;
     const diffHr = Math.round(diffMin / 60);
-    if (diffHr < 24) return `${diffHr} ${locale.value === 'ar' ? 'س' : 'h'}`;
+    if (diffHr < 24) return `${diffHr} ${t('nav.year_suffix')}`;
     return d.toLocaleDateString(locale.value === 'ar' ? 'ar-SA' : 'en-US', {
         month: 'short',
         day: 'numeric',

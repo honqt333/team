@@ -27,7 +27,7 @@
                 <DocumentIcon class="mt-0.5 h-4 w-4 shrink-0 text-gray-400" />
                 <div class="min-w-0 flex-1">
                     <dt class="text-xs text-gray-500 dark:text-gray-400">
-                        {{ isAr ? 'السجل التجاري' : 'CR Number' }}
+                        {{ $t('company_profile.profile.cr_number') }}
                     </dt>
                     <dd class="truncate font-mono text-gray-900 dark:text-white">
                         {{ tenant.cr_number }}
@@ -39,7 +39,7 @@
                 <DocumentIcon class="mt-0.5 h-4 w-4 shrink-0 text-gray-400" />
                 <div class="min-w-0 flex-1">
                     <dt class="text-xs text-gray-500 dark:text-gray-400">
-                        {{ isAr ? 'الرقم الضريبي' : 'VAT Number' }}
+                        {{ $t('center_settings.profile.vat_number') }}
                     </dt>
                     <dd class="truncate font-mono text-gray-900 dark:text-white">
                         {{ tenant.vat_number }}
@@ -51,7 +51,7 @@
                 <MailIcon class="mt-0.5 h-4 w-4 shrink-0 text-gray-400" />
                 <div class="min-w-0 flex-1">
                     <dt class="text-xs text-gray-500 dark:text-gray-400">
-                        {{ isAr ? 'البريد الإلكتروني' : 'Email' }}
+                        {{ $t('center_settings.contact.email') }}
                     </dt>
                     <dd class="truncate text-gray-900 dark:text-white">
                         {{ tenant.email }}
@@ -63,7 +63,7 @@
                 <PhoneIcon class="mt-0.5 h-4 w-4 shrink-0 text-gray-400" />
                 <div class="min-w-0 flex-1">
                     <dt class="text-xs text-gray-500 dark:text-gray-400">
-                        {{ isAr ? 'الهاتف' : 'Phone' }}
+                        {{ $t('common.phone') }}
                     </dt>
                     <dd class="truncate font-mono text-gray-900 dark:text-white">
                         {{ tenant.phone }}
@@ -75,7 +75,7 @@
                 v-if="!tenant?.cr_number && !tenant?.vat_number && !tenant?.email && !tenant?.phone"
                 class="text-center text-xs text-gray-400 italic"
             >
-                {{ isAr ? 'لا توجد بيانات إضافية' : 'No additional data' }}
+                {{ $t('system.invoice_show.no_additional_data') }}
             </div>
         </dl>
 
@@ -84,13 +84,16 @@
             :href="`/system/tenants/${tenant.id}`"
             class="mt-5 flex w-full items-center justify-center gap-1.5 rounded-lg border border-gray-200 px-3 py-2 text-xs font-semibold text-gray-700 transition hover:bg-gray-50 dark:border-gray-700 dark:text-gray-200 dark:hover:bg-gray-700/40"
         >
-            {{ isAr ? 'عرض ملف المستأجر' : 'View tenant profile' }}
+            {{ $t('system.invoice_show.view_tenant') }}
             <ArrowRightIcon class="h-3.5 w-3.5" />
         </Link>
     </div>
 </template>
 
 <script setup>
+import { useI18n } from 'vue-i18n';
+const { t } = useI18n();
+
 import { computed, h } from 'vue';
 import { Link } from '@inertiajs/vue3';
 

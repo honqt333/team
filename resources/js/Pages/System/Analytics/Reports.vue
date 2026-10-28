@@ -9,11 +9,7 @@
                     {{ $t('system.nav_items.reports') }}
                 </h1>
                 <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                    {{
-                        locale === 'ar'
-                            ? 'تقارير وتصديرات بيانات المستأجرين والشركات'
-                            : 'Tenant and company data reports and exports'
-                    }}
+                    {{ $t('system.analytics.reports_subtitle') }}
                 </p>
             </div>
 
@@ -73,6 +69,8 @@
 </template>
 
 <script setup>
+const { t } = useI18n();
+
 import { computed } from 'vue';
 import { Head } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
@@ -87,9 +85,9 @@ const { locale } = useI18n();
 const reports = [
     {
         routeName: 'system.reports.receipts',
-        title: 'إيصالات التحويل البنكي',
+        title: t('system.nav_items.bank_receipts'),
         titleEn: 'Bank transfer receipts',
-        description: 'سجل كامل لإيصالات التحويل البنكي مع المبالغ والحالات.',
+        description: t('system.analytics.bank_transfer_receipts_desc'),
         descriptionEn: 'Full log of bank transfer receipts with amounts and statuses.',
         iconBg: 'bg-emerald-100 dark:bg-emerald-900/40',
         iconColor: 'text-emerald-600 dark:text-emerald-400',
@@ -98,9 +96,9 @@ const reports = [
     },
     {
         routeName: 'system.reports.tenants',
-        title: 'تقرير المستأجرين',
+        title: t('system.analytics.tenants_report'),
         titleEn: 'Tenant report',
-        description: 'قائمة المستأجرين والباقات والاشتراكات وحالة كل اشتراك.',
+        description: t('system.analytics.tenants_report_desc'),
         descriptionEn: 'List of tenants with their plans, subscriptions and subscription status.',
         iconBg: 'bg-indigo-100 dark:bg-indigo-900/40',
         iconColor: 'text-indigo-600 dark:text-indigo-400',
@@ -109,9 +107,9 @@ const reports = [
     },
     {
         routeName: 'system.reports.aging',
-        title: 'تقرير أعمار الديون',
+        title: t('system.analytics.aging_report'),
         titleEn: 'Aging report',
-        description: 'المستحقات المتأخرة موزعة على فترات الاستحقاق.',
+        description: t('system.analytics.aging_report_desc'),
         descriptionEn: 'Outstanding receivables broken down by days overdue.',
         iconBg: 'bg-amber-100 dark:bg-amber-900/40',
         iconColor: 'text-amber-600 dark:text-amber-400',

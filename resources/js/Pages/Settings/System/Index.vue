@@ -1245,7 +1245,7 @@ const makeOptions = computed(() => {
 const currentSectionTitle = computed(() => {
     const section = props.activeSection || 'makes';
     // Mapping for general
-    if (section === 'general') return 'الإعدادات العامة';
+    if (section === 'general') return t('permissions_modules.settings_general');
     if (section === 'condition-items') return t('system_settings.sections.condition_items');
     if (section === 'income-categories') return t('system_settings.income_categories.subtitle');
     return t(`system_settings.${section}.subtitle`) || t(`system_settings.sections.${section}`);
@@ -1263,7 +1263,7 @@ const currentPagination = computed(() => {
 
 const selectedType = ref(props.filters?.transaction_type || '');
 const typeOptions = computed(() => [
-    { value: '', label: 'كل أنواع المعاملات' },
+    { value: '', label: t('settings.all_transaction_types') },
     { value: 'revenue', label: t('system_settings.form.transaction_type_revenue') },
     { value: 'expense', label: t('system_settings.form.transaction_type_expense') },
 ]);

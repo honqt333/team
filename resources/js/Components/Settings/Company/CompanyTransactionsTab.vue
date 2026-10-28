@@ -8,7 +8,7 @@
                     {{ $t('company_profile.tabs.revenue_expenses') }}
                 </h3>
                 <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                    إدارة الإيرادات والمصروفات الخاصة بالإدارة والشركة
+                    {{ $t('company_profile.transactions.subtitle') }}
                 </p>
             </div>
             <button
@@ -39,7 +39,7 @@
                         : 'text-gray-500 hover:text-gray-900 dark:hover:text-white',
                 ]"
             >
-                الكل
+                {{ $t('common.all') }}
             </button>
             <button
                 type="button"
@@ -152,7 +152,7 @@
                                         @click="$emit('approve-transaction', trans)"
                                         class="px-2.5 py-1 text-xs font-bold rounded-lg bg-emerald-50 text-emerald-600 hover:bg-emerald-100 transition-colors"
                                     >
-                                        اعتماد
+                                        {{ $t('hr.payroll.approve') }}
                                     </button>
                                     <button
                                         @click="$emit('edit-transaction', trans)"
@@ -195,7 +195,7 @@
                         </tr>
                         <tr v-if="!filteredTransactions || !filteredTransactions.length">
                             <td colspan="8" class="px-6 py-12 text-center text-gray-400 text-sm">
-                                لا توجد معاملات مسجلة حالياً
+                                {{ $t('company_profile.transactions.empty') }}
                             </td>
                         </tr>
                     </tbody>

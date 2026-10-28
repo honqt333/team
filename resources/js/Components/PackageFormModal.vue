@@ -335,7 +335,7 @@
                         <span
                             class="absolute end-3 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400 text-sm"
                         >
-                            ر.س
+                            {{ $t('common.currency') }}
                         </span>
                     </div>
                     <p
@@ -391,7 +391,7 @@
                             <span
                                 class="absolute end-3 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400 text-sm"
                             >
-                                {{ minPriceAsPercentage ? '%' : 'ر.س' }}
+                                {{ $t('common.currency') }}
                             </span>
                         </div>
 
@@ -420,7 +420,7 @@
                                 <span
                                     class="font-semibold text-indigo-700 dark:text-indigo-300 ms-1"
                                 >
-                                    {{ calculatedMinPrice.toFixed(2) }} ر.س
+                                    {{ calculatedMinPrice.toFixed(2) }} {{ $t('common.currency') }}
                                 </span>
                             </div>
                         </div>

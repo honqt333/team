@@ -6,14 +6,10 @@
             <!-- Header -->
             <div>
                 <h1 class="text-2xl font-bold text-gray-900 dark:text-white">
-                    {{ locale === 'ar' ? 'تحليلات المستأجرين' : 'Customer analytics' }}
+                    {{ $t('system.analytics.tenant_analytics') }}
                 </h1>
                 <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                    {{
-                        locale === 'ar'
-                            ? 'مؤشرات الأداء الرئيسية للدفع والاشتراكات (آخر 30 يوم)'
-                            : 'Headline KPIs for billing & subscriptions (last 30 days)'
-                    }}
+                    {{ $t('system.analytics.kpis_subtitle') }}
                 </p>
             </div>
 
@@ -88,7 +84,7 @@
                     class="rounded-xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-700 dark:bg-gray-800"
                 >
                     <h2 class="text-sm font-bold uppercase tracking-wider text-gray-500">
-                        {{ locale === 'ar' ? 'أفضل الباقات' : 'Top plans' }}
+                        {{ $t('system.analytics.best_plans') }}
                     </h2>
                     <div v-if="!topPlans.length" class="mt-6 text-center text-sm text-gray-500">
                         —
@@ -130,11 +126,7 @@
                     class="rounded-xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-700 dark:bg-gray-800"
                 >
                     <h2 class="text-sm font-bold uppercase tracking-wider text-gray-500">
-                        {{
-                            locale === 'ar'
-                                ? 'توزيع طرق الدفع (90 يوم)'
-                                : 'Payment method mix (90d)'
-                        }}
+                        {{ $t('system.analytics.payment_methods_distribution') }}
                     </h2>
                     <div v-if="!paymentMix.length" class="mt-6 text-center text-sm text-gray-500">
                         —
@@ -165,6 +157,9 @@
 </template>
 
 <script setup>
+import { useI18n } from 'vue-i18n';
+const { t } = useI18n();
+
 import { computed, onMounted, ref } from 'vue';
 import { Head } from '@inertiajs/vue3';
 import SystemLayout from '@/Layouts/SystemLayout.vue';
@@ -203,13 +198,13 @@ const churnTrend = computed(() => churnDelta.value);
 const churnSub = computed(() => {
     const d = churnDelta.value;
     if (d === 0) {
-        return locale.value === 'ar' ? 'مستقر مقارنة بالشهر الماضي' : 'Stable vs last month';
+        return t('system.analytics.stable_vs_last_month');
     }
     if (d > 0) {
-        return locale.value === 'ar' ? `ارتفع ${d}% عن الشهر الماضي` : `Up ${d}% vs last month`;
+        return locale.value === 'ar' ? t('system.analytics.rose') : `Up ${d}% vs last month`;
     }
     return locale.value === 'ar'
-        ? `انخفض ${Math.abs(d)}% عن الشهر الماضي`
+        ? t('system.analytics.fell')
         : `Down ${Math.abs(d)}% vs last month`;
 });
 
@@ -246,7 +241,7 @@ function gatewayLabel(g) {
         paytabs: 'PayTabs',
         tabby: 'Tabby',
         tamara: 'Tamara',
-        bank_transfer: locale.value === 'ar' ? 'تحويل بنكي' : 'Bank transfer',
+        bank_transfer: t('invoices.credit_note.methods.bank_transfer'),
     };
     return map[g] || g;
 }

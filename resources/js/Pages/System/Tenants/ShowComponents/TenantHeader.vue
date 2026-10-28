@@ -43,9 +43,7 @@
                     />
                 </svg>
                 {{ currentSubscription.plan.name_ar || currentSubscription.plan.name_en }}
-                <span class="text-xs opacity-75">
-                    ({{ currentSubscription.billing_cycle === 'yearly' ? 'سنوي' : 'شهري' }})
-                </span>
+                <span class="text-xs opacity-75">({{ $t('hr.leaves.types.annual') }})</span>
             </span>
             <span
                 :class="getStatusClass(tenant.status)"

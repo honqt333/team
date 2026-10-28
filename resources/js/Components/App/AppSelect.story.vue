@@ -1,4 +1,7 @@
 <script setup>
+import { useI18n } from 'vue-i18n';
+const { t } = useI18n();
+
 /**
  * AppSelect Story — visual reference for AppSelect.
  */
@@ -7,7 +10,7 @@ import AppSelect from './AppSelect.vue';
 
 const status = ref('');
 const city = ref('');
-const errorStatus = ref('هذا الحقل مطلوب');
+const errorStatus = ref(t('validation.required'));
 </script>
 
 <template>
@@ -26,16 +29,18 @@ const errorStatus = ref('هذا الحقل مطلوب');
         <section class="space-y-3 max-w-md">
             <h2 class="app-display text-xl font-semibold">Basics</h2>
             <AppSelect v-model="status" label="حالة أمر العمل" placeholder="اختر الحالة">
-                <option value="open">مفتوح</option>
-                <option value="in_progress">قيد التنفيذ</option>
-                <option value="done">منتهي</option>
-                <option value="cancelled">ملغي</option>
+                <option value="open">{{ $t('center_settings.working_hours.open') }}</option>
+                <option value="in_progress">
+                    {{ $t('work_orders.work_order_statuses.in_progress') }}
+                </option>
+                <option value="done">{{ $t('hr.contracts.status.expired') }}</option>
+                <option value="cancelled">{{ $t('common.status_cancelled') }}</option>
             </AppSelect>
 
             <AppSelect v-model="city" label="المدينة" hint="المدن المتاحة للتوصيل">
-                <option value="riyadh">الرياض</option>
-                <option value="jeddah">جدة</option>
-                <option value="dammam">الدمام</option>
+                <option value="riyadh">{{ $t('common.city_riyadh') }}</option>
+                <option value="jeddah">{{ $t('company_profile.address.city_placeholder') }}</option>
+                <option value="dammam">{{ $t('common.city_dammam') }}</option>
             </AppSelect>
         </section>
 
@@ -48,8 +53,10 @@ const errorStatus = ref('هذا الحقل مطلوب');
                 :error="errorStatus"
                 placeholder="اختر الحالة"
             >
-                <option value="open">مفتوح</option>
-                <option value="in_progress">قيد التنفيذ</option>
+                <option value="open">{{ $t('center_settings.working_hours.open') }}</option>
+                <option value="in_progress">
+                    {{ $t('work_orders.work_order_statuses.in_progress') }}
+                </option>
             </AppSelect>
             <AppSelect label="معطّل" disabled>
                 <option>—</option>

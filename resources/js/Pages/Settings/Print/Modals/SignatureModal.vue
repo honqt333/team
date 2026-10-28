@@ -243,13 +243,7 @@
                                 />
                             </svg>
                             <p class="text-sm font-bold text-indigo-600 dark:text-indigo-400">
-                                {{
-                                    uploadFile
-                                        ? uploadFile.name
-                                        : isRtl
-                                          ? 'اضغط لاختيار ملف'
-                                          : 'Click to choose a file'
-                                }}
+                                {{ $t('print_settings.click_to_choose_file') }}
                             </p>
                             <p class="text-[10px] text-gray-400 mt-1 font-mono">
                                 PNG · JPG · SVG — max 2 MB
@@ -385,7 +379,7 @@
                                                     v-if="sig.show === false"
                                                     class="text-[9px] text-gray-400 font-bold mt-0.5"
                                                 >
-                                                    {{ isRtl ? 'مخفي' : 'hidden' }}
+                                                    {{ $t('print_settings.hidden') }}
                                                 </p>
                                             </div>
                                         </button>
@@ -526,7 +520,7 @@
                                                 @click="cancelEdit"
                                                 class="px-3 py-1.5 text-[10px] font-bold rounded-lg text-gray-600 hover:bg-gray-200 dark:hover:bg-gray-700"
                                             >
-                                                {{ isRtl ? 'إلغاء' : 'Cancel' }}
+                                                {{ $t('common.cancel') }}
                                             </button>
                                             <button
                                                 type="button"
@@ -534,7 +528,7 @@
                                                 :disabled="busySigId === sig.id"
                                                 class="px-3 py-1.5 text-[10px] font-bold rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-50"
                                             >
-                                                {{ isRtl ? 'حفظ' : 'Save' }}
+                                                {{ $t('common.save') }}
                                             </button>
                                         </div>
                                     </div>
@@ -553,12 +547,12 @@
                             class="bg-white dark:bg-gray-800 rounded-2xl p-5 max-w-xs w-full shadow-2xl"
                         >
                             <h4 class="text-sm font-bold text-gray-800 dark:text-gray-100 mb-2">
-                                {{ isRtl ? 'تأكيد الحذف' : 'Confirm delete' }}
+                                {{ $t('common.confirm_delete') }}
                             </h4>
                             <p class="text-xs text-gray-500 dark:text-gray-400 mb-4">
                                 {{
                                     isRtl
-                                        ? `هل تريد حذف التوقيع "${deletingSig.name_ar || deletingSig.name_en}"؟ لا يمكن التراجع.`
+                                        ? `$t('print_settings.delete_signature_confirm', { name_en: deletingSig.name_ar || deletingSig.name_en })`
                                         : `Delete signature "${deletingSig.name_en || deletingSig.name_ar}"? This cannot be undone.`
                                 }}
                             </p>
@@ -568,7 +562,7 @@
                                     @click="deletingSig = null"
                                     class="px-3 py-1.5 text-xs font-bold rounded-lg text-gray-600 hover:bg-gray-100"
                                 >
-                                    {{ isRtl ? 'إلغاء' : 'Cancel' }}
+                                    {{ $t('common.cancel') }}
                                 </button>
                                 <button
                                     type="button"
@@ -576,7 +570,7 @@
                                     :disabled="busySigId === deletingSig?.id"
                                     class="px-3 py-1.5 text-xs font-bold rounded-lg bg-red-600 text-white hover:bg-red-700 disabled:opacity-50"
                                 >
-                                    {{ isRtl ? 'حذف' : 'Delete' }}
+                                    {{ $t('common.delete') }}
                                 </button>
                             </div>
                         </div>

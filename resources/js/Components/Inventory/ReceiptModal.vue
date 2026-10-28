@@ -4,7 +4,8 @@
             <!-- Part Selection -->
             <div>
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    {{ $t('inventory.parts.name') }} <span class="text-red-500">*</span>
+                    {{ $t('inventory.parts.name') }}
+                    <span class="text-red-500">*</span>
                 </label>
                 <SearchableSelect
                     v-model="form.part_id"
@@ -18,13 +19,33 @@
                     <template #option="{ option }">
                         <div class="flex items-center justify-between w-full">
                             <div>
-                                <div class="font-bold text-gray-900 dark:text-white text-start">{{ toEnglish(getName(option)) }}</div>
-                                <div class="text-[10px] text-emerald-600 font-bold mt-0.5 text-start">{{ formatCurrency(option.default_sale_price) }}</div>
+                                <div class="font-bold text-gray-900 dark:text-white text-start">
+                                    {{ toEnglish(getName(option)) }}
+                                </div>
+                                <div
+                                    class="text-[10px] text-emerald-600 font-bold mt-0.5 text-start"
+                                >
+                                    {{ formatCurrency(option.default_sale_price) }}
+                                </div>
                             </div>
                             <div class="text-right flex flex-col items-end">
-                                <span class="text-[10px] font-mono text-gray-500">{{ toEnglish(option.sku || option.barcode || '---') }}</span>
-                                <span class="text-[10px] font-bold mt-0.5" :class="Number(option.inventory_balances_sum_qty_on_hand) > 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-500 dark:text-red-400'">
-                                    {{ $t('inventory.stock.available') }}: {{ formatQuantity(option.inventory_balances_sum_qty_on_hand || 0) }}
+                                <span class="text-[10px] font-mono text-gray-500">
+                                    {{ toEnglish(option.sku || option.barcode || '---') }}
+                                </span>
+                                <span
+                                    class="text-[10px] font-bold mt-0.5"
+                                    :class="
+                                        Number(option.inventory_balances_sum_qty_on_hand) > 0
+                                            ? 'text-emerald-600 dark:text-emerald-400'
+                                            : 'text-red-500 dark:text-red-400'
+                                    "
+                                >
+                                    {{ $t('inventory.stock.available') }}:
+                                    {{
+                                        formatQuantity(
+                                            option.inventory_balances_sum_qty_on_hand || 0
+                                        )
+                                    }}
                                 </span>
                             </div>
                         </div>
@@ -36,7 +57,8 @@
             <!-- Quantity -->
             <div>
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    {{ $t('inventory.stock.qty') }} <span class="text-red-500">*</span>
+                    {{ $t('inventory.stock.qty') }}
+                    <span class="text-red-500">*</span>
                 </label>
                 <input
                     v-model="form.qty"
@@ -52,7 +74,8 @@
             <!-- Unit Cost -->
             <div>
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    {{ $t('inventory.moves.cost') }} <span class="text-red-500">*</span>
+                    {{ $t('inventory.moves.cost') }}
+                    <span class="text-red-500">*</span>
                 </label>
                 <input
                     v-model="form.unit_cost"
@@ -62,7 +85,9 @@
                     class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-green-500 font-mono"
                     placeholder="0.00"
                 />
-                <p v-if="errors.unit_cost" class="mt-1 text-sm text-red-500">{{ errors.unit_cost }}</p>
+                <p v-if="errors.unit_cost" class="mt-1 text-sm text-red-500">
+                    {{ errors.unit_cost }}
+                </p>
             </div>
 
             <!-- Notes -->
@@ -100,6 +125,9 @@
 </template>
 
 <script setup>
+import { useI18n } from 'vue-i18n';
+const { t } = useI18n();
+
 import { ref, reactive, watch } from 'vue';
 import { router } from '@inertiajs/vue3';
 import { useToast } from '@/Composables/useToast';
@@ -144,25 +172,33 @@ const handleInput = (event, field) => {
     event.target.value = value;
 };
 
-watch(() => props.warehouseId, (val) => {
-    form.warehouse_id = val;
-});
-
-watch(() => props.show, (val) => {
-    if (val) {
-        // Reset form when modal opens
-        form.part_id = null;
-        form.qty = null;
-        form.unit_cost = null;
-        form.notes = '';
-        Object.keys(errors).forEach(key => delete errors[key]);
-        loadParts();
+watch(
+    () => props.warehouseId,
+    (val) => {
+        form.warehouse_id = val;
     }
-});
+);
+
+watch(
+    () => props.show,
+    (val) => {
+        if (val) {
+            // Reset form when modal opens
+            form.part_id = null;
+            form.qty = null;
+            form.unit_cost = null;
+            form.notes = '';
+            Object.keys(errors).forEach((key) => delete errors[key]);
+            loadParts();
+        }
+    }
+);
 
 async function loadParts() {
     try {
-        const response = await axios.get(route('app.inventory.parts.search'), { params: { q: '' } });
+        const response = await axios.get(route('app.inventory.parts.search'), {
+            params: { q: '' },
+        });
         parts.value = response.data;
     } catch (e) {
         console.error('Failed to load parts', e);
@@ -171,7 +207,9 @@ async function loadParts() {
 
 async function searchParts(query) {
     try {
-        const response = await axios.get(route('app.inventory.parts.search'), { params: { q: query } });
+        const response = await axios.get(route('app.inventory.parts.search'), {
+            params: { q: query },
+        });
         parts.value = response.data;
     } catch (e) {
         console.error('Search failed', e);
@@ -180,18 +218,18 @@ async function searchParts(query) {
 
 function submit() {
     processing.value = true;
-    Object.keys(errors).forEach(key => delete errors[key]);
+    Object.keys(errors).forEach((key) => delete errors[key]);
 
     router.post(route('app.inventory.moves.receipt'), form, {
         preserveScroll: true,
         onSuccess: () => {
-            success('تم تسجيل الاستلام بنجاح');
+            success(t('inventory.moves.receipt_created'));
             emit('saved');
             emit('close');
         },
         onError: (errs) => {
             Object.assign(errors, errs);
-            showError('حدث خطأ أثناء الحفظ');
+            showError(t('common.error_while_saving'));
         },
         onFinish: () => {
             processing.value = false;

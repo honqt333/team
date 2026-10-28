@@ -38,10 +38,10 @@ const iconTrash =
         <section class="space-y-3">
             <h2 class="app-display text-xl font-semibold">Variants</h2>
             <div class="flex flex-wrap items-center gap-3">
-                <AppButton variant="primary">حفظ التغييرات</AppButton>
-                <AppButton variant="secondary">إلغاء</AppButton>
-                <AppButton variant="ghost">تفاصيل إضافية</AppButton>
-                <AppButton variant="danger">حذف</AppButton>
+                <AppButton variant="primary">{{ $t('common.save_changes') }}</AppButton>
+                <AppButton variant="secondary">{{ $t('common.cancel') }}</AppButton>
+                <AppButton variant="ghost">{{ $t('common.additional_details') }}</AppButton>
+                <AppButton variant="danger">{{ $t('common.delete') }}</AppButton>
             </div>
         </section>
 
@@ -66,10 +66,16 @@ const iconTrash =
         <section class="space-y-3">
             <h2 class="app-display text-xl font-semibold">With icons</h2>
             <div class="flex flex-wrap items-center gap-3">
-                <AppButton :icon-left-path="iconSave">حفظ</AppButton>
-                <AppButton :icon-right-path="iconArrow" variant="secondary">التالي</AppButton>
-                <AppButton :icon-left-path="iconTrash" variant="danger" size="sm">حذف</AppButton>
-                <AppButton :icon-left-path="iconSave" size="lg">حفظ وإغلاق</AppButton>
+                <AppButton :icon-left-path="iconSave">{{ $t('common.save') }}</AppButton>
+                <AppButton :icon-right-path="iconArrow" variant="secondary">
+                    {{ $t('common.next') }}
+                </AppButton>
+                <AppButton :icon-left-path="iconTrash" variant="danger" size="sm">
+                    {{ $t('common.delete') }}
+                </AppButton>
+                <AppButton :icon-left-path="iconSave" size="lg">
+                    {{ $t('common.save_and_close') }}
+                </AppButton>
             </div>
         </section>
 
@@ -86,12 +92,12 @@ const iconTrash =
             <h2 class="app-display text-xl font-semibold">As link / disabled + block</h2>
             <div class="flex flex-col items-start gap-3">
                 <AppButton as="link" :href="'/app/customers'" variant="secondary">
-                    فتح قائمة العملاء
+                    {{ $t('common.open_customers_list') }}
                 </AppButton>
                 <AppButton as="a" href="https://example.com" target="_blank" variant="ghost">
-                    فتح رابط خارجي
+                    {{ $t('common.open_external_link') }}
                 </AppButton>
-                <AppButton block>زر بعرض كامل</AppButton>
+                <AppButton block>{{ $t('common.full_width_button') }}</AppButton>
             </div>
         </section>
 

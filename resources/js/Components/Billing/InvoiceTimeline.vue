@@ -3,7 +3,7 @@
         class="rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800"
     >
         <h3 class="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">
-            {{ isAr ? 'سجل الفاتورة' : 'Invoice Timeline' }}
+            {{ $t('system.invoice_show.timeline') }}
         </h3>
 
         <ol class="mt-5 space-y-5">
@@ -52,6 +52,9 @@
 </template>
 
 <script setup>
+import { useI18n } from 'vue-i18n';
+const { t } = useI18n();
+
 import { computed, h } from 'vue';
 
 const props = defineProps({
@@ -110,7 +113,7 @@ const events = computed(() => {
 
     // 1. Issued — always present
     out.push({
-        labelAr: 'تم إصدار الفاتورة',
+        labelAr: t('invoices.timeline.issued'),
         labelEn: 'Invoice issued',
         timestamp: formatDate(props.invoice.issued_at),
         detail: null,
@@ -125,14 +128,10 @@ const events = computed(() => {
         props.invoice.due_at &&
         new Date(props.invoice.due_at) < new Date();
     out.push({
-        labelAr: isPastDue ? 'تجاوز تاريخ الاستحقاق' : 'تاريخ الاستحقاق',
+        labelAr: t('invoices.timeline.overdue'),
         labelEn: isPastDue ? 'Past due date' : 'Due date',
         timestamp: formatDate(props.invoice.due_at),
-        detail: isPastDue
-            ? isAr.value
-                ? 'الفاتورة متأخرة — يلزم إجراء'
-                : 'Invoice is overdue — action required'
-            : null,
+        detail: isPastDue ? t('invoices.timeline.overdue_action') : null,
         icon: icons.calendar,
         color: isPastDue ? 'bg-rose-500 text-white' : 'bg-amber-500 text-white',
         completed: !!props.invoice.due_at,
@@ -141,7 +140,7 @@ const events = computed(() => {
     // 3. Status-specific event
     if (props.invoice.status === 'paid') {
         out.push({
-            labelAr: 'تم استلام الدفع',
+            labelAr: t('invoices.timeline.payment_received'),
             labelEn: 'Payment received',
             timestamp: formatDate(props.invoice.paid_at),
             detail: null,
@@ -151,7 +150,7 @@ const events = computed(() => {
         });
     } else if (props.invoice.status === 'cancelled') {
         out.push({
-            labelAr: 'تم إلغاء الفاتورة',
+            labelAr: t('invoices.timeline.cancelled'),
             labelEn: 'Invoice cancelled',
             timestamp: formatDate(props.invoice.updated_at),
             detail: null,
@@ -161,12 +160,10 @@ const events = computed(() => {
         });
     } else if (props.invoice.status === 'pending') {
         out.push({
-            labelAr: 'بانتظار الدفع',
+            labelAr: t('system.company_subscription.status.pending'),
             labelEn: 'Awaiting payment',
             timestamp: isAr.value ? '—' : '—',
-            detail: isAr.value
-                ? 'أرسل الإيصال من صفحة الإيصالات البنكية'
-                : 'Tenant should submit bank transfer receipt',
+            detail: t('invoices.timeline.send_receipt_hint'),
             icon: icons.envelope,
             color: 'bg-gray-300 text-gray-600 dark:bg-gray-600 dark:text-gray-300',
             completed: false,

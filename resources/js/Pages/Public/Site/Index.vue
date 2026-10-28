@@ -560,8 +560,8 @@ const tr = (key) => {
 // Theme toggle labels are inline (not in i18n) to keep the
 // public site self-contained even if a tenant's translation
 // pack is incomplete. They follow the page locale.
-const darkModeLabel = computed(() => (isRtl.value ? 'الوضع الداكن' : 'Dark mode'));
-const lightModeLabel = computed(() => (isRtl.value ? 'الوضع الفاتح' : 'Light mode'));
+const darkModeLabel = computed(() => t('landing.dark_mode'));
+const lightModeLabel = computed(() => t('landing.light_mode'));
 
 const isDark = ref(true);
 
@@ -616,32 +616,19 @@ const whyUsCards = computed(() => [
     {
         title:
             tr('tenant_site.why_us.cards.quality.title') ||
-            (isRtl.value ? 'جودة معتمدة' : 'Certified quality'),
-        body:
-            tr('tenant_site.why_us.cards.quality.body') ||
-            (isRtl.value
-                ? 'نلتزم بأعلى معايير الجودة في صيانة وإصلاح مركبتك باستخدام قطع غيار أصلية وأجهزة فحص حديثة.'
-                : 'We uphold the highest quality standards in servicing your vehicle, using original parts and modern diagnostics.'),
+            t('tenant_site.why_us.cards.quality.title'),
+        body: tr('tenant_site.why_us.cards.quality.body') || t('landing.certified_quality_desc'),
     },
     {
         title:
-            tr('tenant_site.why_us.cards.speed.title') ||
-            (isRtl.value ? 'سرعة الإنجاز' : 'Fast turnaround'),
-        body:
-            tr('tenant_site.why_us.cards.speed.body') ||
-            (isRtl.value
-                ? 'فريق متخصص يضمن إنجاز خدمتك في الوقت المحدد دون تأخير، مع متابعة دقيقة لكل خطوة.'
-                : 'A specialized team ensures your service is completed on time with step-by-step tracking.'),
+            tr('tenant_site.why_us.cards.speed.title') || t('tenant_site.why_us.cards.speed.title'),
+        body: tr('tenant_site.why_us.cards.speed.body') || t('landing.fast_turnaround_desc'),
     },
     {
         title:
             tr('tenant_site.why_us.cards.warranty.title') ||
-            (isRtl.value ? 'ضمان موثوق' : 'Trusted warranty'),
-        body:
-            tr('tenant_site.why_us.cards.warranty.body') ||
-            (isRtl.value
-                ? 'نقدم ضمانًا على الخدمات والقطع المستبدلة لراحة بالك وثقة كاملة في كل صيانة.'
-                : 'We back our services and replaced parts with a warranty for your complete peace of mind.'),
+            t('tenant_site.why_us.cards.warranty.title'),
+        body: tr('tenant_site.why_us.cards.warranty.body') || t('landing.reliable_warranty_desc'),
     },
 ]);
 

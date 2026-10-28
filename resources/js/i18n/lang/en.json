@@ -19,7 +19,19 @@
     "resend_cooldown": "Please wait :seconds seconds before resending",
     "throttle": "Too many login attempts. Please try again in :seconds seconds.",
     "verification_unavailable": "Verification service is currently unavailable",
-    "verify_phone_first": "Please verify your phone number first"
+    "verify_phone_first": "Please verify your phone number first",
+    "admin_panel": "Admin panel",
+    "admin_login_hint": "Dedicated sign-in for the system administration panel",
+    "login": "Log in",
+    "create_account": "Create account",
+    "forgot_password_link": "Forgot your password?",
+    "forgot_password": "Forgot your password",
+    "forgot_password_hint": "Enter your registered email and we will send you a link to reset your password",
+    "back_to_login": "Back to log in",
+    "reset_password": "Reset password",
+    "email_verification": "Email verification",
+    "verify_email_thanks": "Thanks for signing up! Please confirm your email address by clicking the link we sent.",
+    "new_activation_link_sent": "A new activation link has been sent!"
   },
   "center_settings": {
     "address": {
@@ -329,7 +341,40 @@
     "deleted": "Deleted",
     "deleted_successfully": "Deleted successfully",
     "saved_successfully": "Saved successfully",
-    "updated": "Updated"
+    "updated": "Updated",
+    "additional_details": "Additional details",
+    "save_and_close": "Save and close",
+    "open_customers_list": "Open the customers list",
+    "open_external_link": "Open an external link",
+    "full_width_button": "Full-width button",
+    "approval_required": "Approval is required to continue",
+    "attest_data_accuracy": "I attest that the data is accurate",
+    "declaration_legal_only": "This declaration is used for legal purposes only",
+    "email_invoice_notifications_only": "We use this email for invoice notifications only.",
+    "city_riyadh": "Riyadh",
+    "city_dammam": "Dammam",
+    "item_generic": "Item",
+    "company": "Company",
+    "day_sunday": "Sunday",
+    "day_monday": "Monday",
+    "day_tuesday": "Tuesday",
+    "day_wednesday": "Wednesday",
+    "day_thursday": "Thursday",
+    "day_friday": "Friday",
+    "day_saturday": "Saturday",
+    "error_while_saving": "An error occurred while saving",
+    "percent_sign": "%",
+    "base_label": "(Base:",
+    "plus_tax_label": "+ Tax:",
+    "net_amount_after_offset": "The net amount after the offset",
+    "due_date_label": "(Due date:",
+    "main_branch": "Main branch",
+    "service_team_center": "Service team center",
+    "company_head_office": "The company head office",
+    "saved": "Saved.",
+    "total_label": "Total:",
+    "price_in_sar": "{min_price} SAR",
+    "credit_card": "Credit card"
   },
   "company_profile": {
     "address": {
@@ -544,7 +589,11 @@
         "total": "Total Amount",
         "updated_by": "Updated By",
         "vat": "VAT"
-      }
+      },
+      "subtitle": "Manage the revenue and expenses of the administration and the company",
+      "empty": "No transactions recorded at the moment",
+      "supplier_role": "Supplier",
+      "taxable_partner_hint": "The customer/supplier must be set when taxable is enabled to stay compliant with tax invoicing"
     },
     "vat": {
       "click_for_details": "Click for more details",
@@ -975,7 +1024,9 @@
         "draft": "Draft",
         "expired": "Finished"
       },
-      "title": "Employment contracts"
+      "title": "Employment contracts",
+      "delete_confirm": "Are you sure you want to delete this contract?",
+      "document_body": "Employment contract\n\nOn the day of"
     },
     "documents": {
       "add": "Add document",
@@ -992,7 +1043,8 @@
         "license": "Driving license",
         "other": "Other",
         "passport": "Passport"
-      }
+      },
+      "delete_confirm": "Are you sure you want to delete this document?"
     },
     "employees": {
       "activate": "Activate",
@@ -1170,7 +1222,11 @@
         "bank_info": "Bank information",
         "payment_history": "Transaction log",
         "salaries": "Salaries and allowances"
-      }
+      },
+      "select_start_month": "Please select the start month",
+      "select_end_month": "Please select the end month",
+      "select_flexible_allowance": "Please select the flexible allowance amount",
+      "select_flexible_deduction": "Please select the flexible deduction amount"
     },
     "leaves": {
       "add": "Add vacation",
@@ -1256,7 +1312,14 @@
       "earnings": "Earnings",
       "total_earnings": "Total earnings",
       "amount": "Amount",
-      "print_footer": "This payslip was issued electronically by Khidmh Pro"
+      "print_footer": "This payslip was issued electronically by Khidmh Pro",
+      "return_it": "Return it",
+      "approve_it": "Approve it",
+      "finance_manager": "Finance manager",
+      "recreate_confirm": "Are you sure you want to rebuild the payroll run? All current data will be deleted and recalculated.",
+      "recreated": "The payroll run was rebuilt successfully",
+      "exclude_employee_confirm": "Are you sure you want to exclude this employee from the payroll run?",
+      "employee_excluded": "The employee was excluded successfully"
     },
     "settings": {
       "allowances": {
@@ -1342,13 +1405,16 @@
       "types": {
         "fixed": "Fixed",
         "percentage": "Percentage"
-      }
+      },
+      "arabic_required": "(Arabic) *"
     },
     "subtitle": "Managing employees, payroll and attendance",
     "title": "Human resources",
     "shifts": {
       "cannot_delete_in_use": "Cannot Delete In Use"
-    }
+    },
+    "payslip_title": "Payslip",
+    "arabic_suffix": "(Arabic)"
   },
   "inventory": {
     "hub": {
@@ -1521,7 +1587,8 @@
       "units": {
         "title": "Inventory units",
         "unit": "Unit"
-      }
+      },
+      "arabic_suffix": "(Arabic)"
     },
     "stock": {
       "available": "Available",
@@ -1603,7 +1670,12 @@
       "select": "Select Warehouse",
       "single": "Warehouse",
       "title": "Warehouses"
-    }
+    },
+    "all_categories": "All categories",
+    "total_branches_warehouses": "Total branches / warehouses",
+    "print_coming_soon": "The print feature is coming soon",
+    "spare_part": "Spare part",
+    "part_number_label": "Part number:"
   },
   "invoices": {
     "all_statuses": "All statuses",
@@ -1770,6 +1842,14 @@
       "credit_note": "Credit note",
       "debit_note": "Debit note",
       "invoice": "Invoice"
+    },
+    "timeline": {
+      "issued": "Invoice issued",
+      "overdue": "Past the due date",
+      "overdue_action": "The invoice is overdue — action is required",
+      "payment_received": "Payment received",
+      "cancelled": "Invoice cancelled",
+      "send_receipt_hint": "Send the receipt from the bank receipts page"
     }
   },
   "landing": {
@@ -1790,7 +1870,12 @@
     "uptime": "Uptime",
     "version_2_coming_soon": "Version 2.0 — Coming Soon",
     "with_intelligence": "With Real Intelligence",
-    "yearly": "Yearly"
+    "yearly": "Yearly",
+    "dark_mode": "Dark mode",
+    "light_mode": "Light mode",
+    "certified_quality_desc": "We hold to the highest quality standards in maintaining and repairing your vehicle, using genuine spare parts and modern diagnostic equipment.",
+    "fast_turnaround_desc": "A specialised team ensures your service is completed on time without delay, with careful tracking of every step.",
+    "reliable_warranty_desc": "We warranty the services and the replaced parts so you can rest easy and stay confident through every maintenance."
   },
   "messages": {
     "cannot_cancel_has_technicians_or_parts": "Cannot cancel work order because it has assigned staff, spare parts, or payments.",
@@ -1928,7 +2013,15 @@
     "vehicles": "Vehicles",
     "website": "Website",
     "work_orders": "Business cards",
-    "help": "Help & Tutorials"
+    "help": "Help & Tutorials",
+    "cloud_service_system": "Cloud service center management system",
+    "landing": {
+      "work_orders": "Manage work orders with ease",
+      "inventory_tracking": "Track inventory and parts",
+      "financial_reports": "Complete financial reports"
+    },
+    "day_suffix": "d",
+    "year_suffix": "y"
   },
   "notifications": {
     "days_ago": "{count} days ago",
@@ -2279,7 +2372,15 @@
     "save_signature": "Save Signature",
     "documents": "Documents",
     "library_manage_hint": "Drag to reorder · click ✎ to rename · ⊘ to delete · 👁 to hide",
-    "drag_handle": "Drag"
+    "drag_handle": "Drag",
+    "click_to_choose_file": "Click to choose a file",
+    "hidden": "Hidden",
+    "delete_signature_confirm": "Do you want to delete the signature \"{name_en}\"? This cannot be undone.",
+    "official_signatures": "Official signatures",
+    "name_arabic": "Name (Arabic)",
+    "visible": "Visible",
+    "no_signatures": "No signatures yet",
+    "add_signature_new": "Add a new signature"
   },
   "profile": {
     "info": {
@@ -2298,7 +2399,12 @@
       "info": "Profile",
       "password": "Password",
       "security": "Security"
-    }
+    },
+    "information_subtitle": "Update your account details and email address.",
+    "sms_2fa_required": "Required to use two-factor authentication over SMS",
+    "email_not_verified": "Your email address is not verified.",
+    "resend_activation_link": "Click here to resend the activation link.",
+    "new_activation_link_sent": "A new activation link has been sent to your email address."
   },
   "purchasing": {
     "grn": {
@@ -2502,7 +2608,19 @@
     "returns": {
       "created": "Created"
     },
-    "tax_number": "Tax Number"
+    "tax_number": "Tax Number",
+    "import": {
+      "file_hint": "- parts (spare parts) or services (services)",
+      "success_prefix": "Imported",
+      "success_suffix": "supplier(s) successfully!",
+      "warnings_title": "Warnings and errors during the import:",
+      "nothing_imported": "No supplier was imported, please review the errors",
+      "upload_error": "An error occurred while uploading and importing the file"
+    },
+    "remaining_label": "— remaining:",
+    "payment_exceeds_max": "The payment amount cannot exceed the total requested ({amount})",
+    "days_overdue": "Days past due",
+    "line_item": "Item"
   },
   "quotes": {
     "actions": {
@@ -2789,7 +2907,11 @@
     "title": "Ratings",
     "total_count": "Evaluation",
     "view_open_quote": "View rating",
-    "cannot_remove_package_department_with_items": "Cannot Remove Package Department With Items"
+    "cannot_remove_package_department_with_items": "Cannot Remove Package Department With Items",
+    "quotation_or_estimate": "Quotation / estimate",
+    "expired_prefix": "Sorry, this quote has expired (",
+    "expired_hint": "Please contact the workshop management to review the prices and refresh the quote.",
+    "approved_signature": "Approved signature:"
   },
   "reports": {
     "cash_flow": "Cash Flow",
@@ -3034,7 +3156,12 @@
         "subtitle": "Every saved signature, grouped by document type",
         "no_signatures": "No signatures saved"
       }
-    }
+    },
+    "integrations": {
+      "coming_soon": "Coming soon — the add-ons and integrations store",
+      "description": "You will be able to enable electronic payment gateways, WhatsApp and SMS messaging services, instalment payment services (Tabby/Tamara), Google Maps and other services here."
+    },
+    "all_transaction_types": "All transaction types"
   },
   "suppliers": {
     "tax_number": "Tax Number"
@@ -3289,7 +3416,8 @@
     "vehicle_customer_mismatch": "The selected vehicle does not belong to the selected customer.",
     "vehicle_has_open_work_order": "This vehicle already has an open work order. Please close it first.",
     "vehicle_required": "Vehicle is required.",
-    "vin_invalid": "The chassis number must contain only English letters and numbers."
+    "vin_invalid": "The chassis number must contain only English letters and numbers.",
+    "fix_the_following": "Please correct the following errors:"
   },
   "vehicles": {
     "add": "Add vehicle",
@@ -3391,7 +3519,8 @@
       "cannot_merge_different_make": "Cannot merge this vehicle due to different make",
       "no_targets_for_customer": "No other vehicles found for this customer to merge with.",
       "success": "Vehicle merged successfully and all records transferred"
-    }
+    },
+    "delete_reading_confirm": "Are you sure you want to delete the odometer reading ("
   },
   "work_orders": {
     "allow_credit_override": "Allow credit limit override and proceed",
@@ -3829,7 +3958,18 @@
         "tenant_required": "AI usage tracking requires an active tenant.",
         "unavailable": "The suggestion service is temporarily unavailable. Please try again later."
       }
-    }
+    },
+    "credit_note": {
+      "no_cash_movement_hint": "💡 No deduction or cash movement will be recorded; the credit note stays as an amount owed to the customer on their account.",
+      "load_error": "An error occurred while loading the return data"
+    },
+    "financial": {
+      "overdue_invoice_prefix": "The deferred invoice number",
+      "settle_balance_hint": "Please record the payment or issue a deferred invoice to settle this work order's balance."
+    },
+    "payments_and_receipts": "Payment receipts and payments",
+    "technician_label": "- Technician:",
+    "work_order_label": "Work order"
   },
   "pagination": {
     "previous": "&laquo; Previous",
@@ -3922,7 +4062,9 @@
       "title": "Notifications",
       "mark_all_read": "Mark all as read",
       "empty": "No notifications yet",
-      "view_all": "View all"
+      "view_all": "View all",
+      "all_title": "All notifications",
+      "all_subtitle": "All notifications, newest first"
     },
     "dunning": {
       "preferences_title": "Reminder preferences",
@@ -4309,7 +4451,12 @@
         "enforcement_disabled": "Not Required (Optional)",
         "enforcement_optional": "Optional (Recommended)",
         "enforcement_required": "Required (For new users)"
-      }
+      },
+      "current_plan": "Current plan",
+      "no_plan": "No plan",
+      "assign_plan": "Assign / change the plan",
+      "subscriptions_log": "The tenant's subscription and plan history",
+      "assign_new_plan": "Assign a new plan"
     },
     "subscriptions": {
       "title": "Subscriptions",
@@ -4392,7 +4539,11 @@
         "feature_placeholder_en": "English Feature :n",
         "add_feature_ar": "+ Add Arabic Feature",
         "add_feature_en": "+ Add English Feature"
-      }
+      },
+      "subscribed_tenant": "Subscribed tenant",
+      "annual_includes": "Annual subscription including (",
+      "sar_per_month": "SAR / monthly)",
+      "free_trial_for": "Free trial for"
     },
     "promo_codes": {
       "title": "Promo Codes",
@@ -4470,7 +4621,10 @@
       "website_title": "Website Settings",
       "contact_messages_title": "Contact Messages",
       "save": "Save Settings",
-      "saved": "Settings updated successfully"
+      "saved": "Settings updated successfully",
+      "enable_sms_2fa": "Enable SMS messages (2FA)",
+      "enable_sms_2fa_hint": "Turn on sending verification codes by text message across the whole system.",
+      "enable_sms_2fa_warning": "Warning: this option may incur extra costs (SMS balance)."
     },
     "website": {
       "title": "Website CMS",
@@ -4921,6 +5075,40 @@
         "locale_en": "en-US",
         "no_plan": "—"
       }
+    },
+    "activity_log": {
+      "subtitle": "Track every action performed by the administrators"
+    },
+    "analytics": {
+      "tenant_analytics": "Tenant analytics",
+      "kpis_subtitle": "Key performance indicators for payments and subscriptions (last 30 days)",
+      "best_plans": "Best plans",
+      "payment_methods_distribution": "Payment methods distribution (90 days)",
+      "stable_vs_last_month": "Stable compared with last month",
+      "rose": "Rose",
+      "fell": "Fell",
+      "reports_subtitle": "Reports and exports of tenant and company data",
+      "bank_transfer_receipts_desc": "A full record of bank transfer receipts with their amounts and statuses.",
+      "tenants_report": "Tenant report",
+      "tenants_report_desc": "A list of tenants, plans, subscriptions and the status of each subscription.",
+      "aging_report": "Debt aging report",
+      "aging_report_desc": "Overdue receivables broken down by the periods they are due in."
+    },
+    "communication": {
+      "templates_subtitle": "Manage and customise the email templates and the automated system notifications.",
+      "template_name": "Template name and title",
+      "template_code": "Identifier",
+      "templates_empty": "No communication templates have been added yet."
+    },
+    "payment": {
+      "failed_message": "Sorry, we could not complete the payment",
+      "attempt_details": "Attempt details",
+      "transaction_number": "Transaction number",
+      "retry": "Try again",
+      "back_to_subscriptions": "Back to subscriptions",
+      "support_hint": "If the problem persists, contact technical support",
+      "success_title": "Payment successful! 🎉",
+      "success_message": "Your subscription is now active and the invoice will be sent to your email address"
     }
   },
   "subscription": {
@@ -4976,7 +5164,32 @@
     "vat_label": "VAT ({rate}%)",
     "total": "Total",
     "bank_accounts": "Bank accounts",
-    "continue_to_payment": "Continue to payment"
+    "continue_to_payment": "Continue to payment",
+    "pending_request": "Pending request",
+    "renew_subscription": "Renew subscription",
+    "your_current_plan": "Your current plan",
+    "your_expired_plan": "Your expired plan",
+    "most_popular": "Most popular",
+    "annual_all_features": "Annual subscription with all features",
+    "free_trial_limited": "Free trial for a limited time",
+    "no_features_listed": "No features listed",
+    "expired_notice": "Your subscription has expired.",
+    "expiring_soon": "Your subscription ends soon (within",
+    "days_suffix": "days).",
+    "on_trial_notice": "You are currently on the trial period.",
+    "renew_now_hint": "You can renew your annual subscription now to keep enjoying all services and updates.",
+    "renew_now": "Renew subscription now",
+    "select_payment_method": "Select the available payment method",
+    "no_payment_methods": "No payment methods are enabled at the moment. Please contact the administration.",
+    "promo_verify_error": "An error occurred while verifying",
+    "promo_code_label": "Discount code (optional)",
+    "annual_subscription_12_months": "Annual subscription (12 months)",
+    "annual_cycle_desc": "Annual billing cycle covering all features and updates",
+    "annual_subscription": "Annual subscription",
+    "monthly_subscription": "Monthly subscription",
+    "subscription": "Subscription",
+    "view_plans": "View subscriptions",
+    "yearly_12_months": "Yearly (12 months)"
   },
   "subscription_history": {
     "placeholder": "Subscription history will appear here once the component is lifted.",
@@ -5166,6 +5379,25 @@
         "published": "Published",
         "unpublished": "Unpublished"
       }
+    },
+    "general": {
+      "visual_identity": "Visual identity and branding",
+      "main_logo": "Main platform logo",
+      "browse_files": "Browse files",
+      "logo_hint": "Recommended: PNG with a transparent background (max 2MB)",
+      "favicon": "Browser icon (favicon)",
+      "update_favicon": "Update the icon",
+      "brand_color": "Brand colour"
+    },
+    "pages": {
+      "legal_documents": "Legal documents",
+      "privacy": "Privacy policy",
+      "subpages": "Create subpages",
+      "subpages_hint": "Extra static pages such as \"About us\" or \"Return policy\"",
+      "add_page": "Add a new page",
+      "page_slug": "Page link (slug)",
+      "page_title": "Page title",
+      "no_subpages": "No subpages yet"
     }
   },
   "customer_portal": {
@@ -5484,5 +5716,13 @@
     "support_always_here": "Support is always here",
     "need_more_help": "Need more assistance?",
     "support_desc": "Our customer support team is ready to answer questions and assist you anytime"
+  },
+  "security": {
+    "enter_recovery_code": "Enter the recovery code to sign in",
+    "recovery_code": "Recovery code",
+    "verifying": "Verifying...",
+    "use_email_code": "Use the email code",
+    "enter_authenticator_code": "Enter the code from your authenticator app",
+    "use_verification_code": "Use the verification code"
   }
 }

@@ -6,13 +6,13 @@
             class="flex items-center justify-between border-b border-gray-200 px-5 py-4 dark:border-gray-700"
         >
             <h3 class="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">
-                {{ isAr ? 'عناصر الفاتورة' : 'Invoice Items' }}
+                {{ $t('system.invoice_show.items') }}
             </h3>
             <span
                 v-if="items.length > 0"
                 class="rounded-full bg-gray-100 px-2 py-0.5 text-xs font-semibold text-gray-600 dark:bg-gray-700 dark:text-gray-300"
             >
-                {{ items.length }} {{ isAr ? 'عنصر' : 'item(s)' }}
+                {{ items.length }} {{ $t('common.item_generic') }}
             </span>
         </div>
 
@@ -23,16 +23,16 @@
                 >
                     <tr>
                         <th class="px-5 py-3 text-start font-semibold">
-                            {{ isAr ? 'الوصف' : 'Description' }}
+                            {{ $t('common.description') }}
                         </th>
                         <th class="px-5 py-3 text-start font-semibold">
-                            {{ isAr ? 'الفترة' : 'Billing Period' }}
+                            {{ $t('hr.payroll.period') }}
                         </th>
                         <th class="px-5 py-3 text-end font-semibold">
-                            {{ isAr ? 'السعر' : 'Price' }}
+                            {{ $t('inventory.moves.columns.price') }}
                         </th>
                         <th class="px-5 py-3 text-end font-semibold">
-                            {{ isAr ? 'المجموع' : 'Total' }}
+                            {{ $t('company_profile.vat.table_total') }}
                         </th>
                     </tr>
                 </thead>
@@ -76,6 +76,9 @@
 </template>
 
 <script setup>
+import { useI18n } from 'vue-i18n';
+const { t } = useI18n();
+
 import { computed } from 'vue';
 
 const props = defineProps({
@@ -89,9 +92,9 @@ const isAr = computed(() => (document?.documentElement?.lang || 'ar') === 'ar');
 const billingLabel = computed(() => {
     const cycle = props.subscription?.billing_cycle;
     if (cycle === 'yearly') {
-        return isAr.value ? 'اشتراك سنوي' : 'Yearly subscription';
+        return t('subscription.annual_subscription');
     }
-    return isAr.value ? 'اشتراك شهري' : 'Monthly subscription';
+    return t('subscription.monthly_subscription');
 });
 
 const items = computed(() => {
@@ -111,7 +114,7 @@ const items = computed(() => {
         });
     } else {
         out.push({
-            description: isAr.value ? 'اشتراك' : 'Subscription',
+            description: t('subscription.subscription'),
             subDescription: billingLabel.value,
             period: formatPeriod(props.subscription?.starts_at, props.subscription?.ends_at),
             price: Number(props.invoice.subtotal),

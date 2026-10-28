@@ -914,7 +914,7 @@
                         <label
                             class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
                         >
-                            {{ $t('common.name') }} (العربية) *
+                            {{ $t('common.name') }} {{ $t('hr.settings.arabic_required') }}
                         </label>
                         <input
                             v-model="shiftForm.name_ar"
@@ -1305,7 +1305,15 @@ async function deleteShift(shift) {
 }
 
 // Attendance Settings
-const weekDays = ['الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
+const weekDays = [
+    t('common.day_sunday'),
+    t('common.day_monday'),
+    t('common.day_tuesday'),
+    t('common.day_wednesday'),
+    t('common.day_thursday'),
+    t('common.day_friday'),
+    t('common.day_saturday'),
+];
 const savingAttendanceSettings = ref(false);
 
 // HR Regulations

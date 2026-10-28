@@ -1,4 +1,7 @@
 <script setup>
+import { useI18n } from 'vue-i18n';
+const { t } = useI18n();
+
 import { computed } from 'vue';
 
 const props = defineProps({
@@ -116,7 +119,7 @@ function select(key) {
                         d="M3 10h18M7 15h1m4 0h1m-7 4h12a2 2 0 002-2V8a2 2 0 00-2-2H6a2 2 0 00-2 2v8a2 2 0 002 2z"
                     />
                 </svg>
-                {{ locale === 'ar' ? 'اختر وسيلة الدفع المتاحة' : 'Select Payment Method' }}
+                {{ $t('subscription.select_payment_method') }}
             </p>
         </div>
 
@@ -147,7 +150,7 @@ function select(key) {
                             moyasar
                         </span>
                         <span class="text-[7px] text-blue-200 font-medium tracking-widest mt-0.5">
-                            مُيَسَّر
+                            {{ $t('system.company_subscription.gateways.moyasar') }}
                         </span>
                     </div>
 
@@ -227,7 +230,7 @@ function select(key) {
                             class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-emerald-50 text-[10px] font-black text-[#0082BA] border border-emerald-200/60 dark:bg-emerald-950/40 dark:text-[#38bdf8] dark:border-emerald-800/40"
                         >
                             <span class="w-1.5 h-1.5 rounded-full bg-[#00A859]"></span>
-                            مدى
+                            {{ $t('payments.methods.mada') }}
                         </span>
                         <!-- Visa Logo Badge -->
                         <span
@@ -283,11 +286,7 @@ function select(key) {
             class="rounded-xl border border-amber-200 bg-amber-50 p-4 text-center dark:border-amber-800/50 dark:bg-amber-900/10"
         >
             <p class="text-xs font-bold text-amber-700 dark:text-amber-300">
-                {{
-                    locale === 'ar'
-                        ? 'لا تتوفر وسائل دفع مفعلة حالياً. يرجى التواصل مع الإدارة.'
-                        : 'No payment methods enabled currently. Please contact support.'
-                }}
+                {{ $t('subscription.no_payment_methods') }}
             </p>
         </div>
     </div>

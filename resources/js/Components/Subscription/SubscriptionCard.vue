@@ -192,14 +192,17 @@ const canRenew = computed(() => {
                     />
                 </svg>
                 <span>
-                    <strong v-if="subscription.status === 'expired'">اشتراكك منتهي حالياً.</strong>
+                    <strong v-if="subscription.status === 'expired'">
+                        {{ $t('subscription.expired_notice') }}
+                    </strong>
                     <strong v-else-if="daysLeft !== null && daysLeft <= 30">
-                        ينتهي اشتراكك قريباً (خلال {{ daysLeft }} يوم).
+                        {{ $t('subscription.expiring_soon') }} {{ daysLeft }}
+                        {{ $t('subscription.days_suffix') }}
                     </strong>
                     <strong v-else-if="['trial', 'trialing'].includes(subscription.status)">
-                        أنت حالياً في الفترة التجريبية.
+                        {{ $t('subscription.on_trial_notice') }}
                     </strong>
-                    يمكنك تجديد اشتراكك السنوي الآن للاستمرار بالتمتع بكافة الخدمات والتحديثات.
+                    {{ $t('subscription.renew_now_hint') }}
                 </span>
             </div>
             <button
@@ -215,7 +218,7 @@ const canRenew = computed(() => {
                         d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
                     />
                 </svg>
-                تجديد الاشتراك الآن
+                {{ $t('subscription.renew_now') }}
             </button>
         </div>
 

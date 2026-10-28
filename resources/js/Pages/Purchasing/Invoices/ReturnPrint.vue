@@ -121,11 +121,11 @@ const getTenantAddress = (tenant) => {
     if (typeof addr === 'object') {
         if (addr.address_line) return addr.address_line;
         const parts = [
-            addr.building_number ? `مبنى ${addr.building_number}` : '',
-            addr.street ? `شارع ${addr.street}` : '',
-            addr.district ? `حي ${addr.district}` : '',
+            addr.building_number ? t('common.building') : '',
+            addr.street ? t('common.street') : '',
+            addr.district ? t('common.district') : '',
             addr.city ? addr.city : '',
-            addr.postal_code ? `الرمز البريدي ${addr.postal_code}` : '',
+            addr.postal_code ? t('center_settings.address.postal_code') : '',
         ].filter(Boolean);
         return parts.join('، ');
     }
@@ -134,11 +134,11 @@ const getTenantAddress = (tenant) => {
             const parsed = JSON.parse(addr);
             if (parsed.address_line) return parsed.address_line;
             const parts = [
-                parsed.building_number ? `مبنى ${parsed.building_number}` : '',
-                parsed.street ? `شارع ${parsed.street}` : '',
-                parsed.district ? `حي ${parsed.district}` : '',
+                parsed.building_number ? t('common.building') : '',
+                parsed.street ? t('common.street') : '',
+                parsed.district ? t('common.district') : '',
                 parsed.city ? parsed.city : '',
-                parsed.postal_code ? `الرمز البريدي ${parsed.postal_code}` : '',
+                parsed.postal_code ? t('center_settings.address.postal_code') : '',
             ].filter(Boolean);
             return parts.join('، ');
         } catch (e) {

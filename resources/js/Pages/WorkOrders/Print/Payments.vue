@@ -51,6 +51,8 @@
 </template>
 
 <script setup>
+const { t } = useI18n();
+
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { usePage, router } from '@inertiajs/vue3';
@@ -149,7 +151,7 @@ const documentSettings = computed(() => {
     const tenantSettings = page.props.tenant?.print_settings;
     const docSettings = tenantSettings?.documents?.['payments'] || {};
     return {
-        title_ar: docSettings.title_ar || 'سندات الدفع والمدفوعات',
+        title_ar: docSettings.title_ar || t('work_orders.payments_and_receipts'),
         title_en: docSettings.title_en || 'Payments Receipt',
         terms: docSettings.terms || [],
         print_terms: docSettings.print_terms !== false,

@@ -1,32 +1,45 @@
 <template>
-    <div class="print-container bg-white min-h-screen p-8 print:p-0 print:m-0 flex flex-col items-center" :dir="isRtl ? 'rtl' : 'ltr'">
+    <div
+        class="print-container bg-white min-h-screen p-8 print:p-0 print:m-0 flex flex-col items-center"
+        :dir="isRtl ? 'rtl' : 'ltr'"
+    >
         <!-- Print / Back Controls (hidden during print) -->
         <div class="fixed bottom-6 left-6 flex items-center gap-3 print:hidden z-50">
             <!-- Back Button -->
-            <button 
-                @click="goBack" 
+            <button
+                @click="goBack"
                 class="px-4 py-2.5 bg-white hover:bg-gray-50 text-gray-700 rounded-xl text-sm font-semibold transition-all border border-gray-200 shadow-lg flex items-center gap-2"
             >
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M10 19l-7-7m0 0l7-7m-7 7h18"
+                    />
                 </svg>
                 {{ $t('common.back') }}
             </button>
 
             <!-- Print Button -->
-            <button 
-                @click="printPage" 
+            <button
+                @click="printPage"
                 class="px-5 py-2.5 text-white rounded-xl text-sm font-semibold transition-all shadow-lg flex items-center gap-2"
                 :style="{ backgroundColor: visualSettings.primary_color || '#3b82f6' }"
             >
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 022 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 022 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"
+                    />
                 </svg>
                 {{ $t('common.print') }}
             </button>
         </div>
 
-        <PrintEngine 
+        <PrintEngine
             documentType="proforma_invoice"
             :data="mappedData"
             :centerData="mappedCenterData"
@@ -74,19 +87,25 @@ const goBack = () => {
 };
 const printPage = () => window.print();
 
-const formatNumber = (num) => new Intl.NumberFormat(isRtl.value ? 'ar-SA-u-nu-latn' : 'en-US').format(num || 0);
+const formatNumber = (num) =>
+    new Intl.NumberFormat(isRtl.value ? 'ar-SA-u-nu-latn' : 'en-US').format(num || 0);
 
 const getDiscount = (item) => {
     if (!item.discount_value || item.discount_type === 'none') return 0;
     if (item.discount_type === 'fixed') return item.discount_value;
     if (item.discount_type === 'percentage') {
-        return (item.qty * item.unit_price) * (item.discount_value / 100);
+        return item.qty * item.unit_price * (item.discount_value / 100);
     }
     return 0;
 };
 
 const isTaxEnabled = computed(() => {
-    if (props.taxSettings && (props.taxSettings.vat_enabled === false || props.taxSettings.vat_enabled === 0 || props.taxSettings.vat_enabled === '0')) {
+    if (
+        props.taxSettings &&
+        (props.taxSettings.vat_enabled === false ||
+            props.taxSettings.vat_enabled === 0 ||
+            props.taxSettings.vat_enabled === '0')
+    ) {
         return false;
     }
     const woTax = props.workOrder?.tax_enabled_snapshot;
@@ -106,16 +125,17 @@ const mappedData = computed(() => {
     const vehicleStr = `${make} ${model}`.trim() || '-';
 
     // Map services
-    const services = (wo.items || []).map(item => {
+    const services = (wo.items || []).map((item) => {
         let serviceName = '';
-        const isStandard = item.service && 
-            item.service.name_ar?.trim() !== 'أخرى' && 
+        const isStandard =
+            item.service &&
+            item.service.name_ar?.trim() !== 'أخرى' &&
             item.service.name_en?.trim().toLowerCase() !== 'other';
-            
+
         if (isStandard) {
-            serviceName = isRtl.value 
-                ? (item.service.name_ar || item.title) 
-                : (item.service.name_en || item.service.name_ar || item.title);
+            serviceName = isRtl.value
+                ? item.service.name_ar || item.title
+                : item.service.name_en || item.service.name_ar || item.title;
         } else {
             serviceName = item.title || '';
         }
@@ -126,10 +146,14 @@ const mappedData = computed(() => {
             const val = item.warranty_value_snapshot;
             if (isRtl.value) {
                 if (val >= 3 && val <= 10) {
-                    if (item.warranty_unit_snapshot === 'days') unitLabel = 'أيام';
-                    if (item.warranty_unit_snapshot === 'weeks') unitLabel = 'أسابيع';
-                    if (item.warranty_unit_snapshot === 'months') unitLabel = 'أشهر';
-                    if (item.warranty_unit_snapshot === 'years') unitLabel = 'سنوات';
+                    if (item.warranty_unit_snapshot === 'days')
+                        unitLabel = t('work_orders.service_modal.days');
+                    if (item.warranty_unit_snapshot === 'weeks')
+                        unitLabel = t('work_orders.service_modal.weeks');
+                    if (item.warranty_unit_snapshot === 'months')
+                        unitLabel = t('work_orders.service_modal.months');
+                    if (item.warranty_unit_snapshot === 'years')
+                        unitLabel = t('work_orders.service_modal.years');
                 }
             } else {
                 if (val > 1) {
@@ -148,23 +172,30 @@ const mappedData = computed(() => {
             unit_price: item.unit_price || 0,
             discount: getDiscount(item),
             is_part: false,
-            is_taxable: isTaxEnabled.value
+            is_taxable: isTaxEnabled.value,
         };
     });
 
     // Map parts
     const parts = (props.allParts || [])
-        .filter(part => !part.hide_on_print)
-        .map(part => {
-            const name = part.name || part.part?.name_ar || part.part?.name_en || part.part_number || part.part?.sku || 'قطعة غيار';
+        .filter((part) => !part.hide_on_print)
+        .map((part) => {
+            const name =
+                part.name ||
+                part.part?.name_ar ||
+                part.part?.name_en ||
+                part.part_number ||
+                part.part?.sku ||
+                t('inventory.spare_part');
             return {
                 service_name: name,
-                description: part.description || (part.part_number ? `رمز القطعة: ${part.part_number}` : ''),
+                description:
+                    part.description || (part.part_number ? t('inventory.part_number_label') : ''),
                 qty: part.qty || 1,
                 unit_price: part.unit_price || 0,
                 discount: Number(part.discount || 0),
                 is_part: true,
-                is_taxable: isTaxEnabled.value
+                is_taxable: isTaxEnabled.value,
             };
         });
 
@@ -193,11 +224,15 @@ const mappedData = computed(() => {
         pricing_mode_snapshot: wo.pricing_mode_snapshot || 'exclusive',
         total_excl_tax: Number(wo.total_excl_tax || props.grandTotal || 0),
         total_tax: isTaxEnabled.value ? Number(wo.total_tax || 0) : 0,
-        total_incl_tax: isTaxEnabled.value ? Number(wo.total_incl_tax || 0) : Number(wo.total_excl_tax || props.grandTotal || 0),
+        total_incl_tax: isTaxEnabled.value
+            ? Number(wo.total_incl_tax || 0)
+            : Number(wo.total_excl_tax || props.grandTotal || 0),
         discount_amount: Number(wo.total_discount || 0),
         total_paid: props.totalPaid ?? 0,
-        balance: (isTaxEnabled.value ? Number(wo.total || 0) : Number(props.grandTotal || 0)) - Number(props.totalPaid || 0),
-        items: [...services, ...parts]
+        balance:
+            (isTaxEnabled.value ? Number(wo.total || 0) : Number(props.grandTotal || 0)) -
+            Number(props.totalPaid || 0),
+        items: [...services, ...parts],
     };
 });
 
@@ -205,7 +240,9 @@ const mappedCenterData = computed(() => {
     const center = props.workOrder.center || {};
     const tenant = props.workOrder.tenant || page.props.tenant || {};
     return {
-        name: isRtl.value ? (center.name_ar || center.name || tenant.name) : (center.name_en || center.name || tenant.name),
+        name: isRtl.value
+            ? center.name_ar || center.name || tenant.name
+            : center.name_en || center.name || tenant.name,
         tax_number: center.vat_number || tenant.vat_number,
         cr_number: tenant.cr_number,
         phone: center.phone || tenant.phone,
@@ -220,16 +257,19 @@ const documentSettings = computed(() => {
     const tenantSettings = page.props.tenant?.print_settings;
     const docSettings = tenantSettings?.documents?.['proforma_invoice'] || {};
     return {
-        title_ar: docSettings.title_ar || 'فاتورة أولية',
+        title_ar: docSettings.title_ar || t('invoices.proforma'),
         title_en: docSettings.title_en || 'Proforma Invoice',
         terms: docSettings.terms || [],
         print_terms: docSettings.print_terms !== false,
         show_stamp: docSettings.show_stamp !== false,
         show_customer_address: docSettings.show_customer_address !== false,
-        signatures: docSettings.signatures && docSettings.signatures.length > 0 ? docSettings.signatures : [
-            { name_ar: 'توقيع المدير', name_en: 'Manager Signature' },
-            { name_ar: 'توقيع العميل', name_en: 'Customer Signature' }
-        ]
+        signatures:
+            docSettings.signatures && docSettings.signatures.length > 0
+                ? docSettings.signatures
+                : [
+                      { name_ar: 'توقيع المدير', name_en: 'Manager Signature' },
+                      { name_ar: 'توقيع العميل', name_en: 'Customer Signature' },
+                  ],
     };
 });
 
@@ -244,16 +284,25 @@ const visualSettings = computed(() => {
         show_qr_code: vis.show_qr_code !== false,
         primary_color: vis.primary_color || '#fbbf24',
         footer_text: vis.footer_text || '',
-        stamp_url: center.stamp_url || vis.stamp_url || ''
+        stamp_url: center.stamp_url || vis.stamp_url || '',
     };
 });
 </script>
 
 <style>
 @media print {
-    @page { size: A4; margin: 0 1cm; }
-    body { -webkit-print-color-adjust: exact; print-color-adjust: exact; background-color: white !important; }
-    .print-container { padding: 0; }
+    @page {
+        size: A4;
+        margin: 0 1cm;
+    }
+    body {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+        background-color: white !important;
+    }
+    .print-container {
+        padding: 0;
+    }
     .print-container,
     .print-container * {
         visibility: visible !important;

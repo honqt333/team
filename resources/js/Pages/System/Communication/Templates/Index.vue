@@ -22,14 +22,10 @@
                                 d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
                             />
                         </svg>
-                        <span>{{ isAr ? 'قوالب التواصل' : 'Communication Templates' }}</span>
+                        <span>{{ $t('system.nav_items.templates') }}</span>
                     </h1>
                     <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                        {{
-                            isAr
-                                ? 'إدارة وتخصيص قوالب الرسائل البريدية والإشعارات الآلية للنظام.'
-                                : 'Manage and customize automated system email and notification templates.'
-                        }}
+                        {{ $t('system.communication.templates_subtitle') }}
                     </p>
                 </div>
             </div>
@@ -46,31 +42,31 @@
                                     scope="col"
                                     class="px-6 py-3.5 text-start text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider"
                                 >
-                                    {{ isAr ? 'اسم القالب والعنوان' : 'Template Name & Subject' }}
+                                    {{ $t('system.communication.template_name') }}
                                 </th>
                                 <th
                                     scope="col"
                                     class="px-6 py-3.5 text-start text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider"
                                 >
-                                    {{ isAr ? 'الكود التعريفي' : 'Code' }}
+                                    {{ $t('system.communication.template_code') }}
                                 </th>
                                 <th
                                     scope="col"
                                     class="px-6 py-3.5 text-start text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider"
                                 >
-                                    {{ isAr ? 'النوع' : 'Type' }}
+                                    {{ $t('common.type') }}
                                 </th>
                                 <th
                                     scope="col"
                                     class="px-6 py-3.5 text-start text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider"
                                 >
-                                    {{ isAr ? 'الحالة' : 'Status' }}
+                                    {{ $t('common.status') }}
                                 </th>
                                 <th
                                     scope="col"
                                     class="px-6 py-3.5 text-end text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider"
                                 >
-                                    {{ isAr ? 'الإجراءات' : 'Actions' }}
+                                    {{ $t('common.actions') }}
                                 </th>
                             </tr>
                         </thead>
@@ -101,15 +97,7 @@
                                     <span
                                         class="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-semibold rounded-full bg-blue-50 text-blue-700 border border-blue-200 dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-800"
                                     >
-                                        {{
-                                            template.type === 'email'
-                                                ? isAr
-                                                    ? 'بريد إلكتروني'
-                                                    : 'Email'
-                                                : isAr
-                                                  ? 'رسالة نصية'
-                                                  : 'SMS'
-                                        }}
+                                        {{ $t('quotes.actions.email') }}
                                     </span>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
@@ -129,15 +117,7 @@
                                                     : 'bg-rose-500'
                                             "
                                         ></span>
-                                        {{
-                                            template.is_active
-                                                ? isAr
-                                                    ? 'مفعل'
-                                                    : 'Active'
-                                                : isAr
-                                                  ? 'معطل'
-                                                  : 'Disabled'
-                                        }}
+                                        {{ $t('common.active') }}
                                     </span>
                                 </td>
                                 <td
@@ -165,7 +145,7 @@
                                                 d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
                                             />
                                         </svg>
-                                        <span>{{ isAr ? 'تعديل' : 'Edit' }}</span>
+                                        <span>{{ $t('common.edit') }}</span>
                                     </Link>
                                 </td>
                             </tr>
@@ -174,11 +154,7 @@
                                     colspan="5"
                                     class="px-6 py-12 text-center text-sm text-gray-500 dark:text-gray-400"
                                 >
-                                    {{
-                                        isAr
-                                            ? 'لا توجد قوالب تواصل مضافة حالياً.'
-                                            : 'No communication templates found.'
-                                    }}
+                                    {{ $t('system.communication.templates_empty') }}
                                 </td>
                             </tr>
                         </tbody>
@@ -190,6 +166,9 @@
 </template>
 
 <script setup>
+import { useI18n } from 'vue-i18n';
+const { t } = useI18n();
+
 import { computed } from 'vue';
 import { Head, Link } from '@inertiajs/vue3';
 import SystemLayout from '@/Layouts/SystemLayout.vue';

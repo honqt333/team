@@ -1,4 +1,7 @@
 <script setup>
+import { useI18n } from 'vue-i18n';
+const { t } = useI18n();
+
 import { useForm, router } from '@inertiajs/vue3';
 import SystemLayout from '@/Layouts/SystemLayout.vue';
 import { useToast } from '@/Composables/useToast';
@@ -15,19 +18,23 @@ const form = useForm({
 
 const updateSetting = (key, value) => {
     form.processing = true;
-    router.put(route('system.settings.general.update'), {
-        key: key,
-        value: value
-    }, {
-        preserveScroll: true,
-        onSuccess: () => {
-             success('تم حفظ التغييرات بنجاح');
-             form.processing = false;
+    router.put(
+        route('system.settings.general.update'),
+        {
+            key: key,
+            value: value,
         },
-        onError: () => {
-            form.processing = false;
+        {
+            preserveScroll: true,
+            onSuccess: () => {
+                success(t('system.settings.saved'));
+                form.processing = false;
+            },
+            onError: () => {
+                form.processing = false;
+            },
         }
-    });
+    );
 };
 </script>
 
@@ -35,7 +42,7 @@ const updateSetting = (key, value) => {
     <SystemLayout title="الإعدادات العامة">
         <template #header>
             <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
-                الإعدادات العامة
+                {{ $t('permissions_modules.settings_general') }}
             </h2>
         </template>
 
@@ -43,21 +50,41 @@ const updateSetting = (key, value) => {
             <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
                 <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
                     <div class="p-6 text-gray-900 dark:text-gray-100">
-                        <h3 class="text-lg font-medium mb-4">إعدادات الأمان</h3>
-                        
-                        <div class="flex items-center justify-between py-4 border-b border-gray-200 dark:border-gray-700">
+                        <h3 class="text-lg font-medium mb-4">
+                            {{ $t('system.tenants.actions.security_settings') }}
+                        </h3>
+
+                        <div
+                            class="flex items-center justify-between py-4 border-b border-gray-200 dark:border-gray-700"
+                        >
                             <div>
-                                <h4 class="font-medium">تفعيل رسائل SMS (2FA)</h4>
+                                <h4 class="font-medium">
+                                    {{ $t('system.settings.enable_sms_2fa') }}
+                                </h4>
                                 <p class="text-sm text-gray-500 dark:text-gray-400">
-                                    تفعيل خيار إرسال رموز التحقق عبر الرسائل النصية لكافة النظام. 
-                                    <br>
-                                    <span class="text-xs text-amber-500">تحذير: هذا الخيار قد يترتب عليه تكاليف إضافية (رصيد SMS).</span>
+                                    {{ $t('system.settings.enable_sms_2fa_hint') }}
+                                    <br />
+                                    <span class="text-xs text-amber-500">
+                                        {{ $t('system.settings.enable_sms_2fa_warning') }}
+                                    </span>
                                 </p>
                             </div>
-                            
+
                             <label class="relative inline-flex items-center cursor-pointer">
-                                <input type="checkbox" :checked="form.security_2fa_sms_enabled" @change="updateSetting('security.2fa_sms_enabled', $event.target.checked)" class="sr-only peer">
-                                <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 dark:peer-focus:ring-indigo-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-indigo-600 rtl:peer-checked:after:-translate-x-full"></div>
+                                <input
+                                    type="checkbox"
+                                    :checked="form.security_2fa_sms_enabled"
+                                    @change="
+                                        updateSetting(
+                                            'security.2fa_sms_enabled',
+                                            $event.target.checked
+                                        )
+                                    "
+                                    class="sr-only peer"
+                                />
+                                <div
+                                    class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 dark:peer-focus:ring-indigo-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-indigo-600 rtl:peer-checked:after:-translate-x-full"
+                                ></div>
                             </label>
                         </div>
                     </div>

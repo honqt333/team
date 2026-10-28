@@ -224,7 +224,7 @@ const documentSettings = computed(() => {
     const docSettings =
         tenantSettings?.documents?.['quote'] || tenantSettings?.documents?.['quotation'] || {};
     return {
-        title_ar: docSettings.title_ar || 'عرض سعر / تقييم',
+        title_ar: docSettings.title_ar || t('quotes.quotation_or_estimate'),
         title_en: docSettings.title_en || 'Price Quotation / Assessment',
         terms:
             docSettings.terms ||

@@ -575,7 +575,7 @@
                                             : 'border-gray-200 dark:border-gray-700 hover:bg-white dark:hover:bg-gray-800 text-gray-600 dark:text-gray-300'
                                     "
                                 >
-                                    7 أيام
+                                    {{ $t('quotes.form.days_7') }}
                                 </button>
                                 <button
                                     type="button"
@@ -587,7 +587,7 @@
                                             : 'border-gray-200 dark:border-gray-700 hover:bg-white dark:hover:bg-gray-800 text-gray-600 dark:text-gray-300'
                                     "
                                 >
-                                    15 يوماً
+                                    {{ $t('quotes.form.days_15') }}
                                 </button>
                                 <button
                                     type="button"
@@ -599,7 +599,7 @@
                                             : 'border-gray-200 dark:border-gray-700 hover:bg-white dark:hover:bg-gray-800 text-gray-600 dark:text-gray-300'
                                     "
                                 >
-                                    30 يوماً
+                                    {{ $t('quotes.form.days_30') }}
                                 </button>
                             </div>
                         </div>

@@ -328,6 +328,9 @@
 </template>
 
 <script setup>
+import { useI18n } from 'vue-i18n';
+const { t } = useI18n();
+
 import { ref, onMounted } from 'vue';
 import { Link, router, usePage } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
@@ -402,7 +405,7 @@ function generatePayroll() {
     router.post(route('app.hr.payroll.generate'), generateForm.value, {
         onSuccess: () => {
             showGenerateModal.value = false;
-            success('تم إنشاء المسيّرة بنجاح');
+            success(t('hr.payroll.generated_successfully'));
         },
         onFinish: () => {
             generating.value = false;

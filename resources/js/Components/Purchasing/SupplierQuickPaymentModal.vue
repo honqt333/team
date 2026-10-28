@@ -209,7 +209,7 @@
                         <span>
                             {{
                                 $t('payments.errors.amount_exceeds_max') ||
-                                `لا يمكن أن يتجاوز مبلغ الدفعة إجمالي المطلوب (${formatCurrency(maxAllowedAmount)})`
+                                `$t('purchasing.payment_exceeds_max', { formatCurrency_maxAllowedAmount_: formatCurrency(maxAllowedAmount) })`
                             }}
                         </span>
                     </p>
@@ -385,7 +385,7 @@ const invoiceOptions = computed(() => {
                 dateStr = String(inv.issue_date).split('T')[0];
             }
 
-            const label = `${codeStr} — متبقي: ${formatCurrency(invBalance)}${dateStr ? ' (' + dateStr + ')' : ''}`;
+            const label = t('purchasing.remaining_label');
 
             return {
                 id: inv.id,

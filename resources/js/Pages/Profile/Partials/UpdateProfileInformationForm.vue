@@ -27,18 +27,15 @@ const form = useForm({
     <section>
         <header>
             <h2 class="text-lg font-medium text-gray-900 dark:text-white">
-                معلومات الملف الشخصي
+                {{ $t('profile.info.title') }}
             </h2>
 
             <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
-                تحديث معلومات حسابك وعنوان بريدك الإلكتروني.
+                {{ $t('profile.information_subtitle') }}
             </p>
         </header>
 
-        <form
-            @submit.prevent="form.patch(route('profile.update'))"
-            class="mt-6 space-y-6"
-        >
+        <form @submit.prevent="form.patch(route('profile.update'))" class="mt-6 space-y-6">
             <div>
                 <InputLabel for="name" value="الاسم" />
 
@@ -82,21 +79,23 @@ const form = useForm({
                     placeholder="05xxxxxxxx"
                     autocomplete="tel"
                 />
-                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">مطلوب لاستخدام المصادقة الثنائية عبر SMS</p>
+                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                    {{ $t('profile.sms_2fa_required') }}
+                </p>
 
                 <InputError class="mt-2" :message="form.errors.phone" />
             </div>
 
             <div v-if="mustVerifyEmail && user.email_verified_at === null">
                 <p class="mt-2 text-sm text-gray-800 dark:text-gray-200">
-                    بريدك الإلكتروني غير مفعّل.
+                    {{ $t('profile.email_not_verified') }}
                     <Link
                         :href="route('verification.send')"
                         method="post"
                         as="button"
                         class="rounded-md text-sm text-gray-600 underline hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
                     >
-                        اضغط هنا لإعادة إرسال رابط التفعيل.
+                        {{ $t('profile.resend_activation_link') }}
                     </Link>
                 </p>
 
@@ -104,12 +103,12 @@ const form = useForm({
                     v-show="status === 'verification-link-sent'"
                     class="mt-2 text-sm font-medium text-green-600"
                 >
-                    تم إرسال رابط تفعيل جديد إلى بريدك الإلكتروني.
+                    {{ $t('profile.new_activation_link_sent') }}
                 </div>
             </div>
 
             <div class="flex items-center gap-4">
-                <PrimaryButton :disabled="form.processing">حفظ</PrimaryButton>
+                <PrimaryButton :disabled="form.processing">{{ $t('common.save') }}</PrimaryButton>
 
                 <Transition
                     enter-active-class="transition ease-in-out"
@@ -117,15 +116,11 @@ const form = useForm({
                     leave-active-class="transition ease-in-out"
                     leave-to-class="opacity-0"
                 >
-                    <p
-                        v-if="form.recentlySuccessful"
-                        class="text-sm text-gray-600"
-                    >
-                        تم الحفظ.
+                    <p v-if="form.recentlySuccessful" class="text-sm text-gray-600">
+                        {{ $t('common.saved') }}
                     </p>
                 </Transition>
             </div>
         </form>
     </section>
 </template>
-
