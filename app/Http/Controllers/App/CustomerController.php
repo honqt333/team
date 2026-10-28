@@ -192,6 +192,7 @@ class CustomerController
         $departments = Department::where('is_active', true)->orderBy('sort_order')->get();
         $services = Service::where('is_active', true)->with('department')->orderBy('sort_order')->get();
 
+        $totalDue = (float) ($financialSummary['total_due'] ?? 0);
         $customerCreditLimit = (float) ($customer->credit_limit ?? 0);
         $customer->balance = $totalDue;
         $customer->credit_limit = $customerCreditLimit;
