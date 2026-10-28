@@ -43,7 +43,7 @@
             </div>
         </template>
 
-        <div class="space-y-6 statement-content">
+        <div class="space-y-6 statement-content print-container">
             <!-- Screen Summary Cards (Hidden during Print) -->
             <div class="screen-only grid grid-cols-1 sm:grid-cols-3 gap-3 print:hidden">
                 <div
@@ -410,10 +410,6 @@ const handlePrint = () => {
 }
 
 @media print {
-    :global(#app) {
-        display: none !important;
-    }
-
     :global(body) {
         background-color: white !important;
         margin: 0 !important;

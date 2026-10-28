@@ -1,6 +1,6 @@
 <template>
     <div
-        class="print-statement-page bg-white min-h-screen text-gray-900 p-8 print:p-0 print:m-0"
+        class="print-container print-statement-page bg-white min-h-screen text-gray-900 p-8 print:p-0 print:m-0"
         dir="rtl"
     >
         <Head
@@ -305,7 +305,7 @@ onMounted(() => {
 });
 </script>
 
-<style scoped>
+<style>
 @page {
     size: A4 portrait;
     margin: 10mm;
@@ -319,23 +319,38 @@ onMounted(() => {
         padding: 0 !important;
         color: black !important;
         font-family: 'Noto Kufi Arabic', 'Tajawal', sans-serif !important;
+        height: auto !important;
+        overflow: visible !important;
+        visibility: visible !important;
+    }
+
+    #app,
+    .print-container,
+    .print-container * {
+        visibility: visible !important;
     }
 
     .print-statement-page {
         padding: 0 !important;
         margin: 0 !important;
         min-height: auto !important;
+        background: white !important;
+    }
+
+    .print\:hidden {
+        display: none !important;
+        visibility: hidden !important;
     }
 
     table {
         width: 100% !important;
         border-collapse: collapse !important;
-        font-size: 10.5px !important;
+        font-size: 11px !important;
     }
 
     th,
     td {
-        border: 1px solid #d1d5db !important;
+        border: 1px solid #9ca3af !important;
         padding: 5px 6px !important;
         text-align: center !important;
     }
@@ -344,6 +359,8 @@ onMounted(() => {
         background-color: #f3f4f6 !important;
         color: #111827 !important;
         font-weight: bold !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
     }
 
     tr {
