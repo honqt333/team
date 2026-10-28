@@ -247,6 +247,16 @@ class CustomerController
 
     public function checkPhone(Request $request): JsonResponse
     {
+        // The response carries the matching customer's name, phone,
+        // email, tax number and address — not just a boolean. Without
+        // this check any authenticated user could enumerate the
+        // customer list of their tenant by calling the endpoint with
+        // a phone number, even without the customers read permission.
+        //
+        // The duplicate-check UI needs the details (it links to the
+        // existing record), so the read permission is the right gate.
+        $this->authorize('viewAny', Customer::class);
+
         $tenantId = auth()->user()->tenant_id;
         $phone = $request->query('phone');
 
@@ -330,7 +340,13 @@ class CustomerController
                 'name' => $center?->name_ar ?? $center?->name ?? $tenant->trade_name ?? $tenant->name ?? 'خدمة برو',
                 'branch' => $center?->name ?? '',
                 'vat_number' => $tenant->vat_number ?? $center?->vat_number ?? '',
-                'cr_number' => $tenant->cr_number ?? $center?->cr_number ?? '',
+                // A commercial registration number belongs to the
+                // establishment, not to a branch — the `centers` table
+                // has no `cr_number` column. The old
+                // `$center?->cr_number` fallback therefore always
+                // resolved to null and never contributed anything, so
+                // removing it changes no output.
+                'cr_number' => $tenant->cr_number ?? '',
                 'logo_url' => $center?->logo_invoice_url ?? $center?->logo_light_url ?? $tenant->logo_url ?? ($tenant->logo_path ? '/storage/'.$tenant->logo_path : null),
                 'phone' => $center?->phone ?? $tenant->phone ?? '',
             ],

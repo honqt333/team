@@ -198,11 +198,15 @@ class Integration extends Model
     {
         return match ($provider) {
             'unifonic' => [
-                ['key' => 'app_sid', 'label' => 'App SID', 'type' => 'text', 'required' => true],
+                // `app_sid` authenticates the API call (it is sent as
+                // AppSid on every request), so it is a credential even
+                // though the form shows it as plain text. The
+                // `sensitive` flag tells the controller to mask it.
+                ['key' => 'app_sid', 'label' => 'App SID', 'type' => 'text', 'sensitive' => true, 'required' => true],
                 ['key' => 'sender_id', 'label' => 'Sender ID', 'type' => 'text', 'required' => true],
             ],
             'twilio' => [
-                ['key' => 'account_sid', 'label' => 'Account SID', 'type' => 'text', 'required' => true],
+                ['key' => 'account_sid', 'label' => 'Account SID', 'type' => 'text', 'sensitive' => true, 'required' => true],
                 ['key' => 'auth_token', 'label' => 'Auth Token', 'type' => 'password', 'required' => true],
                 ['key' => 'from_number', 'label' => 'From Number', 'type' => 'text', 'required' => true],
             ],

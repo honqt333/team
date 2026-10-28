@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Services\Sms;
 
 use App\Models\Integration\Integration;
+use App\Support\PhoneNumber;
 use Exception;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -54,10 +55,14 @@ class AuthenticaService
                 ];
             }
 
+            // The raw provider body is not logged: it is the
+            // provider's own echo of the request and can contain the
+            // phone number we just sent. The status code is enough
+            // to tell a 4xx from a 5xx, and the message is already
+            // returned to the caller below.
             Log::error('Authentica sendOtp failed', [
-                'phone' => $phone,
+                'phone_ref' => PhoneNumber::fingerprint($phone),
                 'status' => $response->status(),
-                'response' => $response->body(),
             ]);
 
             return [
@@ -67,7 +72,7 @@ class AuthenticaService
             ];
         } catch (Exception $e) {
             Log::error('Authentica sendOtp exception', [
-                'phone' => $phone,
+                'phone_ref' => PhoneNumber::fingerprint($phone),
                 'error' => $e->getMessage(),
             ]);
 
@@ -117,7 +122,7 @@ class AuthenticaService
             ];
         } catch (Exception $e) {
             Log::error('Authentica verifyOtp exception', [
-                'phone' => $phone,
+                'phone_ref' => PhoneNumber::fingerprint($phone),
                 'error' => $e->getMessage(),
             ]);
 

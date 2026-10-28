@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers\System;
 
 use App\Http\Controllers\Controller;
+use App\Http\Middleware\EnsureSuperAdmin;
 use App\Models\AdminActivityLog;
 use App\Models\AdminUser;
 use Illuminate\Http\RedirectResponse;
@@ -16,6 +17,28 @@ use Inertia\Response;
 
 class AdminUsersController extends Controller
 {
+    /**
+     * Guard for every operation that creates, edits or removes a
+     * system-admin account.
+     *
+     * The route group already applies the `super_admin` middleware, but
+     * this check is kept in the controller as well: the role field on
+     * an admin account selects what that account may do inside the
+     * /system panel, and `super_admin` bypasses the permission list
+     * entirely (AdminUser::hasPermission). A single mis-placed route
+     * declaration would otherwise hand the whole platform away.
+     *
+     * @see EnsureSuperAdmin
+     */
+    private function ensureSuperAdmin(): void
+    {
+        $admin = auth('admin')->user();
+
+        if (! $admin instanceof AdminUser || ! $admin->isSuperAdmin()) {
+            abort(403, 'هذه العملية مخصصة لمديري النظام فقط (super_admin)');
+        }
+    }
+
     /**
      * List admin users.
      */
@@ -68,6 +91,8 @@ class AdminUsersController extends Controller
      */
     public function store(Request $request)
     {
+        $this->ensureSuperAdmin();
+
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:admin_users',
@@ -110,6 +135,8 @@ class AdminUsersController extends Controller
      */
     public function update(Request $request, AdminUser $adminUser)
     {
+        $this->ensureSuperAdmin();
+
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:admin_users,email,'.$adminUser->id,
@@ -138,6 +165,8 @@ class AdminUsersController extends Controller
      */
     public function destroy(AdminUser $adminUser)
     {
+        $this->ensureSuperAdmin();
+
         // Prevent self-deletion
         if (auth('admin')->id() === $adminUser->id) {
             return back()->withErrors(['error' => 'لا يمكنك حذف حسابك الحالي']);

@@ -18,11 +18,44 @@ use Mail;
 class IntegrationsController extends Controller
 {
     /**
+     * Placeholder sent to the browser in place of a stored secret.
+     *
+     * It is a non-empty mask so the form can tell "still set" apart
+     * from "never filled in" and skip overwriting the stored value.
+     */
+    private const REDACTED_PLACEHOLDER = '••••••••';
+
+    /**
      * List all integrations.
+     *
+     * SECURITY: the `config` column holds the provider credentials —
+     * Twilio auth tokens, Unifonic App SIDs, API keys, SMTP passwords.
+     * The list page renders only the catalogue entries (name, type,
+     * active/default flags), so the column is not selected at all:
+     * a secret that is never queried cannot leak if a later change
+     * drops a redaction call.
+     *
+     * The detail page still needs the values, and gets them masked by
+     * redactIntegration() instead.
      */
     public function index(): Response
     {
-        $integrations = Integration::orderBy('type')->orderBy('sort_order')->get();
+        $integrations = Integration::query()
+            ->select([
+                'id',
+                'type',
+                'provider',
+                'name',
+                'name_ar',
+                'description',
+                'is_active',
+                'is_default',
+                'purpose',
+                'sort_order',
+            ])
+            ->orderBy('type')
+            ->orderBy('sort_order')
+            ->get();
 
         $grouped = [
             'sms' => $integrations->where('type', 'sms')->values(),
@@ -138,12 +171,30 @@ class IntegrationsController extends Controller
 
         $validated = $request->validate($rules);
 
-        // Preserve existing sensitive values if not provided
+        // Preserve existing sensitive values if not provided.
+        //
+        // Two cases mean "leave the stored secret alone":
+        //   1. the field was left blank, and
+        //   2. the field still holds the redaction placeholder — the
+        //      form is initialised from the masked payload, so an
+        //      operator who opens the settings page and saves without
+        //      retyping the secret sends the mask back.
+        //
+        // Without case 2 the mask itself would be stored as the live
+        // credential and break the provider integration.
         $newConfig = $validated['config'] ?? [];
         $existingConfig = $integration->config ?? [];
 
         foreach ($configFields as $field) {
-            if ($field['type'] === 'password' && empty($newConfig[$field['key']])) {
+            $isSensitive = $field['type'] === 'password' || ($field['sensitive'] ?? false) === true;
+
+            if (! $isSensitive) {
+                continue;
+            }
+
+            $incoming = $newConfig[$field['key']] ?? null;
+
+            if (empty($incoming) || $incoming === self::REDACTED_PLACEHOLDER) {
                 $newConfig[$field['key']] = $existingConfig[$field['key']] ?? '';
             }
         }
@@ -363,9 +414,14 @@ class IntegrationsController extends Controller
      *
      * We mask every field declared as
      * `type: 'password'` in `getConfigFields()` for
-     * the integration's provider. The list is
-     * resolved server-side so we never have to
-     * hardcode a key name here.
+     * the integration's provider, plus any field
+     * explicitly flagged `sensitive: true` — some
+     * provider credentials are rendered as plain
+     * text in the form (Unifonic's App SID is sent
+     * on every API call and authenticates the
+     * request) but must not be readable in the
+     * payload. The list is resolved server-side so
+     * we never have to hardcode a key name here.
      */
     private function redactIntegration(Integration $integration): Integration
     {
@@ -379,7 +435,7 @@ class IntegrationsController extends Controller
         $sensitiveKeys = [];
 
         foreach ($configFields as $field) {
-            if (($field['type'] ?? null) === 'password') {
+            if (($field['type'] ?? null) === 'password' || ($field['sensitive'] ?? false) === true) {
                 $sensitiveKeys[] = $field['key'];
             }
         }
@@ -392,7 +448,7 @@ class IntegrationsController extends Controller
                 // sees the field as "set" and skips
                 // overwriting it. The actual value
                 // never leaves the server.
-                $config[$key] = '••••••••';
+                $config[$key] = self::REDACTED_PLACEHOLDER;
             }
         }
 

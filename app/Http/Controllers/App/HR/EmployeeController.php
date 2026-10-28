@@ -125,8 +125,23 @@ class EmployeeController extends Controller
      */
     public function store(Request $request)
     {
-        Log::info('Employee store initiated', $request->all());
+        // Authorization comes first, before anything is written
+        // anywhere.
         $this->authorize('create', Employee::class);
+
+        // Operational logging without the request body.
+        //
+        // SECURITY: the previous line logged `$request->all()` —
+        // the employee's name, phone, email, nationality and every
+        // other field the client sent — and it did so BEFORE the
+        // permission check, so a rejected request still produced a
+        // full copy of the personal data in the log. Only
+        // non-identifying context is recorded here.
+        Log::info('Employee store initiated', [
+            'tenant_id' => TenancyContext::tenantId(),
+            'center_id' => TenancyContext::centerId(),
+            'user_id' => auth()->id(),
+        ]);
 
         $validated = $request->validate([
             'name_ar' => 'required|string|max:255',

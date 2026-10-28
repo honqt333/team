@@ -97,4 +97,41 @@ class PhoneNumber
         // Drop the leading +; lookup is digit-only.
         return ltrim($normalized, '+');
     }
+
+    /**
+     * A non-reversible identifier for a phone number, safe to write
+     * to the application log.
+     *
+     * WHY NOT LOG THE NUMBER ITSELF
+     *
+     * The application log is readable by whoever holds the log file
+     * or a log backup, which is a much wider group than the people
+     * who may see customer contact details. A plain phone number in
+     * the log is a copy of the personal data outside its intended
+     * store.
+     *
+     * A fingerprint keeps the operational value of the log line —
+     * attempts for the same number can still be correlated — without
+     * carrying the number. The salt is the application key, so the
+     * fingerprint cannot be reversed by brute force against the small
+     * space of real phone numbers.
+     */
+    public static function fingerprint(?string $number): ?string
+    {
+        $key = self::lookupKey($number);
+
+        if ($key === null || $key === '') {
+            return null;
+        }
+
+        $salt = config('app.key');
+
+        if (! is_string($salt) || $salt === '') {
+            // Without an application key we cannot salt the digest.
+            // Fall back to an unsalted hash rather than the number.
+            $salt = 'phone-fingerprint';
+        }
+
+        return 'ph_'.substr(hash_hmac('sha256', $key, $salt), 0, 12);
+    }
 }

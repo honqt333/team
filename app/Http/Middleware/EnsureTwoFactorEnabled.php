@@ -34,8 +34,18 @@ class EnsureTwoFactorEnabled
             $tenant->two_factor_enforcement === 'required' &&
             is_null($user->two_factor_confirmed_at)) {
 
-            // Allow access to 2FA setup routes to prevent infinite loop
-            if ($request->routeIs('app.security.2fa.*')) {
+            // Allow access to the 2FA routes themselves, otherwise the
+            // user cannot finish the setup they are being sent to.
+            //
+            // Two name families are involved:
+            //   app.security.2fa.*  setup / enable / disable / regenerate
+            //   app.2fa.*           send-code / challenge / verify
+            //
+            // The send-code route belongs to the second family, and
+            // without it the redirected user would land on the setup
+            // screen but be unable to request the code that lets them
+            // confirm 2FA.
+            if ($request->routeIs('app.security.2fa.*', 'app.2fa.*')) {
                 return $next($request);
             }
 

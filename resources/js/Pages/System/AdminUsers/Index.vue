@@ -27,6 +27,7 @@
                         {{ $t('system.admin_users.activity_log') }}
                     </a>
                     <button
+                        v-if="isSuperAdmin"
                         @click="openCreateModal"
                         class="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-medium transition-colors"
                     >
@@ -170,6 +171,7 @@
                             <td class="px-4 py-3 align-middle text-center">
                                 <div class="flex items-center justify-center gap-2">
                                     <button
+                                        v-if="isSuperAdmin"
                                         @click="openEditModal(admin)"
                                         class="inline-flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-lg transition-colors"
                                     >
@@ -189,6 +191,7 @@
                                         {{ $t('system.actions.edit') }}
                                     </button>
                                     <button
+                                        v-if="isSuperAdmin"
                                         @click="deleteAdmin(admin)"
                                         class="inline-flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
                                     >
@@ -452,7 +455,7 @@
 <script setup>
 import { ref, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { router, useForm } from '@inertiajs/vue3';
+import { router, useForm, usePage } from '@inertiajs/vue3';
 import SystemLayout from '@/Layouts/SystemLayout.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 
@@ -482,6 +485,18 @@ const props = defineProps({
     filters: Object,
     permissions: Object,
 });
+
+// Creating, editing and deleting system-admin accounts is restricted
+// to `super_admin` on the server (the `super_admin` route middleware
+// plus the controller guard in AdminUsersController). The same flag is
+// used here so a support admin is not offered buttons that would only
+// answer 403.
+//
+// `usePage()` is used rather than the `$page` template global: inside a
+// `<script setup>` body `$page` is not in scope, and referencing it
+// there is a runtime ReferenceError.
+const page = usePage();
+const isSuperAdmin = computed(() => !!page.props.auth?.is_super_admin);
 
 const search = ref(props.filters?.search || '');
 const role = ref(props.filters?.role || '');

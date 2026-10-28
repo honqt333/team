@@ -27,6 +27,7 @@ use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
+use Inertia\Inertia;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
 use Spatie\Permission\Middleware\PermissionMiddleware;
@@ -209,7 +210,37 @@ return Application::configure(basePath: dirname(__DIR__))
         );
     })
     ->withExceptions(function (Exceptions $exceptions): void {
+        // Render the styled Inertia 403 page for a plain browser
+        // navigation.
         //
+        // The page existed but nothing rendered it: it was only ever
+        // reachable by a direct URL guess, and a contract test kept
+        // pinning its behaviour. It was consequently classified as
+        // unreachable and removed — while the test kept failing.
+        //
+        // Wiring it up here makes the page live again:
+        //
+        //   - a document request that 403s now gets the SPA-styled
+        //     page with the role-aware "Home" link, instead of the
+        //     plain blade error view;
+        //   - Inertia XHR requests and JSON API calls are left alone,
+        //     because those expect a JSON error payload and the SPA
+        //     has its own error handling.
+        $exceptions->respond(function ($response) {
+            $request = request();
+
+            if ($response->getStatusCode() !== 403) {
+                return $response;
+            }
+
+            if ($request->header('X-Inertia') || $request->expectsJson() || $request->ajax()) {
+                return $response;
+            }
+
+            return Inertia::render('Errors/403')
+                ->toResponse($request)
+                ->setStatusCode(403);
+        });
     })->create();
 
 /*

@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Integration\Integration;
 use App\Models\Tenant;
 use App\Services\Sms\AuthenticaService;
+use App\Support\PhoneNumber;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Log;
@@ -102,11 +103,22 @@ class PhoneVerificationController extends Controller
         $service = AuthenticaService::fromIntegration($integration);
         $result = $service->verifyOtp($phone, $request->otp);
 
-        // Debug logging
+        // Operational logging.
+        //
+        // SECURITY: the code and the phone number must never reach
+        // the log. The code is still valid at this point, so a log
+        // reader could complete somebody's verification; and the
+        // number is customer personal data living outside its
+        // intended store. The provider response is not logged either
+        // — it is the provider's raw body and can carry operational
+        // details we do not want to keep.
+        //
+        // The fingerprint keeps the line useful: attempts for the same
+        // number can still be correlated without exposing it.
         Log::info('Phone verification attempt', [
-            'phone' => $phone,
-            'otp' => $request->otp,
-            'result' => $result,
+            'phone_ref' => PhoneNumber::fingerprint($phone),
+            'success' => (bool) ($result['success'] ?? false),
+            'message' => $result['message'] ?? null,
         ]);
 
         if ($result['success']) {

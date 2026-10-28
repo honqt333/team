@@ -160,11 +160,30 @@ class CustomerPortalAuthController extends Controller
         ]);
 
         $tenant = $this->resolveTenant($request);
-        $result = $this->otp->verify(
-            tenant: $tenant,
-            phoneInput: $validated['phone'],
-            code: $validated['code'],
-        );
+
+        try {
+            $result = $this->otp->verify(
+                tenant: $tenant,
+                phoneInput: $validated['phone'],
+                code: $validated['code'],
+            );
+        } catch (OtpRateLimitedException $e) {
+            // Rate limit on the VERIFY side.
+            //
+            // The request side (requestOtp) already handles this
+            // exception, but the verify side did not — so a customer
+            // who exhausted the attempt limit got a 500 error page
+            // instead of being told to wait. The protection worked;
+            // only the user-facing handling was missing.
+            //
+            // The message is the same generic one the request side
+            // uses, and the retry delay is passed along so the screen
+            // can tell the customer how long to wait.
+            return back()
+                ->withErrors(['code' => $e->getMessage()])
+                ->withInput()
+                ->with('otp_retry_after', $e->retryAfterSeconds);
+        }
 
         if (! $result->success) {
             // Same generic error for every failure mode.

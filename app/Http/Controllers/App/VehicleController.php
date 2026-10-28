@@ -349,6 +349,16 @@ class VehicleController
 
     public function checkPlate(Request $request): JsonResponse
     {
+        // The response carries the vehicle's plate, VIN, year, colour
+        // and the owning customer's name and phone. Without this check
+        // any authenticated user could enumerate the vehicle list of
+        // their tenant by calling the endpoint with a plate number,
+        // even without the vehicles read permission.
+        //
+        // The duplicate-check UI needs the details (it links to the
+        // existing record), so the read permission is the right gate.
+        $this->authorize('viewAny', Vehicle::class);
+
         $tenantId = auth()->user()->tenant_id;
         $plateNumber = $request->query('plate_number');
 

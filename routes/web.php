@@ -296,8 +296,13 @@ Route::middleware('guest')->group(function () {
     Route::post('invitations/accept/{user}', [SetPasswordController::class, 'store']);
 });
 
+// The dashboard is the app's landing page and it renders the tenant's
+// operating and financial figures. When the tenant requires 2FA, a
+// user who has not confirmed it must not reach it — the guard used to
+// be missing here, so the requirement was bypassed on exactly the
+// page that shows the most.
 Route::get('/dashboard', [DashboardController::class, 'index'])
-    ->middleware(['auth', 'verified', 'tenant.active', 'center.context'])
+    ->middleware(['auth', 'verified', 'tenant.active', 'center.context', EnsureTwoFactorEnabled::class])
     ->name('dashboard');
 
 // 2FA Challenge (during login)
@@ -305,7 +310,13 @@ Route::get('/app/2fa/challenge', [TwoFactorAuthenticatedSessionController::class
 Route::post('/app/2fa/verify', [TwoFactorAuthenticatedSessionController::class, 'verify'])->middleware('throttle:2fa-verify')->name('app.2fa.verify');
 Route::post('/app/2fa/challenge/resend', [TwoFactorAuthenticatedSessionController::class, 'resend'])->middleware('throttle:phone-otp')->name('app.2fa.challenge.resend');
 
-Route::middleware(['auth', 'verified', EnsureTenantActive::class])->prefix('app')->group(function () {
+// The profile and the employee portal sat in a group without the 2FA
+// guard, so a tenant that requires 2FA could not enforce it on its
+// own staff. The guard exempts the `app.security.2fa.*` routes (see
+// EnsureTwoFactorEnabled), and the setup route lives in this group,
+// so an unconfirmed user is sent to the setup screen and not into a
+// redirect loop.
+Route::middleware(['auth', 'verified', EnsureTenantActive::class, EnsureTwoFactorEnabled::class])->prefix('app')->group(function () {
     // Profile
     Route::get('/profile', [App\Http\Controllers\App\ProfileController::class, 'index'])->name('app.profile');
     Route::patch('/profile', [App\Http\Controllers\App\ProfileController::class, 'update'])->name('app.profile.update');
@@ -313,6 +324,15 @@ Route::middleware(['auth', 'verified', EnsureTenantActive::class])->prefix('app'
     Route::post('/profile/switch-center', [ProfileController::class, 'switchCenter'])->name('profile.switch-center');
 
     // Two-Factor Authentication (Tenant App)
+    //
+    // The setup page needs a GET route of its own. The
+    // EnsureTwoFactorEnabled middleware redirects a user who has not
+    // confirmed 2FA yet to `app.security.2fa.setup`; without this
+    // route the redirect target did not exist and the middleware
+    // raised a 500 instead of showing the setup screen. The Vue page
+    // (App/Security/TwoFactorSetup) and the controller action were
+    // already there — only the route was missing.
+    Route::get('/security/2fa', [TwoFactorController::class, 'setup'])->name('app.security.2fa.setup');
     Route::post('/security/2fa/send-code', [TwoFactorController::class, 'sendCode'])->middleware('throttle:phone-otp')->name('app.2fa.send-code');
     Route::post('/security/2fa/enable', [TwoFactorController::class, 'enable'])->middleware('throttle:2fa-verify')->name('app.security.2fa.enable');
     Route::post('/security/2fa/disable', [TwoFactorController::class, 'disable'])->name('app.security.2fa.disable');
@@ -338,7 +358,12 @@ Route::prefix('app')->middleware(['auth', 'verified', 'tenant.active', 'center.c
     Route::get('/customers/import/template', [CustomerImportExportController::class, 'downloadTemplate'])->name('customers.import.template');
     Route::post('/customers/import', [CustomerImportExportController::class, 'import'])->name('customers.import');
 
-    Route::get('/customers/check-phone', [CustomerController::class, 'checkPhone'])->name('customers.check-phone');
+    // The duplicate lookup answers with the matching customer's
+    // contact details, so it is permission-gated in the controller and
+    // rate-limited here.
+    Route::get('/customers/check-phone', [CustomerController::class, 'checkPhone'])
+        ->middleware('throttle:record-lookup')
+        ->name('customers.check-phone');
     Route::get('/customers/{customer}/statement/print', [CustomerController::class, 'printStatement'])->name('customers.statement.print');
     Route::resource('customers', CustomerController::class);
     // Customer merge routes
@@ -348,7 +373,12 @@ Route::prefix('app')->middleware(['auth', 'verified', 'tenant.active', 'center.c
     // Vehicle export/print routes
     Route::get('/vehicles/export', [VehicleController::class, 'export'])->name('vehicles.export');
     Route::get('/vehicles/print', [VehicleController::class, 'print'])->name('vehicles.print');
-    Route::get('/vehicles/check-plate', [VehicleController::class, 'checkPlate'])->name('vehicles.check-plate');
+    // The duplicate lookup answers with the matching vehicle and its
+    // owning customer's contact details, so it is permission-gated in
+    // the controller and rate-limited here.
+    Route::get('/vehicles/check-plate', [VehicleController::class, 'checkPlate'])
+        ->middleware('throttle:record-lookup')
+        ->name('vehicles.check-plate');
     Route::apiResource('vehicles', VehicleController::class);
     Route::get('/vehicles/{vehicle}/mileage-logs', [VehicleMileageController::class, 'index'])->name('vehicles.mileage-logs.index');
     Route::delete('/vehicles/{vehicle}/mileage-logs/{log}', [VehicleMileageController::class, 'destroy'])->name('vehicles.mileage-logs.destroy');
@@ -1257,13 +1287,29 @@ Route::prefix('system')->middleware(['auth:web,admin', 'system.admin'])->group(f
     Route::put('/profile/password', [App\Http\Controllers\System\ProfileController::class, 'updatePassword'])->name('system.profile.password');
 
     // Admin Users
+    //
+    // Creating, editing and deleting system-admin accounts is a
+    // privileged operation: the role field selects what the account may
+    // do inside the /system panel, and `super_admin` bypasses the
+    // permission list entirely (AdminUser::hasPermission).
+    //
+    // These write routes used to sit in the general `system.admin`
+    // group, so an account with the read-oriented `support` role could
+    // POST a new `super_admin` account — or PUT its own role up to
+    // `super_admin` — and take full control of the platform.
+    //
+    // The `super_admin` middleware closes that escalation path. The
+    // index/edit routes stay readable by every system admin.
     Route::get('/admin-users', [AdminUsersController::class, 'index'])->name('system.admin-users.index');
     Route::get('/admin-users/create', [AdminUsersController::class, 'create'])->name('system.admin-users.create');
-    Route::post('/admin-users', [AdminUsersController::class, 'store'])->name('system.admin-users.store');
-    Route::get('/admin-users/{adminUser}/edit', [AdminUsersController::class, 'edit'])->name('system.admin-users.edit');
-    Route::put('/admin-users/{adminUser}', [AdminUsersController::class, 'update'])->name('system.admin-users.update');
-    Route::delete('/admin-users/{adminUser}', [AdminUsersController::class, 'destroy'])->name('system.admin-users.destroy');
     Route::get('/activity-log', [AdminUsersController::class, 'activityLog'])->name('system.activity-log');
+
+    Route::middleware('super_admin')->group(function () {
+        Route::post('/admin-users', [AdminUsersController::class, 'store'])->name('system.admin-users.store');
+        Route::get('/admin-users/{adminUser}/edit', [AdminUsersController::class, 'edit'])->name('system.admin-users.edit');
+        Route::put('/admin-users/{adminUser}', [AdminUsersController::class, 'update'])->name('system.admin-users.update');
+        Route::delete('/admin-users/{adminUser}', [AdminUsersController::class, 'destroy'])->name('system.admin-users.destroy');
+    });
 
     // Announcements
     Route::get('/announcements', [AnnouncementsController::class, 'index'])->name('system.announcements.index');

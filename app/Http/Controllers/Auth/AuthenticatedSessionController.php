@@ -21,8 +21,19 @@ class AuthenticatedSessionController extends Controller
      */
     public function create(Request $request): Response
     {
-        // `?as=admin` on the URL flags the form as the admin-panel login.
-        $asAdmin = $request->boolean('as_admin') || $request->input('as') === 'admin';
+        // `?as=admin` on the URL flags the form as the admin-panel
+        // login.
+        //
+        // The route name counts as well: the admin panel has its own
+        // /admin/login route, and nothing in the app links to
+        // /admin/login?as=admin. Without the route check the admin
+        // page rendered the TENANT form, and the tenant login route
+        // only ever authenticates a `users` row — so an admin account
+        // could never sign in from the page built for it and always
+        // saw "these credentials do not match".
+        $asAdmin = $request->boolean('as_admin')
+            || $request->input('as') === 'admin'
+            || $request->routeIs('admin.login');
 
         return Inertia::render('Auth/Login', [
             'canResetPassword' => Route::has('password.request'),

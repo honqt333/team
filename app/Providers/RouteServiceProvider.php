@@ -177,5 +177,19 @@ class RouteServiceProvider extends ServiceProvider
         RateLimiter::for('api-public', function (Request $request) {
             return Limit::perMinute(30)->by($request->ip());
         });
+
+        // Duplicate-lookup endpoints (customer phone, vehicle plate).
+        //
+        // These are called by the create/edit forms to detect a
+        // duplicate, and they answer with the matching record's
+        // details. They are permission-gated, but a user who holds the
+        // read permission could still use them to sweep the tenant's
+        // records one number at a time. The limit is generous enough
+        // for interactive use — a form fires one request per field
+        // blur — and keyed by user so one account cannot exhaust
+        // another's budget.
+        RateLimiter::for('record-lookup', function (Request $request) {
+            return Limit::perMinute(60)->by($request->user()?->id ?: $request->ip());
+        });
     }
 }
