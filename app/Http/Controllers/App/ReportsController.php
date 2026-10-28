@@ -86,9 +86,17 @@ class ReportsController extends Controller
 
         $tenant = auth()->user()->tenant;
         $currentCenter = $centerId ? Center::find($centerId) : null;
+        $accessibleCenterIds = $this->accessibleCenterIds();
 
+        // The customer filter must not offer the contact details of
+        // another branch's customers: the payments behind it are already
+        // limited to the centres of the signed-in user.
         $customers = Customer::query()
             ->where('tenant_id', $tenantId)
+            ->when(
+                $accessibleCenterIds !== null,
+                fn ($query) => $query->whereIn('center_id', $accessibleCenterIds)
+            )
             ->select('id', 'name', 'phone')
             ->orderBy('name')
             ->limit(100)
@@ -232,6 +240,39 @@ class ReportsController extends Controller
             'Content-Type' => 'text/csv; charset=UTF-8',
             'Cache-Control' => 'no-store, no-cache',
         ]);
+    }
+
+    /**
+     * The centres whose records the signed-in user may read.
+     *
+     * The tenant owner (super admin) manages every branch of the tenant,
+     * so they are not limited. Every other account is limited to the
+     * centres it is assigned to — the same rule the employee list uses.
+     *
+     * @return array<int>|null null means "every centre of the tenant"
+     */
+    private function accessibleCenterIds(): ?array
+    {
+        $user = auth()->user();
+
+        if (! $user) {
+            return null;
+        }
+
+        if ($user->hasRole('super_admin')) {
+            return null;
+        }
+
+        $centerIds = $user->centers()
+            ->pluck('centers.id')
+            ->map(fn ($id) => (int) $id)
+            ->all();
+
+        if ($centerIds === []) {
+            return null;
+        }
+
+        return array_values(array_unique($centerIds));
     }
 
     /**

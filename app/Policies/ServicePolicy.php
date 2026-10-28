@@ -43,6 +43,19 @@ class ServicePolicy
     }
 
     /**
+     * Can the user change the workshop-wide settings of the services
+     * module — currently the systematic inspection steps?
+     *
+     * This is a class-level ability: the setting does not belong to
+     * one service, it changes what every work order of the workshop
+     * has to go through.
+     */
+    public function manageInspections(User $user, ?string $model = null): bool
+    {
+        return $user->can(Permissions::SERVICES_UPDATE);
+    }
+
+    /**
      * Determine whether the user can update the service.
      */
     public function update(User $user, Service $service): bool

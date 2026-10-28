@@ -437,7 +437,13 @@ class WorkOrderController
             ->select('id', 'name_ar', 'name_en')
             ->get();
 
-        $enableSystematicInspections = Setting::where('key', 'enable_systematic_inspections')->value('value') ?? 'true';
+        // The inspection preference belongs to the tenant — reading the
+        // system-wide row would show one workshop's setting to another.
+        $enableSystematicInspections = Setting::forTenant(
+            auth()->user()?->tenant_id,
+            'enable_systematic_inspections',
+            'true'
+        );
 
         return Inertia::render('WorkOrders/Show', [
             'workOrder' => $workOrder,

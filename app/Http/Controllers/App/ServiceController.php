@@ -138,7 +138,11 @@ class ServiceController
             ->ordered()
             ->get();
 
-        $enableSystematicInspections = Setting::where('key', 'enable_systematic_inspections')->value('value') ?? 'true';
+        $enableSystematicInspections = Setting::forTenant(
+            auth()->user()?->tenant_id,
+            'enable_systematic_inspections',
+            'true'
+        );
 
         Log::info('Packages found in index:', ['count' => $packages->count(), 'sample' => $packages->take(1)->toArray()]);
 
@@ -155,14 +159,28 @@ class ServiceController
 
     public function toggleInspectionsSetting(Request $request): RedirectResponse
     {
-        $setting = Setting::firstOrCreate(
-            ['key' => 'enable_systematic_inspections'],
-            ['group' => 'work_orders', 'value' => 'true']
+        // Toggling the inspection steps is an administration decision,
+        // not a read-only one: it changes what every work order of the
+        // workshop has to go through.
+        $this->authorize('manageInspections', Service::class);
+
+        $tenantId = auth()->user()->tenant_id;
+
+        // The preference belongs to the tenant. It used to live in the
+        // system-wide key/value store, so one workshop's toggle
+        // changed the inspection steps of every workshop on the
+        // install.
+        $currentValue = filter_var(
+            Setting::forTenant($tenantId, 'enable_systematic_inspections', 'true'),
+            FILTER_VALIDATE_BOOLEAN
         );
 
-        $currentValue = filter_var($setting->value, FILTER_VALIDATE_BOOLEAN);
-        $setting->value = $currentValue ? 'false' : 'true';
-        $setting->save();
+        Setting::setForTenant(
+            $tenantId,
+            'enable_systematic_inspections',
+            $currentValue ? 'false' : 'true',
+            'work_orders'
+        );
 
         return redirect()->back()->with('success', __('common.updated_success'));
     }

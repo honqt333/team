@@ -98,54 +98,88 @@ class AnalyticsController extends Controller
     }
 
     /**
-     * Churn rate over a window. Counts subscriptions that ended
-     * during the window and divides by the active count at the
-     * window's start (so a tenant that was already cancelled
-     * before the window doesn't skew the rate).
+     * Churn rate over a window.
+     *
+     * The base is the subscriptions that were RUNNING at the start of
+     * the window, and the numerator is the cancellations that happened
+     * inside the window among that base.
+     *
+     * The old version counted the subscriptions whose status is
+     * `active` NOW and that were created before the window. A
+     * subscription that was active at the start and got cancelled
+     * during the window fell out of the base while still being counted
+     * in the numerator, so the rate came out too high — and could pass
+     * 100% when subscriptions created inside the window were cancelled
+     * too. The dates on the subscription are the historical record, so
+     * they are what decides membership of the base now.
      */
     private function computeChurnRate(Carbon $from, Carbon $to): float
     {
-        $activeAtStart = Subscription::where('status', 'active')
-            ->where('created_at', '<', $from)
+        // The base: started by the start of the window, not yet ended,
+        // not cancelled before it.
+        $base = Subscription::where('starts_at', '<=', $from)
+            ->where(function ($query) use ($from) {
+                $query->whereNull('ends_at')->orWhere('ends_at', '>=', $from);
+            })
+            ->where(function ($query) use ($from) {
+                $query->whereNull('cancelled_at')->orWhere('cancelled_at', '>=', $from);
+            })
             ->count();
 
-        if ($activeAtStart === 0) {
+        if ($base === 0) {
             return 0.0;
         }
 
-        // We use the Subscription status column to count cancellations
-        // rather than parsing ends_at — a tenant with status=cancelled
-        // during the window is the cleanest signal.
+        // Cancellations inside the window, among that base.
+        // `cancelled_at` is the dated event; `updated_at` is the
+        // fallback for rows written before that column existed.
         $cancelledDuring = Subscription::where('status', 'cancelled')
-            ->whereBetween('updated_at', [$from, $to])
+            ->where('starts_at', '<=', $from)
+            ->whereRaw('COALESCE(cancelled_at, updated_at) BETWEEN ? AND ?', [$from, $to])
             ->count();
 
-        return round(($cancelledDuring / $activeAtStart) * 100, 1);
+        // The numerator is a subset of the base, so the rate cannot
+        // pass 100% — the clamp is a guard against a future change
+        // breaking that assumption, not a correction.
+        return round(min(100, ($cancelledDuring / $base) * 100), 1);
     }
 
     /**
      * Top 10 plans by active subscriber count. Used in the dashboard
      * to show which tiers are popular. Names are returned in the
      * current locale so the front end doesn't have to look them up.
+     *
+     * The MRR of a plan is the monthly-normalised sum of what its
+     * subscribers actually pay — the same calculation as the headline
+     * MRR. It used to be `subscribers × list price`, which ignored
+     * the yearly cycle and every discount, so a discounted yearly
+     * plan showed a monthly figure the tenant was not paying.
      */
     public function topPlans(Request $request)
     {
         $locale = app()->getLocale();
 
         $rows = Plan::query()
-            ->withCount(['subscriptions as active_subscribers' => fn ($q) => $q->where('status', 'active')])
+            ->with(['subscriptions' => fn ($q) => $q->where('status', 'active')])
             ->where('is_active', true)
-            ->orderByDesc('active_subscribers')
-            ->limit(10)
-            ->get(['id', 'name', 'name_ar', 'name_en', 'price_monthly', 'price_yearly']);
+            ->get(['id', 'name', 'name_ar', 'name_en', 'price_monthly', 'price_yearly'])
+            ->sortByDesc(fn ($plan) => $plan->subscriptions->count())
+            ->take(10)
+            ->values();
 
         $plans = $rows->map(fn ($plan) => [
             'id' => $plan->id,
             'name' => $locale === 'ar'
                 ? ($plan->name_ar ?? $plan->name)
                 : ($plan->name_en ?? $plan->name),
-            'active_subscribers' => $plan->active_subscribers,
-            'mrr' => $plan->active_subscribers * (float) $plan->price_monthly,
+            'active_subscribers' => $plan->subscriptions->count(),
+            'mrr' => round($plan->subscriptions->sum(function ($sub) {
+                $price = (float) $sub->price;
+
+                return $sub->billing_cycle === 'yearly'
+                    ? $price / 12
+                    : $price;
+            }), 2),
         ]);
 
         return response()->json(['plans' => $plans]);
@@ -247,13 +281,27 @@ class AnalyticsController extends Controller
         return response()->json([
             'cohorts' => array_values($cohorts),
             'window' => $monthsBack,
+            // The schema has no status-change history, so a past month
+            // is reconstructed from the dates on the subscription
+            // (start, scheduled end, cancellation date). A month in
+            // which a subscription was edited rather than cancelled is
+            // therefore judged by the subscription's own dates.
+            'basis' => 'subscription_dates',
         ]);
     }
 
     /**
      * % of cohort tenants whose subscription covered the target month.
-     * A tenant "retained" = any active subscription with starts_at <=
-     * end of target month AND ends_at >= start of target month.
+     *
+     * The coverage is decided by the DATES of the subscription, not by
+     * its current status. The old version required `status === 'active'`
+     * and asked for a date overlap, so a subscription that covered the
+     * month and expired or was cancelled afterwards counted as "not
+     * retained" in a month it was actually paid for.
+     *
+     * A subscription that was cancelled early ends at its cancellation
+     * date, not at the scheduled end — `cancelled_at` is the dated
+     * event, so it is what the overlap uses.
      */
     private function computeRetentionAtMonth($tenants, Carbon $cohortMonth, Carbon $targetMonth): int
     {
@@ -274,14 +322,16 @@ class AnalyticsController extends Controller
 
         foreach ($cohortTenants as $tenant) {
             foreach ($tenant->subscriptions as $sub) {
-                if ($sub->status !== 'active') {
-                    continue;
-                }
                 $startsAt = $sub->starts_at;
                 $endsAt = $sub->ends_at;
 
                 if (! $startsAt || ! $endsAt) {
                     continue;
+                }
+
+                // An early cancellation ends the subscription there.
+                if ($sub->cancelled_at && $sub->cancelled_at->lt($endsAt)) {
+                    $endsAt = $sub->cancelled_at;
                 }
 
                 // Subscription covers the target month if it overlaps
@@ -328,23 +378,44 @@ class AnalyticsController extends Controller
         return response()->json([
             'tenant_id' => $tenant->id,
             'points' => $points,
+            // See computeHealthScoreAt(): the past is reconstructed from
+            // the dates on the records, because the schema keeps no
+            // status-change history.
+            'basis' => 'record_dates',
         ]);
     }
 
     /**
-     * Compute the health score "as of" a given point in time. We
-     * reuse the same logic as the live score in TenantsController but
-     * re-anchor all time-bounded signals to the snapshot date.
+     * Compute the health score "as of" a given point in time.
+     *
+     * Every signal is decided by the DATES on the record, not by its
+     * current status, so a month is judged by what was true then:
+     *
+     *   - an invoice was overdue if it was due by then and had not
+     *     been paid yet at that moment (it may be paid now);
+     *   - a subscription was running if it had started and not ended
+     *     by then, counting an early cancellation at its cancellation
+     *     date;
+     *   - a receipt was rejected if it had been reviewed as rejected
+     *     in the 90 days before the snapshot.
+     *
+     * LIMITATION: there is no status-change history in the schema, so
+     * a subscription that was edited (rather than cancelled) has no
+     * dated record of the edit. The response says so, so the trend is
+     * not read as an exact reconstruction.
      */
     private function computeHealthScoreAt(Tenant $tenant, Carbon $at): array
     {
         $score = 100;
         $flags = [];
 
-        // Overdue invoices as of the snapshot
+        // Overdue invoices as of the snapshot: due by then, and not
+        // yet paid at that moment.
         $overdue = SubscriptionInvoice::where('tenant_id', $tenant->id)
-            ->where('status', 'overdue')
             ->where('due_at', '<=', $at)
+            ->where(function ($query) use ($at) {
+                $query->whereNull('paid_at')->orWhere('paid_at', '>', $at);
+            })
             ->exists();
 
         if ($overdue) {
@@ -352,16 +423,33 @@ class AnalyticsController extends Controller
             $flags[] = 'overdue_invoice';
         }
 
-        $activeSub = Subscription::where('tenant_id', $tenant->id)
-            ->where('status', 'active')
+        // The subscription that was running at the snapshot.
+        //
+        // The effective end of a subscription is the earlier of its
+        // scheduled end and its cancellation date, so the row is picked
+        // in the database instead of loading every subscription of the
+        // tenant into memory for each point of the trend.
+        $runningSub = Subscription::where('tenant_id', $tenant->id)
+            ->where('starts_at', '<=', $at)
+            ->whereNotNull('ends_at')
+            ->whereRaw(
+                'CASE WHEN cancelled_at IS NOT NULL AND cancelled_at < ends_at THEN cancelled_at ELSE ends_at END >= ?',
+                [$at]
+            )
             ->orderByDesc('ends_at')
             ->first();
 
-        if (! $activeSub) {
+        if (! $runningSub) {
             $score -= 10;
             $flags[] = 'no_active_subscription';
         } else {
-            $daysToEnd = (int) $activeSub->ends_at?->diffInDays($at, false);
+            $endsAt = $runningSub->ends_at;
+
+            if ($runningSub->cancelled_at && $runningSub->cancelled_at->lt($endsAt)) {
+                $endsAt = $runningSub->cancelled_at;
+            }
+
+            $daysToEnd = (int) $endsAt->diffInDays($at, false);
 
             if ($daysToEnd <= 30 && $daysToEnd >= 0) {
                 $score -= 10;

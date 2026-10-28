@@ -1093,12 +1093,6 @@ parameters:
 			path: /Users/ahmad/Herd/carag-v2/app/Http/Controllers/Public/TenantSiteController.php
 
 		-
-			message: '#^Access to an undefined property App\\Models\\Billing\\Plan\:\:\$active_subscribers\.$#'
-			identifier: property.notFound
-			count: 2
-			path: /Users/ahmad/Herd/carag-v2/app/Http/Controllers/System/AnalyticsController.php
-
-		-
 			message: '#^Access to an undefined property App\\Models\\Billing\\SubscriptionPayment\:\:\$count\.$#'
 			identifier: property.notFound
 			count: 1
@@ -1108,12 +1102,6 @@ parameters:
 			message: '#^Access to an undefined property App\\Models\\Billing\\SubscriptionPayment\:\:\$total\.$#'
 			identifier: property.notFound
 			count: 2
-			path: /Users/ahmad/Herd/carag-v2/app/Http/Controllers/System/AnalyticsController.php
-
-		-
-			message: '#^Parameter \#1 \$callback of method Illuminate\\Database\\Eloquent\\Collection\<int,App\\Models\\Billing\\Plan\>\:\:map\(\) contains unresolvable type\.$#'
-			identifier: argument.unresolvableType
-			count: 1
 			path: /Users/ahmad/Herd/carag-v2/app/Http/Controllers/System/AnalyticsController.php
 
 		-
