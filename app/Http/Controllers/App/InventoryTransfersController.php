@@ -10,8 +10,10 @@ use App\Models\InventoryTransferItem;
 use App\Models\Part;
 use App\Models\Warehouse;
 use App\Services\Inventory\InventoryService;
+use App\Support\TenancyContext;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 
@@ -146,7 +148,13 @@ class InventoryTransfersController extends Controller
         }
 
         $validated = $request->validate([
-            'part_id' => 'required|exists:parts,id',
+            'part_id' => [
+                'required',
+                // The part has to belong to this tenant — a bare id
+                // check would accept a part of another tenant, and
+                // the item would only fail later, at send time.
+                Rule::exists('parts', 'id')->where('tenant_id', TenancyContext::tenantId()),
+            ],
             'qty_requested' => 'required|numeric|min:0.001',
             'notes' => 'nullable|string|max:255',
         ]);
@@ -179,7 +187,12 @@ class InventoryTransfersController extends Controller
             return back()->with('error', __('inventory.transfers.cannot_modify'));
         }
 
-        $item->delete();
+        // The item has to belong to the transfer in the URL. A bare
+        // item id let a draft transfer delete an item of a transfer
+        // that had already been sent — which cuts the settlement
+        // trail between the issue move and the receipt move, and
+        // leaves the source warehouse short.
+        $transfer->items()->findOrFail($item->id)->delete();
 
         return back()->with('success', __('inventory.transfers.item_removed'));
     }

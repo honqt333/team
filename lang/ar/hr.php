@@ -83,6 +83,7 @@ return [
         'edit' => 'تعديل موظف',
         'employee' => 'موظف',
         'employee_number' => 'الرقم الوظيفي',
+        'wrong_center' => 'هذا الموظف ينتمي إلى فرع آخر.',
         'employee_number_exists' => 'الرقم الوظيفي مستخدم مسبقاً',
         'employee_type' => 'نوع الموظف',
         'gender' => 'الجنس',

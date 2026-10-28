@@ -149,6 +149,48 @@ class WorkOrderItem extends Model
         return $this->hasMany(WorkOrderItemNote::class);
     }
 
+    /**
+     * Resolve a note that belongs to THIS line.
+     *
+     * The note has to belong to the line in the URL. Loading it by its
+     * own id let a note of another line — or of another work order —
+     * be deleted through the URL of an open work order.
+     *
+     * The centre scope is dropped on purpose: the work order decides
+     * which centre its lines belong to. The tenant is re-checked
+     * explicitly, because that scope carried it.
+     */
+    public function scopedNote(mixed $noteId): WorkOrderItemNote
+    {
+        /** @var WorkOrderItemNote $note */
+        $note = $this->itemNotes()
+            ->withoutGlobalScope('center_scoped')
+            ->where('tenant_id', $this->tenant_id)
+            ->whereKey($noteId)
+            ->firstOrFail();
+
+        return $note;
+    }
+
+    /**
+     * Resolve a part line that belongs to THIS line.
+     *
+     * The part has to belong to the line in the URL. Loading it by its
+     * own id let a part of another line be edited or deleted through
+     * the URL of an open work order.
+     */
+    public function scopedPart(mixed $partId): WorkOrderItemPart
+    {
+        /** @var WorkOrderItemPart $part */
+        $part = $this->parts()
+            ->withoutGlobalScope('center_scoped')
+            ->where('tenant_id', $this->tenant_id)
+            ->whereKey($partId)
+            ->firstOrFail();
+
+        return $part;
+    }
+
     public function laborEntries(): HasMany
     {
         return $this->hasMany(WorkOrderLaborEntry::class);

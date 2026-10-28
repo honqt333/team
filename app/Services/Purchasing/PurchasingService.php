@@ -194,7 +194,34 @@ class PurchasingService
             // Add items
             if (! empty($data['items'])) {
                 foreach ($data['items'] as $item) {
-                    $poItem = PurchaseOrderItem::findOrFail($item['purchase_order_item_id']);
+                    // The line has to belong to THIS purchase order.
+                    // Loading it by its own id accepted a line of
+                    // another order (or another tenant), and the stock
+                    // effect and the ordered-quantity effect then
+                    // landed on two different records.
+                    $poItem = $po->items()
+                        ->where('id', $item['purchase_order_item_id'])
+                        ->first();
+
+                    if (! $poItem) {
+                        throw ValidationException::withMessages([
+                            "items.{$item['purchase_order_item_id']}" => [
+                                __('purchasing.grn.item_not_in_order'),
+                            ],
+                        ]);
+                    }
+
+                    // The part is the one of the purchase order line.
+                    // The request used to carry its own part_id, and
+                    // the two were independent: the stock that arrived
+                    // could be a different part than the one ordered.
+                    if (! empty($item['part_id']) && (int) $item['part_id'] !== (int) $poItem->part_id) {
+                        throw ValidationException::withMessages([
+                            "items.{$item['purchase_order_item_id']}" => [
+                                __('purchasing.grn.part_mismatch'),
+                            ],
+                        ]);
+                    }
 
                     // Validate quantity (cannot receive more than pending)
                     if ($item['qty_received'] > $poItem->qty_pending) {
@@ -210,8 +237,8 @@ class PurchasingService
 
                     GrnItem::create([
                         'goods_received_note_id' => $grn->id,
-                        'purchase_order_item_id' => $item['purchase_order_item_id'],
-                        'part_id' => $item['part_id'],
+                        'purchase_order_item_id' => $poItem->id,
+                        'part_id' => $poItem->part_id,
                         'qty_received' => $item['qty_received'],
                         'unit_cost' => $item['unit_cost'],
                         'notes' => $item['notes'] ?? null,

@@ -12,10 +12,13 @@ use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
 
 class WorkOrderPartsController
 {
     use AuthorizesRequests;
+
+    public function __construct(protected WorkOrderPartsService $partsService) {}
 
     /**
      * Add part to item.
@@ -23,6 +26,9 @@ class WorkOrderPartsController
     public function addPart(Request $request, WorkOrder $work_order, WorkOrderItem $item): RedirectResponse|JsonResponse
     {
         $this->authorize('update', $work_order);
+
+        // The line has to belong to the work order in the URL.
+        $item = $work_order->scopedItem($item->id);
 
         $validated = $request->validate([
             'name' => 'required|string|max:255',
@@ -39,9 +45,8 @@ class WorkOrderPartsController
             'notes' => 'nullable|string|max:500',
         ]);
 
-        $partsService = app(WorkOrderPartsService::class);
         $allowNegative = auth()->user()->can('inventory.override_negative_stock');
-        $part = $partsService->addPart([
+        $part = $this->partsService->addPart([
             'work_order_id' => $work_order->id,
             'work_order_item_id' => $item->id,
             'tenant_id' => $work_order->tenant_id,
@@ -60,10 +65,20 @@ class WorkOrderPartsController
 
     /**
      * Update part.
+     *
+     * The change goes through WorkOrderPartsService, which applies the
+     * stock delta and reverses the issue move. It used to write
+     * straight onto the record, so the stock balance and the quantity
+     * shown on the work order could drift apart.
      */
     public function updatePart(Request $request, WorkOrder $work_order, WorkOrderItem $item, WorkOrderItemPart $part): RedirectResponse|JsonResponse
     {
         $this->authorize('update', $work_order);
+
+        // The line and the part both have to belong to the work order
+        // in the URL.
+        $item = $work_order->scopedItem($item->id);
+        $part = $item->scopedPart($part->id);
 
         $validated = $request->validate([
             'name' => 'required|string|max:255',
@@ -79,7 +94,15 @@ class WorkOrderPartsController
             'notes' => 'nullable|string|max:500',
         ]);
 
-        $part->update($validated);
+        $allowNegative = auth()->user()->can('inventory.override_negative_stock');
+
+        try {
+            $this->partsService->updatePart($part, $validated, $allowNegative);
+        } catch (ValidationException $e) {
+            return $request->expectsJson()
+                ? response()->json(['error' => $e->getMessage()], 422)
+                : redirect()->back()->withErrors($e->errors())->with('error', $e->getMessage());
+        }
 
         $work_order->logActivity('part_updated', __('work_orders.activities.actions.part_updated', ['name' => $validated['name']]));
 
@@ -92,13 +115,30 @@ class WorkOrderPartsController
 
     /**
      * Delete part.
+     *
+     * The removal goes through WorkOrderPartsService, which reverses
+     * the issue move before cancelling the line. It used to delete
+     * the record directly, which left the issued stock out of the
+     * warehouse balance.
      */
     public function deletePart(WorkOrder $work_order, WorkOrderItem $item, WorkOrderItemPart $part): RedirectResponse|JsonResponse
     {
         $this->authorize('update', $work_order);
 
+        // The line and the part both have to belong to the work order
+        // in the URL.
+        $item = $work_order->scopedItem($item->id);
+        $part = $item->scopedPart($part->id);
+
         $name = $part->name;
-        $part->delete();
+
+        try {
+            $this->partsService->removePart($part, auth()->id());
+        } catch (ValidationException $e) {
+            return request()->expectsJson()
+                ? response()->json(['error' => $e->getMessage()], 422)
+                : redirect()->back()->withErrors($e->errors())->with('error', $e->getMessage());
+        }
 
         $work_order->logActivity('part_deleted', __('work_orders.activities.actions.part_deleted', ['name' => $name]));
 

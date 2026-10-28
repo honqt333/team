@@ -23,6 +23,9 @@ class WorkOrderNotesController
     {
         $this->authorize('update', $work_order);
 
+        // The line has to belong to the work order in the URL.
+        $item = $work_order->scopedItem($item->id);
+
         $validated = $request->validate([
             'content' => 'required|string|max:2000',
         ]);
@@ -50,6 +53,11 @@ class WorkOrderNotesController
     public function deleteNote(WorkOrder $work_order, WorkOrderItem $item, WorkOrderItemNote $note): RedirectResponse|JsonResponse
     {
         $this->authorize('update', $work_order);
+
+        // The line and the note both have to belong to the work order
+        // in the URL.
+        $item = $work_order->scopedItem($item->id);
+        $note = $item->scopedNote($note->id);
 
         $note->delete();
 
@@ -94,6 +102,9 @@ class WorkOrderNotesController
     public function deleteGeneralNote(WorkOrder $work_order, WorkOrderItemNote $note): RedirectResponse|JsonResponse
     {
         $this->authorize('update', $work_order);
+
+        // The note has to belong to the work order in the URL.
+        $note = $work_order->scopedGeneralNote($note->id);
 
         $note->delete();
 

@@ -335,6 +335,46 @@ class WorkOrder extends Model
     }
 
     /**
+     * Resolve a service line that belongs to THIS work order.
+     *
+     * The line has to belong to the work order in the URL. Loading it
+     * by its own id let an open work order be used to edit, cancel or
+     * annotate a line of a closed one — the global scope only covers
+     * the tenant and the centre, never the parent.
+     *
+     * The centre scope is dropped on purpose: the work order decides
+     * which centre its lines belong to (the work order page loads
+     * them with the work order's own centre). The tenant is
+     * re-checked explicitly, because that scope carried it.
+     */
+    public function scopedItem(mixed $itemId): WorkOrderItem
+    {
+        /** @var WorkOrderItem $item */
+        $item = $this->items()
+            ->withoutGlobalScope('center_scoped')
+            ->where('tenant_id', $this->tenant_id)
+            ->whereKey($itemId)
+            ->firstOrFail();
+
+        return $item;
+    }
+
+    /**
+     * Resolve a general note that belongs to THIS work order.
+     */
+    public function scopedGeneralNote(mixed $noteId): WorkOrderItemNote
+    {
+        /** @var WorkOrderItemNote $note */
+        $note = $this->generalNotes()
+            ->withoutGlobalScope('center_scoped')
+            ->where('tenant_id', $this->tenant_id)
+            ->whereKey($noteId)
+            ->firstOrFail();
+
+        return $note;
+    }
+
+    /**
      * Retrieve the model for a bound value.
      */
     public function resolveRouteBinding($value, $field = null)

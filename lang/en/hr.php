@@ -83,6 +83,7 @@ return [
         'edit' => 'Edit Employee',
         'employee' => 'Employee',
         'employee_number' => 'Employee Number',
+        'wrong_center' => 'This employee belongs to another branch.',
         'employee_number_exists' => 'Employee number already exists',
         'employee_type' => 'Employee Type',
         'gender' => 'Gender',

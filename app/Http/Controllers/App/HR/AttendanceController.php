@@ -12,6 +12,8 @@ use App\Models\HR\Leave;
 use App\Support\TenancyContext;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules\Exists;
 use Inertia\Inertia;
 
 class AttendanceController extends Controller
@@ -154,8 +156,24 @@ class AttendanceController extends Controller
     {
         $this->authorize('create', Attendance::class);
 
+        $user = auth()->user();
+
+        // The employee has to be one the recorder may manage. The
+        // employee list is centre-scoped for everybody except the
+        // tenant super admin (EmployeeController::index), and the
+        // attendance row is what the payroll reads — so a record for
+        // an employee of another branch used to land on that branch's
+        // salary.
+        $isSuperAdmin = $user->hasRole('super_admin');
+
         $validated = $request->validate([
-            'employee_id' => 'required|exists:hr_employees,id',
+            'employee_id' => [
+                'required',
+                Rule::exists('hr_employees', 'id')
+                    ->where('tenant_id', $user->tenant_id)
+                    ->when(! $isSuperAdmin && $user->current_center_id !== null,
+                        fn (Exists $rule) => $rule->where('center_id', $user->current_center_id)),
+            ],
             'date' => 'required|date',
             'status' => 'required|in:present,absent,late,leave,holiday',
             'check_in' => 'nullable|date_format:H:i',
@@ -163,10 +181,14 @@ class AttendanceController extends Controller
             'notes' => 'nullable|string',
         ]);
 
+        $employee = Employee::findOrFail($validated['employee_id']);
+
         $attendance = Attendance::create([
-            'tenant_id' => auth()->user()->tenant_id,
-            'center_id' => auth()->user()->current_center_id,
-            'employee_id' => $validated['employee_id'],
+            'tenant_id' => $employee->tenant_id,
+            // The record belongs to the employee's branch, not to
+            // whoever happened to be logged in.
+            'center_id' => $employee->center_id,
+            'employee_id' => $employee->id,
             'date' => $validated['date'],
             'status' => $validated['status'],
             'check_in' => $validated['check_in'] ?? null,

@@ -10,6 +10,8 @@ return [
         'created' => 'Created',
         'delivery_note' => 'Delivery Note',
         'for_po' => 'For Po',
+        'item_not_in_order' => 'This line does not belong to the purchase order.',
+        'part_mismatch' => 'The part does not match the purchase order line.',
         'over_receiving_error' => 'Over Receiving Error',
         'over_reception' => 'Over Reception',
         'posted' => 'Posted',

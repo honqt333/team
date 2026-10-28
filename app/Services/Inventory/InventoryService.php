@@ -140,6 +140,14 @@ class InventoryService
             // Create move
             return InventoryMove::create([
                 'warehouse_id' => $warehouseId,
+                // The move has to carry the tenant and the centre of
+                // the warehouse it moved stock in. Without them the
+                // row is invisible to every scoped query — including
+                // WorkOrderItemPart::inventoryMove() — so reversing
+                // the issue silently did nothing and the stock was
+                // lost.
+                'tenant_id' => $this->resolveTenantId($warehouseId),
+                'center_id' => $this->resolveCenterId($warehouseId),
                 'part_id' => $partId,
                 'move_type' => InventoryMove::TYPE_RECEIPT,
                 'qty' => $qty,
@@ -220,6 +228,8 @@ class InventoryService
             // Create move (negative qty for issue)
             return InventoryMove::create([
                 'warehouse_id' => $warehouseId,
+                'tenant_id' => $this->resolveTenantId($warehouseId),
+                'center_id' => $this->resolveCenterId($warehouseId),
                 'part_id' => $partId,
                 'move_type' => $moveType ?? InventoryMove::TYPE_ISSUE_TO_WORKORDER,
                 'qty' => -$qty, // Negative for outgoing
@@ -310,6 +320,8 @@ class InventoryService
             // Create move
             return InventoryMove::create([
                 'warehouse_id' => $warehouseId,
+                'tenant_id' => $this->resolveTenantId($warehouseId),
+                'center_id' => $this->resolveCenterId($warehouseId),
                 'part_id' => $partId,
                 'move_type' => $moveType,
                 'qty' => $qty,
@@ -374,6 +386,8 @@ class InventoryService
             // Create reversal move
             $reversalMove = InventoryMove::create([
                 'warehouse_id' => $move->warehouse_id,
+                'tenant_id' => $this->resolveTenantId($move->warehouse_id),
+                'center_id' => $this->resolveCenterId($move->warehouse_id),
                 'part_id' => $move->part_id,
                 'move_type' => InventoryMove::TYPE_REVERSAL,
                 'qty' => $reversalQty,
@@ -523,6 +537,8 @@ class InventoryService
             // Create partial reversal move (positive qty - returning stock)
             return InventoryMove::create([
                 'warehouse_id' => $originalMove->warehouse_id,
+                'tenant_id' => $this->resolveTenantId($originalMove->warehouse_id),
+                'center_id' => $this->resolveCenterId($originalMove->warehouse_id),
                 'part_id' => $originalMove->part_id,
                 'move_type' => InventoryMove::TYPE_REVERSAL,
                 'qty' => $qty, // Positive - returning to stock
@@ -599,6 +615,11 @@ class InventoryService
 
     /**
      * Receive a transfer (receipts into destination warehouse).
+     *
+     * The quantity received may never exceed the quantity that was
+     * actually sent. Receiving more creates stock that never left the
+     * source warehouse — the issue move stays at the original
+     * quantity while the receipt inflates the destination.
      */
     public function receiveTransfer(
         InventoryTransfer $transfer,
@@ -612,9 +633,48 @@ class InventoryService
         }
 
         return DB::transaction(function () use ($transfer, $receivedQtys, $userId) {
-            foreach ($transfer->items as $item) {
-                // Get qty to receive (default to qty_sent if not specified)
-                $qtyToReceive = $receivedQtys[$item->id] ?? (float) $item->qty_sent;
+            // Reload the transfer and its items under a lock: the
+            // quantity that may be received is read from the database
+            // at this moment, not from a model that was loaded
+            // earlier.
+            $lockedTransfer = InventoryTransfer::query()
+                ->lockForUpdate()
+                ->findOrFail($transfer->id);
+
+            $items = $lockedTransfer->items()->lockForUpdate()->get();
+
+            $knownItemIds = $items->pluck('id')->map(fn ($id): string => (string) $id)->all();
+
+            foreach (array_keys($receivedQtys) as $itemId) {
+                if (! in_array((string) $itemId, $knownItemIds, true)) {
+                    throw ValidationException::withMessages([
+                        'received_qtys' => ['One of the received quantities does not belong to this transfer.'],
+                    ]);
+                }
+            }
+
+            foreach ($items as $item) {
+                $qtySent = (float) $item->qty_sent;
+
+                // Default to the full sent quantity when the caller did
+                // not specify one.
+                $qtyToReceive = array_key_exists($item->id, $receivedQtys)
+                    ? (float) $receivedQtys[$item->id]
+                    : $qtySent;
+
+                if ($qtyToReceive < 0) {
+                    throw ValidationException::withMessages([
+                        'received_qtys' => ['A received quantity cannot be negative.'],
+                    ]);
+                }
+
+                if ($qtyToReceive - 0.000001 > $qtySent) {
+                    throw ValidationException::withMessages([
+                        'received_qtys' => [
+                            'The received quantity ('.$qtyToReceive.') exceeds the quantity sent ('.$qtySent.').',
+                        ],
+                    ]);
+                }
 
                 if ($qtyToReceive <= 0) {
                     continue;
@@ -622,14 +682,14 @@ class InventoryService
 
                 // Create receipt move in destination warehouse
                 $move = $this->receipt(
-                    warehouseId: $transfer->to_warehouse_id,
+                    warehouseId: $lockedTransfer->to_warehouse_id,
                     partId: $item->part_id,
                     qty: $qtyToReceive,
                     unitCost: (float) $item->unit_cost,
                     userId: $userId,
                     referenceType: InventoryTransferItem::class,
                     referenceId: $item->id,
-                    notes: 'Transfer from '.$transfer->fromWarehouse->name
+                    notes: 'Transfer from '.$lockedTransfer->fromWarehouse->name
                 );
 
                 // Update item with receive info
@@ -640,13 +700,13 @@ class InventoryService
             }
 
             // Update transfer status
-            $transfer->update([
+            $lockedTransfer->update([
                 'status' => InventoryTransfer::STATUS_RECEIVED,
                 'received_at' => now(),
                 'received_by' => $userId,
             ]);
 
-            return $transfer->fresh(['items.part', 'fromWarehouse', 'toWarehouse']);
+            return $lockedTransfer->fresh(['items.part', 'fromWarehouse', 'toWarehouse']);
         });
     }
 

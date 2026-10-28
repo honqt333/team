@@ -8,9 +8,11 @@ use App\Http\Controllers\Controller;
 use App\Models\GoodsReceivedNote;
 use App\Models\PurchaseOrder;
 use App\Services\Purchasing\PurchasingService;
+use App\Support\TenancyContext;
 use Exception;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 
 class GoodsReceivedNotesController extends Controller
@@ -46,13 +48,20 @@ class GoodsReceivedNotesController extends Controller
         $this->authorize('create', GoodsReceivedNote::class);
 
         $validated = $request->validate([
-            'warehouse_id' => 'required|exists:warehouses,id',
+            'warehouse_id' => [
+                'required',
+                // The warehouse has to belong to this tenant.
+                Rule::exists('warehouses', 'id')->where('tenant_id', TenancyContext::tenantId()),
+            ],
             'received_date' => 'required|date',
             'delivery_note' => 'nullable|string|max:100',
             'notes' => 'nullable|string|max:1000',
             'items' => 'required|array|min:1',
-            'items.*.purchase_order_item_id' => 'required|exists:purchase_order_items,id',
-            'items.*.part_id' => 'required|exists:parts,id',
+            // The line has to belong to the purchase order in the URL,
+            // and the part is derived from that line — the service
+            // refuses a line of another order and a mismatched part.
+            'items.*.purchase_order_item_id' => 'required|integer',
+            'items.*.part_id' => 'nullable|integer',
             'items.*.qty_received' => 'required|numeric|min:0.001',
             'items.*.unit_cost' => 'required|numeric|min:0',
         ]);

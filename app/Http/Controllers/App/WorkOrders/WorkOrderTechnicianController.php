@@ -23,6 +23,9 @@ class WorkOrderTechnicianController
     {
         $this->authorize('update', $work_order);
 
+        // The line has to belong to the work order in the URL.
+        $item = $work_order->scopedItem($item->id);
+
         $validated = $request->validate([
             'status' => 'required|in:'.implode(',', WorkOrderItem::STATUSES),
         ]);
@@ -60,6 +63,9 @@ class WorkOrderTechnicianController
     public function assignTechnician(Request $request, WorkOrder $work_order, WorkOrderItem $item): RedirectResponse|JsonResponse
     {
         $this->authorize('update', $work_order);
+
+        // The line has to belong to the work order in the URL.
+        $item = $work_order->scopedItem($item->id);
 
         $validated = $request->validate([
             'user_id' => 'required|exists:users,id',
@@ -109,6 +115,9 @@ class WorkOrderTechnicianController
     public function removeTechnician(WorkOrder $work_order, WorkOrderItem $item, User $user): RedirectResponse|JsonResponse
     {
         $this->authorize('update', $work_order);
+
+        // The line has to belong to the work order in the URL.
+        $item = $work_order->scopedItem($item->id);
 
         $name = $user->name;
         $item->technicians()->detach($user->id);

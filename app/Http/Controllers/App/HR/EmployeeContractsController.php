@@ -15,6 +15,13 @@ class EmployeeContractsController extends Controller
     {
         $this->authorize('create', EmployeeContract::class);
 
+        // The employee has to be one the current user may manage.
+        // The employee list is centre-scoped for everybody except the
+        // tenant super admin (EmployeeController::index), so a
+        // contract could otherwise be created for an employee of
+        // another branch — and carry that branch's salary data.
+        $this->assertEmployeeInScope($employee);
+
         $validated = $request->validate([
             'contract_number' => 'required|string|unique:hr_employee_contracts,contract_number',
             'start_date' => 'required|date',
@@ -35,6 +42,27 @@ class EmployeeContractsController extends Controller
         ]);
 
         return back()->with('success', __('common.saved_success'));
+    }
+
+    /**
+     * Is the employee inside the scope of the current user?
+     *
+     * The tenant super admin manages every branch of the tenant — the
+     * employee list gives them the whole tenant and lets them filter
+     * by centre. Everybody else only sees their own centre.
+     */
+    private function assertEmployeeInScope(Employee $employee): void
+    {
+        $user = auth()->user();
+
+        if ($user->hasRole('super_admin')) {
+            return;
+        }
+
+        if ($employee->center_id !== null && $user->current_center_id !== null
+            && (int) $employee->center_id !== (int) $user->current_center_id) {
+            abort(403, __('hr.employees.wrong_center'));
+        }
     }
 
     public function update(Request $request, EmployeeContract $contract)

@@ -157,6 +157,9 @@ class WorkOrderItemController
     {
         $this->authorize('update', $work_order);
 
+        // The line has to belong to the work order in the URL.
+        $item = $work_order->scopedItem($item->id);
+
         $validated = $request->validate([
             'title' => 'nullable|string|max:255',
             'qty' => 'required|numeric|min:0.01',
@@ -214,6 +217,9 @@ class WorkOrderItemController
     public function deleteItem(WorkOrder $work_order, WorkOrderItem $item): RedirectResponse
     {
         $this->authorize('update', $work_order);
+
+        // The line has to belong to the work order in the URL.
+        $item = $work_order->scopedItem($item->id);
 
         $hasActiveParts = $item->parts()
             ->whereNotIn('status', [

@@ -27,7 +27,30 @@ class InvoicePolicy
     public function view(User $user, Invoice $invoice): bool
     {
         return $user->can(Permissions::INVOICES_VIEW)
-            && $user->tenant_id === $invoice->tenant_id;
+            && $user->tenant_id === $invoice->tenant_id
+            && $this->inCurrentCenter($user, $invoice);
+    }
+
+    /**
+     * Is the invoice inside the user's current centre?
+     *
+     * The invoice list is filtered by the current centre
+     * (InvoicesController::salesIndex), so the detail and print pages
+     * have to be filtered the same way. The route binding deliberately
+     * drops the centre scope (it resolves within the tenant), which
+     * made knowing — or guessing — an invoice id enough to read and
+     * print another branch's invoice.
+     *
+     * A record that belongs to no centre is tenant-wide, and a user
+     * with no centre selected has no centre restriction.
+     */
+    private function inCurrentCenter(User $user, Invoice $invoice): bool
+    {
+        if ($invoice->center_id === null || $user->current_center_id === null) {
+            return true;
+        }
+
+        return (int) $invoice->center_id === (int) $user->current_center_id;
     }
 
     /**
@@ -50,6 +73,7 @@ class InvoicePolicy
         // check enforces the only-editable-in-draft semantics.
         return $user->can(Permissions::INVOICES_CREATE)
             && $user->tenant_id === $invoice->tenant_id
+            && $this->inCurrentCenter($user, $invoice)
             && $invoice->status === 'draft'; // Can only update drafts
     }
 
@@ -65,6 +89,7 @@ class InvoicePolicy
         // gates the actual destructive operation.
         return $user->can(Permissions::INVOICES_CREATE)
             && $user->tenant_id === $invoice->tenant_id
+            && $this->inCurrentCenter($user, $invoice)
             && $invoice->status === 'draft'; // Can only delete drafts
     }
 
@@ -79,6 +104,7 @@ class InvoicePolicy
     {
         return $user->can(Permissions::PURCHASE_PAYMENTS_MANAGE)
             && $user->tenant_id === $invoice->tenant_id
+            && $this->inCurrentCenter($user, $invoice)
             && $invoice->payment_status !== 'paid';
     }
 }
