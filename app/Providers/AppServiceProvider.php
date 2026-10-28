@@ -8,6 +8,7 @@ use App\Contracts\CustomerPortalOtpChannel;
 use App\Models\AdminUser;
 use App\Models\AppointmentMessageDelivery;
 use App\Models\Center;
+use App\Models\CompanyTransaction;
 use App\Models\Customer;
 use App\Models\Department;
 use App\Models\HR\Attendance;
@@ -39,6 +40,7 @@ use App\Observers\PaymentObserver;
 use App\Observers\WorkOrderItemObserver;
 use App\Observers\WorkOrderObserver;
 use App\Policies\AppointmentMessageDeliveryPolicy;
+use App\Policies\CompanyTransactionPolicy;
 use App\Policies\CustomerPolicy;
 use App\Policies\DepartmentPolicy;
 use App\Policies\EmployeeContractPolicy;
@@ -186,6 +188,7 @@ class AppServiceProvider extends ServiceProvider
 
         // Register policies
         Gate::policy(Customer::class, CustomerPolicy::class);
+        Gate::policy(CompanyTransaction::class, CompanyTransactionPolicy::class);
         Gate::policy(Vehicle::class, VehiclePolicy::class);
         Gate::policy(WorkOrder::class, WorkOrderPolicy::class);
         Gate::policy(Department::class, DepartmentPolicy::class);

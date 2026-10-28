@@ -9,6 +9,7 @@ use App\Models\TenantZatcaSetting;
 use App\Models\User;
 use Database\Seeders\PerformanceBaselineSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Facades\Http;
 use Tests\TestCase;
 
@@ -181,22 +182,155 @@ class ZatcaOnboardingTest extends TestCase
         $this->actingAs($user)->post('/app/settings/zatca/csr', ['environment' => 'simulation']);
         $this->actingAs($user)->post('/app/settings/zatca/compliance', ['otp' => '123456']);
 
+        // The OTP 123456 path stores a locally fabricated CSID. The
+        // credential check has to notice that, so use a real-looking
+        // one here to exercise the "everything executable passed"
+        // branch.
+        $setting = TenantZatcaSetting::where('tenant_id', $tenant->id)->first();
+        $setting->fill(['compliance_csid' => 'REAL-COMPLIANCE-CSID-0001'])->save();
+
+        Http::fake(['*' => Http::response([], 200)]);
+
         $response = $this->actingAs($user)->postJson('/app/settings/zatca/check');
 
         $response->assertStatus(200);
         $response->assertJsonStructure([
             'status',
             'message',
+            'all_passed',
             'checks' => [
-                '*' => ['name', 'status', 'code'],
+                '*' => ['name', 'status', 'code', 'executed', 'detail'],
             ],
         ]);
-        $response->assertJson([
-            'status' => 'success',
-        ]);
+
+        // The four invoice checks cannot be executed by this build, so
+        // the step must NOT report a blanket success.
+        $response->assertJsonPath('status', 'incomplete');
+        $response->assertJsonPath('all_passed', false);
+
+        $checks = $response->json('checks');
+        $this->assertCount(6, $checks);
+
+        $documentCodes = ['ZATCA-SIMP-01', 'ZATCA-CR-02', 'ZATCA-STD-03', 'ZATCA-DB-04'];
+
+        $documentChecks = array_values(array_filter(
+            $checks,
+            fn (array $check): bool => in_array($check['code'], $documentCodes, true)
+        ));
+
+        $this->assertCount(4, $documentChecks);
+
+        foreach ($documentChecks as $check) {
+            $this->assertSame('NOT_EXECUTED', $check['status']);
+            $this->assertFalse($check['executed']);
+        }
+
+        // Nothing may claim PASSED for a check that never ran.
+        foreach ($checks as $check) {
+            if ($check['status'] === 'PASSED') {
+                $this->assertTrue($check['executed']);
+            }
+        }
     }
 
-    public function test_step_4_request_production_csid_and_activate(): void
+    public function test_step_3_fails_when_the_compliance_credential_is_only_a_local_simulation(): void
+    {
+        app(PerformanceBaselineSeeder::class)->run();
+
+        $tenant = Tenant::first();
+        $this->enableTaxForTenant($tenant);
+        $user = User::where('tenant_id', $tenant->id)->where('is_system_admin', true)->first();
+
+        $this->actingAs($user)->post('/app/settings/zatca/csr', ['environment' => 'simulation']);
+        $this->actingAs($user)->post('/app/settings/zatca/compliance', ['otp' => '123456']);
+
+        Http::fake(['*' => Http::response([], 200)]);
+
+        $response = $this->actingAs($user)->postJson('/app/settings/zatca/check');
+
+        // The OTP 123456 path stores a fabricated CSID, so the
+        // credential check must fail rather than pass.
+        $response->assertStatus(200);
+        $response->assertJsonPath('status', 'failed');
+        $response->assertJsonPath('all_passed', false);
+
+        $credentialCheck = collect($response->json('checks'))
+            ->firstWhere('code', 'ZATCA-CRED-00');
+
+        $this->assertSame('FAILED', $credentialCheck['status']);
+        $this->assertStringContainsString('محاكاة محلية', $credentialCheck['detail']);
+    }
+
+    public function test_step_3_reports_a_failed_check_when_the_gateway_is_unreachable(): void
+    {
+        app(PerformanceBaselineSeeder::class)->run();
+
+        $tenant = Tenant::first();
+        $this->enableTaxForTenant($tenant);
+        $user = User::where('tenant_id', $tenant->id)->where('is_system_admin', true)->first();
+
+        $this->actingAs($user)->post('/app/settings/zatca/csr', ['environment' => 'simulation']);
+        $this->actingAs($user)->post('/app/settings/zatca/compliance', ['otp' => '123456']);
+
+        Http::fake(fn () => throw new ConnectionException('network down'));
+
+        $response = $this->actingAs($user)->postJson('/app/settings/zatca/check');
+
+        $response->assertStatus(200);
+        $response->assertJsonPath('status', 'failed');
+        $response->assertJsonPath('all_passed', false);
+    }
+
+    public function test_generated_key_and_csr_are_real_openssl_material(): void
+    {
+        app(PerformanceBaselineSeeder::class)->run();
+
+        $tenant = Tenant::first();
+        $this->enableTaxForTenant($tenant);
+        $user = User::where('tenant_id', $tenant->id)->where('is_system_admin', true)->first();
+
+        $this->actingAs($user)->post('/app/settings/zatca/csr', ['environment' => 'simulation']);
+
+        $setting = TenantZatcaSetting::where('tenant_id', $tenant->id)->first();
+
+        // The old implementation always fell through to a fabricated
+        // PEM (a random blob, and a "CSR" that was really base64 of a
+        // VAT number). ZATCA rejects both.
+        $this->assertStringContainsString('PRIVATE KEY', (string) $setting->private_key);
+        $this->assertNotFalse(
+            @openssl_pkey_get_private((string) $setting->private_key),
+            'The stored private key is not a readable EC key.'
+        );
+
+        $this->assertStringContainsString('CERTIFICATE REQUEST', (string) $setting->csr_content);
+
+        // A real certificate request is a DER SEQUENCE. The fabricated
+        // one this service used to store was base64 of a plain string
+        // ("ZATCA:<vat>:<serial>"), which decodes to no structure at all.
+        $csrBody = (string) preg_replace('/-----[^-]+-----|\s+/', '', (string) $setting->csr_content);
+        $der = base64_decode($csrBody, true);
+
+        $this->assertNotFalse($der);
+        $this->assertNotSame('', $der);
+        $this->assertSame(
+            0x30,
+            ord((string) $der[0]),
+            'The stored CSR is not a DER-encoded certificate request.'
+        );
+    }
+
+    public function test_the_wizard_does_not_fabricate_a_passed_result_in_the_browser(): void
+    {
+        $source = (string) file_get_contents(resource_path('js/Pages/Settings/Zatca/Index.vue'));
+
+        // The previous implementation marked every check as passed from
+        // a setTimeout, without ever calling the server.
+        $this->assertStringNotContainsString('c.passed = true', $source);
+        $this->assertStringNotContainsString('passed: props.setting.has_compliance_csid', $source);
+        $this->assertStringContainsString('/app/settings/zatca/check', $source);
+    }
+
+    public function test_step_4_outside_production_produces_a_labelled_simulation_not_a_live_link(): void
     {
         app(PerformanceBaselineSeeder::class)->run();
 
@@ -214,9 +348,17 @@ class ZatcaOnboardingTest extends TestCase
         $response->assertRedirect();
 
         $setting = TenantZatcaSetting::where('tenant_id', $tenant->id)->first();
-        $this->assertEquals(TenantZatcaSetting::STATUS_ACTIVE, $setting->onboarding_status);
-        $this->assertNotEmpty($setting->production_csid);
-        $this->assertTrue($setting->isPhase2Active());
+
+        // A simulation must never look like a live production link.
+        $this->assertEquals(TenantZatcaSetting::STATUS_SIMULATED, $setting->onboarding_status);
+        $this->assertStringStartsWith(
+            'SIM_PROD_CSID_',
+            (string) $setting->production_csid
+        );
+        $this->assertFalse($setting->isPhase2Active());
+        $this->assertTrue($setting->isSimulated());
+        $this->assertFalse($setting->qr_enabled);
+        $this->assertNull($setting->production_csid_expires_at);
     }
 
     public function test_reset_onboarding_clears_data(): void

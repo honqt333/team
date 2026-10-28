@@ -13,7 +13,10 @@ use App\Models\Invoice;
 use App\Models\Supplier;
 use App\Models\Tenant;
 use App\Models\User;
+use App\Support\Permissions;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Spatie\Permission\Models\Permission;
+use Spatie\Permission\PermissionRegistrar;
 use Tests\TestCase;
 
 class CompanyTransactionsTest extends TestCase
@@ -34,6 +37,19 @@ class CompanyTransactionsTest extends TestCase
     {
         parent::setUp();
 
+        // The company transactions are guarded by CompanyTransactionPolicy
+        // (audit finding #35/#36): the write and approve abilities need
+        // the invoice permissions, which is what the financial roles
+        // (super_admin, branch_manager, accountant) actually hold.
+        app(PermissionRegistrar::class)->forgetCachedPermissions();
+
+        foreach ([
+            Permissions::INVOICES_VIEW,
+            Permissions::INVOICES_CREATE,
+        ] as $permission) {
+            Permission::findOrCreate($permission, 'web');
+        }
+
         $this->tenant = Tenant::factory()->create();
         $this->center = Center::factory()->create(['tenant_id' => $this->tenant->id]);
 
@@ -43,6 +59,15 @@ class CompanyTransactionsTest extends TestCase
         ]);
 
         $this->user->centers()->attach($this->center->id, ['tenant_id' => $this->tenant->id]);
+
+        app(PermissionRegistrar::class)->setPermissionsTeamId($this->tenant->id);
+
+        $this->user->givePermissionTo([
+            Permissions::INVOICES_VIEW,
+            Permissions::INVOICES_CREATE,
+        ]);
+
+        $this->user->refresh();
 
         $this->revenueCategory = IncomeCategory::create([
             'tenant_id' => $this->tenant->id,

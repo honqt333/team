@@ -68,7 +68,10 @@
                         </Tooltip>
 
                         <!-- Add Payment Button -->
-                        <Tooltip v-if="balance > 0.01" :content="$t('payments.add_payment')">
+                        <Tooltip
+                            v-if="balance > 0.01 && canRecordPayment"
+                            :content="$t('payments.add_payment')"
+                        >
                             <button
                                 @click="showPaymentModal = true"
                                 class="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white rounded-xl transition-all font-bold text-xs shadow-sm hover:shadow"
@@ -1092,7 +1095,7 @@
                     </h3>
                     <div class="flex items-center gap-2">
                         <button
-                            v-if="balance > 0.01"
+                            v-if="balance > 0.01 && canRecordPayment"
                             @click="showPaymentModal = true"
                             class="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition-all shadow-sm shadow-emerald-500/10 active:scale-95 shrink-0"
                         >
@@ -1256,7 +1259,7 @@
                                             {{ $t('payments.no_payments_desc') }}
                                         </p>
                                         <button
-                                            v-if="balance > 0.01"
+                                            v-if="balance > 0.01 && canRecordPayment"
                                             @click="showPaymentModal = true"
                                             class="flex items-center gap-1.5 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition-all shadow-md shadow-emerald-500/20 active:scale-95"
                                         >
@@ -1317,6 +1320,18 @@ const props = defineProps({
 const { t } = useI18n();
 const { confirm } = useConfirm();
 const { toEnglish, formatCurrency } = useNumberFormat();
+
+const page = usePage();
+
+/**
+ * Recording a payment is gated by the server on the
+ * `purchasing.payments.manage` permission (InvoicePolicy::recordPayment).
+ * The same flag hides the button here, so a user without it is not
+ * offered an action that would only answer 403.
+ */
+const canRecordPayment = computed(
+    () => page.props.auth?.permissions?.includes('purchasing.payments.manage') ?? false
+);
 
 const formatCurrencyEnglish = (amount) => {
     return (

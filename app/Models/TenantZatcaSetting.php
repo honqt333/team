@@ -29,6 +29,16 @@ class TenantZatcaSetting extends Model
 
     public const STATUS_ACTIVE = 'active';
 
+    /**
+     * The onboarding completed against a locally fabricated credential.
+     *
+     * This state is only reachable outside a real server. It exists so
+     * a simulated credential can never be mistaken for a live ZATCA
+     * certificate: `isPhase2Active()` only answers true for
+     * STATUS_ACTIVE, and the QR flag is never switched on here.
+     */
+    public const STATUS_SIMULATED = 'simulated';
+
     public const STATUS_FAILED = 'failed';
 
     public const ENV_SANDBOX = 'sandbox';
@@ -247,5 +257,17 @@ class TenantZatcaSetting extends Model
     public function isPhase2Active(): bool
     {
         return $this->onboarding_status === self::STATUS_ACTIVE && ! empty($this->production_csid);
+    }
+
+    /**
+     * Is this row holding a locally fabricated (simulated) credential?
+     *
+     * A simulated row is a development convenience, never a live ZATCA
+     * certificate. The UI and the billing code use this to refuse to
+     * treat it as a production integration.
+     */
+    public function isSimulated(): bool
+    {
+        return $this->onboarding_status === self::STATUS_SIMULATED;
     }
 }

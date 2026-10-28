@@ -8,7 +8,9 @@ use App\Http\Controllers\Controller;
 use App\Models\InventoryMove;
 use App\Models\Warehouse;
 use App\Services\Inventory\InventoryService;
+use App\Support\TenancyContext;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 
 class InventoryMoveController extends Controller
@@ -89,9 +91,24 @@ class InventoryMoveController extends Controller
     {
         $this->authorize('create', [InventoryMove::class, 'receipt']);
 
+        $tenantId = TenancyContext::tenantId();
+
         $validated = $request->validate([
-            'warehouse_id' => 'required|exists:warehouses,id',
-            'part_id' => 'required|exists:parts,id',
+            // The warehouse and the part must belong to the caller's
+            // own tenant. A bare `exists:` accepted another tenant's
+            // ids, and the service (which looks the balance up by
+            // its natural key, bypassing the global scopes) then
+            // adjusted that tenant's stock.
+            'warehouse_id' => [
+                'required',
+                'integer',
+                Rule::exists('warehouses', 'id')->where('tenant_id', $tenantId),
+            ],
+            'part_id' => [
+                'required',
+                'integer',
+                Rule::exists('parts', 'id')->where('tenant_id', $tenantId),
+            ],
             'qty' => 'required|numeric|min:0.001',
             'unit_cost' => 'required|numeric|min:0',
             'notes' => 'nullable|string|max:500',
@@ -116,9 +133,19 @@ class InventoryMoveController extends Controller
     {
         $this->authorize('create', [InventoryMove::class, 'adjustment']);
 
+        $tenantId = TenancyContext::tenantId();
+
         $validated = $request->validate([
-            'warehouse_id' => 'required|exists:warehouses,id',
-            'part_id' => 'required|exists:parts,id',
+            'warehouse_id' => [
+                'required',
+                'integer',
+                Rule::exists('warehouses', 'id')->where('tenant_id', $tenantId),
+            ],
+            'part_id' => [
+                'required',
+                'integer',
+                Rule::exists('parts', 'id')->where('tenant_id', $tenantId),
+            ],
             'qty' => 'required|numeric|not_in:0',
             'unit_cost' => 'nullable|numeric|min:0',
             'notes' => 'required|string|max:500',

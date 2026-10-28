@@ -11,7 +11,9 @@ use App\Models\WorkOrder;
 use App\Models\WorkOrderItemPart;
 use App\Services\Inventory\InventoryService;
 use App\Services\Inventory\WorkOrderPartsService;
+use App\Support\TenancyContext;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 
 class WorkOrderPartsController extends Controller
@@ -30,8 +32,21 @@ class WorkOrderPartsController extends Controller
 
         $validated = $request->validate([
             'work_order_item_id' => 'nullable|exists:work_order_items,id',
-            'part_id' => 'nullable|exists:parts,id',
-            'warehouse_id' => 'nullable|exists:warehouses,id',
+            // Tenant-scoped: a bare `exists:` accepted another
+            // tenant's part/warehouse ids, and the inventory service
+            // (which resolves the balance by natural key, bypassing
+            // the global scopes) then issued stock from that tenant's
+            // warehouse.
+            'part_id' => [
+                'nullable',
+                'integer',
+                Rule::exists('parts', 'id')->where('tenant_id', TenancyContext::tenantId()),
+            ],
+            'warehouse_id' => [
+                'nullable',
+                'integer',
+                Rule::exists('warehouses', 'id')->where('tenant_id', TenancyContext::tenantId()),
+            ],
             'name' => 'required|string|max:255',
             'part_number' => 'nullable|string|max:100',
             'source' => 'required|in:warehouse,external,customer',
@@ -115,8 +130,21 @@ class WorkOrderPartsController extends Controller
 
         $validated = $request->validate([
             'work_order_item_id' => 'nullable|exists:work_order_items,id',
-            'part_id' => 'nullable|exists:parts,id',
-            'warehouse_id' => 'nullable|exists:warehouses,id',
+            // Tenant-scoped: a bare `exists:` accepted another
+            // tenant's part/warehouse ids, and the inventory service
+            // (which resolves the balance by natural key, bypassing
+            // the global scopes) then issued stock from that tenant's
+            // warehouse.
+            'part_id' => [
+                'nullable',
+                'integer',
+                Rule::exists('parts', 'id')->where('tenant_id', TenancyContext::tenantId()),
+            ],
+            'warehouse_id' => [
+                'nullable',
+                'integer',
+                Rule::exists('warehouses', 'id')->where('tenant_id', TenancyContext::tenantId()),
+            ],
             'name' => 'required|string|max:255',
             'part_number' => 'nullable|string|max:100',
             'source' => 'required|in:warehouse,external,customer',
@@ -231,8 +259,16 @@ class WorkOrderPartsController extends Controller
     public function checkStock(Request $request)
     {
         $validated = $request->validate([
-            'warehouse_id' => 'required|exists:warehouses,id',
-            'part_id' => 'required|exists:parts,id',
+            'warehouse_id' => [
+                'required',
+                'integer',
+                Rule::exists('warehouses', 'id')->where('tenant_id', TenancyContext::tenantId()),
+            ],
+            'part_id' => [
+                'required',
+                'integer',
+                Rule::exists('parts', 'id')->where('tenant_id', TenancyContext::tenantId()),
+            ],
             'qty' => 'required|numeric|min:0',
         ]);
 

@@ -132,6 +132,27 @@ class SubscriptionPayment extends Model
     }
 
     /**
+     * Mark the payment as rejected because the gateway callback did not
+     * match this payment.
+     *
+     * Unlike markAsFailed() this does NOT tear down the subscription
+     * and its invoice. A mismatched callback proves that this
+     * transaction is not the one we were waiting for — it does not
+     * prove the payment failed, so the legitimate callback can still
+     * arrive and settle the payment.
+     */
+    public function markAsRejected(?string $reason = null, array $response = []): self
+    {
+        $this->update([
+            'status' => 'failed',
+            'failure_reason' => $reason,
+            'gateway_response' => $response,
+        ]);
+
+        return $this;
+    }
+
+    /**
      * Check if payment is successful.
      */
     public function isSuccessful(): bool

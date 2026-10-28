@@ -58,6 +58,9 @@ class ZatcaOnboardingController extends Controller
                 'onboarded_at' => $setting->onboarded_at?->format('Y-m-d H:i'),
                 'qr_enabled' => $setting->qr_enabled,
                 'is_active' => $setting->isPhase2Active(),
+                // A simulated credential must be visible in the UI as
+                // such — it is not a live ZATCA integration.
+                'is_simulated' => $setting->isSimulated(),
                 'last_error' => $setting->last_onboarding_error,
             ],
         ]);
@@ -150,9 +153,12 @@ class ZatcaOnboardingController extends Controller
         }
 
         try {
-            $this->zatcaService->requestProductionCsid($tenant);
+            $result = $this->zatcaService->requestProductionCsid($tenant);
 
-            return back()->with('success', 'مبروك! تم تفعيل الربط الإنتاجي مع هيئة الزكاة والضريبة والجمارك بنجاح.');
+            // The service decides whether this was a live exchange or
+            // a local simulation; the UI must not call a simulation a
+            // live production link.
+            return back()->with('success', $result['message']);
         } catch (Throwable $e) {
             return back()->withErrors(['error' => $e->getMessage()]);
         }

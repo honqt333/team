@@ -142,3 +142,67 @@ tests/Feature/System/        (14 ملف)
 الأداة الفعّالة لكلها: اختبار يرسل ID من **مستأجر آخر** (وليس نفس المستأجر) ويتوقع رفضاً. هذا يحوّل «مراجعة يدوية» إلى **بوابة آلية دائمة** — تماماً كما فعل `InertiaPageExistsTest` مع الصفحات البيضاء.
 
 **التوصية:** ابنِ `CrossTenantIdGuardTest` يمرّر على كل route يقبل معرّفاً، ويرسل معرّفاً من مستأجر آخر ويتوقع 403/422. هذا يغطي أنماط النتائج الـ 59 دفعة واحدة، بدل 59 إصلاحاً يدوياً.
+
+---
+
+# الدفعة 2 — سلامة مالية (منفَّذة)
+
+**الحالة المرجعية عند التنفيذ:** `HEAD caf13a0b`
+**النتائج المنفَّذة:** `#9` · `#5` · `#35`/`#36` · `#37` · `#46` · `#23`
+
+## ما عولج
+
+| # | الخلل المُثبَت | الإصلاح | الاختبار |
+|---|---|---|---|
+| **9** | `PaymentsController::store()` و`payFull()` يستدعيان `authorize('update', $invoice)` — وهي قدرة «تعديل مسودة» تشترط `status === 'draft'`، فالفاتورة الصادرة (`valid`) **رُفضت عند التحصيل** | استُخدمت القدرة الصحيحة `recordPayment`، والحذف عبر `PaymentPolicy::delete` | `IssuedInvoicePaymentTest` — 8 اختبارات / 20 assertion |
+| **5** | `InventoryService` كان يتحقق من المستودع والقطعة بـ`id` فقط — رصيد مخزون مستأجر آخر | `assertResourcesInScope()` يفحص `warehouses.tenant_id` و`parts.tenant_id` عند `receipt`/`issue`/`adjust`/`reverseMove`/`getStockLevel`/`createPartialReversal`، وقواعد `exists:` في المتحكمين تقيّد `tenant_id` | `CrossTenantInventoryScopeTest` — 8 / 16 |
+| **35/36** | `CompanyTransactionController` بلا أي `authorize()` — أي مستخدم داخل المستأجر كان ينشئ ويعتمد معاملات مالية (والاعتماد يُصدر فاتورة ويسجّل دفعة) | `CompanyTransactionPolicy` (قراءة=`INVOICES_VIEW`، كتابة/اعتماد=`INVOICES_CREATE` + المستأجر + `status !== 'approved'`)، و`total_amount` صارت تُشتق على الخادم | `CompanyTransactionAuthorizationTest` — 11 / 32 |
+| **37** | **معالج ZATCA كان يعلن نجاحاً بلا اتصال بالهيئة** — ثلاث طرق مستقلة | ١) `runComplianceChecks()` كانت ترجع 4 نتائج `PASSED` ثابتة ⇒ صارت تُرجع `NOT_EXECUTED` صريحاً مع السبب، والفحوصات القابلة للتنفيذ (سلامة بيانات الاعتماد + الوصول للبوابة) تُنفَّذ فعلاً. ٢) `requestProductionCsid()` كانت تولّد `PROD_CSID_*` بـ`Str::random()` وتُفعّل `STATUS_ACTIVE` ⇒ صارت تُنفّذ POST حقيقياً إلى `{endpoint}/production/csids` وتقرأ `binarySecurityToken`/`secret`، وأي فشل **لا** يفعّل شيئاً. ٣) الواجهة نفسها كانت تُعلّم كل الفحوصات `passed = true` من `setTimeout` بلا نداء الخادم ⇒ صارت تقرأ النتيجة الحقيقية من الخادم | `ZatcaOnboardingTest` + `ZatcaProductionCsidExchangeTest` — 23 اختباراً / 161 assertion |
+| **46** | callback الاشتراك كان يفعّل الاشتراك بمجرد أن تقول البوابة «success» — بلا مطابقة المبلغ أو العملة أو المرجع | `PaymentCallbackValidator` يُستدعى داخل معاملة الإكمال: المرجع، المبلغ (تسامح سنت واحد)، العملة، و«عملية واحدة لا تسوّي دفعتين» (فحص عالمي يتجاوز عزل المستأجر) | `SubscriptionPaymentCallbackMatchingTest` — 7 / 24 |
+| **23** | `PaymentService::recordPayment()` لم يكن يقفل الفاتورة ولا يعيد قراءة الرصيد داخل المعاملة ⇒ دفعتان متزامنتان تُقبلان على نفس الرصيد | `lockForUpdate()` + إعادة قراءة الرصيد داخل المعاملة، و`recordFullPayment()` يسجّل رصيد الفاتورة **المقفلة** لا الرصيد القديم | `PaymentConcurrencySafetyTest` — 8 / 28 |
+
+## اكتشاف إضافي أثناء التنفيذ (#37) — لم يذكره التقرير
+
+**مفتاح التوقيع وطلب الشهادة (CSR) لم يكونا حقيقيين أبداً.**
+
+`generateCsr()` كان يستدعي `openssl_pkey_new()` بمصفوفة تحتوي `digest_alg` — وهي خيار **غير صالح** هناك، فيفشل الاستدعاء **دائماً**، ويسقط إلى «fallback» كان يبني:
+
+- «مفتاحاً خاصاً» = نص عشوائي (base64) ملفوفاً بترويسة `-----BEGIN EC PRIVATE KEY-----`
+- «طلب شهادة» = base64 لنص `ZATCA:{الرقم الضريبي}:{الرقم التسلسلي}`
+
+أي أن ZATCA كان سيرفض الاثنين. وأصلحها:
+
+```php
+$config = [
+    'private_key_bits' => 384,   // PHP >= 8.4 يفرض هذا الحد على كل مفاتيح EC
+    'private_key_type' => OPENSSL_KEYTYPE_EC,
+    'curve_name' => 'secp256k1',
+];
+```
+
+(384 هو الحد الأدنى الذي يقبله PHP؛ حجم المفتاح الفعلي يحدده المنحنى secp256k1 = 256 بت.) **وأُزيل الـ fallback نهائياً** — لا مفتاح مزيّف ولا CSR مزيّف.
+
+## نتيجة الدفعة 2 — بوابات الجودة
+
+```
+اختبارات PHP:  1047 ناجح / 1 فاشل / 5 متجاوز
+                (462 + 381 Feature أعلى مستوى · 140 Feature مجلدات فرعية · 64 Unit)
+PHPStan:        0 أخطاء في ملفات هذه الدفعة
+Pint:           نظيف في كل ملفاتي
+ESLint:         0 أخطاء
+Vitest:         29/29
+ترجمة ar/en:   0 مفاتيح ناقصة
+فحص المستأجر:  0 مخالفة
+composer audit: 0 · npm audit (runtime): 0
+```
+
+**الفشل الوحيد** ليس من هذه الدفعة: `PolicyPermissionReferenceTest` يفشل لأن `FeedbackPolicy` (ميزة «الملاحظات» التي تطوّرها عملية أخرى بالتوازي) لا تشير إلى سجلّ الصلاحيات بعد. لم ألمس ملفاتها قيد العمل؛ الفشل يظهر لحظة إنشاء ملفهم.
+
+## مبدأ «يثبت أن الكود القديم كان خاطئاً»
+
+كل إصلاح رافقه اختبار **يفشل على الكود القديم**. مُثبت تجريبياً لا بالافتراض:
+
+| الاختبار | مع تعطيل الإصلاح | بعد الإصلاح |
+|---|---|---|
+| `SubscriptionPaymentCallbackMatchingTest` | 5 من 7 **تفشل** | 7/7 ناجح |
+| `PaymentConcurrencySafetyTest` | 3 من 8 **تفشل** | 8/8 ناجح |

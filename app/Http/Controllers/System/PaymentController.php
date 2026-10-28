@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\System;
 
+use App\Exceptions\PaymentMismatchException;
 use App\Http\Controllers\Controller;
 use App\Models\Billing\Subscription;
 use App\Models\Billing\SubscriptionPayment;
@@ -11,6 +12,7 @@ use App\Models\PaymentSettings;
 use App\Services\Billing\PaymentCompletionService;
 use App\Services\Payment\PaymentManager;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -100,7 +102,23 @@ class PaymentController extends Controller
             // current admin user id for the audit log so we can trace who
             // triggered the payment on the system side.
             $adminUserId = auth('admin')->id();
-            $this->paymentCompletion->completePayment($payment, $result, $adminUserId);
+
+            try {
+                $this->paymentCompletion->completePayment($payment, $result, $adminUserId);
+            } catch (PaymentMismatchException $e) {
+                // The gateway transaction does not match the recorded
+                // payment — the subscription must not be activated.
+                Log::warning('System payment callback rejected', [
+                    'payment_id' => $payment->id,
+                    'tenant_id' => $payment->tenant_id,
+                    'gateway' => $payment->gateway,
+                    'reason' => $e->getMessage(),
+                ]);
+
+                $payment->markAsRejected($e->getMessage(), $result['raw_response'] ?? []);
+
+                return redirect()->route('system.payment.failed', ['payment' => $payment->id]);
+            }
 
             return redirect()->route('system.payment.success', ['payment' => $payment->id]);
         }

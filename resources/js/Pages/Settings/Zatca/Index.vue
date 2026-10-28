@@ -32,12 +32,23 @@
                     </svg>
                 </template>
                 <template #actions>
-                    <div v-if="setting.is_active" class="flex items-center gap-2">
+                    <div
+                        v-if="setting.is_active || setting.is_simulated"
+                        class="flex items-center gap-2"
+                    >
                         <span
+                            v-if="setting.is_active"
                             class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-700"
                         >
                             <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
                             <span>الربط نشط ومعتمد</span>
+                        </span>
+                        <span
+                            v-else
+                            class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300 border border-amber-300 dark:border-amber-700"
+                        >
+                            <span class="w-2 h-2 rounded-full bg-amber-500"></span>
+                            <span>محاكاة محلية — ليست شهادة صادرة من هيئة الزكاة</span>
                         </span>
                         <button
                             @click="confirmReset"
@@ -65,13 +76,18 @@
                                 'w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm transition-all duration-200 z-10',
                                 currentStep === idx + 1
                                     ? 'bg-emerald-600 text-white ring-4 ring-emerald-100 dark:ring-emerald-900/40 shadow-md'
-                                    : currentStep > idx + 1 || (idx + 1 === 4 && setting.is_active)
+                                    : currentStep > idx + 1 ||
+                                        (idx + 1 === 4 &&
+                                            (setting.is_active || setting.is_simulated))
                                       ? 'bg-emerald-500 text-white'
                                       : 'bg-gray-100 dark:bg-gray-700 text-gray-400',
                             ]"
                         >
                             <svg
-                                v-if="currentStep > idx + 1 || (idx + 1 === 4 && setting.is_active)"
+                                v-if="
+                                    currentStep > idx + 1 ||
+                                    (idx + 1 === 4 && (setting.is_active || setting.is_simulated))
+                                "
                                 class="w-5 h-5"
                                 fill="none"
                                 stroke="currentColor"
@@ -399,25 +415,31 @@
                     <div
                         v-for="(chk, idx) in complianceChecks"
                         :key="chk.code"
-                        class="p-4 bg-gray-50 dark:bg-gray-900/40 rounded-xl border border-gray-100 dark:border-gray-800 flex items-center justify-between"
+                        class="p-4 bg-gray-50 dark:bg-gray-900/40 rounded-xl border border-gray-100 dark:border-gray-800 flex items-start justify-between gap-4"
                     >
                         <div class="flex items-center gap-3">
                             <div
-                                class="w-8 h-8 rounded-lg bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 flex items-center justify-center font-bold text-xs"
+                                class="w-8 h-8 shrink-0 rounded-lg bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 flex items-center justify-center font-bold text-xs"
                             >
                                 0{{ idx + 1 }}
                             </div>
                             <div>
                                 <h5 class="text-sm font-bold text-gray-900 dark:text-white">
-                                    {{ chk.titleAr }}
+                                    {{ chk.name }}
                                 </h5>
                                 <span class="text-xs text-gray-500 font-mono">{{ chk.code }}</span>
+                                <p
+                                    v-if="chk.detail"
+                                    class="text-xs text-gray-500 dark:text-gray-400 mt-1 leading-relaxed"
+                                >
+                                    {{ chk.detail }}
+                                </p>
                             </div>
                         </div>
 
-                        <div>
+                        <div class="shrink-0">
                             <span
-                                v-if="chk.passed"
+                                v-if="chk.status === 'PASSED'"
                                 class="px-3 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300 flex items-center gap-1.5"
                             >
                                 <svg
@@ -436,6 +458,18 @@
                                 <span>ناجح (PASSED)</span>
                             </span>
                             <span
+                                v-else-if="chk.status === 'FAILED'"
+                                class="px-3 py-1 rounded-full text-xs font-bold bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-300"
+                            >
+                                <span>فاشل (FAILED)</span>
+                            </span>
+                            <span
+                                v-else-if="chk.status === 'NOT_EXECUTED'"
+                                class="px-3 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300"
+                            >
+                                <span>لم يُنفَّذ (NOT EXECUTED)</span>
+                            </span>
+                            <span
                                 v-else-if="runningChecks"
                                 class="px-3 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300 animate-pulse"
                             >
@@ -451,6 +485,21 @@
                     </div>
                 </div>
 
+                <!-- The result the server actually returned. It is never
+                     assumed to be a success: the invoice checks cannot be
+                     executed by this build, and the copy has to say so. -->
+                <div
+                    v-if="checksMessage"
+                    class="p-4 rounded-xl border text-xs leading-relaxed"
+                    :class="
+                        checksStatus === 'failed'
+                            ? 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-900/50 text-red-800 dark:text-red-300'
+                            : 'bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-900/50 text-amber-800 dark:text-amber-300'
+                    "
+                >
+                    {{ checksMessage }}
+                </div>
+
                 <div
                     class="flex items-center justify-between pt-4 border-t border-gray-100 dark:border-gray-700"
                 >
@@ -462,18 +511,16 @@
                     </button>
                     <div class="flex items-center gap-3">
                         <button
-                            v-if="!allPassed"
                             @click="runComplianceTests"
                             :disabled="runningChecks"
-                            class="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-sm shadow-sm transition-all disabled:opacity-50"
+                            class="px-6 py-2.5 bg-gray-600 hover:bg-gray-700 text-white rounded-xl font-bold text-sm shadow-sm transition-all disabled:opacity-50"
                         >
-                            {{ runningChecks ? 'جاري الفحص الآن...' : 'بدء فحص العينات التجريبية' }}
+                            {{ runningChecks ? 'جاري الفحص الآن...' : 'تشغيل الفحوصات' }}
                         </button>
                         <button
-                            v-else
                             @click="submitProduction"
                             :disabled="submittingProd"
-                            class="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-sm shadow-sm transition-all flex items-center gap-2"
+                            class="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-sm shadow-sm transition-all disabled:opacity-50 flex items-center gap-2"
                         >
                             <span>إصدار شهادة الإنتاج وتفعيل الربط الحي</span>
                             <svg
@@ -495,8 +542,60 @@
             </div>
 
             <!-- Step 4: Active Production CSID Dashboard -->
-            <div v-if="currentStep === 4 || setting.is_active" class="space-y-6">
+            <div
+                v-if="currentStep === 4 || setting.is_active || setting.is_simulated"
+                class="space-y-6"
+            >
+                <!-- A simulated credential must never be presented as a
+                     live, officially approved integration. -->
                 <div
+                    v-if="setting.is_simulated"
+                    class="bg-gradient-to-br from-amber-900 to-stone-950 rounded-3xl p-8 text-white relative overflow-hidden shadow-xl border border-amber-700/40"
+                >
+                    <div
+                        class="absolute -right-10 -bottom-10 w-60 h-60 rounded-full bg-amber-500/10 blur-3xl"
+                    ></div>
+                    <div
+                        class="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6"
+                    >
+                        <div class="space-y-2">
+                            <span
+                                class="px-3 py-1 rounded-full text-xs font-bold bg-amber-500/20 text-amber-300 border border-amber-400/30 flex items-center gap-1.5 w-fit"
+                            >
+                                <span class="w-2 h-2 rounded-full bg-amber-400"></span>
+                                <span>محاكاة محلية (Simulation) — ليست المرحلة الثانية الحية</span>
+                            </span>
+                            <h3 class="text-2xl font-black mt-2">
+                                معرّف إنتاج تجريبي فقط — لا يوجد اتصال حقيقي مع هيئة الزكاة
+                            </h3>
+                            <p class="text-xs text-amber-200/80 max-w-xl leading-relaxed">
+                                هذا المعرّف مُنشأ داخل هذا الخادم لأغراض التطوير فقط، ولم يصدر عن
+                                هيئة الزكاة والضريبة والجمارك، ولا يتم توليد أكواد QR ولا إرسال
+                                فواتير بناءً عليه. يلزم تبادل حقيقي مع بوابة الإنتاجية الحية لتفعيل
+                                الربط الفعلي.
+                            </p>
+                        </div>
+                        <div
+                            class="w-20 h-20 rounded-2xl bg-white/10 backdrop-blur border border-white/20 flex items-center justify-center shrink-0"
+                        >
+                            <svg
+                                class="w-10 h-10 text-amber-400"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                                />
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+                <div
+                    v-else
                     class="bg-gradient-to-br from-emerald-900 to-teal-950 rounded-3xl p-8 text-white relative overflow-hidden shadow-xl border border-emerald-700/40"
                 >
                     <div
@@ -577,7 +676,13 @@
                                 }}
                             </span>
                         </div>
-                        <p class="text-[11px] text-gray-500">تم الربط والاعتماد بنجاح</p>
+                        <p class="text-[11px] text-gray-500">
+                            {{
+                                setting.is_simulated
+                                    ? 'محاكاة محلية — لا يوجد اعتماد من الهيئة'
+                                    : 'تم الربط والاعتماد بنجاح'
+                            }}
+                        </p>
                     </div>
 
                     <div
@@ -587,7 +692,11 @@
                             صلاحية الشهادة الرقمية
                         </span>
                         <div class="text-sm font-black font-mono text-gray-900 dark:text-white">
-                            {{ setting.production_csid_expires_at || 'صالحة لمدة سنة' }}
+                            {{
+                                setting.is_simulated
+                                    ? 'لا تنطبق (محاكاة)'
+                                    : setting.production_csid_expires_at || 'صالحة لمدة سنة'
+                            }}
                         </div>
                         <p class="text-[11px] text-gray-500">تاريخ تجديد شهادة الإنتاج</p>
                     </div>
@@ -618,7 +727,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref } from 'vue';
 import { useForm, router } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import PageHeader from '@/Components/PageHeader.vue';
@@ -643,7 +752,7 @@ const props = defineProps({
 });
 
 const currentStep = ref(
-    props.setting.is_active
+    props.setting.is_active || props.setting.is_simulated
         ? 4
         : props.setting.has_compliance_csid
           ? 3
@@ -671,33 +780,17 @@ const otpForm = useForm({
 const runningChecks = ref(false);
 const submittingProd = ref(false);
 
-const complianceChecks = ref([
-    {
-        code: 'ZATCA-SIMP-01',
-        titleAr: 'فحص فاتورة ضريبية مبسطة (Simplified Tax Invoice)',
-        passed: props.setting.has_compliance_csid,
-    },
-    {
-        code: 'ZATCA-CR-02',
-        titleAr: 'فحص إشعار دائن مبسط (Simplified Credit Note)',
-        passed: props.setting.has_compliance_csid,
-    },
-    {
-        code: 'ZATCA-STD-03',
-        titleAr: 'فحص فاتورة ضريبية قياسية (Standard Tax Invoice)',
-        passed: props.setting.has_compliance_csid,
-    },
-    {
-        code: 'ZATCA-DB-04',
-        titleAr: 'فحص إشعار مدين قياسي (Standard Debit Note)',
-        passed: props.setting.has_compliance_csid,
-    },
-]);
-
-const allPassed = computed(() => complianceChecks.value.every((c) => c.passed));
+// The check list is filled by the server. It starts empty and is
+// NEVER optimistically marked as passed: the previous version set
+// `passed = true` from a setTimeout without ever calling the backend,
+// which is how the wizard could report a green result for checks that
+// had not run.
+const complianceChecks = ref([]);
+const checksStatus = ref(null);
+const checksMessage = ref('');
 
 const jumpToStepIfAllowed = (target) => {
-    if (props.setting.is_active) {
+    if (props.setting.is_active || props.setting.is_simulated) {
         currentStep.value = target;
         return;
     }
@@ -724,14 +817,40 @@ const submitOtp = () => {
     });
 };
 
-const runComplianceTests = () => {
+const runComplianceTests = async () => {
     runningChecks.value = true;
-    setTimeout(() => {
-        complianceChecks.value.forEach((c) => {
-            c.passed = true;
+    checksStatus.value = null;
+    checksMessage.value = '';
+
+    try {
+        const response = await fetch('/app/settings/zatca/check', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                Accept: 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-TOKEN': document
+                    .querySelector('meta[name="csrf-token"]')
+                    ?.getAttribute('content'),
+            },
         });
+
+        const result = await response.json();
+
+        complianceChecks.value = result.checks ?? [];
+        checksStatus.value = result.status ?? (response.ok ? 'success' : 'failed');
+        checksMessage.value = result.message ?? '';
+
+        if (!response.ok && !result.message) {
+            checksStatus.value = 'failed';
+            checksMessage.value = 'تعذر تشغيل فحوصات الامتثال.';
+        }
+    } catch (err) {
+        checksStatus.value = 'failed';
+        checksMessage.value = 'تعذر الاتصال بالخادم لتشغيل فحوصات الامتثال.';
+    } finally {
         runningChecks.value = false;
-    }, 1200);
+    }
 };
 
 const submitProduction = () => {

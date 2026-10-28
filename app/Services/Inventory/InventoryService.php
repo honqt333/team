@@ -18,6 +18,71 @@ use Illuminate\Validation\ValidationException;
 class InventoryService
 {
     /**
+     * Verify that the warehouse and the part belong to the authorized
+     * tenant before any stock is moved.
+     *
+     * WHY THIS EXISTS
+     *
+     * The balance row is identified by its natural key
+     * (warehouse_id + part_id), so every lookup in this service
+     * deliberately bypasses the global scopes:
+     *
+     *     InventoryBalance::query()->withoutGlobalScopes()
+     *         ->where('warehouse_id', $warehouseId)
+     *         ->where('part_id', $partId)
+     *
+     * That bypass is fine for the LOOKUP, but it also meant the
+     * service never checked whose resources it was touching. The
+     * controllers validated the two ids with a bare
+     * `exists:warehouses,id` / `exists:parts,id`, so a request could
+     * name another tenant's warehouse and part and the service would
+     * happily adjust that tenant's stock — recording the movement
+     * under the CURRENT tenant's context while pointing at the other
+     * tenant's resources.
+     *
+     * The check is TENANT-level, not center-level, on purpose: a
+     * stock transfer between two branches of the same tenant is a
+     * legitimate flow (InventoryTransfer is TenantScoped, and its
+     * from/to warehouses may sit in different centers). Which centers
+     * a given user may pick from is a controller concern; the tenant
+     * boundary is the service's.
+     */
+    protected function assertResourcesInScope(int $warehouseId, int $partId): void
+    {
+        $tenantId = TenancyContext::tenantId();
+
+        if ($tenantId === null) {
+            // No tenant context — the caller (a console command or a
+            // job that sets the context itself) owns the
+            // authorization. The scope check only applies to a
+            // request that has a tenant.
+            return;
+        }
+
+        $warehouseBelongs = DB::table('warehouses')
+            ->where('id', $warehouseId)
+            ->where('tenant_id', $tenantId)
+            ->exists();
+
+        if (! $warehouseBelongs) {
+            throw ValidationException::withMessages([
+                'warehouse_id' => [__('inventory.errors.warehouse_not_in_scope')],
+            ]);
+        }
+
+        $partBelongs = DB::table('parts')
+            ->where('id', $partId)
+            ->where('tenant_id', $tenantId)
+            ->exists();
+
+        if (! $partBelongs) {
+            throw ValidationException::withMessages([
+                'part_id' => [__('inventory.errors.part_not_in_scope')],
+            ]);
+        }
+    }
+
+    /**
      * Process a receipt (stock in).
      * Used for GRN, manual receipt, opening balance.
      */
@@ -36,6 +101,8 @@ class InventoryService
                 'qty' => ['Quantity must be positive for receipt.'],
             ]);
         }
+
+        $this->assertResourcesInScope($warehouseId, $partId);
 
         return DB::transaction(function () use ($warehouseId, $partId, $qty, $unitCost, $userId, $referenceType, $referenceId, $notes) {
             // Lock balance row (bypass global scope — we identify by natural key warehouse_id+part_id).
@@ -109,6 +176,8 @@ class InventoryService
                 'qty' => ['Quantity must be positive for issue.'],
             ]);
         }
+
+        $this->assertResourcesInScope($warehouseId, $partId);
 
         return DB::transaction(function () use ($warehouseId, $partId, $qty, $userId, $referenceType, $referenceId, $notes, $allowNegative, $moveType) {
             // Lock balance row (bypass global scope — we identify by natural key warehouse_id+part_id).
@@ -184,6 +253,8 @@ class InventoryService
                 'qty' => ['Adjustment quantity cannot be zero.'],
             ]);
         }
+
+        $this->assertResourcesInScope($warehouseId, $partId);
 
         return DB::transaction(function () use ($warehouseId, $partId, $qty, $unitCost, $userId, $notes, $allowNegative) {
             // Lock balance row (bypass global scope — we identify by natural key warehouse_id+part_id).
@@ -266,6 +337,8 @@ class InventoryService
                 'move' => ['This move cannot be reversed.'],
             ]);
         }
+
+        $this->assertResourcesInScope($move->warehouse_id, $move->part_id);
 
         return DB::transaction(function () use ($move, $userId, $notes) {
             // Lock balance row (bypass global scope — we identify by natural key warehouse_id+part_id).
@@ -385,6 +458,10 @@ class InventoryService
      */
     public function getStockLevel(int $warehouseId, int $partId): array
     {
+        // A read of another tenant's stock level is still a
+        // disclosure, and this lookup bypasses the global scopes.
+        $this->assertResourcesInScope($warehouseId, $partId);
+
         $balance = InventoryBalance::query()
             ->withoutGlobalScopes()
             ->where('warehouse_id', $warehouseId)
@@ -421,6 +498,8 @@ class InventoryService
                 'qty' => ['Reversal quantity must be positive.'],
             ]);
         }
+
+        $this->assertResourcesInScope($originalMove->warehouse_id, $originalMove->part_id);
 
         return DB::transaction(function () use ($originalMove, $qty, $userId, $notes) {
             // Lock balance row (bypass global scope — we identify by natural key warehouse_id+part_id).

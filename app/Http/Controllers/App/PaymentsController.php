@@ -22,7 +22,16 @@ class PaymentsController extends Controller
 
     public function store(Request $request, Invoice $invoice)
     {
-        $this->authorize('update', $invoice);
+        // The invoice `update` ability is the DRAFT-EDIT ability: it
+        // requires status === 'draft'. An issued invoice (status
+        // `valid`) could therefore never take a payment — the request
+        // was rejected even though the invoice was unpaid and the
+        // customer was standing at the counter.
+        //
+        // `recordPayment` is the ability written for this: it checks
+        // the payment permission, the tenant, and that the invoice is
+        // not already settled.
+        $this->authorize('recordPayment', $invoice);
 
         $validated = $request->validate([
             'type' => 'nullable|in:'.implode(',', Payment::TYPES),
@@ -54,7 +63,12 @@ class PaymentsController extends Controller
      */
     public function destroy(Payment $payment)
     {
-        $this->authorize('update', $payment->invoice);
+        // Deleting a payment is a payment operation, not a draft edit.
+        // Authorizing against the invoice's `update` ability meant a
+        // payment recorded against an ISSUED invoice could never be
+        // removed — a wrong entry on a real invoice was permanent.
+        // PaymentPolicy::delete is the gate written for it.
+        $this->authorize('delete', $payment);
 
         try {
             $this->paymentService->deletePayment($payment);
@@ -70,7 +84,9 @@ class PaymentsController extends Controller
      */
     public function payFull(Request $request, Invoice $invoice)
     {
-        $this->authorize('update', $invoice);
+        // Same reasoning as store(): the draft-edit ability must not
+        // gate a payment on an issued invoice.
+        $this->authorize('recordPayment', $invoice);
 
         $validated = $request->validate([
             'payment_method' => 'required|in:'.implode(',', Payment::METHODS),

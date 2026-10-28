@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers\App;
 
 use App\Events\Billing\ReceiptSubmitted;
+use App\Exceptions\PaymentMismatchException;
 use App\Http\Controllers\Controller;
 use App\Models\BankTransferReceipt;
 use App\Models\Billing\Plan;
@@ -493,7 +494,26 @@ class CompanySubscriptionController extends Controller
         $result = $this->paymentManager->verify($request->all(), $payment->gateway);
 
         if ($result['success']) {
-            $this->paymentCompletion->completePayment($payment, $result);
+            try {
+                $this->paymentCompletion->completePayment($payment, $result);
+            } catch (PaymentMismatchException $e) {
+                // The gateway says the transaction succeeded, but it is
+                // not the transaction this payment is waiting for. The
+                // subscription stays inactive.
+                Log::warning('Subscription payment callback rejected', [
+                    'payment_id' => $payment->id,
+                    'tenant_id' => $payment->tenant_id,
+                    'gateway' => $payment->gateway,
+                    'reason' => $e->getMessage(),
+                ]);
+
+                $payment->markAsRejected($e->getMessage(), $result['raw_response'] ?? []);
+
+                return Inertia::render('Settings/Company/SubscriptionFailed', [
+                    'payment' => $payment->fresh(),
+                    'reason' => $e->getMessage(),
+                ]);
+            }
 
             return Inertia::render('Settings/Company/SubscriptionSuccess', [
                 'payment' => $payment->fresh()->load('subscription.plan'),

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services\Billing;
 
+use App\Exceptions\PaymentMismatchException;
 use App\Mail\SubscriptionActivatedMail;
 use App\Models\AdminActivityLog;
 use App\Models\Billing\Subscription;
@@ -26,7 +27,10 @@ use Throwable;
  */
 class PaymentCompletionService
 {
-    public function __construct(protected PaymentManager $paymentManager) {}
+    public function __construct(
+        protected PaymentManager $paymentManager,
+        protected PaymentCallbackValidator $callbackValidator
+    ) {}
 
     /**
      * Process a successful payment callback.
@@ -34,6 +38,11 @@ class PaymentCompletionService
      * Idempotent: if the payment is already 'paid', this is a no-op so a
      * duplicate gateway callback doesn't re-activate things or double-send
      * emails.
+     *
+     * The callback is validated against the recorded payment first — a
+     * gateway saying "paid" is not enough to activate a subscription.
+     *
+     * @throws PaymentMismatchException
      */
     public function completePayment(
         SubscriptionPayment $payment,
@@ -52,6 +61,11 @@ class PaymentCompletionService
 
         try {
             return DB::transaction(function () use ($payment, $verifyResult, $adminUserId) {
+                // 0. The callback has to match the recorded payment
+                //    (reference, amount, currency) before anything is
+                //    activated.
+                $this->callbackValidator->validate($payment, $verifyResult);
+
                 // 1. Mark the payment as paid
                 $payment->markAsPaid($verifyResult['raw_response'] ?? []);
                 $payment->update([

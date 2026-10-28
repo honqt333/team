@@ -34,6 +34,8 @@ class CompanyTransactionController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
+        $this->authorize('create', CompanyTransaction::class);
+
         if ($request->input('is_taxable') && ! $request->input('contact_id')) {
             return redirect()->back()->withErrors([
                 'contact_id' => 'يجب تحديد العميل/المورد عند تفعيل خاضع للضريبة لضمان التوافق مع الفوترة الضريبية',
@@ -48,7 +50,9 @@ class CompanyTransactionController extends Controller
             'amount' => 'required|numeric|min:0',
             'is_taxable' => 'boolean',
             'tax_amount' => 'nullable|numeric|min:0',
-            'total_amount' => 'required|numeric|min:0',
+            // Derived server-side from amount + tax_amount; the value the
+            // client sends is ignored.
+            'total_amount' => 'nullable|numeric|min:0',
             'contact_type' => 'nullable|string|in:customer,supplier',
             'contact_id' => 'nullable|integer',
             'notes' => 'nullable|string',
@@ -61,6 +65,14 @@ class CompanyTransactionController extends Controller
         $validated['updated_by'] = $user->id;
         $validated['status'] = 'draft';
 
+        // The total is DERIVED, not taken from the request. The client
+        // used to send `total_amount` alongside `amount` and
+        // `tax_amount` without any consistency check, so a crafted
+        // request could store a total that matched neither — and
+        // approve() then issues the invoice and the payment with that
+        // figure.
+        $validated['total_amount'] = $this->computeTotal($validated);
+
         CompanyTransaction::create($validated);
 
         return redirect()->back()->with('success', 'تم حفظ المعاملة الإدارية بنجاح كمسودة');
@@ -71,6 +83,8 @@ class CompanyTransactionController extends Controller
      */
     public function update(Request $request, CompanyTransaction $transaction): RedirectResponse
     {
+        $this->authorize('update', $transaction);
+
         if ($transaction->status === 'approved') {
             return redirect()->back()->with('error', 'لا يمكن تعديل المعاملات المعتمدة');
         }
@@ -89,7 +103,9 @@ class CompanyTransactionController extends Controller
             'amount' => 'required|numeric|min:0',
             'is_taxable' => 'boolean',
             'tax_amount' => 'nullable|numeric|min:0',
-            'total_amount' => 'required|numeric|min:0',
+            // Derived server-side from amount + tax_amount; the value the
+            // client sends is ignored.
+            'total_amount' => 'nullable|numeric|min:0',
             'contact_type' => 'nullable|string|in:customer,supplier',
             'contact_id' => 'nullable|integer',
             'notes' => 'nullable|string',
@@ -97,6 +113,7 @@ class CompanyTransactionController extends Controller
         ]);
 
         $validated['updated_by'] = auth()->id();
+        $validated['total_amount'] = $this->computeTotal($validated);
 
         $transaction->update($validated);
 
@@ -108,6 +125,8 @@ class CompanyTransactionController extends Controller
      */
     public function destroy(CompanyTransaction $transaction): RedirectResponse
     {
+        $this->authorize('delete', $transaction);
+
         if ($transaction->status === 'approved') {
             return redirect()->back()->with('error', 'لا يمكن حذف المعاملات المعتمدة');
         }
@@ -122,6 +141,9 @@ class CompanyTransactionController extends Controller
      */
     public function approve(CompanyTransaction $transaction): RedirectResponse
     {
+        // Approving issues a real invoice and records a real payment.
+        $this->authorize('approve', $transaction);
+
         if ($transaction->status === 'approved') {
             return redirect()->back()->with('error', 'هذه المعاملة معتمدة بالفعل');
         }
@@ -325,14 +347,36 @@ class CompanyTransactionController extends Controller
     }
 
     /**
+     * The authoritative total for a company transaction.
+     *
+     * A transaction carries the net amount and the tax; the total is
+     * their sum. It is computed here so the stored figures cannot
+     * contradict each other, whatever the request body said.
+     */
+    private function computeTotal(array $validated): float
+    {
+        $amount = (float) ($validated['amount'] ?? 0);
+        $tax = (float) ($validated['tax_amount'] ?? 0);
+
+        return round($amount + $tax, 2);
+    }
+
+    /**
      * Search customers and suppliers.
      */
     public function searchContacts(Request $request)
     {
         $search = $request->query('search');
 
-        $customers = Customer::where('name', 'like', "%{$search}%")
-            ->orWhere('phone', 'like', "%{$search}%")
+        // The conditions are GROUPED. Un-grouped, the query reads
+        // "tenant_id = X AND name LIKE ? OR phone LIKE ?", and SQL
+        // binds AND tighter than OR — so the second branch matched
+        // the phone number in ANY tenant, and the search returned
+        // another tenant's customers.
+        $customers = Customer::where(function ($query) use ($search) {
+            $query->where('name', 'like', "%{$search}%")
+                ->orWhere('phone', 'like', "%{$search}%");
+        })
             ->select('id', 'name', 'phone')
             ->limit(10)
             ->get()
@@ -343,8 +387,11 @@ class CompanyTransactionController extends Controller
                 'id' => $c->id,
             ]);
 
-        $suppliers = Supplier::where('name', 'like', "%{$search}%")
-            ->orWhere('phone', 'like', "%{$search}%")
+        // Same grouping fix as the customers above.
+        $suppliers = Supplier::where(function ($query) use ($search) {
+            $query->where('name', 'like', "%{$search}%")
+                ->orWhere('phone', 'like', "%{$search}%");
+        })
             ->select('id', 'name', 'phone')
             ->limit(10)
             ->get()

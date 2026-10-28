@@ -570,7 +570,14 @@ Route::prefix('app')->middleware(['auth', 'verified', 'tenant.active', 'center.c
 
     // Company Transactions Settings
     Route::get('/settings/company/contacts/search', [CompanyTransactionController::class, 'searchContacts'])->name('settings.company.contacts.search');
-    Route::resource('/settings/company/transactions', CompanyTransactionController::class)->names('settings.company.transactions');
+    // Only the write routes are registered. `Route::resource` also
+    // declares index/show/create/edit, and the controller implements
+    // none of them — every one of those URLs answered HTTP 500 with
+    // "method does not exist". The company page hosts the
+    // create/edit modal, so the standalone pages are not needed.
+    Route::resource('/settings/company/transactions', CompanyTransactionController::class)
+        ->only(['store', 'update', 'destroy'])
+        ->names('settings.company.transactions');
     Route::post('/settings/company/transactions/{transaction}/approve', [CompanyTransactionController::class, 'approve'])->name('settings.company.transactions.approve');
 
     // ZATCA Phase 2 Self-Onboarding

@@ -3,6 +3,10 @@
 declare(strict_types=1);
 
 return [
+    'errors' => [
+        'part_not_in_scope' => 'The selected part does not belong to your organization.',
+        'warehouse_not_in_scope' => 'The selected warehouse does not belong to your organization.',
+    ],
     'hub' => [
         'moves_hint' => 'Moves Hint',
         'parts_hint' => 'Parts Hint',
