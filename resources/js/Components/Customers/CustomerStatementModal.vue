@@ -395,12 +395,58 @@ const printDateFormatted = computed(() => {
 });
 
 const handlePrint = () => {
-    window.print();
+    if (props.customer?.id) {
+        window.open(route('customers.statement.print', props.customer.id), '_blank');
+    } else {
+        window.print();
+    }
 };
 </script>
 
 <style scoped>
+@page {
+    size: A4 portrait;
+    margin: 10mm;
+}
+
 @media print {
+    :global(#app) {
+        display: none !important;
+    }
+
+    :global(body) {
+        background-color: white !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    :global(.fixed.inset-0) {
+        position: static !important;
+        display: block !important;
+        overflow: visible !important;
+        background: transparent !important;
+        min-height: auto !important;
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+
+    :global(.flex.min-h-full) {
+        display: block !important;
+        min-height: auto !important;
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+
+    :global(.modal-container),
+    :global(.relative.bg-white) {
+        position: static !important;
+        max-width: 100% !important;
+        box-shadow: none !important;
+        border: none !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
     /* 1. Hide entire page background */
     body * {
         visibility: hidden !important;
@@ -426,12 +472,10 @@ const handlePrint = () => {
     }
 
     .statement-content {
-        position: absolute;
-        left: 0;
-        top: 0;
-        width: 100%;
-        margin: 0;
-        padding: 20px;
+        position: static !important;
+        width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
         background: white !important;
         color: black !important;
     }
@@ -453,6 +497,11 @@ const handlePrint = () => {
         background-color: #f3f4f6 !important;
         color: #111827 !important;
         font-weight: bold !important;
+    }
+
+    tr {
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
     }
 }
 </style>

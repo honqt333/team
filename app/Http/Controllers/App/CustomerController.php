@@ -23,6 +23,7 @@ use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -169,88 +170,8 @@ class CustomerController
             ->latest()
             ->get();
 
-        // Get all payments from customer's work orders or direct invoices
-        $payments = Payment::where(function ($query) use ($customer) {
-            $query->whereHas('workOrder', function ($q) use ($customer) {
-                $q->withoutGlobalScope('center_scoped')->where('customer_id', $customer->id);
-            })
-                ->orWhereHas('invoice', function ($q) use ($customer) {
-                    $q->withoutGlobalScope('center_scoped')->where('customer_id', $customer->id);
-                });
-        })
-            ->with(['receivedBy', 'workOrder', 'invoice'])
-            ->latest('payment_date')
-            ->get();
-
-        // Get customer's invoices (bypassing center_scoped to show tenant-wide history)
-        $invoices = $customer->invoices()
-            ->withoutGlobalScope('center_scoped')
-            ->with(['workOrder.vehicle'])
-            ->latest()
-            ->get();
-
-        // Calculate Customer Financial Summary & Balance Due
-        $totalInvoiced = (float) $invoices->whereNotIn('status', ['cancelled', 'draft'])->sum('total_incl_tax');
-        $totalPaid = (float) $payments->reduce(function ($carry, $pay) {
-            $isRefund = $pay->type === PaymentType::REFUND || $pay->type === 'refund' || ($pay->type instanceof PaymentType && $pay->type->value === 'refund');
-
-            return $isRefund ? ($carry - (float) $pay->amount) : ($carry + (float) $pay->amount);
-        }, 0.0);
-        $totalDue = (float) $invoices->whereNotIn('status', ['cancelled'])->sum(fn ($inv) => max(0, (float) $inv->total_incl_tax - (float) $inv->total_paid));
-
-        $financialSummary = [
-            'total_invoiced' => $totalInvoiced,
-            'total_paid' => $totalPaid,
-            'total_due' => $totalDue,
-            'open_work_orders_count' => $workOrders->whereNotIn('status', ['completed', 'cancelled', 'delivered'])->count(),
-        ];
-
-        // Build Chronological Ledger for Customer Statement of Account
-        $ledgerEntries = collect();
-
-        foreach ($invoices as $inv) {
-            if ($inv->status === 'cancelled') {
-                continue;
-            }
-            $ledgerEntries->push([
-                'id' => 'inv-'.$inv->id,
-                'date' => $inv->issue_date ? Carbon::parse($inv->issue_date)->format('Y-m-d H:i') : $inv->created_at->format('Y-m-d H:i'),
-                'sort_date' => $inv->issue_date ? Carbon::parse($inv->issue_date)->timestamp : $inv->created_at->timestamp,
-                'type' => 'invoice',
-                'type_label' => 'فاتورة مبيعات',
-                'reference' => $inv->invoice_number,
-                'work_order_number' => $inv->workOrder?->work_order_number,
-                'vehicle_plate' => $inv->workOrder?->vehicle?->plate_number,
-                'debit' => (float) $inv->total_incl_tax,
-                'credit' => 0.0,
-            ]);
-        }
-
-        foreach ($payments as $pay) {
-            $isRefund = $pay->type === PaymentType::REFUND || $pay->type === 'refund' || ($pay->type instanceof PaymentType && $pay->type->value === 'refund');
-            $ledgerEntries->push([
-                'id' => 'pay-'.$pay->id,
-                'date' => $pay->payment_date ? Carbon::parse($pay->payment_date)->format('Y-m-d H:i') : $pay->created_at->format('Y-m-d H:i'),
-                'sort_date' => $pay->payment_date ? Carbon::parse($pay->payment_date)->timestamp : $pay->created_at->timestamp,
-                'type' => $isRefund ? 'refund' : 'payment',
-                'type_label' => $isRefund ? 'سند استرجاع' : 'سند قبض',
-                'reference' => $pay->reference ?: ('REC-'.$pay->id),
-                'work_order_number' => $pay->workOrder?->work_order_number,
-                'vehicle_plate' => $pay->workOrder?->vehicle?->plate_number,
-                'method' => $pay->payment_method,
-                'debit' => $isRefund ? (float) $pay->amount : 0.0,
-                'credit' => $isRefund ? 0.0 : (float) $pay->amount,
-            ]);
-        }
-
-        $sortedLedger = $ledgerEntries->unique('id')->sortBy('sort_date')->values();
-        $runningBalance = 0.0;
-        $ledger = $sortedLedger->map(function ($entry) use (&$runningBalance) {
-            $runningBalance += ($entry['debit'] - $entry['credit']);
-            $entry['balance'] = $runningBalance;
-
-            return $entry;
-        });
+        // Build financial summary and chronological ledger via helper
+        [$financialSummary, $ledger, $invoices, $payments] = $this->buildCustomerStatementData($customer);
 
         // Use counts from the relationship counts (avoid extra queries)
         $counts = [
@@ -385,5 +306,127 @@ class CustomerController
         }
 
         return response()->json(['exists' => false]);
+    }
+
+    /**
+     * Dedicated printable page for Customer Statement of Account.
+     */
+    public function printStatement(Customer $customer): Response
+    {
+        $this->authorize('view', $customer);
+
+        [$financialSummary, $ledger] = $this->buildCustomerStatementData($customer);
+
+        $tenant = auth()->user()->tenant;
+        $centerId = TenancyContext::centerId();
+        $center = $centerId ? Center::find($centerId) : null;
+
+        return Inertia::render('Customers/PrintStatement', [
+            'customer' => $customer,
+            'financialSummary' => $financialSummary,
+            'ledger' => $ledger,
+            'companyInfo' => [
+                'name' => $center?->name_ar ?? $center?->name ?? $tenant->trade_name ?? $tenant->name ?? 'خدمة برو',
+                'branch' => $center?->name ?? '',
+                'vat_number' => $tenant->vat_number ?? $center?->vat_number ?? '',
+                'cr_number' => $tenant->cr_number ?? $center?->cr_number ?? '',
+                'logo_url' => $center?->logo_invoice_url ?? $center?->logo_light_url ?? $tenant->logo_url ?? ($tenant->logo_path ? '/storage/'.$tenant->logo_path : null),
+                'phone' => $center?->phone ?? $tenant->phone ?? '',
+            ],
+        ]);
+    }
+
+    /**
+     * Build financial summary and chronological ledger for a customer.
+     *
+     * @return array{0: array<string, mixed>, 1: Collection, 2: \Illuminate\Database\Eloquent\Collection, 3: \Illuminate\Database\Eloquent\Collection}
+     */
+    protected function buildCustomerStatementData(Customer $customer): array
+    {
+        $payments = Payment::where(function ($query) use ($customer) {
+            $query->whereHas('workOrder', function ($q) use ($customer) {
+                $q->withoutGlobalScope('center_scoped')->where('customer_id', $customer->id);
+            })
+                ->orWhereHas('invoice', function ($q) use ($customer) {
+                    $q->withoutGlobalScope('center_scoped')->where('customer_id', $customer->id);
+                });
+        })
+            ->with(['receivedBy', 'workOrder', 'invoice'])
+            ->latest('payment_date')
+            ->get();
+
+        $invoices = $customer->invoices()
+            ->withoutGlobalScope('center_scoped')
+            ->with(['workOrder.vehicle'])
+            ->latest()
+            ->get();
+
+        $openWorkOrdersCount = $customer->workOrders()
+            ->withoutGlobalScope('center_scoped')
+            ->whereNotIn('status', ['completed', 'cancelled', 'delivered'])
+            ->count();
+
+        $totalInvoiced = (float) $invoices->whereNotIn('status', ['cancelled', 'draft'])->sum('total_incl_tax');
+        $totalPaid = (float) $payments->reduce(function ($carry, $pay) {
+            $isRefund = $pay->type === PaymentType::REFUND || $pay->type === 'refund' || ($pay->type instanceof PaymentType && $pay->type->value === 'refund');
+
+            return $isRefund ? ($carry - (float) $pay->amount) : ($carry + (float) $pay->amount);
+        }, 0.0);
+        $totalDue = (float) $invoices->whereNotIn('status', ['cancelled'])->sum(fn ($inv) => max(0, (float) $inv->total_incl_tax - (float) $inv->total_paid));
+
+        $financialSummary = [
+            'total_invoiced' => $totalInvoiced,
+            'total_paid' => $totalPaid,
+            'total_due' => $totalDue,
+            'open_work_orders_count' => $openWorkOrdersCount,
+        ];
+
+        $ledgerEntries = collect();
+
+        foreach ($invoices as $inv) {
+            if ($inv->status === 'cancelled') {
+                continue;
+            }
+            $ledgerEntries->push([
+                'id' => 'inv-'.$inv->id,
+                'date' => $inv->issue_date ? Carbon::parse($inv->issue_date)->format('Y-m-d H:i') : $inv->created_at->format('Y-m-d H:i'),
+                'sort_date' => $inv->issue_date ? Carbon::parse($inv->issue_date)->timestamp : $inv->created_at->timestamp,
+                'type' => 'invoice',
+                'type_label' => 'فاتورة مبيعات',
+                'reference' => $inv->invoice_number,
+                'work_order_number' => $inv->workOrder?->work_order_number,
+                'vehicle_plate' => $inv->workOrder?->vehicle?->plate_number,
+                'debit' => (float) $inv->total_incl_tax,
+                'credit' => 0.0,
+            ]);
+        }
+
+        foreach ($payments as $pay) {
+            $isRefund = $pay->type === PaymentType::REFUND || $pay->type === 'refund' || ($pay->type instanceof PaymentType && $pay->type->value === 'refund');
+            $ledgerEntries->push([
+                'id' => 'pay-'.$pay->id,
+                'date' => $pay->payment_date ? Carbon::parse($pay->payment_date)->format('Y-m-d H:i') : $pay->created_at->format('Y-m-d H:i'),
+                'sort_date' => $pay->payment_date ? Carbon::parse($pay->payment_date)->timestamp : $pay->created_at->timestamp,
+                'type' => $isRefund ? 'refund' : 'payment',
+                'type_label' => $isRefund ? 'سند استرجاع' : 'سند قبض',
+                'reference' => $pay->reference ?: ('REC-'.$pay->id),
+                'work_order_number' => $pay->workOrder?->work_order_number,
+                'vehicle_plate' => $pay->workOrder?->vehicle?->plate_number,
+                'method' => $pay->payment_method,
+                'debit' => $isRefund ? (float) $pay->amount : 0.0,
+                'credit' => $isRefund ? 0.0 : (float) $pay->amount,
+            ]);
+        }
+
+        $sortedLedger = $ledgerEntries->unique('id')->sortBy('sort_date')->values();
+        $runningBalance = 0.0;
+        $ledger = $sortedLedger->map(function ($entry) use (&$runningBalance) {
+            $runningBalance += ($entry['debit'] - $entry['credit']);
+            $entry['balance'] = $runningBalance;
+
+            return $entry;
+        });
+
+        return [$financialSummary, $ledger, $invoices, $payments];
     }
 }

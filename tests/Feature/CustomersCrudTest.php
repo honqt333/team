@@ -257,4 +257,27 @@ class CustomersCrudTest extends TestCase
             ],
         ]);
     }
+
+    public function test_authorized_user_can_view_customer_statement_print_page(): void
+    {
+        $user = $this->createUserWithPermissions(['crm.customers.view']);
+
+        $customer = Customer::create([
+            'tenant_id' => $user->tenant_id,
+            'center_id' => $user->current_center_id,
+            'type' => 'individual',
+            'name' => 'Ali Customer',
+            'phone' => '+966501112233',
+        ]);
+
+        $response = $this->actingAs($user)->get(route('customers.statement.print', $customer));
+        $response->assertOk();
+        $response->assertInertia(fn ($page) => $page
+            ->component('Customers/PrintStatement')
+            ->has('customer')
+            ->has('financialSummary')
+            ->has('ledger')
+            ->has('companyInfo')
+        );
+    }
 }

@@ -339,6 +339,7 @@ Route::prefix('app')->middleware(['auth', 'verified', 'tenant.active', 'center.c
     Route::post('/customers/import', [CustomerImportExportController::class, 'import'])->name('customers.import');
 
     Route::get('/customers/check-phone', [CustomerController::class, 'checkPhone'])->name('customers.check-phone');
+    Route::get('/customers/{customer}/statement/print', [CustomerController::class, 'printStatement'])->name('customers.statement.print');
     Route::resource('customers', CustomerController::class);
     // Customer merge routes
     Route::get('/customers/{customer}/merge', [CustomerMergeController::class, 'mergeData'])->name('customers.merge-data');
