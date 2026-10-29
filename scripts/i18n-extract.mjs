@@ -406,9 +406,9 @@ function extractTemplate(templateContent, raw, templateStart) {
                 // The Arabic branch of a ternary: it may sit right after
                 // the `?` or after the `:` of another ternary.
                 const branch = expression.match(
-                    /\?[^?:]*?:\s*'([^']*)'|\?\s*'([^']*)'\s*:/
+                    /\?[^?:]*?:\s*'([^']*)'|\?\s*'([^']*)'\s*:|\?\s*'([^']*)'/
                 );
-                const branchText = branch && (branch[1] || branch[2]);
+                const branchText = branch && (branch[1] || branch[2] || branch[3]);
                 if (branchText && ARABIC.test(branchText) && isUserFacingCopy(branchText)) {
                     found.push({
                         kind: 'interpolation_branch',

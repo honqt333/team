@@ -178,26 +178,6 @@ function applyFile(file) {
         const text = hit.value.trim();
         // An interpolation carries the whole expression, so its Arabic
         // literal is matched inside the case that handles it.
-        if (hit.kind === 'interpolation') {
-            // The Arabic branches are read from the AST, so a condition
-            // that is itself a ternary is handled correctly.
-            const branches = arabicBranches(hit.value);
-            const arabic = branches.find((b) => entries[b.trim()]);
-            if (!arabic) continue;
-            const entry2 = entries[arabic.trim()];
-            // A key that carries a placeholder keeps the interpolation.
-            const hasPlaceholder = /\$\{[\s\S]*?\}/.test(arabic);
-            const replacementText = hasPlaceholder ? entry2.key : `$t('${entry2.key}')`;
-            edits.push({
-                start: hit.start,
-                end: hit.end,
-                replacement: `{{ ${replacementText} }}`,
-                kind: hit.kind,
-                line: hit.line,
-            });
-            continue;
-        }
-
         if (hit.kind === 'interpolation_literal') {
             // `{{ `${x} ر.س` }}` — the Arabic is the literal part of a
             // template literal. Only that part is replaced; the
@@ -266,8 +246,8 @@ function applyFile(file) {
             // `'نص'` must become `t('key')`, not `'t('key')'`.
             const before = inner.slice(0, offset);
             const after = inner.slice(offset + text.length);
-            const quoted =
-                /['"`]$/.test(before) && /^['"`]/.test(after);
+            // The last character of `before` is the opening quote.
+            const quoted = /['"`]\s*$/.test(before) && /^['"`]/.test(after);
             const quote = quoted ? before.slice(-1) : '';
 
             edits.push({
@@ -308,6 +288,26 @@ function applyFile(file) {
         const key = entry.key;
         const original = source.slice(hit.start, hit.end);
         let replacement = null;
+
+        if (hit.kind === 'interpolation') {
+            // The Arabic branches are read from the AST, so a condition
+            // that is itself a ternary is handled correctly.
+            const branches = arabicBranches(hit.value);
+            const arabic = branches.find((b) => entries[b.trim()]);
+            if (!arabic) continue;
+            const entry2 = entries[arabic.trim()];
+            // A key that carries a placeholder keeps the interpolation.
+            const hasPlaceholder = /\$\{[\s\S]*?\}/.test(arabic);
+            const replacementText = hasPlaceholder ? entry2.key : `$t('${entry2.key}')`;
+            edits.push({
+                start: hit.start,
+                end: hit.end,
+                replacement: `{{ ${replacementText} }}`,
+                kind: hit.kind,
+                line: hit.line,
+            });
+            continue;
+        }
 
         switch (hit.kind) {
             case 'template_text': {

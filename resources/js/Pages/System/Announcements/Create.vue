@@ -4,24 +4,51 @@
             <div class="flex items-center gap-4">
                 <a href="/system/announcements" class="text-gray-500 hover:text-gray-700">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M15 19l-7-7 7-7"
+                        />
                     </svg>
                 </a>
-                <h1 class="text-2xl font-bold text-gray-900 dark:text-white">إنشاء إعلان جديد</h1>
+                <h1 class="text-2xl font-bold text-gray-900 dark:text-white">
+                    {{ $t('system.announcements.create_title') }}
+                </h1>
             </div>
-            
-            <div class="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
+
+            <div
+                class="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700"
+            >
                 <form @submit.prevent="submit" class="space-y-6">
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">العنوان *</label>
-                        <input type="text" v-model="form.title" required class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
+                        <label
+                            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                        >
+                            {{ $t('system.announcements.title_required') }}
+                        </label>
+                        <input
+                            type="text"
+                            v-model="form.title"
+                            required
+                            class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                        />
                     </div>
-                    
+
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">المحتوى *</label>
-                        <textarea v-model="form.content" rows="4" required class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white"></textarea>
+                        <label
+                            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                        >
+                            {{ $t('system.announcements.content_required') }}
+                        </label>
+                        <textarea
+                            v-model="form.content"
+                            rows="4"
+                            required
+                            class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                        ></textarea>
                     </div>
-                    
+
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <SearchableSelect
@@ -42,46 +69,104 @@
                             />
                         </div>
                     </div>
-                    
+
                     <!-- Specific Tenants -->
                     <div v-if="form.target === 'specific'">
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">اختر المستأجرين</label>
-                        <div class="border border-gray-200 dark:border-gray-700 rounded-lg max-h-48 overflow-y-auto p-2 space-y-1">
-                            <label v-for="tenant in tenants" :key="tenant.id" class="flex items-center gap-2 p-2 hover:bg-gray-50 dark:hover:bg-gray-700 rounded cursor-pointer">
-                                <input type="checkbox" :value="tenant.id" v-model="form.target_tenant_ids" class="rounded border-gray-300 text-indigo-600" />
-                                <span class="text-sm text-gray-700 dark:text-gray-300">{{ tenant.trade_name || tenant.name }}</span>
+                        <label
+                            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                        >
+                            {{ $t('system.announcements.select_tenants') }}
+                        </label>
+                        <div
+                            class="border border-gray-200 dark:border-gray-700 rounded-lg max-h-48 overflow-y-auto p-2 space-y-1"
+                        >
+                            <label
+                                v-for="tenant in tenants"
+                                :key="tenant.id"
+                                class="flex items-center gap-2 p-2 hover:bg-gray-50 dark:hover:bg-gray-700 rounded cursor-pointer"
+                            >
+                                <input
+                                    type="checkbox"
+                                    :value="tenant.id"
+                                    v-model="form.target_tenant_ids"
+                                    class="rounded border-gray-300 text-indigo-600"
+                                />
+                                <span class="text-sm text-gray-700 dark:text-gray-300">
+                                    {{ tenant.trade_name || tenant.name }}
+                                </span>
                             </label>
                         </div>
                     </div>
-                    
+
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">قنوات الإرسال</label>
+                        <label
+                            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+                        >
+                            {{ $t('system.announcements.channels') }}
+                        </label>
                         <div class="flex gap-4">
                             <label class="flex items-center gap-2 cursor-pointer">
-                                <input type="checkbox" value="in_app" v-model="form.channels" class="rounded border-gray-300 text-indigo-600" />
-                                <span class="text-sm text-gray-700 dark:text-gray-300">داخل التطبيق</span>
+                                <input
+                                    type="checkbox"
+                                    value="in_app"
+                                    v-model="form.channels"
+                                    class="rounded border-gray-300 text-indigo-600"
+                                />
+                                <span class="text-sm text-gray-700 dark:text-gray-300">
+                                    {{ $t('system.announcements.in_app') }}
+                                </span>
                             </label>
                             <label class="flex items-center gap-2 cursor-pointer">
-                                <input type="checkbox" value="email" v-model="form.channels" class="rounded border-gray-300 text-indigo-600" />
-                                <span class="text-sm text-gray-700 dark:text-gray-300">البريد الإلكتروني</span>
+                                <input
+                                    type="checkbox"
+                                    value="email"
+                                    v-model="form.channels"
+                                    class="rounded border-gray-300 text-indigo-600"
+                                />
+                                <span class="text-sm text-gray-700 dark:text-gray-300">
+                                    {{ $t('center_settings.contact.email') }}
+                                </span>
                             </label>
                             <label class="flex items-center gap-2 cursor-pointer">
-                                <input type="checkbox" value="sms" v-model="form.channels" class="rounded border-gray-300 text-indigo-600" />
+                                <input
+                                    type="checkbox"
+                                    value="sms"
+                                    v-model="form.channels"
+                                    class="rounded border-gray-300 text-indigo-600"
+                                />
                                 <span class="text-sm text-gray-700 dark:text-gray-300">SMS</span>
                             </label>
                         </div>
                     </div>
-                    
+
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">تاريخ الانتهاء (اختياري)</label>
-                        <input type="date" v-model="form.expires_at" class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white" dir="ltr" />
+                        <label
+                            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                        >
+                            {{ $t('system.announcements.expiry_date') }}
+                        </label>
+                        <input
+                            type="date"
+                            v-model="form.expires_at"
+                            class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                            dir="ltr"
+                        />
                     </div>
-                    
+
                     <div class="flex gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
-                        <button type="submit" :disabled="form.processing" class="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium disabled:opacity-50">
-                            إنشاء كمسودة
+                        <button
+                            type="submit"
+                            :disabled="form.processing"
+                            class="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium disabled:opacity-50"
+                        >
+                            {{ $t('system.announcements.create_draft') }}
                         </button>
-                        <a href="/system/announcements" class="px-6 py-2.5 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg">إلغاء</a>
+                        <a
+                            href="/system/announcements"
+                            class="px-6 py-2.5 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg"
+                        >
+                            {{ $t('common.cancel') }}
+                        </a>
                     </div>
                 </form>
             </div>
@@ -90,6 +175,9 @@
 </template>
 
 <script setup>
+import { useI18n } from 'vue-i18n';
+const { t } = useI18n();
+
 import { computed } from 'vue';
 import { useForm } from '@inertiajs/vue3';
 import SystemLayout from '@/Layouts/SystemLayout.vue';
@@ -100,18 +188,18 @@ const props = defineProps({
 });
 
 const typeOptions = computed(() => [
-    { value: 'info', label: 'معلومات' },
-    { value: 'warning', label: 'تحذير' },
-    { value: 'important', label: 'هام' },
-    { value: 'maintenance', label: 'صيانة' },
+    { value: 'info', label: t('system.announcements.type.info') },
+    { value: 'warning', label: t('system.announcements.type.warning') },
+    { value: 'important', label: t('system.announcements.type.important') },
+    { value: 'maintenance', label: t('system.announcements.type.maintenance') },
 ]);
 
 const targetOptions = computed(() => [
-    { value: 'all', label: 'كل المستأجرين' },
-    { value: 'active', label: 'النشطين فقط' },
-    { value: 'trial', label: 'التجريبي فقط' },
-    { value: 'expired', label: 'المنتهية اشتراكاتهم' },
-    { value: 'specific', label: 'مستأجرين محددين' },
+    { value: 'all', label: t('system.backups.filter_all_tenants') },
+    { value: 'active', label: t('system.announcements.active_only') },
+    { value: 'trial', label: t('system.announcements.trial_only') },
+    { value: 'expired', label: t('system.announcements.subscriptions_ended') },
+    { value: 'specific', label: t('system.announcements.specific_tenants') },
 ]);
 
 const form = useForm({
