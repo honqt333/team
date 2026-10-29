@@ -151,4 +151,21 @@ export default [
             'no-console': 'off',
         },
     },
+    {
+        // The tools under scripts/ run on Node, not in the browser, so
+        // they use the Node globals. The i18n scripts read the project
+        // files and write the translation keys, so they have to stay
+        // lint-clean.
+        files: ['scripts/**/*.{js,mjs}'],
+        languageOptions: {
+            ecmaVersion: 2022,
+            sourceType: 'module',
+            globals: {
+                process: 'readonly',
+                console: 'readonly',
+                URL: 'readonly',
+                __dirname: 'readonly',
+            },
+        },
+    },
 ];

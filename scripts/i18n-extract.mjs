@@ -276,7 +276,7 @@ function extractScript(block, raw) {
         });
     }
 
-    walkAst(ast, null, (node, parent) => {
+    walkAst(ast, null, (node) => {
         // A plain string literal.
         if (node.type === 'Literal' && typeof node.value === 'string') {
             if (!ARABIC.test(node.value)) return;
@@ -333,35 +333,6 @@ function extractScript(block, raw) {
         // reported above, so its parts are not reported twice.
         if (node.type === 'TemplateElement') {
             return;
-        }
-    });
-
-    return found;
-}
-
-/**
- * The Arabic branches of the conditional expressions in an expression
- * string, read from the AST. A condition may itself be a ternary, so
- * the branches are found by walking the tree rather than by matching a
- * pattern.
- */
-function arabicBranches(expression) {
-    const found = [];
-    let ast;
-    try {
-        ast = acorn.parse(`(${expression})`, { ecmaVersion: 'latest' });
-    } catch {
-        return found;
-    }
-
-    walkAst(ast, null, (node) => {
-        if (node.type !== 'ConditionalExpression') return;
-        for (const branch of [node.consequent, node.alternate]) {
-            if (!branch || branch.type !== 'Literal') continue;
-            if (typeof branch.value !== 'string') continue;
-            if (!ARABIC.test(branch.value)) continue;
-            if (!isUserFacingCopy(branch.value)) continue;
-            found.push(branch.value);
         }
     });
 

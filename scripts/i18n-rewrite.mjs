@@ -40,7 +40,7 @@ if (mapIndex === -1) {
 }
 const mapPath = args[mapIndex + 1];
 const dryRun = args.includes('--dry-run');
-const targets = args.filter((a, i) => a !== '--map' && a !== mapPath && a !== '--dry-run');
+const targets = args.filter((a) => a !== '--map' && a !== mapPath && a !== '--dry-run');
 
 const mapping = JSON.parse(fs.readFileSync(mapPath, 'utf8'));
 
@@ -58,66 +58,6 @@ function findInventory(file) {
         if (file.endsWith(key) || key.endsWith(file)) return hits;
     }
     return null;
-}
-
-/** The script half of a bilingual pair: `cond ? 'ar' : 'en'`. */
-function englishHalf(source, hit) {
-    const after = source.slice(hit.end, hit.end + 300);
-    const match = after.match(/^\s*:\s*(['"`])((?:\\.|(?!\1).)*)\1/s);
-    return match ? match[2] : null;
-}
-
-/**
- * The whole bilingual expression `cond ? 'ar' : 'en'` — the condition
- * included. Replacing only one half would leave a comparison behind, so
- * the entire expression has to go.
- *
- * The condition is read with a lazy pattern: it must not swallow the
- * text before it, because a line may hold more than one `?` (a class
- * binding, for instance).
- */
-function bilingualExpression(source, hit) {
-    const before = source.slice(Math.max(0, hit.start - 300), hit.start);
-    const after = source.slice(hit.end, hit.end + 300);
-
-    // The `?` that opens the ternary sits right before the literal.
-    const questionIndex = before.lastIndexOf('?');
-    if (questionIndex === -1) return null;
-
-    const englishMatch = after.match(/^(\s*:\s*(['"`])((?:\\.|(?!\2).)*)\2)/s);
-    if (!englishMatch) return null;
-
-    // The condition is the text between the `?` and the start of the
-    // expression. It never spans a line break, so the line is the
-    // boundary to work with.
-    const lineStart = before.lastIndexOf('\n', questionIndex - 1) + 1;
-    const line = before.slice(lineStart, questionIndex);
-
-    // The condition starts after the last operator that can open an
-    // expression: an assignment, a comparison or the start of the line.
-    const operatorMatch = line.match(/^(.*?(?:===|!==|==|!=|\|\||&&|\?|:)\s*)\S/);
-    let expressionStart;
-    if (operatorMatch) {
-        expressionStart = lineStart + operatorMatch[1].length;
-    } else {
-        expressionStart = lineStart + line.search(/\S/);
-        if (expressionStart === lineStart + line.length) expressionStart = lineStart;
-    }
-
-    // Drop a leading keyword (`return`, `const`, …) — it belongs to the
-    // statement, not to the expression being replaced.
-    const keyword = before.slice(expressionStart, questionIndex).match(/^\s*(return|const|let|var)\s+/);
-    if (keyword) expressionStart += keyword[0].length;
-
-    const expressionEnd = hit.end + englishMatch[0].length;
-    if (expressionStart < 0 || expressionStart >= hit.start) return null;
-
-    return {
-        start: expressionStart,
-        end: expressionEnd,
-        text: source.slice(expressionStart, expressionEnd),
-        english: englishMatch[3],
-    };
 }
 
 /**
@@ -291,7 +231,6 @@ function applyFile(file) {
             const after = inner.slice(offset + text.length);
             // The last character of `before` is the opening quote.
             const quoted = /['"`]\s*$/.test(before) && /^['"`]/.test(after);
-            const quote = quoted ? before.slice(-1) : '';
 
             edits.push({
                 start: quoted ? start - 1 : start,
@@ -380,7 +319,6 @@ function applyFile(file) {
                 // `title="نص"` -> `:title="$t('key')"`
                 const attr = hit.attr;
                 if (original.startsWith('"') || original.startsWith("'")) {
-                    const quote = original[0];
                     replacement = `:${attr}="$t('${key}')"`;
                 } else {
                     replacement = `:${attr}="$t('${key}')"`;
