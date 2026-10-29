@@ -180,4 +180,113 @@ class PaymentsReportTest extends TestCase
         $csvResponse = $this->actingAs($user)->get('/app/reports/payments/export?search=WO-000099&range=all');
         $csvResponse->assertStatus(200);
     }
+
+    public function test_payments_report_group_by_method_returns_grouped_payments(): void
+    {
+        app(PerformanceBaselineSeeder::class)->run();
+
+        $tenant = Tenant::first();
+        $user = User::where('tenant_id', $tenant->id)->where('is_system_admin', true)->first();
+        $center = Center::where('tenant_id', $tenant->id)->first();
+
+        Payment::create([
+            'tenant_id' => $tenant->id,
+            'center_id' => $center->id,
+            'amount' => 200.00,
+            'payment_date' => now(),
+            'payment_method' => 'cash',
+            'type' => 'payment',
+            'reference' => 'REC-GRP-CASH',
+        ]);
+
+        Payment::create([
+            'tenant_id' => $tenant->id,
+            'center_id' => $center->id,
+            'amount' => 350.00,
+            'payment_date' => now(),
+            'payment_method' => 'mada',
+            'type' => 'payment',
+            'reference' => 'REC-GRP-MADA',
+        ]);
+
+        $response = $this->actingAs($user)->get('/app/reports/payments?group_by=method&range=all');
+
+        $response->assertStatus(200);
+        $response->assertInertia(fn ($page) => $page
+            ->component('Reports/Payments')
+            ->where('filters.group_by', 'method')
+            ->has('groupedPayments')
+        );
+    }
+
+    public function test_payments_report_handles_bad_debt_kpi(): void
+    {
+        app(PerformanceBaselineSeeder::class)->run();
+
+        $tenant = Tenant::first();
+        $user = User::where('tenant_id', $tenant->id)->where('is_system_admin', true)->first();
+        $center = Center::where('tenant_id', $tenant->id)->first();
+
+        Payment::create([
+            'tenant_id' => $tenant->id,
+            'center_id' => $center->id,
+            'amount' => 75.00,
+            'payment_date' => now(),
+            'payment_method' => 'cash',
+            'type' => 'bad_debt',
+            'reference' => 'REC-BAD-01',
+        ]);
+
+        $response = $this->actingAs($user)->get('/app/reports/payments?type=bad_debt&range=all');
+
+        $response->assertStatus(200);
+        $response->assertInertia(fn ($page) => $page
+            ->component('Reports/Payments')
+            ->where('filters.type', 'bad_debt')
+            ->where('kpis.total_bad_debt', fn ($val) => $val >= 75)
+        );
+    }
+
+    public function test_payments_report_with_linked_invoices_loads_successfully(): void
+    {
+        app(PerformanceBaselineSeeder::class)->run();
+
+        $tenant = Tenant::first();
+        $user = User::where('tenant_id', $tenant->id)->where('is_system_admin', true)->first();
+        $center = Center::where('tenant_id', $tenant->id)->first();
+        $customer = Customer::where('tenant_id', $tenant->id)->first();
+
+        $invoice = Invoice::create([
+            'tenant_id' => $tenant->id,
+            'center_id' => $center->id,
+            'customer_id' => $customer->id,
+            'invoice_number' => 'INV-TEST-999',
+            'issue_date' => now(),
+            'supply_date' => now(),
+            'status' => 'valid',
+            'total_excl_tax' => 100,
+            'total_tax' => 15,
+            'total_incl_tax' => 115,
+            'total_paid' => 115,
+        ]);
+
+        Payment::create([
+            'tenant_id' => $tenant->id,
+            'center_id' => $center->id,
+            'invoice_id' => $invoice->id,
+            'amount' => 115.00,
+            'payment_date' => now(),
+            'payment_method' => 'transfer',
+            'type' => 'payment',
+            'reference' => 'REC-INV-999',
+        ]);
+
+        $response = $this->actingAs($user)->get('/app/reports/payments?range=all');
+
+        $response->assertStatus(200);
+        $response->assertInertia(fn ($page) => $page
+            ->component('Reports/Payments')
+            ->has('payments.data')
+        );
+    }
 }

@@ -19,6 +19,7 @@ use App\Http\Controllers\App\CustomerMergeController;
 use App\Http\Controllers\App\DashboardController;
 use App\Http\Controllers\App\DepartmentController;
 use App\Http\Controllers\App\EmployeePortalController;
+use App\Http\Controllers\App\FeedbackController;
 use App\Http\Controllers\App\GoodsReceivedNotesController;
 use App\Http\Controllers\App\HelpController;
 use App\Http\Controllers\App\HR\AttendanceController;
@@ -117,6 +118,7 @@ use App\Http\Controllers\System\CompanySettingsController;
 use App\Http\Controllers\System\ContactMessageController;
 use App\Http\Controllers\System\DeveloperController;
 use App\Http\Controllers\System\DunningController;
+use App\Http\Controllers\System\FeedbackManagementController;
 use App\Http\Controllers\System\GeneralSettingsController;
 use App\Http\Controllers\System\HelpSettingsController;
 use App\Http\Controllers\System\ImpersonationController;
@@ -988,12 +990,31 @@ Route::prefix('app')->middleware(['auth', 'verified', 'tenant.active', 'center.c
         Route::get('/', [ReportsController::class, 'hub'])->name('hub');
         Route::get('/payments', [ReportsController::class, 'payments'])->name('payments');
         Route::get('/payments/export', [ReportsController::class, 'exportPayments'])->name('payments.export');
+        Route::get('/tickets', [ReportsController::class, 'tickets'])->name('tickets');
+        Route::get('/tickets/export', [ReportsController::class, 'exportTickets'])->name('tickets.export');
+        Route::get('/orders', fn () => redirect()->route('app.reports.tickets'))->name('orders');
+        Route::get('/services', [ReportsController::class, 'services'])->name('services');
+        Route::get('/services/export', [ReportsController::class, 'exportServices'])->name('services.export');
+        Route::get('/customers', [ReportsController::class, 'customers'])->name('customers');
+        Route::get('/customers/export', [ReportsController::class, 'exportCustomers'])->name('customers.export');
     });
 
     // ───────────────────────────────────────────────────────────────
     // Help & Knowledge Base
     // ───────────────────────────────────────────────────────────────
     Route::get('/help', [HelpController::class, 'index'])->name('app.help.index');
+
+    // ───────────────────────────────────────────────────────────────
+    // Feedback & Feature Requests
+    // ───────────────────────────────────────────────────────────────
+    Route::prefix('feedback')->name('app.feedback.')->group(function () {
+        Route::get('/', [FeedbackController::class, 'index'])->name('index');
+        Route::post('/', [FeedbackController::class, 'store'])->name('store');
+        Route::get('/{feedback}/video', [FeedbackController::class, 'streamVideo'])->name('video');
+        Route::get('/{feedback}/reply-video', [FeedbackController::class, 'streamReplyVideo'])->name('reply-video');
+        Route::post('/{feedback}/seen-reply', [FeedbackController::class, 'markReplySeen'])->name('seen-reply');
+        Route::delete('/{feedback}', [FeedbackController::class, 'destroy'])->name('destroy');
+    });
 
     // ───────────────────────────────────────────────────────────────
     // Invoices & Payments
@@ -1027,6 +1048,10 @@ Route::prefix('app')->middleware(['auth', 'verified', 'tenant.active', 'center.c
         // Payments on Invoice
         Route::post('/{invoice}/payments', [PaymentsController::class, 'store'])->name('payments.store');
         Route::post('/{invoice}/pay-full', [PaymentsController::class, 'payFull'])->name('payments.pay-full');
+
+        // Credit Note (Return Invoice) on Invoice
+        Route::get('/{invoice}/credit-note/summary', [InvoicesController::class, 'invoiceCreditNoteSummary'])->name('credit-note.summary');
+        Route::post('/{invoice}/credit-note', [InvoicesController::class, 'storeInvoiceCreditNote'])->name('credit-note.store');
     });
 
     // Delete payment (outside invoices prefix)
@@ -1035,6 +1060,8 @@ Route::prefix('app')->middleware(['auth', 'verified', 'tenant.active', 'center.c
     // Generate invoice from work order
     Route::post('/work-orders/{workOrder}/invoice', [InvoicesController::class, 'createFromWorkOrder'])->name('app.work-orders.invoice');
     Route::get('/work-orders/{workOrder}/proforma', [InvoicesController::class, 'printProforma'])->name('app.work-orders.proforma');
+    Route::get('/work-orders/{workOrder}/credit-note/summary', [InvoicesController::class, 'creditNoteSummary'])->name('app.work-orders.credit-note.summary');
+    Route::post('/work-orders/{workOrder}/credit-note', [InvoicesController::class, 'storeCreditNote'])->name('app.work-orders.credit-note.store');
 });
 
 // Test routes for tenancy middleware (testing environment only)
@@ -1247,6 +1274,14 @@ Route::prefix('system')->middleware(['auth:web,admin', 'system.admin'])->group(f
     Route::get('/settings/contact-messages', [ContactMessageController::class, 'index'])->name('system.contact_messages.index');
     Route::put('/settings/contact-messages/{contactMessage}/read', [ContactMessageController::class, 'markAsRead'])->name('system.contact_messages.read');
     Route::delete('/settings/contact-messages/{contactMessage}', [ContactMessageController::class, 'destroy'])->name('system.contact_messages.destroy');
+
+    // Feedbacks & Support Desk
+    Route::prefix('settings/feedbacks')->name('system.feedbacks.')->group(function () {
+        Route::get('/', [FeedbackManagementController::class, 'index'])->name('index');
+        Route::post('/{feedback}/reply', [FeedbackManagementController::class, 'reply'])->name('reply');
+        Route::put('/{feedback}/status', [FeedbackManagementController::class, 'updateStatus'])->name('update-status');
+        Route::delete('/{feedback}', [FeedbackManagementController::class, 'destroy'])->name('destroy');
+    });
 
     // Subscription Invoices
     Route::get('/invoices', [SubscriptionInvoicesController::class, 'index'])->name('system.invoices.index');

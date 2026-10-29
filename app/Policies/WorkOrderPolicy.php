@@ -50,11 +50,15 @@ class WorkOrderPolicy
 
         // Cannot edit closed/done/cancelled work orders
         if (! $workOrder->canBeEdited()) {
+            // Exception: allow credit note on completed work order
+            $isCreditNoteRoute = request()->routeIs('*credit-note*');
             // Exception: allow recording payments on completed work order if unpaid or deferred invoice
             $isPaymentRoute = request()->routeIs('work-orders.payments.*') || request()->routeIs('payments.*');
             $hasUnpaidOrDeferred = ($workOrder->balance > 0) || ($workOrder->invoice && $workOrder->invoice->due_date !== null);
 
-            if ($isPaymentRoute && $workOrder->status === WorkOrder::STATUS_DONE && $hasUnpaidOrDeferred) {
+            if ($isCreditNoteRoute && in_array($workOrder->status, [WorkOrder::STATUS_DONE, 'delivered'])) {
+                // Allow credit note issuance on completed/delivered work orders
+            } elseif ($isPaymentRoute && $workOrder->status === WorkOrder::STATUS_DONE && $hasUnpaidOrDeferred) {
                 // Allow payment updates
             } else {
                 return false;

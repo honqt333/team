@@ -25,11 +25,13 @@ class Invoice extends Model
         'center_id',
         'customer_id',
         'work_order_id',
+        'original_invoice_id',
         'invoice_number',
         'issue_date',
         'supply_date',
         'due_date',
         'notes',
+        'return_reason',
         'type', // invoice, credit_note, debit_note
         'subtype', // simplified, standard
         'status', // draft, valid, reported, cancelled
@@ -130,6 +132,29 @@ class Invoice extends Model
      */
     public function updatePaymentStatus(): void
     {
+        if ($this->type === InvoiceType::CREDIT_NOTE || ($this->type instanceof InvoiceType ? $this->type->value : (string) $this->type) === 'credit_note') {
+            $totalRefunded = (float) $this->payments()
+                ->selectRaw('SUM(CASE WHEN type IN ("refund", "payment") THEN amount WHEN type = "bad_debt" THEN -amount ELSE 0 END) as refunded')
+                ->value('refunded');
+
+            $totalIncl = (float) $this->total_incl_tax;
+
+            if ($totalRefunded >= $totalIncl - 0.01) {
+                $this->payment_status = 'paid';
+                $this->total_paid = $totalIncl;
+            } elseif ($totalRefunded > 0.01) {
+                $this->payment_status = 'partial';
+                $this->total_paid = $totalRefunded;
+            } else {
+                $this->payment_status = 'unpaid';
+                $this->total_paid = 0;
+            }
+
+            $this->save();
+
+            return;
+        }
+
         // Mirror WorkOrder::getTotalPaidAttribute — payments add, refunds subtract.
         // type values come from Payment::TYPES: 'payment' / 'refund' / 'bad_debt' (lowercase).
         $totalPaid = (float) $this->payments()

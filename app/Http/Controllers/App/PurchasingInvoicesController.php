@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\App;
 
+use App\Enums\InvoiceType;
 use App\Http\Controllers\Controller;
 use App\Models\Customer;
 use App\Models\Department;
@@ -33,25 +34,22 @@ class PurchasingInvoicesController extends Controller
     ) {}
 
     /**
-     * Sales index for inventory/parts only (without services/labor)
+     * Sales index for direct store/inventory sales (without work orders).
      */
     public function salesIndex(Request $request)
     {
         $tenantId = auth()->user()->tenant_id;
         $centerId = auth()->user()->current_center_id;
 
-        // Query invoices for this tenant/center where there are no services in the parent workOrder
-        $query = Invoice::where('tenant_id', $tenantId)
+        $baseQuery = Invoice::where('tenant_id', $tenantId)
             ->where('center_id', $centerId)
-            ->where(function ($q) {
-                // Option 1: The work order exists but doesn't have any labor/service items
-                $q->whereHas('workOrder', function ($woQuery) {
-                    $woQuery->whereDoesntHave('items');
-                })
-                // Option 2: Or there is no work order associated at all (direct sales if any exist)
-                    ->orWhereDoesntHave('workOrder');
+            ->whereNull('work_order_id')
+            ->whereNotExists(function ($q) {
+                $q->select(DB::raw(1))
+                    ->from('company_transactions')
+                    ->whereColumn('company_transactions.invoice_id', 'invoices.id');
             })
-            ->with(['customer', 'workOrder.items', 'workOrder.parts'])
+            ->with(['customer', 'lines', 'originalInvoice:id,invoice_number,issue_date,total_incl_tax'])
             ->when($request->input('search'), function ($q, $search) {
                 $q->where(function ($query) use ($search) {
                     $query->where('invoice_number', 'like', "%{$search}%")
@@ -61,9 +59,27 @@ class PurchasingInvoicesController extends Controller
             ->when($request->input('payment_status'), fn ($q, $s) => $q->where('payment_status', $s))
             ->when($request->input('date_from'), fn ($q, $d) => $q->whereDate('issue_date', '>=', $d))
             ->when($request->input('date_to'), fn ($q, $d) => $q->whereDate('issue_date', '<=', $d))
+            ->orderBy('issue_date', 'desc')
             ->orderBy('id', 'desc');
 
-        $invoices = $query->paginate(25)->withQueryString();
+        // Sales Invoices tab: standard sales invoices (exclude credit notes)
+        $invoices = (clone $baseQuery)
+            ->where(function ($q) {
+                $q->where('type', 'invoice')
+                    ->orWhere('type', InvoiceType::INVOICE)
+                    ->orWhereNull('type');
+            })
+            ->paginate(25, ['*'], 'invoices_page')
+            ->withQueryString();
+
+        // Return Invoices tab: credit notes
+        $returns = (clone $baseQuery)
+            ->where(function ($q) {
+                $q->where('type', 'credit_note')
+                    ->orWhere('type', InvoiceType::CREDIT_NOTE);
+            })
+            ->paginate(25, ['*'], 'returns_page')
+            ->withQueryString();
 
         // Load dependencies for the Create Sales WorkOrder Modal
         $customers = Customer::select('id', 'name', 'phone')->get();
@@ -79,7 +95,8 @@ class PurchasingInvoicesController extends Controller
 
         return Inertia::render('Purchasing/Sales/Index', [
             'invoices' => $invoices,
-            'filters' => $request->only(['search', 'payment_status', 'date_from', 'date_to']),
+            'returns' => $returns,
+            'filters' => $request->only(['search', 'payment_status', 'date_from', 'date_to', 'tab']),
             'customers' => $customers,
             'makes' => $makes,
             'colors' => $colors,
@@ -118,6 +135,7 @@ class PurchasingInvoicesController extends Controller
             'payments.*.amount' => 'required|numeric|min:0.01',
             'payments.*.payment_method' => 'required|string',
             'payments.*.payment_date' => 'required|date',
+            'payments.*.reference' => 'nullable|string',
             'payments.*.notes' => 'nullable|string',
             'payments.*.type' => 'nullable|string|in:payment,refund',
         ]);
@@ -297,7 +315,7 @@ class PurchasingInvoicesController extends Controller
                         'amount' => $amount,
                         'payment_method' => $paymentData['payment_method'],
                         'payment_date' => $paymentData['payment_date'],
-                        'reference' => null,
+                        'reference' => $paymentData['reference'] ?? null,
                         'notes' => $paymentData['notes'] ?? null,
                         'received_by' => $userId,
                     ]);

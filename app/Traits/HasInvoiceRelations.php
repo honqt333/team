@@ -7,6 +7,7 @@ namespace App\Traits;
 use App\Models\Center;
 use App\Models\CompanyTransaction;
 use App\Models\Customer;
+use App\Models\Invoice;
 use App\Models\InvoiceLine;
 use App\Models\Payment;
 use App\Models\Tenant;
@@ -50,5 +51,15 @@ trait HasInvoiceRelations
     public function companyTransaction(): HasOne
     {
         return $this->hasOne(CompanyTransaction::class, 'invoice_id');
+    }
+
+    public function originalInvoice(): BelongsTo
+    {
+        return $this->belongsTo(Invoice::class, 'original_invoice_id');
+    }
+
+    public function creditNotes(): HasMany
+    {
+        return $this->hasMany(Invoice::class, 'original_invoice_id');
     }
 }

@@ -88,7 +88,7 @@
                                     d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
                                 />
                             </svg>
-                            نموذج وهوية الطباعة العامة
+                            {{ $t('print_settings.general_print_identity') }}
                         </h3>
 
                         <!-- Active Template Selector -->
@@ -96,7 +96,7 @@
                             <label
                                 class="block text-xs font-black text-gray-400 uppercase tracking-widest"
                             >
-                                قالب الطباعة الافتراضي
+                                {{ $t('print_settings.default_template') }}
                             </label>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div
@@ -123,7 +123,7 @@
                                         <span
                                             class="text-[8px] font-black px-1.5 py-0.5 rounded-full bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400"
                                         >
-                                            جاري المعاينة
+                                            {{ $t('print_settings.previewing') }}
                                         </span>
                                     </div>
 
@@ -162,11 +162,11 @@
                                             {{
                                                 form.visual.active_template === tmpl.id
                                                     ? 'القالب النشط'
-                                                    : 'تعيين كافتراضي'
+                                                    : '$t('common.set_as_default')'
                                             }}
                                         </button>
                                         <span class="text-[9px] text-emerald-500 font-bold">
-                                            مشمول مجاناً
+                                            {{ $t('print_settings.included_free') }}
                                         </span>
                                     </div>
                                 </div>
@@ -184,7 +184,7 @@
                                         <span
                                             class="text-xs font-semibold text-gray-700 dark:text-gray-300"
                                         >
-                                            إظهار شعار المركز
+                                            {{ $t('print_settings.show_center_logo') }}
                                         </span>
                                     </div>
                                     <label class="relative inline-flex items-center cursor-pointer">
@@ -208,7 +208,7 @@
                                     <label
                                         class="block text-xs font-semibold text-gray-700 dark:text-gray-300"
                                     >
-                                        اللون الأساسي للهوية
+                                        {{ $t('print_settings.brand_primary_color') }}
                                     </label>
                                 </div>
                                 <div class="flex items-center gap-3">
@@ -234,7 +234,7 @@
                                     <label
                                         class="block text-xs font-semibold text-gray-700 dark:text-gray-300"
                                     >
-                                        النص التذييلي الافتراضي (الفوتر)
+                                        {{ $t('print_settings.default_footer_text') }}
                                     </label>
                                 </div>
                                 <textarea
@@ -267,7 +267,7 @@
                                     d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
                                 />
                             </svg>
-                            إعدادات المستندات الخاصة
+                            {{ $t('print_settings.documents_title') }}
                         </h3>
 
                         <!-- Document Selector Drawer list -->
@@ -289,7 +289,7 @@
                                         {{ $t('print_settings.' + key) }}
                                     </span>
                                     <span class="text-[9px] text-gray-400 font-mono font-normal">
-                                        {{ doc.title_ar || 'بدون عنوان مخصص' }}
+                                        {{ doc.title_ar || $t('print_settings.no_custom_title') }}
                                     </span>
                                 </div>
                                 <svg
@@ -317,14 +317,15 @@
                                 <span
                                     class="text-xs font-bold text-emerald-600 dark:text-emerald-400"
                                 >
-                                    تخصيص: {{ $t('print_settings.' + selectedDocKey) }}
+                                    {{ $t('print_settings.customize') }}
+                                    {{ $t('print_settings.' + selectedDocKey) }}
                                 </span>
                                 <button
                                     type="button"
                                     @click="selectedDocKey = null"
                                     class="text-[10px] text-gray-400 hover:text-red-500"
                                 >
-                                    إغلاق التخصيص
+                                    {{ $t('print_settings.close_customization') }}
                                 </button>
                             </div>
 
@@ -334,7 +335,7 @@
                                     <label
                                         class="block text-[10px] font-bold text-gray-400 uppercase"
                                     >
-                                        عنوان المستند المطبوع (عربي)
+                                        {{ $t('print_settings.document_title_arabic') }}
                                     </label>
                                     <input
                                         v-model="form.documents[selectedDocKey].title_ar"
@@ -368,7 +369,7 @@
                                         v-model="form.documents[selectedDocKey].print_terms"
                                         class="w-4 h-4 rounded border-gray-300 text-amber-600 focus:ring-amber-500"
                                     />
-                                    <span>طباعة الشروط</span>
+                                    <span>{{ $t('print_settings.columns.print_terms') }}</span>
                                 </label>
                                 <label
                                     class="flex items-center gap-2 p-2 rounded-lg bg-gray-50/50 dark:bg-gray-900/30 border border-gray-100 dark:border-gray-700/50 cursor-pointer"
@@ -378,7 +379,7 @@
                                         v-model="form.documents[selectedDocKey].terms_first_page"
                                         class="w-4 h-4 rounded border-gray-300 text-amber-600 focus:ring-amber-500"
                                     />
-                                    <span>الشروط بالصفحة الأولى</span>
+                                    <span>{{ $t('print_settings.terms_on_first_page') }}</span>
                                 </label>
                                 <label
                                     class="flex items-center gap-2 p-2 rounded-lg bg-gray-50/50 dark:bg-gray-900/30 border border-gray-100 dark:border-gray-700/50 cursor-pointer"
@@ -388,7 +389,7 @@
                                         v-model="form.documents[selectedDocKey].show_stamp"
                                         class="w-4 h-4 rounded border-gray-300 text-amber-600 focus:ring-amber-500"
                                     />
-                                    <span>تفعيل الختم</span>
+                                    <span>{{ $t('print_settings.enable_stamp') }}</span>
                                 </label>
                                 <label
                                     class="flex items-center gap-2 p-2 rounded-lg bg-gray-50/50 dark:bg-gray-900/30 border border-gray-100 dark:border-gray-700/50 cursor-pointer"
@@ -398,7 +399,7 @@
                                         v-model="form.documents[selectedDocKey].show_qr_code"
                                         class="w-4 h-4 rounded border-gray-300 text-amber-600 focus:ring-amber-500"
                                     />
-                                    <span>إظهار كود QR</span>
+                                    <span>{{ $t('print_settings.show_qr_code_label') }}</span>
                                 </label>
                                 <label
                                     class="flex items-center gap-2 p-2 rounded-lg bg-gray-50/50 dark:bg-gray-900/30 border border-gray-100 dark:border-gray-700/50 cursor-pointer"
@@ -408,7 +409,7 @@
                                         v-model="form.documents[selectedDocKey].show_iban"
                                         class="w-4 h-4 rounded border-gray-300 text-amber-600 focus:ring-amber-500"
                                     />
-                                    <span>إظهار IBAN البنكي</span>
+                                    <span>{{ $t('print_settings.show_bank_iban') }}</span>
                                 </label>
                                 <label
                                     class="flex items-center gap-2 p-2 rounded-lg bg-gray-50/50 dark:bg-gray-900/30 border border-gray-100 dark:border-gray-700/50 cursor-pointer"
@@ -420,7 +421,7 @@
                                         "
                                         class="w-4 h-4 rounded border-gray-300 text-amber-600 focus:ring-amber-500"
                                     />
-                                    <span>إظهار عنوان العميل</span>
+                                    <span>{{ $t('print_settings.show_customer_address') }}</span>
                                 </label>
                             </div>
 
@@ -444,7 +445,7 @@
                                             d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
                                         />
                                     </svg>
-                                    تعديل التوقيعات الرسمية
+                                    {{ $t('print_settings.edit_official_signatures') }}
                                 </button>
                                 <button
                                     type="button"
@@ -464,7 +465,7 @@
                                             d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"
                                         />
                                     </svg>
-                                    تعديل الشروط والأحكام
+                                    {{ $t('print_settings.edit_terms') }}
                                 </button>
                             </div>
                         </div>
@@ -484,7 +485,7 @@
                                 class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping"
                             ></span>
                             <h3 class="text-sm font-bold text-gray-900 dark:text-white">
-                                منصة المعاينة التفاعلية الحية
+                                {{ $t('print_settings.live_preview_platform') }}
                             </h3>
                         </div>
 
@@ -500,7 +501,8 @@
                                     :key="key"
                                     :value="key"
                                 >
-                                    معاينة: {{ $t('print_settings.' + key) }}
+                                    {{ $t('print_settings.preview') }}
+                                    {{ $t('print_settings.' + key) }}
                                 </option>
                             </select>
 
@@ -509,11 +511,21 @@
                                 v-model="previewScale"
                                 class="px-2 py-1 rounded bg-gray-50 border border-gray-200 dark:bg-gray-700 dark:border-gray-600 text-gray-800 dark:text-gray-200 text-xs cursor-pointer focus:ring-0 focus:outline-none"
                             >
-                                <option value="scale-[0.55]">مكبر (55%)</option>
-                                <option value="scale-[0.65]">مكبر (65%)</option>
-                                <option value="scale-[0.75]">مكبر (75%)</option>
-                                <option value="scale-[0.85]">مكبر (85%)</option>
-                                <option value="scale-[1.0]">الحجم الأصلي (100%)</option>
+                                <option value="scale-[0.55]">
+                                    {{ $t('print_settings.zoom_55') }}
+                                </option>
+                                <option value="scale-[0.65]">
+                                    {{ $t('print_settings.zoom_65') }}
+                                </option>
+                                <option value="scale-[0.75]">
+                                    {{ $t('print_settings.zoom_75') }}
+                                </option>
+                                <option value="scale-[0.85]">
+                                    {{ $t('print_settings.zoom_85') }}
+                                </option>
+                                <option value="scale-[1.0]">
+                                    {{ $t('print_settings.actual_size') }}
+                                </option>
                             </select>
                         </div>
                     </div>
@@ -542,7 +554,7 @@
                     </div>
 
                     <div class="mt-4 text-[10px] text-gray-400 text-center select-none">
-                        * المعاينة تمثل الشكل التقريبي النهائي للمستند عند الطباعة.
+                        {{ $t('print_settings.preview_disclaimer') }}
                     </div>
                 </div>
             </div>
@@ -647,22 +659,22 @@ const availableTemplates = [
     {
         id: 'TemplateDefaultA4',
         name: 'Classic A4',
-        description: 'طباعة A4 للمكاتب والمستندات الرسمية والمبيعات',
+        description: t('print_settings.a4_description'),
     },
     {
         id: 'TemplateThermal80',
         name: 'Thermal 80mm',
-        description: 'طباعة حرارية ضيقة للفواتير السريعة والعملاء ورسائل الواتساب',
+        description: t('print_settings.thermal_description_short'),
     },
     {
         id: 'TemplateModernA4',
         name: 'Modern Compact A4',
-        description: 'قالب A4 عصري وموفر للحبر ذو تصميم مضغوط وأنيق وجدول خدمات ملون',
+        description: t('print_settings.a4_description_long'),
     },
     {
         id: 'TemplateSleekThermal',
         name: 'Sleek Thermal 80mm',
-        description: 'تصميم إيصال حراري حديث بلمسة داكنة وتفاصيل انسيابية وتصميم أنيق',
+        description: t('print_settings.thermal_description'),
     },
 ];
 
@@ -908,10 +920,10 @@ function save() {
 
 // Sandbox Dummy Data
 const dummyCenterData = computed(() => ({
-    name: 'مركز خدمة برو',
+    name: t('print_settings.sample_center_name'),
     logo_url: page.props.tenant?.logo_url || '/images/logo.png',
     tax_number: '310298374200003',
-    address: 'الرياض، حي الصحافة، طريق الملك عبد العزيز',
+    address: t('print_settings.sample_address'),
     phone: '+966 55 123 4567',
     website: 'www.khidmapro.com',
     iban: 'SA80 4000 0000 1234 5678 9012',
@@ -924,48 +936,48 @@ const dummyPrintData = computed(() => ({
     odometer: '45,210',
     expected_end_date: new Date(Date.now() + 86400000 * 2), // 2 days from now
     customer: {
-        name: 'أحمد عبد الله القحطاني',
+        name: t('print_settings.sample_name'),
         phone: '+966 50 123 4567',
     },
     vehicle: {
-        make: 'تويوتا',
-        model: 'كامري GLE',
+        make: t('print_settings.sample_make'),
+        model: t('print_settings.sample_model'),
         year: '2023',
-        plate: 'ح ص ك 9922',
-        color: 'أبيض لؤلؤي',
+        plate: t('print_settings.sample_plate'),
+        color: t('print_settings.pearl_white'),
     },
     items: [
         {
-            service_name: 'فحص كمبيوتر وبرمجة كاملة',
-            description: 'فحص جميع الحساسات ومسح الأخطاء السابقة وإعادة التدوير',
+            service_name: t('print_settings.sample_service_computer'),
+            description: t('print_settings.sample_description_3'),
             qty: 1,
             unit_price: 150,
             is_part: false,
         },
         {
-            service_name: 'تغيير زيت المحرك مع الفلتر',
-            description: 'زيت سينثيتك بالكامل 5W-30 يقطع مسافة 10,000 كم مع السيفون الأصلي',
+            service_name: t('print_settings.sample_service_oil'),
+            description: t('print_settings.sample_description_2'),
             qty: 1,
             unit_price: 280,
             is_part: false,
         },
         {
-            service_name: 'تغيير فحمات الفرامل الأمامية',
-            description: 'قطع غيار أصلية مع خرط الهوبات الأمامية وضبط الميزانية',
+            service_name: t('print_settings.sample_service_brakes'),
+            description: t('print_settings.sample_description_4'),
             qty: 1,
             unit_price: 320,
-            technician: 'المهندس سليم',
+            technician: t('print_settings.sample_technician'),
             is_part: false,
         },
         {
-            service_name: 'فحمات فرامل أمامية (قطع غيار)',
-            description: 'من المستودع الرئيسي - تويوتا أصلي',
+            service_name: t('print_settings.sample_line_brakes'),
+            description: t('print_settings.sample_part'),
             qty: 1,
             unit_price: 240,
             is_part: true,
         },
     ],
     amount: 250, // For receipt
-    notes: 'دفعة مقدمة لصيانة السيارة المذكورة أعلاه وبدء أعمال الفحص والبرمجة.',
+    notes: t('print_settings.sample_description_1'),
 }));
 </script>

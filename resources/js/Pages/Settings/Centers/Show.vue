@@ -758,7 +758,7 @@
                                     {{ $t('company_profile.tabs.revenue_expenses') }}
                                 </h3>
                                 <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                                    إدارة الإيرادات والمصروفات الخاصة بمركز الصيانة
+                                    {{ $t('center_settings.transactions.subtitle') }}
                                 </p>
                             </div>
                             <button
@@ -796,7 +796,7 @@
                                         : 'text-gray-500 hover:text-gray-900 dark:hover:text-white',
                                 ]"
                             >
-                                الكل
+                                {{ $t('common.all') }}
                             </button>
                             <button
                                 type="button"
@@ -949,7 +949,7 @@
                                                     {{ formatCurrency(trans.tax_amount) }}
                                                 </span>
                                                 <span v-else class="text-gray-400 italic">
-                                                    غير خاضع
+                                                    {{ $t('common.not_subject') }}
                                                 </span>
                                             </td>
                                             <td
@@ -993,7 +993,7 @@
                                                     v-else
                                                     class="px-2 py-0.5 text-[10px] font-bold rounded bg-amber-500/10 text-amber-500 uppercase tracking-wider"
                                                 >
-                                                    مسودة
+                                                    {{ $t('common.status_draft') }}
                                                 </span>
                                             </td>
                                             <td class="px-6 py-4 text-center">
@@ -1004,7 +1004,7 @@
                                                         @click="approveTransaction(trans)"
                                                         class="px-2.5 py-1 text-xs font-bold text-emerald-650 dark:text-emerald-400 hover:bg-emerald-500/10 rounded-lg transition-colors border border-emerald-500/20"
                                                     >
-                                                        اعتماد
+                                                        {{ $t('hr.payroll.approve') }}
                                                     </button>
 
                                                     <!-- Edit Button -->
@@ -1054,7 +1054,7 @@
                                                         v-if="trans.status === 'approved'"
                                                         class="text-xs text-gray-400 dark:text-gray-500 flex items-center gap-1 font-semibold"
                                                     >
-                                                        🔒 معتمدة
+                                                        {{ $t('common.approved_label') }}
                                                     </span>
                                                 </div>
                                             </td>
@@ -1064,7 +1064,7 @@
                                                 colspan="10"
                                                 class="px-6 py-12 text-center text-gray-500 dark:text-gray-400"
                                             >
-                                                لا توجد معاملات مالية مسجلة حالياً للمركز
+                                                {{ $t('center_settings.transactions.empty') }}
                                             </td>
                                         </tr>
                                     </tbody>
@@ -1091,11 +1091,10 @@
                         >
                             <div>
                                 <h3 class="text-lg font-bold text-gray-900 dark:text-white">
-                                    فواتير المركز
+                                    {{ $t('center_settings.transactions.invoices_title') }}
                                 </h3>
                                 <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                                    عرض وتحميل الفواتير الضريبية الصادرة من معاملات الإيرادات
-                                    والمصروفات الخاصة بهذا المركز
+                                    {{ $t('center_settings.transactions.invoices_desc') }}
                                 </p>
                             </div>
                         </div>
@@ -1251,14 +1250,14 @@
                                                         "
                                                         class="text-xs font-bold text-blue-600 hover:text-blue-700 hover:underline transition-colors flex items-center gap-1"
                                                     >
-                                                        👁️ عرض الفاتورة
+                                                        {{ $t('common.view_invoice') }}
                                                     </Link>
                                                     <a
                                                         :href="route('app.invoices.print', inv.id)"
                                                         target="_blank"
                                                         class="text-xs font-bold text-indigo-600 hover:text-indigo-700 hover:underline transition-colors flex items-center gap-1"
                                                     >
-                                                        🖨️ طباعة
+                                                        {{ $t('common.print_emoji') }}
                                                     </a>
                                                 </div>
                                             </td>
@@ -1268,7 +1267,11 @@
                                                 colspan="10"
                                                 class="px-6 py-12 text-center text-gray-500 dark:text-gray-400"
                                             >
-                                                لا توجد فواتير مبيعات صادرة للمركز حالياً
+                                                {{
+                                                    $t(
+                                                        'center_settings.transactions.no_sales_invoices'
+                                                    )
+                                                }}
                                             </td>
                                         </tr>
                                     </tbody>
@@ -1382,7 +1385,7 @@
                                                         "
                                                         class="text-xs font-bold text-blue-600 hover:text-blue-700 hover:underline transition-colors flex items-center gap-1"
                                                     >
-                                                        👁️ عرض الفاتورة
+                                                        {{ $t('common.view_invoice') }}
                                                     </Link>
                                                     <a
                                                         :href="
@@ -1394,7 +1397,7 @@
                                                         target="_blank"
                                                         class="text-xs font-bold text-indigo-600 hover:text-indigo-700 hover:underline transition-colors flex items-center gap-1"
                                                     >
-                                                        🖨️ طباعة
+                                                        {{ $t('common.print_emoji') }}
                                                     </a>
                                                 </div>
                                             </td>
@@ -1404,7 +1407,11 @@
                                                 colspan="10"
                                                 class="px-6 py-12 text-center text-gray-500 dark:text-gray-400"
                                             >
-                                                لا توجد فواتير مشتريات صادرة للمركز حالياً
+                                                {{
+                                                    $t(
+                                                        'center_settings.transactions.no_purchase_invoices'
+                                                    )
+                                                }}
                                             </td>
                                         </tr>
                                     </tbody>
@@ -1493,7 +1500,7 @@ const tabs = computed(() => [
     { id: 'branding', label: t('center_settings.tabs.branding') },
     { id: 'working_hours', label: t('center_settings.tabs.working_hours') },
     { id: 'revenue_expenses', label: t('company_profile.tabs.revenue_expenses') },
-    { id: 'invoices', label: locale.value === 'ar' ? 'فواتير المركز' : 'Center Invoices' },
+    { id: 'invoices', label: t('center_settings.transactions.invoices_title') },
 ]);
 
 const form = ref({
@@ -1535,7 +1542,15 @@ const centerTypeOptions = computed(() => [
     { value: 'warehouse', label: t('company_profile.branches.center_type_warehouse') },
 ]);
 
-const dayNames = ['الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
+const dayNames = [
+    t('common.day_sunday'),
+    t('common.day_monday_alt'),
+    t('common.day_tuesday'),
+    t('common.day_wednesday'),
+    t('common.day_thursday'),
+    t('common.day_friday'),
+    t('common.day_saturday'),
+];
 
 function getDayName(dayOfWeek) {
     return dayNames[dayOfWeek] ?? '';
@@ -1949,10 +1964,10 @@ const onTransactionSaved = () => {
 
 const deleteTransaction = async (transaction) => {
     const confirmed = await confirm({
-        title: 'حذف المعاملة المالية',
-        message: 'هل أنت متأكد من رغبتك في حذف هذه المعاملة؟ لا يمكن استعادة البيانات بعد ذلك.',
-        confirmText: 'حذف',
-        cancelText: 'إلغاء',
+        title: t('common.delete_transaction'),
+        message: t('common.delete_transaction_confirm'),
+        confirmText: t('common.delete'),
+        cancelText: t('common.cancel'),
         type: 'danger',
     });
 
@@ -1962,7 +1977,7 @@ const deleteTransaction = async (transaction) => {
                 success(t('common.saved_success'));
             },
             onError: (errors) => {
-                error(errors.message || 'حدث خطأ أثناء الحذف');
+                error(errors.message || t('common.error_while_deleting'));
             },
         });
     }
@@ -1970,10 +1985,10 @@ const deleteTransaction = async (transaction) => {
 
 const approveTransaction = async (transaction) => {
     const confirmed = await confirm({
-        title: 'اعتماد المعاملة المالية',
+        title: t('common.approve_transaction'),
         message: t('company_profile.transactions.approve_confirm'),
-        confirmText: 'اعتماد وإصدار الفاتورة',
-        cancelText: 'إلغاء',
+        confirmText: t('common.approve_and_issue_invoice'),
+        cancelText: t('common.cancel'),
         type: 'success',
     });
 
@@ -1983,10 +1998,10 @@ const approveTransaction = async (transaction) => {
             {},
             {
                 onSuccess: () => {
-                    success('تم اعتماد المعاملة بنجاح');
+                    success(t('common.transaction_approved'));
                 },
                 onError: (errors) => {
-                    error(errors.message || 'حدث خطأ أثناء الاعتماد');
+                    error(errors.message || t('common.error_while_approving'));
                 },
             }
         );

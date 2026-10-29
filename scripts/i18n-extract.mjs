@@ -400,6 +400,24 @@ function extractTemplate(templateContent, raw, templateStart) {
                         block: 'template',
                     });
                 }
+                // `cond ? 'نص' : other` — the copy of the ternary branch.
+                // The branch may sit after another expression:
+                // `cond ? $t('other') : 'نص'`.
+                // The Arabic branch of a ternary: it may sit right after
+                // the `?` or after the `:` of another ternary.
+                const branch = expression.match(
+                    /\?[^?:]*?:\s*'([^']*)'|\?\s*'([^']*)'\s*:/
+                );
+                const branchText = branch && (branch[1] || branch[2]);
+                if (branchText && ARABIC.test(branchText) && isUserFacingCopy(branchText)) {
+                    found.push({
+                        kind: 'interpolation_branch',
+                        start: templateStart + node.loc.start.offset,
+                        end: templateStart + node.loc.end.offset,
+                        value: branchText,
+                        block: 'template',
+                    });
+                }
                 // `{{ `${x} ر.س` }}` — the Arabic is the tail of a template
                 // literal.
                 const literal = expression.match(/`([^`]*)`/);
@@ -414,7 +432,7 @@ function extractTemplate(templateContent, raw, templateStart) {
                 }
                 // The plain expression is only reported when it carries
                 // no more specific copy of its own.
-                if (!fallback && !literal) {
+                if (!fallback && !literal && !branch) {
                     found.push({
                         kind: 'interpolation',
                         start: templateStart + node.loc.start.offset,
@@ -473,6 +491,7 @@ function scanFile(file) {
     // a literal tail says more than the raw expression.
     const specificity = {
         interpolation_fallback: 0,
+        interpolation_branch: 0,
         interpolation_literal: 1,
         interpolation: 2,
     };

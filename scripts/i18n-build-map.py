@@ -57,6 +57,8 @@ NAMESPACE_BY_PATH = [
     (re.compile(r"^resources/js/Pages/Auth/"), "auth"),
     (re.compile(r"^resources/js/Pages/Public/"), "landing"),
     (re.compile(r"^resources/js/Components/Print/"), "print"),
+    (re.compile(r"^resources/js/Components/Settings/Company/CompanySubscriptionTab"), "subscription"),
+    (re.compile(r"^resources/js/Components/Settings/Company/"), "company_profile"),
     (re.compile(r"^resources/js/Components/Settings/"), "settings"),
     (re.compile(r"^resources/js/Components/Subscription/"), "subscription"),
     (re.compile(r"^resources/js/Components/Customers/"), "customers"),

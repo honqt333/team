@@ -119,7 +119,12 @@ class WorkOrderItem extends Model
 
     public function workOrder(): BelongsTo
     {
-        return $this->belongsTo(WorkOrder::class);
+        return $this->belongsTo(WorkOrder::class)->withoutGlobalScope('center_scoped');
+    }
+
+    public function center(): BelongsTo
+    {
+        return $this->belongsTo(Center::class);
     }
 
     public function service(): BelongsTo

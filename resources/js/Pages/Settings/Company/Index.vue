@@ -968,7 +968,7 @@
                                                 {{
                                                     props.zatca?.environment === 'production'
                                                         ? 'الإنتاج الحي'
-                                                        : 'بيئة المحاكاة (Simulation)'
+                                                        : '$t('zatca.env_simulation')'
                                                 }}
                                             </span>
                                         </div>
@@ -979,7 +979,7 @@
                                             v-if="props.zatca?.production_csid_expires_at"
                                             class="text-xs text-gray-500 dark:text-gray-400 mt-1"
                                         >
-                                            صلاحية الشهادة حتى:
+                                            {{ $t('company_profile.tax.certificate_valid_until') }}
                                             {{ props.zatca.production_csid_expires_at }}
                                         </p>
                                     </div>
@@ -1044,15 +1044,15 @@
                                             <span
                                                 class="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-amber-100 text-amber-800 dark:bg-amber-900/60 dark:text-amber-300 border border-amber-200 dark:border-amber-800"
                                             >
-                                                يتطلب إكمال إعدادات الضريبة أولاً
+                                                {{
+                                                    $t('company_profile.tax.finish_settings_first')
+                                                }}
                                             </span>
                                         </div>
                                         <p
                                             class="text-sm text-gray-600 dark:text-gray-300 mt-1 max-w-xl"
                                         >
-                                            لا يمكن بدء معالج الربط والتكامل مع منصة فاتورة (ZATCA)
-                                            إلا بعد تفعيل ضريبة القيمة المضافة وإدخال الرقم الضريبي
-                                            المعتمد (15 رقماً) للمنشأة.
+                                            {{ $t('company_profile.tax.activation_required') }}
                                         </p>
                                         <div
                                             v-if="props.zatca?.eligibility_errors?.length"
@@ -1077,7 +1077,7 @@
                                     @click="activeTab = 'vat'"
                                     class="inline-flex items-center justify-center gap-2 px-6 py-3 bg-amber-600 hover:bg-amber-700 text-white font-semibold rounded-xl text-sm shadow-md shadow-amber-600/20 transition-all shrink-0"
                                 >
-                                    <span>الانتقال لإعدادات الضريبة والتفعيل</span>
+                                    <span>{{ $t('company_profile.tax.go_to_settings') }}</span>
                                     <svg
                                         class="w-4 h-4 rtl:rotate-180"
                                         fill="none"
@@ -1131,7 +1131,7 @@
                                             <span
                                                 class="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800"
                                             >
-                                                معالج ذاتي
+                                                {{ $t('company_profile.numbering.self_handled') }}
                                             </span>
                                         </div>
                                         <p
@@ -1193,11 +1193,10 @@
                                         d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14"
                                     />
                                 </svg>
-                                إعدادات الترقيم والتسلسل للمستندات
+                                {{ $t('company_profile.numbering.title') }}
                             </h3>
                             <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                                تخصيص البادئة وصيغة الأرقام التسلسلية للفواتير وكروت العمل وعروض
-                                الأسعار.
+                                {{ $t('company_profile.numbering.subtitle') }}
                             </p>
                         </div>
 
@@ -1209,7 +1208,7 @@
                                 <label
                                     class="block text-xs font-black uppercase tracking-wider text-gray-700 dark:text-gray-300"
                                 >
-                                    صيغة ترقيم الفواتير (Invoices)
+                                    {{ $t('company_profile.numbering.invoices_format') }}
                                 </label>
                                 <input
                                     v-model="form.numbering.invoice_number_format"
@@ -1219,7 +1218,7 @@
                                 <div
                                     class="text-[11px] text-gray-500 dark:text-gray-400 flex items-center justify-between"
                                 >
-                                    <span>المعاينة:</span>
+                                    <span>{{ $t('common.preview') }}</span>
                                     <code
                                         class="px-2 py-0.5 rounded bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 font-mono font-bold"
                                     >
@@ -1235,7 +1234,7 @@
                                 <label
                                     class="block text-xs font-black uppercase tracking-wider text-gray-700 dark:text-gray-300"
                                 >
-                                    صيغة ترقيم كروت الصيانة (Work Orders)
+                                    {{ $t('company_profile.numbering.work_orders_format') }}
                                 </label>
                                 <input
                                     v-model="form.numbering.work_order_number_format"
@@ -1245,7 +1244,7 @@
                                 <div
                                     class="text-[11px] text-gray-500 dark:text-gray-400 flex items-center justify-between"
                                 >
-                                    <span>المعاينة:</span>
+                                    <span>{{ $t('common.preview') }}</span>
                                     <code
                                         class="px-2 py-0.5 rounded bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 font-mono font-bold"
                                     >
@@ -1261,7 +1260,7 @@
                                 <label
                                     class="block text-xs font-black uppercase tracking-wider text-gray-700 dark:text-gray-300"
                                 >
-                                    صيغة ترقيم عروض الأسعار (Quotes)
+                                    {{ $t('company_profile.numbering.quotes_format') }}
                                 </label>
                                 <input
                                     v-model="form.numbering.quote_number_format"
@@ -1271,7 +1270,7 @@
                                 <div
                                     class="text-[11px] text-gray-500 dark:text-gray-400 flex items-center justify-between"
                                 >
-                                    <span>المعاينة:</span>
+                                    <span>{{ $t('common.preview') }}</span>
                                     <code
                                         class="px-2 py-0.5 rounded bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 font-mono font-bold"
                                     >
@@ -1301,7 +1300,7 @@
                                         d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
                                     />
                                 </svg>
-                                الرموز المتاحة في صياغة الترقيم:
+                                {{ $t('company_profile.numbering.available_tokens') }}
                             </p>
                             <div
                                 class="flex flex-wrap gap-2 text-xs text-blue-800 dark:text-blue-400"
@@ -1310,37 +1309,37 @@
                                     class="bg-white/80 dark:bg-gray-800 px-2 py-1 rounded-md border border-blue-200 dark:border-blue-800 font-mono"
                                 >
                                     <strong class="text-blue-600">{SEQ}</strong>
-                                    : الرقم التسلسلي (إلزامي)
+                                    {{ $t('company_profile.numbering.serial_label') }}
                                 </span>
                                 <span
                                     class="bg-white/80 dark:bg-gray-800 px-2 py-1 rounded-md border border-blue-200 dark:border-blue-800 font-mono"
                                 >
                                     <strong class="text-blue-600">{YYYY}</strong>
-                                    : السنة الحالية (4 أرقام)
+                                    {{ $t('company_profile.numbering.year_four_digits') }}
                                 </span>
                                 <span
                                     class="bg-white/80 dark:bg-gray-800 px-2 py-1 rounded-md border border-blue-200 dark:border-blue-800 font-mono"
                                 >
                                     <strong class="text-blue-600">{YY}</strong>
-                                    : السنة (رقمين)
+                                    {{ $t('company_profile.numbering.year_two_digits') }}
                                 </span>
                                 <span
                                     class="bg-white/80 dark:bg-gray-800 px-2 py-1 rounded-md border border-blue-200 dark:border-blue-800 font-mono"
                                 >
                                     <strong class="text-blue-600">{MM}</strong>
-                                    : الشهر الحالي
+                                    {{ $t('company_profile.numbering.current_month') }}
                                 </span>
                                 <span
                                     class="bg-white/80 dark:bg-gray-800 px-2 py-1 rounded-md border border-blue-200 dark:border-blue-800 font-mono"
                                 >
                                     <strong class="text-blue-600">{DD}</strong>
-                                    : اليوم
+                                    {{ $t('company_profile.numbering.day') }}
                                 </span>
                                 <span
                                     class="bg-white/80 dark:bg-gray-800 px-2 py-1 rounded-md border border-blue-200 dark:border-blue-800 font-mono"
                                 >
                                     <strong class="text-blue-600">{CENTER}</strong>
-                                    : رقم الفرع
+                                    {{ $t('company_profile.numbering.branch_number') }}
                                 </span>
                             </div>
                         </div>
@@ -1375,10 +1374,10 @@
                                         d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
                                     />
                                 </svg>
-                                سياسات العمل والتشغيل
+                                {{ $t('company_profile.policies.title') }}
                             </h3>
                             <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                                تحديد القواعد التشغيلية وسماحيات الموظفين في كروت الصيانة والعملاء.
+                                {{ $t('company_profile.policies.subtitle') }}
                             </p>
                         </div>
 
@@ -1389,12 +1388,12 @@
                             >
                                 <div>
                                     <h4 class="text-sm font-bold text-gray-900 dark:text-white">
-                                        السماح بتسجيل قراءة عداد أقل من السابقة
+                                        {{ $t('company_profile.policies.allow_lower_odometer') }}
                                     </h4>
                                     <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                                        عند التعطيل، يمنع النظام تحديث قراءة العداد إذا كانت أقل من
-                                        آخر قراءة مسجلة للسيارة لحماية سجل الصيانة من الأخطاء
-                                        البشرية.
+                                        {{
+                                            $t('company_profile.policies.allow_lower_odometer_desc')
+                                        }}
                                     </p>
                                 </div>
                                 <label
@@ -1417,11 +1416,14 @@
                             >
                                 <div>
                                     <h4 class="text-sm font-bold text-gray-900 dark:text-white">
-                                        إلزامية رقم جوال العميل
+                                        {{ $t('company_profile.policies.customer_phone_required') }}
                                     </h4>
                                     <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                                        اشتراط إدخال رقم هاتف صحيح للعميل عند فتح كرت صيانة جديد
-                                        لضمان إمكانية التواصل وإرسال الإشعارات.
+                                        {{
+                                            $t(
+                                                'company_profile.policies.customer_phone_required_desc'
+                                            )
+                                        }}
                                     </p>
                                 </div>
                                 <label
@@ -1445,11 +1447,10 @@
                                 <label
                                     class="block text-sm font-bold text-gray-900 dark:text-white"
                                 >
-                                    الحد الأقصى للخصم المسموح به لموظف الاستقبال (%)
+                                    {{ $t('company_profile.policies.max_discount') }}
                                 </label>
                                 <p class="text-xs text-gray-500 dark:text-gray-400">
-                                    أقصى نسبة خصم يمكن للموظف تطبيقها على الفواتير وكروت العمل بدون
-                                    طلب موافقة من المدير.
+                                    {{ $t('company_profile.policies.max_discount_desc') }}
                                 </p>
                                 <div class="flex items-center gap-3 pt-1">
                                     <input
@@ -1470,11 +1471,10 @@
                                 <label
                                     class="block text-sm font-bold text-gray-900 dark:text-white"
                                 >
-                                    فترة الضمان الافتراضية لأعمال الصيانة (بالأيام)
+                                    {{ $t('company_profile.numbering.default_warranty_days') }}
                                 </label>
                                 <p class="text-xs text-gray-500 dark:text-gray-400">
-                                    الفترة الافتراضية لضمان أجور اليد والقطع الموضحة في تذييل سندات
-                                    وكروت الفحص المطبوعة.
+                                    {{ $t('company_profile.numbering.default_period_desc') }}
                                 </p>
                                 <div class="flex items-center gap-3 pt-1">
                                     <input
@@ -1484,7 +1484,9 @@
                                         v-model.number="form.workflow.default_warranty_days"
                                         class="w-32 px-3.5 py-2 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white font-mono font-bold text-sm focus:ring-2 focus:ring-emerald-500"
                                     />
-                                    <span class="text-sm text-gray-500">يوم</span>
+                                    <span class="text-sm text-gray-500">
+                                        {{ $t('common.day') }}
+                                    </span>
                                 </div>
                             </div>
                         </div>
@@ -1519,11 +1521,10 @@
                                         d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
                                     />
                                 </svg>
-                                قوالب إشعارات ورسائل العملاء (SMS & WhatsApp)
+                                {{ $t('company_profile.templates.title') }}
                             </h3>
                             <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                                تخصيص نصوص الرسائل التلقائية المرسلة للعملاء في مراحل الصيانة
-                                المختلفة.
+                                {{ $t('company_profile.templates.subtitle') }}
                             </p>
                         </div>
 
@@ -1532,7 +1533,7 @@
                             class="p-4 bg-emerald-50/60 dark:bg-emerald-950/20 rounded-2xl border border-emerald-200 dark:border-emerald-800 space-y-2"
                         >
                             <p class="text-xs font-bold text-emerald-900 dark:text-emerald-300">
-                                المتغيرات المتاحة للاستخدام داخل نصوص الرسائل:
+                                {{ $t('company_profile.templates.available_variables') }}
                             </p>
                             <div class="flex flex-wrap gap-2 text-xs">
                                 <span
@@ -1576,7 +1577,7 @@
                                 <label
                                     class="block text-sm font-bold text-gray-900 dark:text-white"
                                 >
-                                    رسالة استلام المركبة وفتح كرت العمل
+                                    {{ $t('company_profile.templates.vehicle_received') }}
                                 </label>
                                 <textarea
                                     rows="2"
@@ -1592,7 +1593,7 @@
                                 <label
                                     class="block text-sm font-bold text-gray-900 dark:text-white"
                                 >
-                                    رسالة اكتمال الصيانة وجهوزية المركبة للاستلام
+                                    {{ $t('company_profile.templates.service_completed') }}
                                 </label>
                                 <textarea
                                     rows="2"
@@ -1608,7 +1609,7 @@
                                 <label
                                     class="block text-sm font-bold text-gray-900 dark:text-white"
                                 >
-                                    رسالة مشاركة عرض السعر / التقييم للعميل
+                                    {{ $t('company_profile.templates.quote_shared') }}
                                 </label>
                                 <textarea
                                     rows="2"
@@ -1624,7 +1625,7 @@
                                 <label
                                     class="block text-sm font-bold text-gray-900 dark:text-white"
                                 >
-                                    رسالة إصدار الفاتورة الضريبية للعميل
+                                    {{ $t('company_profile.templates.tax_invoice') }}
                                 </label>
                                 <textarea
                                     rows="2"
@@ -1888,7 +1889,7 @@
                                     {{ $t('company_profile.tabs.revenue_expenses') }}
                                 </h3>
                                 <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                                    إدارة الإيرادات والمصروفات الخاصة بالإدارة والشركة
+                                    {{ $t('company_profile.transactions.subtitle') }}
                                 </p>
                             </div>
                             <button
@@ -1926,7 +1927,7 @@
                                         : 'text-gray-500 hover:text-gray-900 dark:hover:text-white',
                                 ]"
                             >
-                                الكل
+                                {{ $t('common.all') }}
                             </button>
                             <button
                                 type="button"
@@ -2079,7 +2080,7 @@
                                                     {{ formatCurrency(trans.tax_amount) }}
                                                 </span>
                                                 <span v-else class="text-gray-400 italic">
-                                                    غير خاضع
+                                                    {{ $t('common.not_subject') }}
                                                 </span>
                                             </td>
                                             <td
@@ -2123,7 +2124,7 @@
                                                     v-else
                                                     class="px-2 py-0.5 text-[10px] font-bold rounded bg-amber-500/10 text-amber-500 uppercase tracking-wider"
                                                 >
-                                                    مسودة
+                                                    {{ $t('common.status_draft') }}
                                                 </span>
                                             </td>
                                             <td class="px-6 py-4 text-center">
@@ -2139,7 +2140,7 @@
                                                             )
                                                         "
                                                     >
-                                                        اعتماد
+                                                        {{ $t('hr.payroll.approve') }}
                                                     </button>
 
                                                     <!-- Edit Button -->
@@ -2189,7 +2190,7 @@
                                                         v-if="trans.status === 'approved'"
                                                         class="text-xs text-gray-400 dark:text-gray-500 flex items-center gap-1 font-semibold"
                                                     >
-                                                        🔒 معتمدة
+                                                        {{ $t('common.approved_label') }}
                                                     </span>
                                                 </div>
                                             </td>
@@ -2199,7 +2200,11 @@
                                                 colspan="10"
                                                 class="px-6 py-12 text-center text-gray-500 dark:text-gray-400"
                                             >
-                                                لا توجد معاملات مالية مسجلة حالياً
+                                                {{
+                                                    $t(
+                                                        'company_profile.transactions.empty_detailed'
+                                                    )
+                                                }}
                                             </td>
                                         </tr>
                                     </tbody>
@@ -2225,11 +2230,10 @@
                         >
                             <div>
                                 <h3 class="text-lg font-bold text-gray-900 dark:text-white">
-                                    فواتير الإدارة
+                                    {{ $t('company_profile.transactions.invoices_title') }}
                                 </h3>
                                 <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                                    عرض وتحميل الفواتير الضريبية الصادرة من معاملات الإيرادات
-                                    والمصروفات
+                                    {{ $t('company_profile.transactions.invoices_desc') }}
                                 </p>
                             </div>
                         </div>
@@ -2385,14 +2389,14 @@
                                                         "
                                                         class="text-xs font-bold text-emerald-600 hover:text-emerald-700 hover:underline transition-colors flex items-center gap-1"
                                                     >
-                                                        👁️ عرض الفاتورة
+                                                        {{ $t('common.view_invoice') }}
                                                     </Link>
                                                     <a
                                                         :href="route('app.invoices.print', inv.id)"
                                                         target="_blank"
                                                         class="text-xs font-bold text-indigo-600 hover:text-indigo-700 hover:underline transition-colors flex items-center gap-1"
                                                     >
-                                                        🖨️ طباعة
+                                                        {{ $t('common.print_emoji') }}
                                                     </a>
                                                 </div>
                                             </td>
@@ -2402,7 +2406,11 @@
                                                 colspan="10"
                                                 class="px-6 py-12 text-center text-gray-500 dark:text-gray-400"
                                             >
-                                                لا توجد فواتير مبيعات صادرة للإدارة حالياً
+                                                {{
+                                                    $t(
+                                                        'company_profile.transactions.no_sales_invoices'
+                                                    )
+                                                }}
                                             </td>
                                         </tr>
                                     </tbody>
@@ -2516,7 +2524,7 @@
                                                         "
                                                         class="text-xs font-bold text-emerald-600 hover:text-emerald-700 hover:underline transition-colors flex items-center gap-1"
                                                     >
-                                                        👁️ عرض الفاتورة
+                                                        {{ $t('common.view_invoice') }}
                                                     </Link>
                                                     <a
                                                         :href="
@@ -2528,7 +2536,7 @@
                                                         target="_blank"
                                                         class="text-xs font-bold text-indigo-600 hover:text-indigo-700 hover:underline transition-colors flex items-center gap-1"
                                                     >
-                                                        🖨️ طباعة
+                                                        {{ $t('common.print_emoji') }}
                                                     </a>
                                                 </div>
                                             </td>
@@ -2538,7 +2546,11 @@
                                                 colspan="10"
                                                 class="px-6 py-12 text-center text-gray-500 dark:text-gray-400"
                                             >
-                                                لا توجد فواتير مشتريات صادرة للإدارة حالياً
+                                                {{
+                                                    $t(
+                                                        'company_profile.transactions.no_purchase_invoices'
+                                                    )
+                                                }}
                                             </td>
                                         </tr>
                                     </tbody>
@@ -2841,16 +2853,14 @@ const form = ref({
     notifications: {
         work_order_created:
             props.notifications?.work_order_created ??
-            'مرحباً {customer_name}، تم استلام مركبتك {plate_number} برقم كرت صيانة #{code} في {center_name}.',
+            t('company_profile.templates.vehicle_received_body'),
         work_order_completed:
             props.notifications?.work_order_completed ??
-            'عزيزنا {customer_name}، اكتملت صيانة مركبتك {plate_number} (#{code}) وأصبحت جاهزة للاستلام في {center_name}.',
+            t('company_profile.templates.service_completed_body'),
         quote_shared:
-            props.notifications?.quote_shared ??
-            'مرحباً {customer_name}، تفضل عرض السعر الخاص بمركبتك {plate_number} رقم {code}، يمكنك الاطلاع عليه هنا: {url}',
+            props.notifications?.quote_shared ?? t('company_profile.templates.quote_shared_body'),
         invoice_issued:
-            props.notifications?.invoice_issued ??
-            'عزيزنا {customer_name}، تم إصدار الفاتورة الضريبية رقم {code} بمبلغ {total} ر.س لمركبتك {plate_number}.',
+            props.notifications?.invoice_issued ?? t('company_profile.templates.tax_invoice_body'),
     },
     admin_user: {
         email: props.admin_user?.email ?? '',
@@ -3433,14 +3443,13 @@ const getPlanName = (sub) => {
         locale.value === 'en'
             ? sub.plan?.name_en || sub.plan?.name_ar
             : sub.plan?.name_ar || sub.plan?.name_en;
-    if (!name)
-        return sub.status === 'trialing' || sub.status === 'trial' ? 'فترة تجريبية' : 'باقة مجهولة';
+    if (!name) return t('subscription.trial_period');
     if (
         (sub.status === 'trialing' || sub.status === 'trial') &&
         !name.includes('Trial') &&
-        !name.includes('تجريبي')
+        !name.includes(t('dashboard.trial'))
     ) {
-        return locale.value === 'en' ? `${name} (Trial)` : `${name} (تجريبي)`;
+        return locale.value === 'en' ? `${name} (Trial)` : t('common.trial_suffix');
     }
     return name;
 };
@@ -3476,25 +3485,25 @@ const closeTransactionModal = () => {
 
 const onTransactionSaved = () => {
     closeTransactionModal();
-    success('تم حفظ المعاملة بنجاح');
+    success(t('common.transaction_saved'));
 };
 
 const deleteTransaction = async (transaction) => {
     const confirmed = await confirm({
-        title: 'حذف المعاملة المالية',
-        message: 'هل أنت متأكد من رغبتك في حذف هذه المعاملة؟ لا يمكن استعادة البيانات بعد ذلك.',
-        confirmText: 'حذف',
-        cancelText: 'إلغاء',
+        title: t('common.delete_transaction'),
+        message: t('common.delete_transaction_confirm'),
+        confirmText: t('common.delete'),
+        cancelText: t('common.cancel'),
         type: 'danger',
     });
 
     if (confirmed) {
         router.delete(`/app/settings/company/transactions/${transaction.id}`, {
             onSuccess: () => {
-                success('تم حذف المعاملة بنجاح');
+                success(t('common.transaction_deleted'));
             },
             onError: (errors) => {
-                error(errors.message || 'حدث خطأ أثناء الحذف');
+                error(errors.message || t('common.error_while_deleting'));
             },
         });
     }
@@ -3502,10 +3511,10 @@ const deleteTransaction = async (transaction) => {
 
 const approveTransaction = async (transaction) => {
     const confirmed = await confirm({
-        title: 'اعتماد المعاملة المالية',
+        title: t('common.approve_transaction'),
         message: t('company_profile.transactions.approve_confirm'),
-        confirmText: 'اعتماد وإصدار الفاتورة',
-        cancelText: 'إلغاء',
+        confirmText: t('common.approve_and_issue_invoice'),
+        cancelText: t('common.cancel'),
         type: 'success',
     });
 
@@ -3515,10 +3524,10 @@ const approveTransaction = async (transaction) => {
             {},
             {
                 onSuccess: () => {
-                    success('تم اعتماد المعاملة بنجاح');
+                    success(t('common.transaction_approved'));
                 },
                 onError: (errors) => {
-                    error(errors.message || 'حدث خطأ أثناء الاعتماد');
+                    error(errors.message || t('common.error_while_approving'));
                 },
             }
         );

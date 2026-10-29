@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Policies;
 
+use App\Enums\InvoiceType;
 use App\Models\Invoice;
 use App\Models\User;
 use App\Support\Permissions;
@@ -18,7 +19,7 @@ class InvoicePolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->can(Permissions::INVOICES_VIEW);
+        return $user->can(Permissions::INVOICES_VIEW) || $user->can('crm.invoices.view');
     }
 
     /**
@@ -26,7 +27,11 @@ class InvoicePolicy
      */
     public function view(User $user, Invoice $invoice): bool
     {
-        return $user->can(Permissions::INVOICES_VIEW)
+        $hasPermission = $user->can(Permissions::INVOICES_VIEW)
+            || $user->can('crm.invoices.view')
+            || ($invoice->work_order_id && $user->can('crm.work_orders.view'));
+
+        return $hasPermission
             && $user->tenant_id === $invoice->tenant_id
             && $this->inCurrentCenter($user, $invoice);
     }
@@ -94,6 +99,23 @@ class InvoicePolicy
     }
 
     /**
+     * Determine whether the user can create a credit note for this invoice.
+     */
+    public function createCreditNote(User $user, Invoice $invoice): bool
+    {
+        $hasPermission = $user->can(Permissions::INVOICES_CREATE)
+            || $user->can('crm.invoices.create')
+            || ($invoice->work_order_id && $user->can('crm.work_orders.update'));
+
+        return $hasPermission
+            && $user->tenant_id === $invoice->tenant_id
+            && $this->inCurrentCenter($user, $invoice)
+            && $invoice->type !== 'credit_note'
+            && $invoice->type !== InvoiceType::CREDIT_NOTE
+            && $invoice->status !== 'cancelled';
+    }
+
+    /**
      * Determine whether the user can record payments.
      *
      * Invoicing payments are part of the purchasing/payment
@@ -105,6 +127,7 @@ class InvoicePolicy
         return $user->can(Permissions::PURCHASE_PAYMENTS_MANAGE)
             && $user->tenant_id === $invoice->tenant_id
             && $this->inCurrentCenter($user, $invoice)
-            && $invoice->payment_status !== 'paid';
+            && $invoice->payment_status !== 'paid'
+            && round((float) $invoice->balance, 2) > 0;
     }
 }

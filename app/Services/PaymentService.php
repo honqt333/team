@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Enums\InvoiceType;
 use App\Exceptions\PaymentExceedsBalanceException;
 use App\Models\Invoice;
 use App\Models\Payment;
@@ -131,10 +132,14 @@ class PaymentService
                 throw new PaymentExceedsBalanceException('لا يوجد رصيد مستحق على هذه الفاتورة.');
             }
 
+            $isCreditNote = $locked->type === InvoiceType::CREDIT_NOTE
+                || ($locked->type instanceof InvoiceType ? $locked->type->value : (string) $locked->type) === 'credit_note';
+
             return $this->createPayment($locked, [
                 'amount' => $balance,
                 'payment_method' => $method,
                 'reference' => $reference,
+                'type' => $isCreditNote ? 'refund' : 'payment',
             ]);
         });
     }
@@ -157,6 +162,15 @@ class PaymentService
      */
     private function createPayment(Invoice $invoice, array $data): Payment
     {
+        $isCreditNote = $invoice->type === InvoiceType::CREDIT_NOTE
+            || ($invoice->type instanceof InvoiceType ? $invoice->type->value : (string) $invoice->type) === 'credit_note';
+
+        $type = $data['type'] ?? ($isCreditNote ? 'refund' : 'payment');
+
+        if ($isCreditNote && $type === 'payment') {
+            $type = 'refund';
+        }
+
         $payment = Payment::create([
             'tenant_id' => $invoice->tenant_id,
             'center_id' => $invoice->center_id,
@@ -169,7 +183,7 @@ class PaymentService
             'reference' => $data['reference'] ?? null,
             'notes' => $data['notes'] ?? null,
             'received_by' => $data['received_by'] ?? auth()->id(),
-            'type' => $data['type'] ?? 'payment',
+            'type' => $type,
         ]);
 
         // Update invoice payment status

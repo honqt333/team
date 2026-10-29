@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\App;
 
+use App\Enums\InvoiceType;
 use App\Http\Controllers\Controller;
 use App\Models\InventoryUnit;
 use App\Models\Invoice;
@@ -13,9 +14,11 @@ use App\Models\PurchaseReturnInvoice;
 use App\Models\Supplier;
 use App\Models\Warehouse;
 use App\Models\WorkOrder;
+use App\Services\CreditNoteService;
 use App\Services\InvoiceService;
 use App\Services\NotificationService;
 use Exception;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
@@ -24,9 +27,12 @@ class InvoicesController extends Controller
 {
     protected InvoiceService $invoiceService;
 
-    public function __construct(InvoiceService $invoiceService)
+    protected CreditNoteService $creditNoteService;
+
+    public function __construct(InvoiceService $invoiceService, CreditNoteService $creditNoteService)
     {
         $this->invoiceService = $invoiceService;
+        $this->creditNoteService = $creditNoteService;
     }
 
     /**
@@ -38,6 +44,8 @@ class InvoicesController extends Controller
 
         $invoice->load([
             'customer',
+            'originalInvoice:id,invoice_number,issue_date,total_incl_tax',
+            'creditNotes:id,original_invoice_id,invoice_number,issue_date,total_incl_tax,status',
             'workOrder.vehicle.make',
             'workOrder.vehicle.model',
             'workOrder.items',
@@ -97,6 +105,222 @@ class InvoicesController extends Controller
     }
 
     /**
+     * Get returnable items summary for Credit Note modal.
+     */
+    public function creditNoteSummary(WorkOrder $workOrder): JsonResponse
+    {
+        $this->authorize('view', $workOrder);
+
+        if (! in_array($workOrder->status, ['done', 'delivered', 'completed'])) {
+            return response()->json([
+                'is_possible' => false,
+                'message' => 'يجب أن يكون كرت الصيانة مكتملاً (Done) لإنشاء إشعار دائن.',
+                'invoice' => null,
+                'services' => [],
+                'parts' => [],
+            ]);
+        }
+
+        if (! $workOrder->invoice()->exists()) {
+            return response()->json([
+                'is_possible' => false,
+                'message' => 'لا توجد فاتورة ضريبية مسجلة لهذا الكرت بعد. يجب إصدار الفاتورة أولاً.',
+                'invoice' => null,
+                'services' => [],
+                'parts' => [],
+            ]);
+        }
+
+        try {
+            $summary = app(CreditNoteService::class)->getReturnableSummary($workOrder);
+
+            return response()->json($summary);
+        } catch (Exception $e) {
+            return response()->json([
+                'is_possible' => false,
+                'message' => $e->getMessage(),
+            ], 422);
+        }
+    }
+
+    /**
+     * Store a new Credit Note (Return Invoice) for a Work Order.
+     */
+    public function storeCreditNote(Request $request, WorkOrder $workOrder)
+    {
+        $this->authorize('update', $workOrder);
+
+        if (! in_array($workOrder->status, ['done', 'delivered', 'completed']) || ! $workOrder->invoice()->exists()) {
+            return response()->json([
+                'message' => 'يجب إكمال كرت الصيانة وإصدار فاتورة ضريبية له قبل إصدار إشعار دائن.',
+            ], 422);
+        }
+
+        $validated = $request->validate([
+            'services' => 'nullable|array',
+            'services.*.work_order_item_id' => 'nullable|integer',
+            'services.*.id' => 'nullable|integer',
+            'services.*.return_amount' => 'required|numeric|min:0',
+            'parts' => 'nullable|array',
+            'parts.*.work_order_item_part_id' => 'nullable|integer',
+            'parts.*.id' => 'nullable|integer',
+            'parts.*.return_qty' => 'required|numeric|min:0',
+            'parts.*.return_to_stock' => 'nullable|boolean',
+            'return_reason' => 'nullable|string|max:255',
+            'notes' => 'nullable|string|max:1000',
+            'offset_unpaid_balance' => 'nullable|boolean',
+            'record_refund' => 'nullable|boolean',
+            'refund_payment_method' => 'nullable|string',
+            'refund_reference' => 'nullable|string|max:100',
+            'refund_notes' => 'nullable|string|max:255',
+            'payment_due_date' => 'nullable|date',
+            'refund_payment' => 'nullable|array',
+            'refund_payment.amount' => 'nullable|numeric|min:0',
+            'refund_payment.payment_method' => 'nullable|string',
+            'refund_payment.payment_date' => 'nullable|date',
+            'refund_payment.reference' => 'nullable|string|max:100',
+            'refund_payment.notes' => 'nullable|string|max:255',
+        ]);
+
+        try {
+            $creditNote = app(CreditNoteService::class)->createCreditNote($workOrder, $validated, $request->user());
+
+            if ($request->wantsJson()) {
+                $totalReturn = (float) $creditNote->total_incl_tax;
+                $debtOffset = (float) ($creditNote->debt_offset ?? 0);
+                $netRefundDue = (float) ($creditNote->net_refund_due ?? 0);
+
+                return response()->json([
+                    'success' => true,
+                    'message' => 'تم إنشاء إشعار الدائن بنجاح.',
+                    'credit_note_id' => $creditNote->id,
+                    'credit_note_number' => $creditNote->invoice_number,
+                    'credit_note_total' => $totalReturn,
+                    'debt_offset' => $debtOffset,
+                    'net_refund_due' => $netRefundDue,
+                    'redirect_url' => route('app.invoices.show', $creditNote->id),
+                ]);
+            }
+
+            return redirect()->route('app.invoices.show', $creditNote->id)
+                ->with('success', 'تم إنشاء إشعار الدائن (فاتورة الإرجاع) بنجاح.');
+        } catch (Exception $e) {
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $e->getMessage(),
+                ], 422);
+            }
+
+            return back()->with('error', $e->getMessage());
+        }
+    }
+
+    /**
+     * Get returnable items summary for Credit Note modal directly from an invoice.
+     */
+    public function invoiceCreditNoteSummary(Invoice $invoice): JsonResponse
+    {
+        $this->authorize('view', $invoice);
+
+        if ($invoice->type === InvoiceType::CREDIT_NOTE || $invoice->type?->value === 'credit_note') {
+            return response()->json([
+                'is_possible' => false,
+                'message' => 'لا يمكن إنشاء إشعار دائن لإشعار دائن آخر.',
+                'invoice' => null,
+                'services' => [],
+                'parts' => [],
+            ], 422);
+        }
+
+        try {
+            $summary = $this->creditNoteService->getReturnableSummaryForInvoice($invoice);
+
+            return response()->json($summary);
+        } catch (Exception $e) {
+            return response()->json([
+                'is_possible' => false,
+                'message' => $e->getMessage(),
+                'invoice' => null,
+                'services' => [],
+                'parts' => [],
+            ], 422);
+        }
+    }
+
+    /**
+     * Store a new Credit Note directly from an invoice.
+     */
+    public function storeInvoiceCreditNote(Request $request, Invoice $invoice)
+    {
+        $this->authorize('createCreditNote', $invoice);
+
+        $data = $request->validate([
+            'services' => 'nullable|array',
+            'services.*.work_order_item_id' => 'nullable|integer',
+            'services.*.id' => 'nullable|integer',
+            'services.*.return_amount' => 'required|numeric|min:0',
+            'parts' => 'nullable|array',
+            'parts.*.work_order_item_part_id' => 'nullable|integer',
+            'parts.*.id' => 'nullable|integer',
+            'parts.*.return_qty' => 'required|numeric|min:0',
+            'parts.*.return_to_stock' => 'nullable|boolean',
+            'return_reason' => 'nullable|string',
+            'notes' => 'nullable|string',
+            'record_refund' => 'nullable|boolean',
+            'refund_payment_method' => 'nullable|string',
+            'refund_reference' => 'nullable|string',
+            'refund_notes' => 'nullable|string',
+            'refund_payment' => 'nullable|array',
+            'refund_payment.amount' => 'nullable|numeric|min:0',
+            'refund_payment.payment_method' => 'nullable|string',
+            'refund_payment.payment_date' => 'nullable|date',
+            'refund_payment.reference' => 'nullable|string',
+            'payment_due_date' => 'nullable|date',
+            'due_date' => 'nullable|date',
+        ]);
+
+        try {
+            $creditNote = $this->creditNoteService->createCreditNoteForInvoice($invoice, $data, auth()->user());
+
+            if ($request->wantsJson()) {
+                $totalReturn = (float) $creditNote->total_incl_tax;
+                $debtOffset = (float) ($creditNote->debt_offset ?? 0);
+                $netRefundDue = (float) ($creditNote->net_refund_due ?? 0);
+
+                return response()->json([
+                    'success' => true,
+                    'message' => 'تم إنشاء إشعار الدائن (فاتورة الإرجاع) بنجاح.',
+                    'credit_note_id' => $creditNote->id,
+                    'credit_note_number' => $creditNote->invoice_number,
+                    'credit_note_total' => $totalReturn,
+                    'debt_offset' => $debtOffset,
+                    'net_refund_due' => $netRefundDue,
+                    'credit_note' => [
+                        'id' => $creditNote->id,
+                        'invoice_number' => $creditNote->invoice_number,
+                        'total_incl_tax' => $creditNote->total_incl_tax,
+                        'payment_status' => $creditNote->payment_status,
+                    ],
+                    'redirect_url' => route('app.invoices.show', $creditNote->id),
+                ]);
+            }
+
+            return redirect()->route('app.invoices.show', $creditNote->id)
+                ->with('success', 'تم إنشاء إشعار الدائن (فاتورة الإرجاع) بنجاح.');
+        } catch (Exception $e) {
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $e->getMessage(),
+                ], 422);
+            }
+
+            return back()->with('error', $e->getMessage());
+        }
+    }
+
+    /**
      * Print invoice view
      */
     public function print(Invoice $invoice)
@@ -105,6 +329,7 @@ class InvoicesController extends Controller
 
         $invoice->load([
             'customer',
+            'originalInvoice:id,invoice_number,issue_date,total_incl_tax',
             'workOrder.vehicle.make',
             'workOrder.vehicle.model',
             'lines',
@@ -181,14 +406,14 @@ class InvoicesController extends Controller
         $tenantId = auth()->user()->tenant_id;
         $centerId = auth()->user()->current_center_id;
 
-        $query = Invoice::where('tenant_id', $tenantId)
+        $baseQuery = Invoice::where('tenant_id', $tenantId)
             ->where('center_id', $centerId)
             ->whereNotExists(function ($q) {
                 $q->select(DB::raw(1))
                     ->from('company_transactions')
                     ->whereColumn('company_transactions.invoice_id', 'invoices.id');
             })
-            ->with(['customer', 'workOrder.items', 'workOrder.parts'])
+            ->with(['customer', 'originalInvoice:id,invoice_number,issue_date,total_incl_tax', 'workOrder.items', 'workOrder.parts'])
             ->when($request->input('search'), function ($q, $search) {
                 $q->where(function ($query) use ($search) {
                     $query->where('invoice_number', 'like', "%{$search}%")
@@ -198,13 +423,32 @@ class InvoicesController extends Controller
             ->when($request->input('payment_status'), fn ($q, $s) => $q->where('payment_status', $s))
             ->when($request->input('date_from'), fn ($q, $d) => $q->whereDate('issue_date', '>=', $d))
             ->when($request->input('date_to'), fn ($q, $d) => $q->whereDate('issue_date', '<=', $d))
-            ->orderBy('issue_date', 'desc');
+            ->orderBy('issue_date', 'desc')
+            ->orderBy('id', 'desc');
 
-        $invoices = $query->paginate(25)->withQueryString();
+        // Sales Invoices tab: standard sales invoices (exclude credit notes)
+        $invoices = (clone $baseQuery)
+            ->where(function ($q) {
+                $q->where('type', 'invoice')
+                    ->orWhere('type', InvoiceType::INVOICE)
+                    ->orWhereNull('type');
+            })
+            ->paginate(25, ['*'], 'invoices_page')
+            ->withQueryString();
+
+        // Return Invoices tab: credit notes
+        $returns = (clone $baseQuery)
+            ->where(function ($q) {
+                $q->where('type', 'credit_note')
+                    ->orWhere('type', InvoiceType::CREDIT_NOTE);
+            })
+            ->paginate(25, ['*'], 'returns_page')
+            ->withQueryString();
 
         return Inertia::render('Invoices/Sales/Index', [
             'invoices' => $invoices,
-            'filters' => $request->only(['search', 'payment_status', 'date_from', 'date_to']),
+            'returns' => $returns,
+            'filters' => $request->only(['search', 'payment_status', 'date_from', 'date_to', 'tab']),
         ]);
     }
 

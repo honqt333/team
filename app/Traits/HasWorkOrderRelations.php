@@ -55,7 +55,17 @@ trait HasWorkOrderRelations
 
     public function invoice(): HasOne
     {
-        return $this->hasOne(Invoice::class, 'work_order_id');
+        return $this->hasOne(Invoice::class, 'work_order_id')->where('type', 'invoice');
+    }
+
+    public function invoices(): HasMany
+    {
+        return $this->hasMany(Invoice::class, 'work_order_id');
+    }
+
+    public function creditNotes(): HasMany
+    {
+        return $this->hasMany(Invoice::class, 'work_order_id')->where('type', 'credit_note');
     }
 
     public function items(): HasMany

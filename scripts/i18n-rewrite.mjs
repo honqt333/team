@@ -247,6 +247,30 @@ function applyFile(file) {
             continue;
         }
 
+        if (hit.kind === 'interpolation_branch') {
+            // `cond ? 'نص' : other` — only the copy of the branch is
+            // replaced; the condition and the other branch stay.
+            const inner = source.slice(hit.start, hit.end);
+            // The Arabic branch of the ternary, whichever side of the
+            // `:` it sits on. It is found by its own text, so the
+            // surrounding expression does not have to be understood.
+            const text = hit.value.trim();
+            const entry6 = entries[text];
+            if (!entry6) continue;
+            const offset = inner.indexOf(text);
+            if (offset === -1) continue;
+            const start = hit.start + offset;
+            const end = start + text.length;
+            edits.push({
+                start,
+                end,
+                replacement: `$t('${entry6.key}')`,
+                kind: hit.kind,
+                line: hit.line,
+            });
+            continue;
+        }
+
         if (hit.kind === 'interpolation_fallback') {
             // `cond ? value : 'نص احتياطي'` — only the fallback copy is
             // replaced; the condition and the real value stay as they are.

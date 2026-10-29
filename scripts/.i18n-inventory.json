@@ -1,0 +1,2445 @@
+{
+  "resources/js/Components/Settings/Company/CompanyProfileTab.vue": [
+    {
+      "kind": "ui_label",
+      "start": 16485,
+      "end": 16521,
+      "value": "🇦🇪 الإمارات العربية المتحدة (AE)",
+      "line": 346,
+      "block": "script",
+      "snippet": "a')} (SA)` }, { value: 'AE', label: '🇦🇪 الإمارات العربية المتحدة (AE)' }, { value: 'KW', label: '🇰🇼 الكو"
+    },
+    {
+      "kind": "ui_label",
+      "start": 16551,
+      "end": 16569,
+      "value": "🇰🇼 الكويت (KW)",
+      "line": 347,
+      "block": "script",
+      "snippet": "تحدة (AE)' }, { value: 'KW', label: '🇰🇼 الكويت (KW)' }, { value: 'BH', label: '🇧🇭 البح"
+    },
+    {
+      "kind": "ui_label",
+      "start": 16599,
+      "end": 16618,
+      "value": "🇧🇭 البحرين (BH)",
+      "line": 348,
+      "block": "script",
+      "snippet": "كويت (KW)' }, { value: 'BH', label: '🇧🇭 البحرين (BH)' }, { value: 'OM', label: '🇴🇲 عُما"
+    },
+    {
+      "kind": "ui_label",
+      "start": 16648,
+      "end": 16665,
+      "value": "🇴🇲 عُمان (OM)",
+      "line": 349,
+      "block": "script",
+      "snippet": "حرين (BH)' }, { value: 'OM', label: '🇴🇲 عُمان (OM)' }, { value: 'QA', label: '🇶🇦 قطر"
+    },
+    {
+      "kind": "ui_label",
+      "start": 16695,
+      "end": 16710,
+      "value": "🇶🇦 قطر (QA)",
+      "line": 350,
+      "block": "script",
+      "snippet": "ُمان (OM)' }, { value: 'QA', label: '🇶🇦 قطر (QA)' }, { value: 'EG', label: '🇪🇬 مصر"
+    },
+    {
+      "kind": "ui_label",
+      "start": 16740,
+      "end": 16755,
+      "value": "🇪🇬 مصر (EG)",
+      "line": 351,
+      "block": "script",
+      "snippet": "قطر (QA)' }, { value: 'EG', label: '🇪🇬 مصر (EG)' }, { value: 'JO', label: '🇯🇴 الأر"
+    },
+    {
+      "kind": "ui_label",
+      "start": 16785,
+      "end": 16803,
+      "value": "🇯🇴 الأردن (JO)",
+      "line": 352,
+      "block": "script",
+      "snippet": "مصر (EG)' }, { value: 'JO', label: '🇯🇴 الأردن (JO)' }, ]); const currencyOptions = compute"
+    },
+    {
+      "kind": "ui_label",
+      "start": 16880,
+      "end": 16898,
+      "value": "SAR - ريال سعودي",
+      "line": 356,
+      "block": "script",
+      "snippet": "uted(() => [ { value: 'SAR', label: 'SAR - ريال سعودي' }, { value: 'AED', label: 'AED - در"
+    },
+    {
+      "kind": "ui_label",
+      "start": 16929,
+      "end": 16949,
+      "value": "AED - درهم إماراتي",
+      "line": 357,
+      "block": "script",
+      "snippet": "ال سعودي' }, { value: 'AED', label: 'AED - درهم إماراتي' }, { value: 'KWD', label: 'KWD - دي"
+    },
+    {
+      "kind": "ui_label",
+      "start": 16980,
+      "end": 16999,
+      "value": "KWD - دينار كويتي",
+      "line": 358,
+      "block": "script",
+      "snippet": "إماراتي' }, { value: 'KWD', label: 'KWD - دينار كويتي' }, { value: 'BHD', label: 'BHD - دي"
+    },
+    {
+      "kind": "ui_label",
+      "start": 17030,
+      "end": 17050,
+      "value": "BHD - دينار بحريني",
+      "line": 359,
+      "block": "script",
+      "snippet": "ار كويتي' }, { value: 'BHD', label: 'BHD - دينار بحريني' }, { value: 'OMR', label: 'OMR - ري"
+    },
+    {
+      "kind": "ui_label",
+      "start": 17081,
+      "end": 17099,
+      "value": "OMR - ريال عماني",
+      "line": 360,
+      "block": "script",
+      "snippet": "ر بحريني' }, { value: 'OMR', label: 'OMR - ريال عماني' }, { value: 'QAR', label: 'QAR - ري"
+    },
+    {
+      "kind": "ui_label",
+      "start": 17130,
+      "end": 17147,
+      "value": "QAR - ريال قطري",
+      "line": 361,
+      "block": "script",
+      "snippet": "ال عماني' }, { value: 'QAR', label: 'QAR - ريال قطري' }, { value: 'EGP', label: 'EGP - جن"
+    },
+    {
+      "kind": "ui_label",
+      "start": 17178,
+      "end": 17195,
+      "value": "EGP - جنيه مصري",
+      "line": 362,
+      "block": "script",
+      "snippet": "يال قطري' }, { value: 'EGP', label: 'EGP - جنيه مصري' }, { value: 'JOD', label: 'JOD - دي"
+    },
+    {
+      "kind": "ui_label",
+      "start": 17226,
+      "end": 17245,
+      "value": "JOD - دينار أردني",
+      "line": 363,
+      "block": "script",
+      "snippet": "نيه مصري' }, { value: 'JOD', label: 'JOD - دينار أردني' }, { value: 'USD', label: 'USD - US"
+    }
+  ],
+  "resources/js/Components/Settings/Company/CompanySubscriptionTab.vue": [
+    {
+      "kind": "template_text",
+      "start": 663,
+      "end": 759,
+      "value": "عرض تفاصيل اشتراكك الحالي والباقات المتاحة للترقية",
+      "block": "template",
+      "line": 15
+    },
+    {
+      "kind": "template_text",
+      "start": 1686,
+      "end": 1792,
+      "value": "إيصال التحويل البنكي قيد المراجعة من الإدارة",
+      "block": "template",
+      "line": 34
+    },
+    {
+      "kind": "template_text",
+      "start": 1976,
+      "end": 2049,
+      "value": "قيد التدقيق",
+      "block": "template",
+      "line": 39
+    },
+    {
+      "kind": "template_text",
+      "start": 2185,
+      "end": 2272,
+      "value": "تم استلام إيصال التحويل لباقة",
+      "block": "template",
+      "line": 43
+    },
+    {
+      "kind": "template_text",
+      "start": 2441,
+      "end": 2567,
+      "value": ". تم إيقاف طلبات الاشتراك الجديدة مؤقتاً لحين انتهاء الفحص وتفعيل حسابك.",
+      "block": "template",
+      "line": 47
+    },
+    {
+      "kind": "template_text",
+      "start": 2917,
+      "end": 2986,
+      "value": "⏳ قيد التدقيق والاعتماد",
+      "block": "template",
+      "line": 55
+    },
+    {
+      "kind": "template_text",
+      "start": 3821,
+      "end": 3901,
+      "value": "طلب دفع إلكتروني غير مكتمل",
+      "block": "template",
+      "line": 73
+    },
+    {
+      "kind": "template_text",
+      "start": 3992,
+      "end": 4078,
+      "value": "لديك طلب دفع غير مكتمل لباقة",
+      "block": "template",
+      "line": 76
+    },
+    {
+      "kind": "template_text",
+      "start": 4133,
+      "end": 4227,
+      "value": ". يمكنك إكمال الدفع أو اختيار باقة أخرى.",
+      "block": "template",
+      "line": 78
+    },
+    {
+      "kind": "template_text",
+      "start": 4616,
+      "end": 4670,
+      "value": "إكمال الدفع الآن",
+      "block": "template",
+      "line": 87
+    },
+    {
+      "kind": "template_text",
+      "start": 5627,
+      "end": 5704,
+      "value": "الاشتراك الحالي",
+      "block": "template",
+      "line": 107
+    },
+    {
+      "kind": "template_text",
+      "start": 6293,
+      "end": 6358,
+      "value": "نشط",
+      "block": "template",
+      "line": 118
+    },
+    {
+      "kind": "template_text",
+      "start": 6868,
+      "end": 6953,
+      "value": "📋 الإيصال قيد المراجعة",
+      "block": "template",
+      "line": 127
+    },
+    {
+      "kind": "template_text",
+      "start": 7545,
+      "end": 7617,
+      "value": "⏳ طلب معلق",
+      "block": "template",
+      "line": 138
+    },
+    {
+      "kind": "template_text",
+      "start": 8178,
+      "end": 8255,
+      "value": "🎁 فترة تجريبية",
+      "block": "template",
+      "line": 149
+    },
+    {
+      "kind": "template_text",
+      "start": 8587,
+      "end": 8654,
+      "value": "منتهي",
+      "block": "template",
+      "line": 157
+    },
+    {
+      "kind": "interpolation_branch",
+      "start": 9744,
+      "end": 9959,
+      "value": "لا يوجد اشتراك نشط",
+      "block": "template",
+      "line": 177
+    },
+    {
+      "kind": "template_text",
+      "start": 10137,
+      "end": 10180,
+      "value": "ينتهي في:",
+      "block": "template",
+      "line": 184
+    },
+    {
+      "kind": "template_text",
+      "start": 10329,
+      "end": 10445,
+      "value": "جاري التحقق من إيصال التحويل البنكي وتفعيل الاشتراك...",
+      "block": "template",
+      "line": 187
+    },
+    {
+      "kind": "template_text",
+      "start": 10494,
+      "end": 10519,
+      "value": "لا يوجد تاريخ انتهاء محدد",
+      "block": "template",
+      "line": 190
+    },
+    {
+      "kind": "template_text",
+      "start": 10736,
+      "end": 10803,
+      "value": "قيمة الاشتراك",
+      "block": "template",
+      "line": 195
+    },
+    {
+      "kind": "interpolation_branch",
+      "start": 11331,
+      "end": 11402,
+      "value": "شهري",
+      "block": "template",
+      "line": 207
+    },
+    {
+      "kind": "template_text",
+      "start": 11690,
+      "end": 11754,
+      "value": "الاشتراكات المتاحة",
+      "block": "template",
+      "line": 216
+    },
+    {
+      "kind": "template_text",
+      "start": 11837,
+      "end": 11943,
+      "value": "اختر الباقة المناسبة لاحتياجات مركزك واشترك مباشرة بكل سهولة",
+      "block": "template",
+      "line": 219
+    },
+    {
+      "kind": "template_text",
+      "start": 13104,
+      "end": 13171,
+      "value": "باقتك الحالية",
+      "block": "template",
+      "line": 241
+    },
+    {
+      "kind": "template_text",
+      "start": 14082,
+      "end": 14166,
+      "value": "/ شهري",
+      "block": "template",
+      "line": 260
+    },
+    {
+      "kind": "template_text",
+      "start": 14673,
+      "end": 14679,
+      "value": "/ سنوي",
+      "block": "template",
+      "line": 270
+    },
+    {
+      "kind": "template_text",
+      "start": 15069,
+      "end": 15152,
+      "value": "ميزات الباقة:",
+      "block": "template",
+      "line": 278
+    },
+    {
+      "kind": "template_text",
+      "start": 16661,
+      "end": 16758,
+      "value": "لا توجد ميزات مسجلة",
+      "block": "template",
+      "line": 305
+    },
+    {
+      "kind": "template_text",
+      "start": 21247,
+      "end": 21357,
+      "value": "هل تحتاج إلى مساعدة في الترقية أو اختيار الباقة؟",
+      "block": "template",
+      "line": 385
+    },
+    {
+      "kind": "template_text",
+      "start": 21449,
+      "end": 21614,
+      "value": "فريق الدعم الفني جاهز لمساعدتك في أي وقت وتفعيل الاشتراك المناسب لمركزك",
+      "block": "template",
+      "line": 388
+    },
+    {
+      "kind": "template_text",
+      "start": 22903,
+      "end": 22965,
+      "value": "اتصل بنا",
+      "block": "template",
+      "line": 411
+    },
+    {
+      "kind": "template_text",
+      "start": 23972,
+      "end": 24032,
+      "value": "راسلنا",
+      "block": "template",
+      "line": 430
+    },
+    {
+      "kind": "template_text",
+      "start": 24750,
+      "end": 24853,
+      "value": "سجل الاشتراكات وتواريخ التجديد والمدفوعات الخاصة بالمؤسسة",
+      "block": "template",
+      "line": 450
+    },
+    {
+      "kind": "template_text",
+      "start": 25560,
+      "end": 25571,
+      "value": "تاريخ الطلب",
+      "block": "template",
+      "line": 466
+    },
+    {
+      "kind": "template_text",
+      "start": 25642,
+      "end": 25656,
+      "value": "الباقة والحالة",
+      "block": "template",
+      "line": 467
+    },
+    {
+      "kind": "template_text",
+      "start": 25727,
+      "end": 25738,
+      "value": "قيمة الباقة",
+      "block": "template",
+      "line": 468
+    },
+    {
+      "kind": "template_text",
+      "start": 25809,
+      "end": 25822,
+      "value": "تاريخ البداية",
+      "block": "template",
+      "line": 469
+    },
+    {
+      "kind": "template_text",
+      "start": 25893,
+      "end": 25907,
+      "value": "تاريخ الإنتهاء",
+      "block": "template",
+      "line": 470
+    },
+    {
+      "kind": "template_text",
+      "start": 25976,
+      "end": 25986,
+      "value": "مبلغ الخصم",
+      "block": "template",
+      "line": 471
+    },
+    {
+      "kind": "template_text",
+      "start": 26055,
+      "end": 26068,
+      "value": "المبلغ الصافي",
+      "block": "template",
+      "line": 472
+    },
+    {
+      "kind": "template_text",
+      "start": 27460,
+      "end": 27549,
+      "value": "نشط",
+      "block": "template",
+      "line": 493
+    },
+    {
+      "kind": "template_text",
+      "start": 28091,
+      "end": 28200,
+      "value": "📋 الإيصال قيد المراجعة",
+      "block": "template",
+      "line": 502
+    },
+    {
+      "kind": "template_text",
+      "start": 28542,
+      "end": 28638,
+      "value": "⏳ طلب معلق",
+      "block": "template",
+      "line": 508
+    },
+    {
+      "kind": "template_text",
+      "start": 29101,
+      "end": 29193,
+      "value": "تجريبي",
+      "block": "template",
+      "line": 516
+    },
+    {
+      "kind": "template_text",
+      "start": 29533,
+      "end": 29623,
+      "value": "ملغي",
+      "block": "template",
+      "line": 522
+    },
+    {
+      "kind": "template_text",
+      "start": 29930,
+      "end": 30021,
+      "value": "منتهي",
+      "block": "template",
+      "line": 528
+    },
+    {
+      "kind": "interpolation_branch",
+      "start": 30307,
+      "end": 30359,
+      "value": "شهر",
+      "block": "template",
+      "line": 535
+    },
+    {
+      "kind": "template_text",
+      "start": 31820,
+      "end": 31919,
+      "value": "لا توجد اشتراكات مسجلة حالياً",
+      "block": "template",
+      "line": 560
+    },
+    {
+      "kind": "template_text",
+      "start": 32490,
+      "end": 32586,
+      "value": "المجموع الإجمالي للمدفوعات",
+      "block": "template",
+      "line": 573
+    },
+    {
+      "kind": "bilingual_pair",
+      "start": 35754,
+      "end": 35838,
+      "value": "فترة تجريبية",
+      "line": 671,
+      "block": "script",
+      "snippet": ".name_en; if (!name) return sub.status === 'trialing' || sub.status === 'trial' ? 'فترة تجريبية' : 'باقة مجهولة'; return name; }; const getFeatures"
+    },
+    {
+      "kind": "script_template",
+      "start": 36662,
+      "end": 36696,
+      "value": "متبقي ",
+      "line": 700,
+      "block": "script",
+      "snippet": "if (daysRemaining.value > 0) return `متبقي ${daysRemaining.value} يوم`; if (day"
+    },
+    {
+      "kind": "script_literal",
+      "start": 36740,
+      "end": 36753,
+      "value": "ينتهي اليوم",
+      "line": 701,
+      "block": "script",
+      "snippet": "if (daysRemaining.value === 0) return 'ينتهي اليوم'; return `منتهي منذ ${Math.abs(daysR"
+    },
+    {
+      "kind": "script_template",
+      "start": 36766,
+      "end": 36814,
+      "value": "منتهي منذ ",
+      "line": 702,
+      "block": "script",
+      "snippet": "== 0) return 'ينتهي اليوم'; return `منتهي منذ ${Math.abs(daysRemaining.value)} يوم`; }"
+    }
+  ],
+  "resources/js/Pages/Settings/Centers/Show.vue": [
+    {
+      "kind": "template_text",
+      "start": 47434,
+      "end": 47551,
+      "value": "إدارة الإيرادات والمصروفات الخاصة بمركز الصيانة",
+      "block": "template",
+      "line": 760
+    },
+    {
+      "kind": "template_text",
+      "start": 49603,
+      "end": 49669,
+      "value": "الكل",
+      "block": "template",
+      "line": 798
+    },
+    {
+      "kind": "template_text",
+      "start": 59744,
+      "end": 59854,
+      "value": "غير خاضع",
+      "block": "template",
+      "line": 951
+    },
+    {
+      "kind": "template_text",
+      "start": 63002,
+      "end": 63109,
+      "value": "مسودة",
+      "block": "template",
+      "line": 995
+    },
+    {
+      "kind": "template_text",
+      "start": 63935,
+      "end": 64051,
+      "value": "اعتماد",
+      "block": "template",
+      "line": 1006
+    },
+    {
+      "kind": "template_text",
+      "start": 67734,
+      "end": 67853,
+      "value": "🔒 معتمدة",
+      "block": "template",
+      "line": 1056
+    },
+    {
+      "kind": "template_text",
+      "start": 68364,
+      "end": 68499,
+      "value": "لا توجد معاملات مالية مسجلة حالياً للمركز",
+      "block": "template",
+      "line": 1066
+    },
+    {
+      "kind": "template_text",
+      "start": 69705,
+      "end": 69788,
+      "value": "فواتير المركز",
+      "block": "template",
+      "line": 1093
+    },
+    {
+      "kind": "template_text",
+      "start": 69883,
+      "end": 70076,
+      "value": "عرض وتحميل الفواتير الضريبية الصادرة من معاملات الإيرادات والمصروفات الخاصة بهذا المركز",
+      "block": "template",
+      "line": 1096
+    },
+    {
+      "kind": "template_text",
+      "start": 80269,
+      "end": 80395,
+      "value": "👁️ عرض الفاتورة",
+      "block": "template",
+      "line": 1253
+    },
+    {
+      "kind": "template_text",
+      "start": 80861,
+      "end": 80980,
+      "value": "🖨️ طباعة",
+      "block": "template",
+      "line": 1260
+    },
+    {
+      "kind": "template_text",
+      "start": 81495,
+      "end": 81630,
+      "value": "لا توجد فواتير مبيعات صادرة للمركز حالياً",
+      "block": "template",
+      "line": 1270
+    },
+    {
+      "kind": "template_text",
+      "start": 89274,
+      "end": 89400,
+      "value": "👁️ عرض الفاتورة",
+      "block": "template",
+      "line": 1384
+    },
+    {
+      "kind": "template_text",
+      "start": 90184,
+      "end": 90303,
+      "value": "🖨️ طباعة",
+      "block": "template",
+      "line": 1396
+    },
+    {
+      "kind": "template_text",
+      "start": 90822,
+      "end": 90958,
+      "value": "لا توجد فواتير مشتريات صادرة للمركز حالياً",
+      "block": "template",
+      "line": 1406
+    },
+    {
+      "kind": "bilingual_pair",
+      "start": 93638,
+      "end": 93697,
+      "value": "فواتير المركز",
+      "line": 1496,
+      "block": "script",
+      "snippet": "enses') }, { id: 'invoices', label: locale.value === 'ar' ? 'فواتير المركز' : 'Center Invoices' }, ]); const form = ref({ profile:"
+    },
+    {
+      "kind": "script_literal",
+      "start": 95296,
+      "end": 95303,
+      "value": "الأحد",
+      "line": 1538,
+      "block": "script",
+      "snippet": "e_warehouse') }, ]); const dayNames = ['الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'ال"
+    },
+    {
+      "kind": "script_literal",
+      "start": 95305,
+      "end": 95314,
+      "value": "الإثنين",
+      "line": 1538,
+      "block": "script",
+      "snippet": "se') }, ]); const dayNames = ['الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الج"
+    },
+    {
+      "kind": "script_literal",
+      "start": 95316,
+      "end": 95326,
+      "value": "الثلاثاء",
+      "line": 1538,
+      "block": "script",
+      "snippet": "const dayNames = ['الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت"
+    },
+    {
+      "kind": "script_literal",
+      "start": 95328,
+      "end": 95338,
+      "value": "الأربعاء",
+      "line": 1538,
+      "block": "script",
+      "snippet": "ames = ['الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت']; functio"
+    },
+    {
+      "kind": "script_literal",
+      "start": 95340,
+      "end": 95348,
+      "value": "الخميس",
+      "line": 1538,
+      "block": "script",
+      "snippet": "حد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت']; function getDayNa"
+    },
+    {
+      "kind": "script_literal",
+      "start": 95350,
+      "end": 95358,
+      "value": "الجمعة",
+      "line": 1538,
+      "block": "script",
+      "snippet": "نين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت']; function getDayName(dayOfWe"
+    },
+    {
+      "kind": "script_literal",
+      "start": 95360,
+      "end": 95367,
+      "value": "السبت",
+      "line": 1538,
+      "block": "script",
+      "snippet": "لاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت']; function getDayName(dayOfWeek) {"
+    },
+    {
+      "kind": "ui_label",
+      "start": 107795,
+      "end": 107817,
+      "value": "حذف المعاملة المالية",
+      "line": 1952,
+      "block": "script",
+      "snippet": "firmed = await confirm({ title: 'حذف المعاملة المالية', message: 'هل أنت متأكد من رغبت"
+    },
+    {
+      "kind": "ui_label",
+      "start": 107836,
+      "end": 107914,
+      "value": "هل أنت متأكد من رغبتك في حذف هذه المعاملة؟ لا يمكن استعادة البيانات بعد ذلك.",
+      "line": 1953,
+      "block": "script",
+      "snippet": "حذف المعاملة المالية', message: 'هل أنت متأكد من رغبتك في حذف هذه المعاملة؟ لا يمكن استعادة البيانات بعد ذلك.', confirmText: 'حذف', ca"
+    },
+    {
+      "kind": "ui_label",
+      "start": 107937,
+      "end": 107942,
+      "value": "حذف",
+      "line": 1954,
+      "block": "script",
+      "snippet": "لبيانات بعد ذلك.', confirmText: 'حذف', cancelText: 'إلغاء', t"
+    },
+    {
+      "kind": "ui_label",
+      "start": 107964,
+      "end": 107971,
+      "value": "إلغاء",
+      "line": 1955,
+      "block": "script",
+      "snippet": "confirmText: 'حذف', cancelText: 'إلغاء', type: 'danger', }); i"
+    },
+    {
+      "kind": "script_literal",
+      "start": 108280,
+      "end": 108301,
+      "value": "حدث خطأ أثناء الحذف",
+      "line": 1965,
+      "block": "script",
+      "snippet": "error(errors.message || 'حدث خطأ أثناء الحذف'); }, }); } };"
+    },
+    {
+      "kind": "ui_label",
+      "start": 108446,
+      "end": 108471,
+      "value": "اعتماد المعاملة المالية",
+      "line": 1973,
+      "block": "script",
+      "snippet": "firmed = await confirm({ title: 'اعتماد المعاملة المالية', message: t('company_profile.tr"
+    },
+    {
+      "kind": "ui_label",
+      "start": 108562,
+      "end": 108586,
+      "value": "اعتماد وإصدار الفاتورة",
+      "line": 1975,
+      "block": "script",
+      "snippet": "approve_confirm'), confirmText: 'اعتماد وإصدار الفاتورة', cancelText: 'إلغاء', t"
+    },
+    {
+      "kind": "ui_label",
+      "start": 108608,
+      "end": 108615,
+      "value": "إلغاء",
+      "line": 1976,
+      "block": "script",
+      "snippet": "د وإصدار الفاتورة', cancelText: 'إلغاء', type: 'success', });"
+    },
+    {
+      "kind": "script_literal",
+      "start": 108862,
+      "end": 108888,
+      "value": "تم اعتماد المعاملة بنجاح",
+      "line": 1986,
+      "block": "script",
+      "snippet": "ss: () => { success('تم اعتماد المعاملة بنجاح'); }, on"
+    },
+    {
+      "kind": "script_literal",
+      "start": 108993,
+      "end": 109017,
+      "value": "حدث خطأ أثناء الاعتماد",
+      "line": 1989,
+      "block": "script",
+      "snippet": "error(errors.message || 'حدث خطأ أثناء الاعتماد'); }, }"
+    }
+  ],
+  "resources/js/Pages/Settings/Company/Index.vue": [
+    {
+      "kind": "interpolation_branch",
+      "start": 64113,
+      "end": 64420,
+      "value": "بيئة المحاكاة (Simulation)",
+      "block": "template",
+      "line": 968
+    },
+    {
+      "kind": "template_text",
+      "start": 65033,
+      "end": 65142,
+      "value": "صلاحية الشهادة حتى:",
+      "block": "template",
+      "line": 981
+    },
+    {
+      "kind": "template_text",
+      "start": 69242,
+      "end": 69369,
+      "value": "يتطلب إكمال إعدادات الضريبة أولاً",
+      "block": "template",
+      "line": 1046
+    },
+    {
+      "kind": "template_text",
+      "start": 69615,
+      "end": 69928,
+      "value": "لا يمكن بدء معالج الربط والتكامل مع منصة فاتورة (ZATCA) إلا بعد تفعيل ضريبة القيمة المضافة وإدخال الرقم الضريبي المعتمد (15 رقماً) للمنشأة.",
+      "block": "template",
+      "line": 1052
+    },
+    {
+      "kind": "template_text",
+      "start": 71546,
+      "end": 71580,
+      "value": "الانتقال لإعدادات الضريبة والتفعيل",
+      "block": "template",
+      "line": 1080
+    },
+    {
+      "kind": "template_text",
+      "start": 74909,
+      "end": 75013,
+      "value": "معالج ذاتي",
+      "block": "template",
+      "line": 1133
+    },
+    {
+      "kind": "template_text",
+      "start": 78482,
+      "end": 78578,
+      "value": "إعدادات الترقيم والتسلسل للمستندات",
+      "block": "template",
+      "line": 1195
+    },
+    {
+      "kind": "template_text",
+      "start": 78669,
+      "end": 78836,
+      "value": "تخصيص البادئة وصيغة الأرقام التسلسلية للفواتير وكروت العمل وعروض الأسعار.",
+      "block": "template",
+      "line": 1198
+    },
+    {
+      "kind": "template_text",
+      "start": 79401,
+      "end": 79501,
+      "value": "صيغة ترقيم الفواتير (Invoices)",
+      "block": "template",
+      "line": 1211
+    },
+    {
+      "kind": "template_text",
+      "start": 80181,
+      "end": 80190,
+      "value": "المعاينة:",
+      "block": "template",
+      "line": 1222
+    },
+    {
+      "kind": "template_text",
+      "start": 81077,
+      "end": 81184,
+      "value": "صيغة ترقيم كروت الصيانة (Work Orders)",
+      "block": "template",
+      "line": 1237
+    },
+    {
+      "kind": "template_text",
+      "start": 81867,
+      "end": 81876,
+      "value": "المعاينة:",
+      "block": "template",
+      "line": 1248
+    },
+    {
+      "kind": "template_text",
+      "start": 82760,
+      "end": 82862,
+      "value": "صيغة ترقيم عروض الأسعار (Quotes)",
+      "block": "template",
+      "line": 1263
+    },
+    {
+      "kind": "template_text",
+      "start": 83540,
+      "end": 83549,
+      "value": "المعاينة:",
+      "block": "template",
+      "line": 1274
+    },
+    {
+      "kind": "template_text",
+      "start": 85142,
+      "end": 85236,
+      "value": "الرموز المتاحة في صياغة الترقيم:",
+      "block": "template",
+      "line": 1303
+    },
+    {
+      "kind": "template_text",
+      "start": 85706,
+      "end": 85801,
+      "value": ": الرقم التسلسلي (إلزامي)",
+      "block": "template",
+      "line": 1312
+    },
+    {
+      "kind": "template_text",
+      "start": 86110,
+      "end": 86205,
+      "value": ": السنة الحالية (4 أرقام)",
+      "block": "template",
+      "line": 1318
+    },
+    {
+      "kind": "template_text",
+      "start": 86512,
+      "end": 86597,
+      "value": ": السنة (رقمين)",
+      "block": "template",
+      "line": 1324
+    },
+    {
+      "kind": "template_text",
+      "start": 86904,
+      "end": 86988,
+      "value": ": الشهر الحالي",
+      "block": "template",
+      "line": 1330
+    },
+    {
+      "kind": "template_text",
+      "start": 87295,
+      "end": 87372,
+      "value": ": اليوم",
+      "block": "template",
+      "line": 1336
+    },
+    {
+      "kind": "template_text",
+      "start": 87683,
+      "end": 87764,
+      "value": ": رقم الفرع",
+      "block": "template",
+      "line": 1342
+    },
+    {
+      "kind": "template_text",
+      "start": 89698,
+      "end": 89781,
+      "value": "سياسات العمل والتشغيل",
+      "block": "template",
+      "line": 1377
+    },
+    {
+      "kind": "template_text",
+      "start": 89872,
+      "end": 90001,
+      "value": "تحديد القواعد التشغيلية وسماحيات الموظفين في كروت الصيانة والعملاء.",
+      "block": "template",
+      "line": 1380
+    },
+    {
+      "kind": "template_text",
+      "start": 90537,
+      "end": 90654,
+      "value": "السماح بتسجيل قراءة عداد أقل من السابقة",
+      "block": "template",
+      "line": 1391
+    },
+    {
+      "kind": "template_text",
+      "start": 90753,
+      "end": 91033,
+      "value": "عند التعطيل، يمنع النظام تحديث قراءة العداد إذا كانت أقل من آخر قراءة مسجلة للسيارة لحماية سجل الصيانة من الأخطاء البشرية.",
+      "block": "template",
+      "line": 1394
+    },
+    {
+      "kind": "template_text",
+      "start": 92520,
+      "end": 92621,
+      "value": "إلزامية رقم جوال العميل",
+      "block": "template",
+      "line": 1419
+    },
+    {
+      "kind": "template_text",
+      "start": 92720,
+      "end": 92934,
+      "value": "اشتراط إدخال رقم هاتف صحيح للعميل عند فتح كرت صيانة جديد لضمان إمكانية التواصل وإرسال الإشعارات.",
+      "block": "template",
+      "line": 1422
+    },
+    {
+      "kind": "template_text",
+      "start": 94431,
+      "end": 94549,
+      "value": "الحد الأقصى للخصم المسموح به لموظف الاستقبال (%)",
+      "block": "template",
+      "line": 1447
+    },
+    {
+      "kind": "template_text",
+      "start": 94642,
+      "end": 94833,
+      "value": "أقصى نسبة خصم يمكن للموظف تطبيقها على الفواتير وكروت العمل بدون طلب موافقة من المدير.",
+      "block": "template",
+      "line": 1450
+    },
+    {
+      "kind": "template_text",
+      "start": 96084,
+      "end": 96201,
+      "value": "فترة الضمان الافتراضية لأعمال الصيانة (بالأيام)",
+      "block": "template",
+      "line": 1472
+    },
+    {
+      "kind": "template_text",
+      "start": 96294,
+      "end": 96485,
+      "value": "الفترة الافتراضية لضمان أجور اليد والقطع الموضحة في تذييل سندات وكروت الفحص المطبوعة.",
+      "block": "template",
+      "line": 1475
+    },
+    {
+      "kind": "template_text",
+      "start": 97205,
+      "end": 97208,
+      "value": "يوم",
+      "block": "template",
+      "line": 1487
+    },
+    {
+      "kind": "template_text",
+      "start": 99144,
+      "end": 99251,
+      "value": "قوالب إشعارات ورسائل العملاء (SMS & WhatsApp)",
+      "block": "template",
+      "line": 1521
+    },
+    {
+      "kind": "template_text",
+      "start": 99342,
+      "end": 99507,
+      "value": "تخصيص نصوص الرسائل التلقائية المرسلة للعملاء في مراحل الصيانة المختلفة.",
+      "block": "template",
+      "line": 1524
+    },
+    {
+      "kind": "template_text",
+      "start": 99897,
+      "end": 100005,
+      "value": "المتغيرات المتاحة للاستخدام داخل نصوص الرسائل:",
+      "block": "template",
+      "line": 1534
+    },
+    {
+      "kind": "template_text",
+      "start": 102660,
+      "end": 102765,
+      "value": "رسالة استلام المركبة وفتح كرت العمل",
+      "block": "template",
+      "line": 1578
+    },
+    {
+      "kind": "template_text",
+      "start": 103684,
+      "end": 103799,
+      "value": "رسالة اكتمال الصيانة وجهوزية المركبة للاستلام",
+      "block": "template",
+      "line": 1594
+    },
+    {
+      "kind": "template_text",
+      "start": 104712,
+      "end": 104821,
+      "value": "رسالة مشاركة عرض السعر / التقييم للعميل",
+      "block": "template",
+      "line": 1610
+    },
+    {
+      "kind": "template_text",
+      "start": 105728,
+      "end": 105834,
+      "value": "رسالة إصدار الفاتورة الضريبية للعميل",
+      "block": "template",
+      "line": 1626
+    },
+    {
+      "kind": "template_text",
+      "start": 122566,
+      "end": 122686,
+      "value": "إدارة الإيرادات والمصروفات الخاصة بالإدارة والشركة",
+      "block": "template",
+      "line": 1890
+    },
+    {
+      "kind": "template_text",
+      "start": 124740,
+      "end": 124806,
+      "value": "الكل",
+      "block": "template",
+      "line": 1928
+    },
+    {
+      "kind": "template_text",
+      "start": 134878,
+      "end": 134988,
+      "value": "غير خاضع",
+      "block": "template",
+      "line": 2081
+    },
+    {
+      "kind": "template_text",
+      "start": 138136,
+      "end": 138243,
+      "value": "مسودة",
+      "block": "template",
+      "line": 2125
+    },
+    {
+      "kind": "template_text",
+      "start": 139429,
+      "end": 139545,
+      "value": "اعتماد",
+      "block": "template",
+      "line": 2141
+    },
+    {
+      "kind": "template_text",
+      "start": 143228,
+      "end": 143347,
+      "value": "🔒 معتمدة",
+      "block": "template",
+      "line": 2191
+    },
+    {
+      "kind": "template_text",
+      "start": 143858,
+      "end": 143986,
+      "value": "لا توجد معاملات مالية مسجلة حالياً",
+      "block": "template",
+      "line": 2201
+    },
+    {
+      "kind": "template_text",
+      "start": 145136,
+      "end": 145220,
+      "value": "فواتير الإدارة",
+      "block": "template",
+      "line": 2227
+    },
+    {
+      "kind": "template_text",
+      "start": 145315,
+      "end": 145489,
+      "value": "عرض وتحميل الفواتير الضريبية الصادرة من معاملات الإيرادات والمصروفات",
+      "block": "template",
+      "line": 2230
+    },
+    {
+      "kind": "template_text",
+      "start": 155704,
+      "end": 155830,
+      "value": "👁️ عرض الفاتورة",
+      "block": "template",
+      "line": 2387
+    },
+    {
+      "kind": "template_text",
+      "start": 156296,
+      "end": 156415,
+      "value": "🖨️ طباعة",
+      "block": "template",
+      "line": 2394
+    },
+    {
+      "kind": "template_text",
+      "start": 156925,
+      "end": 157061,
+      "value": "لا توجد فواتير مبيعات صادرة للإدارة حالياً",
+      "block": "template",
+      "line": 2404
+    },
+    {
+      "kind": "template_text",
+      "start": 164689,
+      "end": 164815,
+      "value": "👁️ عرض الفاتورة",
+      "block": "template",
+      "line": 2518
+    },
+    {
+      "kind": "template_text",
+      "start": 165599,
+      "end": 165718,
+      "value": "🖨️ طباعة",
+      "block": "template",
+      "line": 2530
+    },
+    {
+      "kind": "template_text",
+      "start": 166232,
+      "end": 166369,
+      "value": "لا توجد فواتير مشتريات صادرة للإدارة حالياً",
+      "block": "template",
+      "line": 2540
+    },
+    {
+      "kind": "script_literal",
+      "start": 179240,
+      "end": 179338,
+      "value": "مرحباً {customer_name}، تم استلام مركبتك {plate_number} برقم كرت صيانة #{code} في {center_name}.",
+      "line": 2844,
+      "block": "script",
+      "snippet": "ions?.work_order_created ?? 'مرحباً {customer_name}، تم استلام مركبتك {plate_number} برقم كرت صيانة #{code} في {center_name}.', work_order_completed:"
+    },
+    {
+      "kind": "script_literal",
+      "start": 179439,
+      "end": 179549,
+      "value": "عزيزنا {customer_name}، اكتملت صيانة مركبتك {plate_number} (#{code}) وأصبحت جاهزة للاستلام في {center_name}.",
+      "line": 2847,
+      "block": "script",
+      "snippet": "ns?.work_order_completed ?? 'عزيزنا {customer_name}، اكتملت صيانة مركبتك {plate_number} (#{code}) وأصبحت جاهزة للاستلام في {center_name}.', quote_shared: prop"
+    },
+    {
+      "kind": "script_literal",
+      "start": 179634,
+      "end": 179745,
+      "value": "مرحباً {customer_name}، تفضل عرض السعر الخاص بمركبتك {plate_number} رقم {code}، يمكنك الاطلاع عليه هنا: {url}",
+      "line": 2850,
+      "block": "script",
+      "snippet": "ifications?.quote_shared ?? 'مرحباً {customer_name}، تفضل عرض السعر الخاص بمركبتك {plate_number} رقم {code}، يمكنك الاطلاع عليه هنا: {url}', invoice_issued: pr"
+    },
+    {
+      "kind": "script_literal",
+      "start": 179834,
+      "end": 179939,
+      "value": "عزيزنا {customer_name}، تم إصدار الفاتورة الضريبية رقم {code} بمبلغ {total} ر.س لمركبتك {plate_number}.",
+      "line": 2853,
+      "block": "script",
+      "snippet": "ications?.invoice_issued ?? 'عزيزنا {customer_name}، تم إصدار الفاتورة الضريبية رقم {code} بمبلغ {total} ر.س لمركبتك {plate_number}.', }, admin_user: { email"
+    },
+    {
+      "kind": "bilingual_pair",
+      "start": 198778,
+      "end": 198862,
+      "value": "فترة تجريبية",
+      "line": 3437,
+      "block": "script",
+      "snippet": ".name_en; if (!name) return sub.status === 'trialing' || sub.status === 'trial' ? 'فترة تجريبية' : 'باقة مجهولة'; if ( (sub.status === 'tria"
+    },
+    {
+      "kind": "script_literal",
+      "start": 198996,
+      "end": 199004,
+      "value": "تجريبي",
+      "line": 3441,
+      "block": "script",
+      "snippet": "udes('Trial') && !name.includes('تجريبي') ) { return locale.value =="
+    },
+    {
+      "kind": "script_template",
+      "start": 199073,
+      "end": 199091,
+      "value": " (تجريبي)",
+      "line": 3443,
+      "block": "script",
+      "snippet": "=== 'en' ? `${name} (Trial)` : `${name} (تجريبي)`; } return name; }; const tota"
+    },
+    {
+      "kind": "script_literal",
+      "start": 199954,
+      "end": 199977,
+      "value": "تم حفظ المعاملة بنجاح",
+      "line": 3479,
+      "block": "script",
+      "snippet": "closeTransactionModal(); success('تم حفظ المعاملة بنجاح'); }; const deleteTransaction = async ("
+    },
+    {
+      "kind": "ui_label",
+      "start": 200088,
+      "end": 200110,
+      "value": "حذف المعاملة المالية",
+      "line": 3484,
+      "block": "script",
+      "snippet": "firmed = await confirm({ title: 'حذف المعاملة المالية', message: 'هل أنت متأكد من رغبت"
+    },
+    {
+      "kind": "ui_label",
+      "start": 200129,
+      "end": 200207,
+      "value": "هل أنت متأكد من رغبتك في حذف هذه المعاملة؟ لا يمكن استعادة البيانات بعد ذلك.",
+      "line": 3485,
+      "block": "script",
+      "snippet": "حذف المعاملة المالية', message: 'هل أنت متأكد من رغبتك في حذف هذه المعاملة؟ لا يمكن استعادة البيانات بعد ذلك.', confirmText: 'حذف', ca"
+    },
+    {
+      "kind": "ui_label",
+      "start": 200230,
+      "end": 200235,
+      "value": "حذف",
+      "line": 3486,
+      "block": "script",
+      "snippet": "لبيانات بعد ذلك.', confirmText: 'حذف', cancelText: 'إلغاء', t"
+    },
+    {
+      "kind": "ui_label",
+      "start": 200257,
+      "end": 200264,
+      "value": "إلغاء",
+      "line": 3487,
+      "block": "script",
+      "snippet": "confirmText: 'حذف', cancelText: 'إلغاء', type: 'danger', }); i"
+    },
+    {
+      "kind": "script_literal",
+      "start": 200455,
+      "end": 200478,
+      "value": "تم حذف المعاملة بنجاح",
+      "line": 3494,
+      "block": "script",
+      "snippet": "uccess: () => { success('تم حذف المعاملة بنجاح'); }, onError: ("
+    },
+    {
+      "kind": "script_literal",
+      "start": 200571,
+      "end": 200592,
+      "value": "حدث خطأ أثناء الحذف",
+      "line": 3497,
+      "block": "script",
+      "snippet": "error(errors.message || 'حدث خطأ أثناء الحذف'); }, }); } };"
+    },
+    {
+      "kind": "ui_label",
+      "start": 200737,
+      "end": 200762,
+      "value": "اعتماد المعاملة المالية",
+      "line": 3505,
+      "block": "script",
+      "snippet": "firmed = await confirm({ title: 'اعتماد المعاملة المالية', message: t('company_profile.tr"
+    },
+    {
+      "kind": "ui_label",
+      "start": 200853,
+      "end": 200877,
+      "value": "اعتماد وإصدار الفاتورة",
+      "line": 3507,
+      "block": "script",
+      "snippet": "approve_confirm'), confirmText: 'اعتماد وإصدار الفاتورة', cancelText: 'إلغاء', t"
+    },
+    {
+      "kind": "ui_label",
+      "start": 200899,
+      "end": 200906,
+      "value": "إلغاء",
+      "line": 3508,
+      "block": "script",
+      "snippet": "د وإصدار الفاتورة', cancelText: 'إلغاء', type: 'success', });"
+    },
+    {
+      "kind": "script_literal",
+      "start": 201153,
+      "end": 201179,
+      "value": "تم اعتماد المعاملة بنجاح",
+      "line": 3518,
+      "block": "script",
+      "snippet": "ss: () => { success('تم اعتماد المعاملة بنجاح'); }, on"
+    },
+    {
+      "kind": "script_literal",
+      "start": 201284,
+      "end": 201308,
+      "value": "حدث خطأ أثناء الاعتماد",
+      "line": 3521,
+      "block": "script",
+      "snippet": "error(errors.message || 'حدث خطأ أثناء الاعتماد'); }, }"
+    }
+  ],
+  "resources/js/Pages/Settings/Print/Index.vue": [
+    {
+      "kind": "template_text",
+      "start": 4744,
+      "end": 4824,
+      "value": "نموذج وهوية الطباعة العامة",
+      "block": "template",
+      "line": 90
+    },
+    {
+      "kind": "template_text",
+      "start": 5111,
+      "end": 5195,
+      "value": "قالب الطباعة الافتراضي",
+      "block": "template",
+      "line": 98
+    },
+    {
+      "kind": "template_text",
+      "start": 7123,
+      "end": 7222,
+      "value": "جاري المعاينة",
+      "block": "template",
+      "line": 125
+    },
+    {
+      "kind": "interpolation_branch",
+      "start": 9524,
+      "end": 9801,
+      "value": "تعيين كافتراضي",
+      "block": "template",
+      "line": 162
+    },
+    {
+      "kind": "template_text",
+      "start": 9944,
+      "end": 10042,
+      "value": "مشمول مجاناً",
+      "block": "template",
+      "line": 168
+    },
+    {
+      "kind": "template_text",
+      "start": 10924,
+      "end": 11027,
+      "value": "إظهار شعار المركز",
+      "block": "template",
+      "line": 186
+    },
+    {
+      "kind": "template_text",
+      "start": 12761,
+      "end": 12859,
+      "value": "اللون الأساسي للهوية",
+      "block": "template",
+      "line": 210
+    },
+    {
+      "kind": "template_text",
+      "start": 14383,
+      "end": 14493,
+      "value": "النص التذييلي الافتراضي (الفوتر)",
+      "block": "template",
+      "line": 236
+    },
+    {
+      "kind": "template_text",
+      "start": 16245,
+      "end": 16323,
+      "value": "إعدادات المستندات الخاصة",
+      "block": "template",
+      "line": 269
+    },
+    {
+      "kind": "interpolation_fallback",
+      "start": 17682,
+      "end": 17721,
+      "value": "بدون عنوان مخصص",
+      "block": "template",
+      "line": 292
+    },
+    {
+      "kind": "template_text",
+      "start": 19103,
+      "end": 19147,
+      "value": "تخصيص:",
+      "block": "template",
+      "line": 319
+    },
+    {
+      "kind": "template_text",
+      "start": 19511,
+      "end": 19594,
+      "value": "إغلاق التخصيص",
+      "block": "template",
+      "line": 326
+    },
+    {
+      "kind": "template_text",
+      "start": 20027,
+      "end": 20133,
+      "value": "عنوان المستند المطبوع (عربي)",
+      "block": "template",
+      "line": 336
+    },
+    {
+      "kind": "template_text",
+      "start": 22340,
+      "end": 22352,
+      "value": "طباعة الشروط",
+      "block": "template",
+      "line": 371
+    },
+    {
+      "kind": "template_text",
+      "start": 23047,
+      "end": 23068,
+      "value": "الشروط بالصفحة الأولى",
+      "block": "template",
+      "line": 381
+    },
+    {
+      "kind": "template_text",
+      "start": 23757,
+      "end": 23768,
+      "value": "تفعيل الختم",
+      "block": "template",
+      "line": 391
+    },
+    {
+      "kind": "template_text",
+      "start": 24459,
+      "end": 24471,
+      "value": "إظهار كود QR",
+      "block": "template",
+      "line": 401
+    },
+    {
+      "kind": "template_text",
+      "start": 25159,
+      "end": 25176,
+      "value": "إظهار IBAN البنكي",
+      "block": "template",
+      "line": 411
+    },
+    {
+      "kind": "template_text",
+      "start": 25962,
+      "end": 25980,
+      "value": "إظهار عنوان العميل",
+      "block": "template",
+      "line": 423
+    },
+    {
+      "kind": "template_text",
+      "start": 27467,
+      "end": 27560,
+      "value": "تعديل التوقيعات الرسمية",
+      "block": "template",
+      "line": 446
+    },
+    {
+      "kind": "template_text",
+      "start": 28878,
+      "end": 28969,
+      "value": "تعديل الشروط والأحكام",
+      "block": "template",
+      "line": 466
+    },
+    {
+      "kind": "template_text",
+      "start": 29919,
+      "end": 30010,
+      "value": "منصة المعاينة التفاعلية الحية",
+      "block": "template",
+      "line": 486
+    },
+    {
+      "kind": "template_text",
+      "start": 30826,
+      "end": 30871,
+      "value": "معاينة:",
+      "block": "template",
+      "line": 502
+    },
+    {
+      "kind": "template_text",
+      "start": 31445,
+      "end": 31455,
+      "value": "مكبر (55%)",
+      "block": "template",
+      "line": 512
+    },
+    {
+      "kind": "template_text",
+      "start": 31526,
+      "end": 31536,
+      "value": "مكبر (65%)",
+      "block": "template",
+      "line": 513
+    },
+    {
+      "kind": "template_text",
+      "start": 31607,
+      "end": 31617,
+      "value": "مكبر (75%)",
+      "block": "template",
+      "line": 514
+    },
+    {
+      "kind": "template_text",
+      "start": 31688,
+      "end": 31698,
+      "value": "مكبر (85%)",
+      "block": "template",
+      "line": 515
+    },
+    {
+      "kind": "template_text",
+      "start": 31768,
+      "end": 31787,
+      "value": "الحجم الأصلي (100%)",
+      "block": "template",
+      "line": 516
+    },
+    {
+      "kind": "template_text",
+      "start": 33168,
+      "end": 33273,
+      "value": "* المعاينة تمثل الشكل التقريبي النهائي للمستند عند الطباعة.",
+      "block": "template",
+      "line": 544
+    },
+    {
+      "kind": "ui_label",
+      "start": 36618,
+      "end": 36665,
+      "value": "طباعة A4 للمكاتب والمستندات الرسمية والمبيعات",
+      "line": 650,
+      "block": "script",
+      "snippet": "ame: 'Classic A4', description: 'طباعة A4 للمكاتب والمستندات الرسمية والمبيعات', }, { id: 'TemplateTher"
+    },
+    {
+      "kind": "ui_label",
+      "start": 36764,
+      "end": 36825,
+      "value": "طباعة حرارية ضيقة للفواتير السريعة والعملاء ورسائل الواتساب",
+      "line": 655,
+      "block": "script",
+      "snippet": "e: 'Thermal 80mm', description: 'طباعة حرارية ضيقة للفواتير السريعة والعملاء ورسائل الواتساب', }, { id: 'TemplateMode"
+    },
+    {
+      "kind": "ui_label",
+      "start": 36928,
+      "end": 36992,
+      "value": "قالب A4 عصري وموفر للحبر ذو تصميم مضغوط وأنيق وجدول خدمات ملون",
+      "line": 660,
+      "block": "script",
+      "snippet": "odern Compact A4', description: 'قالب A4 عصري وموفر للحبر ذو تصميم مضغوط وأنيق وجدول خدمات ملون', }, { id: 'TemplateSlee"
+    },
+    {
+      "kind": "ui_label",
+      "start": 37100,
+      "end": 37165,
+      "value": "تصميم إيصال حراري حديث بلمسة داكنة وتفاصيل انسيابية وتصميم أنيق",
+      "line": 665,
+      "block": "script",
+      "snippet": "eek Thermal 80mm', description: 'تصميم إيصال حراري حديث بلمسة داكنة وتفاصيل انسيابية وتصميم أنيق', }, ]; // Tracks which template is"
+    },
+    {
+      "kind": "ui_label",
+      "start": 45534,
+      "end": 45549,
+      "value": "مركز خدمة برو",
+      "line": 911,
+      "block": "script",
+      "snippet": "enterData = computed(() => ({ name: 'مركز خدمة برو', logo_url: page.props.tenant?.logo_"
+    },
+    {
+      "kind": "ui_label",
+      "start": 45664,
+      "end": 45707,
+      "value": "الرياض، حي الصحافة، طريق الملك عبد العزيز",
+      "line": 914,
+      "block": "script",
+      "snippet": "number: '310298374200003', address: 'الرياض، حي الصحافة، طريق الملك عبد العزيز', phone: '+966 55 123 4567', web"
+    },
+    {
+      "kind": "ui_label",
+      "start": 46110,
+      "end": 46134,
+      "value": "أحمد عبد الله القحطاني",
+      "line": 927,
+      "block": "script",
+      "snippet": "from now customer: { name: 'أحمد عبد الله القحطاني', phone: '+966 50 123 4567',"
+    },
+    {
+      "kind": "ui_label",
+      "start": 46207,
+      "end": 46215,
+      "value": "تويوتا",
+      "line": 931,
+      "block": "script",
+      "snippet": "7', }, vehicle: { make: 'تويوتا', model: 'كامري GLE', ye"
+    },
+    {
+      "kind": "ui_label",
+      "start": 46232,
+      "end": 46243,
+      "value": "كامري GLE",
+      "line": 932,
+      "block": "script",
+      "snippet": "make: 'تويوتا', model: 'كامري GLE', year: '2023', plate: '"
+    },
+    {
+      "kind": "ui_label",
+      "start": 46282,
+      "end": 46294,
+      "value": "ح ص ك 9922",
+      "line": 934,
+      "block": "script",
+      "snippet": "', year: '2023', plate: 'ح ص ك 9922', color: 'أبيض لؤلؤي', },"
+    },
+    {
+      "kind": "ui_label",
+      "start": 46311,
+      "end": 46323,
+      "value": "أبيض لؤلؤي",
+      "line": 935,
+      "block": "script",
+      "snippet": "plate: 'ح ص ك 9922', color: 'أبيض لؤلؤي', }, items: [ {"
+    },
+    {
+      "kind": "ui_label",
+      "start": 46381,
+      "end": 46407,
+      "value": "فحص كمبيوتر وبرمجة كاملة",
+      "line": 939,
+      "block": "script",
+      "snippet": ": [ { service_name: 'فحص كمبيوتر وبرمجة كاملة', description: 'فحص جميع الح"
+    },
+    {
+      "kind": "ui_label",
+      "start": 46434,
+      "end": 46489,
+      "value": "فحص جميع الحساسات ومسح الأخطاء السابقة وإعادة التدوير",
+      "line": 940,
+      "block": "script",
+      "snippet": "وبرمجة كاملة', description: 'فحص جميع الحساسات ومسح الأخطاء السابقة وإعادة التدوير', qty: 1, unit_p"
+    },
+    {
+      "kind": "ui_label",
+      "start": 46615,
+      "end": 46643,
+      "value": "تغيير زيت المحرك مع الفلتر",
+      "line": 946,
+      "block": "script",
+      "snippet": "}, { service_name: 'تغيير زيت المحرك مع الفلتر', description: 'زيت سينثيتك"
+    },
+    {
+      "kind": "ui_label",
+      "start": 46670,
+      "end": 46736,
+      "value": "زيت سينثيتك بالكامل 5W-30 يقطع مسافة 10,000 كم مع السيفون الأصلي",
+      "line": 947,
+      "block": "script",
+      "snippet": "رك مع الفلتر', description: 'زيت سينثيتك بالكامل 5W-30 يقطع مسافة 10,000 كم مع السيفون الأصلي', qty: 1, unit_p"
+    },
+    {
+      "kind": "ui_label",
+      "start": 46862,
+      "end": 46892,
+      "value": "تغيير فحمات الفرامل الأمامية",
+      "line": 953,
+      "block": "script",
+      "snippet": "}, { service_name: 'تغيير فحمات الفرامل الأمامية', description: 'قطع غيار أصل"
+    },
+    {
+      "kind": "ui_label",
+      "start": 46919,
+      "end": 46974,
+      "value": "قطع غيار أصلية مع خرط الهوبات الأمامية وضبط الميزانية",
+      "line": 954,
+      "block": "script",
+      "snippet": "امل الأمامية', description: 'قطع غيار أصلية مع خرط الهوبات الأمامية وضبط الميزانية', qty: 1, unit_p"
+    },
+    {
+      "kind": "ui_label",
+      "start": 47049,
+      "end": 47063,
+      "value": "المهندس سليم",
+      "line": 957,
+      "block": "script",
+      "snippet": "nit_price: 320, technician: 'المهندس سليم', is_part: false, },"
+    },
+    {
+      "kind": "ui_label",
+      "start": 47140,
+      "end": 47171,
+      "value": "فحمات فرامل أمامية (قطع غيار)",
+      "line": 961,
+      "block": "script",
+      "snippet": "}, { service_name: 'فحمات فرامل أمامية (قطع غيار)', description: 'من المستودع"
+    },
+    {
+      "kind": "ui_label",
+      "start": 47198,
+      "end": 47233,
+      "value": "من المستودع الرئيسي - تويوتا أصلي",
+      "line": 962,
+      "block": "script",
+      "snippet": "ة (قطع غيار)', description: 'من المستودع الرئيسي - تويوتا أصلي', qty: 1, unit_p"
+    },
+    {
+      "kind": "ui_label",
+      "start": 47372,
+      "end": 47441,
+      "value": "دفعة مقدمة لصيانة السيارة المذكورة أعلاه وبدء أعمال الفحص والبرمجة.",
+      "line": 969,
+      "block": "script",
+      "snippet": "amount: 250, // For receipt notes: 'دفعة مقدمة لصيانة السيارة المذكورة أعلاه وبدء أعمال الفحص والبرمجة.', }));"
+    }
+  ],
+  "resources/js/Pages/Settings/Zatca/Index.vue": [
+    {
+      "kind": "template_text",
+      "start": 2274,
+      "end": 2290,
+      "value": "الربط نشط ومعتمد",
+      "block": "template",
+      "line": 44
+    },
+    {
+      "kind": "template_text",
+      "start": 2766,
+      "end": 2812,
+      "value": "محاكاة محلية — ليست شهادة صادرة من هيئة الزكاة",
+      "block": "template",
+      "line": 51
+    },
+    {
+      "kind": "template_text",
+      "start": 3121,
+      "end": 3192,
+      "value": "إعادة ضبط المعالج",
+      "block": "template",
+      "line": 56
+    },
+    {
+      "kind": "template_text",
+      "start": 6656,
+      "end": 6771,
+      "value": "الخطوة الأولى: إعداد بيانات وحدة الفوترة وتوليد المفتاح (CSR)",
+      "block": "template",
+      "line": 128
+    },
+    {
+      "kind": "template_text",
+      "start": 6858,
+      "end": 7046,
+      "value": "يتم إنشاء زوج مفاتيح التشفير ومواصفات الحل التقني طبقاً للمواصفات القياسية لهيئة الزكاة والضريبة والجمارك.",
+      "block": "template",
+      "line": 131
+    },
+    {
+      "kind": "template_text",
+      "start": 7260,
+      "end": 7319,
+      "value": "الخطوة 1 من 4",
+      "block": "template",
+      "line": 138
+    },
+    {
+      "kind": "template_text",
+      "start": 7599,
+      "end": 7671,
+      "value": "اسم المنشأة المسجل",
+      "block": "template",
+      "line": 147
+    },
+    {
+      "kind": "template_text",
+      "start": 8284,
+      "end": 8362,
+      "value": "الرقم الضريبي (15 رقماً)",
+      "block": "template",
+      "line": 161
+    },
+    {
+      "kind": "template_text",
+      "start": 8968,
+      "end": 9046,
+      "value": "بيئة الربط (Environment)",
+      "block": "template",
+      "line": 175
+    },
+    {
+      "kind": "template_text",
+      "start": 9607,
+      "end": 9709,
+      "value": "الرقم التسلسلي لجهاز الفوترة (EGS Serial Number)",
+      "block": "template",
+      "line": 190
+    },
+    {
+      "kind": "template_text",
+      "start": 11185,
+      "end": 11247,
+      "value": "تم إنشاء ملف طلب الشهادة (CSR) والمفتاح الخاص بنجاح في النظام.",
+      "block": "template",
+      "line": 218
+    },
+    {
+      "kind": "template_text",
+      "start": 11485,
+      "end": 11554,
+      "value": "المتابعة إلى الخطوة 2 ←",
+      "block": "template",
+      "line": 223
+    },
+    {
+      "kind": "interpolation_branch",
+      "start": 12082,
+      "end": 12295,
+      "value": "توليد الـ CSR ومتابعة",
+      "block": "template",
+      "line": 235
+    },
+    {
+      "kind": "template_text",
+      "start": 13491,
+      "end": 13601,
+      "value": "الخطوة الثانية: إدخال رمز التحقق (OTP) من بوابة \"فاتورة\"",
+      "block": "template",
+      "line": 267
+    },
+    {
+      "kind": "template_text",
+      "start": 13688,
+      "end": 13850,
+      "value": "سجل دخولك إلى بوابة فاتورة التابعة لهيئة الزكاة واستخرج رمز الـ OTP للحل التقني.",
+      "block": "template",
+      "line": 270
+    },
+    {
+      "kind": "template_text",
+      "start": 14064,
+      "end": 14123,
+      "value": "الخطوة 2 من 4",
+      "block": "template",
+      "line": 277
+    },
+    {
+      "kind": "template_text",
+      "start": 14958,
+      "end": 14986,
+      "value": "كيف تستخرج رمز التحقق (OTP)؟",
+      "block": "template",
+      "line": 294
+    },
+    {
+      "kind": "template_text",
+      "start": 15213,
+      "end": 15294,
+      "value": "ادخل إلى بوابة فاتورة (",
+      "block": "template",
+      "line": 299
+    },
+    {
+      "kind": "template_text",
+      "start": 15635,
+      "end": 15704,
+      "value": ") بحساب منشأتك.",
+      "block": "template",
+      "line": 308
+    },
+    {
+      "kind": "template_text",
+      "start": 15738,
+      "end": 15783,
+      "value": "توجه إلى قسم \"الحلول التقنية (EGS) والوحدات\".",
+      "block": "template",
+      "line": 311
+    },
+    {
+      "kind": "template_text",
+      "start": 15817,
+      "end": 15876,
+      "value": "اضغط على \"إضافة وحدة حل تقني جديدة\" واطلب رمز التحقق (OTP).",
+      "block": "template",
+      "line": 312
+    },
+    {
+      "kind": "template_text",
+      "start": 15910,
+      "end": 15975,
+      "value": "أدخل الرمز السداسي في الحقل أدناه واضغط على \"طلب شهادة الامتثال\".",
+      "block": "template",
+      "line": 313
+    },
+    {
+      "kind": "template_text",
+      "start": 16365,
+      "end": 16382,
+      "value": "وضع الإنتاج الحي:",
+      "block": "template",
+      "line": 321
+    },
+    {
+      "kind": "template_text",
+      "start": 16391,
+      "end": 16564,
+      "value": "الرمز التجريبي (123456) غير مقبول في وضع الإنتاج، ويجب إدخال رمز OTP فعلي صادر من بوابة فاتورة لمنشأتك.",
+      "block": "template",
+      "line": 321
+    },
+    {
+      "kind": "template_text",
+      "start": 16897,
+      "end": 16911,
+      "value": "بيئة المحاكاة:",
+      "block": "template",
+      "line": 330
+    },
+    {
+      "kind": "template_text",
+      "start": 16920,
+      "end": 16998,
+      "value": "يمكنك استخدام الرمز التجريبي",
+      "block": "template",
+      "line": 330
+    },
+    {
+      "kind": "template_text",
+      "start": 17021,
+      "end": 17097,
+      "value": "لاختبار الربط والامتثال بنجاح.",
+      "block": "template",
+      "line": 332
+    },
+    {
+      "kind": "template_text",
+      "start": 17294,
+      "end": 17372,
+      "value": "رمز التحقق من بوابة فاتورة (OTP)",
+      "block": "template",
+      "line": 338
+    },
+    {
+      "kind": "template_text",
+      "start": 18676,
+      "end": 18736,
+      "value": "→ الرجوع للخلف",
+      "block": "template",
+      "line": 363
+    },
+    {
+      "kind": "template_text",
+      "start": 19155,
+      "end": 19181,
+      "value": "طلب شهادة الامتثال الفورية",
+      "block": "template",
+      "line": 371
+    },
+    {
+      "kind": "template_text",
+      "start": 20357,
+      "end": 20475,
+      "value": "الخطوة الثالثة: إجراء الفحص واختبار الامتثال (Compliance Checks)",
+      "block": "template",
+      "line": 398
+    },
+    {
+      "kind": "template_text",
+      "start": 20562,
+      "end": 20744,
+      "value": "تتطلب هيئة الزكاة إرسال 4 عينات تجريبية لاختبار قدرة النظام على التعامل مع كافة الفواتير والإشعارات.",
+      "block": "template",
+      "line": 401
+    },
+    {
+      "kind": "template_text",
+      "start": 20958,
+      "end": 21017,
+      "value": "الخطوة 3 من 4",
+      "block": "template",
+      "line": 408
+    },
+    {
+      "kind": "template_text",
+      "start": 23583,
+      "end": 23596,
+      "value": "ناجح (PASSED)",
+      "block": "template",
+      "line": 458
+    },
+    {
+      "kind": "template_text",
+      "start": 23952,
+      "end": 23965,
+      "value": "فاشل (FAILED)",
+      "block": "template",
+      "line": 464
+    },
+    {
+      "kind": "template_text",
+      "start": 24335,
+      "end": 24360,
+      "value": "لم يُنفَّذ (NOT EXECUTED)",
+      "block": "template",
+      "line": 470
+    },
+    {
+      "kind": "template_text",
+      "start": 24689,
+      "end": 24767,
+      "value": "جاري الاختبار...",
+      "block": "template",
+      "line": 475
+    },
+    {
+      "kind": "template_text",
+      "start": 25020,
+      "end": 25095,
+      "value": "بانتظار الفحص",
+      "block": "template",
+      "line": 481
+    },
+    {
+      "kind": "template_text",
+      "start": 26417,
+      "end": 26477,
+      "value": "→ الرجوع للخلف",
+      "block": "template",
+      "line": 509
+    },
+    {
+      "kind": "interpolation_branch",
+      "start": 26904,
+      "end": 26965,
+      "value": "تشغيل الفحوصات",
+      "block": "template",
+      "line": 518
+    },
+    {
+      "kind": "template_text",
+      "start": 27394,
+      "end": 27431,
+      "value": "إصدار شهادة الإنتاج وتفعيل الربط الحي",
+      "block": "template",
+      "line": 525
+    },
+    {
+      "kind": "template_text",
+      "start": 29505,
+      "end": 29559,
+      "value": "محاكاة محلية (Simulation) — ليست المرحلة الثانية الحية",
+      "block": "template",
+      "line": 566
+    },
+    {
+      "kind": "template_text",
+      "start": 29668,
+      "end": 29789,
+      "value": "معرّف إنتاج تجريبي فقط — لا يوجد اتصال حقيقي مع هيئة الزكاة",
+      "block": "template",
+      "line": 568
+    },
+    {
+      "kind": "template_text",
+      "start": 29885,
+      "end": 30254,
+      "value": "هذا المعرّف مُنشأ داخل هذا الخادم لأغراض التطوير فقط، ولم يصدر عن هيئة الزكاة والضريبة والجمارك، ولا يتم توليد أكواد QR ولا إرسال فواتير بناءً عليه. يلزم تبادل حقيقي مع بوابة الإنتاجية الحية لتفعيل الربط الفعلي.",
+      "block": "template",
+      "line": 571
+    },
+    {
+      "kind": "template_text",
+      "start": 32288,
+      "end": 32332,
+      "value": "المرحلة الثانية (ZATCA Phase 2) مفعلة رسمياً",
+      "block": "template",
+      "line": 614
+    },
+    {
+      "kind": "template_text",
+      "start": 32441,
+      "end": 32561,
+      "value": "منشأتك متصلة ومطابقة 100% مع هيئة الزكاة والضريبة والجمارك",
+      "block": "template",
+      "line": 616
+    },
+    {
+      "kind": "template_text",
+      "start": 32659,
+      "end": 32931,
+      "value": "يتم توليد الأكواد المشفرة (QR Codes) والبيانات المهيكلة لجميع الفواتير الضريبية المبسطة وتوقيعها رقمياً طبقاً للائحة الفوترة الإلكترونية بالمملكة.",
+      "block": "template",
+      "line": 619
+    },
+    {
+      "kind": "template_text",
+      "start": 34285,
+      "end": 34366,
+      "value": "الرقم التسلسلي للجهاز (EGS)",
+      "block": "template",
+      "line": 650
+    },
+    {
+      "kind": "template_text",
+      "start": 34646,
+      "end": 34740,
+      "value": "معرف وحدة الفوترة المسجل في بوابة فاتورة",
+      "block": "template",
+      "line": 656
+    },
+    {
+      "kind": "template_text",
+      "start": 35041,
+      "end": 35115,
+      "value": "بيئة التشغيل الحالية",
+      "block": "template",
+      "line": 664
+    },
+    {
+      "kind": "interpolation_branch",
+      "start": 35451,
+      "end": 35721,
+      "value": "بيئة المحاكاة المعتمدة (Simulation)",
+      "block": "template",
+      "line": 672
+    },
+    {
+      "kind": "interpolation_branch",
+      "start": 35879,
+      "end": 36110,
+      "value": "تم الربط والاعتماد بنجاح",
+      "block": "template",
+      "line": 680
+    },
+    {
+      "kind": "template_text",
+      "start": 36436,
+      "end": 36512,
+      "value": "صلاحية الشهادة الرقمية",
+      "block": "template",
+      "line": 691
+    },
+    {
+      "kind": "interpolation_fallback",
+      "start": 36645,
+      "end": 36882,
+      "value": "صالحة لمدة سنة",
+      "block": "template",
+      "line": 695
+    },
+    {
+      "kind": "template_text",
+      "start": 36975,
+      "end": 37000,
+      "value": "تاريخ تجديد شهادة الإنتاج",
+      "block": "template",
+      "line": 701
+    },
+    {
+      "kind": "template_text",
+      "start": 37366,
+      "end": 37455,
+      "value": "إعادة إصدار الشهادة أو تغيير البيئة",
+      "block": "template",
+      "line": 709
+    },
+    {
+      "kind": "template_text",
+      "start": 37525,
+      "end": 37709,
+      "value": "إذا أردت الانتقال من بيئة المحاكاة إلى الإنتاجية أو تجديد الشهادة المنتهية، يمكنك إعادة تشغيل المعالج.",
+      "block": "template",
+      "line": 712
+    },
+    {
+      "kind": "template_text",
+      "start": 38042,
+      "end": 38107,
+      "value": "إعادة تشغيل المعالج",
+      "block": "template",
+      "line": 720
+    },
+    {
+      "kind": "ui_label",
+      "start": 38584,
+      "end": 38629,
+      "value": "بيئة المحاكاة والتجربة (Simulation Gateway)",
+      "line": 738,
+      "block": "script",
+      "snippet": "s = [ { value: 'simulation', label: 'بيئة المحاكاة والتجربة (Simulation Gateway)' }, { value: 'production', label: 'ا"
+    },
+    {
+      "kind": "ui_label",
+      "start": 38667,
+      "end": 38712,
+      "value": "البيئة الإنتاجية الحية (Production Gateway)",
+      "line": 739,
+      "block": "script",
+      "snippet": ")' }, { value: 'production', label: 'البيئة الإنتاجية الحية (Production Gateway)' }, { value: 'sandbox', label: 'بيئة"
+    },
+    {
+      "kind": "ui_label",
+      "start": 38747,
+      "end": 38782,
+      "value": "بيئة المطورين (Developer Sandbox)",
+      "line": 740,
+      "block": "script",
+      "snippet": "way)' }, { value: 'sandbox', label: 'بيئة المطورين (Developer Sandbox)' }, ]; const props = defineProps({"
+    },
+    {
+      "kind": "ui_label",
+      "start": 39217,
+      "end": 39237,
+      "value": "وحدة الفوترة (CSR)",
+      "line": 765,
+      "block": "script",
+      "snippet": "); const steps = [ { id: 1, title: 'وحدة الفوترة (CSR)' }, { id: 2, title: 'رمز التحقق (OTP"
+    },
+    {
+      "kind": "ui_label",
+      "start": 39261,
+      "end": 39279,
+      "value": "رمز التحقق (OTP)",
+      "line": 766,
+      "block": "script",
+      "snippet": "ة الفوترة (CSR)' }, { id: 2, title: 'رمز التحقق (OTP)' }, { id: 3, title: 'فحص الامتثال' }"
+    },
+    {
+      "kind": "ui_label",
+      "start": 39303,
+      "end": 39317,
+      "value": "فحص الامتثال",
+      "line": 767,
+      "block": "script",
+      "snippet": "مز التحقق (OTP)' }, { id: 3, title: 'فحص الامتثال' }, { id: 4, title: 'الربط الحي (Act"
+    },
+    {
+      "kind": "ui_label",
+      "start": 39341,
+      "end": 39362,
+      "value": "الربط الحي (Active)",
+      "line": 768,
+      "block": "script",
+      "snippet": ": 'فحص الامتثال' }, { id: 4, title: 'الربط الحي (Active)' }, ]; const csrForm = useForm({ en"
+    },
+    {
+      "kind": "script_literal",
+      "start": 41783,
+      "end": 41812,
+      "value": "تعذر تشغيل فحوصات الامتثال.",
+      "line": 846,
+      "block": "script",
+      "snippet": "led'; checksMessage.value = 'تعذر تشغيل فحوصات الامتثال.'; } } catch (err) {"
+    },
+    {
+      "kind": "script_literal",
+      "start": 41913,
+      "end": 41959,
+      "value": "تعذر الاتصال بالخادم لتشغيل فحوصات الامتثال.",
+      "line": 850,
+      "block": "script",
+      "snippet": "'failed'; checksMessage.value = 'تعذر الاتصال بالخادم لتشغيل فحوصات الامتثال.'; } finally { runningChecks."
+    },
+    {
+      "kind": "script_literal",
+      "start": 42458,
+      "end": 42517,
+      "value": "هل أنت متأكد من رغبتك في إعادة ضبط معالج الربط مع الزكاة؟",
+      "line": 874,
+      "block": "script",
+      "snippet": "confirmReset = () => { if (confirm('هل أنت متأكد من رغبتك في إعادة ضبط معالج الربط مع الزكاة؟')) { router.post( '/"
+    }
+  ]
+}

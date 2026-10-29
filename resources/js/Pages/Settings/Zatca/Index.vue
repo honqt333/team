@@ -41,20 +41,20 @@
                             class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-700"
                         >
                             <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                            <span>الربط نشط ومعتمد</span>
+                            <span>{{ $t('zatca.link_active_approved') }}</span>
                         </span>
                         <span
                             v-else
                             class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300 border border-amber-300 dark:border-amber-700"
                         >
                             <span class="w-2 h-2 rounded-full bg-amber-500"></span>
-                            <span>محاكاة محلية — ليست شهادة صادرة من هيئة الزكاة</span>
+                            <span>{{ $t('zatca.simulation_not_zatca_certificate') }}</span>
                         </span>
                         <button
                             @click="confirmReset"
                             class="px-3 py-1.5 text-xs font-medium text-gray-500 hover:text-red-600 dark:text-gray-400 dark:hover:text-red-400 transition-colors"
                         >
-                            إعادة ضبط المعالج
+                            {{ $t('zatca.reset_handler') }}
                         </button>
                     </div>
                 </template>
@@ -126,17 +126,16 @@
                 >
                     <div>
                         <h3 class="text-base font-bold text-gray-900 dark:text-white">
-                            الخطوة الأولى: إعداد بيانات وحدة الفوترة وتوليد المفتاح (CSR)
+                            {{ $t('zatca.step_1_title') }}
                         </h3>
                         <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                            يتم إنشاء زوج مفاتيح التشفير ومواصفات الحل التقني طبقاً للمواصفات
-                            القياسية لهيئة الزكاة والضريبة والجمارك.
+                            {{ $t('zatca.key_pair_description') }}
                         </p>
                     </div>
                     <span
                         class="px-3 py-1 rounded-full text-xs font-bold bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300"
                     >
-                        الخطوة 1 من 4
+                        {{ $t('zatca.step_1_of_4') }}
                     </span>
                 </div>
 
@@ -145,7 +144,7 @@
                         <label
                             class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1"
                         >
-                            اسم المنشأة المسجل
+                            {{ $t('zatca.establishment_name') }}
                         </label>
                         <input
                             type="text"
@@ -159,7 +158,7 @@
                         <label
                             class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1"
                         >
-                            الرقم الضريبي (15 رقماً)
+                            {{ $t('zatca.tax_number_15') }}
                         </label>
                         <input
                             type="text"
@@ -173,7 +172,7 @@
                         <label
                             class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1"
                         >
-                            بيئة الربط (Environment)
+                            {{ $t('zatca.link_environment') }}
                         </label>
                         <SearchableSelect
                             v-model="csrForm.environment"
@@ -188,7 +187,7 @@
                         <label
                             class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1"
                         >
-                            الرقم التسلسلي لجهاز الفوترة (EGS Serial Number)
+                            {{ $t('zatca.egs_serial_number') }}
                         </label>
                         <input
                             v-model="csrForm.egs_serial_number"
@@ -215,13 +214,13 @@
                                 clip-rule="evenodd"
                             />
                         </svg>
-                        <span>تم إنشاء ملف طلب الشهادة (CSR) والمفتاح الخاص بنجاح في النظام.</span>
+                        <span>{{ $t('zatca.csr_created') }}</span>
                     </div>
                     <button
                         @click="currentStep = 2"
                         class="text-xs font-bold text-emerald-700 dark:text-emerald-400 hover:underline"
                     >
-                        المتابعة إلى الخطوة 2 ←
+                        {{ $t('zatca.continue_to_step_2') }}
                     </button>
                 </div>
 
@@ -235,7 +234,7 @@
                             {{
                                 setting.has_csr
                                     ? 'إعادة توليد الـ CSR والمفاتيح'
-                                    : 'توليد الـ CSR ومتابعة'
+                                    : '$t('zatca.generate_csr_and_continue')'
                             }}
                         </span>
                         <svg
@@ -265,17 +264,16 @@
                 >
                     <div>
                         <h3 class="text-base font-bold text-gray-900 dark:text-white">
-                            الخطوة الثانية: إدخال رمز التحقق (OTP) من بوابة "فاتورة"
+                            {{ $t('zatca.step_2_title') }}
                         </h3>
                         <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                            سجل دخولك إلى بوابة فاتورة التابعة لهيئة الزكاة واستخرج رمز الـ OTP للحل
-                            التقني.
+                            {{ $t('zatca.otp_instructions') }}
                         </p>
                     </div>
                     <span
                         class="px-3 py-1 rounded-full text-xs font-bold bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300"
                     >
-                        الخطوة 2 من 4
+                        {{ $t('zatca.step_2_of_4') }}
                     </span>
                 </div>
 
@@ -291,13 +289,13 @@
                                 clip-rule="evenodd"
                             />
                         </svg>
-                        <span>كيف تستخرج رمز التحقق (OTP)؟</span>
+                        <span>{{ $t('zatca.how_to_get_otp') }}</span>
                     </h4>
                     <ol
                         class="list-decimal list-inside space-y-1 ps-2 leading-relaxed text-sky-800 dark:text-sky-200"
                     >
                         <li>
-                            ادخل إلى بوابة فاتورة (
+                            {{ $t('zatca.go_to_fatoora') }}
                             <a
                                 href="https://fatoora.zatca.gov.sa"
                                 target="_blank"
@@ -306,11 +304,11 @@
                             >
                                 fatoora.zatca.gov.sa
                             </a>
-                            ) بحساب منشأتك.
+                            {{ $t('zatca.with_your_account') }}
                         </li>
-                        <li>توجه إلى قسم "الحلول التقنية (EGS) والوحدات".</li>
-                        <li>اضغط على "إضافة وحدة حل تقني جديدة" واطلب رمز التحقق (OTP).</li>
-                        <li>أدخل الرمز السداسي في الحقل أدناه واضغط على "طلب شهادة الامتثال".</li>
+                        <li>{{ $t('zatca.go_to_egs_section') }}</li>
+                        <li>{{ $t('zatca.add_egs_hint') }}</li>
+                        <li>{{ $t('zatca.otp_hint') }}</li>
                     </ol>
 
                     <div
@@ -318,25 +316,24 @@
                         class="p-3 bg-amber-100/70 dark:bg-amber-950/40 rounded-lg border border-amber-300 dark:border-amber-700 text-amber-900 dark:text-amber-200 font-medium"
                     >
                         ⚠️
-                        <strong>وضع الإنتاج الحي:</strong>
-                        الرمز التجريبي (123456) غير مقبول في وضع الإنتاج، ويجب إدخال رمز OTP فعلي
-                        صادر من بوابة فاتورة لمنشأتك.
+                        <strong>{{ $t('zatca.live_production_mode') }}</strong>
+                        {{ $t('zatca.test_code_rejected') }}
                     </div>
                     <div
                         v-else
                         class="p-3 bg-emerald-100/70 dark:bg-emerald-950/40 rounded-lg border border-emerald-300 dark:border-emerald-700 text-emerald-900 dark:text-emerald-200 font-medium"
                     >
                         💡
-                        <strong>بيئة المحاكاة:</strong>
-                        يمكنك استخدام الرمز التجريبي
+                        <strong>{{ $t('zatca.simulation_env_label') }}</strong>
+                        {{ $t('zatca.can_use_test_code') }}
                         <strong>123456</strong>
-                        لاختبار الربط والامتثال بنجاح.
+                        {{ $t('zatca.for_successful_test') }}
                     </div>
                 </div>
 
                 <div class="max-w-md mx-auto py-3 space-y-4 text-center">
                     <label class="block text-sm font-bold text-gray-800 dark:text-gray-200">
-                        رمز التحقق من بوابة فاتورة (OTP)
+                        {{ $t('zatca.fatoora_otp') }}
                     </label>
                     <input
                         v-model="otpForm.otp"
@@ -361,14 +358,14 @@
                         @click="currentStep = 1"
                         class="px-5 py-2.5 text-xs font-bold text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl transition-colors"
                     >
-                        → الرجوع للخلف
+                        {{ $t('zatca.go_back') }}
                     </button>
                     <button
                         @click="submitOtp"
                         :disabled="otpForm.processing || !otpForm.otp || otpForm.otp.length < 6"
                         class="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-sm shadow-sm transition-all disabled:opacity-50 flex items-center gap-2"
                     >
-                        <span>طلب شهادة الامتثال الفورية</span>
+                        <span>{{ $t('zatca.request_certificate_now') }}</span>
                         <svg
                             class="w-4 h-4 rtl:rotate-180"
                             fill="none"
@@ -396,17 +393,16 @@
                 >
                     <div>
                         <h3 class="text-base font-bold text-gray-900 dark:text-white">
-                            الخطوة الثالثة: إجراء الفحص واختبار الامتثال (Compliance Checks)
+                            {{ $t('zatca.step_3_title') }}
                         </h3>
                         <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                            تتطلب هيئة الزكاة إرسال 4 عينات تجريبية لاختبار قدرة النظام على التعامل
-                            مع كافة الفواتير والإشعارات.
+                            {{ $t('zatca.samples_requirement') }}
                         </p>
                     </div>
                     <span
                         class="px-3 py-1 rounded-full text-xs font-bold bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300"
                     >
-                        الخطوة 3 من 4
+                        {{ $t('zatca.step_3_of_4') }}
                     </span>
                 </div>
 
@@ -455,31 +451,31 @@
                                         d="M5 13l4 4L19 7"
                                     />
                                 </svg>
-                                <span>ناجح (PASSED)</span>
+                                <span>{{ $t('zatca.status_passed') }}</span>
                             </span>
                             <span
                                 v-else-if="chk.status === 'FAILED'"
                                 class="px-3 py-1 rounded-full text-xs font-bold bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-300"
                             >
-                                <span>فاشل (FAILED)</span>
+                                <span>{{ $t('zatca.status_failed') }}</span>
                             </span>
                             <span
                                 v-else-if="chk.status === 'NOT_EXECUTED'"
                                 class="px-3 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300"
                             >
-                                <span>لم يُنفَّذ (NOT EXECUTED)</span>
+                                <span>{{ $t('zatca.status_not_executed') }}</span>
                             </span>
                             <span
                                 v-else-if="runningChecks"
                                 class="px-3 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300 animate-pulse"
                             >
-                                جاري الاختبار...
+                                {{ $t('zatca.testing') }}
                             </span>
                             <span
                                 v-else
                                 class="px-3 py-1 rounded-full text-xs font-bold bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400"
                             >
-                                بانتظار الفحص
+                                {{ $t('work_orders.work_order_statuses.ready_for_qc') }}
                             </span>
                         </div>
                     </div>
@@ -507,7 +503,7 @@
                         @click="currentStep = 2"
                         class="px-5 py-2.5 text-xs font-bold text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl transition-colors"
                     >
-                        → الرجوع للخلف
+                        {{ $t('zatca.go_back') }}
                     </button>
                     <div class="flex items-center gap-3">
                         <button
@@ -515,14 +511,14 @@
                             :disabled="runningChecks"
                             class="px-6 py-2.5 bg-gray-600 hover:bg-gray-700 text-white rounded-xl font-bold text-sm shadow-sm transition-all disabled:opacity-50"
                         >
-                            {{ runningChecks ? 'جاري الفحص الآن...' : 'تشغيل الفحوصات' }}
+                            {{ runningChecks ? 'جاري الفحص الآن...' : '$t('zatca.run_checks')' }}
                         </button>
                         <button
                             @click="submitProduction"
                             :disabled="submittingProd"
                             class="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-sm shadow-sm transition-all disabled:opacity-50 flex items-center gap-2"
                         >
-                            <span>إصدار شهادة الإنتاج وتفعيل الربط الحي</span>
+                            <span>{{ $t('zatca.production_certificate') }}</span>
                             <svg
                                 class="w-4 h-4 rtl:rotate-180"
                                 fill="none"
@@ -563,16 +559,13 @@
                                 class="px-3 py-1 rounded-full text-xs font-bold bg-amber-500/20 text-amber-300 border border-amber-400/30 flex items-center gap-1.5 w-fit"
                             >
                                 <span class="w-2 h-2 rounded-full bg-amber-400"></span>
-                                <span>محاكاة محلية (Simulation) — ليست المرحلة الثانية الحية</span>
+                                <span>{{ $t('zatca.simulation_not_live_phase_2') }}</span>
                             </span>
                             <h3 class="text-2xl font-black mt-2">
-                                معرّف إنتاج تجريبي فقط — لا يوجد اتصال حقيقي مع هيئة الزكاة
+                                {{ $t('zatca.test_only_identifier') }}
                             </h3>
                             <p class="text-xs text-amber-200/80 max-w-xl leading-relaxed">
-                                هذا المعرّف مُنشأ داخل هذا الخادم لأغراض التطوير فقط، ولم يصدر عن
-                                هيئة الزكاة والضريبة والجمارك، ولا يتم توليد أكواد QR ولا إرسال
-                                فواتير بناءً عليه. يلزم تبادل حقيقي مع بوابة الإنتاجية الحية لتفعيل
-                                الربط الفعلي.
+                                {{ $t('zatca.sandbox_identifier_warning') }}
                             </p>
                         </div>
                         <div
@@ -611,15 +604,13 @@
                                 <span
                                     class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"
                                 ></span>
-                                <span>المرحلة الثانية (ZATCA Phase 2) مفعلة رسمياً</span>
+                                <span>{{ $t('zatca.phase_2_official') }}</span>
                             </span>
                             <h3 class="text-2xl font-black mt-2">
-                                منشأتك متصلة ومطابقة 100% مع هيئة الزكاة والضريبة والجمارك
+                                {{ $t('zatca.fully_connected') }}
                             </h3>
                             <p class="text-xs text-emerald-200/80 max-w-xl leading-relaxed">
-                                يتم توليد الأكواد المشفرة (QR Codes) والبيانات المهيكلة لجميع
-                                الفواتير الضريبية المبسطة وتوقيعها رقمياً طبقاً للائحة الفوترة
-                                الإلكترونية بالمملكة.
+                                {{ $t('zatca.qr_description') }}
                             </p>
                         </div>
                         <div
@@ -648,13 +639,13 @@
                         class="p-5 bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700/60 shadow-sm space-y-2"
                     >
                         <span class="text-xs font-bold text-gray-400 uppercase">
-                            الرقم التسلسلي للجهاز (EGS)
+                            {{ $t('zatca.device_serial_number') }}
                         </span>
                         <div class="text-sm font-black font-mono text-gray-900 dark:text-white">
                             {{ setting.egs_serial_number || '1-CARAG|2-V2|MAIN' }}
                         </div>
                         <p class="text-[11px] text-gray-500">
-                            معرف وحدة الفوترة المسجل في بوابة فاتورة
+                            {{ $t('zatca.registered_device_id') }}
                         </p>
                     </div>
 
@@ -662,7 +653,7 @@
                         class="p-5 bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700/60 shadow-sm space-y-2"
                     >
                         <span class="text-xs font-bold text-gray-400 uppercase">
-                            بيئة التشغيل الحالية
+                            {{ $t('zatca.current_environment') }}
                         </span>
                         <div
                             class="text-sm font-black text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5"
@@ -672,7 +663,7 @@
                                 {{
                                     setting.environment === 'production'
                                         ? 'البيئة الإنتاجية الحية (Production)'
-                                        : 'بيئة المحاكاة المعتمدة (Simulation)'
+                                        : '$t('zatca.env_simulation_approved')'
                                 }}
                             </span>
                         </div>
@@ -680,7 +671,7 @@
                             {{
                                 setting.is_simulated
                                     ? 'محاكاة محلية — لا يوجد اعتماد من الهيئة'
-                                    : 'تم الربط والاعتماد بنجاح'
+                                    : '$t('zatca.link_approved_success')'
                             }}
                         </p>
                     </div>
@@ -689,16 +680,19 @@
                         class="p-5 bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700/60 shadow-sm space-y-2"
                     >
                         <span class="text-xs font-bold text-gray-400 uppercase">
-                            صلاحية الشهادة الرقمية
+                            {{ $t('zatca.certificate_validity') }}
                         </span>
                         <div class="text-sm font-black font-mono text-gray-900 dark:text-white">
                             {{
                                 setting.is_simulated
                                     ? 'لا تنطبق (محاكاة)'
-                                    : setting.production_csid_expires_at || 'صالحة لمدة سنة'
+                                    : setting.production_csid_expires_at ||
+                                      $t('zatca.valid_for_a_year')
                             }}
                         </div>
-                        <p class="text-[11px] text-gray-500">تاريخ تجديد شهادة الإنتاج</p>
+                        <p class="text-[11px] text-gray-500">
+                            {{ $t('zatca.production_certificate_renewal_date') }}
+                        </p>
                     </div>
                 </div>
 
@@ -707,18 +701,17 @@
                 >
                     <div>
                         <h4 class="text-sm font-bold text-gray-900 dark:text-white">
-                            إعادة إصدار الشهادة أو تغيير البيئة
+                            {{ $t('zatca.reissue_or_change_env') }}
                         </h4>
                         <p class="text-xs text-gray-500 mt-0.5">
-                            إذا أردت الانتقال من بيئة المحاكاة إلى الإنتاجية أو تجديد الشهادة
-                            المنتهية، يمكنك إعادة تشغيل المعالج.
+                            {{ $t('zatca.restart_hint') }}
                         </p>
                     </div>
                     <button
                         @click="confirmReset"
                         class="px-4 py-2 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 text-xs font-bold text-gray-700 dark:text-gray-300 rounded-xl transition-colors"
                     >
-                        إعادة تشغيل المعالج
+                        {{ $t('zatca.restart_handler') }}
                     </button>
                 </div>
             </div>
@@ -727,6 +720,9 @@
 </template>
 
 <script setup>
+import { useI18n } from 'vue-i18n';
+const { t } = useI18n();
+
 import { ref } from 'vue';
 import { useForm, router } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
@@ -735,9 +731,9 @@ import BackButton from '@/Components/BackButton.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 
 const environmentOptions = [
-    { value: 'simulation', label: 'بيئة المحاكاة والتجربة (Simulation Gateway)' },
-    { value: 'production', label: 'البيئة الإنتاجية الحية (Production Gateway)' },
-    { value: 'sandbox', label: 'بيئة المطورين (Developer Sandbox)' },
+    { value: 'simulation', label: t('zatca.env_simulation_gateway') },
+    { value: 'production', label: t('zatca.env_production_gateway') },
+    { value: 'sandbox', label: t('zatca.env_developer_sandbox') },
 ];
 
 const props = defineProps({
@@ -762,10 +758,10 @@ const currentStep = ref(
 );
 
 const steps = [
-    { id: 1, title: 'وحدة الفوترة (CSR)' },
-    { id: 2, title: 'رمز التحقق (OTP)' },
-    { id: 3, title: 'فحص الامتثال' },
-    { id: 4, title: 'الربط الحي (Active)' },
+    { id: 1, title: t('zatca.billing_device_csr') },
+    { id: 2, title: t('zatca.otp') },
+    { id: 3, title: t('zatca.compliance_check') },
+    { id: 4, title: t('zatca.live_link_active') },
 ];
 
 const csrForm = useForm({
@@ -843,11 +839,11 @@ const runComplianceTests = async () => {
 
         if (!response.ok && !result.message) {
             checksStatus.value = 'failed';
-            checksMessage.value = 'تعذر تشغيل فحوصات الامتثال.';
+            checksMessage.value = t('zatca.checks_run_error');
         }
     } catch (err) {
         checksStatus.value = 'failed';
-        checksMessage.value = 'تعذر الاتصال بالخادم لتشغيل فحوصات الامتثال.';
+        checksMessage.value = t('zatca.checks_connection_error');
     } finally {
         runningChecks.value = false;
     }
@@ -871,7 +867,7 @@ const submitProduction = () => {
 };
 
 const confirmReset = () => {
-    if (confirm('هل أنت متأكد من رغبتك في إعادة ضبط معالج الربط مع الزكاة؟')) {
+    if (confirm(t('zatca.reset_confirm'))) {
         router.post(
             '/app/settings/zatca/reset',
             {},

@@ -13,7 +13,7 @@
                         {{ $t('company_profile.tabs.subscription') }}
                     </h3>
                     <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                        عرض تفاصيل اشتراكك الحالي والباقات المتاحة للترقية
+                        {{ $t('subscription.view_current_and_upgrade') }}
                     </p>
                 </div>
             </div>
@@ -32,20 +32,20 @@
                     <div>
                         <div class="flex items-center gap-2">
                             <h4 class="font-black text-sm text-blue-900 dark:text-blue-100">
-                                إيصال التحويل البنكي قيد المراجعة من الإدارة
+                                {{ $t('subscription.receipt_under_review_short') }}
                             </h4>
                             <span
                                 class="px-2 py-0.5 text-[10px] font-extrabold bg-blue-600 text-white rounded-full"
                             >
-                                قيد التدقيق
+                                {{ $t('subscription.under_audit') }}
                             </span>
                         </div>
                         <p class="text-xs text-blue-700 dark:text-blue-300 mt-1 leading-relaxed">
-                            تم استلام إيصال التحويل لباقة
+                            {{ $t('subscription.receipt_received') }}
                             <strong class="font-black text-blue-900 dark:text-blue-100">
                                 {{ getPlanName(currentSubscription) }}
                             </strong>
-                            . تم إيقاف طلبات الاشتراك الجديدة مؤقتاً لحين انتهاء الفحص وتفعيل حسابك.
+                            {{ $t('subscription.suspended_note') }}
                         </p>
                     </div>
                 </div>
@@ -53,7 +53,7 @@
                     <span
                         class="px-3 py-1.5 text-xs font-bold bg-blue-100 text-blue-800 dark:bg-blue-900/60 dark:text-blue-200 rounded-xl border border-blue-300/60 dark:border-blue-700"
                     >
-                        ⏳ قيد التدقيق والاعتماد
+                        {{ $t('subscription.under_audit_label') }}
                     </span>
                 </div>
             </div>
@@ -71,12 +71,12 @@
                     </div>
                     <div>
                         <h4 class="font-black text-sm text-amber-900 dark:text-amber-100">
-                            طلب دفع إلكتروني غير مكتمل
+                            {{ $t('subscription.incomplete_payment_request') }}
                         </h4>
                         <p class="text-xs text-amber-700 dark:text-amber-300 mt-0.5">
-                            لديك طلب دفع غير مكتمل لباقة
+                            {{ $t('subscription.incomplete_request_for') }}
                             <strong>{{ getPlanName(currentSubscription) }}</strong>
-                            . يمكنك إكمال الدفع أو اختيار باقة أخرى.
+                            {{ $t('subscription.incomplete_payment_note') }}
                         </p>
                     </div>
                 </div>
@@ -85,7 +85,7 @@
                     type="button"
                     class="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white text-xs font-black rounded-xl shadow-md transition-colors shrink-0 cursor-pointer"
                 >
-                    إكمال الدفع الآن
+                    {{ $t('subscription.complete_payment_now') }}
                 </button>
             </div>
 
@@ -105,7 +105,7 @@
                             <span
                                 class="text-xs uppercase tracking-wider font-semibold text-indigo-600 dark:text-indigo-400"
                             >
-                                الاشتراك الحالي
+                                {{ $t('system.billing.page.section_current') }}
                             </span>
 
                             <!-- Active Status -->
@@ -116,7 +116,7 @@
                                 <span
                                     class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"
                                 ></span>
-                                نشط
+                                {{ $t('dashboard.active') }}
                             </span>
 
                             <!-- Bank Transfer Receipt Pending Review -->
@@ -125,7 +125,7 @@
                                 class="px-3 py-1 text-xs bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300 rounded-full font-bold border border-blue-300/50 flex items-center gap-1.5"
                             >
                                 <span class="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
-                                📋 الإيصال قيد المراجعة
+                                {{ $t('subscription.receipt_review_badge') }}
                             </span>
 
                             <!-- Pending Online Payment -->
@@ -136,7 +136,7 @@
                                 <span
                                     class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"
                                 ></span>
-                                ⏳ طلب معلق
+                                {{ $t('subscription.pending_request_badge') }}
                             </span>
 
                             <!-- Trial Status -->
@@ -147,7 +147,7 @@
                                 "
                                 class="px-3 py-1 text-xs bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300 rounded-full font-bold border border-amber-300/50 flex items-center gap-1.5"
                             >
-                                🎁 فترة تجريبية
+                                {{ $t('subscription.trial_badge') }}
                             </span>
 
                             <!-- Expired Status -->
@@ -155,7 +155,7 @@
                                 v-else
                                 class="px-3 py-1 text-xs bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-400 rounded-full font-bold border border-gray-300/50"
                             >
-                                منتهي
+                                {{ $t('hr.contracts.status.expired') }}
                             </span>
 
                             <!-- Remaining Days Counter Badge -->
@@ -177,23 +177,24 @@
                             {{
                                 currentSubscription
                                     ? getPlanName(currentSubscription)
-                                    : 'لا يوجد اشتراك نشط'
+                                    : '$t('subscription.no_active_subscription')'
                             }}
                         </h4>
                         <p class="text-sm text-gray-500 dark:text-gray-400">
                             <span v-if="currentSubscription?.ends_at">
-                                ينتهي في: {{ formatDate(currentSubscription.ends_at) }}
+                                {{ $t('subscription.ends_on') }}
+                                {{ formatDate(currentSubscription.ends_at) }}
                             </span>
                             <span v-else-if="isReceiptUnderReview">
-                                جاري التحقق من إيصال التحويل البنكي وتفعيل الاشتراك...
+                                {{ $t('subscription.checking_receipt') }}
                             </span>
-                            <span v-else>لا يوجد تاريخ انتهاء محدد</span>
+                            <span v-else>{{ $t('subscription.no_end_date') }}</span>
                         </p>
                     </div>
 
                     <div class="text-start md:text-end space-y-1">
                         <span class="text-xs text-gray-500 dark:text-gray-400 block">
-                            قيمة الاشتراك
+                            {{ $t('subscription.subscription_value') }}
                         </span>
                         <span class="text-3xl font-black text-gray-900 dark:text-white">
                             {{
@@ -204,7 +205,7 @@
                         </span>
                         <span class="text-xs text-gray-500 dark:text-gray-400 block">
                             /
-                            {{ currentSubscription?.billing_cycle === 'yearly' ? 'سنوي' : 'شهري' }}
+                            {{ currentSubscription?.billing_cycle === 'yearly' ? 'سنوي' : '$t('common.monthly')' }}
                         </span>
                     </div>
                 </div>
@@ -214,10 +215,10 @@
             <div class="space-y-6">
                 <div>
                     <h4 class="text-base font-bold text-gray-900 dark:text-white">
-                        الاشتراكات المتاحة
+                        {{ $t('subscription.available_plans') }}
                     </h4>
                     <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                        اختر الباقة المناسبة لاحتياجات مركزك واشترك مباشرة بكل سهولة
+                        {{ $t('subscription.choose_plan_cta') }}
                     </p>
                 </div>
 
@@ -239,7 +240,7 @@
                             "
                             class="absolute -top-3 right-6 bg-indigo-600 text-white text-[10px] px-3 py-1 rounded-full font-bold uppercase tracking-wider shadow"
                         >
-                            باقتك الحالية
+                            {{ $t('subscription.your_current_plan') }}
                         </div>
 
                         <div class="space-y-4">
@@ -258,7 +259,7 @@
                                         {{ formatCurrency(plan.price_monthly) }}
                                     </span>
                                     <span class="text-xs text-gray-500 dark:text-gray-400">
-                                        / شهري
+                                        {{ $t('subscription.per_month') }}
                                     </span>
                                 </div>
                                 <div class="flex items-baseline gap-1 mt-1">
@@ -267,7 +268,9 @@
                                     >
                                         {{ formatCurrency(plan.price_yearly) }}
                                     </span>
-                                    <span class="text-[10px] text-gray-400">/ سنوي</span>
+                                    <span class="text-[10px] text-gray-400">
+                                        {{ $t('subscription.per_year') }}
+                                    </span>
                                 </div>
                             </div>
 
@@ -276,7 +279,7 @@
                                 class="space-y-2 pt-4 border-t border-gray-100 dark:border-gray-700/50"
                             >
                                 <p class="text-xs font-bold text-gray-700 dark:text-gray-300">
-                                    ميزات الباقة:
+                                    {{ $t('subscription.plan_features') }}
                                 </p>
                                 <ul class="space-y-2">
                                     <li
@@ -303,7 +306,7 @@
                                         v-if="!getFeatures(plan).length"
                                         class="text-xs text-gray-400 italic"
                                     >
-                                        لا توجد ميزات مسجلة
+                                        {{ $t('subscription.no_features_listed') }}
                                     </li>
                                 </ul>
                             </div>
@@ -383,11 +386,10 @@
                         </div>
                         <div>
                             <p class="font-bold text-sm text-gray-900 dark:text-white">
-                                هل تحتاج إلى مساعدة في الترقية أو اختيار الباقة؟
+                                {{ $t('subscription.need_help') }}
                             </p>
                             <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                                فريق الدعم الفني جاهز لمساعدتك في أي وقت وتفعيل الاشتراك المناسب
-                                لمركزك
+                                {{ $t('subscription.support_team_ready') }}
                             </p>
                         </div>
                     </div>
@@ -409,7 +411,7 @@
                                     d="M3 5a2 2 0 012-2h3.28a1 1 0 01.94.725l.548 2.2a1 1 0 01-.321.988l-1.305.98a10.582 10.582 0 004.872 4.872l.98-1.305a1 1 0 01.988-.321l2.2.548a1 1 0 01.725.94V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
                                 />
                             </svg>
-                            اتصل بنا
+                            {{ $t('tenant_site.cta.call') }}
                         </a>
                         <a
                             :href="`mailto:${contact?.email || 'support@example.com'}`"
@@ -428,7 +430,7 @@
                                     d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
                                 />
                             </svg>
-                            راسلنا
+                            {{ $t('subscription.contact_us') }}
                         </a>
                     </div>
                 </div>
@@ -448,7 +450,7 @@
                         {{ $t('company_profile.tabs.subscription_history') }}
                     </h3>
                     <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                        سجل الاشتراكات وتواريخ التجديد والمدفوعات الخاصة بالمؤسسة
+                        {{ $t('subscription_history.subtitle') }}
                     </p>
                 </div>
             </div>
@@ -463,13 +465,27 @@
                         >
                             <tr>
                                 <th class="px-6 py-4 text-center">#</th>
-                                <th class="px-6 py-4 text-start">تاريخ الطلب</th>
-                                <th class="px-6 py-4 text-start">الباقة والحالة</th>
-                                <th class="px-6 py-4 text-start">قيمة الباقة</th>
-                                <th class="px-6 py-4 text-start">تاريخ البداية</th>
-                                <th class="px-6 py-4 text-start">تاريخ الإنتهاء</th>
-                                <th class="px-6 py-4 text-end">مبلغ الخصم</th>
-                                <th class="px-6 py-4 text-end">المبلغ الصافي</th>
+                                <th class="px-6 py-4 text-start">
+                                    {{ $t('subscription.request_date') }}
+                                </th>
+                                <th class="px-6 py-4 text-start">
+                                    {{ $t('subscription.plan_and_status') }}
+                                </th>
+                                <th class="px-6 py-4 text-start">
+                                    {{ $t('subscription.plan_value') }}
+                                </th>
+                                <th class="px-6 py-4 text-start">
+                                    {{ $t('hr.contracts.start_date') }}
+                                </th>
+                                <th class="px-6 py-4 text-start">
+                                    {{ $t('subscription.end_date') }}
+                                </th>
+                                <th class="px-6 py-4 text-end">
+                                    {{ $t('pricing.discount_amount') }}
+                                </th>
+                                <th class="px-6 py-4 text-end">
+                                    {{ $t('subscription.net_amount') }}
+                                </th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
@@ -491,7 +507,7 @@
                                             v-if="sub.status === 'active'"
                                             class="px-2.5 py-0.5 text-xs bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300 rounded-full font-bold"
                                         >
-                                            نشط
+                                            {{ $t('dashboard.active') }}
                                         </span>
                                         <span
                                             v-else-if="
@@ -500,13 +516,13 @@
                                             "
                                             class="px-2.5 py-0.5 text-xs bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300 rounded-full font-bold"
                                         >
-                                            📋 الإيصال قيد المراجعة
+                                            {{ $t('subscription.receipt_review_badge') }}
                                         </span>
                                         <span
                                             v-else-if="sub.status === 'pending'"
                                             class="px-2.5 py-0.5 text-xs bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300 rounded-full font-bold"
                                         >
-                                            ⏳ طلب معلق
+                                            {{ $t('subscription.pending_request_badge') }}
                                         </span>
                                         <span
                                             v-else-if="
@@ -514,25 +530,25 @@
                                             "
                                             class="px-2.5 py-0.5 text-xs bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300 rounded-full font-bold"
                                         >
-                                            تجريبي
+                                            {{ $t('dashboard.trial') }}
                                         </span>
                                         <span
                                             v-else-if="sub.status === 'cancelled'"
                                             class="px-2.5 py-0.5 text-xs bg-rose-100 text-rose-800 dark:bg-rose-900/40 dark:text-rose-300 rounded-full font-bold"
                                         >
-                                            ملغي
+                                            {{ $t('common.status_cancelled') }}
                                         </span>
                                         <span
                                             v-else
                                             class="px-2.5 py-0.5 text-xs bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-400 rounded-full font-medium"
                                         >
-                                            منتهي
+                                            {{ $t('hr.contracts.status.expired') }}
                                         </span>
                                     </div>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap font-mono text-xs">
                                     {{ formatCurrency(sub.price) }} /
-                                    {{ sub.billing_cycle === 'yearly' ? 'سنة' : 'شهر' }}
+                                    {{ sub.billing_cycle === 'yearly' ? 'سنة' : '$t('services_management.warranty_units.months')' }}
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap font-mono text-xs">
                                     {{ formatDate(sub.starts_at) }}
@@ -558,7 +574,7 @@
                                     colspan="8"
                                     class="px-6 py-12 text-center text-gray-500 dark:text-gray-400"
                                 >
-                                    لا توجد اشتراكات مسجلة حالياً
+                                    {{ $t('subscription.no_subscriptions') }}
                                 </td>
                             </tr>
                         </tbody>
@@ -571,7 +587,7 @@
                                     colspan="6"
                                     class="px-6 py-4 text-start text-gray-900 dark:text-white"
                                 >
-                                    المجموع الإجمالي للمدفوعات
+                                    {{ $t('subscription.total_payments') }}
                                 </td>
                                 <td
                                     class="px-6 py-4 text-end font-mono text-xs text-red-600 dark:text-red-400"
@@ -604,6 +620,9 @@
 </template>
 
 <script setup>
+import { useI18n } from 'vue-i18n';
+const { t } = useI18n();
+
 import { ref, computed } from 'vue';
 import SubscribeModal from '@/Components/Subscription/SubscribeModal.vue';
 
@@ -667,8 +686,7 @@ const getPlanName = (sub) => {
         props.locale === 'en'
             ? sub.plan?.name_en || sub.plan?.name_ar
             : sub.plan?.name_ar || sub.plan?.name_en;
-    if (!name)
-        return sub.status === 'trialing' || sub.status === 'trial' ? 'فترة تجريبية' : 'باقة مجهولة';
+    if (!name) return t('subscription.trial_period');
     return name;
 };
 
@@ -697,9 +715,9 @@ const daysRemaining = computed(() => {
 
 const daysRemainingText = computed(() => {
     if (daysRemaining.value === null) return null;
-    if (daysRemaining.value > 0) return `متبقي ${daysRemaining.value} يوم`;
-    if (daysRemaining.value === 0) return 'ينتهي اليوم';
-    return `منتهي منذ ${Math.abs(daysRemaining.value)} يوم`;
+    if (daysRemaining.value > 0) return t('subscription.remaining');
+    if (daysRemaining.value === 0) return t('subscription.ends_today');
+    return t('subscription.ended_since');
 });
 
 const totalDiscount = computed(() => {

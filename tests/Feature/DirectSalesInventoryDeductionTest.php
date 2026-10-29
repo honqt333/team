@@ -194,4 +194,51 @@ class DirectSalesInventoryDeductionTest extends TestCase
         $this->assertEquals(10.00, (float) $balance->qty_on_hand);
         $this->assertEquals(0, Invoice::count());
     }
+
+    public function test_direct_sale_creates_payment_with_reference_and_correct_method(): void
+    {
+        $this->actingAs($this->user);
+
+        $response = $this->post(route('app.purchasing.sales-invoices.store'), [
+            'customer_id' => $this->customer->id,
+            'issue_date' => now()->format('Y-m-d'),
+            'items' => [
+                [
+                    'part_id' => $this->part->id,
+                    'warehouse_id' => $this->warehouse->id,
+                    'source' => 'warehouse',
+                    'name' => $this->part->name_ar,
+                    'qty' => 1,
+                    'unit_price' => 150,
+                    'discount' => 0,
+                    'tax_amount' => 22.5,
+                    'total' => 150,
+                    'grand_total' => 172.5,
+                ],
+            ],
+            'payments' => [
+                [
+                    'amount' => 172.5,
+                    'payment_method' => 'mada',
+                    'payment_date' => now()->format('Y-m-d'),
+                    'reference' => 'REC-998877',
+                    'notes' => 'الدفع عبر مدى',
+                ],
+            ],
+        ]);
+
+        $response->assertSessionHasNoErrors();
+
+        $invoice = Invoice::where('customer_id', $this->customer->id)->latest('id')->first();
+        $this->assertNotNull($invoice);
+        $this->assertEquals('paid', $invoice->payment_status);
+        $this->assertEquals(172.5, (float) $invoice->total_paid);
+
+        $payment = $invoice->payments()->first();
+        $this->assertNotNull($payment);
+        $this->assertEquals('mada', $payment->payment_method);
+        $this->assertEquals('REC-998877', $payment->reference);
+        $this->assertEquals('الدفع عبر مدى', $payment->notes);
+        $this->assertEquals(172.5, (float) $payment->amount);
+    }
 }

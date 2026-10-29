@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\App;
 
+use App\Enums\InvoiceType;
 use App\Http\Controllers\Controller;
 use App\Models\Invoice;
 use App\Models\Payment;
@@ -33,16 +34,25 @@ class PaymentsController extends Controller
         // not already settled.
         $this->authorize('recordPayment', $invoice);
 
+        $maxBalance = round((float) $invoice->balance, 2) + 0.01;
+
         $validated = $request->validate([
             'type' => 'nullable|in:'.implode(',', Payment::TYPES),
-            'amount' => 'required|numeric|min:0.01|max:'.$invoice->balance,
+            'amount' => 'required|numeric|min:0.01|max:'.$maxBalance,
             'payment_method' => 'required_unless:type,bad_debt|nullable|in:'.implode(',', Payment::METHODS),
             'payment_date' => 'nullable|date',
             'reference' => 'nullable|string|max:100',
             'notes' => 'nullable|string|max:500',
         ]);
 
-        $validated['type'] = $validated['type'] ?? 'payment';
+        $isCreditNote = $invoice->type === InvoiceType::CREDIT_NOTE
+            || ($invoice->type instanceof InvoiceType ? $invoice->type->value : (string) $invoice->type) === 'credit_note';
+
+        if ($isCreditNote) {
+            $validated['type'] = 'refund';
+        } else {
+            $validated['type'] = $validated['type'] ?? 'payment';
+        }
 
         if ($validated['type'] === 'bad_debt') {
             $validated['payment_method'] = $validated['payment_method'] ?? 'cash';
