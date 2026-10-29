@@ -28,11 +28,22 @@ class AdminUser extends Authenticatable
         'user_id',
         'last_login_at',
         'last_login_ip',
+        // Two-factor authentication. The User model carries the same
+        // three fields; without them here a mass assignment of the
+        // two-factor state silently dropped it, and the admin could
+        // never be challenged at login.
+        'two_factor_secret',
+        'two_factor_recovery_codes',
+        'two_factor_confirmed_at',
     ];
 
     protected $hidden = [
         'password',
         'remember_token',
+        // The secret and the recovery codes must never reach a
+        // response — not through the panel, not through a log.
+        'two_factor_secret',
+        'two_factor_recovery_codes',
     ];
 
     protected function casts(): array
@@ -42,6 +53,7 @@ class AdminUser extends Authenticatable
             'permissions' => 'array',
             'is_active' => 'boolean',
             'last_login_at' => 'datetime',
+            'two_factor_confirmed_at' => 'datetime',
         ];
     }
 

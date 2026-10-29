@@ -10,6 +10,7 @@ use App\Models\User;
 use App\Services\TwoFactorService;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -163,6 +164,14 @@ class TwoFactorController extends Controller
      */
     public function challenge(): Response
     {
+        // The admin panel authenticates with a TOTP code from an
+        // authenticator app — that is the mechanism its setup page
+        // enrols (the QR code of the shared secret). So the challenge
+        // does not send a code by mail or SMS: the admin reads the
+        // current code from their app.
+        //
+        // The tenant flow is the one that sends a code, and it has its
+        // own controller and its own cache key.
         return Inertia::render('System/Security/TwoFactorChallenge');
     }
 
@@ -219,8 +228,16 @@ class TwoFactorController extends Controller
         // Clear 2FA session
         session()->forget(['2fa:user_id', '2fa:user_type']);
 
-        // Login user
-        auth()->login($user);
+        // Login user on the guard that owns the account. The system
+        // panel reads the 'admin' guard, and the default guard is
+        // 'web' — logging an AdminUser into 'web' would leave the
+        // panel unauthenticated.
+        if ($userType === 'admin') {
+            Auth::guard('admin')->login($user);
+        } else {
+            Auth::guard('web')->login($user);
+        }
+
         $user->updateLoginInfo();
 
         return redirect()->intended('/system');

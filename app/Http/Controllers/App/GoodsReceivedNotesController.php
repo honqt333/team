@@ -69,6 +69,15 @@ class GoodsReceivedNotesController extends Controller
         $grn = $this->purchasingService->createGoodsReceivedNote($purchaseOrder, $validated);
 
         if ($request->boolean('post_now')) {
+            // Posting is a different ability from creating the note:
+            // it writes the inventory movements, credits the ordered
+            // quantity and creates the purchase invoice. The policy
+            // requires INVENTORY_MOVES_CREATE for it, while creating
+            // the note only requires POS_VIEW. Without this check a
+            // user who may only read purchase orders could post a GRN
+            // through the create endpoint and move stock.
+            $this->authorize('post', $grn);
+
             $this->purchasingService->postGoodsReceivedNote($grn, auth()->id());
         }
 

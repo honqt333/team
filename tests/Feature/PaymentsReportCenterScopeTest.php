@@ -9,7 +9,9 @@ use App\Models\Customer;
 use App\Models\Payment;
 use App\Models\Tenant;
 use App\Models\User;
+use App\Support\Permissions;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\PermissionRegistrar;
 use Tests\TestCase;
@@ -62,6 +64,13 @@ class PaymentsReportCenterScopeTest extends TestCase
         if ($superAdmin) {
             Role::findOrCreate('super_admin', 'web');
             $user->assignRole('super_admin');
+        } else {
+            // Reading the payments report needs the payments
+            // permission (audit finding #51). These tests are about
+            // the centre scope, so the user is given the permission
+            // and the scope is what is under test.
+            Permission::findOrCreate(Permissions::PAYMENTS_VIEW, 'web');
+            $user->givePermissionTo(Permissions::PAYMENTS_VIEW);
         }
 
         $user->refresh();

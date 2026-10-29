@@ -6,6 +6,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
+use App\Models\AdminUser;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -54,6 +55,24 @@ class AuthenticatedSessionController extends Controller
         // Check if this is an admin login
         if (session('is_admin_login')) {
             session()->forget('is_admin_login');
+
+            // A system administrator may have turned on two-factor
+            // authentication. The admin guard holds that identity, so
+            // the check below — which reads the tenant user — never
+            // saw it, and the admin reached /system with the password
+            // alone. The challenge for the admin panel lives at
+            // /2fa/challenge and reads '2fa:user_type' to know which
+            // table to load the identity from.
+            $admin = Auth::guard('admin')->user();
+
+            if ($admin instanceof AdminUser && $admin->two_factor_confirmed_at !== null) {
+                $request->session()->put('2fa:user_id', $admin->id);
+                $request->session()->put('2fa:user_type', 'admin');
+
+                Auth::guard('admin')->logout();
+
+                return redirect()->route('2fa.challenge');
+            }
 
             return redirect('/system');
         }

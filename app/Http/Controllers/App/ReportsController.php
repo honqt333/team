@@ -42,6 +42,12 @@ class ReportsController extends Controller
      */
     public function payments(Request $request): Response
     {
+        // The report exposes the financial records of the tenant, so it
+        // needs the same ability as reading a payment. Without this
+        // check any signed-in user of the app could open the report and
+        // the CSV export and read the amounts they collected.
+        $this->authorize('viewAny', Payment::class);
+
         $tenantId = auth()->user()->tenant_id;
         $centerId = TenancyContext::centerId();
 
@@ -240,6 +246,10 @@ class ReportsController extends Controller
      */
     public function exportPayments(Request $request): StreamedResponse
     {
+        // The export carries the same financial records as the report
+        // itself, so it carries the same gate.
+        $this->authorize('viewAny', Payment::class);
+
         $tenantId = auth()->user()->tenant_id;
         $centerId = TenancyContext::centerId();
 
