@@ -1015,6 +1015,7 @@ Route::prefix('app')->middleware(['auth', 'verified', 'tenant.active', 'center.c
         Route::post('/{feedback}/seen-reply', [FeedbackController::class, 'markReplySeen'])->name('seen-reply');
         Route::delete('/{feedback}', [FeedbackController::class, 'destroy'])->name('destroy');
     });
+    Route::get('/feedbacks', fn () => redirect()->route('app.feedback.index'));
 
     // ───────────────────────────────────────────────────────────────
     // Invoices & Payments
@@ -1282,6 +1283,8 @@ Route::prefix('system')->middleware(['auth:web,admin', 'system.admin'])->group(f
         Route::put('/{feedback}/status', [FeedbackManagementController::class, 'updateStatus'])->name('update-status');
         Route::delete('/{feedback}', [FeedbackManagementController::class, 'destroy'])->name('destroy');
     });
+    Route::get('/feedbacks', fn () => redirect()->route('system.feedbacks.index'));
+    Route::get('/feedback', fn () => redirect()->route('system.feedbacks.index'));
 
     // Subscription Invoices
     Route::get('/invoices', [SubscriptionInvoicesController::class, 'index'])->name('system.invoices.index');
