@@ -74,6 +74,22 @@
                         {{ $t('common.code') }}:
                         <span class="font-mono">{{ data.code || 'T202620001' }}</span>
                     </p>
+                    <p
+                        v-if="data.original_invoice_number"
+                        class="text-sky-800 font-bold mt-0.5 text-xs"
+                        :class="isRtl ? 'text-right' : 'text-left'"
+                    >
+                        {{ isRtl ? 'الفاتورة الأصلية:' : 'Ref. Invoice:' }}
+                        <span class="font-mono">{{ data.original_invoice_number }}</span>
+                    </p>
+                    <p
+                        v-if="data.return_reason"
+                        class="text-gray-600 mt-0.5 text-[11px]"
+                        :class="isRtl ? 'text-right' : 'text-left'"
+                    >
+                        {{ isRtl ? 'سبب الإرجاع:' : 'Reason:' }}
+                        <span>{{ data.return_reason }}</span>
+                    </p>
                     <p class="text-gray-600 mt-0.5" :class="isRtl ? 'text-right' : 'text-left'">
                         {{ $t('work_orders.print_view.date') }}:
                         {{ formatDate(data.created_at || new Date()) }}
@@ -1707,6 +1723,7 @@ function getDocTypeTitle(type) {
         payments: 'سندات الدفع والمدفوعات',
         purchase_invoice: taxActive ? 'فاتورة مشتريات ضريبية' : 'فاتورة مشتريات',
         purchase_return: taxActive ? 'فاتورة مرتجع مشتريات ضريبية' : 'فاتورة مرتجع مشتريات',
+        credit_note: taxActive ? 'إشعار دائن (فاتورة إرجاع)' : 'إشعار دائن',
     };
     const titlesEn = {
         invoice: taxActive ? 'Tax Invoice' : 'Invoice',
@@ -1721,6 +1738,7 @@ function getDocTypeTitle(type) {
         payments: 'Payments Receipt',
         purchase_invoice: taxActive ? 'Tax Purchase Invoice' : 'Purchase Invoice',
         purchase_return: taxActive ? 'Tax Purchase Return Invoice' : 'Purchase Return Invoice',
+        credit_note: taxActive ? 'Credit Note (Return Invoice)' : 'Credit Note',
     };
     if (isRtl.value) {
         return titlesAr[type] || 'وثيقة رسمية';

@@ -9,7 +9,9 @@
                             ? $t('payments.edit_payment')
                             : localPayment.type === 'bad_debt'
                               ? $t('payments.types.bad_debt')
-                              : $t('payments.add_payment')
+                              : localPayment.type === 'refund'
+                                ? $t('payments.types.refund')
+                                : $t('payments.add_payment')
                     }}
                 </span>
             </div>

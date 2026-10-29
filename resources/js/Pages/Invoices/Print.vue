@@ -41,7 +41,11 @@
 
         <PrintEngine
             :documentType="
-                invoice.work_order_id || invoice.company_transaction ? 'invoice' : 'parts_invoice'
+                invoice.type === 'credit_note'
+                    ? 'credit_note'
+                    : invoice.work_order_id || invoice.company_transaction
+                      ? 'invoice'
+                      : 'parts_invoice'
             "
             :data="mappedData"
             :centerData="mappedCenterData"
@@ -138,6 +142,8 @@ const mappedData = computed(() => {
     return {
         code: props.invoice.invoice_number,
         created_at: props.invoice.issue_date,
+        original_invoice_number: props.invoice.original_invoice?.invoice_number || null,
+        return_reason: props.invoice.return_reason || null,
         entry_date: props.invoice.supply_date || props.invoice.issue_date,
         mileage: props.invoice.work_order?.mileage,
         odometer: props.invoice.work_order?.mileage

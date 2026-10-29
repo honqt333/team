@@ -65,6 +65,17 @@
                 <span>{{ formatDate(data.created_at || new Date()) }}</span>
             </div>
             <div
+                v-if="data.original_invoice_number"
+                class="flex justify-between text-indigo-700 font-bold"
+            >
+                <span>{{ isRtl ? 'الفاتورة الأصلية' : 'Ref. Invoice' }}:</span>
+                <span>#{{ data.original_invoice_number }}</span>
+            </div>
+            <div v-if="data.return_reason" class="flex justify-between text-gray-500 text-[9px]">
+                <span>{{ isRtl ? 'سبب الإرجاع' : 'Reason' }}:</span>
+                <span>{{ data.return_reason }}</span>
+            </div>
+            <div
                 v-if="data.expected_end_date"
                 class="flex justify-between text-amber-600 font-bold"
             >
@@ -802,6 +813,9 @@ function getDocTypeTitle(type) {
         delivery_note: 'سند تسليم مركبة',
         condition_report: 'تقرير حالة المركبة',
         payments: 'سندات الدفع والمدفوعات المبسطة',
+        credit_note: taxActive
+            ? 'إشعار دائن ضريبي مبسط (فاتورة إرجاع)'
+            : 'إشعار دائن مبسط (فاتورة إرجاع)',
         purchase_invoice: taxActive ? 'فاتورة مشتريات ضريبية مبسطة' : 'فاتورة مشتريات مبسطة',
         purchase_return: taxActive
             ? 'فاتورة مرتجع مشتريات ضريبية مبسطة'
@@ -818,6 +832,7 @@ function getDocTypeTitle(type) {
         delivery_note: 'Vehicle Delivery Note',
         condition_report: 'Vehicle Condition Report',
         payments: 'Payments Receipt',
+        credit_note: taxActive ? 'Simplified Tax Credit Note' : 'Simplified Credit Note',
         purchase_invoice: taxActive
             ? 'Simplified Tax Purchase Invoice'
             : 'Simplified Purchase Invoice',

@@ -11,6 +11,7 @@
                 @edit="showEditModal = true"
                 @change-status="changeStatus"
                 @create-deferred-invoice="showDeferredInvoiceModal = true"
+                @create-credit-note="showCreditNoteModal = true"
             />
 
             <!-- Top Section: Financial Summary & Customer Info -->
@@ -606,6 +607,14 @@
                 </button>
             </template>
         </BaseModal>
+
+        <!-- Return Invoice / Credit Note Modal -->
+        <WorkOrderCreditNoteModal
+            :show="showCreditNoteModal"
+            :work-order="workOrder"
+            @close="showCreditNoteModal = false"
+            @created="refreshWorkOrder"
+        />
     </AppLayout>
 </template>
 
@@ -654,6 +663,7 @@ import WorkOrderSignatures from '@/Components/WorkOrders/WorkOrderSignatures.vue
 import PartsDisplay from '@/Components/Common/PartsDisplay.vue';
 import WorkOrderIssueMoreModal from '@/Components/WorkOrders/WorkOrderIssueMoreModal.vue';
 import WorkOrderReturnModal from '@/Components/WorkOrders/WorkOrderReturnModal.vue';
+import WorkOrderCreditNoteModal from '@/Components/WorkOrders/WorkOrderCreditNoteModal.vue';
 import WorkOrderCustomerCard from '@/Components/WorkOrders/WorkOrderCustomerCard.vue';
 import WorkOrderFinancialSummary from '@/Components/WorkOrders/WorkOrderFinancialSummary.vue';
 import WorkOrderInfoCards from '@/Components/WorkOrders/WorkOrderInfoCards.vue';
@@ -711,6 +721,7 @@ const showIssueMoreModal = ref(false);
 const editingIssueMorePart = ref(null);
 const showReturnModal = ref(false);
 const editingReturnPart = ref(null);
+const showCreditNoteModal = ref(false);
 
 const showExclusive = computed(() => {
     if (props.workOrder?.pricing_mode_snapshot !== 'inclusive') {

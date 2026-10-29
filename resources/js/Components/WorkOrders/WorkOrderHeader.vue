@@ -57,6 +57,23 @@
                     </svg>
                 </button>
 
+                <!-- Return Invoice / Credit Note Button (Done + invoice exists) -->
+                <button
+                    v-if="showCreditNoteBtn"
+                    @click="emit('create-credit-note')"
+                    class="p-2.5 text-rose-600 hover:text-rose-700 hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded-xl transition-all"
+                    :title="$t('invoices.credit_note.create_button')"
+                >
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"
+                        />
+                    </svg>
+                </button>
+
                 <div class="w-px h-6 bg-gray-200 dark:bg-gray-700 mx-1"></div>
 
                 <!-- Edit Button -->
@@ -300,9 +317,26 @@ const props = defineProps({
     balance: { type: Number, default: 0 },
 });
 
-const emit = defineEmits(['print', 'payments', 'edit', 'change-status', 'create-deferred-invoice']);
+const emit = defineEmits([
+    'print',
+    'payments',
+    'edit',
+    'change-status',
+    'create-deferred-invoice',
+    'create-credit-note',
+]);
 
 const { t } = useI18n();
+
+// Show return invoice / credit note button when:
+// - WO is completed / delivered
+// - An invoice has been issued
+const showCreditNoteBtn = computed(() => {
+    return (
+        ['done', 'delivered', 'completed'].includes(props.workOrder.status) &&
+        !!(props.workOrder.invoice && props.workOrder.invoice.id)
+    );
+});
 
 // Show deferred invoice button when:
 // - WO is done

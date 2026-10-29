@@ -407,6 +407,8 @@
         :balance="remainingBalance"
         :totalPaid="totals.paid"
         :pendingMode="true"
+        :allowBadDebt="false"
+        :allowRefund="false"
         @close="showPaymentModal = false"
         @saved="handlePaymentSaved"
     />

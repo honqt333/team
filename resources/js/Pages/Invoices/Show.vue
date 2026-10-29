@@ -1,9 +1,19 @@
 <template>
-    <AppLayout :title="`${$t('invoices.invoice')} #${invoice.invoice_number}`">
+    <AppLayout
+        :title="
+            invoice.type === 'credit_note'
+                ? `${$t('invoices.credit_note.title')} #${invoice.invoice_number}`
+                : `${$t('invoices.invoice')} #${invoice.invoice_number}`
+        "
+    >
         <div class="space-y-6 pb-20">
             <!-- Premium Glassmorphic Header -->
             <PageHeader
-                :title="`${$t('invoices.invoice')} #${invoice.invoice_number}`"
+                :title="
+                    invoice.type === 'credit_note'
+                        ? `${$t('invoices.credit_note.title')} #${invoice.invoice_number}`
+                        : `${$t('invoices.invoice')} #${invoice.invoice_number}`
+                "
                 :subtitle="
                     invoice.company_transaction
                         ? invoice.company_transaction.title
@@ -13,9 +23,9 @@
                 :countLabel="
                     invoice.tax_enabled_snapshot ? $t('invoices.grand_total') : $t('invoices.total')
                 "
-                gradientFrom="from-blue-600"
-                gradientTo="to-indigo-600"
-                glowFrom="from-blue-500"
+                :gradientFrom="invoice.type === 'credit_note' ? 'from-rose-600' : 'from-blue-600'"
+                :gradientTo="invoice.type === 'credit_note' ? 'to-amber-600' : 'to-indigo-600'"
+                :glowFrom="invoice.type === 'credit_note' ? 'from-rose-500' : 'from-blue-500'"
                 badgeBg="bg-blue-50/50 dark:bg-blue-900/30"
                 badgeText="text-blue-600 dark:text-blue-400"
                 badgeBorder="border-blue-100/50 dark:border-blue-800/30"
@@ -67,10 +77,40 @@
                             </a>
                         </Tooltip>
 
+                        <!-- Return Invoice / Credit Note Button -->
+                        <Tooltip
+                            v-if="canCreateCreditNote"
+                            :content="$t('invoices.credit_note.create_button')"
+                        >
+                            <button
+                                @click="showCreditNoteModal = true"
+                                class="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-rose-500 to-amber-500 hover:from-rose-600 hover:to-amber-600 text-white rounded-xl transition-all font-bold text-xs shadow-sm hover:shadow"
+                            >
+                                <svg
+                                    class="w-4 h-4 text-white"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2"
+                                        d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"
+                                    />
+                                </svg>
+                                <span>{{ $t('invoices.credit_note.create_button') }}</span>
+                            </button>
+                        </Tooltip>
+
                         <!-- Add Payment Button -->
                         <Tooltip
                             v-if="balance > 0.01 && canRecordPayment"
-                            :content="$t('payments.add_payment')"
+                            :content="
+                                isCreditNote
+                                    ? $t('payments.types.refund')
+                                    : $t('payments.add_payment')
+                            "
                         >
                             <button
                                 @click="showPaymentModal = true"
@@ -89,7 +129,13 @@
                                         d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
                                     />
                                 </svg>
-                                <span>{{ $t('payments.add_payment') }}</span>
+                                <span>
+                                    {{
+                                        isCreditNote
+                                            ? $t('payments.types.refund')
+                                            : $t('payments.add_payment')
+                                    }}
+                                </span>
                             </button>
                         </Tooltip>
 
@@ -383,6 +429,81 @@
                                         size="sm"
                                     />
                                 </span>
+                            </div>
+                        </div>
+
+                        <!-- Credit Note Reference to Original Invoice -->
+                        <div
+                            v-if="invoice.type === 'credit_note' && invoice.original_invoice"
+                            class="mt-2 pt-4 border-t border-rose-200 dark:border-rose-900/40 bg-rose-50/50 dark:bg-rose-950/20 p-3 rounded-xl"
+                        >
+                            <div
+                                class="flex flex-col sm:flex-row sm:items-center justify-between gap-2"
+                            >
+                                <div>
+                                    <p
+                                        class="text-[10px] font-black text-rose-600 dark:text-rose-400 uppercase tracking-widest mb-1"
+                                    >
+                                        {{ $t('invoices.credit_note.original_invoice') }}
+                                    </p>
+                                    <Link
+                                        :href="
+                                            route('app.invoices.show', invoice.original_invoice.id)
+                                        "
+                                        class="text-sm font-black text-rose-700 hover:text-rose-800 dark:text-rose-300 hover:underline flex items-center gap-1.5"
+                                    >
+                                        <span>#{{ invoice.original_invoice.invoice_number }}</span>
+                                        <span class="text-xs text-gray-500 font-normal">
+                                            ({{ formatDate(invoice.original_invoice.issue_date) }})
+                                        </span>
+                                    </Link>
+                                </div>
+                                <div v-if="invoice.return_reason" class="text-start sm:text-end">
+                                    <p
+                                        class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-0.5"
+                                    >
+                                        {{ $t('invoices.credit_note.reason') }}
+                                    </p>
+                                    <span
+                                        class="text-xs font-semibold text-gray-700 dark:text-gray-300"
+                                    >
+                                        {{ invoice.return_reason }}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Related Credit Notes if viewing original invoice -->
+                        <div
+                            v-if="invoice.credit_notes && invoice.credit_notes.length > 0"
+                            class="mt-2 pt-4 border-t border-amber-200 dark:border-amber-900/40 bg-amber-50/50 dark:bg-amber-950/20 p-3 rounded-xl"
+                        >
+                            <p
+                                class="text-[10px] font-black text-amber-700 dark:text-amber-400 uppercase tracking-widest mb-2"
+                            >
+                                {{ $t('invoices.credit_note.related_credit_notes') }}
+                            </p>
+                            <div class="space-y-1.5">
+                                <div
+                                    v-for="cn in invoice.credit_notes"
+                                    :key="cn.id"
+                                    class="flex items-center justify-between text-xs"
+                                >
+                                    <Link
+                                        :href="route('app.invoices.show', cn.id)"
+                                        class="font-mono font-bold text-amber-800 dark:text-amber-300 hover:underline flex items-center gap-1"
+                                    >
+                                        <span>↩ #{{ cn.invoice_number }}</span>
+                                        <span class="text-gray-500 font-normal">
+                                            ({{ formatDate(cn.issue_date) }})
+                                        </span>
+                                    </Link>
+                                    <span
+                                        class="font-bold text-rose-600 dark:text-rose-400 font-mono"
+                                    >
+                                        -{{ formatCurrency(cn.total_incl_tax) }}
+                                    </span>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -1112,7 +1233,13 @@
                                     d="M12 4v16m8-8H4"
                                 />
                             </svg>
-                            <span>{{ $t('payments.add_payment') }}</span>
+                            <span>
+                                {{
+                                    isCreditNote
+                                        ? $t('payments.types.refund')
+                                        : $t('payments.add_payment')
+                                }}
+                            </span>
                         </button>
                     </div>
                 </div>
@@ -1276,7 +1403,13 @@
                                                     d="M12 4v16m8-8H4"
                                                 />
                                             </svg>
-                                            <span>{{ $t('payments.add_payment') }}</span>
+                                            <span>
+                                                {{
+                                                    isCreditNote
+                                                        ? $t('payments.types.refund')
+                                                        : $t('payments.add_payment')
+                                                }}
+                                            </span>
                                         </button>
                                     </div>
                                 </td>
@@ -1291,10 +1424,20 @@
                 v-if="showPaymentModal"
                 :show="showPaymentModal"
                 :balance="balance"
-                default-type="payment"
-                :allow-bad-debt="true"
+                :default-type="isCreditNote ? 'refund' : 'payment'"
+                :allow-bad-debt="!isCreditNote"
                 @close="showPaymentModal = false"
                 @saved="onPaymentSaved"
+            />
+
+            <!-- Return Invoice / Credit Note Modal -->
+            <WorkOrderCreditNoteModal
+                v-if="showCreditNoteModal"
+                :show="showCreditNoteModal"
+                :work-order="invoice.work_order"
+                :invoice="invoice"
+                @close="showCreditNoteModal = false"
+                @created="onCreditNoteCreated"
             />
         </div>
     </AppLayout>
@@ -1308,6 +1451,7 @@ import AppLayout from '@/Layouts/AppLayout.vue';
 import PageHeader from '@/Components/PageHeader.vue';
 import BackButton from '@/Components/BackButton.vue';
 import PurchaseOrderPaymentModal from '@/Components/Purchasing/PurchaseOrderPaymentModal.vue';
+import WorkOrderCreditNoteModal from '@/Components/WorkOrders/WorkOrderCreditNoteModal.vue';
 import { useConfirm } from '@/Composables/useConfirm';
 import { useNumberFormat } from '@/Composables/useNumberFormat';
 import Tooltip from '@/Components/Tooltip.vue';
@@ -1323,15 +1467,36 @@ const { toEnglish, formatCurrency } = useNumberFormat();
 
 const page = usePage();
 
+const isCreditNote = computed(() => {
+    const type = props.invoice?.type;
+    return type === 'credit_note' || type?.value === 'credit_note';
+});
+
 /**
  * Recording a payment is gated by the server on the
  * `purchasing.payments.manage` permission (InvoicePolicy::recordPayment).
  * The same flag hides the button here, so a user without it is not
  * offered an action that would only answer 403.
  */
-const canRecordPayment = computed(
-    () => page.props.auth?.permissions?.includes('purchasing.payments.manage') ?? false
-);
+const canRecordPayment = computed(() => {
+    const auth = page.props.auth;
+    if (auth?.is_super_admin || auth?.user?.is_system_admin) {
+        return true;
+    }
+    const permissions = auth?.permissions || [];
+    return permissions.includes('purchasing.payments.manage');
+});
+
+const showCreditNoteModal = ref(false);
+
+const canCreateCreditNote = computed(() => {
+    return props.invoice.type !== 'credit_note' && props.invoice.status !== 'cancelled';
+});
+
+const onCreditNoteCreated = () => {
+    showCreditNoteModal.value = false;
+    router.reload({ only: ['invoice'] });
+};
 
 const formatCurrencyEnglish = (amount) => {
     return (

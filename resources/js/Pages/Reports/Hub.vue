@@ -61,10 +61,10 @@
                     </span>
                 </a>
 
-                <!-- Orders (Work Orders) -->
+                <!-- Orders (Work Orders / Tickets) -->
                 <a
-                    href="#"
-                    class="group relative bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-2xl p-7 border border-blue-200 dark:border-blue-800 hover:border-blue-400 dark:hover:border-blue-600 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 text-center cursor-not-allowed"
+                    href="/app/reports/tickets"
+                    class="group relative bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-2xl p-7 border border-blue-200 dark:border-blue-800 hover:border-blue-400 dark:hover:border-blue-600 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 text-center"
                 >
                     <div
                         class="w-16 h-16 mx-auto rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-blue-500/30 group-hover:scale-110 transition-all duration-300"
@@ -88,13 +88,17 @@
                     >
                         {{ $t('reports.orders') }}
                     </h3>
-                    <ComingSoonBadge />
+                    <span
+                        class="mt-2 inline-block px-2.5 py-0.5 text-[10px] font-semibold rounded-full bg-blue-100 dark:bg-blue-900/60 text-blue-700 dark:text-blue-300"
+                    >
+                        متاح الآن
+                    </span>
                 </a>
 
                 <!-- Services -->
                 <a
-                    href="#"
-                    class="group relative bg-gradient-to-br from-teal-50 to-cyan-50 dark:from-teal-900/20 dark:to-cyan-900/20 rounded-2xl p-7 border border-teal-200 dark:border-teal-800 hover:border-teal-400 dark:hover:border-teal-600 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 text-center cursor-not-allowed"
+                    href="/app/reports/services"
+                    class="group relative bg-gradient-to-br from-teal-50 to-cyan-50 dark:from-teal-900/20 dark:to-cyan-900/20 rounded-2xl p-7 border border-teal-200 dark:border-teal-800 hover:border-teal-400 dark:hover:border-teal-600 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 text-center"
                 >
                     <div
                         class="w-16 h-16 mx-auto rounded-2xl bg-gradient-to-br from-teal-500 to-cyan-600 flex items-center justify-center shadow-lg shadow-teal-500/30 group-hover:scale-110 transition-all duration-300"
@@ -124,7 +128,11 @@
                     >
                         {{ $t('reports.services') }}
                     </h3>
-                    <ComingSoonBadge />
+                    <span
+                        class="mt-2 inline-block px-2.5 py-0.5 text-[10px] font-semibold rounded-full bg-teal-100 dark:bg-teal-900/60 text-teal-700 dark:text-teal-300"
+                    >
+                        متاح الآن
+                    </span>
                 </a>
 
                 <!-- Invoices -->
@@ -219,8 +227,8 @@
 
                 <!-- Customers -->
                 <a
-                    href="#"
-                    class="group relative bg-gradient-to-br from-sky-50 to-blue-50 dark:from-sky-900/20 dark:to-blue-900/20 rounded-2xl p-7 border border-sky-200 dark:border-sky-800 hover:border-sky-400 dark:hover:border-sky-600 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 text-center cursor-not-allowed"
+                    href="/app/reports/customers"
+                    class="group relative bg-gradient-to-br from-sky-50 to-blue-50 dark:from-sky-900/20 dark:to-blue-900/20 rounded-2xl p-7 border border-sky-200 dark:border-sky-800 hover:border-sky-400 dark:hover:border-sky-600 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 text-center"
                 >
                     <div
                         class="w-16 h-16 mx-auto rounded-2xl bg-gradient-to-br from-sky-500 to-blue-600 flex items-center justify-center shadow-lg shadow-sky-500/30 group-hover:scale-110 transition-all duration-300"
@@ -244,7 +252,11 @@
                     >
                         {{ $t('reports.customers') }}
                     </h3>
-                    <ComingSoonBadge />
+                    <span
+                        class="mt-2 inline-block px-2.5 py-0.5 text-[10px] font-semibold rounded-full bg-sky-100 dark:bg-sky-900/60 text-sky-700 dark:text-sky-300"
+                    >
+                        متاح الآن
+                    </span>
                 </a>
 
                 <!-- Partners -->
