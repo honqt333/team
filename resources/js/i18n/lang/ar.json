@@ -404,7 +404,25 @@
         "enter_current_password": "يرجى إدخال كلمة المرور الحالية للمتابعة:",
         "enabled": "مفعّل",
         "sending": "جاري الإرسال...",
-        "not_available": "غير متاح"
+        "not_available": "غير متاح",
+        "required_label": "إلزامي",
+        "start": "البداية",
+        "statement": "البيان",
+        "tax_number_label": "الرقم الضريبي:",
+        "period_label": "الفترة:",
+        "branch_label": "الفرع:",
+        "code_label": "الكود:",
+        "until_now": "حتى الآن",
+        "center_manager": "مدير المركز",
+        "this_year": "هذه السنة",
+        "voucher_label": "سند: {reference}",
+        "payment_number": "دفعة #{id}",
+        "commercial_registration_label": "السجل التجاري:",
+        "prepared_by_label": "المُعد:",
+        "phone_label": "الهاتف:",
+        "print_date_label": "تاريخ الطباعة:",
+        "print_date_time_label": "تاريخ ووقت الطباعة:",
+        "reference_document_number": "رقم المرجع / المستند"
     },
     "company_profile": {
         "address": {
@@ -879,7 +897,12 @@
             "total_paid": "إجمالي المدفوعات المسددة",
             "type": "نوع الحركة",
             "vehicle": "المركبة",
-            "work_order": "أمر العمل"
+            "work_order": "أمر العمل",
+            "work_order_vehicle": "أمر العمل / المركبة",
+            "total_invoices": "إجمالي الفواتير:",
+            "remaining_balance": "الرصيد المتبقي المستحق:",
+            "no_transactions": "لا توجد حركات مالية مسجلة للعميل حتى الآن",
+            "debtor_invoices": "مدين (فواتير)"
         },
         "search": "بحث...",
         "showing": "عرض",
@@ -908,7 +931,13 @@
             "list": "قائمة"
         },
         "view_profile": "عرض ملف العميل",
-        "work_orders": "كروت العمل"
+        "work_orders": "كروت العمل",
+        "print": {
+            "total_customers": "إجمالي العملاء:",
+            "contact_person": "المسؤول / الاتصال",
+            "report_date": "تاريخ التقرير:",
+            "title": "تقرير دليل العملاء (Customers Directory)"
+        }
     },
     "dashboard": {
         "active_count": "{n} نشط حالياً",
@@ -2637,7 +2666,18 @@
             },
             "subtitle": "استلام البضاعة من الموردين",
             "title": "سندات الاستلام",
-            "over_receiving_error": "الكمية المستلمة تتجاوز الكمية المطلوبة"
+            "over_receiving_error": "الكمية المستلمة تتجاوز الكمية المطلوبة",
+            "cancel_receipt": "إلغاء سند الاستلام",
+            "create_invoice_now": "إنشاء الفاتورة الآن",
+            "create_purchase_invoice": "إنشاء فاتورة شراء",
+            "post_voucher": "ترحيل السند",
+            "post_receipt": "ترحيل سند الاستلام",
+            "posted_success": "تم ترحيل السند بنجاح",
+            "no_invoice_yet": "لم يتم إنشاء فاتورة بعد",
+            "posting_details": "معلومات الترحيل",
+            "cancel_confirm": "هل أنت متأكد من إلغاء هذا السند؟",
+            "post_confirm": "هل أنت متأكد من ترحيل هذا السند؟ سيتم تحديث المخزون فوراً وإنشاء الفاتورة.",
+            "create_invoice_confirm": "هل تريد إنشاء فاتورة شراء لهذا السند الآن؟"
         },
         "invoices": {
             "auto_generated_from_grn": "تم إنشاؤها تلقائياً من سند استلام البضاعة: {code}",
@@ -2825,7 +2865,26 @@
         "remaining_label": "— متبقي:",
         "days_overdue": "ايام تجاوز تاريخ الاستحقاق",
         "line_item": "البند",
-        "payment_exceeds_max": "لا يمكن أن يتجاوز مبلغ الدفعة إجمالي المطلوب ({formatCurrency(maxAllowedAmount)})"
+        "payment_exceeds_max": "لا يمكن أن يتجاوز مبلغ الدفعة إجمالي المطلوب ({formatCurrency_maxAllowedAmount_})",
+        "last_3_months": "آخر 3 أشهر",
+        "total_invoices": "إجمالي الفواتير (+)",
+        "total_payments": "إجمالي المدفوعات (-)",
+        "total_returns": "إجمالي المرتجعات (-)",
+        "cash_refund": "استرداد نقدي",
+        "final_due_balance": "الرصيد النهائي المستحق",
+        "current_month": "الشهر الحالي",
+        "accountant_in_charge": "المحاسب المسؤول",
+        "supplier_stamp_and_signature": "ختم وتوقيع المورد للمطابقة",
+        "opening_balance": "رصيد افتتاحي سابق",
+        "payment_voucher": "سند صرف",
+        "supplier_is_vat_payer": "ضريبي المورد:",
+        "invoice_plus": "فاتورة (+)",
+        "supplier_statement": "كشف حساب مالي للمورد",
+        "paid_or_returned": "مدفوع / مرتجع (-)",
+        "purchase_return": "مرتجع مشتريات",
+        "purchase_invoice_number": "فاتورة مشتريات رقم {invoice_number}",
+        "purchase_return_note": "مرتجع مشتريات {code}",
+        "payment_voucher_prefix": "سند صرف - {payment_method}"
     },
     "quotes": {
         "actions": {
@@ -3116,7 +3175,23 @@
         "quotation_or_estimate": "عرض سعر / تقييم",
         "expired_prefix": "عذراً، انتهت فترة صلاحية هذا العرض (",
         "expired_hint": "يرجى التواصل مع إدارة الورشة لمراجعة الأسعار وتحديث عرض السعر.",
-        "approved_signature": "التوقيع المعتمد:"
+        "approved_signature": "التوقيع المعتمد:",
+        "convert_to_work_order": "تحويل عرض السعر إلى أمر عمل",
+        "signature_saved": "تم حفظ توقيع العميل بنجاح",
+        "customer_signature_and_approval": "توقيع العميل واعتماد عرض السعر",
+        "signature_save_error": "حدث خطأ أثناء حفظ التوقيع",
+        "convert_desc": "سيتم إنشاء أمر عمل (كرت صيانة) جديد بناءً على هذا التقييم المعتمد.",
+        "not_signed_yet": "لم يتم توقيع العميل بعد",
+        "duplicate_confirm": "نعم، تكرار العرض",
+        "duplicate_confirm_full": "هل أنت متأكد من رغبتك في نسخ وتكرار هذا العرض بجميع خدماته وقطعه لإنشاء عرض سعر جديد مسودة؟",
+        "customer_can_sign_hint": "يمكن للعميل التوقيع مباشرة في المساحة أدناه لاعتماد عرض السعر.",
+        "approval": {
+            "parts_to_issue": "سوف يتم تسجيل القطع التالية للإصدار من المستودع",
+            "net_amount": "صافي المبلغ",
+            "no_warehouse_parts": "لا توجد قطع مستودع في هذا التقييم.",
+            "cannot_convert": "لا يمكن تحويل عرض السعر وتأكيد صرف القطع، يرجى تعديل مصدر القطع غير المتوفرة أو توفيرها في المخزون أولاً.",
+            "convert_confirm": "هل أنت متأكد من رغبتك في تحويل عرض السعر إلى كرت صيانة وحجز هذه القطع؟"
+        }
     },
     "reports": {
         "cash_flow": "حركة الصندوق",
@@ -4485,7 +4560,20 @@
         },
         "payments_and_receipts": "سندات الدفع والمدفوعات",
         "technician_label": "- فني:",
-        "work_order_label": "كرت صيانة"
+        "work_order_label": "كرت صيانة",
+        "technicians": {
+            "add": "إضافة فني",
+            "choose_service": "اختر الخدمة لإسنادها",
+            "choose_technician": "اختر فني لإضافته",
+            "title": "الفنيون",
+            "confirm_removal": "تأكيد الإزالة",
+            "print_work_order": "طباعة كرت العمل للفني",
+            "no_services": "لا يوجد خدمات مرتبطة بهذا الفني",
+            "none_assigned": "لا يوجد فنيين معينين حالياً",
+            "job_title": "مسمى الوظيفة",
+            "remove_confirm": "هل أنت متأكد من إزالة هذا الفني؟",
+            "remove_service_confirm": "هل أنت متأكد من إزالة هذه الخدمة من الفني؟"
+        }
     },
     "pagination": {
         "previous": "&laquo; السابق",
@@ -4538,17 +4626,18 @@
         },
         "nav_groups": {
             "overview": "نظرة عامة",
-            "website": "الموقع العام",
+            "support": "الدعم الفني والمساعدة",
             "clients": "إدارة العملاء",
             "service_config": "إعدادات الخدمة",
             "communication": "بوابة التواصل",
             "admin": "إدارة النظام",
+            "website": "الموقع العام",
             "security": "الأمان"
         },
         "nav_items": {
             "dashboard": "الرئيسية",
             "website_settings": "إعدادات الموقع",
-            "help_center": "مركز المساعدة والدعم",
+            "help_center": "إعدادات المساعدة والشروحات",
             "contact_messages": "رسائل الزوار",
             "tenants": "المستأجرين",
             "subscriptions": "الاشتراكات",
@@ -5805,7 +5894,38 @@
         "under_audit_label": "⏳ قيد التدقيق والاعتماد",
         "trial_badge": "🎁 فترة تجريبية",
         "receipt_review_badge": "📋 الإيصال قيد المراجعة",
-        "no_active_subscription": "لا يوجد اشتراك نشط"
+        "no_active_subscription": "لا يوجد اشتراك نشط",
+        "receipt": {
+            "select_invoice": "اختر الفاتورة التي دفعت عنها. الافتراضي: الأحدث.",
+            "upload_failed": "فشل رفع الإيصال",
+            "unsupported_type": "نوع الملف غير مدعوم (JPG, PNG, WEBP, PDF فقط)",
+            "reference_already_used": "هذا المرجع مستخدم بالفعل في إيصال آخر",
+            "bank_name_required": "يرجى إدخال اسم البنك",
+            "account_holder_required": "يرجى إدخال اسم صاحب الحساب",
+            "amount_required": "يرجى إدخال المبلغ",
+            "transfer_date_required": "يرجى إدخال تاريخ التحويل",
+            "transfer_reference_required": "يرجى إدخال مرجع التحويل",
+            "upload_required": "يرجى رفع الإيصال",
+            "most_recent_default": "— الأحدث تلقائياً —",
+            "file_too_large": "حجم الملف يتجاوز {maxFileSize} ميجابايت",
+            "upload_instructions": "تعليمات رفع الإيصال",
+            "upload_help": "يرجى رفع إيصال التحويل البنكي (صورة أو PDF، حتى 5 ميجابايت).",
+            "transfer_to_account": "حوّل إلى أحد الحسابات",
+            "bank_details": "تفاصيل البنك",
+            "receipt_required": "الإيصال *",
+            "click_to_upload": "اضغط لرفع الإيصال",
+            "accepted_formats": "JPG, PNG, WEBP, PDF — حتى 5 ميجابايت",
+            "amount_transferred": "المبلغ المحول *",
+            "suggested": "مقترح",
+            "amount_auto": "المبلغ محسوب تلقائياً من خطتك. عدّله لو حوّلت مبلغاً مختلفاً.",
+            "transfer_date": "تاريخ التحويل *",
+            "bank_name": "البنك *",
+            "transfer_reference": "مرجع التحويل *",
+            "checking_reference": "جاري التحقق من المرجع...",
+            "account_holder_name": "اسم صاحب الحساب *",
+            "upload_receipt": "رفع الإيصال",
+            "receipt": "الإيصال"
+        }
     },
     "subscription_history": {
         "placeholder": "سيتم عرض سجل الاشتراكات هنا بمجرد رفع المكوّن.",
@@ -6591,7 +6711,15 @@
         "keep_codes_safe_short": "احتفظ بهذه الرموز في مكان آمن. يمكن استخدام كل رمز مرة واحدة فقط.",
         "use_authenticator_app": "استخدم تطبيق Google Authenticator أو أي تطبيق TOTP",
         "account_has_extra_layer": "حسابك محمي بطبقة أمان إضافية",
-        "enable_to_protect": "قم بتفعيلها لحماية حسابك"
+        "enable_to_protect": "قم بتفعيلها لحماية حسابك",
+        "enter_code_sent_to_address": "أدخل رمز التحقق المرسل إلى",
+        "when_signing_in": "عند تسجيل الدخول",
+        "code_sent_to_address": "يتم إرسال الرمز إلى",
+        "add_email_layer": "أضف طبقة حماية إضافية لحسابك عن طريق البريد الإلكتروني",
+        "required_by_admin": "إلزامي من قبل مدير النظام",
+        "account_protected_code_sent_to": "حسابك محمي - سيطلب منك إدخال رمز يرسل لـ",
+        "enable_to_protect_email": "قم بتفعيلها لحماية حسابك باستخدام رمز يرسل لبريدك الإلكتروني",
+        "two_factor_mandatory": "المصادقة إلزامية ولا يمكن تعطيلها"
     },
     "zatca": {
         "otp_hint": "أدخل الرمز السداسي في الحقل أدناه واضغط على \"طلب شهادة الامتثال\".",

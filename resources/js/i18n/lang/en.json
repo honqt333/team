@@ -208,7 +208,7 @@
         "export": "Export",
         "export_excel": "Export Excel",
         "female": "Female",
-        "file_too_large": "File is too large",
+        "file_too_large": "File is too large: {file} (maximum {size})",
         "finance": "Finance",
         "fixed_amount": "Fixed Amount",
         "from": "From",
@@ -225,7 +225,7 @@
         "import_success": "Imported successfully",
         "inactive": "Ineffective",
         "index": "#",
-        "invalid_file_type": "Invalid file type",
+        "invalid_file_type": "Invalid file type: {file}",
         "invoice_attachment": "Invoice Attachment",
         "km": "How much?",
         "lang": {
@@ -404,7 +404,25 @@
         "enter_current_password": "Please enter the current password to continue:",
         "enabled": "Enabled",
         "sending": "Sending...",
-        "not_available": "Not available"
+        "not_available": "Not available",
+        "required_label": "Required",
+        "start": "Start",
+        "statement": "Statement",
+        "tax_number_label": "Tax number:",
+        "period_label": "Period:",
+        "branch_label": "Branch:",
+        "code_label": "Code:",
+        "until_now": "Until now",
+        "center_manager": "The center manager",
+        "this_year": "This year",
+        "voucher_label": "Voucher: {reference}",
+        "payment_number": "Payment #{id}",
+        "commercial_registration_label": "Commercial registration:",
+        "prepared_by_label": "Prepared by:",
+        "phone_label": "Phone:",
+        "print_date_label": "Print date:",
+        "print_date_time_label": "Print date and time:",
+        "reference_document_number": "Reference / document number"
     },
     "company_profile": {
         "address": {
@@ -710,11 +728,11 @@
             "vehicle_received": "The message sent when the vehicle is received and the work order is opened",
             "service_completed": "The message sent when the maintenance is finished and the vehicle is ready for collection",
             "quote_shared": "The message sent when the quote or the estimate is shared with the customer",
-            "service_completed_body": "Dear {center_name}, the maintenance of your vehicle {plate_number} (#{code}) is complete and it is now ready for collection at {center_name}.",
-            "tax_invoice_body": "Dear {plate_number}, tax invoice {code} has been issued for the amount of {total} SAR for your vehicle {plate_number}.",
+            "service_completed_body": "Dear {customer_name}, the maintenance of your vehicle {plate_number} (#{code}) is complete and it is now ready for collection at {center_name}.",
+            "tax_invoice_body": "Dear {customer_name}, tax invoice {code} has been issued for the amount of {total} SAR for your vehicle {plate_number}.",
             "title": "Customer notification and message templates (SMS & WhatsApp)",
-            "quote_shared_body": "Hello {url}, please find the quote for your vehicle {plate_number}, number {code}, here: {url}",
-            "vehicle_received_body": "Hello {center_name}, your vehicle {plate_number} has been received under work order #{code} at {center_name}."
+            "quote_shared_body": "Hello {customer_name}, please find the quote for your vehicle {plate_number}, number {code}, here: {url}",
+            "vehicle_received_body": "Hello {customer_name}, your vehicle {plate_number} has been received under work order #{code} at {center_name}."
         },
         "edit_main_user": "Edit the main user details",
         "currency": {
@@ -879,7 +897,12 @@
             "total_paid": "Total Paid",
             "type": "Type",
             "vehicle": "Vehicle",
-            "work_order": "Work Order"
+            "work_order": "Work Order",
+            "work_order_vehicle": "Work order / vehicle",
+            "total_invoices": "Total invoices:",
+            "remaining_balance": "Remaining balance due:",
+            "no_transactions": "There are no financial transactions recorded for the customer so far",
+            "debtor_invoices": "Debtor (invoices)"
         },
         "search": "Search...",
         "showing": "Show",
@@ -908,7 +931,13 @@
             "list": "List"
         },
         "view_profile": "View Profile",
-        "work_orders": "Business cards"
+        "work_orders": "Business cards",
+        "print": {
+            "total_customers": "Total customers:",
+            "contact_person": "Responsible / contact",
+            "report_date": "Report date:",
+            "title": "Customers directory report (Customers Directory)"
+        }
     },
     "dashboard": {
         "active_count": "{n} active now",
@@ -2637,7 +2666,18 @@
             },
             "subtitle": "Receiving goods from suppliers",
             "title": "Receipt vouchers",
-            "over_receiving_error": "Over Receiving Error"
+            "over_receiving_error": "Over Receiving Error",
+            "cancel_receipt": "Cancel the goods receipt",
+            "create_invoice_now": "Create the invoice now",
+            "create_purchase_invoice": "Create a purchase invoice",
+            "post_voucher": "Post the voucher",
+            "post_receipt": "Post the goods receipt",
+            "posted_success": "The voucher was posted successfully",
+            "no_invoice_yet": "No invoice has been created yet",
+            "posting_details": "Posting details",
+            "cancel_confirm": "Are you sure you want to cancel this voucher?",
+            "post_confirm": "Are you sure you want to post this voucher? The stock will be updated right away and the invoice will be created.",
+            "create_invoice_confirm": "Do you want to create a purchase invoice for this voucher now?"
         },
         "invoices": {
             "auto_generated_from_grn": "Auto-generated from GRN: {code}",
@@ -2825,7 +2865,26 @@
         "remaining_label": "— remaining:",
         "days_overdue": "Days past due",
         "line_item": "Item",
-        "payment_exceeds_max": "The payment amount cannot exceed the total requested ({amount})"
+        "payment_exceeds_max": "The payment amount cannot exceed the total requested ({formatCurrency_maxAllowedAmount_})",
+        "last_3_months": "Last 3 months",
+        "total_invoices": "Total invoices (+)",
+        "total_payments": "Total payments (-)",
+        "total_returns": "Total returns (-)",
+        "cash_refund": "Cash refund",
+        "final_due_balance": "Final balance due",
+        "current_month": "The current month",
+        "accountant_in_charge": "The accountant in charge",
+        "supplier_stamp_and_signature": "The supplier stamp and signature for the reconciliation",
+        "opening_balance": "Previous opening balance",
+        "payment_voucher": "Payment voucher",
+        "supplier_is_vat_payer": "The supplier is a VAT payer:",
+        "invoice_plus": "Invoice (+)",
+        "supplier_statement": "A financial statement for the supplier",
+        "paid_or_returned": "Paid / returned (-)",
+        "purchase_return": "Purchase return",
+        "purchase_invoice_number": "Purchase invoice #{invoice_number}",
+        "purchase_return_note": "Purchase return {code}",
+        "payment_voucher_prefix": "Payment voucher - {payment_method}"
     },
     "quotes": {
         "actions": {
@@ -3116,7 +3175,23 @@
         "quotation_or_estimate": "Quotation / estimate",
         "expired_prefix": "Sorry, this quote has expired (",
         "expired_hint": "Please contact the workshop management to review the prices and refresh the quote.",
-        "approved_signature": "Approved signature:"
+        "approved_signature": "Approved signature:",
+        "convert_to_work_order": "Convert the quote into a work order",
+        "signature_saved": "The customer signature was saved successfully",
+        "customer_signature_and_approval": "Customer signature and quote approval",
+        "signature_save_error": "An error occurred while saving the signature",
+        "convert_desc": "A new work order will be created from this approved estimate.",
+        "not_signed_yet": "The customer has not signed yet",
+        "duplicate_confirm": "Yes, duplicate the quote",
+        "duplicate_confirm_full": "Are you sure you want to copy and duplicate this quote with all its services and parts to create a new draft quote?",
+        "customer_can_sign_hint": "The customer can sign directly in the space below to approve the quote.",
+        "approval": {
+            "parts_to_issue": "The following parts will be issued from the warehouse",
+            "net_amount": "Net amount",
+            "no_warehouse_parts": "There are no warehouse parts in this estimate.",
+            "cannot_convert": "The quote cannot be converted and the parts cannot be issued. Adjust the source of the unavailable parts or stock them first.",
+            "convert_confirm": "Are you sure you want to convert the quote into a work order and reserve these parts?"
+        }
     },
     "reports": {
         "cash_flow": "Cash Flow",
@@ -4485,7 +4560,20 @@
         },
         "payments_and_receipts": "Payment receipts and payments",
         "technician_label": "- Technician:",
-        "work_order_label": "Work order"
+        "work_order_label": "Work order",
+        "technicians": {
+            "add": "Add a technician",
+            "choose_service": "Choose the service to assign",
+            "choose_technician": "Choose a technician to add",
+            "title": "Technicians",
+            "confirm_removal": "Confirm the removal",
+            "print_work_order": "Print the work order for the technician",
+            "no_services": "There are no services assigned to this technician",
+            "none_assigned": "There are no technicians assigned at the moment",
+            "job_title": "Job title",
+            "remove_confirm": "Are you sure you want to remove this technician?",
+            "remove_service_confirm": "Are you sure you want to remove this service from the technician?"
+        }
     },
     "pagination": {
         "previous": "&laquo; Previous",
@@ -4538,17 +4626,18 @@
         },
         "nav_groups": {
             "overview": "Overview",
-            "website": "Public Website",
+            "support": "Support & Help Desk",
             "clients": "Client Management",
             "service_config": "Service Configurations",
             "communication": "Communication Hub",
             "admin": "System Administration",
+            "website": "Public Website",
             "security": "Security"
         },
         "nav_items": {
             "dashboard": "Overview",
             "website_settings": "Website Settings",
-            "help_center": "Help & Support Center",
+            "help_center": "Help & Tutorials Settings",
             "contact_messages": "Contact Messages",
             "tenants": "Tenants",
             "subscriptions": "Subscriptions",
@@ -5805,7 +5894,38 @@
         "under_audit_label": "⏳ Under audit and approval",
         "trial_badge": "🎁 Trial period",
         "receipt_review_badge": "📋 The receipt is under review",
-        "no_active_subscription": "There is no active subscription"
+        "no_active_subscription": "There is no active subscription",
+        "receipt": {
+            "select_invoice": "Choose the invoice you paid for. The default is the most recent one.",
+            "upload_failed": "The receipt could not be uploaded",
+            "unsupported_type": "Unsupported file type (JPG, PNG, WEBP, PDF only)",
+            "reference_already_used": "This reference is already used in another receipt",
+            "bank_name_required": "Please enter the bank name",
+            "account_holder_required": "Please enter the account holder name",
+            "amount_required": "Please enter the amount",
+            "transfer_date_required": "Please enter the transfer date",
+            "transfer_reference_required": "Please enter the transfer reference",
+            "upload_required": "Please upload the receipt",
+            "most_recent_default": "— The most recent one, automatically —",
+            "file_too_large": "The file exceeds {maxFileSize} MB",
+            "upload_instructions": "Receipt upload instructions",
+            "upload_help": "Please upload your bank transfer receipt (image or PDF, up to 5 MB).",
+            "transfer_to_account": "Transfer to one of these accounts",
+            "bank_details": "Bank details",
+            "receipt_required": "Receipt *",
+            "click_to_upload": "Click to upload",
+            "accepted_formats": "JPG, PNG, WEBP, PDF — up to 5 MB",
+            "amount_transferred": "Amount transferred *",
+            "suggested": "Suggested",
+            "amount_auto": "Auto-filled from your plan. Edit if you transferred a different amount.",
+            "transfer_date": "Transfer date *",
+            "bank_name": "Bank name *",
+            "transfer_reference": "Transfer reference *",
+            "checking_reference": "Checking reference...",
+            "account_holder_name": "Account holder name *",
+            "upload_receipt": "Upload receipt",
+            "receipt": "Receipt"
+        }
     },
     "subscription_history": {
         "placeholder": "Subscription history will appear here once the component is lifted.",
@@ -6591,7 +6711,15 @@
         "keep_codes_safe_short": "Keep these codes somewhere safe. Each code can be used only once.",
         "use_authenticator_app": "Use the Google Authenticator app or any TOTP app",
         "account_has_extra_layer": "Your account is protected by an extra layer of security",
-        "enable_to_protect": "Enable it to protect your account"
+        "enable_to_protect": "Enable it to protect your account",
+        "enter_code_sent_to_address": "Enter the verification code sent to",
+        "when_signing_in": "When signing in",
+        "code_sent_to_address": "The code is sent to",
+        "add_email_layer": "Add an extra layer of protection to your account through your email",
+        "required_by_admin": "Required by the system administrator",
+        "account_protected_code_sent_to": "Your account is protected — you will be asked for a code sent to",
+        "enable_to_protect_email": "Enable it to protect your account using a code sent to your email",
+        "two_factor_mandatory": "Two-factor authentication is mandatory and cannot be disabled"
     },
     "zatca": {
         "otp_hint": "Enter the six-digit code in the field below and press \"Request compliance certificate\".",

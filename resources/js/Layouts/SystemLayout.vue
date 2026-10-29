@@ -61,9 +61,7 @@
                             :href="item.href"
                             :class="[
                                 'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors',
-                                isActive(item.href) &&
-                                page.url === item.href &&
-                                !item.href.endsWith('/admin-users')
+                                isActive(item.href)
                                     ? 'bg-indigo-50 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300'
                                     : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700',
                             ]"
