@@ -449,7 +449,7 @@
                             <span
                                 class="text-sm font-bold text-teal-600 dark:text-teal-400 font-mono cursor-default"
                             >
-                                {{ Number(quote.odometer).toLocaleString() }} كم
+                                {{ Number(quote.odometer).toLocaleString() }} {{ $t('common.km') }}
                             </span>
                             <div
                                 class="absolute bottom-full right-0 mb-2 hidden group-hover/odo:block z-50 pointer-events-none"
@@ -693,7 +693,7 @@
                                 @click="openSignatureModal"
                                 class="text-[11px] text-emerald-700 hover:text-emerald-800 dark:text-emerald-300 underline font-medium"
                             >
-                                تغيير
+                                {{ $t('common.change') }}
                             </button>
                         </div>
                     </div>
@@ -704,7 +704,7 @@
                     >
                         <div class="flex items-center gap-2">
                             <span class="text-xs text-gray-500 dark:text-gray-400">
-                                لم يتم توقيع العميل بعد
+                                {{ $t('quotes.not_signed_yet') }}
                             </span>
                         </div>
                         <button
@@ -713,7 +713,7 @@
                             class="px-3 py-1.5 text-xs font-bold bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-900/30 dark:hover:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400 rounded-lg transition-all flex items-center gap-1.5"
                         >
                             <span>✍️</span>
-                            <span>توقيع العميل</span>
+                            <span>{{ $t('work_orders.print_view.customer_signature') }}</span>
                         </button>
                     </div>
                 </div>
@@ -1199,7 +1199,7 @@
                         class="text-base font-bold text-gray-900 dark:text-white flex items-center gap-2"
                     >
                         <span>✍️</span>
-                        <span>توقيع العميل واعتماد عرض السعر</span>
+                        <span>{{ $t('quotes.customer_signature_and_approval') }}</span>
                     </h3>
                     <button
                         type="button"
@@ -1210,7 +1210,7 @@
                     </button>
                 </div>
                 <p class="text-xs text-gray-500 dark:text-gray-400 mb-3">
-                    يمكن للعميل التوقيع مباشرة في المساحة أدناه لاعتماد عرض السعر.
+                    {{ $t('quotes.customer_can_sign_hint') }}
                 </p>
                 <div
                     class="rounded-xl border border-dashed border-gray-300 dark:border-gray-600 p-2 bg-gray-50 dark:bg-gray-900/50"
@@ -1349,14 +1349,16 @@ const approveQuote = async () => {
         const confirmed = await confirm({
             title:
                 props.quote.status === 'approved'
-                    ? 'تحويل عرض السعر إلى أمر عمل'
+                    ? t('quotes.convert_to_work_order')
                     : t('quotes.messages.confirm_approve_title'),
             message:
                 props.quote.status === 'approved'
-                    ? 'سيتم إنشاء أمر عمل (كرت صيانة) جديد بناءً على هذا التقييم المعتمد.'
+                    ? t('quotes.convert_desc')
                     : t('quotes.messages.confirm_approve'),
             confirmText:
-                props.quote.status === 'approved' ? 'تحويل لأمر عمل' : t('quotes.actions.approve'),
+                props.quote.status === 'approved'
+                    ? t('quotes.actions.convert_to_work_order')
+                    : t('quotes.actions.approve'),
             type: 'success',
         });
 
@@ -1393,9 +1395,9 @@ const saveQuoteSignature = () => {
             preserveScroll: true,
             onSuccess: () => {
                 showSignatureModal.value = false;
-                successToast('تم حفظ توقيع العميل بنجاح');
+                successToast(t('quotes.signature_saved'));
             },
-            onError: (err) => errorToast(err.message || 'حدث خطأ أثناء حفظ التوقيع'),
+            onError: (err) => errorToast(err.message || t('quotes.signature_save_error')),
             onFinish: () => {
                 isSavingSignature.value = false;
             },
@@ -1686,9 +1688,8 @@ function shareQuote() {
 async function duplicateQuote() {
     const confirmed = await confirm({
         title: t('quotes.actions.duplicate'),
-        message:
-            'هل أنت متأكد من رغبتك في نسخ وتكرار هذا العرض بجميع خدماته وقطعه لإنشاء عرض سعر جديد مسودة؟',
-        confirmText: 'نعم، تكرار العرض',
+        message: t('quotes.duplicate_confirm_full'),
+        confirmText: t('quotes.duplicate_confirm'),
         cancelText: t('common.cancel'),
     });
 

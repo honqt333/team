@@ -1,4 +1,7 @@
 <script setup>
+import { useI18n } from 'vue-i18n';
+const { t } = useI18n();
+
 import { ref, computed, watch, onUnmounted } from 'vue';
 import { router, usePage } from '@inertiajs/vue3';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
@@ -47,7 +50,7 @@ const form = ref({
 const invoiceOptions = computed(() => [
     {
         value: null,
-        label: locale.value === 'ar' ? '— الأحدث تلقائياً —' : '— Most recent pending (default) —',
+        label: t('subscription.receipt.most_recent_default'),
     },
     ...props.pendingInvoices.map((inv) => ({
         value: inv.id,
@@ -84,9 +87,7 @@ function scheduleRefCheck() {
             if (res.ok) {
                 const data = await res.json();
                 refCheckError.value = data.exists
-                    ? locale.value === 'ar'
-                        ? 'هذا المرجع مستخدم بالفعل في إيصال آخر'
-                        : 'This reference is already used in another pending receipt'
+                    ? t('subscription.receipt.reference_already_used')
                     : null;
             }
         } catch (_) {
@@ -189,15 +190,12 @@ function onFileChange(e) {
     if (file.size > maxFileSize * 1024 * 1024) {
         errors.value.receipt =
             locale.value === 'ar'
-                ? `حجم الملف يتجاوز ${maxFileSize} ميجابايت`
+                ? t('subscription.receipt.file_too_large', { maxFileSize: maxFileSize })
                 : `File size exceeds ${maxFileSize} MB`;
         return;
     }
     if (!acceptedTypes.includes(file.type)) {
-        errors.value.receipt =
-            locale.value === 'ar'
-                ? 'نوع الملف غير مدعوم (JPG, PNG, WEBP, PDF فقط)'
-                : 'Unsupported file type (JPG, PNG, WEBP, PDF only)';
+        errors.value.receipt = t('subscription.receipt.unsupported_type');
         return;
     }
 
@@ -212,40 +210,30 @@ function removeFile() {
 
 async function submit() {
     if (!form.value.receipt) {
-        errors.value.receipt =
-            locale.value === 'ar' ? 'يرجى رفع الإيصال' : 'Please upload the receipt';
+        errors.value.receipt = t('subscription.receipt.upload_required');
         return;
     }
     if (!form.value.transfer_amount) {
-        errors.value.transfer_amount =
-            locale.value === 'ar' ? 'يرجى إدخال المبلغ' : 'Please enter the amount';
+        errors.value.transfer_amount = t('subscription.receipt.amount_required');
         return;
     }
     if (!form.value.transfer_date) {
-        errors.value.transfer_date =
-            locale.value === 'ar' ? 'يرجى إدخال تاريخ التحويل' : 'Please enter transfer date';
+        errors.value.transfer_date = t('subscription.receipt.transfer_date_required');
         return;
     }
     // The server-side validation requires these three fields. Block
     // submit early so the user sees the field-level error rather than
     // a generic "Upload failed" toast from the server's 422 response.
     if (!form.value.bank_name?.trim()) {
-        errors.value.bank_name =
-            locale.value === 'ar' ? 'يرجى إدخال اسم البنك' : 'Please enter the bank name';
+        errors.value.bank_name = t('subscription.receipt.bank_name_required');
         return;
     }
     if (!form.value.account_name?.trim()) {
-        errors.value.account_name =
-            locale.value === 'ar'
-                ? 'يرجى إدخال اسم صاحب الحساب'
-                : 'Please enter the account holder name';
+        errors.value.account_name = t('subscription.receipt.account_holder_required');
         return;
     }
     if (!form.value.transfer_reference?.trim()) {
-        errors.value.transfer_reference =
-            locale.value === 'ar'
-                ? 'يرجى إدخال مرجع التحويل'
-                : 'Please enter the transfer reference';
+        errors.value.transfer_reference = t('subscription.receipt.transfer_reference_required');
         return;
     }
     // Block submit if the real-time duplicate check already found a
@@ -310,11 +298,10 @@ async function submit() {
                     Object.entries(result.errors).map(([k, v]) => [k, v[0]])
                 );
             }
-            error.value =
-                result.error || (locale.value === 'ar' ? 'فشل رفع الإيصال' : 'Upload failed');
+            error.value = result.error || t('subscription.receipt.upload_failed');
         }
     } catch (e) {
-        error.value = locale.value === 'ar' ? 'حدث خطأ' : 'Error occurred';
+        error.value = t('common.error_occurred');
     } finally {
         processing.value = false;
     }
@@ -328,7 +315,7 @@ async function submit() {
             class="rounded-lg border border-indigo-200 bg-indigo-50 p-4 dark:border-indigo-800/50 dark:bg-indigo-900/10"
         >
             <p class="text-sm font-semibold text-indigo-700 dark:text-indigo-300">
-                {{ locale === 'ar' ? 'تعليمات رفع الإيصال' : 'Receipt upload instructions' }}
+                {{ $t('subscription.receipt.upload_instructions') }}
             </p>
             <p
                 v-if="paymentSettings.bank_transfer_receipt_instructions"
@@ -337,11 +324,7 @@ async function submit() {
                 {{ paymentSettings.bank_transfer_receipt_instructions }}
             </p>
             <p v-else class="mt-1 text-xs text-indigo-600/80 dark:text-indigo-400/80">
-                {{
-                    locale === 'ar'
-                        ? 'يرجى رفع إيصال التحويل البنكي (صورة أو PDF، حتى 5 ميجابايت).'
-                        : 'Please upload your bank transfer receipt (image or PDF, up to 5 MB).'
-                }}
+                {{ $t('subscription.receipt.upload_help') }}
             </p>
         </div>
 
@@ -355,9 +338,7 @@ async function submit() {
             class="rounded-lg border border-emerald-200 bg-emerald-50 p-4 dark:border-emerald-800/50 dark:bg-emerald-900/10"
         >
             <p class="text-sm font-semibold text-emerald-700 dark:text-emerald-300">
-                {{
-                    locale === 'ar' ? 'حوّل إلى أحد الحسابات' : 'Transfer to one of these accounts'
-                }}
+                {{ $t('subscription.receipt.transfer_to_account') }}
             </p>
             <div class="mt-2 space-y-2">
                 <div
@@ -379,7 +360,8 @@ async function submit() {
                         class="font-mono text-gray-600 dark:text-gray-400"
                         dir="ltr"
                     >
-                        {{ locale === 'ar' ? 'رقم الحساب' : 'Account #' }}: {{ acc.account_number }}
+                        {{ $t('system.payment_settings.bank_transfer.account_number') }}:
+                        {{ acc.account_number }}
                     </p>
                 </div>
             </div>
@@ -398,7 +380,7 @@ async function submit() {
                     {{ form.receipt ? '✓' : '1' }}
                 </div>
                 <span :class="stepLabelClass(1)">
-                    {{ locale === 'ar' ? 'الإيصال' : 'Receipt' }}
+                    {{ $t('subscription.receipt.receipt') }}
                 </span>
             </div>
             <div class="h-px flex-1 bg-gray-200 dark:bg-gray-700"></div>
@@ -410,7 +392,7 @@ async function submit() {
                     {{ step2Done ? '✓' : '2' }}
                 </div>
                 <span :class="stepLabelClass(2)">
-                    {{ locale === 'ar' ? 'المبلغ' : 'Amount' }}
+                    {{ $t('common.amount') }}
                 </span>
             </div>
             <div class="h-px flex-1 bg-gray-200 dark:bg-gray-700"></div>
@@ -422,7 +404,7 @@ async function submit() {
                     {{ step3Done ? '✓' : '3' }}
                 </div>
                 <span :class="stepLabelClass(3)">
-                    {{ locale === 'ar' ? 'تفاصيل البنك' : 'Bank details' }}
+                    {{ $t('subscription.receipt.bank_details') }}
                 </span>
             </div>
         </div>
@@ -430,7 +412,7 @@ async function submit() {
         <!-- File upload area -->
         <div>
             <label class="mb-1.5 block text-sm font-semibold text-slate-900 dark:text-white">
-                {{ locale === 'ar' ? 'الإيصال *' : 'Receipt *' }}
+                {{ $t('subscription.receipt.receipt_required') }}
             </label>
             <div
                 v-if="!form.receipt"
@@ -451,14 +433,10 @@ async function submit() {
                     />
                 </svg>
                 <p class="mt-2 text-sm font-semibold text-slate-700 dark:text-slate-300">
-                    {{ locale === 'ar' ? 'اضغط لرفع الإيصال' : 'Click to upload' }}
+                    {{ $t('subscription.receipt.click_to_upload') }}
                 </p>
                 <p class="mt-1 text-xs text-slate-500">
-                    {{
-                        locale === 'ar'
-                            ? 'JPG, PNG, WEBP, PDF — حتى 5 ميجابايت'
-                            : 'JPG, PNG, WEBP, PDF — up to 5 MB'
-                    }}
+                    {{ $t('subscription.receipt.accepted_formats') }}
                 </p>
             </div>
             <div
@@ -521,7 +499,7 @@ async function submit() {
              you paying?" choice. -->
         <div v-if="showInvoiceSelector">
             <label class="mb-1.5 block text-sm font-semibold text-slate-900 dark:text-white">
-                {{ locale === 'ar' ? 'الفاتورة' : 'Invoice' }}
+                {{ $t('invoices.invoice') }}
             </label>
             <SearchableSelect
                 v-model="form.subscription_invoice_id"
@@ -530,11 +508,7 @@ async function submit() {
                 option-value="value"
             />
             <p class="mt-1 text-xs text-slate-500">
-                {{
-                    locale === 'ar'
-                        ? 'اختر الفاتورة التي دفعت عنها. الافتراضي: الأحدث.'
-                        : 'Pick the invoice you are paying for. Default: most recent pending.'
-                }}
+                {{ $t('subscription.receipt.select_invoice') }}
             </p>
         </div>
 
@@ -544,7 +518,7 @@ async function submit() {
                 <label
                     class="mb-1.5 flex items-center justify-between text-sm font-semibold text-slate-900 dark:text-white"
                 >
-                    <span>{{ locale === 'ar' ? 'المبلغ المحول *' : 'Amount transferred *' }}</span>
+                    <span>{{ $t('subscription.receipt.amount_transferred') }}</span>
                     <span
                         v-if="defaultAmount"
                         class="inline-flex items-center gap-1 text-[10px] font-medium text-indigo-600 dark:text-indigo-400"
@@ -562,7 +536,7 @@ async function submit() {
                                 d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
                             />
                         </svg>
-                        {{ locale === 'ar' ? 'مقترح' : 'Suggested' }}: {{ defaultAmount }} SAR
+                        {{ $t('subscription.receipt.suggested') }}: {{ defaultAmount }} SAR
                     </span>
                 </label>
                 <input
@@ -575,11 +549,7 @@ async function submit() {
                     class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-mono dark:border-slate-600 dark:bg-slate-700 dark:text-white"
                 />
                 <p class="mt-1 text-xs text-slate-500">
-                    {{
-                        locale === 'ar'
-                            ? 'المبلغ محسوب تلقائياً من خطتك. عدّله لو حوّلت مبلغاً مختلفاً.'
-                            : 'Auto-filled from your plan. Edit if you transferred a different amount.'
-                    }}
+                    {{ $t('subscription.receipt.amount_auto') }}
                 </p>
                 <p v-if="errors.transfer_amount" class="mt-1 text-xs text-rose-600">
                     {{ errors.transfer_amount }}
@@ -587,7 +557,7 @@ async function submit() {
             </div>
             <div>
                 <label class="mb-1.5 block text-sm font-semibold text-slate-900 dark:text-white">
-                    {{ locale === 'ar' ? 'تاريخ التحويل *' : 'Transfer date *' }}
+                    {{ $t('subscription.receipt.transfer_date') }}
                 </label>
                 <input
                     v-model="form.transfer_date"
@@ -601,7 +571,7 @@ async function submit() {
             </div>
             <div>
                 <label class="mb-1.5 block text-sm font-semibold text-slate-900 dark:text-white">
-                    {{ locale === 'ar' ? 'البنك *' : 'Bank name *' }}
+                    {{ $t('subscription.receipt.bank_name') }}
                 </label>
                 <input
                     v-model="form.bank_name"
@@ -614,7 +584,7 @@ async function submit() {
             </div>
             <div>
                 <label class="mb-1.5 block text-sm font-semibold text-slate-900 dark:text-white">
-                    {{ locale === 'ar' ? 'مرجع التحويل *' : 'Transfer reference *' }}
+                    {{ $t('subscription.receipt.transfer_reference') }}
                 </label>
                 <input
                     v-model="form.transfer_reference"
@@ -629,7 +599,7 @@ async function submit() {
                     @input="scheduleRefCheck"
                 />
                 <p v-if="checkingRef" class="mt-1 text-xs text-slate-500 dark:text-slate-400">
-                    {{ locale === 'ar' ? 'جاري التحقق من المرجع...' : 'Checking reference...' }}
+                    {{ $t('subscription.receipt.checking_reference') }}
                 </p>
                 <p
                     v-else-if="refCheckError"
@@ -643,7 +613,7 @@ async function submit() {
             </div>
             <div>
                 <label class="mb-1.5 block text-sm font-semibold text-slate-900 dark:text-white">
-                    {{ locale === 'ar' ? 'اسم صاحب الحساب *' : 'Account holder name *' }}
+                    {{ $t('subscription.receipt.account_holder_name') }}
                 </label>
                 <input
                     v-model="form.account_name"
@@ -670,7 +640,7 @@ async function submit() {
                 :disabled="processing"
                 class="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-300"
             >
-                {{ locale === 'ar' ? 'إلغاء' : 'Cancel' }}
+                {{ $t('common.cancel') }}
             </button>
             <button
                 type="button"
@@ -693,7 +663,7 @@ async function submit() {
                         d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                     />
                 </svg>
-                <span>{{ locale === 'ar' ? 'رفع الإيصال' : 'Upload receipt' }}</span>
+                <span>{{ $t('subscription.receipt.upload_receipt') }}</span>
             </button>
         </div>
     </div>

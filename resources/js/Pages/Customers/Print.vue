@@ -37,18 +37,18 @@
                 <div class="text-start space-y-1">
                     <h1 class="text-base font-black text-black">{{ companyInfo.name }}</h1>
                     <p v-if="companyInfo.center_name" class="font-bold text-gray-700">
-                        الفرع: {{ companyInfo.center_name }}
+                        {{ $t('common.branch_label') }} {{ companyInfo.center_name }}
                     </p>
                     <p v-if="companyInfo.phone" class="text-gray-600">
-                        الهاتف:
+                        {{ $t('common.phone_label') }}
                         <span class="font-mono" dir="ltr">{{ companyInfo.phone }}</span>
                     </p>
                     <p v-if="companyInfo.vat_number" class="text-gray-600">
-                        الرقم الضريبي:
+                        {{ $t('common.tax_number_label') }}
                         <span class="font-mono font-bold">{{ companyInfo.vat_number }}</span>
                     </p>
                     <p v-if="companyInfo.cr_number" class="text-gray-600">
-                        السجل التجاري:
+                        {{ $t('common.commercial_registration_label') }}
                         <span class="font-mono">{{ companyInfo.cr_number }}</span>
                     </p>
                 </div>
@@ -67,18 +67,18 @@
                         </span>
                     </div>
                     <h2 class="text-sm font-black uppercase tracking-wider text-black">
-                        تقرير دليل العملاء (Customers Directory)
+                        {{ $t('customers.print.title') }}
                     </h2>
                 </div>
 
                 <!-- Column 3: Metadata -->
                 <div class="text-end space-y-1 text-xs text-gray-600">
                     <p class="font-bold text-black">
-                        إجمالي العملاء:
+                        {{ $t('customers.print.total_customers') }}
                         <span class="font-mono font-black text-sm">{{ customers.length }}</span>
                     </p>
                     <p>
-                        تاريخ التقرير:
+                        {{ $t('customers.print.report_date') }}
                         <span class="font-mono">{{ reportDateFormatted }}</span>
                     </p>
                 </div>
@@ -90,13 +90,23 @@
             <thead>
                 <tr class="bg-gray-100 border-b-2 border-gray-800 text-gray-700">
                     <th class="py-2.5 px-2 font-bold w-10 text-center">#</th>
-                    <th class="py-2.5 px-3 font-bold text-center">اسم العميل</th>
-                    <th class="py-2.5 px-2 font-bold text-center">النوع</th>
-                    <th class="py-2.5 px-3 font-bold text-center">المسؤول / الاتصال</th>
-                    <th class="py-2.5 px-3 font-bold text-center">رقم الجوال</th>
-                    <th class="py-2.5 px-2 font-bold text-center">المركبات</th>
-                    <th class="py-2.5 px-2 font-bold text-center">أوامر العمل</th>
-                    <th class="py-2.5 px-3 font-bold text-center">الرصيد المستحق</th>
+                    <th class="py-2.5 px-3 font-bold text-center">
+                        {{ $t('customers.columns.name') }}
+                    </th>
+                    <th class="py-2.5 px-2 font-bold text-center">{{ $t('common.type') }}</th>
+                    <th class="py-2.5 px-3 font-bold text-center">
+                        {{ $t('customers.print.contact_person') }}
+                    </th>
+                    <th class="py-2.5 px-3 font-bold text-center">
+                        {{ $t('system.admin_users.form.phone') }}
+                    </th>
+                    <th class="py-2.5 px-2 font-bold text-center">
+                        {{ $t('customers.vehicles') }}
+                    </th>
+                    <th class="py-2.5 px-2 font-bold text-center">{{ $t('work_orders.title') }}</th>
+                    <th class="py-2.5 px-3 font-bold text-center">
+                        {{ $t('customers.balance_due') }}
+                    </th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-gray-200">
@@ -118,7 +128,11 @@
                                     : 'bg-emerald-100 text-emerald-800'
                             "
                         >
-                            {{ customer.type === 'company' ? 'شركة' : 'فرد' }}
+                            {{
+                                customer.type === 'company'
+                                    ? $t('customers.type.company')
+                                    : $t('customers.form.individual')
+                            }}
                         </span>
                     </td>
                     <td class="py-2 px-3 text-center text-gray-600">

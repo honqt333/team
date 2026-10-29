@@ -120,6 +120,19 @@ function bilingualExpression(source, hit) {
     };
 }
 
+/**
+ * The name a placeholder gets in a translation call. The name is taken
+ * from the last part of the interpolated expression, so
+ * `${invoice.code || invoice.number}` becomes `number`. The same rule is
+ * used when the key is written to the language files, so the Arabic, the
+ * English and the call all carry the same name.
+ */
+function parameterName(expression) {
+    const last = expression.split(/\|\||\?\?|:/).pop().trim();
+    const name = (last.split('.').pop() || 'value').replace(/[^A-Za-z0-9_]/g, '_');
+    return name || 'value';
+}
+
 /** Does this file already have a `t` in scope inside <script setup>? */
 function scriptHasT(source) {
     return /const\s*\{[^}]*\bt\b[^}]*\}\s*=\s*useI18n\s*\(/.test(source);
@@ -197,14 +210,7 @@ function applyFile(file) {
             // The literal text becomes one call; the interpolations it
             // carries are passed along as named parameters.
             const placeholders = [...literal.matchAll(/\$\{([^}]*)\}/g)];
-            const parameters = placeholders.map((p) => {
-                // The parameter is named after the last part of the
-                // expression: `deletingSig.name_en` becomes `name_en`.
-                const expression = p[1].trim();
-                const last = expression.split(/\|\||\?\?|:/).pop().trim();
-                const name = (last.split('.').pop() || 'value').replace(/[^A-Za-z0-9_]/g, '_');
-                return name || 'value';
-            });
+            const parameters = placeholders.map((p) => parameterName(p[1].trim()));
 
             let replacement = `$t('${entry3.key}'`;
             if (parameters.length > 0) {
@@ -222,6 +228,7 @@ function applyFile(file) {
                 end: literalStart + literal.length,
                 replacement,
                 kind: hit.kind,
+                block: hit.block,
                 line: hit.line,
             });
             continue;
@@ -257,6 +264,7 @@ function applyFile(file) {
                     ? `$t('${entry6.key}')`
                     : `$t('${entry6.key}')`,
                 kind: hit.kind,
+                block: hit.block,
                 line: hit.line,
             });
             continue;
@@ -277,6 +285,7 @@ function applyFile(file) {
                 end,
                 replacement: `|| $t('${entry4.key}')`,
                 kind: hit.kind,
+                block: hit.block,
                 line: hit.line,
             });
             continue;
@@ -304,6 +313,7 @@ function applyFile(file) {
                 end: hit.end,
                 replacement: `{{ ${replacementText} }}`,
                 kind: hit.kind,
+                block: hit.block,
                 line: hit.line,
             });
             continue;
@@ -344,19 +354,40 @@ function applyFile(file) {
             case 'bilingual_pair': {
                 // The extractor read the conditional expression from the
                 // AST, so the span already covers `cond ? 'ar' : 'en'`.
+                // Inside a template the call is `$t(...)`, inside a script
+                // it is `t(...)`.
                 edits.push({
                     start: hit.start,
                     end: hit.end,
-                    replacement: `t('${key}')`,
+                    replacement:
+                        hit.block === 'template' ? `$t('${key}')` : `t('${key}')`,
                     kind: hit.kind,
+                    block: hit.block,
                     line: hit.line,
                 });
                 break;
             }
             case 'script_literal':
-            case 'script_template':
             case 'ui_label': {
                 replacement = `t('${key}')`;
+                break;
+            }
+            case 'script_template': {
+                // `سند: ${reference}` — the interpolations are woven into
+                // the copy, so they are handed to the call as named
+                // parameters instead of being dropped with the literal.
+                const placeholders = [...original.matchAll(/\$\{([^}]*)\}/g)];
+                if (placeholders.length === 0) {
+                    replacement = `t('${key}')`;
+                    break;
+                }
+                const parameters = placeholders.map((p) => parameterName(p[1].trim()));
+                replacement =
+                    `t('${key}', { ` +
+                    placeholders
+                        .map((p, index) => `${parameters[index]}: ${p[1].trim()}`)
+                        .join(', ') +
+                    ' })';
                 break;
             }
             default:
@@ -364,7 +395,14 @@ function applyFile(file) {
         }
 
         if (replacement !== null) {
-            edits.push({ start: hit.start, end: hit.end, replacement, kind: hit.kind, line: hit.line });
+            edits.push({
+                start: hit.start,
+                end: hit.end,
+                replacement,
+                kind: hit.kind,
+                block: hit.block,
+                line: hit.line,
+            });
         }
     }
 
@@ -377,8 +415,11 @@ function applyFile(file) {
         output = output.slice(0, edit.start) + edit.replacement + output.slice(edit.end);
     }
 
-    // A file that now calls `t(...)` in its script needs `useI18n`.
-    const needsT = edits.some((e) => e.kind !== 'template_text' && e.kind !== 'template_attr');
+    // A file that now calls `t(...)` in its script needs `useI18n`. The
+    // templates call `$t(...)`, which the i18n plugin puts in the app
+    // scope on its own (globalInjection), so a template-only change does
+    // not need the import.
+    const needsT = edits.some((e) => e.block === 'script');
     const sourceHasT = scriptHasT(source);
     if (needsT && !sourceHasT) {
         const scriptSetupMatch = output.match(/<script setup[^>]*>/);

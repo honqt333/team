@@ -572,28 +572,28 @@
                                         @click="setStatementPreset('this_month')"
                                         class="px-2.5 py-1 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300 font-medium"
                                     >
-                                        الشهر الحالي
+                                        {{ $t('purchasing.current_month') }}
                                     </button>
                                     <button
                                         type="button"
                                         @click="setStatementPreset('last_3_months')"
                                         class="px-2.5 py-1 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300 font-medium"
                                     >
-                                        آخر 3 أشهر
+                                        {{ $t('purchasing.last_3_months') }}
                                     </button>
                                     <button
                                         type="button"
                                         @click="setStatementPreset('this_year')"
                                         class="px-2.5 py-1 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300 font-medium"
                                     >
-                                        هذه السنة
+                                        {{ $t('common.this_year') }}
                                     </button>
                                     <button
                                         type="button"
                                         @click="setStatementPreset('all')"
                                         class="px-2.5 py-1 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300 font-medium"
                                     >
-                                        الكل
+                                        {{ $t('common.all') }}
                                     </button>
                                 </div>
                             </div>
@@ -772,7 +772,7 @@
                                     >
                                         <td class="py-3 px-4 text-center font-mono">—</td>
                                         <td class="py-3 px-4 text-center font-mono" dir="ltr">
-                                            {{ statementStartDate || 'البداية' }}
+                                            {{ statementStartDate || $t('common.start') }}
                                         </td>
                                         <td class="py-3 px-4 text-center" colspan="3">
                                             <span
@@ -813,19 +813,23 @@
                                                 v-if="tx.type === 'invoice'"
                                                 class="px-2 py-0.5 rounded text-[10px] font-black uppercase bg-blue-50 text-blue-700 dark:bg-blue-950/40 dark:text-blue-300 border border-blue-200 dark:border-blue-800"
                                             >
-                                                فاتورة مشتريات
+                                                {{
+                                                    $t(
+                                                        'company_profile.invoices_tab.table.type_purchase'
+                                                    )
+                                                }}
                                             </span>
                                             <span
                                                 v-else-if="tx.type === 'return'"
                                                 class="px-2 py-0.5 rounded text-[10px] font-black uppercase bg-rose-50 text-rose-700 dark:bg-rose-950/40 dark:text-rose-300 border border-rose-200 dark:border-rose-800"
                                             >
-                                                مرتجع مشتريات
+                                                {{ $t('purchasing.purchase_return') }}
                                             </span>
                                             <span
                                                 v-else
                                                 class="px-2 py-0.5 rounded text-[10px] font-black uppercase bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800"
                                             >
-                                                سند صرف دفع
+                                                {{ $t('purchasing.payment_voucher') }}
                                             </span>
                                         </td>
                                         <td
@@ -1688,7 +1692,7 @@
                                     }}
                                 </h1>
                                 <p v-if="$page.props.center?.name" class="font-bold text-gray-700">
-                                    الفرع: {{ $page.props.center?.name }}
+                                    {{ $t('common.branch_label') }} {{ $page.props.center?.name }}
                                 </p>
                                 <p
                                     v-if="
@@ -1697,7 +1701,7 @@
                                     "
                                     class="font-mono"
                                 >
-                                    الرقم الضريبي:
+                                    {{ $t('common.tax_number_label') }}
                                     {{
                                         $page.props.tenant?.vat_number ||
                                         $page.props.tenant?.tax_number
@@ -1709,21 +1713,24 @@
                                 <h2
                                     class="text-base font-black px-3 py-1 border-2 border-black rounded-xl inline-block uppercase"
                                 >
-                                    كشف حساب مالي للمورد
+                                    {{ $t('purchasing.supplier_statement') }}
                                 </h2>
                                 <p class="text-[11px] font-mono text-gray-700">
-                                    الفترة: {{ statementStartDate || 'البداية' }} إلى
-                                    {{ statementEndDate || 'حتى الآن' }}
+                                    {{ $t('common.period_label') }}
+                                    {{ statementStartDate || $t('common.start') }}
+                                    {{ $t('common.to') }}
+                                    {{ statementEndDate || $t('common.until_now') }}
                                 </p>
                             </div>
                             <!-- Supplier Info -->
                             <div class="text-end space-y-1">
                                 <p class="font-black text-sm">{{ supplier.name }}</p>
                                 <p v-if="supplier.code" class="font-mono font-bold text-gray-700">
-                                    الكود: {{ supplier.code }}
+                                    {{ $t('common.code_label') }} {{ supplier.code }}
                                 </p>
                                 <p v-if="supplier.tax_number" class="font-mono">
-                                    ضريبي المورد: {{ supplier.tax_number }}
+                                    {{ $t('purchasing.supplier_is_vat_payer') }}
+                                    {{ supplier.tax_number }}
                                 </p>
                                 <p v-if="supplier.phone" dir="ltr" class="font-mono">
                                     {{ supplier.phone }}
@@ -1736,7 +1743,7 @@
                     <div class="grid grid-cols-5 gap-2 mb-4 text-center">
                         <div class="p-2 border border-gray-400 rounded">
                             <span class="block text-[10px] text-gray-600 font-bold">
-                                الرصيد الافتتاحي
+                                {{ $t('purchasing.opening_balance') }}
                             </span>
                             <span class="block font-black font-mono mt-0.5" dir="ltr">
                                 {{ formatCurrency(statementLedger.openingBalance) }}
@@ -1744,7 +1751,7 @@
                         </div>
                         <div class="p-2 border border-gray-400 rounded">
                             <span class="block text-[10px] text-gray-600 font-bold">
-                                إجمالي الفواتير (+)
+                                {{ $t('purchasing.total_invoices') }}
                             </span>
                             <span class="block font-black font-mono mt-0.5" dir="ltr">
                                 {{ formatCurrency(statementLedger.periodInvoiced) }}
@@ -1752,7 +1759,7 @@
                         </div>
                         <div class="p-2 border border-gray-400 rounded">
                             <span class="block text-[10px] text-gray-600 font-bold">
-                                إجمالي المدفوعات (-)
+                                {{ $t('purchasing.total_payments') }}
                             </span>
                             <span class="block font-black font-mono mt-0.5" dir="ltr">
                                 {{ formatCurrency(statementLedger.periodPaid) }}
@@ -1760,14 +1767,16 @@
                         </div>
                         <div class="p-2 border border-gray-400 rounded">
                             <span class="block text-[10px] text-gray-600 font-bold">
-                                إجمالي المرتجعات (-)
+                                {{ $t('purchasing.total_returns') }}
                             </span>
                             <span class="block font-black font-mono mt-0.5" dir="ltr">
                                 {{ formatCurrency(statementLedger.periodReturned) }}
                             </span>
                         </div>
                         <div class="p-2 border-2 border-black rounded bg-gray-100">
-                            <span class="block text-[10px] font-black">الرصيد النهائي المستحق</span>
+                            <span class="block text-[10px] font-black">
+                                {{ $t('purchasing.final_due_balance') }}
+                            </span>
                             <span class="block font-black font-mono mt-0.5" dir="ltr">
                                 {{ formatCurrency(statementLedger.closingBalance) }}
                             </span>
@@ -1779,28 +1788,40 @@
                         <thead>
                             <tr class="bg-gray-200">
                                 <th class="border border-gray-400 p-1.5 text-center">#</th>
-                                <th class="border border-gray-400 p-1.5 text-center">التاريخ</th>
-                                <th class="border border-gray-400 p-1.5 text-center">نوع الحركة</th>
-                                <th class="border border-gray-400 p-1.5 text-center">المرجع</th>
-                                <th class="border border-gray-400 p-1.5 text-center">البيان</th>
-                                <th class="border border-gray-400 p-1.5 text-center">فاتورة (+)</th>
                                 <th class="border border-gray-400 p-1.5 text-center">
-                                    مدفوع / مرتجع (-)
+                                    {{ $t('common.date') }}
                                 </th>
-                                <th class="border border-gray-400 p-1.5 text-center">الرصيد</th>
+                                <th class="border border-gray-400 p-1.5 text-center">
+                                    {{ $t('customers.statement.type') }}
+                                </th>
+                                <th class="border border-gray-400 p-1.5 text-center">
+                                    {{ $t('system.credits.reference') }}
+                                </th>
+                                <th class="border border-gray-400 p-1.5 text-center">
+                                    {{ $t('common.statement') }}
+                                </th>
+                                <th class="border border-gray-400 p-1.5 text-center">
+                                    {{ $t('purchasing.invoice_plus') }}
+                                </th>
+                                <th class="border border-gray-400 p-1.5 text-center">
+                                    {{ $t('purchasing.paid_or_returned') }}
+                                </th>
+                                <th class="border border-gray-400 p-1.5 text-center">
+                                    {{ $t('invoices.columns.balance') }}
+                                </th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr v-if="statementLedger.openingBalance !== 0">
                                 <td class="border border-gray-400 p-1 text-center font-mono">—</td>
                                 <td class="border border-gray-400 p-1 text-center font-mono">
-                                    {{ statementStartDate || 'البداية' }}
+                                    {{ statementStartDate || $t('common.start') }}
                                 </td>
                                 <td
                                     class="border border-gray-400 p-1 text-center font-bold"
                                     colspan="3"
                                 >
-                                    رصيد افتتاحي سابق
+                                    {{ $t('purchasing.opening_balance') }}
                                 </td>
                                 <td class="border border-gray-400 p-1 text-center font-mono">—</td>
                                 <td class="border border-gray-400 p-1 text-center font-mono">—</td>
@@ -1824,10 +1845,10 @@
                                 <td class="border border-gray-400 p-1 text-center font-bold">
                                     {{
                                         tx.type === 'invoice'
-                                            ? 'فاتورة مشتريات'
+                                            ? $t('company_profile.invoices_tab.table.type_purchase')
                                             : tx.type === 'return'
-                                              ? 'مرتجع مشتريات'
-                                              : 'سند صرف'
+                                              ? $t('purchasing.purchase_return')
+                                              : $t('purchasing.payment_voucher')
                                     }}
                                 </td>
                                 <td class="border border-gray-400 p-1 text-center font-mono">
@@ -1861,15 +1882,17 @@
                     <!-- Footer Signatures -->
                     <div class="border-t border-gray-800 pt-4 grid grid-cols-3 text-xs text-center">
                         <div>
-                            <p class="font-bold">المحاسب المسؤول</p>
+                            <p class="font-bold">{{ $t('purchasing.accountant_in_charge') }}</p>
                             <p class="mt-8 text-gray-500">.............................</p>
                         </div>
                         <div>
-                            <p class="font-bold">مدير المركز</p>
+                            <p class="font-bold">{{ $t('common.center_manager') }}</p>
                             <p class="mt-8 text-gray-500">.............................</p>
                         </div>
                         <div>
-                            <p class="font-bold">ختم وتوقيع المورد للمطابقة</p>
+                            <p class="font-bold">
+                                {{ $t('purchasing.supplier_stamp_and_signature') }}
+                            </p>
                             <p class="mt-8 text-gray-500">.............................</p>
                         </div>
                     </div>
@@ -1969,7 +1992,11 @@ const statementLedger = computed(() => {
             link: route('app.invoices.purchases.show', inv.id),
             debit: Number(inv.total) || 0,
             credit: 0,
-            notes: inv.notes || `فاتورة مشتريات رقم ${inv.code || inv.invoice_number}`,
+            notes:
+                inv.notes ||
+                t('purchasing.purchase_invoice_number', {
+                    invoice_number: inv.code || inv.invoice_number,
+                }),
             id: `inv-${inv.id}`,
         });
     });
@@ -1983,7 +2010,7 @@ const statementLedger = computed(() => {
             link: route('app.invoices.purchases.returns.show', ret.id),
             debit: 0,
             credit: Number(ret.total) || 0,
-            notes: ret.notes || `مرتجع مشتريات ${ret.code}`,
+            notes: ret.notes || t('purchasing.purchase_return_note', { code: ret.code }),
             id: `ret-${ret.id}`,
         });
     });
@@ -1994,7 +2021,9 @@ const statementLedger = computed(() => {
         allTxs.push({
             date: p.payment_date || (p.created_at ? p.created_at.split('T')[0] : ''),
             type: isRefund ? 'refund' : 'payment',
-            code: p.reference ? `سند: ${p.reference}` : p.purchase_invoice?.code || `دفعة #${p.id}`,
+            code: p.reference
+                ? t('common.voucher_label', { reference: p.reference })
+                : p.purchase_invoice?.code || t('common.payment_number', { id: p.id }),
             link: p.purchase_invoice
                 ? route('app.invoices.purchases.show', p.purchase_invoice.id)
                 : null,
@@ -2003,8 +2032,11 @@ const statementLedger = computed(() => {
             notes:
                 p.notes ||
                 (isRefund
-                    ? 'استرداد نقدي'
-                    : `سند صرف - ${t('payments.methods.' + p.payment_method) || p.payment_method}`),
+                    ? t('purchasing.cash_refund')
+                    : t('purchasing.payment_voucher_prefix', {
+                          payment_method:
+                              t('payments.methods.' + p.payment_method) || p.payment_method,
+                      })),
             id: `pay-${p.id}`,
         });
     });

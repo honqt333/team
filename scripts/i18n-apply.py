@@ -51,6 +51,20 @@ def set_path(tree, dotted_key, value):
     node[parts[-1]] = value
 
 
+def placeholder_name(expression):
+    """The name a placeholder gets in a translation call.
+
+    The name is taken from the last part of the interpolated expression,
+    so `${invoice.code || invoice.number}` becomes `number`. The rewriter
+    (scripts/i18n-rewrite.mjs) uses the same rule, so the Arabic, the
+    English and the generated call all carry the same name.
+    """
+    last = re.split(r"\|\||\?\?|:", expression)[-1].strip()
+    name = last.split(".")[-1].strip()
+    name = re.sub(r"[^A-Za-z0-9_]", "_", name)
+    return name or "value"
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--map", required=True)
@@ -70,10 +84,14 @@ def main() -> int:
             key = entry["key"]
             # The Arabic copy keeps the same named placeholders as the
             # English one: `${deletingSig.name_en}` becomes `{name_en}`.
+            # An entry may carry its own `ar` when the same key serves
+            # two spellings of one concept: the key then holds one
+            # wording, and both spellings read the same.
+            source = entry.get("ar", arabic)
             arabic_value = re.sub(
                 r"\$\{([^}]*)\}",
-                lambda m: "{" + m.group(1).strip().split(".")[-1].split("||")[-1].strip() + "}",
-                arabic,
+                lambda m: "{" + placeholder_name(m.group(1)) + "}",
+                source,
             )
             english_value = entry["en"]
             # The placeholder names must match on both sides, so the
@@ -102,13 +120,16 @@ def main() -> int:
     print(f"{len(new_keys)} new keys written to ar.json / en.json")
 
     # ---- 2) rewrite the sources ----------------------------------------
+    # The inventory is a cache of the whole project, not of the files of
+    # this batch: writing a partial one would leave the next run (or the
+    # next agent) with an inventory that misses most of the sources.
     inventory_path = os.path.join(ROOT, "scripts/.i18n-inventory.json")
     result = subprocess.run(
         [
             "node",
             os.path.join(ROOT, "scripts/i18n-extract.mjs"),
             "--json",
-            *sorted(mapping.keys()),
+            "resources/js",
         ],
         capture_output=True,
         text=True,

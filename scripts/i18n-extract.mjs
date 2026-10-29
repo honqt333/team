@@ -187,6 +187,13 @@ function isUserFacingCopy(value) {
     if (trimmed.length === 0) return false;
     if (NUMERAL_ONLY.test(trimmed)) return false;
     if (PUNCTUATION_ONLY.test(trimmed)) return false;
+    // A lone letter is not a label, it is a value: the letters of the
+    // Saudi plate alphabet (`{ ar: 'أ', en: 'A' }`) are data. Translating
+    // them would break the plate, and no copy in this project is a
+    // single character. The tatweel (`هـ`) is part of the letter, not a
+    // character of its own.
+    const letters = [...trimmed].filter((char) => char !== '\u0640');
+    if (letters.length === 1) return false;
     return true;
 }
 
@@ -258,6 +265,7 @@ function extractScript(block, raw) {
             start,
             end,
             value: conditional.arabic,
+            english: conditional.english,
             line: raw.slice(0, start).split('\n').length,
             block: 'script',
             snippet: content
@@ -292,22 +300,23 @@ function extractScript(block, raw) {
             return;
         }
 
-        // The literal parts of a template literal.
-        if (node.type === 'TemplateElement') {
-            const raw_ = node.value.raw;
+        // A template literal. The whole literal is one string, so it is
+        // one hit: the Arabic text and the interpolations that are woven
+        // into it belong together. The interpolations are kept in the
+        // value (`${code}`), because the key has to carry them as
+        // placeholders (`{code}`) when it is written to the language
+        // files.
+        if (node.type === 'TemplateLiteral') {
+            const raw_ = content.slice(node.start + 1, node.end - 1);
             if (!ARABIC.test(raw_)) return;
             if (!isUserFacingCopy(raw_)) return;
             if (insideConditional(node.start, node.end)) return;
             const start = blockStart + node.start;
             const end = blockStart + node.end;
-            // The template element sits between two backticks; the whole
-            // template is replaced, so the span covers the backticks too.
-            const fullStart = content.lastIndexOf('`', node.start) + 1;
-            const fullEnd = content.indexOf('`', node.end) + 1;
             found.push({
                 kind: 'script_template',
-                start: blockStart + (fullStart > 0 ? fullStart - 1 : node.start),
-                end: blockStart + fullEnd,
+                start,
+                end,
                 value: raw_,
                 line: raw.slice(0, start).split('\n').length,
                 block: 'script',
@@ -317,6 +326,13 @@ function extractScript(block, raw) {
                     .trim()
                     .slice(0, 160),
             });
+            return;
+        }
+
+        // The literal parts of a template literal: the template itself is
+        // reported above, so its parts are not reported twice.
+        if (node.type === 'TemplateElement') {
+            return;
         }
     });
 
@@ -350,6 +366,76 @@ function arabicBranches(expression) {
     });
 
     return found;
+}
+
+/**
+ * The branches of the ternaries inside a template expression, with the
+ * exact span of every one of them.
+ *
+ * A ternary that carries an Arabic side and an English side is one piece
+ * of copy in two languages: it is reported as a `bilingual_pair`, so the
+ * whole expression is replaced by a single call. Every other Arabic
+ * branch is reported on its own, so a ternary inside a ternary does not
+ * lose its branches.
+ */
+function templateConditionals(expression) {
+    const found = [];
+    let ast;
+    try {
+        ast = acorn.parseExpressionAt(expression, 0, { ecmaVersion: 'latest' });
+    } catch {
+        return found;
+    }
+
+    walkAst(ast, null, (node) => {
+        if (node.type !== 'ConditionalExpression') return;
+        const consequent = node.consequent;
+        const alternate = node.alternate;
+        const consequentIsText =
+            consequent && consequent.type === 'Literal' && typeof consequent.value === 'string';
+        const alternateIsText =
+            alternate && alternate.type === 'Literal' && typeof alternate.value === 'string';
+
+        if (consequentIsText && alternateIsText) {
+            const consequentIsArabic = ARABIC.test(consequent.value);
+            const alternateIsArabic = ARABIC.test(alternate.value);
+            if (consequentIsArabic !== alternateIsArabic) {
+                const arabic = consequentIsArabic ? consequent : alternate;
+                const english = consequentIsArabic ? alternate : consequent;
+                found.push({
+                    kind: 'bilingual_pair',
+                    start: node.start,
+                    end: node.end,
+                    value: arabic.value,
+                    english: english.value,
+                });
+                return;
+            }
+        }
+
+        for (const branch of [consequent, alternate]) {
+            if (!branch || branch.type !== 'Literal') continue;
+            if (typeof branch.value !== 'string') continue;
+            if (!ARABIC.test(branch.value)) continue;
+            if (!isUserFacingCopy(branch.value)) continue;
+            found.push({
+                kind: 'branch',
+                start: branch.start,
+                end: branch.end,
+                value: branch.value,
+            });
+        }
+    });
+
+    // The same literal may be reached twice (a ternary inside a ternary
+    // shares its outer span), so the spans are made unique.
+    const seen = new Set();
+    return found.filter((entry) => {
+        const span = `${entry.kind}:${entry.start}:${entry.end}`;
+        if (seen.has(span)) return false;
+        seen.add(span);
+        return true;
+    });
 }
 
 function extractTemplate(templateContent, raw, templateStart) {
@@ -388,6 +474,16 @@ function extractTemplate(templateContent, raw, templateStart) {
                 if (/^\s*t\(\s*['"`][^'"`]+['"`]\s*,/.test(expression)) {
                     return;
                 }
+                // The offset of the expression inside the template.
+                const expressionStart = node.content.loc
+                    ? node.content.loc.start.offset
+                    : node.loc.start.offset + 2;
+
+                // Every branch of every ternary in the expression, read
+                // from the AST. A ternary may sit inside another ternary,
+                // and a pattern would only ever find one of them.
+                const conditionals = templateConditionals(expression);
+
                 // `cond ? value : 'نص احتياطي'` — the copy that shows when
                 // the condition does not hold.
                 const fallback = expression.match(/\|\|\s*'([^']*)'/);
@@ -400,24 +496,34 @@ function extractTemplate(templateContent, raw, templateStart) {
                         block: 'template',
                     });
                 }
-                // `cond ? 'نص' : other` — the copy of the ternary branch.
-                // The branch may sit after another expression:
-                // `cond ? $t('other') : 'نص'`.
-                // The Arabic branch of a ternary: it may sit right after
-                // the `?` or after the `:` of another ternary.
-                const branch = expression.match(
-                    /\?[^?:]*?:\s*'([^']*)'|\?\s*'([^']*)'\s*:|\?\s*'([^']*)'/
-                );
-                const branchText = branch && (branch[1] || branch[2] || branch[3]);
-                if (branchText && ARABIC.test(branchText) && isUserFacingCopy(branchText)) {
+
+                // The branches of the ternaries. A ternary that carries
+                // an Arabic side and an English side is one piece of copy
+                // in two languages, so the whole expression is reported
+                // and replaced by a single call.
+                for (const conditional of conditionals) {
+                    const start = templateStart + expressionStart + conditional.start;
+                    const end = templateStart + expressionStart + conditional.end;
+                    if (conditional.kind === 'bilingual_pair') {
+                        found.push({
+                            kind: 'bilingual_pair',
+                            start,
+                            end,
+                            value: conditional.value,
+                            english: conditional.english,
+                            block: 'template',
+                        });
+                        continue;
+                    }
                     found.push({
                         kind: 'interpolation_branch',
-                        start: templateStart + node.loc.start.offset,
-                        end: templateStart + node.loc.end.offset,
-                        value: branchText,
+                        start,
+                        end,
+                        value: conditional.value,
                         block: 'template',
                     });
                 }
+
                 // `{{ `${x} ر.س` }}` — the Arabic is the tail of a template
                 // literal.
                 const literal = expression.match(/`([^`]*)`/);
@@ -432,7 +538,7 @@ function extractTemplate(templateContent, raw, templateStart) {
                 }
                 // The plain expression is only reported when it carries
                 // no more specific copy of its own.
-                if (!fallback && !literal && !branch) {
+                if (!fallback && !literal && conditionals.length === 0) {
                     found.push({
                         kind: 'interpolation',
                         start: templateStart + node.loc.start.offset,

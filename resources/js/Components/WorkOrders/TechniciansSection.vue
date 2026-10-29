@@ -551,17 +551,17 @@ watch(
 const labels = computed(() => {
     return locale.value === 'ar'
         ? {
-              title: 'الفنيون',
-              addTechnician: 'إضافة فني',
-              printWorkCard: 'طباعة كرت العمل للفني',
-              services: 'الخدمات',
-              noServices: 'لا يوجد خدمات مرتبطة بهذا الفني',
-              noTechnicians: 'لا يوجد فنيين معينين حالياً',
-              selectService: 'اختر الخدمة لإسنادها',
-              selectTechnician: 'اختر فني لإضافته',
-              confirmRemoveService: 'هل أنت متأكد من إزالة هذه الخدمة من الفني؟',
-              jobTitle: 'مسمى الوظيفة',
-              name: 'الاسم',
+              title: t('work_orders.technicians.title'),
+              addTechnician: t('work_orders.technicians.add'),
+              printWorkCard: t('work_orders.technicians.print_work_order'),
+              services: t('departments.columns.services_count'),
+              noServices: t('work_orders.technicians.no_services'),
+              noTechnicians: t('work_orders.technicians.none_assigned'),
+              selectService: t('work_orders.technicians.choose_service'),
+              selectTechnician: t('work_orders.technicians.choose_technician'),
+              confirmRemoveService: t('work_orders.technicians.remove_service_confirm'),
+              jobTitle: t('work_orders.technicians.job_title'),
+              name: t('common.name'),
           }
         : {
               title: 'Technicians',
@@ -751,7 +751,7 @@ const assignServiceToTech = (techId, itemId) => {
 // Action: Remove service from technician
 const removeServiceFromTech = async (techId, itemId) => {
     const confirmed = await confirm({
-        title: locale.value === 'ar' ? 'تأكيد الحذف' : 'Confirm Delete',
+        title: t('common.confirm_delete'),
         message: labels.value.confirmRemoveService,
         confirmText: t('common.delete'),
         cancelText: t('common.cancel'),
@@ -790,12 +790,9 @@ const toggleAddServiceDropdown = (techId) => {
 // Action: Remove technician card
 const removeTechnicianCard = async (techId) => {
     const confirmed = await confirm({
-        title: locale.value === 'ar' ? 'تأكيد الإزالة' : 'Confirm Removal',
-        message:
-            locale.value === 'ar'
-                ? 'هل أنت متأكد من إزالة هذا الفني؟'
-                : 'Are you sure you want to remove this technician?',
-        confirmText: locale.value === 'ar' ? 'إزالة' : 'Remove',
+        title: t('work_orders.technicians.confirm_removal'),
+        message: t('work_orders.technicians.remove_confirm'),
+        confirmText: t('common.remove'),
         cancelText: t('common.cancel'),
         variant: 'danger',
     });

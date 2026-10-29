@@ -29,19 +29,26 @@ class HardcodedArabicTest extends TestCase
     /**
      * The ceiling of Arabic literals that may stay inline.
      *
-     * Rebased to 1,867 on 2026-10-29 — the first i18n extraction batch
-     * moved 371 strings out of 84 components.
+     * Rebased to 1,052 on 2026-10-29 — batch 2C moved 286 literals out
+     * of 11 files.
      *
      * History:
      *   2,238  before the extraction started (the first measurement)
      *   1,867  after the first batch (84 components, 371 strings)
+     *   1,062  after the system pages (batch 2B)
+     *   1,338  the same tree, measured with the fixed extractor: it sees
+     *          the bilingual pairs it used to miss (a ternary that
+     *          carries an Arabic side and an English side), and it no
+     *          longer counts a lone letter as copy (the letters of the
+     *          Saudi plate are data, not labels)
+     *   1,052  after batch 2C
      *
      * The number must never grow. Each further batch lowers it.
      *
      * @var array<string, int>
      */
     private const MAX_INLINE_ARABIC = [
-        'ar' => 1867,
+        'ar' => 1052,
     ];
 
     public function test_no_new_hardcoded_arabic_in_the_vue_sources(): void
@@ -108,6 +115,58 @@ class HardcodedArabicTest extends TestCase
             array_values($onlyEnglish),
             'These keys exist in en.json but not in ar.json: '.implode(', ', array_slice($onlyEnglish, 0, 10))
         );
+    }
+
+    /**
+     * The two languages must carry the same placeholders.
+     *
+     * A placeholder that exists in one language only is shown to the user
+     * as it is: `{amount}` instead of the amount. The placeholders of a
+     * key are the names the code passes to the call, so both languages
+     * have to ask for the same ones.
+     */
+    public function test_the_locale_files_carry_the_same_placeholders(): void
+    {
+        $ar = $this->flattenJson(base_path('resources/js/i18n/lang/ar.json'));
+        $en = $this->flattenJson(base_path('resources/js/i18n/lang/en.json'));
+
+        $mismatched = [];
+
+        foreach (array_intersect(array_keys($ar), array_keys($en)) as $key) {
+            $inArabic = $this->placeholders($ar[$key]);
+            $inEnglish = $this->placeholders($en[$key]);
+
+            if ($inArabic !== $inEnglish) {
+                $mismatched[$key] = sprintf(
+                    'ar=[%s] en=[%s]',
+                    implode(', ', $inArabic),
+                    implode(', ', $inEnglish)
+                );
+            }
+        }
+
+        $this->assertSame(
+            [],
+            $mismatched,
+            "These keys carry different placeholders in the two languages:\n"
+            .implode("\n", array_map(
+                static fn (string $key, string $detail): string => "  {$key}: {$detail}",
+                array_keys($mismatched),
+                $mismatched
+            ))
+        );
+    }
+
+    /**
+     * The placeholders of a copy, in the order they appear.
+     *
+     * @return array<int, string>
+     */
+    private function placeholders(string $copy): array
+    {
+        preg_match_all('/\{([A-Za-z0-9_]+)\}/', $copy, $matches);
+
+        return array_values(array_unique($matches[1]));
     }
 
     /**

@@ -118,16 +118,16 @@
                             {{ companyInfo.name }}
                         </h2>
                         <p v-if="companyInfo.branch" class="font-bold text-gray-700">
-                            الفرع: {{ companyInfo.branch }}
+                            {{ $t('common.branch_label') }} {{ companyInfo.branch }}
                         </p>
                         <p v-if="companyInfo.tax_number" class="text-gray-600">
-                            الرقم الضريبي:
+                            {{ $t('common.tax_number_label') }}
                             <span class="font-mono font-bold">
                                 {{ companyInfo.tax_number }}
                             </span>
                         </p>
                         <p v-if="companyInfo.cr_number" class="text-gray-600">
-                            السجل التجاري:
+                            {{ $t('common.commercial_registration_label') }}
                             <span class="font-mono">{{ companyInfo.cr_number }}</span>
                         </p>
                     </div>
@@ -146,7 +146,7 @@
                             </span>
                         </div>
                         <span class="text-sm font-black text-black uppercase tracking-wider">
-                            كشف حساب عميل (Statement of Account)
+                            {{ $t('customers.statement.title') }}
                         </span>
                     </div>
 
@@ -155,11 +155,11 @@
                         <p class="font-black text-black text-sm">{{ customer?.name }}</p>
                         <p class="font-mono" dir="ltr">{{ customer?.phone }}</p>
                         <p v-if="customer?.tax_number" class="text-gray-600">
-                            الرقم الضريبي:
+                            {{ $t('common.tax_number_label') }}
                             <span class="font-mono">{{ customer?.tax_number }}</span>
                         </p>
                         <p class="text-gray-500">
-                            تاريخ الطباعة:
+                            {{ $t('common.print_date_label') }}
                             <span class="font-mono">{{ printDateFormatted }}</span>
                         </p>
                     </div>
@@ -170,19 +170,25 @@
                     class="grid grid-cols-3 gap-2 mt-4 p-2.5 bg-gray-100 rounded border border-gray-300 text-center text-xs"
                 >
                     <div>
-                        <span class="text-gray-600 block">إجمالي الفواتير:</span>
+                        <span class="text-gray-600 block">
+                            {{ $t('customers.statement.total_invoices') }}
+                        </span>
                         <strong class="font-mono">
                             {{ formatMoney(financialSummary?.total_invoiced) }}
                         </strong>
                     </div>
                     <div>
-                        <span class="text-gray-600 block">إجمالي المسدد:</span>
+                        <span class="text-gray-600 block">
+                            {{ $t('customers.statement.total_paid') }}
+                        </span>
                         <strong class="font-mono text-emerald-700">
                             {{ formatMoney(financialSummary?.total_paid) }}
                         </strong>
                     </div>
                     <div>
-                        <span class="text-gray-600 block">الرصيد المتبقي المستحق:</span>
+                        <span class="text-gray-600 block">
+                            {{ $t('customers.statement.remaining_balance') }}
+                        </span>
                         <strong class="font-mono text-red-700">
                             {{ formatMoney(financialSummary?.total_due) }}
                         </strong>
@@ -199,13 +205,25 @@
                         >
                             <tr>
                                 <th class="px-3 py-3 text-center">#</th>
-                                <th class="px-3 py-3 text-center">التاريخ</th>
-                                <th class="px-3 py-3 text-center">نوع الحركة</th>
-                                <th class="px-3 py-3 text-center">رقم المرجع / المستند</th>
-                                <th class="px-3 py-3 text-center">أمر العمل / المركبة</th>
-                                <th class="px-3 py-3 text-center">مدين (فواتير)</th>
-                                <th class="px-3 py-3 text-center">دائن (سداد)</th>
-                                <th class="px-3 py-3 text-center">الرصيد التراكمي</th>
+                                <th class="px-3 py-3 text-center">{{ $t('common.date') }}</th>
+                                <th class="px-3 py-3 text-center">
+                                    {{ $t('customers.statement.type') }}
+                                </th>
+                                <th class="px-3 py-3 text-center">
+                                    {{ $t('common.reference_document_number') }}
+                                </th>
+                                <th class="px-3 py-3 text-center">
+                                    {{ $t('customers.statement.work_order_vehicle') }}
+                                </th>
+                                <th class="px-3 py-3 text-center">
+                                    {{ $t('customers.statement.debtor_invoices') }}
+                                </th>
+                                <th class="px-3 py-3 text-center">
+                                    {{ $t('customers.statement.credit') }}
+                                </th>
+                                <th class="px-3 py-3 text-center">
+                                    {{ $t('customers.statement.balance') }}
+                                </th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-100 dark:divide-gray-800 font-medium">
@@ -225,19 +243,19 @@
                                         v-if="entry.type === 'invoice'"
                                         class="inline-block px-2 py-0.5 rounded-md text-[10px] font-bold bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300"
                                     >
-                                        فاتورة
+                                        {{ $t('invoices.invoice') }}
                                     </span>
                                     <span
                                         v-else-if="entry.type === 'refund'"
                                         class="inline-block px-2 py-0.5 rounded-md text-[10px] font-bold bg-rose-50 text-rose-700 dark:bg-rose-900/30 dark:text-rose-300"
                                     >
-                                        استرجاع
+                                        {{ $t('payments.types.refund') }}
                                     </span>
                                     <span
                                         v-else
                                         class="inline-block px-2 py-0.5 rounded-md text-[10px] font-bold bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300"
                                     >
-                                        سند قبض
+                                        {{ $t('print_settings.receipt') }}
                                     </span>
                                 </td>
                                 <td
@@ -284,7 +302,7 @@
 
                             <tr v-if="!ledger || ledger.length === 0">
                                 <td colspan="8" class="px-4 py-8 text-center text-gray-400 text-xs">
-                                    لا توجد حركات مالية مسجلة للعميل حتى الآن
+                                    {{ $t('customers.statement.no_transactions') }}
                                 </td>
                             </tr>
                         </tbody>
@@ -299,19 +317,19 @@
                 <div class="flex items-center justify-between">
                     <div>
                         <p>
-                            المُعد:
+                            {{ $t('common.prepared_by_label') }}
                             <span class="font-bold text-black">
                                 {{ $page.props.auth?.user?.name || 'Administrator' }}
                             </span>
                         </p>
                         <p>
-                            تاريخ ووقت الطباعة:
+                            {{ $t('common.print_date_time_label') }}
                             <span class="font-mono">{{ printDateFormatted }}</span>
                         </p>
                     </div>
                     <div class="text-center w-48 border-t border-dashed border-gray-400 pt-1">
                         <span class="text-[11px] font-bold text-black block">
-                            الختم والتوقيع الرسمي
+                            {{ $t('reports.payments_report.official_seal') }}
                         </span>
                     </div>
                 </div>
@@ -321,6 +339,9 @@
 </template>
 
 <script setup>
+import { useI18n } from 'vue-i18n';
+const { t } = useI18n();
+
 import { computed } from 'vue';
 import { usePage } from '@inertiajs/vue3';
 import BaseModal from '@/Components/BaseModal.vue';
@@ -362,7 +383,7 @@ const companyInfo = computed(() => {
             tenant.trade_name ||
             tenant.legal_name ||
             tenant.name ||
-            'خدمة برو',
+            t('common.app_name'),
         branch: center.name || center.name_ar || '',
         tax_number: tenant.vat_number || tenant.tax_number || center.vat_number || '',
         cr_number: tenant.cr_number || center.cr_number || '',
