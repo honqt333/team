@@ -2580,7 +2580,8 @@
         "zoom_85": "مكبر (85%)",
         "sample_part": "من المستودع الرئيسي - تويوتا أصلي",
         "live_preview_platform": "منصة المعاينة التفاعلية الحية",
-        "general_print_identity": "نموذج وهوية الطباعة العامة"
+        "general_print_identity": "نموذج وهوية الطباعة العامة",
+        "active_template": "القالب النشط"
     },
     "profile": {
         "info": {

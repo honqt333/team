@@ -2580,7 +2580,8 @@
         "zoom_85": "Zoom (85%)",
         "sample_part": "From the main warehouse — genuine Toyota",
         "live_preview_platform": "The live interactive preview platform",
-        "general_print_identity": "The general printing model and identity"
+        "general_print_identity": "The general printing model and identity",
+        "active_template": "The active template"
     },
     "profile": {
         "info": {
