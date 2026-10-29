@@ -12,7 +12,7 @@ Khidmah Pro is a mature, operational, enterprise-grade ERP platform serving acti
 * **It is NOT an MVP.**
 * **It is NOT a prototype.**
 
-Every feature, integration, migration, or interface modification must be designed and implemented to be **production-ready**, highly performant, secure, and backward-compatible. Refactoring stable components or introducing untested abstractions is strictly forbidden unless authorized. Extension of the existing core is the primary development path.
+Every feature, integration, migration, or interface modification should be production-ready, secure, performant, and backward-compatible. Prefer extending stable code when that is the simplest safe solution. Refactoring is appropriate when the task requires it; avoid unrelated rewrites and untested abstractions.
 
 ---
 
@@ -102,8 +102,8 @@ Khidmah Pro uses a single shared database partitioned by `tenant_id` (Logical Is
 
 1. **Tenant Scope**: Models containing tenant-specific data must use the `App\Models\Concerns\TenantScoped` trait.
 2. **Center Scope**: Models containing branch-specific data must use the `App\Models\Concerns\CenterScoped` trait.
-3. **Implicit Insertion**: Do not manually assign `tenant_id` or `center_id` on model creation if the traits are booted. They will be auto-filled from `TenancyContext`.
-4. **File Uploads**: Files uploaded by a tenant must be saved in isolated paths: `storage/app/public/tenants/{tenant_id}/{center_id}/{domain}/`.
+3. **Context and insertion**: Determine whether the model or operation is tenant-scoped, center-scoped, or global. Use the authenticated tenant and active center context. If a model trait fills IDs automatically, do not duplicate assignment; set them explicitly only when the operation's validated context requires it.
+4. **File uploads**: Follow the storage and authorization pattern already used by the relevant module. Tenant separation alone does not make a public disk private; sensitive documents require private storage and authorized delivery.
 5. **Internal/External Notifications**: Notifications must target user groups belonging strictly to the tenant's context.
 6. **Cache Keys**: Tenant cache keys must be isolated using the pattern: `tenant:{tenant_id}:center:{center_id}:{key}`.
 7. **Queues**: Queue jobs must carry and restore the tenant context (e.g., tenant ID and center ID) upon execution.
@@ -115,13 +115,13 @@ Khidmah Pro uses a single shared database partitioned by `tenant_id` (Logical Is
 * **Table Names**: Must be plural and use snake_case (e.g. `work_orders`, `purchase_invoice_lines`).
 * **Model Names**: Must be singular and use PascalCase (e.g. `WorkOrder`, `PurchaseInvoiceLine`).
 * **Foreign Keys**: Must follow the convention: `singular_table_name_id` (e.g. `customer_id`, `supplier_id`).
-* **Tenant Safety**: Every tenant-level table must include:
+* **Tenant safety**: Tenant-owned tables normally include `tenant_id`. Add `center_id` only when records belong to a center; global, shared, and center-independent records are valid exceptions. Confirm the intended scope from neighboring models and migrations:
   ```php
   $table->foreignId('tenant_id')->constrained()->cascadeOnDelete();
   $table->foreignId('center_id')->nullable()->constrained()->nullOnDelete();
   ```
 * **Destructive Actions Prohibited**: Never drop tables, remove production columns, or rename tables without a safe migration strategy that preserves historical records.
-* **Soft Deletes**: Always use `$table->softDeletes()` and the `SoftDeletes` trait on core business models (Customers, Vehicles, Work Orders, Invoices, Parts, Suppliers, Employees).
+* **Soft deletes**: Use soft deletion when the domain requires recoverability or historical retention and the surrounding module supports it. Do not add it mechanically where lifecycle, uniqueness, or existing relations make it inappropriate.
 * **Indexes**: Add database indexes to frequently queried columns (such as `status`, `sku`, `phone`, `date`).
 
 ---
@@ -199,23 +199,23 @@ Maintain a premium visual identity across the ERP:
 
 ## 13. Feature Development Workflow
 
-When implementing or extending any feature, you must strictly follow this 9-step development cycle:
+When implementing or extending a feature, use this workflow in proportion to its scope and risk:
 
 1. **Inspect Architecture**: Understand the system design for the feature scope.
 2. **Inspect Existing Code**: Search the database migrations, routes, policies, and Vue files.
 3. **Identify Reusable Code**: Find actions, composables, helpers, or layout modules to leverage.
 4. **Detect Potential Conflicts**: Ensure the changes do not break backward compatibility or scope boundaries.
 5. **Define Integration Strategy**: Decide whether to wrap, listen, extend, or subclass.
-6. **Request Feedback**: Stop and get explicit user approval if any breaking change is detected.
+6. **Resolve material risks**: Preserve compatibility by default. Explain and ask only when a necessary breaking or irreversible decision cannot be resolved from the request and repository context.
 7. **Implement Safely**: Write clean, DRY code matching existing patterns.
 8. **Run Tests**: Verify using unit/feature tests and perform manual UI verification.
-9. **Write Walkthrough**: Record and document the changes in a walkthrough artifact.
+9. **Document when useful**: Update project documentation when behavior, setup, operations, or architecture changes; do not create a walkthrough artifact for every small fix.
 
 ---
 
-## 14. Mandatory Integration Report
+## 14. Change Plan
 
-Before writing any backend or frontend code, the AI assistant **MUST** generate an Integration Report and present it to the user. Use the following structured format:
+For substantial or high-risk changes, summarize the integration plan before implementation. For small, localized changes, inspect the relevant code and communicate the plan briefly. Include only applicable sections from this template:
 
 ```markdown
 # Integration Report: [Feature Name]
@@ -268,7 +268,7 @@ Every feature contribution must pass the following quality checkpoints:
 4. **Performance Gate**: Verify eager loading is applied, check database queries count, and ensure correct indexing.
 5. **Accessibility (a11y) Gate**: Ensure HTML tags are semantic, buttons have labels, images have alt tags, and contrast is sufficient.
 6. **API Gate**: Ensure REST routes are structured, versioned, and return consistent formats.
-7. **Database Gate**: Validate migrations are safe, columns are not removed, and soft deletes are active.
+7. **Database Gate**: Validate migrations preserve existing data and have an appropriate rollback or recovery plan.
 8. **Tenant Isolation Gate**: Run assertions ensuring one tenant cannot view or modify another's data.
 9. **Testing Gate**: Write feature tests covering new logic paths, ensuring all assertions pass cleanly.
 
@@ -284,5 +284,5 @@ A development task is considered complete **ONLY** when the following criteria a
 * **No API Duplication**: Shared endpoints and services.
 * **All Tests Passed**: Automated feature/unit tests run and pass without errors.
 * **Zero Breaking Changes**: Fully backward-compatible with no regressions.
-* **Fully Documented**: Updated modal references, workflows, and walkthrough logs.
+* **Documented where needed**: Update relevant documentation when user-facing behavior, setup, operations, or architecture changed.
 * **Production-Ready**: The feature is robust, fully localized (Arabic/English), responsive, and tested.

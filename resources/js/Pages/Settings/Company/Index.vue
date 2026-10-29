@@ -1,5 +1,7 @@
 <template>
     <AppLayout>
+        <Head :title="$t('company_profile.title')" />
+
         <div class="space-y-6">
             <!-- Back Button & Header Section -->
             <PageHeader
@@ -984,8 +986,8 @@
                                         </p>
                                     </div>
                                 </div>
-                                <a
-                                    href="/app/settings/zatca"
+                                <Link
+                                    :href="route('settings.zatca.index')"
                                     class="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-xl text-sm shadow-sm transition-colors shrink-0"
                                 >
                                     <span>
@@ -1004,7 +1006,7 @@
                                             d="M14 5l7 7m0 0l-7 7m7-7H3"
                                         />
                                     </svg>
-                                </a>
+                                </Link>
                             </div>
                         </div>
 
@@ -1141,8 +1143,8 @@
                                         </p>
                                     </div>
                                 </div>
-                                <a
-                                    href="/app/settings/zatca"
+                                <Link
+                                    :href="route('settings.zatca.index')"
                                     class="inline-flex items-center justify-center gap-2 px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-xl text-sm shadow-md shadow-emerald-600/20 transition-all hover:scale-102 shrink-0"
                                 >
                                     <span>{{ $t('company_profile.zatca.setup_integration') }}</span>
@@ -1159,7 +1161,7 @@
                                             d="M14 5l7 7m0 0l-7 7m7-7H3"
                                         />
                                     </svg>
-                                </a>
+                                </Link>
                             </div>
                         </div>
 
@@ -1678,8 +1680,8 @@
                                     <p class="text-sm text-gray-600 dark:text-gray-300 mb-4">
                                         {{ $t('company_profile.billing_moved.subtitle') }}
                                     </p>
-                                    <a
-                                        href="/app/settings/billing"
+                                    <Link
+                                        :href="route('app.billing.index')"
                                         class="inline-flex items-center gap-2 px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-semibold text-sm transition-colors"
                                     >
                                         <svg
@@ -1696,7 +1698,7 @@
                                             />
                                         </svg>
                                         {{ $t('company_profile.billing_moved.cta') }}
-                                    </a>
+                                    </Link>
                                 </div>
                             </div>
                         </div>
@@ -2678,7 +2680,7 @@
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted, watch, nextTick } from 'vue';
-import { Link, router, usePage } from '@inertiajs/vue3';
+import { Head, Link, router, usePage } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import PageHeader from '@/Components/PageHeader.vue';

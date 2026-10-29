@@ -1,6 +1,7 @@
 {
     "auth": {
         "confirm_password": "Confirm password",
+        "confirm_password_hint": "This is a secure area of the application. Please confirm your password before continuing.",
         "password": "Password",
         "set_password": "Set Password",
         "set_password_action": "Set Password",
@@ -172,7 +173,7 @@
         "currency": "Rs",
         "currency_sar": "Rs",
         "customer": "Customer",
-        "date": "History",
+        "date": "Date",
         "date_from": "Date From",
         "date_to": "Date To",
         "day": "day",
@@ -227,7 +228,7 @@
         "index": "#",
         "invalid_file_type": "Invalid file type: {file}",
         "invoice_attachment": "Invoice Attachment",
-        "km": "How much?",
+        "km": "km",
         "lang": {
             "ar": "العربية",
             "en": "English"
@@ -2033,7 +2034,8 @@
             "payment_received": "Payment received",
             "cancelled": "Invoice cancelled",
             "send_receipt_hint": "Send the receipt from the bank receipts page"
-        }
+        },
+        "credit_notes_total": "Total Returns (Credit Notes)"
     },
     "landing": {
         "active_shops": "Active Shops",
@@ -2179,7 +2181,7 @@
         "dashboard": "Control panel",
         "departments": "Sections",
         "employee_portal": "My gateway",
-        "integrations": "Integrations",
+        "integrations": "Add-ons",
         "invoices": "Invoices",
         "language": "Change language",
         "logout": "Log out",
@@ -2875,7 +2877,7 @@
         "current_month": "The current month",
         "accountant_in_charge": "The accountant in charge",
         "supplier_stamp_and_signature": "The supplier stamp and signature for the reconciliation",
-        "opening_balance": "Previous opening balance",
+        "opening_balance": "Opening balance",
         "payment_voucher": "Payment voucher",
         "supplier_is_vat_payer": "The supplier is a VAT payer:",
         "invoice_plus": "Invoice (+)",
@@ -3013,6 +3015,8 @@
         "parts": {
             "customer": "From the client",
             "customer_hint": "The client brought it with him",
+            "duplicate_notice": "Notice: This spare part is already added to this estimate",
+            "duplicate_warning": "This spare part has already been added. Do you want to proceed?",
             "external": "External purchase",
             "external_hint": "Insurance from an external supplier",
             "issue_more": "Issue More",
@@ -3085,6 +3089,10 @@
             "discount": "Discount",
             "discount_method": "How to calculate the discount",
             "discount_value": "Discount value",
+            "duplicate_continue": "Proceed",
+            "duplicate_notice": "Notice: This service is already added to this estimate",
+            "duplicate_warning_message": "This service has already been added. Do you want to proceed and add it again?",
+            "duplicate_warning_title": "Duplicate Service",
             "fixed": "Fixed amount",
             "no_discount": "Without discount",
             "price": "Service price",
@@ -3730,8 +3738,38 @@
             }
         },
         "integrations": {
+            "title": "Add-ons",
+            "hub_subtitle": "Unified hub for support tools, help & tutorials, bug reports & suggestions, and integrations",
             "coming_soon": "Coming soon — the add-ons and integrations store",
-            "description": "You will be able to enable electronic payment gateways, WhatsApp and SMS messaging services, instalment payment services (Tabby/Tamara), Google Maps and other services here."
+            "description": "You will be able to enable electronic payment gateways, WhatsApp and SMS messaging services, instalment payment services (Tabby/Tamara), Google Maps and other services here.",
+            "help_title": "Help & Tutorials",
+            "help_desc": "Interactive user guides, instructional video walkthroughs, and FAQs to support you at every step.",
+            "open_help": "Open Help Center",
+            "feedback_title": "Bug Reports & Suggestions",
+            "feedback_desc": "Submit technical bug reports, feedback, and feature suggestions with direct photo and video attachments.",
+            "submit_feedback": "Submit Report or Feedback",
+            "zatca_title": "E-Invoicing (ZATCA)",
+            "zatca_desc": "Zakat, Tax and Customs Authority Phase 2 integration settings for cryptographic stamps and QR codes.",
+            "manage_zatca": "Manage Integration",
+            "website_title": "Business Website & Landing Page",
+            "website_desc": "Customize your workshop landing page, promotional banners, social media links, and online booking.",
+            "customize_website": "Customize Website",
+            "whatsapp_title": "WhatsApp Messages & Alerts",
+            "whatsapp_desc": "Automatically send invoice links, work order status updates, and appointment reminders via WhatsApp.",
+            "payments_title": "Installment Payments (Tabby & Tamara)",
+            "payments_desc": "Enable customers to split maintenance bills into interest-free installments via digital payment gateways.",
+            "maps_title": "Google Maps & Branch Locations",
+            "maps_desc": "Integrate interactive branch locations on Google Maps for easy navigation and roadside assistance.",
+            "erp_title": "Cloud Accounting Sync",
+            "erp_desc": "Sync invoices, journal entries, and payment receipts automatically with approved cloud ERP systems.",
+            "badges": {
+                "available": "Available",
+                "direct_support": "Direct Support",
+                "approved": "Approved",
+                "active": "Active",
+                "coming_soon": "Coming Soon"
+            },
+            "in_development": "In Development"
         },
         "all_transaction_types": "All transaction types"
     },
@@ -4296,6 +4334,8 @@
             "description": "Service description",
             "description_placeholder": "Enter service description...",
             "discount": "Discount",
+            "duplicate_part_notice": "Notice: This spare part is already added to this work order",
+            "duplicate_part_warning": "This spare part has already been added. Do you want to proceed?",
             "hide_on_print": "Hide when printing",
             "include_in_package": "Included in the package price",
             "no_notes": "There are no notes",
@@ -4380,7 +4420,7 @@
             "condition_details": "Condition Details",
             "customer": "Customer",
             "customer_complaint": "Customer Complaint",
-            "customer_signature": "Customer",
+            "customer_signature": "Customer signature",
             "customer_signature_short": "Customer Signature",
             "damage": "Damage",
             "date": "Date",
@@ -4428,6 +4468,10 @@
         "service_modal": {
             "days": "Days",
             "due_date": "Due Date",
+            "duplicate_continue": "Proceed",
+            "duplicate_notice": "Notice: This service is already added to this work order",
+            "duplicate_warning_message": "This service has already been added. Do you want to proceed and add it again?",
+            "duplicate_warning_title": "Duplicate Service",
             "duration_unit": "Period",
             "duration_value": "Service Duration",
             "hours": "Hours",
@@ -4573,7 +4617,8 @@
             "job_title": "Job title",
             "remove_confirm": "Are you sure you want to remove this technician?",
             "remove_service_confirm": "Are you sure you want to remove this service from the technician?"
-        }
+        },
+        "net_total": "Net Work Total After Returns"
     },
     "pagination": {
         "previous": "&laquo; Previous",
@@ -4652,7 +4697,7 @@
             "sms_credits": "SMS Credits",
             "whatsapp_credits": "WhatsApp Credits",
             "admin_users": "Admin Users",
-            "integrations": "Integrations",
+            "integrations": "Add-ons",
             "general_settings": "General Settings",
             "payment_settings": "Payment Settings",
             "company_settings": "Company Settings",
@@ -5254,7 +5299,7 @@
                 "maintenance": "Maintenance Mode",
                 "footer": "Footer",
                 "announcement": "Announcement Bar",
-                "integrations": "Integrations",
+                "integrations": "Add-ons",
                 "seo_social": "SEO & Social"
             }
         },
@@ -6114,6 +6159,82 @@
                 "draft": "Draft",
                 "published": "Published",
                 "unpublished": "Unpublished"
+            },
+            "tabs": {
+                "branding": "Branding & Theme",
+                "banners": "Banners & Offers",
+                "services": "Services & Pricing",
+                "contact": "Branches & Contact",
+                "domain_seo": "Domain & SEO",
+                "features": "Trust Badges & Portal"
+            },
+            "banners_manager": {
+                "title": "Promotional Banners & Offers",
+                "subtitle": "Add promotional banners and carousel slides at the top of your site to boost engagement",
+                "add_banner": "Add New Banner",
+                "no_banners": "No promotional banners yet. Create your first banner to promote special offers to site visitors!",
+                "banner_badge": "Banner Badge (e.g. Special Offer, 20% OFF)",
+                "banner_title": "Main Offer Title",
+                "banner_subtitle": "Offer Details or Conditions",
+                "cta_text": "Button Text (e.g. Book Now)",
+                "cta_link": "Button Link (or #booking)",
+                "banner_image": "Banner Image (Optional)",
+                "upload_banner_image": "Upload Banner Image",
+                "bg_gradient": "Background Gradient",
+                "is_active": "Activate this banner",
+                "delete_banner": "Delete Banner"
+            },
+            "announcement": {
+                "title": "Top Announcement Bar",
+                "enable": "Enable announcement bar at top of website",
+                "text": "Quick Announcement Text",
+                "text_placeholder": "e.g., Open 7 days a week from 8 AM to 10 PM"
+            },
+            "services_manager": {
+                "title": "Services Display & Pricing Control",
+                "subtitle": "Choose which services appear on your website and configure price visibility",
+                "pricing_mode": "Service Price Display Mode",
+                "pricing_modes": {
+                    "exact": "Show exact service price",
+                    "starting_from": "Show Starting from X SAR",
+                    "upon_inspection": "Hide price and show Price upon inspection",
+                    "hidden": "Completely hide price column"
+                },
+                "display_mode": "Services Selection Mode",
+                "all_services": "Display all active services automatically",
+                "selected_only": "Display selected services only on the website",
+                "search_services": "Search services...",
+                "featured_badge": "Featured",
+                "make_featured": "Mark as Featured",
+                "show_on_site": "Show on website",
+                "no_services_found": "No matching services found"
+            },
+            "custom_domain": {
+                "title": "Custom Domain",
+                "subtitle": "Connect your own custom domain (e.g. workshop.com) for professional branding and competitive edge",
+                "input_label": "Custom Domain Name",
+                "input_placeholder": "workshop.com or www.garage.sa",
+                "dns_instructions_title": "DNS Configuration Instructions:",
+                "dns_cname": "Create a CNAME record pointing to sites.carag.app or an A record pointing to the server IP.",
+                "status_label": "Domain Status:",
+                "status_none": "Not Connected",
+                "status_pending": "Pending DNS Verification",
+                "status_active": "Connected & Active with SSL",
+                "badge_pro": "Pro Feature"
+            },
+            "features_manager": {
+                "title": "Trust Badges & Workshop Features",
+                "subtitle": "Key value propositions that build customer trust and encourage appointment bookings",
+                "badge_title": "Feature Title",
+                "badge_desc": "Short Description",
+                "portal_tracking": "Customer Work Order Tracking Portal",
+                "portal_tracking_desc": "Allow customers to track repair progress using plate/chassis number directly on site",
+                "online_booking": "Enable Online Appointment Booking"
+            },
+            "device_preview": {
+                "desktop": "Desktop",
+                "mobile": "Mobile",
+                "visit_live": "Visit Live Site"
             }
         },
         "general": {

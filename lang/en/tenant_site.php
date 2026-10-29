@@ -15,6 +15,11 @@ return [
         'whatsapp_cta' => 'WhatsApp',
         'book_cta' => 'Book appointment',
     ],
+    'pricing' => [
+        'starting_from' => 'Starting from :price SAR',
+        'upon_inspection' => 'Price upon inspection',
+        'sar' => 'SAR',
+    ],
     'services' => [
         'title' => 'Our services',
         'subtitle' => 'A selection of services available at our center',

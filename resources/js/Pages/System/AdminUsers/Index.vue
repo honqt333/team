@@ -1,5 +1,7 @@
 <template>
     <SystemLayout>
+        <Head :title="$t('system.admin_users.title')" />
+
         <div class="space-y-6">
             <!-- Header -->
             <div class="flex items-center justify-between">
@@ -12,8 +14,8 @@
                     </p>
                 </div>
                 <div class="flex gap-3">
-                    <a
-                        href="/system/activity-log"
+                    <Link
+                        :href="route('system.activity-log')"
                         class="inline-flex items-center gap-1 px-4 py-2 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 rounded-lg text-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
                     >
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -25,7 +27,7 @@
                             />
                         </svg>
                         {{ $t('system.admin_users.activity_log') }}
-                    </a>
+                    </Link>
                     <button
                         v-if="isSuperAdmin"
                         @click="openCreateModal"
@@ -455,7 +457,7 @@
 <script setup>
 import { ref, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { router, useForm, usePage } from '@inertiajs/vue3';
+import { Head, Link, router, useForm, usePage } from '@inertiajs/vue3';
 import SystemLayout from '@/Layouts/SystemLayout.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 

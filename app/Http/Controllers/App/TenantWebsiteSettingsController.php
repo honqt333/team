@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers\App;
 
 use App\Http\Controllers\Controller;
+use App\Models\Service;
 use App\Models\TenantWebsite;
 use App\Support\Media\ImageType;
 use App\Support\TenantWebsite\ThemeRegistry;
@@ -47,9 +48,26 @@ class TenantWebsiteSettingsController extends Controller
         $tenantId = $this->currentTenantId();
         $website = $this->getOrCreateWebsite($tenantId);
 
+        $services = Service::query()
+            ->where('tenant_id', $tenantId)
+            ->where('is_active', true)
+            ->where('type', Service::TYPE_INTERNAL)
+            ->orderBy('sort_order')
+            ->orderBy('name_ar')
+            ->get(['id', 'name_ar', 'name_en', 'base_price', 'min_price'])
+            ->map(fn ($s) => [
+                'id' => $s->id,
+                'name_ar' => $s->name_ar,
+                'name_en' => $s->name_en,
+                'name' => $s->name ?? $s->name_ar,
+                'base_price' => (float) ($s->base_price ?? 0),
+                'min_price' => (float) ($s->min_price ?? 0),
+            ]);
+
         return Inertia::render('Settings/Website', [
             'website' => $website->toAdminPayload(),
             'theme_options' => ThemeRegistry::optionsForSelect(),
+            'tenant_services' => $services,
         ]);
     }
 
@@ -124,6 +142,25 @@ class TenantWebsiteSettingsController extends Controller
         $website->save();
 
         return response()->json(['success' => true]);
+    }
+
+    /**
+     * Upload an image for a promotional banner.
+     */
+    public function uploadBannerImage(Request $request): JsonResponse
+    {
+        $request->validate([
+            'image' => ['required', 'image', 'mimes:png,jpg,jpeg,webp', 'max:4096'],
+        ]);
+
+        $tenantId = $this->currentTenantId();
+        $path = $this->storeImage($request->file('image'), $tenantId, 'banner_'.time(), null);
+
+        return response()->json([
+            'success' => true,
+            'image_path' => $path,
+            'image_url' => Storage::url($path),
+        ]);
     }
 
     // ─────────────────────────────────────────────────────────────────
@@ -213,6 +250,16 @@ class TenantWebsiteSettingsController extends Controller
             'seo_description' => ['nullable', 'string', 'max:200'],
 
             'theme_key' => ['required', 'string', Rule::in($allowedKeys)],
+
+            'custom_domain' => [
+                'nullable',
+                'string',
+                'max:255',
+                Rule::unique('tenant_websites', 'custom_domain')->ignore($website->id),
+            ],
+
+            'banners' => ['nullable', 'array'],
+            'settings' => ['nullable', 'array'],
 
             'logo' => ['nullable', 'image', 'mimes:png,jpg,jpeg,webp', 'max:4096'],
             'cover' => ['nullable', 'image', 'mimes:png,jpg,jpeg,webp', 'max:4096'],

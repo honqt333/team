@@ -276,6 +276,169 @@ class TenantPublicSiteTest extends TestCase
             );
     }
 
+    public function test_public_site_renders_banners_and_settings(): void
+    {
+        $tenant = Tenant::factory()->create(['slug' => 'banner-site']);
+        TenantWebsite::factory()->for($tenant)->published()->create([
+            'banners' => [
+                [
+                    'id' => 'b1',
+                    'badge' => 'حصري',
+                    'title' => 'عرض الصيف المميز',
+                    'subtitle' => 'خصم 30%',
+                    'cta_text' => 'احجز موعد',
+                    'is_active' => true,
+                ],
+                [
+                    'id' => 'b2',
+                    'title' => 'عرض متوقف',
+                    'is_active' => false,
+                ],
+            ],
+            'settings' => [
+                'pricing_mode' => 'upon_inspection',
+                'announcement_bar' => [
+                    'enabled' => true,
+                    'text' => 'أهلاً بكم في فرعنا الجديد',
+                ],
+            ],
+        ]);
+
+        $this->get('/banner-site')
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page
+                ->component('Public/Site/Index')
+                ->where('site.banners', fn ($banners) => count($banners) === 1 && $banners[0]['title'] === 'عرض الصيف المميز')
+                ->where('site.settings.announcement_bar.text', 'أهلاً بكم في فرعنا الجديد')
+            );
+    }
+
+    public function test_public_site_respects_selective_services_and_pricing_mode(): void
+    {
+        $tenant = Tenant::factory()->create(['slug' => 'pricing-site']);
+
+        $service1 = Service::factory()->create([
+            'tenant_id' => $tenant->id,
+            'name_ar' => 'تغيير زيت',
+            'name_en' => 'Oil Change',
+            'base_price' => 150.00,
+            'min_price' => 120.00,
+            'is_active' => true,
+            'type' => Service::TYPE_INTERNAL,
+        ]);
+
+        $service2 = Service::factory()->create([
+            'tenant_id' => $tenant->id,
+            'name_ar' => 'فحص كمبيوتر',
+            'name_en' => 'Computer Diagnostic',
+            'base_price' => 200.00,
+            'min_price' => 180.00,
+            'is_active' => true,
+            'type' => Service::TYPE_INTERNAL,
+        ]);
+
+        TenantWebsite::factory()->for($tenant)->published()->create([
+            'settings' => [
+                'services_mode' => 'selected',
+                'selected_service_ids' => [$service1->id],
+                'featured_service_ids' => [$service1->id],
+                'pricing_mode' => 'starting_from',
+                'show_prices' => true,
+            ],
+        ]);
+
+        $this->get('/pricing-site')
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page
+                ->component('Public/Site/Index')
+                ->where('services', function ($services) use ($service1) {
+                    $servicesCol = collect($services);
+                    $first = $servicesCol->first();
+
+                    return $servicesCol->count() === 1
+                        && $first['id'] === $service1->id
+                        && $first['is_featured'] === true
+                        && str_contains($first['price_display'], '120.00');
+                })
+            );
+    }
+
+    public function test_pricing_mode_exact(): void
+    {
+        $tenant = Tenant::factory()->create(['slug' => 'exact-price']);
+
+        Service::factory()->create([
+            'tenant_id' => $tenant->id,
+            'name_ar' => 'خدمة دقيقة',
+            'base_price' => 250.00,
+            'is_active' => true,
+            'type' => Service::TYPE_INTERNAL,
+        ]);
+
+        TenantWebsite::factory()->for($tenant)->published()->create([
+            'settings' => [
+                'pricing_mode' => 'exact',
+                'show_prices' => true,
+            ],
+        ]);
+
+        $this->get('/exact-price')
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page
+                ->where('services.0.price_display', fn ($price) => str_contains($price, '250.00'))
+            );
+    }
+
+    public function test_pricing_mode_upon_inspection(): void
+    {
+        $tenant = Tenant::factory()->create(['slug' => 'inspection-price']);
+
+        Service::factory()->create([
+            'tenant_id' => $tenant->id,
+            'name_ar' => 'توضيب محرك',
+            'base_price' => 1500.00,
+            'is_active' => true,
+            'type' => Service::TYPE_INTERNAL,
+        ]);
+
+        TenantWebsite::factory()->for($tenant)->published()->create([
+            'settings' => [
+                'pricing_mode' => 'upon_inspection',
+            ],
+        ]);
+
+        $this->get('/inspection-price')
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page
+                ->where('services.0.price_display', fn ($price) => ! empty($price) && ! str_contains($price, '1500'))
+            );
+    }
+
+    public function test_pricing_mode_hidden(): void
+    {
+        $tenant = Tenant::factory()->create(['slug' => 'hidden-price']);
+
+        Service::factory()->create([
+            'tenant_id' => $tenant->id,
+            'name_ar' => 'خدمة بدون سعر',
+            'base_price' => 500.00,
+            'is_active' => true,
+            'type' => Service::TYPE_INTERNAL,
+        ]);
+
+        TenantWebsite::factory()->for($tenant)->published()->create([
+            'settings' => [
+                'pricing_mode' => 'hidden',
+            ],
+        ]);
+
+        $this->get('/hidden-price')
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page
+                ->where('services.0.price_display', null)
+            );
+    }
+
     public function test_reserved_slugs_do_not_hit_tenant_site(): void
     {
         // The /{tenant} catch-all must NOT shadow the platform's

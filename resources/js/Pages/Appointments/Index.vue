@@ -2,7 +2,7 @@
     <AppLayout>
         <Head :title="$t('appointments.title')" />
 
-        <div class="px-4 sm:px-6 py-6 space-y-6">
+        <div class="space-y-6">
             <PageHeader
                 :title="$t('appointments.title')"
                 :subtitle="$t('appointments.subtitle')"
@@ -29,12 +29,17 @@
                 </template>
 
                 <template #actions>
-                    <a
+                    <Link
                         v-if="can('crm.appointments.manage')"
-                        href="/app/settings/service-bays"
-                        class="px-3 py-2 rounded-xl text-xs font-bold bg-white/15 hover:bg-white/25 text-white border border-white/20 flex items-center gap-1.5"
+                        :href="route('service-bays.index')"
+                        class="px-4 py-2.5 rounded-xl text-sm font-semibold text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow transition-all flex items-center gap-2"
                     >
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg
+                            class="w-4 h-4 text-emerald-600 dark:text-emerald-400"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                        >
                             <path
                                 stroke-linecap="round"
                                 stroke-linejoin="round"
@@ -43,11 +48,11 @@
                             />
                         </svg>
                         {{ $t('service_bays.title') }}
-                    </a>
+                    </Link>
                     <button
                         type="button"
                         @click="openCreate"
-                        class="px-3 py-2 rounded-xl text-xs font-bold bg-white/15 hover:bg-white/25 text-white border border-white/20 flex items-center gap-1.5"
+                        class="px-4 py-2.5 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 shadow-md shadow-emerald-500/20 hover:shadow-lg hover:shadow-emerald-500/30 transition-all flex items-center gap-2"
                     >
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path
@@ -133,7 +138,7 @@
                 <button
                     type="button"
                     @click="clearFilters"
-                    class="text-xs font-bold text-gray-600 dark:text-gray-300 hover:underline"
+                    class="px-3 py-2 rounded-xl text-xs font-semibold text-gray-600 dark:text-gray-300 bg-gray-100 dark:bg-gray-700/80 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
                 >
                     {{ $t('appointments.clear_filters') }}
                 </button>
@@ -216,7 +221,7 @@
                                     type="button"
                                     @click="checkIn(appt)"
                                     :disabled="busy"
-                                    class="px-2 py-1 rounded-md text-[11px] font-bold bg-emerald-600 hover:bg-emerald-700 text-white disabled:opacity-50"
+                                    class="px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm disabled:opacity-50 transition-colors"
                                 >
                                     {{ $t('appointments.check_in') }}
                                 </button>
@@ -225,7 +230,7 @@
                                     type="button"
                                     @click="markNoShow(appt)"
                                     :disabled="busy"
-                                    class="px-2 py-1 rounded-md text-[11px] font-bold bg-amber-500 hover:bg-amber-600 text-white disabled:opacity-50"
+                                    class="px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-amber-500 hover:bg-amber-600 text-white shadow-sm disabled:opacity-50 transition-colors"
                                 >
                                     {{ $t('appointments.no_show') }}
                                 </button>
@@ -238,7 +243,7 @@
                                     type="button"
                                     @click="convert(appt)"
                                     :disabled="busy"
-                                    class="px-2 py-1 rounded-md text-[11px] font-bold bg-indigo-600 hover:bg-indigo-700 text-white disabled:opacity-50"
+                                    class="px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm disabled:opacity-50 transition-colors"
                                 >
                                     {{ $t('appointments.convert') }}
                                 </button>
@@ -249,7 +254,7 @@
                                     type="button"
                                     @click="openCancel(appt)"
                                     :disabled="busy"
-                                    class="px-2 py-1 rounded-md text-[11px] font-bold bg-rose-600 hover:bg-rose-700 text-white disabled:opacity-50"
+                                    class="px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-rose-600 hover:bg-rose-700 text-white shadow-sm disabled:opacity-50 transition-colors"
                                 >
                                     {{ $t('appointments.cancel') }}
                                 </button>
@@ -459,7 +464,7 @@
 
 <script setup>
 import { reactive, ref, computed } from 'vue';
-import { Head, router } from '@inertiajs/vue3';
+import { Head, Link, router } from '@inertiajs/vue3';
 import axios from 'axios';
 import { useI18n } from 'vue-i18n';
 import AppLayout from '@/Layouts/AppLayout.vue';

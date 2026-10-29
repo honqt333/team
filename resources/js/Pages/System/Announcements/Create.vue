@@ -1,8 +1,13 @@
 <template>
     <SystemLayout>
+        <Head :title="$t('system.announcements.create')" />
+
         <div class="max-w-2xl mx-auto space-y-6">
             <div class="flex items-center gap-4">
-                <a href="/system/announcements" class="text-gray-500 hover:text-gray-700">
+                <Link
+                    :href="route('system.announcements.index')"
+                    class="text-gray-500 hover:text-gray-700 rtl:rotate-180"
+                >
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path
                             stroke-linecap="round"
@@ -11,7 +16,7 @@
                             d="M15 19l-7-7 7-7"
                         />
                     </svg>
-                </a>
+                </Link>
                 <h1 class="text-2xl font-bold text-gray-900 dark:text-white">
                     {{ $t('system.announcements.create_title') }}
                 </h1>
@@ -161,12 +166,12 @@
                         >
                             {{ $t('system.announcements.create_draft') }}
                         </button>
-                        <a
-                            href="/system/announcements"
+                        <Link
+                            :href="route('system.announcements.index')"
                             class="px-6 py-2.5 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg"
                         >
                             {{ $t('common.cancel') }}
-                        </a>
+                        </Link>
                     </div>
                 </form>
             </div>
@@ -179,7 +184,7 @@ import { useI18n } from 'vue-i18n';
 const { t } = useI18n();
 
 import { computed } from 'vue';
-import { useForm } from '@inertiajs/vue3';
+import { Head, Link, useForm } from '@inertiajs/vue3';
 import SystemLayout from '@/Layouts/SystemLayout.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 

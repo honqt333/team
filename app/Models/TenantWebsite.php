@@ -41,17 +41,25 @@ class TenantWebsite extends Model
         'contact_email',
         'address_line',
         'social_links',
+        'banners',
+        'settings',
         'primary_color',
         'secondary_color',
         'status',
         'seo_title',
         'seo_description',
         'theme_key',
+        'custom_domain',
+        'custom_domain_status',
+        'custom_domain_verified_at',
         'published_at',
     ];
 
     protected $casts = [
         'social_links' => 'array',
+        'banners' => 'array',
+        'settings' => 'array',
+        'custom_domain_verified_at' => 'datetime',
         'published_at' => 'datetime',
     ];
 
@@ -228,6 +236,58 @@ class TenantWebsite extends Model
             : null;
     }
 
+    public function getEffectiveSettingsAttribute(): array
+    {
+        $defaults = [
+            'pricing_mode' => 'upon_inspection', // 'exact' | 'starting_from' | 'upon_inspection' | 'hidden'
+            'show_prices' => false,
+            'services_mode' => 'all', // 'all' | 'selected'
+            'selected_service_ids' => [],
+            'featured_service_ids' => [],
+            'announcement_bar' => [
+                'enabled' => false,
+                'text' => '',
+                'link' => '',
+            ],
+            'features_badges' => [
+                ['icon' => 'shield-check', 'title' => 'ضمان معتمد', 'desc' => 'ضمان على قطع الغيار والأعمال'],
+                ['icon' => 'wrench', 'title' => 'فنيون متخصصون', 'desc' => 'أحدث أجهزة الفحص والبرمجة'],
+                ['icon' => 'clock', 'title' => 'التزام بالمواعيد', 'desc' => 'دقة وسرعة في تسليم المركبة'],
+            ],
+            'enable_portal_lookup' => true,
+            'enable_online_booking' => true,
+        ];
+
+        $stored = is_array($this->settings) ? $this->settings : [];
+
+        return array_replace_recursive($defaults, $stored);
+    }
+
+    public function getEffectiveBannersAttribute(): array
+    {
+        $raw = is_array($this->banners) ? $this->banners : [];
+
+        return array_values(array_filter(array_map(function ($banner) {
+            if (! is_array($banner)) {
+                return null;
+            }
+
+            return [
+                'id' => (string) ($banner['id'] ?? uniqid('ban_')),
+                'badge' => (string) ($banner['badge'] ?? ''),
+                'title' => (string) ($banner['title'] ?? ''),
+                'subtitle' => (string) ($banner['subtitle'] ?? ''),
+                'cta_text' => (string) ($banner['cta_text'] ?? ''),
+                'cta_link' => (string) ($banner['cta_link'] ?? ''),
+                'image_path' => (string) ($banner['image_path'] ?? ''),
+                'image_url' => ! empty($banner['image_path']) ? Storage::url($banner['image_path']) : null,
+                'bg_gradient' => (string) ($banner['bg_gradient'] ?? 'from-indigo-600 to-blue-700'),
+                'is_active' => (bool) ($banner['is_active'] ?? true),
+                'sort_order' => (int) ($banner['sort_order'] ?? 0),
+            ];
+        }, $raw)));
+    }
+
     /**
      * Convenience for the admin form: build the full payload
      * for the settings page (includes the normalized theme
@@ -248,6 +308,8 @@ class TenantWebsite extends Model
             'contact_email' => $this->contact_email,
             'address_line' => $this->address_line,
             'social_links' => $this->social_links ?? [],
+            'banners' => $this->effective_banners,
+            'settings' => $this->effective_settings,
             'primary_color' => $this->primary_color,
             'secondary_color' => $this->secondary_color,
             'status' => $this->status,
@@ -255,6 +317,9 @@ class TenantWebsite extends Model
             'seo_description' => $this->seo_description,
             'theme_key' => $this->attributes['theme_key'] ?? ThemeRegistry::DEFAULT_THEME,
             'theme_key_normalized' => $this->themeKeyNormalized,
+            'custom_domain' => $this->custom_domain,
+            'custom_domain_status' => $this->custom_domain_status ?? 'none',
+            'custom_domain_verified_at' => $this->custom_domain_verified_at?->toIso8601String(),
             'is_published' => $this->is_published,
             'published_at' => $this->published_at?->toIso8601String(),
         ];

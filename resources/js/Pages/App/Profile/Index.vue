@@ -5,6 +5,7 @@ const { t } = useI18n();
 import { ref, computed } from 'vue';
 import { useForm, usePage, router } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
+import PageHeader from '@/Components/PageHeader.vue';
 import { useToast } from '@/Composables/useToast';
 
 const props = defineProps({
@@ -122,35 +123,43 @@ const regenerateCodes = () =>
 </script>
 
 <template>
-    <AppLayout shadow-sm>
+    <AppLayout>
         <div class="space-y-6">
-            <!-- Header -->
-            <div
-                class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-200 dark:border-gray-700"
+            <!-- Header Section -->
+            <PageHeader
+                :title="user.name"
+                gradientFrom="from-indigo-600"
+                gradientTo="to-purple-600"
+                glowFrom="from-indigo-500"
+                badgeBg="bg-indigo-50/50 dark:bg-indigo-900/30"
+                badgeText="text-indigo-600 dark:text-indigo-400"
+                badgeBorder="border-indigo-100/50 dark:border-indigo-800/30"
+                badgeDot="bg-indigo-500"
             >
-                <div class="flex flex-col sm:flex-row items-center sm:items-start gap-6">
+                <template #icon>
                     <!-- Photo Display & Upload -->
-                    <div class="relative group">
-                        <div
-                            class="w-24 h-24 rounded-2xl bg-gradient-to-br from-indigo-600 to-purple-600 flex items-center justify-center text-white text-3xl font-bold shadow-lg shadow-indigo-500/30 overflow-hidden"
-                        >
-                            <img
-                                v-if="user.photo_url"
-                                :src="user.photo_url"
-                                :alt="user.name"
-                                class="w-full h-full object-cover"
-                            />
-                            <span v-else>{{ user.name?.charAt(0).toUpperCase() }}</span>
-                        </div>
+                    <div
+                        class="relative w-full h-full rounded-2xl overflow-hidden group flex items-center justify-center"
+                    >
+                        <img
+                            v-if="user.photo_url"
+                            :src="user.photo_url"
+                            :alt="user.name"
+                            class="w-full h-full object-cover"
+                        />
+                        <span v-else class="text-white text-2xl font-black">
+                            {{ user.name?.charAt(0).toUpperCase() }}
+                        </span>
 
                         <!-- Upload Overlay -->
                         <div
                             v-if="user.can_update_photo"
                             @click="$refs.photoInput.click()"
-                            class="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer rounded-2xl"
+                            class="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer rounded-2xl"
+                            :title="$t('profile.photo.update')"
                         >
                             <svg
-                                class="w-8 h-8 text-white"
+                                class="w-6 h-6 text-white"
                                 fill="none"
                                 stroke="currentColor"
                                 viewBox="0 0 24 24"
@@ -189,36 +198,22 @@ const regenerateCodes = () =>
                             ></div>
                         </div>
                     </div>
+                </template>
 
-                    <div class="flex-1 text-center sm:text-start">
-                        <h1 class="text-2xl font-bold text-gray-900 dark:text-white">
-                            {{ user.name }}
-                        </h1>
-                        <p class="text-sm text-gray-500 dark:text-gray-400">{{ user.email }}</p>
-                        <div
-                            v-if="user.phone"
-                            class="flex items-center justify-center sm:justify-start gap-2 mt-2 text-sm text-gray-500 dark:text-gray-400"
-                            dir="ltr"
-                        >
-                            <svg
-                                class="w-4 h-4"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                            >
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    stroke-width="2"
-                                    d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
-                                />
-                            </svg>
-                            {{ user.phone }}
-                        </div>
-
-                        <div
+                <template #identity>
+                    <div
+                        class="flex flex-wrap items-center gap-3 text-sm text-gray-500 dark:text-gray-400 font-medium mt-1"
+                    >
+                        <span>{{ user.email }}</span>
+                        <template v-if="user.phone">
+                            <span class="text-gray-300 dark:text-gray-600">|</span>
+                            <span dir="ltr" class="font-mono text-gray-700 dark:text-gray-300">
+                                {{ user.phone }}
+                            </span>
+                        </template>
+                        <span
                             v-if="!user.can_update_photo"
-                            class="mt-3 inline-flex items-center gap-2 px-3 py-1 bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400 border border-amber-100 dark:border-amber-800 rounded-lg text-xs font-medium"
+                            class="inline-flex items-center gap-1 px-2.5 py-0.5 bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400 border border-amber-200 dark:border-amber-800 rounded-lg text-xs font-semibold"
                         >
                             <svg
                                 class="w-3.5 h-3.5"
@@ -234,10 +229,10 @@ const regenerateCodes = () =>
                                 />
                             </svg>
                             {{ $t('profile.photo.hr_locked') }}
-                        </div>
+                        </span>
                     </div>
-                </div>
-            </div>
+                </template>
+            </PageHeader>
 
             <!-- Tabs -->
             <div

@@ -542,6 +542,8 @@ Route::prefix('app')->middleware(['auth', 'verified', 'tenant.active', 'center.c
     // Settings
     Route::get('/settings', [SettingsController::class, 'index'])->name('settings.index');
     Route::get('/settings/integrations', [SettingsController::class, 'integrations'])->name('settings.integrations');
+    Route::get('/addons', [SettingsController::class, 'integrations'])->name('app.addons');
+    Route::get('/integrations', fn () => redirect()->route('settings.integrations'));
     // /settings/website is a placeholder card on the settings
     // hub. The real edit form lives at /settings/website/edit;
     // we redirect so the hub card opens the actual form.
@@ -561,6 +563,9 @@ Route::prefix('app')->middleware(['auth', 'verified', 'tenant.active', 'center.c
     Route::delete('/settings/website/edit/image', [TenantWebsiteSettingsController::class, 'deleteImage'])
         ->middleware('permission:settings.website.manage')
         ->name('settings.website.image.delete');
+    Route::post('/settings/website/edit/banner-image', [TenantWebsiteSettingsController::class, 'uploadBannerImage'])
+        ->middleware('permission:settings.website.manage')
+        ->name('settings.website.banner.upload');
 
     // Company Profile Settings
     Route::get('/settings/company', [CompanyProfileController::class, 'index'])->name('settings.company');

@@ -2,56 +2,33 @@
     <AppLayout>
         <Head :title="$t('workshop.board.title')" />
 
-        <div class="px-4 sm:px-6 py-6 space-y-6">
+        <div class="space-y-6">
             <!-- Page Header -->
-            <div
-                class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-emerald-600 via-emerald-500 to-teal-600 dark:from-emerald-700 dark:via-emerald-600 dark:to-teal-700 px-6 py-5 shadow-lg"
+            <PageHeader
+                :title="$t('workshop.board.title')"
+                :subtitle="$t('workshop.board.subtitle')"
+                gradientFrom="from-emerald-600"
+                gradientTo="to-teal-600"
+                glowFrom="from-emerald-500"
+                :total-count="toEnglish(counts.total)"
+                :count-label="$t('workshop.board.title')"
             >
-                <div
-                    class="absolute inset-y-0 start-0 w-1/3 bg-gradient-to-r from-white/10 to-transparent pointer-events-none"
-                ></div>
-                <div class="relative flex flex-wrap items-center justify-between gap-4">
-                    <div class="flex items-center gap-4">
-                        <div
-                            class="w-12 h-12 rounded-xl bg-white/15 backdrop-blur-sm flex items-center justify-center flex-shrink-0"
-                        >
-                            <svg
-                                class="w-7 h-7 text-white"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                            >
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    stroke-width="2"
-                                    d="M4 6h6v6H4V6zm0 10h6v4H4v-4zm10-10h6v4h-6V6zm0 8h6v6h-6v-6z"
-                                />
-                            </svg>
-                        </div>
-                        <div>
-                            <h1 class="text-2xl font-bold text-white">
-                                {{ $t('workshop.board.title') }}
-                            </h1>
-                            <p class="text-sm text-emerald-50/90 mt-0.5">
-                                {{ $t('workshop.board.subtitle') }}
-                            </p>
-                        </div>
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <span
-                            class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/15 backdrop-blur-sm text-sm font-semibold text-white"
-                        >
-                            <span class="w-2 h-2 rounded-full bg-emerald-200 animate-pulse"></span>
-                            {{
-                                $t('workshop.board.total_active', {
-                                    count: toEnglish(counts.total),
-                                })
-                            }}
-                        </span>
-                    </div>
-                </div>
-            </div>
+                <template #icon>
+                    <svg
+                        class="w-9 h-9 text-white"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2.5"
+                            d="M4 6h6v6H4V6zm0 10h6v4H4v-4zm10-10h6v4h-6V6zm0 8h6v6h-6v-6z"
+                        />
+                    </svg>
+                </template>
+            </PageHeader>
 
             <!-- Kanban Board -->
             <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
@@ -318,6 +295,7 @@ import { computed } from 'vue';
 import { Head, Link } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import AppLayout from '@/Layouts/AppLayout.vue';
+import PageHeader from '@/Components/PageHeader.vue';
 import { useNumberFormat } from '@/Composables/useNumberFormat';
 
 const { t } = useI18n();

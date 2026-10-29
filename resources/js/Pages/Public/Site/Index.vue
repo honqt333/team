@@ -16,6 +16,17 @@
         :style="cssVars"
         class="tenant-site min-h-screen bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100"
     >
+        <!-- Top announcement bar -->
+        <aside
+            v-if="site.settings?.announcement_bar?.enabled && site.settings?.announcement_bar?.text"
+            class="bg-gradient-to-r from-pink-600 via-rose-600 to-amber-600 text-white text-xs font-semibold py-2 px-4 shadow-sm"
+        >
+            <div class="max-w-6xl mx-auto flex items-center justify-center gap-2">
+                <span class="inline-block animate-pulse">📢</span>
+                <span>{{ site.settings.announcement_bar.text }}</span>
+            </div>
+        </aside>
+
         <!-- Top bar -->
         <header
             class="sticky top-0 z-40 backdrop-blur bg-white/80 dark:bg-slate-900/80 border-b border-slate-200 dark:border-slate-800"
@@ -105,6 +116,93 @@
                 </div>
             </div>
         </header>
+
+        <!-- Promotional Marketing Banners Slider -->
+        <section
+            v-if="site.banners && site.banners.length"
+            class="max-w-6xl mx-auto px-4 sm:px-6 pt-6"
+        >
+            <div
+                class="relative rounded-3xl overflow-hidden shadow-xl border border-slate-200/60 dark:border-slate-800"
+            >
+                <div
+                    class="relative min-h-[220px] sm:min-h-[280px] p-6 sm:p-10 flex flex-col justify-center text-white bg-gradient-to-r transition-all duration-500"
+                    :class="currentBanner.bg_gradient || 'from-indigo-600 to-blue-700'"
+                >
+                    <!-- Background image overlay if exists -->
+                    <div v-if="currentBanner.image_url" class="absolute inset-0 -z-0">
+                        <img
+                            :src="currentBanner.image_url"
+                            class="w-full h-full object-cover opacity-25"
+                            alt=""
+                        />
+                        <div
+                            class="absolute inset-0 bg-gradient-to-r from-black/70 to-transparent"
+                        ></div>
+                    </div>
+
+                    <div class="relative z-10 max-w-xl space-y-3">
+                        <span
+                            v-if="currentBanner.badge"
+                            class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-white/20 backdrop-blur-md text-white border border-white/20"
+                        >
+                            {{ currentBanner.badge }}
+                        </span>
+                        <h2
+                            class="text-2xl sm:text-4xl font-extrabold tracking-tight leading-tight"
+                        >
+                            {{ currentBanner.title }}
+                        </h2>
+                        <p
+                            v-if="currentBanner.subtitle"
+                            class="text-sm sm:text-base text-white/90 font-medium line-clamp-2"
+                        >
+                            {{ currentBanner.subtitle }}
+                        </p>
+                        <div v-if="currentBanner.cta_text" class="pt-2">
+                            <a
+                                :href="currentBanner.cta_link || site.whatsapp_link || '#services'"
+                                class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white text-slate-900 font-bold text-sm shadow-lg hover:bg-slate-100 transition"
+                            >
+                                <span>{{ currentBanner.cta_text }}</span>
+                                <svg
+                                    class="w-4 h-4 rtl:rotate-180"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2"
+                                        d="M14 5l7 7m0 0l-7 7m7-7H3"
+                                    />
+                                </svg>
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Slider dots & navigation -->
+                    <div
+                        v-if="site.banners.length > 1"
+                        class="absolute bottom-4 end-6 z-10 flex items-center gap-2"
+                    >
+                        <button
+                            v-for="(_, bIndex) in site.banners"
+                            :key="bIndex"
+                            type="button"
+                            @click="currentBannerIdx = bIndex"
+                            class="h-2.5 rounded-full transition-all"
+                            :class="
+                                currentBannerIdx === bIndex
+                                    ? 'bg-white w-6'
+                                    : 'bg-white/40 hover:bg-white/70 w-2.5'
+                            "
+                        ></button>
+                    </div>
+                </div>
+            </div>
+        </section>
 
         <!-- Hero -->
         <section class="relative overflow-hidden">
@@ -212,37 +310,88 @@
                     <article
                         v-for="service in services"
                         :key="service.id"
-                        class="group p-5 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:shadow-lg hover:-translate-y-0.5 transition"
+                        class="group p-5 rounded-2xl border bg-white dark:bg-slate-900 hover:shadow-lg hover:-translate-y-0.5 transition flex flex-col justify-between"
+                        :class="
+                            service.is_featured
+                                ? 'border-amber-300/80 dark:border-amber-600/50 shadow-sm ring-1 ring-amber-400/20'
+                                : 'border-slate-200 dark:border-slate-800'
+                        "
                     >
-                        <div
-                            class="w-10 h-10 rounded-xl flex items-center justify-center mb-3"
-                            :style="{
-                                backgroundColor:
-                                    'color-mix(in srgb, var(--tenant-primary) 12%, transparent)',
-                                color: 'var(--tenant-primary)',
-                            }"
-                        >
-                            <svg
-                                class="w-5 h-5"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
+                        <div>
+                            <div class="flex items-center justify-between gap-2 mb-3">
+                                <div
+                                    class="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
+                                    :style="{
+                                        backgroundColor:
+                                            'color-mix(in srgb, var(--tenant-primary) 12%, transparent)',
+                                        color: 'var(--tenant-primary)',
+                                    }"
+                                >
+                                    <svg
+                                        class="w-5 h-5"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                                        />
+                                    </svg>
+                                </div>
+
+                                <!-- Featured badge -->
+                                <span
+                                    v-if="service.is_featured"
+                                    class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300 border border-amber-200 dark:border-amber-700"
+                                >
+                                    ⭐ خدمة مميزة
+                                </span>
+                            </div>
+
+                            <h4 class="font-bold text-base">{{ service.name }}</h4>
+                            <p
+                                v-if="service.description"
+                                class="mt-1.5 text-sm text-slate-600 dark:text-slate-400 line-clamp-3"
                             >
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    stroke-width="2"
-                                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                                />
-                            </svg>
+                                {{ service.description }}
+                            </p>
                         </div>
-                        <h4 class="font-bold text-base">{{ service.name }}</h4>
-                        <p
-                            v-if="service.description"
-                            class="mt-1.5 text-sm text-slate-600 dark:text-slate-400 line-clamp-3"
+
+                        <!-- Price display & WhatsApp inquiry -->
+                        <div
+                            class="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between gap-2"
                         >
-                            {{ service.description }}
-                        </p>
+                            <span
+                                v-if="service.price_display"
+                                class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-bold"
+                                :style="{
+                                    backgroundColor:
+                                        'color-mix(in srgb, var(--tenant-primary) 10%, transparent)',
+                                    color: 'var(--tenant-primary)',
+                                }"
+                            >
+                                {{ service.price_display }}
+                            </span>
+                            <span v-else></span>
+
+                            <a
+                                v-if="site.whatsapp_link"
+                                :href="`${site.whatsapp_link}?text=${encodeURIComponent('مرحباً، أود الاستفسار عن خدمة: ' + service.name)}`"
+                                target="_blank"
+                                rel="noopener"
+                                class="inline-flex items-center gap-1 text-xs font-semibold text-emerald-600 dark:text-emerald-400 hover:underline"
+                            >
+                                <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24">
+                                    <path
+                                        d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.711 2.598 2.668-.699c.966.541 1.782.814 2.791.814 3.181 0 5.767-2.586 5.768-5.766 0-3.18-2.586-5.766-5.767-5.766zm0 10.457c-.896 0-1.688-.266-2.434-.732l-.174-.108-1.78.467.475-1.734-.114-.182c-.521-.832-.8-1.597-.8-2.399 0-2.571 2.091-4.662 4.663-4.662 2.571 0 4.662 2.091 4.662 4.662 0 2.571-2.091 4.662-4.662 4.662z"
+                                    />
+                                </svg>
+                                <span>استفسار</span>
+                            </a>
+                        </div>
                     </article>
                 </div>
             </div>
@@ -612,25 +761,43 @@ const heroGradient = computed(() => {
     return `linear-gradient(135deg, ${props.site.primary_color || '#4f46e5'} 0%, ${props.site.secondary_color || '#0ea5e9'} 100%)`;
 });
 
-const whyUsCards = computed(() => [
-    {
-        title:
-            tr('tenant_site.why_us.cards.quality.title') ||
-            t('tenant_site.why_us.cards.quality.title'),
-        body: tr('tenant_site.why_us.cards.quality.body') || t('landing.certified_quality_desc'),
-    },
-    {
-        title:
-            tr('tenant_site.why_us.cards.speed.title') || t('tenant_site.why_us.cards.speed.title'),
-        body: tr('tenant_site.why_us.cards.speed.body') || t('landing.fast_turnaround_desc'),
-    },
-    {
-        title:
-            tr('tenant_site.why_us.cards.warranty.title') ||
-            t('tenant_site.why_us.cards.warranty.title'),
-        body: tr('tenant_site.why_us.cards.warranty.body') || t('landing.reliable_warranty_desc'),
-    },
-]);
+const currentBannerIdx = ref(0);
+const currentBanner = computed(() => {
+    const list = props.site?.banners || [];
+    return list[currentBannerIdx.value] || list[0] || {};
+});
+
+const whyUsCards = computed(() => {
+    const badges = props.site?.settings?.features_badges;
+    if (Array.isArray(badges) && badges.length) {
+        return badges.map((b) => ({
+            title: b.title,
+            body: b.desc,
+        }));
+    }
+    return [
+        {
+            title:
+                tr('tenant_site.why_us.cards.quality.title') ||
+                t('tenant_site.why_us.cards.quality.title'),
+            body:
+                tr('tenant_site.why_us.cards.quality.body') || t('landing.certified_quality_desc'),
+        },
+        {
+            title:
+                tr('tenant_site.why_us.cards.speed.title') ||
+                t('tenant_site.why_us.cards.speed.title'),
+            body: tr('tenant_site.why_us.cards.speed.body') || t('landing.fast_turnaround_desc'),
+        },
+        {
+            title:
+                tr('tenant_site.why_us.cards.warranty.title') ||
+                t('tenant_site.why_us.cards.warranty.title'),
+            body:
+                tr('tenant_site.why_us.cards.warranty.body') || t('landing.reliable_warranty_desc'),
+        },
+    ];
+});
 
 const socialPlatforms = {
     facebook: {

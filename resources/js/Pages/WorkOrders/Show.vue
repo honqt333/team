@@ -28,6 +28,7 @@
                     :total-paid="workOrderTotalPaid"
                     :bad-debt="workOrderBadDebt"
                     :balance="workOrderBalance"
+                    :credit-notes-total="workOrderTotalCreditNotes"
                 />
             </div>
 
@@ -884,9 +885,19 @@ const workOrderBadDebt = computed(() => {
     );
 });
 
-const workOrderBalance = computed(
-    () => workOrderTotal.value - workOrderTotalPaid.value - workOrderBadDebt.value
-);
+const workOrderTotalCreditNotes = computed(() => {
+    return (
+        props.workOrder.credit_notes?.reduce((sum, cn) => {
+            if (cn.status === 'cancelled') return sum;
+            return sum + parseFloat(cn.total_incl_tax || 0);
+        }, 0) || 0
+    );
+});
+
+const workOrderBalance = computed(() => {
+    const netTotal = Math.max(0, workOrderTotal.value - workOrderTotalCreditNotes.value);
+    return Math.max(0, netTotal - workOrderTotalPaid.value - workOrderBadDebt.value);
+});
 
 // ─── Composable layer ──────────────────────────────────────────────────────────
 const items = useWorkOrderItems({

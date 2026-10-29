@@ -295,7 +295,7 @@ class WorkOrder extends Model
      */
     public function scopeHasOutstandingBalance($query): void
     {
-        $query->whereRaw('(COALESCE((SELECT SUM((unit_price * qty) - discount_amount) FROM work_order_items WHERE work_order_id = work_orders.id), 0) + COALESCE((SELECT SUM((unit_price * qty) - discount) FROM work_order_item_parts WHERE work_order_id = work_orders.id), 0)) > (COALESCE((SELECT SUM(CASE WHEN type = "payment" THEN amount WHEN type = "refund" THEN -amount ELSE 0 END) FROM payments WHERE work_order_id = work_orders.id), 0))');
+        $query->whereRaw(self::outstandingBalanceSql());
     }
 
     /**
@@ -331,7 +331,7 @@ class WorkOrder extends Model
      */
     public static function outstandingBalanceSql(): string
     {
-        return '(COALESCE((SELECT SUM((unit_price * qty) - discount_amount) FROM work_order_items WHERE work_order_id = work_orders.id), 0) + COALESCE((SELECT SUM((unit_price * qty) - discount) FROM work_order_item_parts WHERE work_order_id = work_orders.id), 0)) > (COALESCE((SELECT SUM(CASE WHEN type = "payment" THEN amount WHEN type = "refund" THEN -amount ELSE 0 END) FROM payments WHERE work_order_id = work_orders.id), 0))';
+        return '((COALESCE((SELECT SUM((unit_price * qty) - discount_amount) FROM work_order_items WHERE work_order_id = work_orders.id AND status != "cancelled"), 0) + COALESCE((SELECT SUM((unit_price * qty) - discount) FROM work_order_item_parts WHERE work_order_id = work_orders.id AND status NOT IN ("cancelled", "reversed")), 0) - COALESCE((SELECT SUM(total_incl_tax) FROM invoices WHERE work_order_id = work_orders.id AND type = "credit_note" AND status != "cancelled"), 0)) > (COALESCE((SELECT SUM(CASE WHEN type = "payment" THEN amount WHEN type = "refund" THEN -amount ELSE 0 END) FROM payments WHERE work_order_id = work_orders.id), 0)) + 0.001)';
     }
 
     /**

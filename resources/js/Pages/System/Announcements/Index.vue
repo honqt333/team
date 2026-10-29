@@ -1,5 +1,7 @@
 <template>
     <SystemLayout>
+        <Head :title="$t('system.announcements.title')" />
+
         <div class="space-y-6">
             <div class="flex items-center justify-between">
                 <div>
@@ -10,8 +12,8 @@
                         {{ $t('system.announcements.subtitle') }}
                     </p>
                 </div>
-                <a
-                    href="/system/announcements/create"
+                <Link
+                    :href="route('system.announcements.create')"
                     class="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-medium transition-colors"
                 >
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -23,7 +25,7 @@
                         />
                     </svg>
                     {{ $t('system.announcements.create') }}
-                </a>
+                </Link>
             </div>
 
             <!-- Filters -->
@@ -89,12 +91,12 @@
                             class="hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors"
                         >
                             <td class="px-4 py-3 align-middle">
-                                <a
-                                    :href="`/system/announcements/${item.id}`"
+                                <Link
+                                    :href="route('system.announcements.show', item.id)"
                                     class="font-medium text-gray-900 dark:text-white hover:text-indigo-600"
                                 >
                                     {{ item.title }}
-                                </a>
+                                </Link>
                             </td>
                             <td class="px-4 py-3 align-middle">
                                 <span
@@ -139,8 +141,8 @@
                             </td>
                             <td class="px-4 py-3 align-middle text-center">
                                 <div class="flex items-center justify-center gap-2">
-                                    <a
-                                        :href="`/system/announcements/${item.id}`"
+                                    <Link
+                                        :href="route('system.announcements.show', item.id)"
                                         class="inline-flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-lg transition-colors"
                                     >
                                         <svg
@@ -163,7 +165,7 @@
                                             />
                                         </svg>
                                         {{ $t('system.actions.view') }}
-                                    </a>
+                                    </Link>
                                     <button
                                         @click="deleteAnnouncement(item)"
                                         class="inline-flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
@@ -204,7 +206,7 @@
 <script setup>
 import { ref, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { router } from '@inertiajs/vue3';
+import { Head, Link, router } from '@inertiajs/vue3';
 import SystemLayout from '@/Layouts/SystemLayout.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 import { useConfirm } from '@/Composables/useConfirm';

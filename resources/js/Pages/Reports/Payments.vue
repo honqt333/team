@@ -2,112 +2,79 @@
     <AppLayout>
         <div class="space-y-6">
             <!-- Screen Only Header Section (AUDIT_STANDARDS.md compliant) -->
-            <div
-                class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-gray-200 dark:border-gray-800 print:hidden"
+            <PageHeader
+                :title="$t('reports.payments_report.title')"
+                :subtitle="$t('reports.payments_report.subtitle')"
+                gradientFrom="from-indigo-600"
+                gradientTo="to-purple-600"
+                glowFrom="from-indigo-500"
+                class="print:hidden"
             >
-                <div class="flex items-center gap-4">
-                    <!-- Premium Back Button -->
-                    <a
-                        href="/app/reports"
-                        class="p-2.5 rounded-2xl backdrop-blur-md bg-white/80 dark:bg-gray-800/80 border border-gray-200/80 dark:border-gray-700/80 text-indigo-600 dark:text-indigo-400 hover:shadow-md hover:border-indigo-300 dark:hover:border-indigo-600 transition-all duration-300 group shrink-0"
-                        :title="$t('reports.payments_report.back_to_reports')"
-                    >
-                        <svg
-                            class="w-5 h-5 rtl:rotate-180 group-hover:-translate-x-0.5 rtl:group-hover:translate-x-0.5 transition-transform"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                        >
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M10 19l-7-7m0 0l7-7m-7 7h18"
-                            />
-                        </svg>
-                    </a>
+                <template #back>
+                    <BackButton href="/app/reports" />
+                </template>
 
-                    <div>
-                        <div
-                            class="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400 mb-1"
+                <template #icon>
+                    <svg
+                        class="w-9 h-9 text-white"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"
+                        />
+                    </svg>
+                </template>
+
+                <template #actions>
+                    <div class="flex items-center gap-2.5 shrink-0">
+                        <button
+                            type="button"
+                            @click="handlePrint"
+                            class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 text-xs font-bold transition-all shadow-sm"
                         >
-                            <span>{{ $t('reports.title') }}</span>
-                            <span>/</span>
-                            <span class="text-indigo-600 dark:text-indigo-400 font-bold">
-                                {{ $t('reports.payments_report.title') }}
-                            </span>
-                        </div>
-                        <div class="flex items-center gap-3">
-                            <div
-                                class="w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-600 to-purple-600 text-white flex items-center justify-center font-bold shadow-lg shadow-indigo-500/25 shrink-0"
+                            <svg
+                                class="w-4 h-4 text-gray-500"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
                             >
-                                <svg
-                                    class="w-6 h-6"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        stroke-width="2"
-                                        d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"
-                                    />
-                                </svg>
-                            </div>
-                            <div>
-                                <h1
-                                    class="text-2xl sm:text-3xl font-black text-gray-900 dark:text-white"
-                                >
-                                    {{ $t('reports.payments_report.title') }}
-                                </h1>
-                                <p class="text-xs text-gray-500 dark:text-gray-400">
-                                    {{ $t('reports.payments_report.subtitle') }}
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"
+                                />
+                            </svg>
+                            <span>{{ $t('reports.payments_report.print_report') }}</span>
+                        </button>
 
-                <!-- Export & Print Actions -->
-                <div class="flex items-center gap-2.5 shrink-0">
-                    <button
-                        type="button"
-                        @click="handlePrint"
-                        class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-750 text-xs font-bold transition-all shadow-sm"
-                    >
-                        <svg
-                            class="w-4 h-4 text-gray-500"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
+                        <a
+                            :href="exportUrl"
+                            class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white text-xs font-bold transition-all shadow-lg shadow-indigo-500/25 hover:-translate-y-0.5"
                         >
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"
-                            />
-                        </svg>
-                        <span>{{ $t('reports.payments_report.print_report') }}</span>
-                    </button>
-
-                    <a
-                        :href="exportUrl"
-                        class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white text-xs font-bold transition-all shadow-lg shadow-indigo-500/25 hover:-translate-y-0.5"
-                    >
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
-                            />
-                        </svg>
-                        <span>{{ $t('reports.payments_report.export_excel') }}</span>
-                    </a>
-                </div>
-            </div>
+                            <svg
+                                class="w-4 h-4"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+                                />
+                            </svg>
+                            <span>{{ $t('reports.payments_report.export_excel') }}</span>
+                        </a>
+                    </div>
+                </template>
+            </PageHeader>
 
             <!-- AUDIT_STANDARDS.md Section 5: Standard Official Print Section -->
             <div class="print-section hidden">
@@ -893,6 +860,8 @@ import { reactive, computed } from 'vue';
 import { router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import AppLayout from '@/Layouts/AppLayout.vue';
+import PageHeader from '@/Components/PageHeader.vue';
+import BackButton from '@/Components/BackButton.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 import CustomDatePicker from '@/Components/CustomDatePicker.vue';
 

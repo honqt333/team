@@ -2,7 +2,7 @@
     <AppLayout>
         <Head :title="$t('service_bays.title')" />
 
-        <div class="px-4 sm:px-6 py-6 space-y-6">
+        <div class="space-y-6">
             <PageHeader
                 :title="$t('service_bays.title')"
                 :subtitle="$t('service_bays.subtitle')"

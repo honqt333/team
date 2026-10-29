@@ -570,7 +570,9 @@
                                             >
                                                 {{
                                                     service.min_price
-                                                        ? `$t('common.price_in_sar', { min_price: service.min_price })`
+                                                        ? $t('common.price_in_sar', {
+                                                              min_price: service.min_price,
+                                                          })
                                                         : $t('services_management.not_set')
                                                 }}
                                             </td>
@@ -879,7 +881,9 @@
                                             >
                                                 {{
                                                     service.min_price
-                                                        ? `$t('common.price_in_sar', { min_price: service.min_price })`
+                                                        ? $t('common.price_in_sar', {
+                                                              min_price: service.min_price,
+                                                          })
                                                         : $t('services_management.not_set')
                                                 }}
                                             </td>

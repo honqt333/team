@@ -3,6 +3,8 @@ import { ref, computed, onMounted } from 'vue';
 import { Head, router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import AppLayout from '@/Layouts/AppLayout.vue';
+import PageHeader from '@/Components/PageHeader.vue';
+import BackButton from '@/Components/BackButton.vue';
 import SubscriptionCard from '@/Components/Subscription/SubscriptionCard.vue';
 import PlanCard from '@/Components/Subscription/PlanCard.vue';
 import SubscribeModal from '@/Components/Subscription/SubscribeModal.vue';
@@ -157,40 +159,33 @@ const noPlanLabel = () => t('system.billing.page.no_plan');
 
     <AppLayout>
         <div class="space-y-6">
-            <!-- Header (Stripe-style: one prominent title, no sub-page nav) -->
-            <div
-                class="rounded-2xl border border-slate-200 bg-white p-6 dark:border-slate-700 dark:bg-slate-800"
+            <!-- Header Section -->
+            <PageHeader
+                :title="t('system.billing.page.title')"
+                :subtitle="t('system.billing.page.subtitle')"
+                gradientFrom="from-blue-600"
+                gradientTo="to-indigo-700"
+                glowFrom="from-blue-500"
+                badgeBg="bg-blue-50/50 dark:bg-blue-900/30"
+                badgeText="text-blue-600 dark:text-blue-400"
+                badgeBorder="border-blue-100/50 dark:border-blue-800/30"
+                badgeDot="bg-blue-500"
             >
-                <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                    <div>
-                        <h1 class="text-2xl font-bold text-slate-900 dark:text-white">
-                            {{ t('system.billing.page.title') }}
-                        </h1>
-                        <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">
-                            {{ t('system.billing.page.subtitle') }}
-                        </p>
-                    </div>
-                    <a
-                        href="/app/settings"
-                        class="inline-flex items-center gap-1 self-start rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
-                    >
-                        <svg
-                            class="h-3.5 w-3.5 rtl:rotate-180"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                        >
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M10 19l-7-7m0 0l7-7m-7 7h18"
-                            />
-                        </svg>
-                        {{ t('system.billing.page.back_to_settings') }}
-                    </a>
-                </div>
-            </div>
+                <template #back>
+                    <BackButton href="/app/settings" />
+                </template>
+
+                <template #icon>
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"
+                        />
+                    </svg>
+                </template>
+            </PageHeader>
 
             <!-- 1. Current subscription (the hero card, Stripe-style) -->
             <section>

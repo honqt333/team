@@ -1,10 +1,15 @@
 <template>
     <SystemLayout>
+        <Head :title="integration.name_ar || integration.name" />
+
         <div class="space-y-6">
             <!-- Header -->
             <div class="flex items-center justify-between">
                 <div class="flex items-center gap-4">
-                    <a href="/system/integrations" class="text-gray-500 hover:text-gray-700">
+                    <Link
+                        :href="route('system.integrations.index')"
+                        class="text-gray-500 hover:text-gray-700 rtl:rotate-180"
+                    >
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path
                                 stroke-linecap="round"
@@ -13,7 +18,7 @@
                                 d="M15 19l-7-7 7-7"
                             />
                         </svg>
-                    </a>
+                    </Link>
                     <div>
                         <h1 class="text-2xl font-bold text-gray-900 dark:text-white">
                             {{ integration.name_ar }}
@@ -338,7 +343,7 @@ import { useI18n } from 'vue-i18n';
 const { t } = useI18n();
 
 import { ref, computed } from 'vue';
-import { useForm, router } from '@inertiajs/vue3';
+import { Head, Link, useForm, router } from '@inertiajs/vue3';
 import SystemLayout from '@/Layouts/SystemLayout.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 

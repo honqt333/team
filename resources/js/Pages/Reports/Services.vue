@@ -2,118 +2,85 @@
     <AppLayout>
         <div class="space-y-6">
             <!-- Screen Only Header Section -->
-            <div
-                class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-gray-200 dark:border-gray-800 print:hidden"
+            <PageHeader
+                :title="$t('reports.services_report.title')"
+                :subtitle="$t('reports.services_report.subtitle')"
+                gradientFrom="from-teal-500"
+                gradientTo="to-cyan-600"
+                glowFrom="from-teal-500"
+                class="print:hidden"
             >
-                <div class="flex items-center gap-4">
-                    <!-- Back Button -->
-                    <a
-                        href="/app/reports"
-                        class="p-2.5 rounded-2xl backdrop-blur-md bg-white/80 dark:bg-gray-800/80 border border-gray-200/80 dark:border-gray-700/80 text-teal-600 dark:text-teal-400 hover:shadow-md hover:border-teal-300 dark:hover:border-teal-600 transition-all duration-300 group shrink-0"
-                        :title="$t('reports.services_report.back_to_reports')"
-                    >
-                        <svg
-                            class="w-5 h-5 rtl:rotate-180 group-hover:-translate-x-0.5 rtl:group-hover:translate-x-0.5 transition-transform"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                        >
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M10 19l-7-7m0 0l7-7m-7 7h18"
-                            />
-                        </svg>
-                    </a>
+                <template #back>
+                    <BackButton href="/app/reports" />
+                </template>
 
-                    <div>
-                        <div
-                            class="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400 mb-1"
+                <template #icon>
+                    <svg
+                        class="w-9 h-9 text-white"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
+                        />
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                        />
+                    </svg>
+                </template>
+
+                <template #actions>
+                    <div class="flex items-center gap-2.5 shrink-0">
+                        <button
+                            type="button"
+                            @click="handlePrint"
+                            class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 text-xs font-bold transition-all shadow-sm"
                         >
-                            <span>{{ $t('reports.title') }}</span>
-                            <span>/</span>
-                            <span class="text-teal-600 dark:text-teal-400 font-bold">
-                                {{ $t('reports.services_report.title') }}
-                            </span>
-                        </div>
-                        <div class="flex items-center gap-3">
-                            <div
-                                class="w-12 h-12 rounded-2xl bg-gradient-to-br from-teal-500 to-cyan-600 text-white flex items-center justify-center font-bold shadow-lg shadow-teal-500/25 shrink-0"
+                            <svg
+                                class="w-4 h-4 text-gray-500"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
                             >
-                                <svg
-                                    class="w-6 h-6"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        stroke-width="2"
-                                        d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
-                                    />
-                                    <path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        stroke-width="2"
-                                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                                    />
-                                </svg>
-                            </div>
-                            <div>
-                                <h1
-                                    class="text-2xl sm:text-3xl font-black text-gray-900 dark:text-white"
-                                >
-                                    {{ $t('reports.services_report.title') }}
-                                </h1>
-                                <p class="text-xs text-gray-500 dark:text-gray-400">
-                                    {{ $t('reports.services_report.subtitle') }}
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"
+                                />
+                            </svg>
+                            <span>{{ $t('reports.services_report.print_report') }}</span>
+                        </button>
 
-                <!-- Export & Print Actions -->
-                <div class="flex items-center gap-2.5 shrink-0">
-                    <button
-                        type="button"
-                        @click="handlePrint"
-                        class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-750 text-xs font-bold transition-all shadow-sm"
-                    >
-                        <svg
-                            class="w-4 h-4 text-gray-500"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
+                        <a
+                            :href="exportUrl"
+                            class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 text-white text-xs font-bold transition-all shadow-lg shadow-teal-500/25 hover:-translate-y-0.5"
                         >
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"
-                            />
-                        </svg>
-                        <span>{{ $t('reports.services_report.print_report') }}</span>
-                    </button>
-
-                    <a
-                        :href="exportUrl"
-                        class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 text-white text-xs font-bold transition-all shadow-lg shadow-teal-500/25 hover:-translate-y-0.5"
-                    >
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
-                            />
-                        </svg>
-                        <span>{{ $t('reports.services_report.export_excel') }}</span>
-                    </a>
-                </div>
-            </div>
+                            <svg
+                                class="w-4 h-4"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+                                />
+                            </svg>
+                            <span>{{ $t('reports.services_report.export_excel') }}</span>
+                        </a>
+                    </div>
+                </template>
+            </PageHeader>
 
             <!-- Print Header -->
             <div class="print-header hidden pb-4 border-b-2 border-gray-800 mb-6">
@@ -1345,6 +1312,8 @@ import { reactive, computed, watch, ref } from 'vue';
 import { router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import AppLayout from '@/Layouts/AppLayout.vue';
+import PageHeader from '@/Components/PageHeader.vue';
+import BackButton from '@/Components/BackButton.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 import CustomDatePicker from '@/Components/CustomDatePicker.vue';
 

@@ -364,6 +364,7 @@ class WorkOrderController
             'activities.user',
             'inspections' => fn ($q) => $q->withoutGlobalScope('center_scoped')->with('performedBy'),
             'invoice' => fn ($q) => $q->withoutGlobalScope('center_scoped'),
+            'creditNotes' => fn ($q) => $q->withoutGlobalScope('center_scoped'),
         ]);
 
         // TODO(refactor): Move tab-specific relations to partial-reload endpoints.

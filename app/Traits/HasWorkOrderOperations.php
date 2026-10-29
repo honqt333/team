@@ -51,11 +51,25 @@ trait HasWorkOrderOperations
     }
 
     /**
+     * Get total credit notes amount.
+     */
+    public function getTotalCreditNotesAttribute(): float
+    {
+        if ($this->relationLoaded('creditNotes')) {
+            return (float) $this->creditNotes->where('status', '!=', 'cancelled')->sum('total_incl_tax');
+        }
+
+        return (float) $this->creditNotes()->where('status', '!=', 'cancelled')->sum('total_incl_tax');
+    }
+
+    /**
      * Get remaining balance.
      */
     public function getBalanceAttribute(): float
     {
-        return $this->total - $this->total_paid;
+        $netTotal = max(0.0, (float) $this->total - $this->total_credit_notes);
+
+        return max(0.0, round($netTotal - $this->total_paid - $this->bad_debt, 2));
     }
 
     /**

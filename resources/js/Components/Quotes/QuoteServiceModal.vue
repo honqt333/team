@@ -85,6 +85,27 @@
                 </div>
             </div>
 
+            <!-- Duplicate Service Warning Banner -->
+            <div
+                v-if="isDuplicateService"
+                class="flex items-center gap-2.5 p-3 rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700/50 text-amber-800 dark:text-amber-300 text-xs sm:text-sm font-medium transition-all"
+            >
+                <svg
+                    class="w-5 h-5 flex-shrink-0 text-amber-600 dark:text-amber-400"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                >
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                    />
+                </svg>
+                <span>{{ $t('quotes.service_modal.duplicate_notice') }}</span>
+            </div>
+
             <!-- Description -->
             <div>
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
@@ -92,159 +113,59 @@
                 </label>
                 <textarea
                     v-model="form.description"
-                    rows="3"
+                    rows="2"
                     :disabled="isReadOnly"
-                    class="w-full px-4 py-3 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none disabled:bg-gray-100 dark:disabled:bg-gray-900 disabled:text-gray-500"
+                    class="w-full px-4 py-2.5 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none disabled:bg-gray-100 dark:disabled:bg-gray-900 disabled:text-gray-500 text-sm"
                     :placeholder="$t('quotes.service_modal.description_placeholder')"
                 ></textarea>
             </div>
 
-            <!-- Price (Qty is hidden/fixed to 1) -->
-            <div>
-                <div class="flex items-center justify-between mb-1">
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                        {{ $t('quotes.service_modal.price') }}
-                    </label>
-                </div>
-                <div class="relative">
-                    <input
-                        type="text"
-                        inputmode="decimal"
-                        v-model="form.unit_price"
-                        dir="ltr"
-                        @input="
-                            form.unit_price = toEnglish($event.target.value)
-                                .replace(/[^0-9.]/g, '')
-                                .replace(/(\..*?)\..*/g, '$1')
-                        "
-                        :disabled="isPriceLocked || isReadOnly"
-                        :class="[
-                            'w-full py-3 pl-4 pr-16 border rounded-xl font-mono text-right focus:ring-2 focus:border-blue-500',
-                            isPriceLocked || isReadOnly
-                                ? 'bg-gray-100 dark:bg-gray-900 text-gray-500 dark:text-gray-400 cursor-not-allowed border-gray-200 dark:border-gray-700'
-                                : isPriceBelowMinimum
-                                  ? 'bg-white dark:bg-gray-800 text-gray-900 dark:text-white border-red-300 dark:border-red-700 focus:ring-red-500'
-                                  : 'bg-white dark:bg-gray-800 text-gray-900 dark:text-white border-gray-200 dark:border-gray-700 focus:ring-blue-500',
-                        ]"
-                        required
-                    />
-                    <div
-                        class="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none"
-                    >
-                        <span class="text-gray-500">{{ $t('common.currency') }}</span>
+            <!-- Price & Discount in a 2-column grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- Price (Qty is hidden/fixed to 1) -->
+                <div>
+                    <div class="flex items-center justify-between mb-1">
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                            {{ $t('quotes.service_modal.price') }}
+                        </label>
                     </div>
-                </div>
-                <!-- Min price warning -->
-                <p
-                    v-if="isPriceBelowMinimum"
-                    class="mt-1 text-sm text-red-600 dark:text-red-400 flex items-center gap-1"
-                >
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            stroke-width="2"
-                            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                    <div class="relative">
+                        <input
+                            type="text"
+                            inputmode="decimal"
+                            v-model="form.unit_price"
+                            dir="ltr"
+                            @input="
+                                form.unit_price = toEnglish($event.target.value)
+                                    .replace(/[^0-9.]/g, '')
+                                    .replace(/(\..*?)\..*/g, '$1')
+                            "
+                            :disabled="isPriceLocked || isReadOnly"
+                            :class="[
+                                'w-full py-2.5 pl-4 pr-16 border rounded-xl font-mono text-right focus:ring-2 focus:border-blue-500 text-sm',
+                                isPriceLocked || isReadOnly
+                                    ? 'bg-gray-100 dark:bg-gray-900 text-gray-500 dark:text-gray-400 cursor-not-allowed border-gray-200 dark:border-gray-700'
+                                    : isPriceBelowMinimum
+                                      ? 'bg-white dark:bg-gray-800 text-gray-900 dark:text-white border-red-300 dark:border-red-700 focus:ring-red-500'
+                                      : 'bg-white dark:bg-gray-800 text-gray-900 dark:text-white border-gray-200 dark:border-gray-700 focus:ring-blue-500',
+                            ]"
+                            required
                         />
-                    </svg>
-                    {{
-                        $t('quotes.min_price_warning', {
-                            min: formatCurrency(selectedServiceMinPrice),
-                        })
-                    }}
-                </p>
-            </div>
-
-            <!-- Discount Section -->
-            <div
-                class="bg-gray-50 dark:bg-gray-900/50 rounded-xl p-4 border border-gray-200 dark:border-gray-700"
-            >
-                <div class="flex items-center justify-between mb-3">
-                    <label class="text-sm font-medium text-gray-700 dark:text-gray-300">
-                        {{ $t('quotes.service_modal.discount_method') }}
-                    </label>
-                    <div class="flex items-center gap-2">
-                        <button
-                            type="button"
-                            @click="form.discount_type = 'none'"
-                            :class="[
-                                'px-3 py-1.5 text-xs font-medium rounded-lg border transition-all',
-                                form.discount_type === 'none'
-                                    ? 'bg-indigo-600 border-indigo-600 text-white shadow-sm'
-                                    : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700',
-                                isReadOnly ? 'cursor-not-allowed opacity-50' : '',
-                            ]"
+                        <div
+                            class="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none"
                         >
-                            {{ $t('quotes.service_modal.no_discount') }}
-                        </button>
-                        <button
-                            type="button"
-                            @click="form.discount_type = 'fixed'"
-                            :class="[
-                                'px-3 py-1.5 text-xs font-medium rounded-lg border transition-all',
-                                form.discount_type === 'fixed'
-                                    ? 'bg-indigo-600 border-indigo-600 text-white shadow-sm'
-                                    : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700',
-                                isReadOnly ? 'cursor-not-allowed opacity-50' : '',
-                            ]"
-                        >
-                            {{ $t('quotes.service_modal.fixed') }}
-                        </button>
-                        <button
-                            type="button"
-                            @click="form.discount_type = 'percentage'"
-                            :class="[
-                                'px-3 py-1.5 text-xs font-medium rounded-lg border transition-all',
-                                form.discount_type === 'percentage'
-                                    ? 'bg-indigo-600 border-indigo-600 text-white shadow-sm'
-                                    : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700',
-                                isReadOnly ? 'cursor-not-allowed opacity-50' : '',
-                            ]"
-                        >
-                            %
-                        </button>
+                            <span class="text-xs font-bold text-gray-500">
+                                {{ $t('common.currency') }}
+                            </span>
+                        </div>
                     </div>
-                </div>
-
-                <!-- Discount Value -->
-                <div v-if="form.discount_type !== 'none'">
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                        {{ $t('quotes.service_modal.discount_value') }}
-                    </label>
-                    <input
-                        type="text"
-                        inputmode="decimal"
-                        v-model="form.discount_value"
-                        dir="ltr"
-                        :disabled="isReadOnly"
-                        @input="
-                            form.discount_value = toEnglish($event.target.value)
-                                .replace(/[^0-9.]/g, '')
-                                .replace(/(\..*?)\..*/g, '$1')
-                        "
-                        :class="[
-                            'w-full px-4 py-3 border rounded-xl font-mono text-end focus:ring-2',
-                            isReadOnly
-                                ? 'bg-gray-100 dark:bg-gray-900 text-gray-500 dark:text-gray-400 cursor-not-allowed border-gray-200 dark:border-gray-700'
-                                : isPriceBelowMinimum
-                                  ? 'border-red-300 dark:border-red-700 bg-red-50 dark:bg-red-900/20 focus:ring-red-500 focus:border-red-500'
-                                  : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 focus:ring-blue-500 focus:border-blue-500',
-                        ]"
-                    />
-
-                    <!-- Max allowed discount hint -->
+                    <!-- Min price warning -->
                     <p
-                        v-if="selectedServiceMinPrice > 0"
-                        :class="[
-                            'mt-1 text-sm flex items-center gap-1',
-                            isPriceBelowMinimum
-                                ? 'text-red-600 dark:text-red-400'
-                                : 'text-gray-500 dark:text-gray-400',
-                        ]"
+                        v-if="isPriceBelowMinimum"
+                        class="mt-1 text-xs text-red-600 dark:text-red-400 flex items-center gap-1"
                     >
                         <svg
-                            v-if="isPriceBelowMinimum"
-                            class="w-4 h-4"
+                            class="w-3.5 h-3.5"
                             fill="none"
                             stroke="currentColor"
                             viewBox="0 0 24 24"
@@ -256,81 +177,160 @@
                                 d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
                             />
                         </svg>
-                        <span v-if="form.discount_type === 'fixed'">
-                            {{
-                                $t('quotes.max_discount_fixed', {
-                                    max: formatCurrency(maxAllowedFixedDiscount),
-                                })
-                            }}
-                        </span>
-                        <span v-else-if="form.discount_type === 'percentage'">
-                            {{
-                                $t('quotes.max_discount_percentage', {
-                                    max: maxAllowedPercentageDiscount.toFixed(1),
-                                })
-                            }}
-                        </span>
+                        {{
+                            $t('quotes.min_price_warning', {
+                                min: formatCurrency(selectedServiceMinPrice),
+                            })
+                        }}
                     </p>
+                </div>
+
+                <!-- Discount Section -->
+                <div
+                    class="bg-gray-50/80 dark:bg-gray-900/40 rounded-xl p-3 border border-gray-200 dark:border-gray-700 flex flex-col justify-between"
+                >
+                    <div class="flex items-center justify-between mb-2">
+                        <label class="text-xs font-semibold text-gray-700 dark:text-gray-300">
+                            {{ $t('quotes.service_modal.discount_method') }}
+                        </label>
+                        <div class="flex items-center gap-1.5">
+                            <button
+                                type="button"
+                                @click="form.discount_type = 'none'"
+                                :class="[
+                                    'px-2.5 py-1 text-xs font-medium rounded-lg border transition-all',
+                                    form.discount_type === 'none'
+                                        ? 'bg-blue-600 border-blue-600 text-white shadow-sm'
+                                        : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700',
+                                    isReadOnly ? 'cursor-not-allowed opacity-50' : '',
+                                ]"
+                            >
+                                {{ $t('quotes.service_modal.no_discount') }}
+                            </button>
+                            <button
+                                type="button"
+                                @click="form.discount_type = 'fixed'"
+                                :class="[
+                                    'px-2.5 py-1 text-xs font-medium rounded-lg border transition-all',
+                                    form.discount_type === 'fixed'
+                                        ? 'bg-blue-600 border-blue-600 text-white shadow-sm'
+                                        : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700',
+                                    isReadOnly ? 'cursor-not-allowed opacity-50' : '',
+                                ]"
+                            >
+                                {{ $t('quotes.service_modal.fixed') }}
+                            </button>
+                            <button
+                                type="button"
+                                @click="form.discount_type = 'percentage'"
+                                :class="[
+                                    'px-2.5 py-1 text-xs font-medium rounded-lg border transition-all',
+                                    form.discount_type === 'percentage'
+                                        ? 'bg-blue-600 border-blue-600 text-white shadow-sm'
+                                        : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700',
+                                    isReadOnly ? 'cursor-not-allowed opacity-50' : '',
+                                ]"
+                            >
+                                %
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Discount Value -->
+                    <div v-if="form.discount_type !== 'none'">
+                        <input
+                            type="text"
+                            inputmode="decimal"
+                            v-model="form.discount_value"
+                            dir="ltr"
+                            :disabled="isReadOnly"
+                            placeholder="0.00"
+                            @input="
+                                form.discount_value = toEnglish($event.target.value)
+                                    .replace(/[^0-9.]/g, '')
+                                    .replace(/(\..*?)\..*/g, '$1')
+                            "
+                            :class="[
+                                'w-full px-3 py-2 border rounded-xl font-mono text-end text-sm focus:ring-2',
+                                isReadOnly
+                                    ? 'bg-gray-100 dark:bg-gray-900 text-gray-500 dark:text-gray-400 cursor-not-allowed border-gray-200 dark:border-gray-700'
+                                    : isPriceBelowMinimum
+                                      ? 'border-red-300 dark:border-red-700 bg-red-50 dark:bg-red-900/20 focus:ring-red-500 focus:border-red-500'
+                                      : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 focus:ring-blue-500 focus:border-blue-500',
+                            ]"
+                        />
+
+                        <!-- Max allowed discount hint -->
+                        <p
+                            v-if="selectedServiceMinPrice > 0"
+                            :class="[
+                                'mt-1 text-xs flex items-center gap-1',
+                                isPriceBelowMinimum
+                                    ? 'text-red-600 dark:text-red-400'
+                                    : 'text-gray-500 dark:text-gray-400',
+                            ]"
+                        >
+                            <svg
+                                v-if="isPriceBelowMinimum"
+                                class="w-3.5 h-3.5"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                                />
+                            </svg>
+                            <span v-if="form.discount_type === 'fixed'">
+                                {{
+                                    $t('quotes.max_discount_fixed', {
+                                        max: formatCurrency(maxAllowedFixedDiscount),
+                                    })
+                                }}
+                            </span>
+                            <span v-else-if="form.discount_type === 'percentage'">
+                                {{
+                                    $t('quotes.max_discount_percentage', {
+                                        max: maxAllowedPercentageDiscount.toFixed(1),
+                                    })
+                                }}
+                            </span>
+                        </p>
+                    </div>
+                    <div v-else class="text-xs text-gray-400 dark:text-gray-500 py-1">
+                        {{ $t('quotes.service_modal.no_discount') }}
+                    </div>
                 </div>
             </div>
 
             <!-- Calculated Total -->
             <div
                 :class="[
-                    'p-4 rounded-xl border',
+                    'p-3.5 rounded-xl border flex items-center justify-between',
                     isPriceBelowMinimum
                         ? 'bg-gradient-to-r from-red-50 to-red-100 dark:from-red-900/30 dark:to-red-900/20 border-red-300 dark:border-red-700'
-                        : 'bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border-blue-200 dark:border-blue-800',
+                        : 'bg-gradient-to-r from-blue-50/80 to-indigo-50/80 dark:from-blue-900/20 dark:to-indigo-900/20 border-blue-200 dark:border-blue-800',
                 ]"
             >
-                <div class="flex items-center justify-between gap-4">
+                <span class="text-sm font-semibold text-gray-700 dark:text-gray-300">
+                    {{ $t('quotes.service_modal.total_cost') }}
+                </span>
+                <div class="flex items-baseline gap-1.5 font-mono">
                     <span
-                        class="text-sm font-medium text-gray-700 dark:text-gray-300 whitespace-nowrap"
+                        :class="[
+                            'text-xl font-black',
+                            isPriceBelowMinimum
+                                ? 'text-red-600 dark:text-red-400'
+                                : 'text-blue-600 dark:text-blue-400',
+                        ]"
                     >
-                        {{ $t('quotes.service_modal.total_cost') }}
+                        {{ formatCurrency(calculatedTotal) }}
                     </span>
-                    <div class="flex items-baseline gap-1.5 whitespace-nowrap">
-                        <span
-                            :class="[
-                                'text-2xl font-black font-mono',
-                                isPriceBelowMinimum
-                                    ? 'text-red-600 dark:text-red-400'
-                                    : 'text-blue-600 dark:text-blue-400',
-                            ]"
-                        >
-                            {{ formatCurrency(calculatedTotal) }}
-                        </span>
-                        <span
-                            class="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider"
-                        >
-                            {{ $t('common.currency') }}
-                        </span>
-                    </div>
-                </div>
-                <!-- Min price warning - more visible here -->
-                <div
-                    v-if="isPriceBelowMinimum"
-                    class="mt-2 flex items-center gap-2 text-sm text-red-600 dark:text-red-400"
-                >
-                    <svg
-                        class="w-5 h-5 flex-shrink-0"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                    >
-                        <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            stroke-width="2"
-                            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-                        />
-                    </svg>
-                    <span class="font-medium">
-                        {{
-                            $t('quotes.min_price_warning', {
-                                min: formatCurrency(selectedServiceMinPrice),
-                            })
-                        }}
+                    <span class="text-xs font-bold text-gray-500 uppercase">
+                        {{ $t('common.currency') }}
                     </span>
                 </div>
             </div>
@@ -732,10 +732,24 @@ async function handlePartDelete(part) {
     await removePart(part, index);
 }
 
-// Watch for service selection to auto-fill price
+// Check for existing services in quote (for duplicate warning)
+const existingServiceIds = computed(() => {
+    if (!props.quote?.lines) return [];
+    return props.quote.lines
+        .filter((l) => !props.line || l.id !== props.line.id)
+        .map((l) => Number(l.service_id))
+        .filter((id) => Boolean(id));
+});
+
+const isDuplicateService = computed(() => {
+    if (!form.service_id || form.service_id === 'other') return false;
+    return existingServiceIds.value.includes(Number(form.service_id));
+});
+
+// Watch for service selection to auto-fill price and check duplicates
 watch(
     () => form.service_id,
-    (serviceId) => {
+    async (serviceId, oldServiceId) => {
         if (isPopulating.value) return; // Skip if we are just loading data
         if (serviceId && !props.line) {
             if (serviceId === 'other') {
@@ -743,7 +757,26 @@ watch(
                 form.description = '';
                 return;
             }
-            const service = props.services.find((s) => s.id == serviceId);
+
+            // Check if duplicate
+            if (existingServiceIds.value.includes(Number(serviceId))) {
+                const s = props.services?.find((srv) => srv.id == serviceId);
+                const sName = s ? toEnglish(getName(s)) : '';
+                const confirmed = await confirm({
+                    title: t('quotes.service_modal.duplicate_warning_title'),
+                    message: t('quotes.service_modal.duplicate_warning_message', { name: sName }),
+                    confirmText: t('quotes.service_modal.duplicate_continue'),
+                    cancelText: t('common.cancel'),
+                    type: 'warning',
+                });
+
+                if (!confirmed) {
+                    form.service_id = oldServiceId || '';
+                    return;
+                }
+            }
+
+            const service = props.services?.find((s) => s.id == serviceId);
             if (service) {
                 form.unit_price = service.base_price || 0;
                 form.description = getPreferredTitle(service);

@@ -1,6 +1,6 @@
 <template>
     <AppLayout>
-        <div class="space-y-8 pb-12 max-w-5xl mx-auto">
+        <div class="space-y-6 pb-12">
             <!-- Header Section -->
             <PageHeader
                 title="معالج الربط الذاتي مع هيئة الزكاة (ZATCA)"

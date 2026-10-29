@@ -1,79 +1,139 @@
 <template>
     <AppLayout>
         <div class="space-y-6">
-            <!-- Header -->
-            <div
-                class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-200 dark:border-gray-700"
+            <!-- Header Section -->
+            <PageHeader
+                :title="$t('hr.payroll.details')"
+                :subtitle="formatPeriod(payrollRun.period_start)"
+                gradientFrom="from-emerald-600"
+                gradientTo="to-teal-600"
+                glowFrom="from-emerald-500"
+                badgeBg="bg-emerald-50/50 dark:bg-emerald-900/30"
+                badgeText="text-emerald-600 dark:text-emerald-400"
+                badgeBorder="border-emerald-100/50 dark:border-emerald-800/30"
+                badgeDot="bg-emerald-500"
             >
-                <div class="flex items-center justify-between flex-wrap gap-4">
-                    <div class="flex items-center gap-4">
-                        <BackButton :href="route('app.hr.payroll.index')" />
-                        <div
-                            class="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-lg"
-                        >
-                            💵
-                        </div>
-                        <div>
-                            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">
-                                {{ $t('hr.payroll.details') }}
-                            </h1>
-                            <p class="text-sm text-gray-500 dark:text-gray-400">
-                                {{ formatPeriod(payrollRun.period_start) }}
-                            </p>
-                        </div>
-                    </div>
-                    <div class="flex items-center gap-3">
-                        <!-- Other Payments Link -->
-                        <Link
-                            :href="route('app.hr.employees.index')"
-                            class="text-sm font-medium text-emerald-600 hover:text-emerald-700 dark:text-emerald-400"
-                        >
-                            {{ $t('hr.financial.other_payments.title') }} ↗
-                        </Link>
+                <template #back>
+                    <BackButton :href="route('app.hr.payroll.index')" />
+                </template>
 
-                        <!-- Status Badge -->
-                        <span
-                            :class="getStatusClass(payrollRun.status)"
-                            class="px-4 py-2 rounded-full text-sm font-bold"
-                        >
-                            {{ $t(`hr.payroll.statuses.${payrollRun.status}`) }}
-                        </span>
+                <template #icon>
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                        />
+                    </svg>
+                </template>
 
-                        <!-- Actions -->
-                        <div v-if="payrollRun.status === 'draft'" class="flex gap-2">
-                            <button
-                                @click="regeneratePayroll"
-                                :disabled="processing"
-                                class="px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 disabled:opacity-50 flex items-center gap-2"
-                            >
-                                🔄 {{ $t('hr.payroll.regenerate') }}
-                            </button>
-                            <button
-                                @click="approvePayroll"
-                                :disabled="processing"
-                                class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
-                            >
-                                ✅ {{ $t('hr.payroll.approve') }}
-                            </button>
-                        </div>
+                <template #actions>
+                    <!-- Other Payments Link -->
+                    <Link
+                        :href="route('app.hr.employees.index')"
+                        class="px-3.5 py-2 rounded-xl text-xs font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-900/30 border border-emerald-200 dark:border-emerald-800 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 transition-colors flex items-center gap-1.5"
+                    >
+                        <span>{{ $t('hr.financial.other_payments.title') }}</span>
+                        <svg
+                            class="w-3.5 h-3.5"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                            />
+                        </svg>
+                    </Link>
+
+                    <!-- Status Badge -->
+                    <span
+                        :class="getStatusClass(payrollRun.status)"
+                        class="px-3.5 py-1.5 rounded-xl text-xs font-bold border shadow-sm"
+                    >
+                        {{ $t(`hr.payroll.statuses.${payrollRun.status}`) }}
+                    </span>
+
+                    <!-- Actions -->
+                    <div v-if="payrollRun.status === 'draft'" class="flex items-center gap-2">
                         <button
-                            v-if="payrollRun.status === 'approved'"
-                            @click="markAsPaid"
+                            @click="regeneratePayroll"
                             :disabled="processing"
-                            class="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 disabled:opacity-50"
+                            class="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-xl text-xs font-semibold shadow-sm transition-colors flex items-center gap-1.5 disabled:opacity-50"
                         >
-                            💵 {{ $t('hr.payroll.mark_paid') }}
+                            <svg
+                                class="w-4 h-4"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                                />
+                            </svg>
+                            <span>{{ $t('hr.payroll.regenerate') }}</span>
                         </button>
-                        <a
-                            :href="route('app.hr.payroll.print', payrollRun.id)"
-                            target="_blank"
-                            class="px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200"
+                        <button
+                            @click="approvePayroll"
+                            :disabled="processing"
+                            class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-semibold shadow-sm transition-colors flex items-center gap-1.5 disabled:opacity-50"
                         >
-                            🖨️ {{ $t('common.print') }}
-                        </a>
+                            <svg
+                                class="w-4 h-4"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M5 13l4 4L19 7"
+                                />
+                            </svg>
+                            <span>{{ $t('hr.payroll.approve') }}</span>
+                        </button>
                     </div>
-                </div>
-            </div>
+                    <button
+                        v-if="payrollRun.status === 'approved'"
+                        @click="markAsPaid"
+                        :disabled="processing"
+                        class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-semibold shadow-sm transition-colors flex items-center gap-1.5 disabled:opacity-50"
+                    >
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"
+                            />
+                        </svg>
+                        <span>{{ $t('hr.payroll.mark_paid') }}</span>
+                    </button>
+                    <a
+                        :href="route('app.hr.payroll.print', payrollRun.id)"
+                        target="_blank"
+                        class="px-4 py-2 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-gray-700 rounded-xl text-xs font-semibold shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors flex items-center gap-1.5"
+                    >
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"
+                            />
+                        </svg>
+                        <span>{{ $t('common.print') }}</span>
+                    </a>
+                </template>
+            </PageHeader>
 
             <!-- Summary Cards -->
             <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -283,6 +343,7 @@ const { t } = useI18n();
 import { ref, computed } from 'vue';
 import { Link, router } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
+import PageHeader from '@/Components/PageHeader.vue';
 import BackButton from '@/Components/BackButton.vue';
 import { useToast } from '@/Composables/useToast';
 

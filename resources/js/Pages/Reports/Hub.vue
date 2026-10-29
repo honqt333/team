@@ -1,5 +1,7 @@
 <template>
     <AppLayout>
+        <Head :title="$t('reports.title')" />
+
         <div class="space-y-8">
             <!-- Header Section -->
             <PageHeader
@@ -28,8 +30,8 @@
             <!-- Report Cards Grid -->
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
                 <!-- Payments (Active Unit) -->
-                <a
-                    href="/app/reports/payments"
+                <Link
+                    :href="route('app.reports.payments')"
                     class="group relative bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20 rounded-2xl p-7 border border-emerald-200 dark:border-emerald-800 hover:border-emerald-400 dark:hover:border-emerald-600 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 text-center"
                 >
                     <div
@@ -59,11 +61,11 @@
                     >
                         متاح الآن
                     </span>
-                </a>
+                </Link>
 
                 <!-- Orders (Work Orders / Tickets) -->
-                <a
-                    href="/app/reports/tickets"
+                <Link
+                    :href="route('app.reports.tickets')"
                     class="group relative bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-2xl p-7 border border-blue-200 dark:border-blue-800 hover:border-blue-400 dark:hover:border-blue-600 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 text-center"
                 >
                     <div
@@ -93,11 +95,11 @@
                     >
                         متاح الآن
                     </span>
-                </a>
+                </Link>
 
                 <!-- Services -->
-                <a
-                    href="/app/reports/services"
+                <Link
+                    :href="route('app.reports.services')"
                     class="group relative bg-gradient-to-br from-teal-50 to-cyan-50 dark:from-teal-900/20 dark:to-cyan-900/20 rounded-2xl p-7 border border-teal-200 dark:border-teal-800 hover:border-teal-400 dark:hover:border-teal-600 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 text-center"
                 >
                     <div
@@ -133,7 +135,7 @@
                     >
                         متاح الآن
                     </span>
-                </a>
+                </Link>
 
                 <!-- Invoices -->
                 <a
@@ -226,8 +228,8 @@
                 </a>
 
                 <!-- Customers -->
-                <a
-                    href="/app/reports/customers"
+                <Link
+                    :href="route('app.reports.customers')"
                     class="group relative bg-gradient-to-br from-sky-50 to-blue-50 dark:from-sky-900/20 dark:to-blue-900/20 rounded-2xl p-7 border border-sky-200 dark:border-sky-800 hover:border-sky-400 dark:hover:border-sky-600 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 text-center"
                 >
                     <div
@@ -257,7 +259,7 @@
                     >
                         متاح الآن
                     </span>
-                </a>
+                </Link>
 
                 <!-- Partners -->
                 <a
@@ -456,6 +458,7 @@
 </template>
 
 <script setup>
+import { Head, Link } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import PageHeader from '@/Components/PageHeader.vue';
 import { defineComponent, h } from 'vue';

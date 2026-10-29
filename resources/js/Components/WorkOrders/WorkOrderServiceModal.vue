@@ -98,6 +98,27 @@
                                 {{ getName(item?.service) }}
                             </div>
 
+                            <!-- Duplicate Service Warning Banner -->
+                            <div
+                                v-if="isDuplicateService"
+                                class="mt-3 flex items-center gap-2.5 p-3 rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700/50 text-amber-800 dark:text-amber-300 text-xs sm:text-sm font-medium transition-all"
+                            >
+                                <svg
+                                    class="w-5 h-5 flex-shrink-0 text-amber-600 dark:text-amber-400"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2"
+                                        d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                                    />
+                                </svg>
+                                <span>{{ $t('work_orders.service_modal.duplicate_notice') }}</span>
+                            </div>
+
                             <!-- Active Warranty Alert Box & Toggle -->
                             <div
                                 v-if="activeWarrantyForSelectedService"
@@ -999,8 +1020,10 @@ import SearchableSelect from '@/Components/SearchableSelect.vue';
 import CustomDatePicker from '@/Components/CustomDatePicker.vue';
 import axios from 'axios';
 import { useToast } from '@/Composables/useToast';
+import { useConfirm } from '@/Composables/useConfirm';
 
 const { success: toastSuccess } = useToast();
+const { confirm } = useConfirm();
 
 const props = defineProps({
     show: Boolean,
@@ -1811,10 +1834,24 @@ function submitForm() {
     }
 }
 
+// Check for existing services in work order (for duplicate warning)
+const existingServiceIds = computed(() => {
+    if (!props.workOrder?.items) return [];
+    return props.workOrder.items
+        .filter((i) => !props.item || i.id !== props.item.id)
+        .map((i) => Number(i.service_id))
+        .filter((id) => Boolean(id));
+});
+
+const isDuplicateService = computed(() => {
+    if (!form.service_id || form.service_id === 'other') return false;
+    return existingServiceIds.value.includes(Number(form.service_id));
+});
+
 // Watch for service selection to auto-fill price and other fields
 watch(
     () => form.service_id,
-    (serviceId) => {
+    async (serviceId, oldServiceId) => {
         // If the selected service changes, check if it has an active warranty.
         // If it doesn't, automatically set form.is_warranty to false.
         if (serviceId !== 'other') {
@@ -1854,6 +1891,27 @@ watch(
                 form.due_date = form.started_at;
                 return;
             }
+
+            // Check if duplicate service in work order
+            if (existingServiceIds.value.includes(Number(serviceId))) {
+                const currentService = props.services?.find((s) => s.id == serviceId);
+                const serviceName = currentService ? getName(currentService) : '';
+                const proceed = await confirm({
+                    title: t('work_orders.service_modal.duplicate_warning_title'),
+                    message: t('work_orders.service_modal.duplicate_warning_message', {
+                        name: serviceName,
+                    }),
+                    confirmText: t('work_orders.service_modal.duplicate_continue'),
+                    cancelText: t('common.cancel'),
+                    type: 'warning',
+                });
+
+                if (!proceed) {
+                    form.service_id = oldServiceId || '';
+                    return;
+                }
+            }
+
             const service = props.services.find((s) => s.id == serviceId);
             if (service) {
                 form.unit_price = service.base_price || 0;

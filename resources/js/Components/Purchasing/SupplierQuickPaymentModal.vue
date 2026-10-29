@@ -208,8 +208,10 @@
                         </svg>
                         <span>
                             {{
-                                $t('payments.errors.amount_exceeds_max') ||
-                                `$t('purchasing.payment_exceeds_max', { formatCurrency_maxAllowedAmount_: formatCurrency(maxAllowedAmount) })`
+                                $t('purchasing.payment_exceeds_max', {
+                                    formatCurrency_maxAllowedAmount_:
+                                        formatCurrency(maxAllowedAmount),
+                                })
                             }}
                         </span>
                     </p>

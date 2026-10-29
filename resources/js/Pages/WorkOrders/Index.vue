@@ -210,103 +210,184 @@
                 </template>
 
                 <template #filters v-if="statusFilter">
-                    <div
-                        class="grid grid-cols-2 md:grid-cols-3 lg:flex lg:flex-wrap items-end gap-3"
-                    >
-                        <!-- Search -->
-                        <div class="col-span-2 md:col-span-1 lg:w-48">
-                            <div class="relative group">
-                                <div
-                                    class="absolute inset-y-0 start-0 flex items-center ps-4 pointer-events-none group-focus-within:text-indigo-500 transition-colors"
-                                >
-                                    <svg
-                                        class="w-5 h-5"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        viewBox="0 0 24 24"
+                    <div class="flex flex-col gap-6">
+                        <div
+                            class="grid grid-cols-2 md:grid-cols-3 lg:flex lg:flex-wrap items-end gap-3"
+                        >
+                            <!-- Search -->
+                            <div class="col-span-2 md:col-span-1 lg:w-48">
+                                <div class="relative group">
+                                    <div
+                                        class="absolute inset-y-0 start-0 flex items-center ps-4 pointer-events-none group-focus-within:text-indigo-500 transition-colors"
                                     >
-                                        <path
-                                            stroke-linecap="round"
-                                            stroke-linejoin="round"
-                                            stroke-width="2"
-                                            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                                        />
-                                    </svg>
+                                        <svg
+                                            class="w-5 h-5"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            viewBox="0 0 24 24"
+                                        >
+                                            <path
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                stroke-width="2"
+                                                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                                            />
+                                        </svg>
+                                    </div>
+                                    <input
+                                        type="text"
+                                        v-model="searchQuery"
+                                        :placeholder="$t('work_orders.search')"
+                                        class="block w-full ps-11 pe-4 py-3 text-sm text-gray-900 dark:text-white bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all outline-none shadow-sm"
+                                    />
                                 </div>
-                                <input
-                                    type="text"
-                                    v-model="searchQuery"
-                                    :placeholder="$t('work_orders.search')"
-                                    class="block w-full ps-11 pe-4 py-3 text-sm text-gray-900 dark:text-white bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all outline-none shadow-sm"
+                            </div>
+
+                            <!-- Date From -->
+                            <div class="lg:w-36">
+                                <label
+                                    class="block text-[10px] font-bold text-gray-500 dark:text-gray-400 mb-1 px-1 uppercase tracking-wider"
+                                >
+                                    {{ $t('common.date_from') }}
+                                </label>
+                                <CustomDatePicker
+                                    v-model="dateFrom"
+                                    @change="applyFilters"
+                                    class="!rounded-2xl"
                                 />
                             </div>
-                        </div>
 
-                        <!-- Date From -->
-                        <div class="lg:w-36">
-                            <label
-                                class="block text-[10px] font-bold text-gray-500 dark:text-gray-400 mb-1 px-1 uppercase tracking-wider"
-                            >
-                                {{ $t('common.date_from') }}
-                            </label>
-                            <CustomDatePicker
-                                v-model="dateFrom"
-                                @change="applyFilters"
-                                class="!rounded-2xl"
-                            />
-                        </div>
-
-                        <!-- Date To -->
-                        <div class="lg:w-36">
-                            <label
-                                class="block text-[10px] font-bold text-gray-500 dark:text-gray-400 mb-1 px-1 uppercase tracking-wider"
-                            >
-                                {{ $t('common.date_to') }}
-                            </label>
-                            <CustomDatePicker
-                                v-model="dateTo"
-                                @change="applyFilters"
-                                class="!rounded-2xl"
-                            />
-                        </div>
-
-                        <!-- Customer Type Filter -->
-                        <div class="lg:w-40">
-                            <label
-                                class="block text-[10px] font-bold text-gray-500 dark:text-gray-400 mb-1 px-1 uppercase tracking-wider"
-                            >
-                                {{ $t('work_orders.filters.customer_type') }}
-                            </label>
-                            <SearchableSelect
-                                v-model="customerTypeFilter"
-                                :options="customerTypeOptions"
-                                option-label="label"
-                                option-value="value"
-                                :placeholder="$t('work_orders.filters.all_types')"
-                                :label="''"
-                                class="!rounded-2xl"
-                            />
-                        </div>
-
-                        <button
-                            @click="resetFilters"
-                            class="p-3 text-gray-500 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 transition-all shadow-sm"
-                            :title="$t('common.reset')"
-                        >
-                            <svg
-                                class="w-5 h-5"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                            >
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    stroke-width="2"
-                                    d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                            <!-- Date To -->
+                            <div class="lg:w-36">
+                                <label
+                                    class="block text-[10px] font-bold text-gray-500 dark:text-gray-400 mb-1 px-1 uppercase tracking-wider"
+                                >
+                                    {{ $t('common.date_to') }}
+                                </label>
+                                <CustomDatePicker
+                                    v-model="dateTo"
+                                    @change="applyFilters"
+                                    class="!rounded-2xl"
                                 />
-                            </svg>
-                        </button>
+                            </div>
+
+                            <!-- Customer Type Filter -->
+                            <div class="lg:w-40">
+                                <label
+                                    class="block text-[10px] font-bold text-gray-500 dark:text-gray-400 mb-1 px-1 uppercase tracking-wider"
+                                >
+                                    {{ $t('work_orders.filters.customer_type') }}
+                                </label>
+                                <SearchableSelect
+                                    v-model="customerTypeFilter"
+                                    :options="customerTypeOptions"
+                                    option-label="label"
+                                    option-value="value"
+                                    :placeholder="$t('work_orders.filters.all_types')"
+                                    :label="''"
+                                    class="!rounded-2xl"
+                                />
+                            </div>
+
+                            <button
+                                @click="resetFilters"
+                                class="p-3 text-gray-500 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 transition-all shadow-sm"
+                                :title="$t('common.reset')"
+                            >
+                                <svg
+                                    class="w-5 h-5"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2"
+                                        d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                                    />
+                                </svg>
+                            </button>
+                        </div>
+
+                        <!-- Filter Tabs (for open and closed status) -->
+                        <div
+                            v-if="statusFilter === 'open' || statusFilter === 'closed'"
+                            class="flex flex-wrap gap-3"
+                        >
+                            <button
+                                v-for="tab in filterTabs"
+                                :key="tab.key"
+                                @click="setSubFilter(tab.key)"
+                                :class="[
+                                    'relative flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-200',
+                                    currentSubFilter === tab.key
+                                        ? 'text-white shadow-lg'
+                                        : 'bg-white dark:bg-gray-800 hover:shadow-md border border-gray-200 dark:border-gray-700',
+                                ]"
+                                :style="
+                                    currentSubFilter === tab.key
+                                        ? `background: linear-gradient(135deg, ${tab.gradientFrom}, ${tab.gradientTo})`
+                                        : ''
+                                "
+                            >
+                                <!-- Icon -->
+                                <div
+                                    :class="[
+                                        'w-8 h-8 rounded-lg flex items-center justify-center',
+                                        currentSubFilter === tab.key ? 'bg-white/20' : tab.bgColor,
+                                    ]"
+                                >
+                                    <component
+                                        :is="tab.icon"
+                                        :class="[
+                                            'w-4 h-4',
+                                            currentSubFilter === tab.key
+                                                ? 'text-white'
+                                                : tab.iconColor,
+                                        ]"
+                                    />
+                                </div>
+
+                                <!-- Label & Count -->
+                                <div class="flex items-center gap-2">
+                                    <span
+                                        :class="[
+                                            'font-medium text-sm',
+                                            currentSubFilter === tab.key
+                                                ? 'text-white'
+                                                : 'text-gray-700 dark:text-gray-300',
+                                        ]"
+                                    >
+                                        {{ tab.label }}
+                                    </span>
+                                    <span
+                                        :class="[
+                                            'px-2 py-0.5 rounded-full text-xs font-bold',
+                                            currentSubFilter === tab.key
+                                                ? 'bg-white/20 text-white'
+                                                : tab.bgColor + ' ' + tab.iconColor,
+                                        ]"
+                                    >
+                                        {{ toEnglish(tab.count) }}
+                                    </span>
+                                </div>
+
+                                <!-- Selected Check -->
+                                <svg
+                                    v-if="currentSubFilter === tab.key"
+                                    class="w-4 h-4 text-white/80"
+                                    fill="currentColor"
+                                    viewBox="0 0 20 20"
+                                >
+                                    <path
+                                        fill-rule="evenodd"
+                                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                        clip-rule="evenodd"
+                                    />
+                                </svg>
+                            </button>
+                        </div>
                     </div>
                 </template>
             </PageHeader>
@@ -444,83 +525,6 @@
 
             <!-- List/Grid View Section (visible only when status filter is active) -->
             <div v-if="statusFilter" class="space-y-6">
-                <!-- Filter Tabs (for open and closed status) -->
-                <div
-                    v-if="statusFilter === 'open' || statusFilter === 'closed'"
-                    class="flex flex-wrap gap-3"
-                >
-                    <button
-                        v-for="tab in filterTabs"
-                        :key="tab.key"
-                        @click="setSubFilter(tab.key)"
-                        :class="[
-                            'relative flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-200',
-                            currentSubFilter === tab.key
-                                ? 'text-white shadow-lg'
-                                : 'bg-white dark:bg-gray-800 hover:shadow-md border border-gray-200 dark:border-gray-700',
-                        ]"
-                        :style="
-                            currentSubFilter === tab.key
-                                ? `background: linear-gradient(135deg, ${tab.gradientFrom}, ${tab.gradientTo})`
-                                : ''
-                        "
-                    >
-                        <!-- Icon -->
-                        <div
-                            :class="[
-                                'w-8 h-8 rounded-lg flex items-center justify-center',
-                                currentSubFilter === tab.key ? 'bg-white/20' : tab.bgColor,
-                            ]"
-                        >
-                            <component
-                                :is="tab.icon"
-                                :class="[
-                                    'w-4 h-4',
-                                    currentSubFilter === tab.key ? 'text-white' : tab.iconColor,
-                                ]"
-                            />
-                        </div>
-
-                        <!-- Label & Count -->
-                        <div class="flex items-center gap-2">
-                            <span
-                                :class="[
-                                    'font-medium text-sm',
-                                    currentSubFilter === tab.key
-                                        ? 'text-white'
-                                        : 'text-gray-700 dark:text-gray-300',
-                                ]"
-                            >
-                                {{ tab.label }}
-                            </span>
-                            <span
-                                :class="[
-                                    'px-2 py-0.5 rounded-full text-xs font-bold',
-                                    currentSubFilter === tab.key
-                                        ? 'bg-white/20 text-white'
-                                        : tab.bgColor + ' ' + tab.iconColor,
-                                ]"
-                            >
-                                {{ toEnglish(tab.count) }}
-                            </span>
-                        </div>
-
-                        <!-- Selected Check -->
-                        <svg
-                            v-if="currentSubFilter === tab.key"
-                            class="w-4 h-4 text-white/80"
-                            fill="currentColor"
-                            viewBox="0 0 20 20"
-                        >
-                            <path
-                                fill-rule="evenodd"
-                                d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                                clip-rule="evenodd"
-                            />
-                        </svg>
-                    </button>
-                </div>
-
                 <!-- Loading State -->
                 <div v-if="!workOrders" class="flex flex-col items-center justify-center py-16">
                     <div class="relative">
@@ -1267,7 +1271,7 @@
 
 <script setup>
 import BackButton from '@/Components/BackButton.vue';
-import { ref, watch, computed, onMounted, onUnmounted } from 'vue';
+import { ref, watch, computed, onMounted, onUnmounted, h } from 'vue';
 import { Head, Link, router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import axios from 'axios';
@@ -1421,25 +1425,42 @@ onUnmounted(() => {
     if (observer) observer.disconnect();
 });
 
-// Icons for filter tabs
-const IconOpen = {
-    template: `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>`,
-};
-const IconDraft = {
-    template: `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>`,
-};
-const IconOverdue = {
-    template: `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>`,
-};
-const IconPending = {
-    template: `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>`,
-};
-const IconDone = {
-    template: `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>`,
-};
-const IconBadDebt = {
-    template: `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>`,
-};
+// Icons for filter tabs (Render functions for Vue 3 SFC compatibility)
+const createIcon =
+    (d, strokeWidth = 2) =>
+    (props, { attrs }) =>
+        h(
+            'svg',
+            {
+                fill: 'none',
+                stroke: 'currentColor',
+                viewBox: '0 0 24 24',
+                ...attrs,
+            },
+            [
+                h('path', {
+                    'stroke-linecap': 'round',
+                    'stroke-linejoin': 'round',
+                    'stroke-width': strokeWidth,
+                    d,
+                }),
+            ]
+        );
+
+const IconOpen = createIcon(
+    'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2'
+);
+const IconDraft = createIcon(
+    'M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z'
+);
+const IconOverdue = createIcon('M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z');
+const IconPending = createIcon(
+    'M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z'
+);
+const IconDone = createIcon('M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z', 2.5);
+const IconBadDebt = createIcon(
+    'M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z'
+);
 
 const filterTabs = computed(() => {
     if (props.statusFilter === 'closed') {

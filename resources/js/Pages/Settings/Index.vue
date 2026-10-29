@@ -1,5 +1,7 @@
 <template>
     <AppLayout>
+        <Head :title="$t('settings.title')" />
+
         <div class="space-y-6">
             <!-- Header Section -->
             <PageHeader
@@ -14,7 +16,12 @@
                 badgeDot="bg-slate-500"
             >
                 <template #icon>
-                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg
+                        class="w-8 h-8 text-white"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                    >
                         <path
                             stroke-linecap="round"
                             stroke-linejoin="round"
@@ -36,9 +43,9 @@
                 class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-200 dark:border-gray-700 space-y-4"
             >
                 <!-- Company Profile -->
-                <a
+                <Link
                     v-if="can('settings.company.manage')"
-                    href="/app/settings/company"
+                    :href="route('settings.company')"
                     class="group flex items-center gap-5 p-4 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-emerald-400 dark:hover:border-emerald-600 hover:bg-emerald-50/50 dark:hover:bg-emerald-900/20 transition-all"
                 >
                     <div
@@ -81,12 +88,12 @@
                             d="M9 5l7 7-7 7"
                         />
                     </svg>
-                </a>
+                </Link>
 
                 <!-- Branches -->
-                <a
+                <Link
                     v-if="can('settings.centers.view')"
-                    href="/app/settings/branches"
+                    :href="route('settings.branches')"
                     class="group flex items-center gap-5 p-4 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-blue-400 dark:hover:border-blue-600 hover:bg-blue-50/50 dark:hover:bg-blue-900/20 transition-all"
                 >
                     <div
@@ -135,12 +142,12 @@
                             d="M9 5l7 7-7 7"
                         />
                     </svg>
-                </a>
+                </Link>
 
                 <!-- Users & Roles -->
-                <a
+                <Link
                     v-if="can('users.view')"
-                    href="/app/settings/users"
+                    :href="route('settings.users.index')"
                     class="group flex items-center gap-5 p-4 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-violet-400 dark:hover:border-violet-600 hover:bg-violet-50/50 dark:hover:bg-violet-900/20 transition-all"
                 >
                     <div
@@ -183,12 +190,12 @@
                             d="M9 5l7 7-7 7"
                         />
                     </svg>
-                </a>
+                </Link>
 
                 <!-- System Settings -->
-                <a
+                <Link
                     v-if="can('crm.vehicles.settings.view')"
-                    href="/app/settings/system"
+                    :href="route('settings.system')"
                     class="group flex items-center gap-5 p-4 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-indigo-400 dark:hover:border-indigo-600 hover:bg-indigo-50/50 dark:hover:bg-indigo-900/20 transition-all"
                 >
                     <div
@@ -231,12 +238,12 @@
                             d="M9 5l7 7-7 7"
                         />
                     </svg>
-                </a>
+                </Link>
 
                 <!-- Print Settings -->
-                <a
+                <Link
                     v-if="can('settings.company.manage')"
-                    href="/app/settings/print"
+                    :href="route('settings.print')"
                     class="group flex items-center gap-5 p-4 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-amber-400 dark:hover:border-amber-600 hover:bg-amber-50/50 dark:hover:bg-amber-900/20 transition-all"
                 >
                     <div
@@ -279,11 +286,11 @@
                             d="M9 5l7 7-7 7"
                         />
                     </svg>
-                </a>
+                </Link>
 
                 <!-- Billing & Subscription (unified hub at /app/settings/billing) -->
-                <a
-                    href="/app/settings/billing"
+                <Link
+                    :href="route('app.billing.index')"
                     class="group flex items-center gap-5 p-4 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-rose-400 dark:hover:border-rose-600 hover:bg-rose-50/50 dark:hover:bg-rose-900/20 transition-all"
                 >
                     <div
@@ -326,13 +333,14 @@
                             d="M9 5l7 7-7 7"
                         />
                     </svg>
-                </a>
+                </Link>
             </div>
         </div>
     </AppLayout>
 </template>
 
 <script setup>
+import { Head, Link } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import PageHeader from '@/Components/PageHeader.vue';
 import { usePermission } from '@/Composables/usePermission';

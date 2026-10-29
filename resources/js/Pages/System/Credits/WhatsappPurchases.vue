@@ -1,5 +1,6 @@
 <template>
     <SystemLayout>
+        <Head :title="$t('system.credits.whatsapp_purchases_title')" />
         <div class="space-y-6">
             <!-- Header -->
             <div>
@@ -12,31 +13,52 @@
             </div>
 
             <!-- Navigation Tabs (mirrors WhatsappUsage) -->
+            <!-- Navigation Tabs -->
             <div class="flex gap-2 border-b border-gray-200 dark:border-gray-700">
-                <a
-                    href="/system/whatsapp/packages"
-                    class="px-4 py-2 border-b-2 border-transparent text-gray-500 hover:text-gray-700"
+                <Link
+                    :href="route('system.whatsapp.packages')"
+                    :class="
+                        route().current('system.whatsapp.packages')
+                            ? 'border-emerald-600 text-emerald-600 font-medium'
+                            : 'border-transparent text-gray-500 hover:text-gray-700'
+                    "
+                    class="px-4 py-2 border-b-2"
                 >
                     {{ $t('system.credits.tabs.packages') }}
-                </a>
-                <a
-                    href="/system/whatsapp/balances"
-                    class="px-4 py-2 border-b-2 border-transparent text-gray-500 hover:text-gray-700"
+                </Link>
+                <Link
+                    :href="route('system.whatsapp.balances')"
+                    :class="
+                        route().current('system.whatsapp.balances')
+                            ? 'border-emerald-600 text-emerald-600 font-medium'
+                            : 'border-transparent text-gray-500 hover:text-gray-700'
+                    "
+                    class="px-4 py-2 border-b-2"
                 >
                     {{ $t('system.credits.tabs.balances') }}
-                </a>
-                <a
-                    href="/system/whatsapp/purchases"
-                    class="px-4 py-2 border-b-2 border-emerald-600 text-emerald-600 font-medium"
+                </Link>
+                <Link
+                    :href="route('system.whatsapp.purchases')"
+                    :class="
+                        route().current('system.whatsapp.purchases')
+                            ? 'border-emerald-600 text-emerald-600 font-medium'
+                            : 'border-transparent text-gray-500 hover:text-gray-700'
+                    "
+                    class="px-4 py-2 border-b-2"
                 >
                     {{ $t('system.credits.tabs.purchases') }}
-                </a>
-                <a
-                    href="/system/whatsapp/usage"
-                    class="px-4 py-2 border-b-2 border-transparent text-gray-500 hover:text-gray-700"
+                </Link>
+                <Link
+                    :href="route('system.whatsapp.usage')"
+                    :class="
+                        route().current('system.whatsapp.usage')
+                            ? 'border-emerald-600 text-emerald-600 font-medium'
+                            : 'border-transparent text-gray-500 hover:text-gray-700'
+                    "
+                    class="px-4 py-2 border-b-2"
                 >
                     {{ $t('system.credits.tabs.usage') }}
-                </a>
+                </Link>
             </div>
 
             <!-- Stats Cards -->
@@ -274,7 +296,7 @@
 <script setup>
 import { ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { router } from '@inertiajs/vue3';
+import { Head, Link, router } from '@inertiajs/vue3';
 import SystemLayout from '@/Layouts/SystemLayout.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 

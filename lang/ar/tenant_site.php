@@ -15,6 +15,11 @@ return [
         'whatsapp_cta' => 'واتساب',
         'book_cta' => 'احجز موعد',
     ],
+    'pricing' => [
+        'starting_from' => 'يبدأ من :price ر.س',
+        'upon_inspection' => 'السعر عند الفحص والمعاينة',
+        'sar' => 'ر.س',
+    ],
     'services' => [
         'title' => 'خدماتنا',
         'subtitle' => 'مجموعة مختارة من الخدمات المتاحة في مركزنا',

@@ -2,7 +2,7 @@
     <AppLayout>
         <Head :title="$t('communications.appointment_messages.title')" />
 
-        <div class="px-4 sm:px-6 py-6 space-y-6">
+        <div class="space-y-6">
             <PageHeader
                 :title="$t('communications.appointment_messages.title')"
                 :subtitle="$t('communications.appointment_messages.subtitle')"

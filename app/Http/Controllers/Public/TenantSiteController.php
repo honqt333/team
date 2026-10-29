@@ -58,24 +58,31 @@ class TenantSiteController extends Controller
         /** @var TenantWebsite $website */
         $website = $request->attributes->get('public_tenant_website');
 
-        // Active services only, scoped to this tenant. We do
-        // not show packages here (those are bundled SKUs and
-        // would be confusing on a public landing page until
-        // a real ordering flow exists).
-        $services = Service::query()
+        $settings = $website->effective_settings;
+        $banners = array_values(array_filter($website->effective_banners, fn ($b) => ! empty($b['is_active'])));
+
+        // Services query scoped to tenant and configured display mode
+        $servicesQuery = Service::query()
             ->where('tenant_id', $tenant->id)
             ->where('is_active', true)
-            ->where('type', Service::TYPE_INTERNAL)
+            ->where('type', Service::TYPE_INTERNAL);
+
+        if (($settings['services_mode'] ?? 'all') === 'selected' && ! empty($settings['selected_service_ids'])) {
+            $servicesQuery->whereIn('id', (array) $settings['selected_service_ids']);
+        }
+
+        $featuredIds = (array) ($settings['featured_service_ids'] ?? []);
+
+        $services = $servicesQuery
             ->orderBy('sort_order')
             ->orderBy('name_ar')
-            ->limit(12)
-            ->get(['id', 'name_ar', 'name_en', 'description_ar', 'description_en']);
+            ->limit(24)
+            ->get(['id', 'name_ar', 'name_en', 'description_ar', 'description_en', 'base_price', 'min_price']);
 
-        // Active centers with the public-facing contact
-        // fields. We use a manual query rather than
-        // $tenant->centers() because the centers relation
-        // would not filter is_active in one go without a
-        // scope, and we want to be explicit.
+        $pricingMode = $settings['pricing_mode'] ?? 'upon_inspection';
+        $showPrices = ($pricingMode !== 'hidden') && (bool) ($settings['show_prices'] ?? true);
+
+        // Active centers with the public-facing contact fields
         $centers = Center::query()
             ->where('tenant_id', $tenant->id)
             ->where('is_active', true)
@@ -88,7 +95,7 @@ class TenantSiteController extends Controller
             'site' => [
                 'tenant_id' => $tenant->id,
                 'tenant_slug' => $tenant->slug,
-                'has_portal' => true,
+                'has_portal' => (bool) ($settings['enable_portal_lookup'] ?? true),
                 'site_name' => $website->display_name,
                 'tagline' => $website->tagline,
                 'logo_url' => $website->logo_url,
@@ -105,12 +112,36 @@ class TenantSiteController extends Controller
                 'social_links' => $website->social_links ?? [],
                 'seo_title' => $website->seo_title ?: $website->display_name,
                 'seo_description' => $website->seo_description ?: $website->tagline,
+                'banners' => $banners,
+                'settings' => $settings,
             ],
-            'services' => $services->map(fn (Service $s) => [
-                'id' => $s->id,
-                'name' => $s->name,
-                'description' => $s->description,
-            ])->values(),
+            'services' => $services->map(function (Service $s) use ($pricingMode, $showPrices, $featuredIds) {
+                $base = (float) ($s->base_price ?? 0);
+                $min = (float) ($s->min_price ?? 0);
+
+                $priceDisplay = null;
+
+                if ($pricingMode === 'exact' && $showPrices && $base > 0) {
+                    $priceDisplay = number_format($base, 2).' '.__('tenant_site.pricing.sar');
+                } elseif ($pricingMode === 'starting_from' && $showPrices) {
+                    $val = ($min > 0) ? $min : $base;
+
+                    if ($val > 0) {
+                        $priceDisplay = __('tenant_site.pricing.starting_from', ['price' => number_format($val, 2)]);
+                    }
+                } elseif ($pricingMode === 'upon_inspection') {
+                    $priceDisplay = __('tenant_site.pricing.upon_inspection');
+                }
+
+                return [
+                    'id' => $s->id,
+                    'name' => $s->name,
+                    'description' => $s->description,
+                    'price' => $base,
+                    'price_display' => $priceDisplay,
+                    'is_featured' => in_array($s->id, $featuredIds, false),
+                ];
+            })->values(),
             'centers' => $centers->map(fn (Center $c) => [
                 'id' => $c->id,
                 'name' => $c->name,

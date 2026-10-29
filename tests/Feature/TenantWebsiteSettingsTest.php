@@ -91,6 +91,58 @@ class TenantWebsiteSettingsTest extends TestCase
         $this->assertNotNull($website->published_at);
     }
 
+    public function test_update_persists_banners_settings_and_custom_domain(): void
+    {
+        $user = $this->makeWebsiteManager();
+
+        $banners = [
+            [
+                'id' => 'ban_1',
+                'badge' => 'عرض الصيف',
+                'title' => 'فحص كمبيوتر مجاني',
+                'subtitle' => 'مع كل تغيير زيت',
+                'cta_text' => 'احجز الآن',
+                'cta_link' => '#booking',
+                'bg_gradient' => 'from-indigo-600 to-blue-700',
+                'is_active' => true,
+            ],
+        ];
+
+        $settings = [
+            'pricing_mode' => 'starting_from',
+            'show_prices' => true,
+            'services_mode' => 'selected',
+            'selected_service_ids' => [1, 2],
+            'featured_service_ids' => [1],
+            'announcement_bar' => [
+                'enabled' => true,
+                'text' => 'أوقات العمل برمضان من 9 مساءً إلى 2 صباحاً',
+            ],
+        ];
+
+        $this->actingAsWithTeam($user)
+            ->put(route('settings.website.update'), [
+                'site_name' => 'مركز الصيانة المتقدم',
+                'primary_color' => '#1e3a8a',
+                'secondary_color' => '#3b82f6',
+                'status' => TenantWebsite::STATUS_PUBLISHED,
+                'theme_key' => 'default',
+                'custom_domain' => 'workshop.example.com',
+                'banners' => $banners,
+                'settings' => $settings,
+            ])
+            ->assertRedirect();
+
+        $website = TenantWebsite::where('tenant_id', $user->tenant_id)->first();
+        $this->assertNotNull($website);
+        $this->assertSame('workshop.example.com', $website->custom_domain);
+        $this->assertCount(1, $website->banners);
+        $this->assertSame('عرض الصيف', $website->banners[0]['badge']);
+        $this->assertSame('starting_from', $website->effective_settings['pricing_mode']);
+        $this->assertTrue($website->effective_settings['show_prices']);
+        $this->assertSame([1, 2], $website->effective_settings['selected_service_ids']);
+    }
+
     public function test_publish_stamps_published_at(): void
     {
         $user = $this->makeWebsiteManager();
@@ -243,6 +295,29 @@ class TenantWebsiteSettingsTest extends TestCase
         $this->assertNotNull($website->logo_path);
         $this->assertStringStartsWith("tenants/{$user->tenant_id}/website/", $website->logo_path);
         Storage::disk('public')->assertExists($website->logo_path);
+    }
+
+    public function test_upload_banner_image_endpoint(): void
+    {
+        Storage::fake('public');
+        $user = $this->makeWebsiteManager();
+
+        $file = UploadedFile::fake()->image('summer-banner.jpg');
+
+        $response = $this->actingAsWithTeam($user)
+            ->postJson(route('settings.website.banner.upload'), [
+                'image' => $file,
+            ])
+            ->assertOk()
+            ->assertJsonStructure([
+                'success',
+                'image_path',
+                'image_url',
+            ]);
+
+        $path = $response->json('image_path');
+        $this->assertStringStartsWith("tenants/{$user->tenant_id}/website/", $path);
+        Storage::disk('public')->assertExists($path);
     }
 
     /**

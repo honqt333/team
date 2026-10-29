@@ -551,9 +551,11 @@
                             </h4>
                             <p class="text-xs text-gray-500 dark:text-gray-400 mb-4">
                                 {{
-                                    isRtl
-                                        ? `$t('print_settings.delete_signature_confirm', { name_en: deletingSig.name_ar || deletingSig.name_en })`
-                                        : `Delete signature "${deletingSig.name_en || deletingSig.name_ar}"? This cannot be undone.`
+                                    $t('print_settings.delete_signature_confirm', {
+                                        name_en: isRtl
+                                            ? deletingSig.name_ar || deletingSig.name_en
+                                            : deletingSig.name_en || deletingSig.name_ar,
+                                    })
                                 }}
                             </p>
                             <div class="flex gap-2 justify-end">

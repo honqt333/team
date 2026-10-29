@@ -808,38 +808,12 @@
                         {{ $t('nav.reports') }}
                     </a>
 
-                    <!-- Help & Tutorials Link -->
+                    <!-- Add-ons Link (الإضافات: يضم المساعدة والشروحات، البلاغات، والتكاملات) -->
                     <a
-                        href="/app/help"
+                        href="/app/settings/integrations"
                         :class="[
                             'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors',
-                            isActive('/app/help')
-                                ? 'bg-sky-50 dark:bg-sky-900/50 text-sky-700 dark:text-sky-300 font-bold'
-                                : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700',
-                        ]"
-                    >
-                        <svg
-                            class="w-5 h-5 flex-shrink-0"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                        >
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                            />
-                        </svg>
-                        {{ $t('nav.help') }}
-                    </a>
-
-                    <!-- Feedback & Feature Requests Link -->
-                    <a
-                        href="/app/feedback"
-                        :class="[
-                            'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors',
-                            isActive('/app/feedback')
+                            isActive('/app/settings/integrations')
                                 ? 'bg-indigo-50 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300 font-bold'
                                 : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700',
                         ]"
@@ -854,10 +828,10 @@
                                 stroke-linecap="round"
                                 stroke-linejoin="round"
                                 stroke-width="2"
-                                d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"
+                                d="M11 4a2 2 0 114 0v1a1 1 0 001 1h3a1 1 0 011 1v3a1 1 0 01-1 1h-1a2 2 0 100 4h1a1 1 0 011 1v3a1 1 0 01-1 1h-3a1 1 0 01-1-1v-1a2 2 0 10-4 0v1a1 1 0 01-1 1H7a1 1 0 01-1-1v-3a1 1 0 00-1-1H4a2 2 0 110-4h1a1 1 0 001-1V7a1 1 0 011-1h3a1 1 0 001-1V4z"
                             />
                         </svg>
-                        {{ $t('nav.feedback') }}
+                        {{ $t('nav.integrations') }}
                     </a>
 
                     <!-- Divider -->
@@ -888,58 +862,6 @@
                             />
                         </svg>
                         {{ $t('nav.employee_portal') }}
-                    </a>
-
-                    <a
-                        v-if="can('settings.company.manage')"
-                        href="/app/settings/website"
-                        :class="[
-                            'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors',
-                            isActive('/app/settings/website')
-                                ? 'bg-rose-50 dark:bg-rose-900/50 text-rose-700 dark:text-rose-300'
-                                : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700',
-                        ]"
-                    >
-                        <svg
-                            class="w-5 h-5 flex-shrink-0"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                        >
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"
-                            />
-                        </svg>
-                        {{ $t('nav.website') }}
-                    </a>
-
-                    <a
-                        v-if="can('settings.company.manage')"
-                        href="/app/settings/integrations"
-                        :class="[
-                            'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors',
-                            isActive('/app/settings/integrations')
-                                ? 'bg-blue-50 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300'
-                                : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700',
-                        ]"
-                    >
-                        <svg
-                            class="w-5 h-5 flex-shrink-0"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                        >
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"
-                            />
-                        </svg>
-                        {{ $t('nav.integrations') }}
                     </a>
 
                     <a
@@ -2217,40 +2139,13 @@
                         {{ $t('nav.reports') }}
                     </a>
 
-                    <!-- Help & Tutorials Link (Mobile) -->
+                    <!-- Add-ons Link (Mobile) -->
                     <a
-                        href="/app/help"
+                        href="/app/settings/integrations"
                         @click="mobileMenuOpen = false"
                         :class="[
                             'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors',
-                            isActive('/app/help')
-                                ? 'bg-sky-50 dark:bg-sky-900/50 text-sky-700 dark:text-sky-300 font-bold'
-                                : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700',
-                        ]"
-                    >
-                        <svg
-                            class="w-5 h-5 flex-shrink-0"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                        >
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                            />
-                        </svg>
-                        {{ $t('nav.help') }}
-                    </a>
-
-                    <!-- Feedback & Feature Requests Link (Mobile) -->
-                    <a
-                        href="/app/feedback"
-                        @click="mobileMenuOpen = false"
-                        :class="[
-                            'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors',
-                            isActive('/app/feedback')
+                            isActive('/app/settings/integrations')
                                 ? 'bg-indigo-50 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300 font-bold'
                                 : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700',
                         ]"
@@ -2265,10 +2160,10 @@
                                 stroke-linecap="round"
                                 stroke-linejoin="round"
                                 stroke-width="2"
-                                d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"
+                                d="M11 4a2 2 0 114 0v1a1 1 0 001 1h3a1 1 0 011 1v3a1 1 0 01-1 1h-1a2 2 0 100 4h1a1 1 0 011 1v3a1 1 0 01-1 1h-3a1 1 0 01-1-1v-1a2 2 0 10-4 0v1a1 1 0 01-1 1H7a1 1 0 01-1-1v-3a1 1 0 00-1-1H4a2 2 0 110-4h1a1 1 0 001-1V7a1 1 0 011-1h3a1 1 0 001-1V4z"
                             />
                         </svg>
-                        {{ $t('nav.feedback') }}
+                        {{ $t('nav.integrations') }}
                     </a>
 
                     <!-- Employee Portal Link (Mobile) -->
@@ -2297,60 +2192,6 @@
                             />
                         </svg>
                         {{ $t('nav.employee_portal') }}
-                    </a>
-
-                    <a
-                        v-if="can('settings.company.manage')"
-                        href="/app/settings/website"
-                        @click="mobileMenuOpen = false"
-                        :class="[
-                            'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors',
-                            isActive('/app/settings/website')
-                                ? 'bg-rose-50 dark:bg-rose-900/50 text-rose-700 dark:text-rose-300'
-                                : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700',
-                        ]"
-                    >
-                        <svg
-                            class="w-5 h-5 flex-shrink-0"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                        >
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"
-                            />
-                        </svg>
-                        {{ $t('nav.website') }}
-                    </a>
-
-                    <a
-                        v-if="can('settings.company.manage')"
-                        href="/app/settings/integrations"
-                        @click="mobileMenuOpen = false"
-                        :class="[
-                            'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors',
-                            isActive('/app/settings/integrations')
-                                ? 'bg-blue-50 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300'
-                                : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700',
-                        ]"
-                    >
-                        <svg
-                            class="w-5 h-5 flex-shrink-0"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                        >
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"
-                            />
-                        </svg>
-                        {{ $t('nav.integrations') }}
                     </a>
 
                     <a
