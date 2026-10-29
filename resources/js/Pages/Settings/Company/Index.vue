@@ -967,7 +967,7 @@
                                             >
                                                 {{
                                                     props.zatca?.environment === 'production'
-                                                        ? 'الإنتاج الحي'
+                                                        ? $t('company_profile.tax.production_live')
                                                         : $t('zatca.env_simulation')
                                                 }}
                                             </span>

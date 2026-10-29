@@ -207,7 +207,7 @@
                             /
                             {{
                                 currentSubscription?.billing_cycle === 'yearly'
-                                    ? 'سنوي'
+                                    ? $t('subscription.yearly')
                                     : $t('common.monthly')
                             }}
                         </span>
@@ -554,7 +554,7 @@
                                     {{ formatCurrency(sub.price) }} /
                                     {{
                                         sub.billing_cycle === 'yearly'
-                                            ? 'سنة'
+                                            ? $t('services_management.warranty_units.years')
                                             : $t('services_management.warranty_units.months')
                                     }}
                                 </td>

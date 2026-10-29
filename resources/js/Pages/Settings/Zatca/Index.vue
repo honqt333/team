@@ -233,7 +233,7 @@
                         <span>
                             {{
                                 setting.has_csr
-                                    ? 'إعادة توليد الـ CSR والمفاتيح'
+                                    ? $t('zatca.regenerate_csr')
                                     : $t('zatca.generate_csr_and_continue')
                             }}
                         </span>
@@ -511,7 +511,7 @@
                             :disabled="runningChecks"
                             class="px-6 py-2.5 bg-gray-600 hover:bg-gray-700 text-white rounded-xl font-bold text-sm shadow-sm transition-all disabled:opacity-50"
                         >
-                            {{ runningChecks ? 'جاري الفحص الآن...' : $t('zatca.run_checks') }}
+                            {{ runningChecks ? $t('zatca.checking_now') : $t('zatca.run_checks') }}
                         </button>
                         <button
                             @click="submitProduction"
@@ -662,7 +662,7 @@
                             <span>
                                 {{
                                     setting.environment === 'production'
-                                        ? 'البيئة الإنتاجية الحية (Production)'
+                                        ? $t('zatca.env_production')
                                         : $t('zatca.env_simulation_approved')
                                 }}
                             </span>
@@ -670,7 +670,7 @@
                         <p class="text-[11px] text-gray-500">
                             {{
                                 setting.is_simulated
-                                    ? 'محاكاة محلية — لا يوجد اعتماد من الهيئة'
+                                    ? $t('zatca.simulation_not_certified')
                                     : $t('zatca.link_approved_success')
                             }}
                         </p>

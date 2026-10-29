@@ -161,7 +161,7 @@
                                         >
                                             {{
                                                 form.visual.active_template === tmpl.id
-                                                    ? 'القالب النشط'
+                                                    ? $t('print_settings.active_template')
                                                     : $t('common.set_as_default')
                                             }}
                                         </button>

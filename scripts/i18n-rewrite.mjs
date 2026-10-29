@@ -261,10 +261,21 @@ function applyFile(file) {
             if (offset === -1) continue;
             const start = hit.start + offset;
             const end = start + text.length;
+
+            // When the copy sits inside quotes, the quotes go too:
+            // `'نص'` must become `t('key')`, not `'t('key')'`.
+            const before = inner.slice(0, offset);
+            const after = inner.slice(offset + text.length);
+            const quoted =
+                /['"`]$/.test(before) && /^['"`]/.test(after);
+            const quote = quoted ? before.slice(-1) : '';
+
             edits.push({
-                start,
-                end,
-                replacement: `$t('${entry6.key}')`,
+                start: quoted ? start - 1 : start,
+                end: quoted ? end + 1 : end,
+                replacement: quoted
+                    ? `$t('${entry6.key}')`
+                    : `$t('${entry6.key}')`,
                 kind: hit.kind,
                 line: hit.line,
             });
