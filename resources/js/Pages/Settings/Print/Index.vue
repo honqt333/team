@@ -162,7 +162,7 @@
                                             {{
                                                 form.visual.active_template === tmpl.id
                                                     ? 'القالب النشط'
-                                                    : '$t('common.set_as_default')'
+                                                    : $t('common.set_as_default')
                                             }}
                                         </button>
                                         <span class="text-[9px] text-emerald-500 font-bold">

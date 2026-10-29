@@ -177,7 +177,7 @@
                             {{
                                 currentSubscription
                                     ? getPlanName(currentSubscription)
-                                    : '$t('subscription.no_active_subscription')'
+                                    : $t('subscription.no_active_subscription')
                             }}
                         </h4>
                         <p class="text-sm text-gray-500 dark:text-gray-400">
@@ -205,7 +205,11 @@
                         </span>
                         <span class="text-xs text-gray-500 dark:text-gray-400 block">
                             /
-                            {{ currentSubscription?.billing_cycle === 'yearly' ? 'سنوي' : '$t('common.monthly')' }}
+                            {{
+                                currentSubscription?.billing_cycle === 'yearly'
+                                    ? 'سنوي'
+                                    : $t('common.monthly')
+                            }}
                         </span>
                     </div>
                 </div>
@@ -548,7 +552,11 @@
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap font-mono text-xs">
                                     {{ formatCurrency(sub.price) }} /
-                                    {{ sub.billing_cycle === 'yearly' ? 'سنة' : '$t('services_management.warranty_units.months')' }}
+                                    {{
+                                        sub.billing_cycle === 'yearly'
+                                            ? 'سنة'
+                                            : $t('services_management.warranty_units.months')
+                                    }}
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap font-mono text-xs">
                                     {{ formatDate(sub.starts_at) }}

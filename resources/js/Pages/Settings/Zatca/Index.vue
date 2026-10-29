@@ -234,7 +234,7 @@
                             {{
                                 setting.has_csr
                                     ? 'إعادة توليد الـ CSR والمفاتيح'
-                                    : '$t('zatca.generate_csr_and_continue')'
+                                    : $t('zatca.generate_csr_and_continue')
                             }}
                         </span>
                         <svg
@@ -511,7 +511,7 @@
                             :disabled="runningChecks"
                             class="px-6 py-2.5 bg-gray-600 hover:bg-gray-700 text-white rounded-xl font-bold text-sm shadow-sm transition-all disabled:opacity-50"
                         >
-                            {{ runningChecks ? 'جاري الفحص الآن...' : '$t('zatca.run_checks')' }}
+                            {{ runningChecks ? 'جاري الفحص الآن...' : $t('zatca.run_checks') }}
                         </button>
                         <button
                             @click="submitProduction"
@@ -663,7 +663,7 @@
                                 {{
                                     setting.environment === 'production'
                                         ? 'البيئة الإنتاجية الحية (Production)'
-                                        : '$t('zatca.env_simulation_approved')'
+                                        : $t('zatca.env_simulation_approved')
                                 }}
                             </span>
                         </div>
@@ -671,7 +671,7 @@
                             {{
                                 setting.is_simulated
                                     ? 'محاكاة محلية — لا يوجد اعتماد من الهيئة'
-                                    : '$t('zatca.link_approved_success')'
+                                    : $t('zatca.link_approved_success')
                             }}
                         </p>
                     </div>
@@ -685,7 +685,7 @@
                         <div class="text-sm font-black font-mono text-gray-900 dark:text-white">
                             {{
                                 setting.is_simulated
-                                    ? 'لا تنطبق (محاكاة)'
+                                    ? $t('zatca.not_applicable_simulation')
                                     : setting.production_csid_expires_at ||
                                       $t('zatca.valid_for_a_year')
                             }}

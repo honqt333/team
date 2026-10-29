@@ -968,7 +968,7 @@
                                                 {{
                                                     props.zatca?.environment === 'production'
                                                         ? 'الإنتاج الحي'
-                                                        : '$t('zatca.env_simulation')'
+                                                        : $t('zatca.env_simulation')
                                                 }}
                                             </span>
                                         </div>
