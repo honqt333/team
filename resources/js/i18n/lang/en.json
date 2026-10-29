@@ -6555,7 +6555,275 @@
         "faq_title": "Frequently Asked Questions",
         "support_always_here": "Support is always here",
         "need_more_help": "Need more assistance?",
-        "support_desc": "Our customer support team is ready to answer questions and assist you anytime"
+        "support_desc": "Our customer support team is ready to answer questions and assist you anytime",
+        "support": {
+            "whatsapp_instant": "Instant support via WhatsApp",
+            "open_ticket": "Open a support ticket",
+            "hours": "Saturday - Thursday: 8:00 AM - 10:00 PM"
+        },
+        "video": {
+            "not_supported": "Your browser does not support video playback.",
+            "no_direct_link": "No direct playback link has been added for this video yet.",
+            "being_prepared": "The video is being prepared, or you can add the link from the system administration panel",
+            "duration": "Duration:",
+            "open_source": "Open the source"
+        },
+        "workflows": {
+            "new_work_order": "Open a new work order",
+            "new_work_order_desc": "The steps to receive the customer vehicle, add the services and parts, and set the expected delivery date.",
+            "workshop_board": "The workshop board and the technician timers",
+            "workshop_board_desc": "Run the work timers for the technicians, follow the repair stages, and watch the workshop on the big screen.",
+            "zatca": "ZATCA integration",
+            "zatca_desc": "Issue the simplified tax invoice, 100% compliant with phase two and the QR code.",
+            "customer_portal": "The smart customer portal",
+            "customer_portal_desc": "How the customer signs in with their mobile number, books appointments, and follows the repair step by step.",
+            "quick_tour": "A quick tour of the system and the center setup",
+            "basics": "The basics",
+            "quick_tour_desc": "An overview of the main dashboard, the settings, and adding the center details and the contact information.",
+            "work_order_lifecycle": "The life cycle of a work order, from arrival to departure",
+            "work_orders": "Work orders",
+            "work_orders_desc": "A detailed walkthrough of creating a work order, adding the labor and the parts, the initial inspection, and the quality check.",
+            "live_workshop": "Live workshop management and the technician timers",
+            "workshop_board_short": "Workshop board",
+            "live_workshop_desc": "How the technician starts and stops the timer from their device, and how the productivity shows on the kanban board.",
+            "e_invoicing": "E-invoicing and ZATCA integration",
+            "billing_tax": "Billing and tax",
+            "e_invoicing_desc": "The steps to issue the tax invoice, collect the payment by card, in cash or on account, and meet the ZATCA requirements.",
+            "inventory": "Managing the inventory, the spare parts and the purchase orders",
+            "inventory_short": "Inventory",
+            "inventory_desc": "Add the products, follow the balances in the warehouses, link the parts to the work orders, and issue purchase orders to the suppliers.",
+            "self_service": "The smart customer portal and self-service booking",
+            "customer_portal_short": "Customer portal",
+            "self_service_desc": "The customer experience on the phone: request a maintenance appointment, receive an OTP code, and follow the readiness of the car."
+        },
+        "categories": {
+            "work_orders": "Work orders and services",
+            "workshop": "Workshop board and technicians",
+            "billing": "Billing and ZATCA tax",
+            "inventory": "Inventory and spare parts",
+            "customers": "Customers and vehicle records",
+            "appointments": "Appointments and service bays"
+        },
+        "articles": {
+            "new_work_order": {
+                "title": "How do you create a new work order for a vehicle?",
+                "summary": "The steps to open an official job and receive the car at the center.",
+                "step1": "Go to the work orders list (/app/work-orders) and click the \"New Work Order\" button.",
+                "step2": "Choose the customer by name or mobile number, or click \"Add a new customer\" to register them on the spot.",
+                "step3": "Choose the vehicle that belongs to the customer and enter the current odometer reading (in kilometers).",
+                "step4": "Add the customer complaint, the initial inspection notes, and attach photos of the vehicle if there are any.",
+                "step5": "Set the expected delivery date and time, then click \"Save\" to create the work order.",
+                "tip": "You can attach photos of the vehicle damage and document the scratches with the vehicle inspection feature before the repair starts.",
+                "cta": "Go to the work orders"
+            },
+            "services_parts": {
+                "title": "Add the services and the spare parts to the work order",
+                "summary": "Price the labor and link the parts that are taken from the warehouse.",
+                "step1": "From the work order page, go to the \"Services\" tab.",
+                "step2": "Click \"Add a service\" and choose the department (mechanics, electrical, quick service).",
+                "step3": "Set the price, the quantity and the discount, if there is one.",
+                "step4": "In the spare parts section, pick the part that is taken from the warehouse; it is deducted from the stock automatically once the work order is approved.",
+                "tip": "You can assign the lines of the work order to ready-made packages with one click to speed things up."
+            },
+            "quality": {
+                "title": "Quality check (QC) and the vehicle delivery",
+                "summary": "Verify that every line is complete and approve the vehicle release.",
+                "step1": "Once the technicians finish all the lines, the work order status turns to \"Ready for QC\".",
+                "step2": "The workshop supervisor reviews the inspection lines and approves them or sends them back with a note.",
+                "step3": "Once approved, the final invoice can be issued and the work order closed so the car can leave."
+            },
+            "kanban": {
+                "title": "Use the workshop kanban board and follow the technicians",
+                "summary": "Manage the floor work on the big screen inside the service bay.",
+                "step1": "Go to the workshop board path (/app/workshop).",
+                "step2": "The four workflow columns are shown: waiting, in progress, on hold, and ready for the quality check.",
+                "step3": "The top of the board shows the summary of today's upcoming appointments and the quick check-in button.",
+                "step4": "The cards update by themselves and show the name of the technician on the job and the elapsed time.",
+                "cta": "Open the workshop board now"
+            },
+            "labor": {
+                "title": "Record the working hours with the technician timer (Labor Timers)",
+                "summary": "Measure the real productivity of every technician with the start and stop buttons.",
+                "step1": "The technician opens their account and picks the line they are working on.",
+                "step2": "They press the \"Start Work\" button to start the seconds counter.",
+                "step3": "During a break or while waiting for a spare part, they press \"Pause\".",
+                "step4": "When the repair is done they press \"End\", and the total effective hours is saved automatically in the technician report.",
+                "tip": "The system does not let a technician run two timers at the same time, which prevents clashes and keeps the productivity accurate."
+            },
+            "portal": {
+                "title": "How does the customer sign in to their own portal?",
+                "summary": "A secure sign in with the mobile number through an OTP code, with no password needed.",
+                "step1": "The customer visits the link that belongs to the center: /{tenant_slug}/portal.",
+                "step2": "They enter the mobile number registered in the system and receive a 4-digit OTP code by SMS.",
+                "step3": "After the verification, a dedicated dashboard opens with their cars and their past and upcoming appointments.",
+                "tip": "The customer portal is security-isolated from the center staff dashboard and works smoothly on phone screens."
+            },
+            "booking": {
+                "title": "Book a new maintenance appointment and reschedule it yourself",
+                "summary": "Let the customer pick the branch, the services and the time that suits them.",
+                "step1": "The customer presses the \"Book an appointment\" button.",
+                "step2": "They pick their car, the nearest branch and the services they need.",
+                "step3": "They pick the date and the time that is available according to the capacity of the service bays.",
+                "step4": "The customer gets an instant notification with the booking number, and can change or cancel the appointment from the same page."
+            },
+            "tax_invoice": {
+                "title": "Issue the tax invoice and collect the amounts",
+                "summary": "Issue the simplified tax invoice that meets the ZATCA, tax and customs requirements.",
+                "step1": "From the finished work order page, click the \"Approve and issue the invoice\" button.",
+                "step2": "The system calculates the 15% VAT automatically and generates the QR code.",
+                "step3": "Choose the payment method: cash, card, credit card, bank transfer, or on account.",
+                "step4": "Print the invoice on the fast thermal printer or on the approved A4 size.",
+                "tip": "The system supports printing the encrypted barcode that the official ZATCA verification app expects."
+            },
+            "stock": {
+                "title": "Manage the warehouses and stocktake the spare parts",
+                "summary": "Follow the stock movement, the low-stock alerts and the warehouse reconciliations.",
+                "step1": "From the inventory list (/app/inventory/stock), browse all the parts and their balances in each warehouse.",
+                "step2": "You can create a new purchase order for the supplier when a part reaches its minimum order quantity.",
+                "step3": "When the goods arrive, record a goods received note (GRN) so the balances are updated automatically."
+            },
+            "bays": {
+                "title": "Schedule the service bays (lifts) and manage the capacity",
+                "summary": "Prevent clashes and calculate the daily capacity of the center lifts.",
+                "step1": "Learn about the center lifts and the service spots on the service bays page (/app/service-bays).",
+                "step2": "When any appointment is booked, the system checks that the bay, the technician and the vehicle are free at that time.",
+                "step3": "When the customer arrives, click \"Check in\", then \"Convert to Work Order\" with a single click."
+            }
+        },
+        "admin": {
+            "title": "Help center and guide management",
+            "controller_hint": "Controller of the /app/help page",
+            "description": "The full control panel for the contact channels, the video walkthroughs, the knowledge topics and the FAQ shown to every subscriber of the system.",
+            "type": {
+                "topic": "Topic",
+                "video": "Video",
+                "faq": "Question"
+            },
+            "preview": "Preview the help page (/app/help)",
+            "restore_defaults": "Restore the defaults",
+            "saving": "Saving...",
+            "support": {
+                "title": "Support channels and direct contact",
+                "description": "This data is shown in the header and the footer of the help page and is available to every subscriber of the system.",
+                "whatsapp": "WhatsApp support number",
+                "whatsapp_hint": "A direct chat with this number opens when the customer presses the WhatsApp support button.",
+                "show_whatsapp": "Show the WhatsApp button in the page header",
+                "enabled": "Enabled and shown in the header",
+                "disabled": "Disabled and hidden",
+                "phone": "Central support phone",
+                "email": "Official support email",
+                "hours": "Working hours and schedule",
+                "ticket_url": "External ticket portal link (optional)"
+            },
+            "videos": {
+                "title": "Training walkthroughs and videos (",
+                "description": "The videos appear in their own section on the help page and can be played or linked to YouTube.",
+                "add": "Add a new training video",
+                "category_general": "General",
+                "edit": "Edit the training video",
+                "video_title": "Video title",
+                "duration_auto": "Duration (calculated automatically)",
+                "fetching": "Fetching...",
+                "calculate": "⚡ Calculate",
+                "url": "Direct video link (YouTube, Vimeo or MP4)",
+                "url_hint": "Every YouTube link format is supported (watch?v= or youtu.be), as well as Vimeo links and direct video files (.mp4 / .webm). The link is converted and played automatically inside the advanced video player of the help page.",
+                "guide_description": "Guidance description",
+                "save": "Save the video"
+            },
+            "edit": "Edit",
+            "delete": "Delete",
+            "topics": {
+                "title": "User guide topics and steps (",
+                "description": "The topics and the walkthroughs of every section, and the detailed working steps.",
+                "add": "Add a new topic",
+                "edit": "Edit the guide topic",
+                "add_modal": "Add a new topic to the guide",
+                "parent_section": "Section it belongs to",
+                "step_number": "Step number / order",
+                "topic_title": "Topic title",
+                "summary": "Summary",
+                "steps": "The sequential steps of the process (",
+                "add_step": "+ Add a step",
+                "tip_placeholder": "A tip or a highlighted note (optional)",
+                "link_title": "Internal link title (optional)",
+                "link_url": "Link path (URL)",
+                "save": "Save the topic"
+            },
+            "steps": {
+                "title": "Steps (",
+                "tip": "💡 Tip:",
+                "link": "🔗 Link:",
+                "first_step": "The first step"
+            },
+            "categories": {
+                "title": "Guide sections and categories (",
+                "description": "The knowledge categories that the help topics are sorted by in the tabs.",
+                "add": "Add a new section",
+                "edit": "Edit the section",
+                "add_modal": "Add a new guide section",
+                "slug": "Section slug (Slug ID)",
+                "name": "Section name shown to the users",
+                "save": "Save the section"
+            },
+            "faq": {
+                "title": "Frequently asked questions (",
+                "description": "The FAQ shown at the bottom of the help page for an instant answer.",
+                "add": "Add a new FAQ",
+                "prefix": "Q:",
+                "edit": "Edit the FAQ",
+                "question": "FAQ",
+                "answer": "Explanatory answer",
+                "save": "Save the question"
+            },
+            "quick_cards": {
+                "title": "The four quick-start cards at the top",
+                "description": "The four main cards that appear under the search bar to guide the subscribers straight to the right place.",
+                "number": "Card number #",
+                "go_to": "Go to:",
+                "card_title": "Card title",
+                "short_description": "Short description",
+                "target_section": "Target section on click"
+            },
+            "category": "Category",
+            "filter": {
+                "all_sections": "All sections",
+                "support": "Contact channels and support",
+                "videos": "Video walkthroughs",
+                "topics": "Guide topics",
+                "sections": "Guide sections",
+                "faq": "Frequently Asked Questions",
+                "quick_cards": "Quick-start cards"
+            },
+            "messages": {
+                "saved": "The help page settings were saved successfully.",
+                "save_error": "An error occurred while saving the settings, please check the entries.",
+                "restored": "The default settings were restored successfully.",
+                "video_title_required": "Please enter the video title.",
+                "videos_updated": "The video list was updated. Press \"Save changes\" to apply it.",
+                "video_deleted": "The video was deleted from the list.",
+                "duration_calculated": "The video duration was calculated automatically: {duration}",
+                "topic_title_required": "Please enter the topic title.",
+                "topic_updated": "The topic was updated. Press \"Save changes\" to apply it.",
+                "topic_deleted": "The topic was deleted from the list.",
+                "section_required": "Please enter the section name and its slug.",
+                "sections_updated": "The sections were updated. Press \"Save changes\" to apply it.",
+                "section_deleted": "The section was deleted.",
+                "faq_required": "Please fill in the question and the answer.",
+                "faq_updated": "The FAQ was updated. Press \"Save changes\" to apply it.",
+                "question_deleted": "The question was deleted."
+            },
+            "restore_confirm_title": "Restore the default settings?",
+            "restore_confirm_body": "Are you sure you want to restore all the default settings, topics and walkthroughs of the help page? Any earlier change will be overwritten.",
+            "restore_confirm_yes": "Yes, restore the defaults",
+            "delete_video_title": "Delete the video?",
+            "delete_video_body": "Are you sure you want to delete this training video from the help list?",
+            "delete_topic_title": "Delete the topic?",
+            "delete_topic_body": "Are you sure you want to delete this topic and its steps from the user guide?",
+            "delete_section_title": "Delete the section?",
+            "delete_section_body": "Are you sure you want to delete this section? The topics under it may be affected.",
+            "delete_question_title": "Delete the question?",
+            "delete_question_body": "Are you sure you want to delete this question from the FAQ list?"
+        }
     },
     "systemNav": {
         "feedbacks_support": "Feedbacks & Support"

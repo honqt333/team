@@ -46,7 +46,7 @@
                                 <h1
                                     class="text-2xl sm:text-3xl md:text-4xl font-black text-gray-900 dark:text-white tracking-tight"
                                 >
-                                    إدارة مركز المساعدة والدليل
+                                    {{ $t('help.admin.title') }}
                                 </h1>
                                 <span
                                     class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-indigo-50 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800"
@@ -54,14 +54,13 @@
                                     <span
                                         class="w-2 h-2 rounded-full bg-indigo-500 animate-pulse"
                                     ></span>
-                                    <span>متحكم صفحة /app/help</span>
+                                    <span>{{ $t('help.admin.controller_hint') }}</span>
                                 </span>
                             </div>
                             <p
                                 class="mt-2 text-sm text-gray-500 dark:text-gray-400 max-w-2xl leading-relaxed"
                             >
-                                لوحة التحكم الشاملة لإدارة قنوات التواصل، الشروحات المرئية، مواضيع
-                                المعرفة، والأسئلة الشائعة المعروضة لجميع مشتركي النظام.
+                                {{ $t('help.admin.description') }}
                             </p>
                         </div>
                     </div>
@@ -79,7 +78,7 @@
                             <span
                                 class="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider"
                             >
-                                موضوع
+                                {{ $t('help.admin.type.topic') }}
                             </span>
                         </div>
                         <div class="w-px h-8 bg-gray-200 dark:bg-gray-700"></div>
@@ -92,7 +91,7 @@
                             <span
                                 class="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider"
                             >
-                                فيديو
+                                {{ $t('help.admin.type.video') }}
                             </span>
                         </div>
                         <div class="w-px h-8 bg-gray-200 dark:border-gray-700"></div>
@@ -105,7 +104,7 @@
                             <span
                                 class="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider"
                             >
-                                سؤال
+                                {{ $t('help.admin.type.faq') }}
                             </span>
                         </div>
                     </div>
@@ -125,7 +124,7 @@
                         rel="noopener"
                         class="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 text-xs font-bold transition-all hover:-translate-y-0.5 w-full sm:w-auto"
                     >
-                        <span>معاينة صفحة المساعدة (/app/help)</span>
+                        <span>{{ $t('help.admin.preview') }}</span>
                         <svg
                             class="w-4 h-4 rtl:rotate-180"
                             fill="none"
@@ -155,7 +154,7 @@
                                 d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
                             />
                         </svg>
-                        <span>استعادة الافتراضيات</span>
+                        <span>{{ $t('help.admin.restore_defaults') }}</span>
                     </button>
                 </div>
 
@@ -200,7 +199,13 @@
                                 d="M5 13l4 4L19 7"
                             />
                         </svg>
-                        <span>{{ form.processing ? 'جاري الحفظ...' : 'حفظ التغييرات' }}</span>
+                        <span>
+                            {{
+                                form.processing
+                                    ? $t('help.admin.saving')
+                                    : $t('common.save_changes')
+                            }}
+                        </span>
                     </button>
                 </div>
             </div>
@@ -251,11 +256,10 @@
                     >
                         <div>
                             <h3 class="text-base font-bold text-gray-900 dark:text-white">
-                                قنوات الدعم والتواصل المباشر
+                                {{ $t('help.admin.support.title') }}
                             </h3>
                             <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                                يتم عرض هذه البيانات في هيدر وتذييل صفحة المساعدة ومتاحة لكافة
-                                مشتركي النظام.
+                                {{ $t('help.admin.support.description') }}
                             </p>
                         </div>
                         <span class="w-3 h-3 rounded-full bg-emerald-500"></span>
@@ -265,7 +269,7 @@
                         <!-- WhatsApp -->
                         <div class="space-y-2">
                             <label class="block text-xs font-bold text-gray-700 dark:text-gray-300">
-                                رقم دعم الواتساب (WhatsApp Support)
+                                {{ $t('help.admin.support.whatsapp') }}
                             </label>
                             <div class="relative">
                                 <input
@@ -277,15 +281,14 @@
                                 />
                             </div>
                             <p class="text-[11px] text-gray-500 dark:text-gray-400">
-                                يتم فتح محادثة مباشرة مع هذا الرقم عند ضغط العميل على زر الدعم عبر
-                                واتساب.
+                                {{ $t('help.admin.support.whatsapp_hint') }}
                             </p>
                         </div>
 
                         <!-- WhatsApp Enabled Toggle -->
                         <div class="space-y-2">
                             <label class="block text-xs font-bold text-gray-700 dark:text-gray-300">
-                                إظهار زر الواتساب في هيدر الصفحة
+                                {{ $t('help.admin.support.show_whatsapp') }}
                             </label>
                             <div
                                 class="flex items-center justify-between p-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50"
@@ -293,8 +296,8 @@
                                 <span class="text-xs font-bold text-gray-700 dark:text-gray-300">
                                     {{
                                         form.contact_whatsapp_enabled
-                                            ? 'مفعّل ويظهر في الهيدر'
-                                            : 'معطّل ومخفي'
+                                            ? $t('help.admin.support.enabled')
+                                            : $t('help.admin.support.disabled')
                                     }}
                                 </span>
                                 <label class="relative inline-flex items-center cursor-pointer">
@@ -313,7 +316,7 @@
                         <!-- Support Phone -->
                         <div class="space-y-2">
                             <label class="block text-xs font-bold text-gray-700 dark:text-gray-300">
-                                هاتف الدعم المركزي (Support Phone)
+                                {{ $t('help.admin.support.phone') }}
                             </label>
                             <input
                                 v-model="form.contact_phone"
@@ -327,7 +330,7 @@
                         <!-- Support Email -->
                         <div class="space-y-2">
                             <label class="block text-xs font-bold text-gray-700 dark:text-gray-300">
-                                البريد الإلكتروني الرسمي للدعم (Support Email)
+                                {{ $t('help.admin.support.email') }}
                             </label>
                             <input
                                 v-model="form.contact_email"
@@ -341,7 +344,7 @@
                         <!-- Support Hours -->
                         <div class="space-y-2">
                             <label class="block text-xs font-bold text-gray-700 dark:text-gray-300">
-                                ساعات ومواعيد العمل
+                                {{ $t('help.admin.support.hours') }}
                             </label>
                             <input
                                 v-model="form.contact_hours"
@@ -354,7 +357,7 @@
                         <!-- External Ticket URL -->
                         <div class="space-y-2">
                             <label class="block text-xs font-bold text-gray-700 dark:text-gray-300">
-                                رابط بوابة التذاكر الخارجية (اختياري)
+                                {{ $t('help.admin.support.ticket_url') }}
                             </label>
                             <input
                                 v-model="form.contact_ticket_url"
@@ -375,11 +378,10 @@
                 <div class="flex items-center justify-between flex-wrap gap-4">
                     <div>
                         <h3 class="text-base font-bold text-gray-900 dark:text-white">
-                            الشروحات التدريبية والفيديوهات ({{ form.video_tutorials.length }})
+                            {{ $t('help.admin.videos.title') }}{{ form.video_tutorials.length }})
                         </h3>
                         <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                            الفيديوهات تظهر في قسم خاص في صفحة المساعدة مع إمكانية التشغيل أو الربط
-                            مع يوتيوب.
+                            {{ $t('help.admin.videos.description') }}
                         </p>
                     </div>
 
@@ -396,7 +398,7 @@
                                 d="M12 4v16m8-8H4"
                             />
                         </svg>
-                        <span>إضافة فيديو تدريبي جديد</span>
+                        <span>{{ $t('help.admin.videos.add') }}</span>
                     </button>
                 </div>
 
@@ -411,7 +413,7 @@
                                 <span
                                     class="px-2.5 py-1 rounded-md text-xs font-bold bg-indigo-50 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300"
                                 >
-                                    {{ video.category || 'عام' }}
+                                    {{ video.category || $t('help.admin.videos.category_general') }}
                                 </span>
                                 <span class="text-xs font-mono font-bold text-gray-400">
                                     ⏱️ {{ video.duration || '00:00' }}
@@ -446,14 +448,14 @@
                                 @click="openVideoModal(video, idx)"
                                 class="px-3 py-1.5 rounded-lg text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 transition-colors"
                             >
-                                تعديل
+                                {{ $t('help.admin.edit') }}
                             </button>
                             <button
                                 type="button"
                                 @click="deleteVideo(idx)"
                                 class="px-3 py-1.5 rounded-lg text-xs font-bold text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors"
                             >
-                                حذف
+                                {{ $t('help.admin.delete') }}
                             </button>
                         </div>
                     </div>
@@ -469,10 +471,10 @@
                 >
                     <div>
                         <h3 class="text-base font-bold text-gray-900 dark:text-white">
-                            مواضيع دليل الاستخدام والخطوات ({{ form.topics.length }})
+                            {{ $t('help.admin.topics.title') }}{{ form.topics.length }})
                         </h3>
                         <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                            المواضيع والشروحات الإرشادية لكل قسم وخطوات العمل التفصيلية.
+                            {{ $t('help.admin.topics.description') }}
                         </p>
                     </div>
 
@@ -505,7 +507,7 @@
                                     d="M12 4v16m8-8H4"
                                 />
                             </svg>
-                            <span>إضافة موضوع جديد</span>
+                            <span>{{ $t('help.admin.topics.add') }}</span>
                         </button>
                     </div>
                 </div>
@@ -590,7 +592,7 @@
                             class="bg-gray-50 dark:bg-gray-900/50 rounded-xl p-3.5 border border-gray-100 dark:border-gray-800 text-xs text-gray-700 dark:text-gray-300"
                         >
                             <span class="font-bold block mb-1 text-gray-900 dark:text-white">
-                                الخطوات ({{ topic.steps.length }}):
+                                {{ $t('help.admin.steps.title') }}{{ topic.steps.length }}):
                             </span>
                             <ol
                                 class="list-decimal list-inside space-y-1 ps-1 text-[11px] text-gray-600 dark:text-gray-400"
@@ -611,13 +613,15 @@
                                 v-if="topic.tip"
                                 class="inline-flex items-center gap-1 text-amber-600 dark:text-amber-400 text-[11px]"
                             >
-                                💡 نصيحة: {{ topic.tip }}
+                                {{ $t('help.admin.steps.tip') }} {{ topic.tip }}
                             </span>
                             <span
                                 v-if="topic.link"
                                 class="inline-flex items-center gap-1 text-indigo-600 dark:text-indigo-400 text-[11px] font-mono"
                             >
-                                🔗 رابط: {{ topic.link.label }} ({{ topic.link.url }})
+                                {{ $t('help.admin.steps.link') }} {{ topic.link.label }} ({{
+                                    topic.link.url
+                                }})
                             </span>
                         </div>
                     </div>
@@ -631,10 +635,10 @@
                 <div class="flex items-center justify-between flex-wrap gap-4">
                     <div>
                         <h3 class="text-base font-bold text-gray-900 dark:text-white">
-                            أقسام وتصنيفات الدليل ({{ form.categories.length }})
+                            {{ $t('help.admin.categories.title') }}{{ form.categories.length }})
                         </h3>
                         <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                            تصنيفات المعرفة التي يتم فرز مواضيع المساعدة بحسبها في التبويبات.
+                            {{ $t('help.admin.categories.description') }}
                         </p>
                     </div>
 
@@ -651,7 +655,7 @@
                                 d="M12 4v16m8-8H4"
                             />
                         </svg>
-                        <span>إضافة قسم جديد</span>
+                        <span>{{ $t('help.admin.categories.add') }}</span>
                     </button>
                 </div>
 
@@ -683,14 +687,14 @@
                                 @click="openCategoryModal(cat, idx)"
                                 class="p-1.5 rounded-lg text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/30"
                             >
-                                تعديل
+                                {{ $t('help.admin.edit') }}
                             </button>
                             <button
                                 type="button"
                                 @click="deleteCategory(idx)"
                                 class="p-1.5 rounded-lg text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30"
                             >
-                                حذف
+                                {{ $t('help.admin.delete') }}
                             </button>
                         </div>
                     </div>
@@ -704,10 +708,10 @@
                 <div class="flex items-center justify-between flex-wrap gap-4">
                     <div>
                         <h3 class="text-base font-bold text-gray-900 dark:text-white">
-                            الأسئلة الأكثر تكراراً ({{ form.faqs.length }})
+                            {{ $t('help.admin.faq.title') }}{{ form.faqs.length }})
                         </h3>
                         <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                            الأسئلة الشائعة المعروضة في أسفل صفحة المساعدة للإجابة الفورية.
+                            {{ $t('help.admin.faq.description') }}
                         </p>
                     </div>
 
@@ -724,7 +728,7 @@
                                 d="M12 4v16m8-8H4"
                             />
                         </svg>
-                        <span>إضافة سؤال شائع جديد</span>
+                        <span>{{ $t('help.admin.faq.add') }}</span>
                     </button>
                 </div>
 
@@ -739,7 +743,7 @@
                                 <span
                                     class="font-black text-indigo-600 dark:text-indigo-400 text-sm"
                                 >
-                                    س:
+                                    {{ $t('help.admin.faq.prefix') }}
                                 </span>
                                 <h4 class="text-sm font-bold text-gray-900 dark:text-white">
                                     {{ faq.q }}
@@ -752,14 +756,14 @@
                                     @click="openFaqModal(faq, idx)"
                                     class="px-2.5 py-1 text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 rounded-lg"
                                 >
-                                    تعديل
+                                    {{ $t('help.admin.edit') }}
                                 </button>
                                 <button
                                     type="button"
                                     @click="deleteFaq(idx)"
                                     class="px-2.5 py-1 text-xs font-bold text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg"
                                 >
-                                    حذف
+                                    {{ $t('help.admin.delete') }}
                                 </button>
                             </div>
                         </div>
@@ -777,10 +781,10 @@
             <div v-if="activeTab === 'quick_start'" class="space-y-6">
                 <div>
                     <h3 class="text-base font-bold text-gray-900 dark:text-white">
-                        بطاقات البدء السريع الأربعة العلوية
+                        {{ $t('help.admin.quick_cards.title') }}
                     </h3>
                     <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                        البطاقات الأربعة الرئيسية التي تظهر أسفل شريط البحث لتوجيه المشتركين مباشرة.
+                        {{ $t('help.admin.quick_cards.description') }}
                     </p>
                 </div>
 
@@ -794,10 +798,10 @@
                             class="flex items-center justify-between border-b border-gray-100 dark:border-gray-700 pb-3"
                         >
                             <span class="text-xs font-bold text-indigo-600 dark:text-indigo-400">
-                                بطاقة رقم #{{ idx + 1 }}
+                                {{ $t('help.admin.quick_cards.number') }}{{ idx + 1 }}
                             </span>
                             <span class="text-xs font-mono text-gray-400">
-                                توجه إلى: {{ item.targetCategory }}
+                                {{ $t('help.admin.quick_cards.go_to') }} {{ item.targetCategory }}
                             </span>
                         </div>
 
@@ -806,7 +810,7 @@
                                 <label
                                     class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1"
                                 >
-                                    عنوان البطاقة
+                                    {{ $t('help.admin.quick_cards.card_title') }}
                                 </label>
                                 <input
                                     v-model="item.title"
@@ -819,7 +823,7 @@
                                 <label
                                     class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1"
                                 >
-                                    الوصف المختصر
+                                    {{ $t('help.admin.quick_cards.short_description') }}
                                 </label>
                                 <textarea
                                     v-model="item.desc"
@@ -832,7 +836,7 @@
                                 <label
                                     class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1"
                                 >
-                                    القسم المستهدف عند النقر
+                                    {{ $t('help.admin.quick_cards.target_section') }}
                                 </label>
                                 <SearchableSelect
                                     v-model="item.targetCategory"
@@ -868,8 +872,8 @@
                         <h4 class="text-base font-bold text-gray-900 dark:text-white">
                             {{
                                 videoModal.isEditing
-                                    ? 'تعديل الفيديو التدريبي'
-                                    : 'إضافة فيديو تدريبي جديد'
+                                    ? $t('help.admin.videos.edit')
+                                    : $t('help.admin.videos.add')
                             }}
                         </h4>
                         <button
@@ -886,7 +890,7 @@
                             <label
                                 class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1"
                             >
-                                عنوان الفيديو التدريبي
+                                {{ $t('help.admin.videos.video_title') }}
                             </label>
                             <input
                                 v-model="videoModal.form.title"
@@ -901,7 +905,7 @@
                                 <label
                                     class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1"
                                 >
-                                    التصنيف
+                                    {{ $t('help.admin.category') }}
                                 </label>
                                 <input
                                     v-model="videoModal.form.category"
@@ -916,7 +920,7 @@
                                     <label
                                         class="block text-xs font-bold text-gray-700 dark:text-gray-300"
                                     >
-                                        المدة (تُحسب تلقائياً)
+                                        {{ $t('help.admin.videos.duration_auto') }}
                                     </label>
                                     <span
                                         v-if="fetchingDuration"
@@ -941,7 +945,7 @@
                                                 d="M4 12a8 8 0 018-8v8H4z"
                                             ></path>
                                         </svg>
-                                        جاري الجلب...
+                                        {{ $t('help.admin.videos.fetching') }}
                                     </span>
                                 </div>
                                 <div class="relative">
@@ -960,7 +964,7 @@
                                         class="absolute inset-y-1 end-1 px-2.5 bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-900/40 dark:hover:bg-indigo-900/60 text-indigo-600 dark:text-indigo-300 rounded-lg text-[11px] font-bold transition-colors flex items-center gap-1"
                                         title="إعادة احتساب المدة تلقائياً من الرابط"
                                     >
-                                        <span>⚡ احتساب</span>
+                                        <span>{{ $t('help.admin.videos.calculate') }}</span>
                                     </button>
                                 </div>
                             </div>
@@ -970,7 +974,7 @@
                             <label
                                 class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1"
                             >
-                                رابط الفيديو المباشر (YouTube أو Vimeo أو MP4)
+                                {{ $t('help.admin.videos.url') }}
                             </label>
                             <input
                                 v-model="videoModal.form.video_url"
@@ -984,9 +988,7 @@
                             <p
                                 class="text-[11px] text-gray-500 dark:text-gray-400 mt-1.5 leading-relaxed"
                             >
-                                يدعم روابط YouTube بجميع صيغها (watch?v= أو youtu.be)، روابط Vimeo،
-                                أو ملفات الفيديو المباشرة (.mp4 / .webm). يتم تحويل الرابط وتشغيله
-                                تلقائياً داخل مشغل فيديو متطور في صفحة المساعدة.
+                                {{ $t('help.admin.videos.url_hint') }}
                             </p>
 
                             <!-- Live preview in modal -->
@@ -1027,7 +1029,7 @@
                             <label
                                 class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1"
                             >
-                                الوصف الإرشادي
+                                {{ $t('help.admin.videos.guide_description') }}
                             </label>
                             <textarea
                                 v-model="videoModal.form.description"
@@ -1046,14 +1048,14 @@
                             @click="videoModal.open = false"
                             class="px-4 py-2 rounded-xl border border-gray-200 dark:border-gray-700 text-xs font-bold text-gray-600 dark:text-gray-300"
                         >
-                            إلغاء
+                            {{ $t('common.cancel') }}
                         </button>
                         <button
                             type="button"
                             @click="saveVideoModal"
                             class="px-5 py-2 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 text-white text-xs font-bold shadow-md shadow-indigo-500/20"
                         >
-                            حفظ الفيديو
+                            {{ $t('help.admin.videos.save') }}
                         </button>
                     </div>
                 </div>
@@ -1075,8 +1077,8 @@
                         <h4 class="text-base font-bold text-gray-900 dark:text-white">
                             {{
                                 topicModal.isEditing
-                                    ? 'تعديل موضوع الدليل'
-                                    : 'إضافة موضوع جديد في الدليل'
+                                    ? $t('help.admin.topics.edit')
+                                    : $t('help.admin.topics.add_modal')
                             }}
                         </h4>
                         <button
@@ -1094,7 +1096,7 @@
                                 <label
                                     class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1"
                                 >
-                                    القسم التابع له
+                                    {{ $t('help.admin.topics.parent_section') }}
                                 </label>
                                 <SearchableSelect
                                     v-model="topicModal.form.category"
@@ -1109,7 +1111,7 @@
                                 <label
                                     class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1"
                                 >
-                                    رقم الخطوة / الترتيب
+                                    {{ $t('help.admin.topics.step_number') }}
                                 </label>
                                 <input
                                     v-model="topicModal.form.stepNumber"
@@ -1124,7 +1126,7 @@
                             <label
                                 class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1"
                             >
-                                عنوان الموضوع
+                                {{ $t('help.admin.topics.topic_title') }}
                             </label>
                             <input
                                 v-model="topicModal.form.title"
@@ -1138,7 +1140,7 @@
                             <label
                                 class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1"
                             >
-                                الملخص
+                                {{ $t('help.admin.topics.summary') }}
                             </label>
                             <input
                                 v-model="topicModal.form.summary"
@@ -1154,14 +1156,15 @@
                                 <label
                                     class="block text-xs font-bold text-gray-700 dark:text-gray-300"
                                 >
-                                    الخطوات المتتالية للعملية ({{ topicModal.form.steps.length }})
+                                    {{ $t('help.admin.topics.steps')
+                                    }}{{ topicModal.form.steps.length }})
                                 </label>
                                 <button
                                     type="button"
                                     @click="addTopicStep"
                                     class="text-xs text-indigo-600 dark:text-indigo-400 font-bold hover:underline"
                                 >
-                                    + إضافة خطوة
+                                    {{ $t('help.admin.topics.add_step') }}
                                 </button>
                             </div>
 
@@ -1196,7 +1199,7 @@
                             <label
                                 class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1"
                             >
-                                نصيحة أو تنبيه مميز (اختياري)
+                                {{ $t('help.admin.topics.tip_placeholder') }}
                             </label>
                             <input
                                 v-model="topicModal.form.tip"
@@ -1211,7 +1214,7 @@
                                 <label
                                     class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1"
                                 >
-                                    عنوان الرابط الداخلي (اختياري)
+                                    {{ $t('help.admin.topics.link_title') }}
                                 </label>
                                 <input
                                     v-model="topicModal.form.linkLabel"
@@ -1224,7 +1227,7 @@
                                 <label
                                     class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1"
                                 >
-                                    مسار الرابط (URL)
+                                    {{ $t('help.admin.topics.link_url') }}
                                 </label>
                                 <input
                                     v-model="topicModal.form.linkUrl"
@@ -1245,14 +1248,14 @@
                             @click="topicModal.open = false"
                             class="px-4 py-2 rounded-xl border border-gray-200 dark:border-gray-700 text-xs font-bold text-gray-600 dark:text-gray-300"
                         >
-                            إلغاء
+                            {{ $t('common.cancel') }}
                         </button>
                         <button
                             type="button"
                             @click="saveTopicModal"
                             class="px-5 py-2 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 text-white text-xs font-bold shadow-md shadow-indigo-500/20"
                         >
-                            حفظ الموضوع
+                            {{ $t('help.admin.topics.save') }}
                         </button>
                     </div>
                 </div>
@@ -1272,7 +1275,11 @@
                         class="p-6 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between"
                     >
                         <h4 class="text-base font-bold text-gray-900 dark:text-white">
-                            {{ categoryModal.isEditing ? 'تعديل القسم' : 'إضافة قسم دليل جديد' }}
+                            {{
+                                categoryModal.isEditing
+                                    ? $t('help.admin.categories.edit')
+                                    : $t('help.admin.categories.add_modal')
+                            }}
                         </h4>
                         <button
                             type="button"
@@ -1288,7 +1295,7 @@
                             <label
                                 class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1"
                             >
-                                معرف القسم البرمجي (Slug ID)
+                                {{ $t('help.admin.categories.slug') }}
                             </label>
                             <input
                                 v-model="categoryModal.form.id"
@@ -1303,7 +1310,7 @@
                             <label
                                 class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1"
                             >
-                                اسم القسم الظاهر للمستخدمين
+                                {{ $t('help.admin.categories.name') }}
                             </label>
                             <input
                                 v-model="categoryModal.form.name"
@@ -1322,14 +1329,14 @@
                             @click="categoryModal.open = false"
                             class="px-4 py-2 rounded-xl border border-gray-200 dark:border-gray-700 text-xs font-bold text-gray-600 dark:text-gray-300"
                         >
-                            إلغاء
+                            {{ $t('common.cancel') }}
                         </button>
                         <button
                             type="button"
                             @click="saveCategoryModal"
                             class="px-5 py-2 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 text-white text-xs font-bold shadow-md shadow-indigo-500/20"
                         >
-                            حفظ القسم
+                            {{ $t('help.admin.categories.save') }}
                         </button>
                     </div>
                 </div>
@@ -1350,7 +1357,9 @@
                     >
                         <h4 class="text-base font-bold text-gray-900 dark:text-white">
                             {{
-                                faqModal.isEditing ? 'تعديل السؤال الشائع' : 'إضافة سؤال شائع جديد'
+                                faqModal.isEditing
+                                    ? $t('help.admin.faq.edit')
+                                    : $t('help.admin.faq.add')
                             }}
                         </h4>
                         <button
@@ -1367,7 +1376,7 @@
                             <label
                                 class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1"
                             >
-                                السؤال الشائع
+                                {{ $t('help.admin.faq.question') }}
                             </label>
                             <input
                                 v-model="faqModal.form.q"
@@ -1381,7 +1390,7 @@
                             <label
                                 class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1"
                             >
-                                الإجابة التوضيحية
+                                {{ $t('help.admin.faq.answer') }}
                             </label>
                             <textarea
                                 v-model="faqModal.form.a"
@@ -1400,14 +1409,14 @@
                             @click="faqModal.open = false"
                             class="px-4 py-2 rounded-xl border border-gray-200 dark:border-gray-700 text-xs font-bold text-gray-600 dark:text-gray-300"
                         >
-                            إلغاء
+                            {{ $t('common.cancel') }}
                         </button>
                         <button
                             type="button"
                             @click="saveFaqModal"
                             class="px-5 py-2 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 text-white text-xs font-bold shadow-md shadow-indigo-500/20"
                         >
-                            حفظ السؤال
+                            {{ $t('help.admin.faq.save') }}
                         </button>
                     </div>
                 </div>
@@ -1417,6 +1426,9 @@
 </template>
 
 <script setup>
+import { useI18n } from 'vue-i18n';
+const { t } = useI18n();
+
 import { ref, computed, h } from 'vue';
 import { useForm, router } from '@inertiajs/vue3';
 import axios from 'axios';
@@ -1444,7 +1456,7 @@ const form = useForm({
     contact_whatsapp: props.settings.contact_whatsapp || '+966 555 785 658',
     contact_phone: props.settings.contact_phone || '920000000',
     contact_email: props.settings.contact_email || 'support@carag.sa',
-    contact_hours: props.settings.contact_hours || 'السبت - الخميس: 8:00 ص - 10:00 م',
+    contact_hours: props.settings.contact_hours || t('help.support.hours'),
     contact_whatsapp_enabled: props.settings.contact_whatsapp_enabled !== false,
     contact_ticket_url: props.settings.contact_ticket_url || '',
 
@@ -1456,7 +1468,7 @@ const form = useForm({
 });
 
 const categoryFilterOptions = computed(() => [
-    { value: 'all', label: 'كافة الأقسام' },
+    { value: 'all', label: t('help.admin.filter.all_sections') },
     ...form.categories.map((c) => ({ value: c.id, label: c.name })),
 ]);
 
@@ -1526,19 +1538,29 @@ const IconLightning = () =>
     ]);
 
 const tabs = computed(() => [
-    { id: 'channels', label: 'قنوات التواصل والدعم', icon: IconPhone },
+    { id: 'channels', label: t('help.admin.filter.support'), icon: IconPhone },
     {
         id: 'videos',
-        label: 'الشروحات المرئية',
+        label: t('help.admin.filter.videos'),
         count: form.video_tutorials.length,
         icon: IconVideo,
     },
-    { id: 'topics', label: 'مواضيع الدليل', count: form.topics.length, icon: IconBook },
-    { id: 'categories', label: 'أقسام الدليل', count: form.categories.length, icon: IconFolder },
-    { id: 'faqs', label: 'الأسئلة الشائعة', count: form.faqs.length, icon: IconQuestion },
+    {
+        id: 'topics',
+        label: t('help.admin.filter.topics'),
+        count: form.topics.length,
+        icon: IconBook,
+    },
+    {
+        id: 'categories',
+        label: t('help.admin.filter.sections'),
+        count: form.categories.length,
+        icon: IconFolder,
+    },
+    { id: 'faqs', label: t('help.admin.filter.faq'), count: form.faqs.length, icon: IconQuestion },
     {
         id: 'quick_start',
-        label: 'بطاقات البدء السريع',
+        label: t('help.admin.filter.quick_cards'),
         count: form.quick_start_items.length,
         icon: IconLightning,
     },
@@ -1566,10 +1588,10 @@ const submitForm = () => {
     form.put('/system/settings/help', {
         preserveScroll: true,
         onSuccess: () => {
-            toastSuccess('تم حفظ إعدادات صفحة المساعدة بنجاح.');
+            toastSuccess(t('help.admin.messages.saved'));
         },
         onError: () => {
-            toastError('حدث خطأ أثناء حفظ الإعدادات، يرجى التحقق من المدخلات.');
+            toastError(t('help.admin.messages.save_error'));
         },
     });
 };
@@ -1577,11 +1599,10 @@ const submitForm = () => {
 // Reset defaults handler
 const handleResetDefaults = async () => {
     const confirmed = await confirm({
-        title: 'استعادة الإعدادات الافتراضية؟',
-        message:
-            'هل أنت متأكد من رغبتك في استعادة كافة الإعدادات والمواضيع والشروحات الافتراضية لصفحة المساعدة؟ سيتم الكتابة فوق أي تعديلات سابقة.',
-        confirmText: 'نعم، استعد الافتراضيات',
-        cancelText: 'إلغاء',
+        title: t('help.admin.restore_confirm_title'),
+        message: t('help.admin.restore_confirm_body'),
+        confirmText: t('help.admin.restore_confirm_yes'),
+        cancelText: t('common.cancel'),
         type: 'danger',
     });
 
@@ -1594,7 +1615,7 @@ const handleResetDefaults = async () => {
         {
             preserveScroll: true,
             onSuccess: () => {
-                toastSuccess('تمت استعادة الإعدادات الافتراضية بنجاح.');
+                toastSuccess(t('help.admin.messages.restored'));
                 // Update local form state from refreshed props
                 form.contact_whatsapp = props.settings.contact_whatsapp;
                 form.contact_phone = props.settings.contact_phone;
@@ -1699,7 +1720,7 @@ const openVideoModal = (video = null, index = -1) => {
             form: {
                 id: 'v_' + Date.now(),
                 title: '',
-                category: form.categories[0]?.name || 'عام',
+                category: form.categories[0]?.name || t('help.admin.videos.category_general'),
                 duration: '05:00',
                 video_url: '',
                 description: '',
@@ -1710,7 +1731,7 @@ const openVideoModal = (video = null, index = -1) => {
 
 const saveVideoModal = () => {
     if (!videoModal.value.form.title) {
-        toastError('يرجى إدخال عنوان الفيديو.');
+        toastError(t('help.admin.messages.video_title_required'));
         return;
     }
     if (videoModal.value.isEditing && videoModal.value.index >= 0) {
@@ -1719,19 +1740,19 @@ const saveVideoModal = () => {
         form.video_tutorials.push({ ...videoModal.value.form });
     }
     videoModal.value.open = false;
-    toastSuccess('تم تحديث قائمة الفيديوهات. اضغط "حفظ التغييرات" لتثبيتها.');
+    toastSuccess(t('help.admin.messages.videos_updated'));
 };
 
 const deleteVideo = async (index) => {
     const confirmed = await confirm({
-        title: 'حذف الفيديو؟',
-        message: 'هل أنت متأكد من حذف هذا الفيديو التدريبي من قائمة المساعدة؟',
-        confirmText: 'حذف',
-        cancelText: 'إلغاء',
+        title: t('help.admin.delete_video_title'),
+        message: t('help.admin.delete_video_body'),
+        confirmText: t('help.admin.delete'),
+        cancelText: t('common.cancel'),
     });
     if (!confirmed) return;
     form.video_tutorials.splice(index, 1);
-    toastSuccess('تم حذف الفيديو من القائمة.');
+    toastSuccess(t('help.admin.messages.video_deleted'));
 };
 
 const fetchingDuration = ref(false);
@@ -1753,7 +1774,9 @@ const autoFetchVideoDuration = async () => {
                     const s = sec % 60;
                     videoModal.value.form.duration = `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
                     toastSuccess(
-                        `تم احتساب مدة الفيديو تلقائياً: ${videoModal.value.form.duration}`
+                        t('help.admin.messages.duration_calculated', {
+                            duration: videoModal.value.form.duration,
+                        })
                     );
                 }
                 fetchingDuration.value = false;
@@ -1772,7 +1795,9 @@ const autoFetchVideoDuration = async () => {
             if (!videoModal.value.form.title && response.data.title) {
                 videoModal.value.form.title = response.data.title;
             }
-            toastSuccess(`تم احتساب مدة الفيديو تلقائياً: ${response.data.duration}`);
+            toastSuccess(
+                t('help.admin.messages.duration_calculated', { duration: response.data.duration })
+            );
         }
     } catch (e) {
         // silent fallback
@@ -1834,7 +1859,7 @@ const openTopicModal = (topic = null, index = -1) => {
                 stepNumber: '0' + (form.topics.length + 1),
                 title: '',
                 summary: '',
-                steps: ['الخطوة الأولى'],
+                steps: [t('help.admin.steps.first_step')],
                 tip: '',
                 linkLabel: '',
                 linkUrl: '',
@@ -1855,7 +1880,7 @@ const removeTopicStep = (sIdx) => {
 
 const saveTopicModal = () => {
     if (!topicModal.value.form.title) {
-        toastError('يرجى إدخال عنوان الموضوع.');
+        toastError(t('help.admin.messages.topic_title_required'));
         return;
     }
 
@@ -1882,19 +1907,19 @@ const saveTopicModal = () => {
     }
 
     topicModal.value.open = false;
-    toastSuccess('تم تحديث الموضوع. اضغط "حفظ التغييرات" لتثبيتها.');
+    toastSuccess(t('help.admin.messages.topic_updated'));
 };
 
 const deleteTopic = async (index) => {
     const confirmed = await confirm({
-        title: 'حذف الموضوع؟',
-        message: 'هل أنت متأكد من حذف هذا الموضوع وخطواته من دليل الاستخدام؟',
-        confirmText: 'حذف',
-        cancelText: 'إلغاء',
+        title: t('help.admin.delete_topic_title'),
+        message: t('help.admin.delete_topic_body'),
+        confirmText: t('help.admin.delete'),
+        cancelText: t('common.cancel'),
     });
     if (!confirmed) return;
     form.topics.splice(index, 1);
-    toastSuccess('تم حذف الموضوع من القائمة.');
+    toastSuccess(t('help.admin.messages.topic_deleted'));
 };
 
 // Category Modal
@@ -1931,7 +1956,7 @@ const openCategoryModal = (cat = null, index = -1) => {
 
 const saveCategoryModal = () => {
     if (!categoryModal.value.form.id || !categoryModal.value.form.name) {
-        toastError('يرجى إدخال اسم ومعرف القسم.');
+        toastError(t('help.admin.messages.section_required'));
         return;
     }
     if (categoryModal.value.isEditing && categoryModal.value.index >= 0) {
@@ -1940,19 +1965,19 @@ const saveCategoryModal = () => {
         form.categories.push({ ...categoryModal.value.form });
     }
     categoryModal.value.open = false;
-    toastSuccess('تم تحديث الأقسام. اضغط "حفظ التغييرات" لتثبيتها.');
+    toastSuccess(t('help.admin.messages.sections_updated'));
 };
 
 const deleteCategory = async (index) => {
     const confirmed = await confirm({
-        title: 'حذف القسم؟',
-        message: 'هل أنت متأكد من حذف هذا القسم؟ قد تتأثر المواضيع التابعة له.',
-        confirmText: 'حذف',
-        cancelText: 'إلغاء',
+        title: t('help.admin.delete_section_title'),
+        message: t('help.admin.delete_section_body'),
+        confirmText: t('help.admin.delete'),
+        cancelText: t('common.cancel'),
     });
     if (!confirmed) return;
     form.categories.splice(index, 1);
-    toastSuccess('تم حذف القسم.');
+    toastSuccess(t('help.admin.messages.section_deleted'));
 };
 
 // FAQ Modal
@@ -1991,7 +2016,7 @@ const openFaqModal = (faq = null, index = -1) => {
 
 const saveFaqModal = () => {
     if (!faqModal.value.form.q || !faqModal.value.form.a) {
-        toastError('يرجى ملء السؤال والإجابة.');
+        toastError(t('help.admin.messages.faq_required'));
         return;
     }
     if (faqModal.value.isEditing && faqModal.value.index >= 0) {
@@ -2000,18 +2025,18 @@ const saveFaqModal = () => {
         form.faqs.push({ ...faqModal.value.form });
     }
     faqModal.value.open = false;
-    toastSuccess('تم تحديث الأسئلة الشائعة. اضغط "حفظ التغييرات" لتثبيتها.');
+    toastSuccess(t('help.admin.messages.faq_updated'));
 };
 
 const deleteFaq = async (index) => {
     const confirmed = await confirm({
-        title: 'حذف السؤال؟',
-        message: 'هل أنت متأكد من حذف هذا السؤال من قائمة الأسئلة الشائعة؟',
-        confirmText: 'حذف',
-        cancelText: 'إلغاء',
+        title: t('help.admin.delete_question_title'),
+        message: t('help.admin.delete_question_body'),
+        confirmText: t('help.admin.delete'),
+        cancelText: t('common.cancel'),
     });
     if (!confirmed) return;
     form.faqs.splice(index, 1);
-    toastSuccess('تم حذف السؤال.');
+    toastSuccess(t('help.admin.messages.question_deleted'));
 };
 </script>

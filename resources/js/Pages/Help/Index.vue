@@ -453,7 +453,9 @@
                             {{ $t('help.need_more_help') }}
                         </h3>
                         <p class="text-sm text-slate-300 mt-1 max-w-xl">
-                            {{ $t('help.support_desc') }} ({{ contactSupport.hours }})
+                            {{ $t('help.support_desc') }} ({{
+                                contactSupport.hours || $t('help.support.hours')
+                            }})
                         </p>
                     </div>
 
@@ -465,7 +467,7 @@
                             rel="noopener"
                             class="px-5 py-3 rounded-xl bg-emerald-500 hover:bg-emerald-600 font-bold text-sm text-white transition-colors flex items-center gap-2 shadow-lg shadow-emerald-500/20"
                         >
-                            <span>واتساب الدعم الفوري</span>
+                            <span>{{ $t('help.support.whatsapp_instant') }}</span>
                         </a>
                         <a
                             v-if="contactSupport.phone"
@@ -488,7 +490,7 @@
                             rel="noopener"
                             class="px-5 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 font-bold text-sm text-white transition-colors flex items-center gap-2 shadow-lg shadow-indigo-600/30"
                         >
-                            <span>فتح تذكرة دعم</span>
+                            <span>{{ $t('help.support.open_ticket') }}</span>
                         </a>
                     </div>
                 </div>
@@ -561,7 +563,7 @@
                             class="w-full h-full"
                             :src="activeVideoEmbed.src"
                         >
-                            متصفحك لا يدعم تشغيل الفيديو.
+                            {{ $t('help.video.not_supported') }}
                         </video>
                     </div>
 
@@ -580,15 +582,12 @@
                             {{ activeVideo.title }}
                         </h4>
                         <p class="text-xs text-gray-400 max-w-md leading-relaxed mb-4">
-                            {{
-                                activeVideo.description ||
-                                'لم يتم إضافة رابط تشغيل مباشر لهذا الفيديو بعد.'
-                            }}
+                            {{ activeVideo.description || $t('help.video.no_direct_link') }}
                         </p>
                         <span
                             class="text-xs text-amber-400 bg-amber-500/10 border border-amber-500/30 px-3.5 py-1.5 rounded-full"
                         >
-                            الفيديو قيد الإعداد أو يمكنك إضافة الرابط من لوحة إدارة النظام
+                            {{ $t('help.video.being_prepared') }}
                         </span>
                     </div>
 
@@ -600,7 +599,7 @@
                             <span
                                 class="px-2.5 py-1 rounded-lg text-xs font-mono bg-gray-800 text-sky-300 border border-gray-700"
                             >
-                                المدة: {{ activeVideo.duration }}
+                                {{ $t('help.video.duration') }} {{ activeVideo.duration }}
                             </span>
                             <p
                                 v-if="activeVideo.description && activeVideoEmbed"
@@ -617,7 +616,7 @@
                                 rel="noopener"
                                 class="px-3.5 py-2 rounded-xl bg-gray-800 hover:bg-gray-700 text-gray-200 text-xs font-semibold transition-colors inline-flex items-center gap-1.5"
                             >
-                                <span>فتح المصدر</span>
+                                <span>{{ $t('help.video.open_source') }}</span>
                                 <svg
                                     class="w-3.5 h-3.5 rtl:rotate-180"
                                     fill="none"
@@ -660,7 +659,11 @@ const props = defineProps({
             whatsapp_enabled: true,
             email: 'support@carag.sa',
             phone: '920000000',
-            hours: 'السبت - الخميس: 8:00 ص - 10:00 م',
+            // The working hours come from the settings; the translated
+            // default is used when they are not set. It cannot be built
+            // here: `defineProps` is hoisted out of setup(), so it may
+            // not call `t()`.
+            hours: '',
             ticket_url: '',
         }),
     },
@@ -798,32 +801,32 @@ const IconUserCheck = () =>
 // Quick-start items
 const defaultQuickStartItems = [
     {
-        title: 'فتح كرت عمل جديد',
-        desc: 'خطوات استلام سيارة العميل، وإضافة الخدمات والقطع وتحديد تاريخ التسليم المتوقع.',
+        title: t('help.workflows.new_work_order'),
+        desc: t('help.workflows.new_work_order_desc'),
         icon: IconFileText,
         bg: 'bg-blue-50 dark:bg-blue-900/30',
         text: 'text-blue-600 dark:text-blue-400',
         targetCategory: 'work_orders',
     },
     {
-        title: 'لوحة الورشة ومؤقتات الفنيين',
-        desc: 'تشغيل مؤقتات العمل للفنيين، تتبع مراحل الصيانة، ومراقبة الورشة على الشاشة الكبيرة.',
+        title: t('help.workflows.workshop_board'),
+        desc: t('help.workflows.workshop_board_desc'),
         icon: IconActivity,
         bg: 'bg-emerald-50 dark:bg-emerald-900/30',
         text: 'text-emerald-600 dark:text-emerald-400',
         targetCategory: 'workshop',
     },
     {
-        title: 'الربط مع هيئة الزكاة (ZATCA)',
-        desc: 'إصدار الفاتورة الضريبية المبسطة المتوافقة 100% مع المرحلة الثانية ورمز QR.',
+        title: t('help.workflows.zatca'),
+        desc: t('help.workflows.zatca_desc'),
         icon: IconCheckCircle,
         bg: 'bg-amber-50 dark:bg-amber-900/30',
         text: 'text-amber-600 dark:text-amber-400',
         targetCategory: 'billing',
     },
     {
-        title: 'بوابة العميل الذكية',
-        desc: 'كيفية دخول العميل برقم جواله، حجز المواعيد، وتتبع حالة الصيانة خطوة بخطوة.',
+        title: t('help.workflows.customer_portal'),
+        desc: t('help.workflows.customer_portal_desc'),
         icon: IconUserCheck,
         bg: 'bg-purple-50 dark:bg-purple-900/30',
         text: 'text-purple-600 dark:text-purple-400',
@@ -835,63 +838,57 @@ const defaultQuickStartItems = [
 const defaultVideoTutorials = [
     {
         id: 'v1',
-        title: 'جولة سريعة في النظام وضبط المركز',
-        category: 'الأساسيات',
+        title: t('help.workflows.quick_tour'),
+        category: t('help.workflows.basics'),
         duration: '05:20',
-        description:
-            'نظرة شاملة على لوحة التحكم الرئيسية، الإعدادات، وإضافة بيانات المركز ومعلومات التواصل.',
+        description: t('help.workflows.quick_tour_desc'),
     },
     {
         id: 'v2',
-        title: 'دورة حياة كرت العمل من الدخول حتى الخروج',
-        category: 'كروت العمل',
+        title: t('help.workflows.work_order_lifecycle'),
+        category: t('help.workflows.work_orders'),
         duration: '07:45',
-        description:
-            'شرح تفصيلي لإنشاء كرت عمل، إضافة أجور اليد وقطع الغيار، الفحص المبدئي، واعتماد الجودة.',
+        description: t('help.workflows.work_orders_desc'),
     },
     {
         id: 'v3',
-        title: 'إدارة الورشة الحية ومؤقتات الفنيين',
-        category: 'لوحة الورشة',
+        title: t('help.workflows.live_workshop'),
+        category: t('help.workflows.workshop_board_short'),
         duration: '04:30',
-        description:
-            'كيف يضغط الفني على بدء العمل وإيقافه من جهازه، وكيف تظهر الإنتاجية على لوحة الكانبان.',
+        description: t('help.workflows.live_workshop_desc'),
     },
     {
         id: 'v4',
-        title: 'الفوترة الإلكترونية والربط مع هيئة الزكاة',
-        category: 'الفوترة والضريبة',
+        title: t('help.workflows.e_invoicing'),
+        category: t('help.workflows.billing_tax'),
         duration: '06:15',
-        description:
-            'خطوات إصدار الفاتورة الضريبية، السداد عبر مدى والنقد والآجل، ومطابقة متطلبات هيئة الزكاة.',
+        description: t('help.workflows.e_invoicing_desc'),
     },
     {
         id: 'v5',
-        title: 'إدارة المخزون وقطع الغيار وأوامر الشراء',
-        category: 'المخزون',
+        title: t('help.workflows.inventory'),
+        category: t('help.workflows.inventory_short'),
         duration: '08:10',
-        description:
-            'إضافة المنتجات، تتبع الأرصدة بالمستودعات، ربط القطع بكروت العمل، وإصدار أوامر الشراء للموردين.',
+        description: t('help.workflows.inventory_desc'),
     },
     {
         id: 'v6',
-        title: 'بوابة العميل الذكية والحجز الذاتي',
-        category: 'بوابة العميل',
+        title: t('help.workflows.self_service'),
+        category: t('help.workflows.customer_portal_short'),
         duration: '03:50',
-        description:
-            'تجربة العميل من الجوال: طلب حجز موعد صيانة، تلقي رمز التحقق OTP، ومتابعة جاهزية السيارة.',
+        description: t('help.workflows.self_service_desc'),
     },
 ];
 
 // Knowledge base categories
 const defaultCategories = [
-    { id: 'work_orders', name: 'كروت العمل والخدمات' },
-    { id: 'workshop', name: 'لوحة الورشة والفنيين' },
-    { id: 'portal', name: 'بوابة العميل الذكية' },
-    { id: 'billing', name: 'الفوترة وضريبة ZATCA' },
-    { id: 'inventory', name: 'المخزون وقطع الغيار' },
-    { id: 'customers', name: 'العملاء وسجل المركبات' },
-    { id: 'appointments', name: 'المواعيد والبايات' },
+    { id: 'work_orders', name: t('help.categories.work_orders') },
+    { id: 'workshop', name: t('help.categories.workshop') },
+    { id: 'portal', name: t('help.workflows.customer_portal') },
+    { id: 'billing', name: t('help.categories.billing') },
+    { id: 'inventory', name: t('help.categories.inventory') },
+    { id: 'customers', name: t('help.categories.customers') },
+    { id: 'appointments', name: t('help.categories.appointments') },
 ];
 
 // Topics
@@ -901,42 +898,42 @@ const defaultAllTopics = [
         id: 1,
         category: 'work_orders',
         stepNumber: '01',
-        title: 'كيف تنشئ كرت عمل جديد للمركبة؟',
-        summary: 'خطوات فتح أمر شغل رسمي واستلام السيارة في المركز.',
+        title: t('help.articles.new_work_order.title'),
+        summary: t('help.articles.new_work_order.summary'),
         steps: [
-            'توجه إلى قائمة كروت العمل (/app/work-orders) واضغط على زر "كرت عمل جديد".',
-            'اختر العميل بالاسم أو رقم الجوال، أو اضغط "إضافة عميل جديد" للتسجيل الفوري.',
-            'اختر المركبة التابعة للعميل وحدد قراءة العداد الحالي (الكيلومترات).',
-            'أضف شكوى العميل وملاحظات الفحص المبدئي وأرفق صور المركبة إن وجدت.',
-            'حدد تاريخ ووقت التسليم المتوقع ثم اضغط "حفظ وإنشاء الكرت".',
+            t('help.articles.new_work_order.step1'),
+            t('help.articles.new_work_order.step2'),
+            t('help.articles.new_work_order.step3'),
+            t('help.articles.new_work_order.step4'),
+            t('help.articles.new_work_order.step5'),
         ],
-        tip: 'يمكنك إرفاق صور أضرار المركبة وتوثيق الخدوش عبر ميزة فحص المركبة قبل بدء الصيانة.',
-        link: { label: 'الانتقال إلى كروت العمل', url: '/app/work-orders' },
+        tip: t('help.articles.new_work_order.tip'),
+        link: { label: t('help.articles.new_work_order.cta'), url: '/app/work-orders' },
     },
     {
         id: 2,
         category: 'work_orders',
         stepNumber: '02',
-        title: 'إضافة الخدمات وقطع الغيار إلى كرت العمل',
-        summary: 'تسعير أجور اليد وربط القطع المصروفة من المستودع.',
+        title: t('help.articles.services_parts.title'),
+        summary: t('help.articles.services_parts.summary'),
         steps: [
-            'من صفحة كرت العمل، انتقل إلى تبويب "الخدمات والقطع".',
-            'اضغط على "إضافة خدمة"، واختر القسم المعني (ميكانيكا، كهرباء، صيانة سريعة).',
-            'حدد السعر والكمية والخصم إن وُجد.',
-            'في خانة قطع الغيار، اختر القطعة المصروفة من المستودع؛ سيتم خصمها من المخزون تلقائياً عند اعتماد الكرت.',
+            t('help.articles.services_parts.step1'),
+            t('help.articles.services_parts.step2'),
+            t('help.articles.services_parts.step3'),
+            t('help.articles.services_parts.step4'),
         ],
-        tip: 'يمكنك توزيع بنود كرت العمل على باقات جاهزة بضغطة زر لتسريع العملية.',
+        tip: t('help.articles.services_parts.tip'),
     },
     {
         id: 3,
         category: 'work_orders',
         stepNumber: '03',
-        title: 'فحص الجودة (QC) وتسليم المركبة',
-        summary: 'التحقق من اكتمال كافة البنود واعتماد خروج السيارة.',
+        title: t('help.articles.quality.title'),
+        summary: t('help.articles.quality.summary'),
         steps: [
-            'بعد انتهاء الفنيين من كافة البنود، تتحول حالة الكرت إلى "جاهز لفحص الجودة".',
-            'يقوم مشرف الورشة بمراجعة بنود الفحص واعتمادها أو إعادتها مع كتابة الملاحظة.',
-            'عند الاعتماد، يُتاح إصدار الفاتورة النهائية وإغلاق الكرت لخروج السيارة.',
+            t('help.articles.quality.step1'),
+            t('help.articles.quality.step2'),
+            t('help.articles.quality.step3'),
         ],
     },
 
@@ -945,29 +942,29 @@ const defaultAllTopics = [
         id: 10,
         category: 'workshop',
         stepNumber: '01',
-        title: 'استخدام لوحة كانبان للورشة ومتابعة الفنيين',
-        summary: 'إدارة العمليات الميدانية على الشاشة الكبيرة داخل صالة الصيانة.',
+        title: t('help.articles.kanban.title'),
+        summary: t('help.articles.kanban.summary'),
         steps: [
-            'ادخل إلى مسار لوحة الورشة (/app/workshop).',
-            'تظهر الأعمدة الأربعة للعمليات: قيد الانتظار، جاري العمل، معلق، وجاهز لفحص الجودة.',
-            'يعرض أعلى اللوحة ملخص المواعيد القادمة اليوم وزر التسجيل السريع (Check-in).',
-            'تتحدث الكروت تلقائياً وتُظهر اسم الفني الفعال والوقت المنقضي.',
+            t('help.articles.kanban.step1'),
+            t('help.articles.kanban.step2'),
+            t('help.articles.kanban.step3'),
+            t('help.articles.kanban.step4'),
         ],
-        link: { label: 'فتح لوحة الورشة الآن', url: '/app/workshop' },
+        link: { label: t('help.articles.kanban.cta'), url: '/app/workshop' },
     },
     {
         id: 11,
         category: 'workshop',
         stepNumber: '02',
-        title: 'تسجيل ساعات العمل بمؤقت الفني (Labor Timers)',
-        summary: 'حساب الإنتاجية الحقيقية لكل فني عبر أزرار البدء والتوقف.',
+        title: t('help.articles.labor.title'),
+        summary: t('help.articles.labor.summary'),
         steps: [
-            'يفتح الفني حسابه ويختار البند المكلف به.',
-            'يضغط على زر "بدء العمل" لبدء عداد الثواني.',
-            'في حال الراحة أو انتظار قطعة الغيار، يضغط على "إيقاف مؤقت".',
-            'عند إنهاء الإصلاح يضغط "إنهاء العمل"، فيتم حفظ مجموع الساعات الفعالة آلياً في تقرير الفني.',
+            t('help.articles.labor.step1'),
+            t('help.articles.labor.step2'),
+            t('help.articles.labor.step3'),
+            t('help.articles.labor.step4'),
         ],
-        tip: 'يمنع النظام الفني من تشغيل مؤقتين متزامنين في وقت واحد لمنع التضارب وحساب الإنتاجية بدقة.',
+        tip: t('help.articles.labor.tip'),
     },
 
     // Customer Portal
@@ -975,26 +972,26 @@ const defaultAllTopics = [
         id: 20,
         category: 'portal',
         stepNumber: '01',
-        title: 'كيف يدخل العميل إلى بوابته الخاصة؟',
-        summary: 'الدخول الآمن برقم الجوال عبر رمز التحقق OTP دون الحاجة لكلمة مرور.',
+        title: t('help.articles.portal.title'),
+        summary: t('help.articles.portal.summary'),
         steps: [
-            'يزور العميل الرابط المخصص للمركز: /{tenant_slug}/portal.',
-            'يدخل رقم جواله المسجل في النظام، ويتلقى رمز تحقق OTP مكون من 4 أرقام عبر SMS.',
-            'بعد التحقق، تفتح لوحة تحكم مخصصة تعرض سياراته ومواعيده السابقة والحالية.',
+            t('help.articles.portal.step1'),
+            t('help.articles.portal.step2'),
+            t('help.articles.portal.step3'),
         ],
-        tip: 'بوابة العميل معزولة أمنياً عن لوحة موظفي المركز وتعمل بسلاسة على شاشات الجوال.',
+        tip: t('help.articles.portal.tip'),
     },
     {
         id: 21,
         category: 'portal',
         stepNumber: '02',
-        title: 'حجز موعد صيانة جديد وإعادة الجدولة ذاتياً',
-        summary: 'تمكين العميل من اختيار الفرع والخدمات والموعد المناسب له.',
+        title: t('help.articles.booking.title'),
+        summary: t('help.articles.booking.summary'),
         steps: [
-            'يضغط العميل على زر "حجز موعد صيانة".',
-            'يختار مركبته، والفرع الأقرب، والخدمات المطلوبة.',
-            'يختار التاريخ والوقت المتاح وفق الطاقة الاستيعابية للبايات.',
-            'يحصل العميل على إشعار فوري برقم الحجز مع إمكانية تعديل الموعد أو إلغائه من نفس الصفحة.',
+            t('help.articles.booking.step1'),
+            t('help.articles.booking.step2'),
+            t('help.articles.booking.step3'),
+            t('help.articles.booking.step4'),
         ],
     },
 
@@ -1003,16 +1000,15 @@ const defaultAllTopics = [
         id: 30,
         category: 'billing',
         stepNumber: '01',
-        title: 'إصدار الفاتورة الضريبية وتحصيل المبالغ',
-        summary:
-            'إصدار الفاتورة الضريبية المبسطة المتوافقة مع متطلبات هيئة الزكاة والضريبة والجمارك.',
+        title: t('help.articles.tax_invoice.title'),
+        summary: t('help.articles.tax_invoice.summary'),
         steps: [
-            'من صفحة كرت العمل المنجز، اضغط على زر "إصدار فاتورة".',
-            'يقوم النظام بحساب ضريبة القيمة المضافة 15% تلقائياً وتوليد رمز الاستجابة السريعة (QR Code).',
-            'اختر طريقة الدفع: نقدي، مدى، بطاقة ائتمانية، تحويل بنكي، أو ذمم مدينة (آجل).',
-            'اطبع الفاتورة بالشكل الحراري السريع (Thermal Print) أو مقاس A4 المعتمد.',
+            t('help.articles.tax_invoice.step1'),
+            t('help.articles.tax_invoice.step2'),
+            t('help.articles.tax_invoice.step3'),
+            t('help.articles.tax_invoice.step4'),
         ],
-        tip: 'يدعم النظام طباعة الباركود المشفر المتوافق مع تطبيق التحقق الرسمي لهيئة الزكاة (ZATCA).',
+        tip: t('help.articles.tax_invoice.tip'),
     },
 
     // Inventory
@@ -1020,12 +1016,12 @@ const defaultAllTopics = [
         id: 40,
         category: 'inventory',
         stepNumber: '01',
-        title: 'إدارة المستودعات وجرد قطع الغيار',
-        summary: 'متابعة حركة المخزون، تنبيهات النواقص، والتسويات المخزنية.',
+        title: t('help.articles.stock.title'),
+        summary: t('help.articles.stock.summary'),
         steps: [
-            'من قائمة المخزون (/app/inventory/stock)، استعرض كافة القطع وأرصدتها في كل مستودع.',
-            'يمكنك إنشاء أمر شراء جديد للمورد عند وصول القطعة إلى حد الطلب الأدنى.',
-            'عند استلام البضائع، سجل مذكرة استلام بضاعة (GRN) ليتم تحديث الأرصدة تلقائياً.',
+            t('help.articles.stock.step1'),
+            t('help.articles.stock.step2'),
+            t('help.articles.stock.step3'),
         ],
     },
 
@@ -1034,12 +1030,12 @@ const defaultAllTopics = [
         id: 50,
         category: 'appointments',
         stepNumber: '01',
-        title: 'جدولة البايات (الرافعات) وإدارة السعة',
-        summary: 'منع التعارضات وحساب السعة اليومية لرافعات المركز.',
+        title: t('help.articles.bays.title'),
+        summary: t('help.articles.bays.summary'),
         steps: [
-            'عرف رافعات المركز وبقع الخدمة من صفحة البايات (/app/service-bays).',
-            'عند حجز أي موعد، يتحقق النظام من خلو الباي والفني والمركبة في الوقت المحدد.',
-            'عند حضور العميل، اضغط على "تسجيل وصول" (Check-in)، ثم "تحويل إلى كرت عمل" بضغطة زر واحدة.',
+            t('help.articles.bays.step1'),
+            t('help.articles.bays.step2'),
+            t('help.articles.bays.step3'),
         ],
     },
 ];

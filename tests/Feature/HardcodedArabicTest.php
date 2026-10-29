@@ -29,8 +29,8 @@ class HardcodedArabicTest extends TestCase
     /**
      * The ceiling of Arabic literals that may stay inline.
      *
-     * Rebased to 1,052 on 2026-10-29 — batch 2C moved 286 literals out
-     * of 11 files.
+     * Rebased to 812 on 2026-10-29 — batch 2D moved 240 literals out of
+     * the two help pages.
      *
      * History:
      *   2,238  before the extraction started (the first measurement)
@@ -42,13 +42,14 @@ class HardcodedArabicTest extends TestCase
      *          longer counts a lone letter as copy (the letters of the
      *          Saudi plate are data, not labels)
      *   1,052  after batch 2C
+     *   812   after batch 2D (the two help pages)
      *
      * The number must never grow. Each further batch lowers it.
      *
      * @var array<string, int>
      */
     private const MAX_INLINE_ARABIC = [
-        'ar' => 1052,
+        'ar' => 812,
     ];
 
     public function test_no_new_hardcoded_arabic_in_the_vue_sources(): void

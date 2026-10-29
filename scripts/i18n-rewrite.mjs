@@ -178,6 +178,33 @@ function arabicBranches(expression) {
     return found;
 }
 
+/**
+ * Does this offset sit inside a `defineProps(...)` call?
+ *
+ * The options of `defineProps` are hoisted out of `setup()`, so they may
+ * not call `t()` — the build fails with "defineProps() in <script setup>
+ * cannot reference locally declared variables". A default value that
+ * holds copy has to be translated where it is shown instead.
+ */
+function insideDefineProps(source, offset) {
+    const start = source.lastIndexOf('defineProps(', offset);
+    if (start === -1) return false;
+
+    let depth = 0;
+    // The scan starts at the bracket of `defineProps(` itself, so the
+    // first closing bracket that brings the depth back to zero is the
+    // end of the whole call.
+    for (let index = start + 'defineProps'.length; index < source.length; index++) {
+        const character = source[index];
+        if (character === '(') depth++;
+        else if (character === ')') {
+            depth--;
+            if (depth === 0) return offset > start && offset < index;
+        }
+    }
+    return false;
+}
+
 function applyFile(file) {
     const hits = findInventory(file);
     const entries = mapping[file];
@@ -189,6 +216,15 @@ function applyFile(file) {
 
     for (const hit of hits) {
         const text = hit.value.trim();
+        // A call inside the options of `defineProps` cannot be built
+        // there: the options are hoisted out of `setup()`. The copy is
+        // left alone and reported instead.
+        if (hit.block === 'script' && insideDefineProps(source, hit.start)) {
+            notes.push(
+                `line ${hit.line}: the copy is inside defineProps() — it must be translated where it is shown`
+            );
+            continue;
+        }
         // An interpolation carries the whole expression, so its Arabic
         // literal is matched inside the case that handles it.
         if (hit.kind === 'interpolation_literal') {
