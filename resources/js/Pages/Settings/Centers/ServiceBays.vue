@@ -68,7 +68,7 @@
                         type="button"
                         @click="save"
                         :disabled="busy || !form.name.trim()"
-                        class="px-3 py-1.5 rounded-md text-xs font-bold bg-indigo-600 hover:bg-indigo-700 text-white disabled:opacity-50"
+                        class="btn-primary !text-xs !py-1.5"
                     >
                         {{ form.id ? $t('common.save') : $t('common.create') }}
                     </button>

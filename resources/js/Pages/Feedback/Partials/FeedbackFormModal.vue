@@ -385,7 +385,7 @@
                     <button
                         type="submit"
                         :disabled="form.processing || recorder.isRecording.value"
-                        class="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white rounded-xl text-xs font-semibold shadow-sm transition-colors flex items-center gap-2"
+                        class="btn-primary"
                     >
                         <svg
                             v-if="form.processing"

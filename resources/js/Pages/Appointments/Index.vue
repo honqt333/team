@@ -243,7 +243,7 @@
                                     type="button"
                                     @click="convert(appt)"
                                     :disabled="busy"
-                                    class="px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm disabled:opacity-50 transition-colors"
+                                    class="btn-primary !text-xs !py-1.5"
                                 >
                                     {{ $t('appointments.convert') }}
                                 </button>
@@ -414,7 +414,7 @@
                             !form.scheduled_at ||
                             !form.estimated_end_at
                         "
-                        class="px-3 py-1.5 rounded-md text-xs font-bold bg-indigo-600 hover:bg-indigo-700 text-white disabled:opacity-50"
+                        class="btn-primary !text-xs !py-1.5"
                     >
                         {{ $t('common.create') }}
                     </button>

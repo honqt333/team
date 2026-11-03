@@ -11,10 +11,7 @@
                         {{ $t('system.plans.subtitle') }}
                     </p>
                 </div>
-                <button
-                    @click="openModal()"
-                    class="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-medium transition-colors"
-                >
+                <button @click="openModal()" class="btn-primary">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path
                             stroke-linecap="round"
@@ -626,11 +623,7 @@
                             >
                                 {{ $t('system.actions.cancel') }}
                             </button>
-                            <button
-                                @click="submit"
-                                :disabled="form.processing"
-                                class="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium disabled:opacity-50"
-                            >
+                            <button @click="submit" :disabled="form.processing" class="btn-primary">
                                 {{
                                     editingPlan
                                         ? $t('system.plans.save_changes')

@@ -64,10 +64,7 @@
                 </div>
 
                 <div class="flex flex-col sm:flex-row gap-3 justify-center">
-                    <Link
-                        :href="route('app.billing.index')"
-                        class="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium transition-colors"
-                    >
+                    <Link :href="route('app.billing.index')" class="px-6 py-2.5 btn-primary">
                         {{ $t('subscription.try_again') }}
                     </Link>
                     <a

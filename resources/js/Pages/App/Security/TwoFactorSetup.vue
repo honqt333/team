@@ -175,7 +175,7 @@ const regenerate = () =>
                         <button
                             @click="sendCode"
                             :disabled="sendCodeForm.processing"
-                            class="flex items-center gap-2 px-6 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium disabled:opacity-50"
+                            class="btn-primary"
                         >
                             <svg
                                 v-if="!sendCodeForm.processing"
@@ -468,7 +468,7 @@ const regenerate = () =>
                                     <button
                                         type="submit"
                                         :disabled="regenForm.processing"
-                                        class="flex-1 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium disabled:opacity-50"
+                                        class="btn-primary flex-1"
                                     >
                                         {{ $t('security.new_codes') }}
                                     </button>
