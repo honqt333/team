@@ -452,19 +452,17 @@
         </template>
 
         <template #footer>
-            <button
-                @click="handleClose"
-                class="px-4 py-2.5 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 mr-3"
-            >
+            <SecondaryButton @click="handleClose">
                 {{ $t('common.cancel') }}
-            </button>
-            <button
+            </SecondaryButton>
+            <AppButton
+                variant="action-xl"
                 @click="submit"
                 :disabled="form.processing"
-                class="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-medium shadow-lg shadow-indigo-500/30 transition-all disabled:opacity-50 disabled:shadow-none"
+                :loading="form.processing"
             >
-                {{ form.processing ? $t('common.saving') : $t('common.save') }}
-            </button>
+                {{ $t('common.save') }}
+            </AppButton>
         </template>
     </DialogModal>
 </template>
@@ -478,6 +476,8 @@ import { useI18n } from 'vue-i18n';
 import { useConfirm } from '@/Composables/useConfirm';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
+import AppButton from '@/Components/App/AppButton.vue';
+import SecondaryButton from '@/Components/SecondaryButton.vue';
 
 // Fix Leaflet default marker icon issue
 delete L.Icon.Default.prototype._getIconUrl;

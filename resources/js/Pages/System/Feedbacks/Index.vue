@@ -342,17 +342,14 @@
                         >
                             {{ $t('system.feedbacks.reply_modal.cancel') }}
                         </button>
-                        <button
+                        <AppButton
+                            variant="action-xs"
                             type="submit"
                             :disabled="replyForm.processing"
-                            class="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white rounded-xl text-xs font-semibold"
+                            :loading="replyForm.processing"
                         >
-                            {{
-                                replyForm.processing
-                                    ? $t('system.feedbacks.reply_modal.submitting')
-                                    : $t('system.feedbacks.reply_modal.submit')
-                            }}
-                        </button>
+                            {{ $t('system.feedbacks.reply_modal.submit') }}
+                        </AppButton>
                     </div>
                 </form>
             </div>
@@ -377,6 +374,7 @@ import Modal from '@/Components/Modal.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 import VideoPlayerModal from '@/Pages/Feedback/Partials/VideoPlayerModal.vue';
 import { debounce } from 'lodash-es';
+import AppButton from '@/Components/App/AppButton.vue';
 
 const { t, locale } = useI18n();
 

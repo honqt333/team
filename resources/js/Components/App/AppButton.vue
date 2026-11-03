@@ -21,7 +21,21 @@ const props = defineProps({
     variant: {
         type: String,
         default: 'primary',
-        validator: (v) => ['primary', 'secondary', 'ghost', 'danger'].includes(v),
+        validator: (v) =>
+            [
+                'primary',
+                'secondary',
+                'ghost',
+                'danger',
+                'action',
+                'action-lg',
+                'action-xl',
+                'action-sm',
+                'action-xs',
+                'action-bold',
+                'action-shadow-lg',
+                'action-shadow-md',
+            ].includes(v),
     },
     size: {
         type: String,
@@ -68,10 +82,21 @@ const slots = useSlots();
 const isDisabled = computed(() => props.disabled || props.loading);
 const showLabel = computed(() => !!slots.default);
 
+const actionVariants = [
+    'action',
+    'action-lg',
+    'action-xl',
+    'action-sm',
+    'action-xs',
+    'action-bold',
+    'action-shadow-lg',
+    'action-shadow-md',
+];
+
 const rootClass = computed(() => [
     'app-btn',
     `app-btn--${props.variant}`,
-    `app-btn--${props.size}`,
+    ...(actionVariants.includes(props.variant) ? [] : [`app-btn--${props.size}`]),
     {
         'app-btn--block': props.block,
         'app-btn--loading': props.loading,
@@ -80,6 +105,10 @@ const rootClass = computed(() => [
 ]);
 
 const iconSize = computed(() => {
+    // Action variants use their own sizing, fallback to size prop
+    if (actionVariants.includes(props.variant)) {
+        return 16;
+    }
     switch (props.size) {
         case 'sm':
             return 14;
@@ -298,6 +327,125 @@ const iconSize = computed(() => {
     --app-btn-bg-active: color-mix(in srgb, var(--color-danger) 78%, black);
     --app-btn-border-hover: var(--color-danger);
     box-shadow: var(--shadow-sm);
+}
+
+/* --- Action variants (Indigo for primary actions) --- */
+
+/* action: standard indigo primary action */
+.app-btn--action {
+    --app-btn-bg: var(--color-action-primary);
+    --app-btn-fg: var(--color-action-on);
+    --app-btn-border: var(--color-action-primary);
+    --app-btn-bg-hover: var(--color-action-primary-hover);
+    --app-btn-bg-active: var(--color-action-primary-active);
+    --app-btn-border-hover: var(--color-action-primary-hover);
+    box-shadow: var(--shadow-sm);
+}
+.app-btn--action:hover:not(:disabled):not([aria-disabled='true']) {
+    box-shadow: var(--shadow-md);
+}
+
+/* action-lg: larger padding for prominent actions */
+.app-btn--action-lg {
+    --app-btn-bg: var(--color-action-primary);
+    --app-btn-fg: var(--color-action-on);
+    --app-btn-border: var(--color-action-primary);
+    --app-btn-bg-hover: var(--color-action-primary-hover);
+    --app-btn-bg-active: var(--color-action-primary-active);
+    --app-btn-border-hover: var(--color-action-primary-hover);
+    padding-inline: var(--space-6);
+    padding-block: var(--space-2.5);
+    box-shadow: var(--shadow-sm);
+    border-radius: var(--radius-lg);
+}
+.app-btn--action-lg:hover:not(:disabled):not([aria-disabled='true']) {
+    box-shadow: var(--shadow-md);
+}
+
+/* action-xl: extra large with xl radius and shadow */
+.app-btn--action-xl {
+    --app-btn-bg: var(--color-action-primary);
+    --app-btn-fg: var(--color-action-on);
+    --app-btn-border: var(--color-action-primary);
+    --app-btn-bg-hover: var(--color-action-primary-hover);
+    --app-btn-bg-active: var(--color-action-primary-active);
+    --app-btn-border-hover: var(--color-action-primary-hover);
+    padding-inline: var(--space-6);
+    padding-block: var(--space-2.5);
+    box-shadow: var(--shadow-md);
+    border-radius: var(--radius-xl);
+}
+.app-btn--action-xl:hover:not(:disabled):not([aria-disabled='true']) {
+    box-shadow: var(--shadow-lg);
+}
+
+/* action-sm: smaller padding */
+.app-btn--action-sm {
+    --app-btn-bg: var(--color-action-primary);
+    --app-btn-fg: var(--color-action-on);
+    --app-btn-border: var(--color-action-primary);
+    --app-btn-bg-hover: var(--color-action-primary-hover);
+    --app-btn-bg-active: var(--color-action-primary-active);
+    --app-btn-border-hover: var(--color-action-primary-hover);
+    padding-inline: var(--space-4);
+    padding-block: var(--space-2);
+    box-shadow: var(--shadow-sm);
+    border-radius: var(--radius-lg);
+}
+
+/* action-xs: extra small with xs text */
+.app-btn--action-xs {
+    --app-btn-bg: var(--color-action-primary);
+    --app-btn-fg: var(--color-action-on);
+    --app-btn-border: var(--color-action-primary);
+    --app-btn-bg-hover: var(--color-action-primary-hover);
+    --app-btn-bg-active: var(--color-action-primary-active);
+    --app-btn-border-hover: var(--color-action-primary-hover);
+    padding-inline: var(--space-5);
+    padding-block: var(--space-2);
+    box-shadow: var(--shadow-sm);
+    border-radius: var(--radius-lg);
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-bold);
+}
+
+/* action-bold: bold text weight */
+.app-btn--action-bold {
+    --app-btn-bg: var(--color-action-primary);
+    --app-btn-fg: var(--color-action-on);
+    --app-btn-border: var(--color-action-primary);
+    --app-btn-bg-hover: var(--color-action-primary-hover);
+    --app-btn-bg-active: var(--color-action-primary-active);
+    --app-btn-border-hover: var(--color-action-primary-hover);
+    font-weight: var(--font-weight-bold);
+    box-shadow: var(--shadow-sm);
+}
+
+/* action-shadow-lg: large shadow with scale on active */
+.app-btn--action-shadow-lg {
+    --app-btn-bg: var(--color-action-primary);
+    --app-btn-fg: var(--color-action-on);
+    --app-btn-border: var(--color-action-primary);
+    --app-btn-bg-hover: var(--color-action-primary-hover);
+    --app-btn-bg-active: var(--color-action-primary-active);
+    --app-btn-border-hover: var(--color-action-primary-hover);
+    box-shadow: var(--shadow-lg);
+    border-radius: var(--radius-xl);
+}
+.app-btn--action-shadow-lg:active:not(:disabled):not([aria-disabled='true']) {
+    transform: scale(0.95);
+}
+
+/* action-shadow-md: medium shadow */
+.app-btn--action-shadow-md {
+    --app-btn-bg: var(--color-action-primary);
+    --app-btn-fg: var(--color-action-on);
+    --app-btn-border: var(--color-action-primary);
+    --app-btn-bg-hover: var(--color-action-primary-hover);
+    --app-btn-bg-active: var(--color-action-primary-active);
+    --app-btn-border-hover: var(--color-action-primary-hover);
+    box-shadow: var(--shadow-md);
+    border-radius: var(--radius-xl);
 }
 
 /* --- Loading --- */

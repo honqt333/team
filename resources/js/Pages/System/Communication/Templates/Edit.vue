@@ -39,22 +39,14 @@
                     >
                         {{ isAr ? 'إلغاء وعودة' : 'Cancel' }}
                     </Link>
-                    <button
-                        type="button"
+                    <AppButton
+                        variant="action-xs"
                         @click="submit"
                         :disabled="form.processing"
-                        class="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold shadow-md shadow-indigo-500/20 disabled:opacity-50 transition-all"
+                        :loading="form.processing"
                     >
-                        {{
-                            form.processing
-                                ? isAr
-                                    ? 'جاري الحفظ...'
-                                    : 'Saving...'
-                                : isAr
-                                  ? 'حفظ التعديلات'
-                                  : 'Save Changes'
-                        }}
-                    </button>
+                        {{ isAr ? 'حفظ التعديلات' : 'Save Changes' }}
+                    </AppButton>
                 </div>
             </div>
 
@@ -259,22 +251,14 @@
                 <div
                     class="px-6 py-4 bg-gray-50 dark:bg-gray-900/50 border-t border-gray-200 dark:border-gray-700 flex justify-end gap-3"
                 >
-                    <button
-                        type="button"
+                    <AppButton
+                        variant="action-xl"
                         @click="submit"
                         :disabled="form.processing"
-                        class="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold shadow-md shadow-indigo-500/20 disabled:opacity-50 transition-all"
+                        :loading="form.processing"
                     >
-                        {{
-                            form.processing
-                                ? isAr
-                                    ? 'جاري الحفظ...'
-                                    : 'Saving...'
-                                : isAr
-                                  ? 'حفظ التغييرات'
-                                  : 'Save Changes'
-                        }}
-                    </button>
+                        {{ isAr ? 'حفظ التغييرات' : 'Save Changes' }}
+                    </AppButton>
                 </div>
             </div>
         </div>
@@ -286,6 +270,7 @@ import { computed, ref } from 'vue';
 import { Head, Link, useForm } from '@inertiajs/vue3';
 import SystemLayout from '@/Layouts/SystemLayout.vue';
 import { useToast } from '@/Composables/useToast';
+import AppButton from '@/Components/App/AppButton.vue';
 
 const props = defineProps({
     template: Object,
