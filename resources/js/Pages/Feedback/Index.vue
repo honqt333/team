@@ -29,28 +29,35 @@
                     </svg>
                 </template>
                 <template #actions>
-                    <button
+                    <PrimaryButton
                         type="button"
                         @click="showCreateModal = true"
-                        class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-sm font-semibold shadow-sm transition-colors"
+                        class="w-full sm:w-auto"
                     >
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M12 4v16m8-8H4"
-                            />
-                        </svg>
-                        <span>{{ $t('feedback.add_feedback') }}</span>
-                    </button>
+                        <template #iconLeft>
+                            <svg
+                                class="w-5 h-5"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M12 4v16m8-8H4"
+                                />
+                            </svg>
+                        </template>
+                        {{ $t('feedback.add_feedback') }}
+                    </PrimaryButton>
                 </template>
             </PageHeader>
 
             <!-- Quick Stats -->
             <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
                 <div
-                    class="p-4 bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm"
+                    class="p-4 bg-white dark:bg-gray-800 rounded-xl border border-border shadow-sm"
                 >
                     <div class="text-xs font-semibold text-gray-500 dark:text-gray-400">
                         {{ $t('feedback.stats.total') }}
@@ -60,7 +67,7 @@
                     </div>
                 </div>
                 <div
-                    class="p-4 bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm"
+                    class="p-4 bg-white dark:bg-gray-800 rounded-xl border border-border shadow-sm"
                 >
                     <div class="flex items-center justify-between">
                         <span class="text-xs font-semibold text-amber-600 dark:text-amber-400">
@@ -73,7 +80,7 @@
                     </div>
                 </div>
                 <div
-                    class="p-4 bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm"
+                    class="p-4 bg-white dark:bg-gray-800 rounded-xl border border-border shadow-sm"
                 >
                     <div class="flex items-center justify-between">
                         <span class="text-xs font-semibold text-sky-600 dark:text-sky-400">
@@ -86,7 +93,7 @@
                     </div>
                 </div>
                 <div
-                    class="p-4 bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm"
+                    class="p-4 bg-white dark:bg-gray-800 rounded-xl border border-border shadow-sm"
                 >
                     <div class="flex items-center justify-between">
                         <span class="text-xs font-semibold text-emerald-600 dark:text-emerald-400">
@@ -102,7 +109,7 @@
 
             <!-- Filter & Search Bar -->
             <div
-                class="p-4 bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm space-y-3"
+                class="p-4 bg-white dark:bg-gray-800 rounded-xl border border-border shadow-sm space-y-3"
             >
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
                     <!-- Search Input -->
@@ -112,7 +119,7 @@
                             v-model="searchQuery"
                             @keyup.enter="applyFilters"
                             :placeholder="$t('feedback.filters.search_placeholder')"
-                            class="w-full text-xs rounded-xl border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/60 text-gray-900 dark:text-gray-100 focus:border-indigo-500 focus:ring-indigo-500 pe-9 ps-3 py-2.5"
+                            class="input-field text-xs pe-9 ps-3 py-2.5 focus:border-action-primary focus:ring-action-primary"
                         />
                         <div
                             class="absolute inset-y-0 end-0 pe-3 flex items-center pointer-events-none text-gray-400"
@@ -172,7 +179,7 @@
 
                 <div
                     v-if="hasActiveFilters"
-                    class="flex justify-end pt-2 border-t border-gray-100 dark:border-gray-700/50"
+                    class="flex justify-end pt-2 border-t border-border/50"
                 >
                     <button
                         type="button"
@@ -192,7 +199,7 @@
                 <div
                     v-for="item in feedbacks.data"
                     :key="item.id"
-                    class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700/80 shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between overflow-hidden"
+                    class="bg-white dark:bg-gray-800 rounded-xl border border-border/80 shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between overflow-hidden"
                 >
                     <!-- Card Top Header -->
                     <div class="p-5 space-y-3.5">
@@ -237,42 +244,46 @@
 
                         <!-- Comments Text -->
                         <div
-                            class="text-xs text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-line bg-gray-50/50 dark:bg-gray-900/30 p-3 rounded-xl border border-gray-100 dark:border-gray-700/50"
+                            class="text-xs text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-line bg-gray-50/50 dark:bg-gray-900/30 p-3 rounded-xl border border-border/50"
                         >
                             {{ item.comments || $t('feedback.card.no_comments') }}
                         </div>
 
                         <!-- Video Screen Recording Preview Button -->
                         <div v-if="item.video_url" class="pt-1">
-                            <button
+                            <PrimaryButton
                                 type="button"
+                                variant="ghost"
+                                size="sm"
+                                class="w-full text-sky-700 dark:text-sky-300 bg-sky-50/50 dark:bg-sky-950/20 hover:bg-sky-100 dark:hover:bg-sky-900/30"
                                 @click="
                                     openVideoModal(
                                         item.video_url,
                                         $t('feedback.card.watch_recording')
                                     )
                                 "
-                                class="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-xl bg-sky-50 dark:bg-sky-950/40 hover:bg-sky-100 dark:hover:bg-sky-900/50 border border-sky-200 dark:border-sky-800 text-sky-700 dark:text-sky-300 text-xs font-semibold transition-colors"
                             >
-                                <svg
-                                    class="w-4 h-4 text-sky-500"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        stroke-width="2"
-                                        d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"
-                                    />
-                                    <path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        stroke-width="2"
-                                        d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                                    />
-                                </svg>
+                                <template #iconLeft>
+                                    <svg
+                                        class="w-4 h-4 text-sky-500"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"
+                                        />
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                                        />
+                                    </svg>
+                                </template>
                                 <span>{{ $t('feedback.card.watch_recording') }}</span>
                                 <span
                                     v-if="item.video_duration_seconds"
@@ -280,7 +291,7 @@
                                 >
                                     ({{ formatTime(item.video_duration_seconds) }})
                                 </span>
-                            </button>
+                            </PrimaryButton>
                         </div>
 
                         <!-- Admin Access Badge (if permitted) -->
@@ -340,38 +351,42 @@
                             </p>
 
                             <!-- Reply Video (if admin uploaded response video) -->
-                            <button
+                            <PrimaryButton
                                 v-if="item.admin_reply_video_url"
                                 type="button"
+                                variant="ghost"
+                                size="sm"
+                                class="text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 bg-indigo-50/50 dark:bg-indigo-950/20 hover:bg-indigo-100 dark:hover:bg-indigo-900/30"
                                 @click="
                                     openVideoModal(
                                         item.admin_reply_video_url,
                                         $t('feedback.card.watch_reply_video')
                                     )
                                 "
-                                class="inline-flex items-center gap-1.5 text-xs text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 font-semibold"
                             >
-                                <svg
-                                    class="w-3.5 h-3.5"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        stroke-width="2"
-                                        d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"
-                                    />
-                                </svg>
-                                <span>{{ $t('feedback.card.watch_reply_video') }}</span>
-                            </button>
+                                <template #iconLeft>
+                                    <svg
+                                        class="w-3.5 h-3.5"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"
+                                        />
+                                    </svg>
+                                </template>
+                                {{ $t('feedback.card.watch_reply_video') }}
+                            </PrimaryButton>
                         </div>
                     </div>
 
                     <!-- Card Footer Actions -->
                     <div
-                        class="px-5 py-3 bg-gray-50/80 dark:bg-gray-900/40 border-t border-gray-100 dark:border-gray-700/60 flex items-center justify-between text-xs text-gray-500 dark:text-gray-400"
+                        class="px-5 py-3 bg-gray-50/80 dark:bg-gray-900/40 border-t border-border/60 flex items-center justify-between text-xs text-gray-500 dark:text-gray-400"
                     >
                         <div class="flex items-center gap-2">
                             <span
@@ -394,10 +409,10 @@
             <!-- Empty State -->
             <div
                 v-else
-                class="p-12 text-center bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm space-y-4"
+                class="p-12 text-center bg-white dark:bg-gray-800 rounded-xl border border-border shadow-sm space-y-4"
             >
                 <div
-                    class="w-16 h-16 mx-auto rounded-2xl bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 flex items-center justify-center"
+                    class="w-16 h-16 mx-auto rounded-xl bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 flex items-center justify-center"
                 >
                     <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path
@@ -417,21 +432,24 @@
                     </p>
                 </div>
                 <div>
-                    <button
-                        type="button"
-                        @click="showCreateModal = true"
-                        class="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-semibold shadow-sm transition-colors"
-                    >
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M12 4v16m8-8H4"
-                            />
-                        </svg>
-                        <span>{{ $t('feedback.empty.action') }}</span>
-                    </button>
+                    <PrimaryButton type="button" @click="showCreateModal = true" size="sm">
+                        <template #iconLeft>
+                            <svg
+                                class="w-4 h-4"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M12 4v16m8-8H4"
+                                />
+                            </svg>
+                        </template>
+                        {{ $t('feedback.empty.action') }}
+                    </PrimaryButton>
                 </div>
             </div>
 
@@ -483,6 +501,7 @@ import PageHeader from '@/Components/PageHeader.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 import FeedbackFormModal from './Partials/FeedbackFormModal.vue';
 import VideoPlayerModal from './Partials/VideoPlayerModal.vue';
+import PrimaryButton from '@/Components/PrimaryButton.vue';
 
 const { t, locale } = useI18n();
 

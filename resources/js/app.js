@@ -6,6 +6,7 @@ import './bootstrap';
 import '@/Design/tokens.css';
 import '@/Design/reset.css';
 import '@/Design/typography.css';
+import '@/Design/global-styles.css';
 
 import { createInertiaApp } from '@inertiajs/vue3';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';

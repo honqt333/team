@@ -20,6 +20,14 @@
     --color-brand-primary-soft-dark: rgba(251, 191, 36, 0.16);
     --color-brand-on: #0f172a;
 
+    /* --- Action (Indigo for primary actions) --- */
+    --color-action-primary: #4f46e5;
+    --color-action-primary-hover: #4338ca;
+    --color-action-primary-active: #3730a3;
+    --color-action-primary-soft: #eef2ff;
+    --color-action-primary-soft-dark: rgba(79, 70, 229, 0.16);
+    --color-action-on: #ffffff;
+
     /* --- Surfaces (light) --- */
     --color-background: #f8fafc;
     --color-surface: #ffffff;
@@ -162,6 +170,14 @@
     --color-brand-primary-soft: rgba(251, 191, 36, 0.16);
     --color-brand-primary-soft-dark: rgba(251, 191, 36, 0.16);
     --color-brand-on: #0f172a;
+
+    /* --- Action (Indigo for primary actions) --- */
+    --color-action-primary: #6366f1;
+    --color-action-primary-hover: #818cf8;
+    --color-action-primary-active: #a5b4fc;
+    --color-action-primary-soft: rgba(99, 102, 241, 0.16);
+    --color-action-primary-soft-dark: rgba(99, 102, 241, 0.16);
+    --color-action-on: #ffffff;
 
     --shadow-xs: 0 1px 2px 0 rgba(0, 0, 0, 0.4);
     --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.45), 0 1px 2px 0 rgba(0, 0, 0, 0.35);

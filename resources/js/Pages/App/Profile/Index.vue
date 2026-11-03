@@ -7,6 +7,9 @@ import { useForm, usePage, router } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import PageHeader from '@/Components/PageHeader.vue';
 import { useToast } from '@/Composables/useToast';
+import PrimaryButton from '@/Components/PrimaryButton.vue';
+import SecondaryButton from '@/Components/SecondaryButton.vue';
+import DangerButton from '@/Components/DangerButton.vue';
 
 const props = defineProps({
     mustVerifyEmail: Boolean,
@@ -139,7 +142,7 @@ const regenerateCodes = () =>
                 <template #icon>
                     <!-- Photo Display & Upload -->
                     <div
-                        class="relative w-full h-full rounded-2xl overflow-hidden group flex items-center justify-center"
+                        class="relative w-full h-full rounded-xl overflow-hidden group flex items-center justify-center"
                     >
                         <img
                             v-if="user.photo_url"
@@ -155,7 +158,7 @@ const regenerateCodes = () =>
                         <div
                             v-if="user.can_update_photo"
                             @click="$refs.photoInput.click()"
-                            class="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer rounded-2xl"
+                            class="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer rounded-xl"
                             :title="$t('profile.photo.update')"
                         >
                             <svg
@@ -191,7 +194,7 @@ const regenerateCodes = () =>
                         <!-- Loading State -->
                         <div
                             v-if="photoForm.processing"
-                            class="absolute inset-0 bg-white/60 dark:bg-gray-800/60 flex items-center justify-center rounded-2xl"
+                            class="absolute inset-0 bg-white/60 dark:bg-gray-800/60 flex items-center justify-center rounded-xl"
                         >
                             <div
                                 class="w-6 h-6 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin"
@@ -236,7 +239,7 @@ const regenerateCodes = () =>
 
             <!-- Tabs -->
             <div
-                class="bg-white dark:bg-gray-800 rounded-2xl p-2 shadow-sm border border-gray-200 dark:border-gray-700"
+                class="bg-white dark:bg-gray-800 rounded-xl p-2 shadow-sm border border-border dark:border-border-strong"
             >
                 <div class="flex items-center gap-1 flex-wrap">
                     <button
@@ -301,7 +304,7 @@ const regenerateCodes = () =>
 
             <div
                 v-if="activeTab === 'profile'"
-                class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-200 dark:border-gray-700"
+                class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-border dark:border-border-strong"
             >
                 <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-6">
                     {{ $t('profile.info.title') }}
@@ -361,13 +364,9 @@ const regenerateCodes = () =>
                     </div>
 
                     <div class="flex items-center gap-4">
-                        <button
-                            type="submit"
-                            :disabled="profileForm.processing"
-                            class="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium disabled:opacity-50 transition-colors"
-                        >
+                        <PrimaryButton type="submit" :disabled="profileForm.processing">
                             {{ $t('profile.info.save_changes') }}
-                        </button>
+                        </PrimaryButton>
                     </div>
                 </form>
             </div>
@@ -375,7 +374,7 @@ const regenerateCodes = () =>
             <!-- Security Tab (2FA) -->
             <div v-if="activeTab === 'security'" class="space-y-6">
                 <div
-                    class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-200 dark:border-gray-700"
+                    class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-border dark:border-border-strong"
                 >
                     <div class="flex items-center justify-between mb-6">
                         <div>
@@ -430,7 +429,7 @@ const regenerateCodes = () =>
                         <div v-if="!codeSent" class="space-y-4">
                             <div class="space-y-3">
                                 <label
-                                    class="flex items-center p-4 border border-gray-200 dark:border-gray-700 rounded-xl cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
+                                    class="flex items-center p-4 border border-border dark:border-border-strong rounded-xl cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
                                 >
                                     <input
                                         type="radio"
@@ -452,7 +451,7 @@ const regenerateCodes = () =>
 
                                 <label
                                     v-if="smsEnabled && user.phone"
-                                    class="flex items-center p-4 border border-gray-200 dark:border-gray-700 rounded-xl cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
+                                    class="flex items-center p-4 border border-border dark:border-border-strong rounded-xl cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
                                 >
                                     <input
                                         type="radio"
@@ -473,31 +472,28 @@ const regenerateCodes = () =>
                                 </label>
                             </div>
 
-                            <button
+                            <PrimaryButton
                                 @click="sendCode"
                                 :disabled="sendCodeForm.processing"
-                                class="flex items-center gap-2 px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium disabled:opacity-50 transition-colors"
+                                :loading="sendCodeForm.processing"
                             >
-                                <svg
-                                    v-if="!sendCodeForm.processing"
-                                    class="w-5 h-5"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        stroke-width="2"
-                                        d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
-                                    />
-                                </svg>
-                                <span
-                                    v-else
-                                    class="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"
-                                ></span>
+                                <template #iconLeft v-if="!sendCodeForm.processing">
+                                    <svg
+                                        class="w-5 h-5"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                                        />
+                                    </svg>
+                                </template>
                                 {{ $t('security.send_verification_code') }}
-                            </button>
+                            </PrimaryButton>
 
                             <div
                                 v-if="$page.props.errors?.method"
@@ -595,7 +591,7 @@ const regenerateCodes = () =>
                         <!-- Recovery Codes -->
                         <div
                             v-if="recoveryCodes"
-                            class="p-4 bg-gray-50 dark:bg-gray-700/30 rounded-xl border border-gray-200 dark:border-gray-700"
+                            class="p-4 bg-gray-50 dark:bg-gray-700/30 rounded-xl border border-border dark:border-border-strong"
                         >
                             <div class="flex items-center justify-between mb-3">
                                 <h4 class="font-medium text-gray-900 dark:text-white">
@@ -625,7 +621,7 @@ const regenerateCodes = () =>
                         <!-- Disable Button -->
                         <div
                             v-if="!isEnforced"
-                            class="pt-4 border-t border-gray-200 dark:border-gray-700"
+                            class="pt-4 border-t border-border dark:border-border-strong"
                         >
                             <button
                                 @click="showDisableModal = true"
@@ -641,7 +637,7 @@ const regenerateCodes = () =>
             <!-- Password Tab -->
             <div
                 v-if="activeTab === 'password'"
-                class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-200 dark:border-gray-700"
+                class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-border dark:border-border-strong"
             >
                 <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-6">
                     {{ $t('company_profile.admin_user.change_password') }}
@@ -699,13 +695,9 @@ const regenerateCodes = () =>
                         />
                     </div>
 
-                    <button
-                        type="submit"
-                        :disabled="passwordForm.processing"
-                        class="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium disabled:opacity-50 transition-colors"
-                    >
+                    <PrimaryButton type="submit" :disabled="passwordForm.processing">
                         {{ $t('security.update_password') }}
-                    </button>
+                    </PrimaryButton>
                 </form>
             </div>
 
@@ -718,7 +710,7 @@ const regenerateCodes = () =>
                             @click="showDisableModal = false"
                         ></div>
                         <div
-                            class="relative bg-white dark:bg-gray-800 rounded-2xl p-6 w-full max-w-md shadow-xl"
+                            class="relative bg-white dark:bg-gray-800 rounded-xl p-6 w-full max-w-md shadow-xl"
                         >
                             <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
                                 {{ $t('security.confirm_disable_two_factor') }}
@@ -738,24 +730,23 @@ const regenerateCodes = () =>
                                     />
                                 </div>
                                 <div class="flex gap-3">
-                                    <button
+                                    <DangerButton
                                         type="submit"
                                         :disabled="disableForm.processing"
-                                        class="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium disabled:opacity-50"
+                                        class="flex-1"
                                     >
                                         {{ $t('security.deactivate') }}
-                                    </button>
-                                    <button
+                                    </DangerButton>
+                                    <SecondaryButton
                                         type="button"
                                         @click="showDisableModal = false"
-                                        class="px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg"
                                     >
                                         {{
                                             $t(
                                                 'system.company_subscription.history.confirm_modal.go_back'
                                             )
                                         }}
-                                    </button>
+                                    </SecondaryButton>
                                 </div>
                             </form>
                         </div>
@@ -772,7 +763,7 @@ const regenerateCodes = () =>
                             @click="showRegenModal = false"
                         ></div>
                         <div
-                            class="relative bg-white dark:bg-gray-800 rounded-2xl p-6 w-full max-w-md shadow-xl"
+                            class="relative bg-white dark:bg-gray-800 rounded-xl p-6 w-full max-w-md shadow-xl"
                         >
                             <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
                                 {{ $t('security.new_recovery_codes') }}
@@ -795,20 +786,16 @@ const regenerateCodes = () =>
                                     />
                                 </div>
                                 <div class="flex gap-3">
-                                    <button
+                                    <PrimaryButton
                                         type="submit"
                                         :disabled="regenForm.processing"
-                                        class="flex-1 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium disabled:opacity-50"
+                                        class="flex-1"
                                     >
                                         {{ $t('security.new_codes') }}
-                                    </button>
-                                    <button
-                                        type="button"
-                                        @click="showRegenModal = false"
-                                        class="px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg"
-                                    >
+                                    </PrimaryButton>
+                                    <SecondaryButton type="button" @click="showRegenModal = false">
                                         {{ $t('common.cancel') }}
-                                    </button>
+                                    </SecondaryButton>
                                 </div>
                             </form>
                         </div>

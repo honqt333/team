@@ -1,7 +1,21 @@
 <template>
     <button
-        class="inline-flex items-center rounded-md border border-transparent bg-gray-800 px-4 py-2 text-xs font-semibold uppercase tracking-widest text-white transition duration-150 ease-in-out hover:bg-gray-700 focus:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 active:bg-gray-900"
+        class="inline-flex items-center rounded-lg border border-transparent px-4 py-2 text-sm font-semibold transition duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 active:bg-action-primary-active disabled:opacity-50 disabled:cursor-not-allowed"
+        :style="{
+            backgroundColor: 'var(--color-action-primary)',
+            color: 'var(--color-action-on)',
+            '--tw-ring-color': 'var(--color-action-primary)',
+        }"
     >
         <slot />
     </button>
 </template>
+
+<style scoped>
+button:hover:not(:disabled) {
+    background-color: var(--color-action-primary-hover);
+}
+button:focus-visible {
+    box-shadow: var(--shadow-focus);
+}
+</style>
