@@ -29,27 +29,47 @@ class SystemSettingsController extends Controller
     /**
      * Display the print settings page.
      */
-    /**
-     * Display the print settings page.
-     */
     public function printSettings(): Response
     {
         $tenant = auth()->user()->tenant;
         $printSettings = $tenant->print_settings ?? [];
 
+        // Comprehensive document types aligned with PrintService
         $documentTypes = [
+            // App invoices
             'invoice' => 'فاتورة',
-            'parts_invoice' => 'فاتورة قطع غيار',
-            'quote' => 'تقييم',
-            'payments' => 'مدفوعات',
-            'receipt_voucher' => 'سند قبض',
-            'payment_voucher' => 'سند صرف',
-            'bad_debts' => 'ديون معدمة',
-            'work_order' => 'أمر العمل',
-            'condition_report' => 'تقرير حالة المركبة',
-            'return_invoice' => 'فاتورة إرجاع',
             'proforma_invoice' => 'فاتورة أولية',
-            'purchase_invoice' => 'فاتورة الشراء',
+            'credit_note' => 'إشعار دائن',
+            'parts_invoice' => 'فاتورة قطع غيار',
+
+            // Quotes
+            'quotation' => 'عرض سعر',
+
+            // Work orders
+            'work_order' => 'كرت صيانة',
+            'condition_report' => 'تقرير حالة المركبة',
+            'payments' => 'سندات الدفع والمدفوعات',
+
+            // Receipts
+            'receipt' => 'سند قبض مالي',
+            'delivery_note' => 'سند تسليم',
+
+            // Purchasing
+            'purchase_invoice' => 'فاتورة مشتريات',
+            'purchase_return' => 'فاتورة مرتجع مشتريات',
+
+            // Billing
+            'subscription_invoice' => 'فاتورة اشتراك',
+
+            // HR
+            'payslip' => 'سند راتب',
+            'payroll' => 'كشف رواتب',
+            'attendance' => 'تقرير حضور',
+            'employee' => 'ملف موظف',
+
+            // Reports
+            'customers' => 'قائمة عملاء',
+            'vehicles' => 'قائمة مركبات',
         ];
 
         $documents = [];
@@ -58,7 +78,7 @@ class SystemSettingsController extends Controller
             $existing = $printSettings['documents'][$key] ?? [];
             $documents[$key] = [
                 'name' => $name,
-                'title_ar' => $existing['title_ar'] ?? ($existing['title'] ?? ($tenant->{"{$key}_title"} ?? $name)),
+                'title_ar' => $existing['title_ar'] ?? ($existing['title'] ?? $name),
                 'title_en' => $existing['title_en'] ?? ($existing['title'] ?? $name),
                 'terms' => is_array($existing['terms'] ?? null) ? array_values(array_filter($existing['terms'], fn ($t) => ! empty($t['text_ar']) || ! empty($t['text_en']))) : [],
                 'print_terms' => $existing['print_terms'] ?? true,
@@ -138,10 +158,10 @@ class SystemSettingsController extends Controller
                         'visual' => $validated['visual'],
                     ],
                     // Keep legacy columns in sync for now if they exist
-                    'quote_title' => $newDocuments['quote']['title_ar'] ?? ($newDocuments['quote']['title'] ?? $tenant->quote_title),
+                    'quote_title' => $newDocuments['quotation']['title_ar'] ?? ($newDocuments['quotation']['title'] ?? $tenant->quote_title),
                     'work_order_title' => $newDocuments['work_order']['title_ar'] ?? ($newDocuments['work_order']['title'] ?? $tenant->work_order_title),
                     'invoice_title' => $newDocuments['invoice']['title_ar'] ?? ($newDocuments['invoice']['title'] ?? $tenant->invoice_title),
-                    'quote_terms' => is_array($newDocuments['quote']['terms'] ?? null) ? ($newDocuments['quote']['terms'][0]['text_ar'] ?? '') : ($newDocuments['quote']['terms'] ?? $tenant->quote_terms),
+                    'quote_terms' => is_array($newDocuments['quotation']['terms'] ?? null) ? ($newDocuments['quotation']['terms'][0]['text_ar'] ?? '') : ($newDocuments['quotation']['terms'] ?? $tenant->quote_terms),
                     'work_order_terms' => is_array($newDocuments['work_order']['terms'] ?? null) ? ($newDocuments['work_order']['terms'][0]['text_ar'] ?? '') : ($newDocuments['work_order']['terms'] ?? $tenant->work_order_terms),
                     'invoice_terms' => is_array($newDocuments['invoice']['terms'] ?? null) ? ($newDocuments['invoice']['terms'][0]['text_ar'] ?? '') : ($newDocuments['invoice']['terms'] ?? $tenant->invoice_terms),
                 ]);
