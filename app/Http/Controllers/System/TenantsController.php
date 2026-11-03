@@ -212,7 +212,7 @@ class TenantsController extends Controller
         if (! $activeSub) {
             $score -= 10;
             $flags[] = ['type' => 'warning', 'key' => 'no_active_subscription'];
-        } elseif ($activeSub->ends_at && $activeSub->ends_at->diffInDays(now(), false) >= -30) {
+        } elseif ($activeSub->ends_at && $activeSub->ends_at->diffInDays(now(), false) <= 30 && $activeSub->ends_at->isFuture()) {
             $score -= 10;
             $flags[] = ['type' => 'warning', 'key' => 'expiring_within_30_days'];
         }

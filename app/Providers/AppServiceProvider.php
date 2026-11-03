@@ -182,8 +182,12 @@ class AppServiceProvider extends ServiceProvider
         // importantly `php artisan key:generate` in CI. Bail out cleanly
         // when the table is missing; the next request after migrations will
         // pick up the live cache.
-        if (Schema::hasTable('cache')) {
-            app(PermissionRegistrar::class)->forgetCachedPermissions();
+        try {
+            if (Schema::hasTable('cache')) {
+                app(PermissionRegistrar::class)->forgetCachedPermissions();
+            }
+        } catch (Throwable $e) {
+            // Silently fail if DB is not ready or restricted during boot
         }
 
         // Register policies

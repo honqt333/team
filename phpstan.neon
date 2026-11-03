@@ -6,6 +6,9 @@ parameters:
     paths:
         - app/
 
+    parallel:
+        maximumNumberOfProcesses: 1
+
     # Level 5: catches undefined methods, wrong argument types, missing
     # return types, etc. Higher levels (6-9) find more bugs but require
     # extensive baseline annotations. We start at 5 — the cost/benefit

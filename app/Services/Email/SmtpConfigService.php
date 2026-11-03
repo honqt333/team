@@ -8,6 +8,7 @@ use App\Models\Integration\Integration;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schema;
+use Throwable;
 
 /**
  * Single source of truth for SMTP configuration.
@@ -82,7 +83,11 @@ class SmtpConfigService
         // (pre-migration) or in a unit-test environment that has not
         // loaded the schema. Bail out cleanly so we never throw during
         // boot or a request bootstrap.
-        if (! Schema::hasTable('integrations')) {
+        try {
+            if (! Schema::hasTable('integrations')) {
+                return null;
+            }
+        } catch (Throwable $e) {
             return null;
         }
 
