@@ -251,7 +251,7 @@ class EmployeeController extends Controller
             'userRoles' => $employee->user ? $employee->user->roles->pluck('name') : [],
             // Financial Data
             'payrollItems' => $employee->payrollItems()
-                ->with(['payrollRun', 'createdBy:id,name'])
+                ->with(['payrollRun:id,period_start,period_end,status', 'createdBy:id,name'])
                 ->orderByDesc('created_at')
                 ->take(12)
                 ->get(),

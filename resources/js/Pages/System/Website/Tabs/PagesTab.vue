@@ -29,7 +29,7 @@ defineProps({ form: Object, addItem: Function, removeItem: Function });
                         class="text-sm font-medium text-gray-700 dark:text-gray-300 flex justify-between mb-1"
                         dir="ltr"
                     >
-                        Terms & Conditions
+                        {{ $t('system.website.terms_en') }}
                         <span class="badge-lang">EN</span>
                     </label>
                     <textarea
@@ -57,7 +57,7 @@ defineProps({ form: Object, addItem: Function, removeItem: Function });
                         class="text-sm font-medium text-gray-700 dark:text-gray-300 flex justify-between mb-1"
                         dir="ltr"
                     >
-                        Privacy Policy
+                        {{ $t('system.website.privacy_en') }}
                         <span class="badge-lang">EN</span>
                     </label>
                     <textarea
@@ -148,7 +148,7 @@ defineProps({ form: Object, addItem: Function, removeItem: Function });
                                 class="text-xs text-gray-500 dark:text-gray-400 mb-1 flex justify-between"
                                 dir="ltr"
                             >
-                                Page Title
+                                {{ $t('system.website.page_title_en') }}
                                 <span class="badge-lang">EN</span>
                             </label>
                             <input
@@ -175,7 +175,7 @@ defineProps({ form: Object, addItem: Function, removeItem: Function });
                                 class="text-xs text-gray-500 dark:text-gray-400 mb-1 flex justify-between"
                                 dir="ltr"
                             >
-                                Content
+                                {{ $t('system.website.content_en') }}
                                 <span class="badge-lang">EN</span>
                             </label>
                             <textarea

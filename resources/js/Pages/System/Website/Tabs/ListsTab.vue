@@ -1,5 +1,35 @@
 <script setup>
-defineProps({ form: Object, addItem: Function, removeItem: Function, tab: String });
+import { ref } from 'vue';
+
+const props = defineProps({
+    form: Object,
+    addItem: Function,
+    removeItem: Function,
+    tab: String,
+    uploadImage: Function,
+});
+
+const bannerInputs = ref({});
+const uploadingIndex = ref(null);
+
+async function onBannerFileChange(e, banner, index) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (props.uploadImage) {
+        uploadingIndex.value = index;
+        try {
+            const url = await props.uploadImage('banner_image', file);
+            banner.image = url;
+        } catch (err) {
+            console.error('Banner upload failed', err);
+        } finally {
+            uploadingIndex.value = null;
+        }
+    } else {
+        banner.image = file;
+    }
+}
 </script>
 
 <template>
@@ -37,7 +67,7 @@ defineProps({ form: Object, addItem: Function, removeItem: Function, tab: String
                         </div>
                         <div>
                             <label class="text-xs text-gray-500 dark:text-gray-400 mb-1 block">
-                                Label (EN)
+                                {{ $t('system.website.label_en') }}
                             </label>
                             <input
                                 v-model="item.label_en"
@@ -112,7 +142,7 @@ defineProps({ form: Object, addItem: Function, removeItem: Function, tab: String
                         </div>
                         <div>
                             <label class="text-xs text-gray-500 dark:text-gray-400 mb-1 block">
-                                Label (EN)
+                                {{ $t('system.website.label_en') }}
                             </label>
                             <input
                                 v-model="item.label_en"
@@ -223,19 +253,35 @@ defineProps({ form: Object, addItem: Function, removeItem: Function, tab: String
                         <div class="relative">
                             <input
                                 type="file"
-                                @input="banner.image = $event.target.files[0]"
+                                @change="onBannerFileChange($event, banner, index)"
                                 class="hidden"
-                                :ref="'bannerInput' + index"
+                                :ref="
+                                    (el) => {
+                                        if (el) bannerInputs[index] = el;
+                                    }
+                                "
                                 accept="image/*"
                             />
                             <button
-                                @click="$refs['bannerInput' + index]?.[0]?.click()"
+                                @click="bannerInputs[index]?.click()"
                                 type="button"
-                                class="text-xs text-indigo-600 dark:text-indigo-400 font-medium hover:text-indigo-800 w-full text-center"
+                                :disabled="uploadingIndex === index"
+                                class="text-xs text-indigo-600 dark:text-indigo-400 font-medium hover:text-indigo-800 w-full text-center disabled:opacity-50"
                             >
-                                {{ $t('tenant_site.lists.change_image') }}
+                                {{
+                                    uploadingIndex === index
+                                        ? $t('system.website.uploading')
+                                        : $t('tenant_site.lists.change_image')
+                                }}
                             </button>
                         </div>
+                        <input
+                            v-model="banner.image"
+                            type="text"
+                            :placeholder="$t('system.website.image_url_placeholder')"
+                            class="input-enterprise text-xs py-1 font-mono mt-2"
+                            dir="ltr"
+                        />
                     </div>
                     <div class="flex-1 space-y-4">
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -253,7 +299,7 @@ defineProps({ form: Object, addItem: Function, removeItem: Function, tab: String
                                     class="text-xs text-gray-500 dark:text-gray-400 mb-1 flex justify-between"
                                     dir="ltr"
                                 >
-                                    Title
+                                    {{ $t('system.website.title_en') }}
                                     <span class="badge-lang">EN</span>
                                 </label>
                                 <input

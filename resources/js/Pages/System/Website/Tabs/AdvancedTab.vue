@@ -67,7 +67,7 @@ defineProps({ form: Object, tab: String });
                         class="text-sm font-medium text-gray-700 dark:text-gray-300 flex justify-between mb-1"
                         dir="ltr"
                     >
-                        Maintenance Title
+                        {{ $t('system.website.maintenance_title_en') }}
                         <span class="badge-lang">EN</span>
                     </label>
                     <input
@@ -94,7 +94,7 @@ defineProps({ form: Object, tab: String });
                         class="text-sm font-medium text-gray-700 dark:text-gray-300 flex justify-between mb-1"
                         dir="ltr"
                     >
-                        Message
+                        {{ $t('system.website.maintenance_message_en') }}
                         <span class="badge-lang">EN</span>
                     </label>
                     <textarea
@@ -133,7 +133,7 @@ defineProps({ form: Object, tab: String });
                         class="text-sm font-medium text-gray-700 dark:text-gray-300 flex justify-between mb-1"
                         dir="ltr"
                     >
-                        Short About
+                        {{ $t('system.website.footer_about_en') }}
                         <span class="badge-lang">EN</span>
                     </label>
                     <textarea
@@ -160,7 +160,7 @@ defineProps({ form: Object, tab: String });
                         class="text-sm font-medium text-gray-700 dark:text-gray-300 flex justify-between mb-1"
                         dir="ltr"
                     >
-                        Copyrights
+                        {{ $t('system.website.copyright_text_en') }}
                         <span class="badge-lang">EN</span>
                     </label>
                     <input
@@ -227,7 +227,7 @@ defineProps({ form: Object, tab: String });
                             class="text-sm font-medium text-gray-700 dark:text-gray-300 flex justify-between mb-1"
                             dir="ltr"
                         >
-                            Announcement Text
+                            {{ $t('system.website.announcement_text_en') }}
                             <span class="badge-lang">EN</span>
                         </label>
                         <input

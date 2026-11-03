@@ -1,9 +1,9 @@
 <script setup>
 import { Head, Link, usePage, useForm, router } from '@inertiajs/vue3';
-import { ref, onMounted, onUnmounted, computed, nextTick } from 'vue';
+import { ref, onMounted, onUnmounted, computed, nextTick, watch } from 'vue';
 import axios from 'axios';
 
-const props = defineProps({ settings: Object, plans: Array });
+const props = defineProps({ settings: Object, plans: Array, isAdminPreview: Boolean });
 const page = usePage();
 const isRtl = computed(() => page.props.locale === 'ar');
 const isDark = ref(true);
@@ -20,6 +20,29 @@ const cursorVisible = ref(false);
 let particles = [];
 const statsVisible = ref(false);
 const statsCounters = ref({});
+
+// ── Live Settings (Synced in real-time from CMS via postMessage) ─────────────
+const liveSettings = ref({ ...(props.settings || {}) });
+const settings = computed(() => liveSettings.value);
+
+watch(
+    () => props.settings,
+    (val) => {
+        if (val) {
+            liveSettings.value = { ...liveSettings.value, ...val };
+        }
+    },
+    { deep: true }
+);
+
+function handlePostMessage(event) {
+    if (event.data?.type === 'CARAG_PREVIEW_UPDATE' && event.data?.settings) {
+        liveSettings.value = {
+            ...liveSettings.value,
+            ...event.data.settings,
+        };
+    }
+}
 
 // Contact Form
 const contactForm = useForm({
@@ -43,7 +66,7 @@ function submitContact() {
 }
 
 // ── Localisation helpers ──────────────────────────────────────────────────────
-const t = (ar, en) => (isRtl.value ? props.settings[ar] || '' : props.settings[en] || '');
+const t = (ar, en) => (isRtl.value ? settings.value[ar] || '' : settings.value[en] || '');
 const li = (item, key) =>
     isRtl.value ? item[`${key}_ar`] || item[key] || '' : item[`${key}_en`] || item[key] || '';
 
@@ -87,7 +110,7 @@ const hexToRgb = (hex) => {
 };
 
 const cssVars = computed(() => {
-    const pc = props.settings.primary_color || 'var(--primary)';
+    const pc = settings.value.primary_color || 'var(--primary)';
     return {
         '--primary': pc,
         '--primary-rgb': hexToRgb(pc),
@@ -97,8 +120,8 @@ const cssVars = computed(() => {
 
 const typedPhrases = computed(() => {
     const raw = isRtl.value
-        ? props.settings.hero_typed_phrases_ar
-        : props.settings.hero_typed_phrases_en;
+        ? settings.value.hero_typed_phrases_ar
+        : settings.value.hero_typed_phrases_en;
     if (!raw)
         return isRtl.value
             ? ['مركزك الآن', 'أرباحك اليوم', 'فريقك معك', 'مستقبلك هنا']
@@ -276,7 +299,7 @@ function initStatsObserver() {
         ([entry]) => {
             if (entry.isIntersecting && !statsVisible.value) {
                 statsVisible.value = true;
-                (props.settings.stats_list || []).forEach(async (stat, i) => {
+                (settings.value.stats_list || []).forEach(async (stat, i) => {
                     const animate = async () => {
                         const num = parseFloat((stat.value || '0').replace(/\D/g, ''));
                         const suffix = (stat.value || '').replace(/[\d.]/g, '');
@@ -318,6 +341,7 @@ onMounted(async () => {
         { passive: true }
     );
     window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('message', handlePostMessage);
     // Idle freeze for particles
     const activityEvents = ['mousemove', 'scroll', 'click', 'keydown', 'touchstart'];
     activityEvents.forEach((ev) => window.addEventListener(ev, resetIdleTimer));
@@ -328,7 +352,7 @@ onMounted(async () => {
     await nextTick();
     initParticles(canvasRef.value);
     // Init stat counters with '0'
-    (props.settings.stats_list || []).forEach((_, i) => {
+    (settings.value.stats_list || []).forEach((_, i) => {
         statsCounters.value[i] = '0';
     });
     runTyped();
@@ -350,13 +374,14 @@ onUnmounted(() => {
     clearTimeout(typedTimer);
     clearTimeout(idleTimer);
     window.removeEventListener('mousemove', handleMouseMove);
+    window.removeEventListener('message', handlePostMessage);
 });
 
 // Chatbot Injection
 onMounted(() => {
-    if (props.settings.chatbot_enabled && props.settings.chatbot_script) {
+    if (settings.value.chatbot_enabled && settings.value.chatbot_script) {
         const div = document.createElement('div');
-        div.innerHTML = props.settings.chatbot_script;
+        div.innerHTML = settings.value.chatbot_script;
         const scripts = div.getElementsByTagName('script');
         for (let i = 0; i < scripts.length; i++) {
             const s = document.createElement('script');
@@ -389,8 +414,8 @@ onMounted(() => {
         }
     };
 
-    inject(props.settings.scripts_header, document.head);
-    inject(props.settings.scripts_footer, document.body);
+    inject(settings.value.scripts_header, document.head);
+    inject(settings.value.scripts_footer, document.body);
 });
 const getSocialIcon = (platform) => {
     const icons = {
@@ -467,8 +492,17 @@ const getSocialIcon = (platform) => {
             <div class="grid-overlay"></div>
         </div>
 
+        <!-- Admin Preview Notice when Maintenance Mode is ON -->
+        <div
+            v-if="isAdminPreview && settings.maintenance_mode === '1'"
+            class="sticky top-0 z-50 bg-gradient-to-r from-amber-600 to-yellow-600 text-white text-xs font-bold py-2.5 px-4 text-center shadow-lg flex items-center justify-center gap-2"
+        >
+            <span>⚠️</span>
+            <span>وضع المعاينة الإدارية نشط — الموقع حالياً في وضع الصيانة للزوار العاديين</span>
+        </div>
+
         <!-- MAINTENANCE -->
-        <div v-if="settings.maintenance_mode === '1'" class="maint-screen">
+        <div v-if="settings.maintenance_mode === '1' && !isAdminPreview" class="maint-screen">
             <div class="maint-box sr">
                 <div class="maint-icon-ring">
                     <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -497,7 +531,7 @@ const getSocialIcon = (platform) => {
             </div>
         </div>
 
-        <template v-if="settings.maintenance_mode !== '1'">
+        <template v-if="settings.maintenance_mode !== '1' || isAdminPreview">
             <!-- ANNOUNCEMENT BAR -->
             <div
                 v-if="settings.announcement_enabled"
@@ -2880,6 +2914,49 @@ html {
     .aurora {
         filter: blur(40px) !important;
         opacity: 0.25 !important;
+    }
+    .section-pad {
+        padding: 4.5rem 1.25rem;
+    }
+    .hero {
+        padding: 6.5rem 1.25rem 3rem;
+    }
+    .cta-box {
+        padding: 3.5rem 1.5rem;
+        border-radius: 24px;
+    }
+    .stats-section {
+        padding: 4rem 1.25rem;
+    }
+    .stats-grid {
+        gap: 2rem;
+    }
+}
+
+@media (max-width: 640px) {
+    .nav-actions .btn-ghost-sm,
+    .nav-actions .btn-primary-sm {
+        display: none;
+    }
+    .hero-btns {
+        flex-direction: column;
+        width: 100%;
+    }
+    .hero-btns .btn-cta,
+    .hero-btns .btn-ghost {
+        width: 100%;
+        justify-content: center;
+        text-align: center;
+    }
+    .feat-card {
+        padding: 1.75rem;
+    }
+    .plan-card {
+        padding: 1.75rem;
+    }
+    .faq-item {
+        padding: 1.25rem;
+        gap: 1rem;
     }
 }
 </style>

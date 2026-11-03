@@ -1105,7 +1105,16 @@
         "recent_payslips": "Latest payslips",
         "title": "Employee portal",
         "total_hours": "Total hours",
-        "welcome": "Hello"
+        "welcome": "Hello",
+        "my_tasks": "My tasks",
+        "no_tasks": "No tasks assigned to you currently",
+        "items": "Items",
+        "no_items": "No items in this work order",
+        "actions": {
+            "start_work": "Start work",
+            "ready_for_qc": "Ready for QC",
+            "complete": "Complete"
+        }
     },
     "errors": {
         "403": {
@@ -2120,6 +2129,8 @@
         "cannot_cancel_has_relations": "Cannot cancel work order - please delete all services, parts, assigned staff, and refund any payments first",
         "cannot_change_item_status": "Cannot change item status - has assigned staff or parts",
         "cannot_complete_error": "Cannot Complete Error",
+        "action_not_confirmed": "Action was not confirmed",
+        "item_completed": "Service completed successfully",
         "cannot_complete_items_pending": "Cannot complete work order - pending items exist",
         "cannot_deactivate_self": "Cannot Deactivate Self",
         "cannot_delete_has_users": "Cannot Delete Has Users",
@@ -5346,6 +5357,15 @@
             "preview": "Preview Site",
             "save": "Save Changes",
             "saved": "Changes saved successfully",
+            "saving": "Saving...",
+            "save_error": "An error occurred while saving settings",
+            "unsaved_changes": "You have unsaved changes",
+            "upload_error": "Upload failed. Please check file size and type",
+            "uploading": "Uploading...",
+            "live": "Live",
+            "reload": "Reload Preview",
+            "open_new_tab": "Open in new tab",
+            "loading_preview": "Loading preview...",
             "tabs": {
                 "general": "Visual Identity",
                 "menus": "Navigation Menus",

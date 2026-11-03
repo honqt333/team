@@ -2,7 +2,7 @@
 import { computed } from 'vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 
-const props = defineProps({ form: Object, addItem: Function, removeItem: Function });
+defineProps({ form: Object, addItem: Function, removeItem: Function });
 
 const platformOptions = computed(() => [
     { value: 'facebook', label: 'Facebook' },

@@ -5,224 +5,417 @@ declare(strict_types=1);
 namespace App\Http\Controllers\System;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\WebsiteSettingsUpdateRequest;
+use App\Models\AdminUser;
 use App\Models\Setting;
+use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Inertia\Inertia;
+use Inertia\Response;
 
 class WebsiteSettingsController extends Controller
 {
-    public function index()
+    public const CACHE_KEY = 'system.website_settings';
+
+    /**
+     * Strict allowlist of settings keys that can be managed via this controller.
+     * Prevents arbitrary key injection into the settings table.
+     */
+    public const ALLOWED_KEYS = [
+        // Visual & Identity
+        'website_title_ar',
+        'website_title_en',
+        'website_description_ar',
+        'website_description_en',
+        'website_keywords',
+        'website_logo',
+        'website_favicon',
+        'website_primary_color',
+
+        // Contact
+        'website_contact_email',
+        'website_contact_phone',
+        'website_whatsapp_number',
+        'website_whatsapp_floating_enabled',
+        'website_whatsapp_floating_number',
+
+        // Integrations & Scripts
+        'website_chatbot_enabled',
+        'website_chatbot_script',
+        'website_scripts_header',
+        'website_scripts_footer',
+
+        // Announcement Bar
+        'website_announcement_enabled',
+        'website_announcement_text_ar',
+        'website_announcement_text_en',
+        'website_announcement_url',
+        'website_announcement_bg_color',
+        'website_announcement_text_color',
+
+        // Header & Navigation
+        'website_login_button_text_ar',
+        'website_login_button_text_en',
+        'website_header_menu',
+        'website_footer_menu',
+
+        // Social & Address
+        'website_social_links',
+        'website_facebook_url',
+        'website_twitter_url',
+        'website_instagram_url',
+        'website_linkedin_url',
+        'website_address_ar',
+        'website_address_en',
+
+        // Footer
+        'website_footer_about_ar',
+        'website_footer_about_en',
+        'website_copyright_text_ar',
+        'website_copyright_text_en',
+
+        // Landing Hero
+        'landing_hero_title_ar',
+        'landing_hero_title_en',
+        'landing_hero_subtitle_ar',
+        'landing_hero_subtitle_en',
+        'landing_hero_cta_text_ar',
+        'landing_hero_cta_text_en',
+
+        // Hero Typed Animation
+        'landing_hero_typed_enabled',
+        'landing_hero_typed_prefix_ar',
+        'landing_hero_typed_prefix_en',
+        'landing_hero_typed_suffix_ar',
+        'landing_hero_typed_suffix_en',
+        'landing_hero_typed_phrases_ar',
+        'landing_hero_typed_phrases_en',
+
+        // Section Headings & Subtitles
+        'landing_features_title_ar',
+        'landing_features_title_en',
+        'landing_features_subtitle_ar',
+        'landing_features_subtitle_en',
+        'landing_pricing_title_ar',
+        'landing_pricing_title_en',
+        'landing_pricing_subtitle_ar',
+        'landing_pricing_subtitle_en',
+
+        // Section Toggles
+        'landing_features_enabled',
+        'landing_pricing_enabled',
+        'landing_stats_enabled',
+        'landing_faq_enabled',
+        'landing_testimonials_enabled',
+        'landing_contact_enabled',
+
+        // Maintenance Mode
+        'website_maintenance_mode',
+        'website_maintenance_title_ar',
+        'website_maintenance_title_en',
+        'website_maintenance_message_ar',
+        'website_maintenance_message_en',
+
+        // Lists
+        'landing_banners_list',
+        'landing_features_list',
+        'landing_faq_list',
+        'landing_testimonials_list',
+        'landing_stats_list',
+        'website_custom_pages',
+
+        // Legal Pages
+        'website_page_terms_ar',
+        'website_page_terms_en',
+        'website_page_privacy_ar',
+        'website_page_privacy_en',
+    ];
+
+    /**
+     * Fetch all platform website & landing settings in a single bulk query with caching.
+     *
+     * @return array<string, string|null>
+     */
+    public static function getPlatformSettingsMap(): array
     {
+        return Cache::remember(self::CACHE_KEY, 3600, function () {
+            return Setting::whereNull('tenant_id')
+                ->where(function ($query) {
+                    $query->where('key', 'like', 'website.%')
+                        ->orWhere('key', 'like', 'landing.%');
+                })
+                ->pluck('value', 'key')
+                ->toArray();
+        });
+    }
+
+    /**
+     * Clear the cached settings map.
+     */
+    public static function flushSettingsCache(): void
+    {
+        Cache::forget(self::CACHE_KEY);
+    }
+
+    /**
+     * Display the CMS website settings form.
+     */
+    public function index(): Response
+    {
+        $raw = self::getPlatformSettingsMap();
+
+        $get = function (string $dbKey, $default = '') use ($raw) {
+            $val = $raw[$dbKey] ?? null;
+
+            return ($val !== null && $val !== '') ? $val : $default;
+        };
+
+        $getJson = function (string $dbKey, array $default = []) use ($raw) {
+            $val = $raw[$dbKey] ?? null;
+
+            if ($val === null || $val === '') {
+                return $default;
+            }
+
+            $decoded = json_decode((string) $val, true);
+
+            return is_array($decoded) && ! empty($decoded) ? $decoded : $default;
+        };
+
         return Inertia::render('System/Website/Index', [
             'settings' => [
-                'website_title_ar' => Setting::get('website.title.ar', 'Carag - نظام إدارة مراكز صيانة السيارات'),
-                'website_title_en' => Setting::get('website.title.en', 'Carag - Car Workshop Management System'),
-                'website_description_ar' => Setting::get('website.description.ar', ''),
-                'website_description_en' => Setting::get('website.description.en', ''),
-                'website_keywords' => Setting::get('website.keywords', ''),
-                'website_logo' => Setting::get('website.logo', ''),
-                'website_favicon' => Setting::get('website.favicon', ''),
-                'website_primary_color' => Setting::get('website.primary.color', '#4f46e5'),
+                'website_title_ar' => $get('website.title.ar', 'Carag - نظام إدارة مراكز صيانة السيارات'),
+                'website_title_en' => $get('website.title.en', 'Carag - Car Workshop Management System'),
+                'website_description_ar' => $get('website.description.ar', ''),
+                'website_description_en' => $get('website.description.en', ''),
+                'website_keywords' => $get('website.keywords', ''),
+                'website_logo' => $get('website.logo', ''),
+                'website_favicon' => $get('website.favicon', ''),
+                'website_primary_color' => $get('website.primary.color', '#4f46e5'),
 
-                'website_contact_email' => Setting::get('website.contact.email', ''),
-                'website_contact_phone' => Setting::get('website.contact.phone', ''),
-                'website_whatsapp_number' => Setting::get('website.whatsapp.number', ''),
+                'website_contact_email' => $get('website.contact.email', ''),
+                'website_contact_phone' => $get('website.contact.phone', ''),
+                'website_whatsapp_number' => $get('website.whatsapp.number', ''),
+                'website_whatsapp_floating_enabled' => $get('website.whatsapp.floating.enabled', '0'),
+                'website_whatsapp_floating_number' => $get('website.whatsapp.floating.number', ''),
 
-                'website_whatsapp_floating_enabled' => Setting::get('website.whatsapp.floating.enabled', '0'),
-                'website_whatsapp_floating_number' => Setting::get('website.whatsapp.floating.number', ''),
+                'website_chatbot_enabled' => $get('website.chatbot.enabled', '0'),
+                'website_chatbot_script' => $get('website.chatbot.script', ''),
+                'website_scripts_header' => $get('website.scripts.header', ''),
+                'website_scripts_footer' => $get('website.scripts.footer', ''),
 
-                'website_chatbot_enabled' => Setting::get('website.chatbot.enabled', '0'),
-                'website_chatbot_script' => Setting::get('website.chatbot.script', ''),
+                'website_announcement_enabled' => $get('website.announcement.enabled', '0'),
+                'website_announcement_text_ar' => $get('website.announcement.text.ar', ''),
+                'website_announcement_text_en' => $get('website.announcement.text.en', ''),
+                'website_announcement_url' => $get('website.announcement.url', ''),
+                'website_announcement_bg_color' => $get('website.announcement.bg.color', '#6366f1'),
+                'website_announcement_text_color' => $get('website.announcement.text.color', '#ffffff'),
 
-                'website_scripts_header' => Setting::get('website.scripts.header', ''),
-                'website_scripts_footer' => Setting::get('website.scripts.footer', ''),
+                'website_login_button_text_ar' => $get('website.login.button.text.ar', 'دخول'),
+                'website_login_button_text_en' => $get('website.login.button.text.en', 'Login'),
 
-                'website_announcement_enabled' => Setting::get('website.announcement.enabled', '0'),
-                'website_announcement_text_ar' => Setting::get('website.announcement.text.ar', ''),
-                'website_announcement_text_en' => Setting::get('website.announcement.text.en', ''),
-                'website_announcement_url' => Setting::get('website.announcement.url', ''),
-                'website_announcement_bg_color' => Setting::get('website.announcement.bg.color', '#6366f1'),
-                'website_announcement_text_color' => Setting::get('website.announcement.text.color', '#ffffff'),
-
-                'website_login_button_text_ar' => Setting::get('website.login.button.text.ar', 'دخول'),
-                'website_login_button_text_en' => Setting::get('website.login.button.text.en', 'Login'),
-
-                'website_social_links' => json_decode(Setting::get('website.social.links', '[]'), true),
-
-                'website_facebook_url' => Setting::get('website.facebook.url', ''),
-                'website_twitter_url' => Setting::get('website.twitter.url', ''),
-                'website_instagram_url' => Setting::get('website.instagram.url', ''),
-                'website_linkedin_url' => Setting::get('website.linkedin.url', ''),
-                'website_address_ar' => Setting::get('website.address.ar', ''),
-                'website_address_en' => Setting::get('website.address.en', ''),
+                'website_social_links' => $getJson('website.social.links', []),
+                'website_facebook_url' => $get('website.facebook.url', ''),
+                'website_twitter_url' => $get('website.twitter.url', ''),
+                'website_instagram_url' => $get('website.instagram.url', ''),
+                'website_linkedin_url' => $get('website.linkedin.url', ''),
+                'website_address_ar' => $get('website.address.ar', ''),
+                'website_address_en' => $get('website.address.en', ''),
 
                 // Lists
-                'website_header_menu' => json_decode(Setting::get('website.header.menu', '[]'), true),
-                'website_footer_menu' => json_decode(Setting::get('website.footer.menu', '[]'), true),
-
-                'website_footer_about_ar' => Setting::get('website.footer.about.ar', ''),
-                'website_footer_about_en' => Setting::get('website.footer.about.en', ''),
-                'website_copyright_text_ar' => Setting::get('website.copyright.text.ar', '© '.date('Y').' Carag. جميع الحقوق محفوظة.'),
-                'website_copyright_text_en' => Setting::get('website.copyright.text.en', '© '.date('Y').' Carag. All rights reserved.'),
+                'website_header_menu' => $getJson('website.header.menu', []),
+                'website_footer_menu' => $getJson('website.footer.menu', []),
+                'website_footer_about_ar' => $get('website.footer.about.ar', ''),
+                'website_footer_about_en' => $get('website.footer.about.en', ''),
+                'website_copyright_text_ar' => $get('website.copyright.text.ar', '© '.date('Y').' Carag. جميع الحقوق محفوظة.'),
+                'website_copyright_text_en' => $get('website.copyright.text.en', '© '.date('Y').' Carag. All rights reserved.'),
 
                 // Landing Page Content
-                'landing_hero_title_ar' => Setting::get('landing.hero.title.ar', 'مرحباً بك في عصر الإدارة الذكية للورش'),
-                'landing_hero_title_en' => Setting::get('landing.hero.title.en', 'Welcome to the Era of Smart Workshop Management'),
-                'landing_hero_subtitle_ar' => Setting::get('landing.hero.subtitle.ar', 'النظام الأول المعتمد لإدارة مراكز صيانة السيارات. فحص رقمي، فواتير إلكترونية، إدارة المخزون، ونقاط البيع في منصة واحدة متكاملة.'),
-                'landing_hero_subtitle_en' => Setting::get('landing.hero.subtitle.en', 'The certified #1 system for car workshop management. Digital inspections, e-invoices, inventory, and POS in one integrated platform.'),
-                'landing_hero_cta_text_ar' => Setting::get('landing.hero.cta.text.ar', 'اشترك الآن مجاناً'),
-                'landing_hero_cta_text_en' => Setting::get('landing.hero.cta.text.en', 'Start Your Free Trial Now'),
+                'landing_hero_title_ar' => $get('landing.hero.title.ar', 'مرحباً بك في عصر الإدارة الذكية للورش'),
+                'landing_hero_title_en' => $get('landing.hero.title.en', 'Welcome to the Era of Smart Workshop Management'),
+                'landing_hero_subtitle_ar' => $get('landing.hero.subtitle.ar', 'النظام الأول المعتمد لإدارة مراكز صيانة السيارات. فحص رقمي، فواتير إلكترونية، إدارة المخزون، ونقاط البيع في منصة واحدة متكاملة.'),
+                'landing_hero_subtitle_en' => $get('landing.hero.subtitle.en', 'The certified #1 system for car workshop management. Digital inspections, e-invoices, inventory, and POS in one integrated platform.'),
+                'landing_hero_cta_text_ar' => $get('landing.hero.cta.text.ar', 'اشترك الآن مجاناً'),
+                'landing_hero_cta_text_en' => $get('landing.hero.cta.text.en', 'Start Your Free Trial Now'),
 
                 // Hero Typed Animation
-                'landing_hero_typed_enabled' => Setting::get('landing.hero.typed.enabled', '1'),
-                'landing_hero_typed_prefix_ar' => Setting::get('landing.hero.typed.prefix.ar', 'أدر'),
-                'landing_hero_typed_prefix_en' => Setting::get('landing.hero.typed.prefix.en', 'Elevate'),
-                'landing_hero_typed_suffix_ar' => Setting::get('landing.hero.typed.suffix.ar', 'بذكاء حقيقي'),
-                'landing_hero_typed_suffix_en' => Setting::get('landing.hero.typed.suffix.en', 'With Real Intelligence'),
-                'landing_hero_typed_phrases_ar' => Setting::get('landing.hero.typed.phrases.ar', 'مركزك الآن|أرباحك اليوم|فريقك معك|مستقبلك هنا'),
-                'landing_hero_typed_phrases_en' => Setting::get('landing.hero.typed.phrases.en', 'Your Workshop|Your Revenue|Your Team|Your Future'),
+                'landing_hero_typed_enabled' => $get('landing.hero.typed.enabled', '1'),
+                'landing_hero_typed_prefix_ar' => $get('landing.hero.typed.prefix.ar', 'أدر'),
+                'landing_hero_typed_prefix_en' => $get('landing.hero.typed.prefix.en', 'Elevate'),
+                'landing_hero_typed_suffix_ar' => $get('landing.hero.typed.suffix.ar', 'بذكاء حقيقي'),
+                'landing_hero_typed_suffix_en' => $get('landing.hero.typed.suffix.en', 'With Real Intelligence'),
+                'landing_hero_typed_phrases_ar' => $get('landing.hero.typed.phrases.ar', 'مركزك الآن|أرباحك اليوم|فريقك معك|مستقبلك هنا'),
+                'landing_hero_typed_phrases_en' => $get('landing.hero.typed.phrases.en', 'Your Workshop|Your Revenue|Your Team|Your Future'),
 
-                'landing_features_title_ar' => Setting::get('landing.features.title.ar', 'لماذا نظام Carag هو خيارك الأفضل؟'),
-                'landing_features_title_en' => Setting::get('landing.features.title.en', 'Why Carag is Your Best Choice?'),
-                'landing_features_subtitle_ar' => Setting::get('landing.features.subtitle.ar', 'بنينا النظام خصيصاً ليناسب احتياجات مراكز الصيانة، لنوفر لك أدوات تقنية متطورة تزيد من كفاءة العمل.'),
-                'landing_features_subtitle_en' => Setting::get('landing.features.subtitle.en', 'We built the system specifically for workshop needs, providing advanced tech tools to boost efficiency.'),
+                'landing_features_title_ar' => $get('landing.features.title.ar', 'لماذا نظام Carag هو خيارك الأفضل؟'),
+                'landing_features_title_en' => $get('landing.features.title.en', 'Why Carag is Your Best Choice?'),
+                'landing_features_subtitle_ar' => $get('landing.features.subtitle.ar', 'بنينا النظام خصيصاً ليناسب احتياجات مراكز الصيانة، لنوفر لك أدوات تقنية متطورة تزيد من كفاءة العمل.'),
+                'landing_features_subtitle_en' => $get('landing.features.subtitle.en', 'We built the system specifically for workshop needs, providing advanced tech tools to boost efficiency.'),
 
-                'landing_pricing_title_ar' => Setting::get('landing.pricing.title.ar', 'خطط وأسعار مرنة تناسب احتياجاتك'),
-                'landing_pricing_title_en' => Setting::get('landing.pricing.title.en', 'Flexible Pricing Plans'),
-                'landing_pricing_subtitle_ar' => Setting::get('landing.pricing.subtitle.ar', 'اختر الباقة التي تناسب حجم مركزك وابدأ مسار النجاح معنا'),
-                'landing_pricing_subtitle_en' => Setting::get('landing.pricing.subtitle.en', 'Choose the plan that fits your business size.'),
+                'landing_pricing_title_ar' => $get('landing.pricing.title.ar', 'خطط وأسعار مرنة تناسب احتياجاتك'),
+                'landing_pricing_title_en' => $get('landing.pricing.title.en', 'Flexible Pricing Plans'),
+                'landing_pricing_subtitle_ar' => $get('landing.pricing.subtitle.ar', 'اختر الباقة التي تناسب حجم مركزك وابدأ مسار النجاح معنا'),
+                'landing_pricing_subtitle_en' => $get('landing.pricing.subtitle.en', 'Choose the plan that fits your business size.'),
 
                 // Maintenance Mode
-                'website_maintenance_mode' => Setting::get('website.maintenance.mode', '0'),
-                'website_maintenance_title_ar' => Setting::get('website.maintenance.title.ar', 'الموقع تحت الصيانة'),
-                'website_maintenance_title_en' => Setting::get('website.maintenance.title.en', 'Site Under Maintenance'),
-                'website_maintenance_message_ar' => Setting::get('website.maintenance.message.ar', 'نعمل حالياً على تحسين تجربتكم، سنعود قريباً.'),
-                'website_maintenance_message_en' => Setting::get('website.maintenance.message.en', 'We are currently improving your experience, we will be back soon.'),
+                'website_maintenance_mode' => $get('website.maintenance.mode', '0'),
+                'website_maintenance_title_ar' => $get('website.maintenance.title.ar', 'الموقع تحت الصيانة'),
+                'website_maintenance_title_en' => $get('website.maintenance.title.en', 'Site Under Maintenance'),
+                'website_maintenance_message_ar' => $get('website.maintenance.message.ar', 'نعمل حالياً على تحسين تجربتكم، سنعود قريباً.'),
+                'website_maintenance_message_en' => $get('website.maintenance.message.en', 'We are currently improving your experience, we will be back soon.'),
 
                 // Lists stored as JSON (with rich defaults)
-                'landing_banners_list' => json_decode(Setting::get('landing.banners.list', '[]'), true) ?: [],
-                'landing_features_list' => json_decode(Setting::get('landing.features.list', '[]'), true) ?: [
+                'landing_banners_list' => $getJson('landing.banners.list', []),
+                'landing_features_list' => $getJson('landing.features.list', [
                     ['title_ar' => 'فحص فني رقمي', 'title_en' => 'Digital Inspection', 'desc_ar' => 'نماذج فحص رقمية احترافية مدعومة بالصور وإرسالها للعميل للموافقة.', 'desc_en' => 'Professional digital inspection templates with photos, sent to clients for approval.'],
                     ['title_ar' => 'إدارة شاملة للمخزون', 'title_en' => 'Comprehensive Inventory', 'desc_ar' => 'تتبع قطع الغيار، فواتير المشتريات، وتنبيهات النواقص لحظة بلحظة.', 'desc_en' => 'Track spare parts, purchase invoices, and shortage alerts instantly.'],
                     ['title_ar' => 'فواتير إلكترونية معتمدة', 'title_en' => 'Certified E-Invoices', 'desc_ar' => 'متوافق تماماً مع متطلبات هيئة الزكاة والدخل، مع دعم ضريبة القيمة المضافة.', 'desc_en' => 'Fully compliant with ZATCA requirements, with VAT support.'],
                     ['title_ar' => 'نقاط البيع السريعة', 'title_en' => 'Fast POS', 'desc_ar' => 'شاشة نقاط بيع سريعة لإصدار الفواتير الفورية بخطوات بسيطة.', 'desc_en' => 'Fast POS screen to issue instant invoices with simple steps.'],
-                ],
-                'landing_faq_list' => json_decode(Setting::get('landing.faq.list', '[]'), true) ?: [
+                ]),
+                'landing_faq_list' => $getJson('landing.faq.list', [
                     ['q_ar' => 'هل النظام معتمد من هيئة الزكاة والدخل؟', 'q_en' => 'Is the system ZATCA certified?', 'a_ar' => 'نعم، النظام معتمد بالكامل ويدعم الفوترة الإلكترونية المرحلة الأولى والثانية.', 'a_en' => 'Yes, the system is fully certified and supports e-invoicing phases 1 & 2.'],
                     ['q_ar' => 'هل يمكنني إدارة أكثر من فرع؟', 'q_en' => 'Can I manage multiple branches?', 'a_ar' => 'نعم، يدعم النظام إدارة فروع متعددة بصلاحيات منفصلة لكل فرع ومخزون مستقل.', 'a_en' => 'Yes, the system supports managing multiple branches with separate roles and inventory.'],
                     ['q_ar' => 'ماذا يحدث إذا انقطع الإنترنت؟', 'q_en' => 'What if the internet disconnects?', 'a_ar' => 'النظام سحابي ويتطلب اتصال بالإنترنت، ولكننا نستخدم خوادم مستقرة تضمن استمرار العمل.', 'a_en' => 'The system is cloud-based and requires internet, but we use stable servers to ensure uptime.'],
-                ],
-                'landing_testimonials_list' => json_decode(Setting::get('landing.testimonials.list', '[]'), true) ?: [
+                ]),
+                'landing_testimonials_list' => $getJson('landing.testimonials.list', [
                     ['name' => 'AutoCare', 'logo_url' => 'https://upload.wikimedia.org/wikipedia/commons/4/44/BMW.svg'],
                     ['name' => 'SpeedFix', 'logo_url' => 'https://upload.wikimedia.org/wikipedia/commons/a/a1/Volkswagen_Logo_till_1995.svg'],
                     ['name' => 'ProGarage', 'logo_url' => 'https://upload.wikimedia.org/wikipedia/commons/9/90/Mercedes-Logo.svg'],
                     ['name' => 'StarMotors', 'logo_url' => 'https://upload.wikimedia.org/wikipedia/commons/1/12/Suzuki_logo_2.svg'],
-                ],
-                'landing_stats_list' => json_decode(Setting::get('landing.stats.list', '[]'), true) ?: [
+                ]),
+                'landing_stats_list' => $getJson('landing.stats.list', [
                     ['value' => '+500', 'label_ar' => 'ورشة وصناعية', 'label_en' => 'Workshops'],
                     ['value' => '+1M', 'label_ar' => 'فاتورة مصدرة', 'label_en' => 'Invoices Issued'],
                     ['value' => '+100K', 'label_ar' => 'عميل مسجل', 'label_en' => 'Registered Clients'],
                     ['value' => '%99.9', 'label_ar' => 'استقرار النظام', 'label_en' => 'Uptime'],
-                ],
-                'website_custom_pages' => json_decode(Setting::get('website.custom.pages', '[]'), true),
+                ]),
+                'website_custom_pages' => $getJson('website.custom.pages', []),
 
                 // Section Toggles
-                'landing_features_enabled' => Setting::get('landing.features.enabled', '1'),
-                'landing_pricing_enabled' => Setting::get('landing.pricing.enabled', '1'),
-                'landing_stats_enabled' => Setting::get('landing.stats.enabled', '1'),
-                'landing_faq_enabled' => Setting::get('landing.faq.enabled', '1'),
-                'landing_testimonials_enabled' => Setting::get('landing.testimonials.enabled', '1'),
-                'landing_contact_enabled' => Setting::get('landing.contact.enabled', '1'),
+                'landing_features_enabled' => $get('landing.features.enabled', '1'),
+                'landing_pricing_enabled' => $get('landing.pricing.enabled', '1'),
+                'landing_stats_enabled' => $get('landing.stats.enabled', '1'),
+                'landing_faq_enabled' => $get('landing.faq.enabled', '1'),
+                'landing_testimonials_enabled' => $get('landing.testimonials.enabled', '1'),
+                'landing_contact_enabled' => $get('landing.contact.enabled', '1'),
 
                 // Legal Pages
-                'website_page_terms_ar' => Setting::get('website.page.terms.ar', ''),
-                'website_page_terms_en' => Setting::get('website.page.terms.en', ''),
-                'website_page_privacy_ar' => Setting::get('website.page.privacy.ar', ''),
-                'website_page_privacy_en' => Setting::get('website.page.privacy.en', ''),
+                'website_page_terms_ar' => $get('website.page.terms.ar', ''),
+                'website_page_terms_en' => $get('website.page.terms.en', ''),
+                'website_page_privacy_ar' => $get('website.page.privacy.ar', ''),
+                'website_page_privacy_en' => $get('website.page.privacy.en', ''),
             ],
         ]);
     }
 
-    public function update(Request $request)
+    /**
+     * Update website and landing page settings securely with allowlist enforcement.
+     */
+    public function update(WebsiteSettingsUpdateRequest $request)
     {
-        $request->validate([
-            'settings' => 'required|array',
-        ]);
+        $submitted = $request->input('settings', []);
+        $allowedLookup = array_flip(self::ALLOWED_KEYS);
 
-        // Define allowed image keys for file validation
-        $imageKeys = ['website_logo', 'website_favicon'];
+        $user = $request->user();
+        $isSuperAdmin = ($user instanceof AdminUser && $user->isSuperAdmin())
+            || ($user instanceof User && (bool) ($user->is_system_admin ?? false));
 
-        foreach ($request->settings as $key => $value) {
-            // Validate file uploads (logo, favicon)
-            if ($request->hasFile("settings.$key")) {
-                if (in_array($key, $imageKeys)) {
-                    $request->validate([
-                        "settings.$key" => 'required|image|mimes:png,jpg,jpeg,webp,svg|max:2048',
-                    ]);
-                }
-                $file = $request->file("settings.$key");
-                $path = $file->store('website', 'public');
-                $value = asset('storage/'.$path);
+        $restrictedScriptKeys = [
+            'website_scripts_header',
+            'website_scripts_footer',
+            'website_chatbot_script',
+        ];
+
+        foreach ($submitted as $key => $value) {
+            // Strictly reject / ignore any key not present in the allowlist
+            if (! isset($allowedLookup[$key])) {
+                continue;
             }
 
-            // Handle Files inside Lists (Banners, etc.)
-            if ($key === 'landing_banners_list' && is_array($value)) {
-                foreach ($value as $index => &$item) {
-                    if ($request->hasFile("settings.landing_banners_list.$index.image")) {
-                        $request->validate([
-                            "settings.landing_banners_list.$index.image" => 'required|image|mimes:png,jpg,jpeg,webp,svg|max:2048',
-                        ]);
-                        $file = $request->file("settings.landing_banners_list.$index.image");
-                        $path = $file->store('website/banners', 'public');
-                        $item['image'] = asset('storage/'.$path);
-                    }
-                }
-            }
-
-            // Validate text field lengths to prevent abuse
-            if (is_string($value) && strlen($value) > 50000) {
-                return back()->withErrors(['settings' => 'قيمة الحقل طويلة جداً']);
+            // High-risk raw script injection is restricted to super administrators
+            if (in_array($key, $restrictedScriptKeys, true) && ! $isSuperAdmin) {
+                continue;
             }
 
             // Encode arrays to JSON strings
             if (is_array($value)) {
-                $value = json_encode($value);
+                $value = json_encode($value, JSON_UNESCAPED_UNICODE);
+            } elseif ($value === null) {
+                $value = '';
             }
 
-            // Unified Key Mapping Logic
-            // Converts website_title_ar -> website.title.ar
-            // Converts landing_hero_cta_text_ar -> landing.hero.cta.text.ar
+            // Convert website_title_ar -> website.title.ar
             $dbKey = str_replace('_', '.', $key);
-
-            // Special cases where we want to keep some parts together if needed?
-            // Actually, in this system, dots are the universal separator.
-
             $group = str_starts_with($dbKey, 'landing.') ? 'landing' : 'website';
 
-            Setting::set($dbKey, $value, $group);
+            Setting::set($dbKey, (string) $value, $group);
+        }
+
+        // Invalidate settings cache
+        self::flushSettingsCache();
+
+        // Audit Trail: Log action if triggered by an AdminUser
+        if ($user instanceof AdminUser) {
+            $user->logActivity('update', 'WebsiteSettings', null, [
+                'updated_keys' => array_keys($submitted),
+                'ip' => $request->ip(),
+            ]);
         }
 
         return back()->with('success', 'تم تحديث إعدادات الموقع بنجاح');
     }
 
     /**
-     * Upload a single image (logo or favicon) and return its public URL.
+     * Upload an image (logo, favicon, or banner) and return its public URL.
      * Called via dedicated AJAX endpoint to avoid multipart/form-data issues
-     * when submitting large settings forms.
+     * and ensure strict MIME / SVG security validation.
      */
     public function uploadImage(Request $request): JsonResponse
     {
         $request->validate([
-            'key' => 'required|string|in:website_logo,website_favicon',
-            'image' => 'required|image|mimes:png,jpg,jpeg,webp,svg|max:4096',
+            'key' => 'required|string|in:website_logo,website_favicon,banner_image',
+            'image' => 'required|file|mimes:png,jpg,jpeg,webp,svg|max:4096',
         ]);
 
-        $path = $request->file('image')->store('website', 'public');
+        $file = $request->file('image');
+
+        // SVG security inspection against Stored XSS
+        $extension = strtolower($file->getClientOriginalExtension());
+        $mime = $file->getClientMimeType();
+
+        if ($extension === 'svg' || str_contains($mime, 'svg')) {
+            $content = (string) file_get_contents($file->getRealPath());
+
+            if (preg_match('/<script|onload|onerror|onclick|onmouseover|javascript:/i', $content)) {
+                return response()->json(['message' => 'ملف SVG المرفوع يحتوي على برمجيات غير آمنة'], 422);
+            }
+        }
+
+        $folder = $request->key === 'banner_image' ? 'website/banners' : 'website';
+        $path = $file->store($folder, 'public');
         $url = asset('storage/'.$path);
 
-        // Persist immediately so it survives even if the main form is not saved
-        Setting::set($request->key === 'website_logo' ? 'website.logo' : 'website.favicon', $url, 'website');
+        // Immediate persistence for logo & favicon
+        if ($request->key === 'website_logo') {
+            Setting::set('website.logo', $url, 'website');
+            self::flushSettingsCache();
+        } elseif ($request->key === 'website_favicon') {
+            Setting::set('website.favicon', $url, 'website');
+            self::flushSettingsCache();
+        }
+
+        // Audit Trail: Log image upload
+        $user = $request->user();
+
+        if ($user instanceof AdminUser) {
+            $user->logActivity('upload', 'WebsiteSettings', null, [
+                'key' => $request->key,
+                'url' => $url,
+                'ip' => $request->ip(),
+            ]);
+        }
 
         return response()->json(['url' => $url]);
     }

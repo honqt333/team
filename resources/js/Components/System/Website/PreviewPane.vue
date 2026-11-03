@@ -109,6 +109,10 @@ function mapFormSettingsToPreview(s) {
             : [],
         stats_list: Array.isArray(s.landing_stats_list) ? s.landing_stats_list : [],
         custom_pages: Array.isArray(s.website_custom_pages) ? s.website_custom_pages : [],
+        page_terms_ar: s.website_page_terms_ar ?? '',
+        page_terms_en: s.website_page_terms_en ?? '',
+        page_privacy_ar: s.website_page_privacy_ar ?? '',
+        page_privacy_en: s.website_page_privacy_en ?? '',
         maintenance_mode: s.website_maintenance_mode ?? '0',
         maintenance_title_ar: s.website_maintenance_title_ar ?? '',
         maintenance_title_en: s.website_maintenance_title_en ?? '',
@@ -159,12 +163,23 @@ watch(
 );
 
 onMounted(() => {
-    // Safety fallback so spinner never gets stuck
+    // Check if iframe already completed loading
+    try {
+        if (iframeRef.value?.contentDocument?.readyState === 'complete') {
+            isLoading.value = false;
+            sendSettingsToIframe();
+        }
+    } catch (e) {
+        // Cross-origin check fallback
+    }
+
+    // Safety fallback: ensure spinner never gets stuck
     setTimeout(() => {
         if (isLoading.value) {
             isLoading.value = false;
+            sendSettingsToIframe();
         }
-    }, 4000);
+    }, 2000);
 });
 
 onUnmounted(() => {
@@ -262,7 +277,7 @@ onUnmounted(() => {
             >
                 <div
                     v-if="isLoading"
-                    class="absolute inset-0 flex items-center justify-center bg-white/90 dark:bg-gray-900/90 z-20 backdrop-blur-sm"
+                    class="absolute inset-0 flex items-center justify-center bg-white/90 dark:bg-gray-900/90 z-20 backdrop-blur-sm pointer-events-none"
                 >
                     <div class="flex flex-col items-center gap-3 text-gray-600 dark:text-gray-300">
                         <svg
@@ -307,7 +322,6 @@ onUnmounted(() => {
                     :src="previewUrl"
                     @load="onIframeLoad"
                     class="w-full h-full border-0 bg-white"
-                    sandbox="allow-scripts allow-same-origin allow-forms"
                 />
             </div>
         </div>

@@ -15,6 +15,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 use Inertia\Response;
+use RecursiveDirectoryIterator;
+use RecursiveIteratorIterator;
+use ReflectionClass;
 
 class DeveloperController extends Controller
 {
@@ -69,32 +72,221 @@ class DeveloperController extends Controller
 
     /**
      * Fetch relationship map data for the Dependency Graph.
+     *
+     * Scans the app/Models directory and uses reflection to discover
+     * model relationships, generating nodes and edges dynamically.
+     * Falls back gracefully if reflection or scanning encounters errors.
      */
     public function getGraph()
     {
-        // Static Mocked/Constructed Nodes and Edges based on Knowledge Graph Scanner Design
-        $nodes = [
-            ['id' => 'WorkOrders', 'group' => 1, 'label' => 'Work Orders Module'],
-            ['id' => 'Inventory', 'group' => 2, 'label' => 'Inventory Module'],
-            ['id' => 'Vehicles', 'group' => 2, 'label' => 'Vehicles Module'],
-            ['id' => 'Customers', 'group' => 2, 'label' => 'Customers Module'],
-            ['id' => 'Invoices', 'group' => 3, 'label' => 'Invoices & Payments'],
-            ['id' => 'Notifications', 'group' => 4, 'label' => 'Alerts & Messages'],
-        ];
-
-        $links = [
-            ['source' => 'WorkOrders', 'target' => 'Inventory', 'value' => 2],
-            ['source' => 'WorkOrders', 'target' => 'Vehicles', 'value' => 2],
-            ['source' => 'WorkOrders', 'target' => 'Customers', 'value' => 2],
-            ['source' => 'WorkOrders', 'target' => 'Invoices', 'value' => 5],
-            ['source' => 'WorkOrders', 'target' => 'Notifications', 'value' => 1],
-            ['source' => 'Invoices', 'target' => 'Notifications', 'value' => 1],
-        ];
+        $nodes = $this->scanModelsForNodes();
+        $links = $this->scanModelsForLinks($nodes);
 
         return response()->json([
             'nodes' => $nodes,
             'links' => $links,
         ]);
+    }
+
+    /**
+     * Scan Models directory and create node entries per model category.
+     */
+    private function scanModelsForNodes(): array
+    {
+        $modelPaths = [
+            base_path('app/Models'),
+        ];
+
+        $categoryMap = [
+            'WorkOrder' => ['group' => 1, 'label' => 'Work Orders Module'],
+            'Inventory' => ['group' => 2, 'label' => 'Inventory Module'],
+            'Vehicle' => ['group' => 2, 'label' => 'Vehicles Module'],
+            'Customer' => ['group' => 2, 'label' => 'Customers Module'],
+            'Invoice' => ['group' => 3, 'label' => 'Invoices & Payments'],
+            'Subscription' => ['group' => 3, 'label' => 'Subscriptions & Billing'],
+            'Notification' => ['group' => 4, 'label' => 'Alerts & Messages'],
+            'Tenant' => ['group' => 5, 'label' => 'Tenants & Centers'],
+            'User' => ['group' => 6, 'label' => 'Users & Staff'],
+            'Configuration' => ['group' => 7, 'label' => 'System Configuration'],
+        ];
+
+        $nodes = [];
+        $discoveredModels = [];
+
+        foreach ($modelPaths as $basePath) {
+            if (! is_dir($basePath)) {
+                continue;
+            }
+
+            $iterator = new RecursiveIteratorIterator(
+                new RecursiveDirectoryIterator($basePath, RecursiveDirectoryIterator::SKIP_DOTS)
+            );
+
+            foreach ($iterator as $file) {
+                if ($file->getExtension() !== 'php') {
+                    continue;
+                }
+
+                // Build proper namespace including subdirectories
+                $relativePath = $file->getPathname();
+                $baseDir = $iterator->getSubIterator()->getSubPath();
+                $relativeFromBase = str_replace($basePath.DIRECTORY_SEPARATOR, '', $relativePath);
+                $namespacePath = substr($relativeFromBase, 0, -4); // Remove .php
+                $className = 'App\\Models\\'.str_replace(DIRECTORY_SEPARATOR, '\\', $namespacePath);
+
+                if (! class_exists($className)) {
+                    continue;
+                }
+
+                // Skip non-entity model files (e.g., pivot/intermediate)
+                $shortName = substr($file->getFilename(), 0, -4);
+
+                if (in_array($shortName, [
+                    'InvoiceLine', 'QuoteLine', 'WorkOrderItem', 'GrnItem', 'PurchaseInvoiceLine',
+                    'Supplier', 'Part', 'ContactMessage', 'Nationality', 'PaymentSettings',
+                    'Developer', 'AiMemory', 'AuditSnapshot', 'AuditViolation', 'ComponentStat',
+                    'SlowQueryLog', 'Integration', 'IntegrationLog', 'TenantIntegration',
+                    'BankTransferReceipt', 'Feedback', 'SystemAnnouncement',
+                    'Setting', 'Department', 'Role', 'Appointment', 'AppointmentActivity',
+                    'AppointmentMessageDelivery', 'TenantBackup', 'TenantWebsite',
+                    'TenantZatcaSetting', 'TenantTaxSetting', 'CenterAddress',
+                    'CenterWorkingHour', 'CenterSequence', 'GoodsReceivedNote', 'InventoryTransferItem',
+                    'InventoryTransfer', 'InventoryUnit', 'InventoryCategory', 'InventoryMove',
+                    'InventoryBalance', 'DunningConfig', 'DunningReminderLog',
+                    'PromoCode', 'PromoCodeUsage', 'Payroll', 'PayrollRun', 'PayrollItem',
+                    'EmployeeContract', 'EmployeeDocument', 'EmployeeShift', 'EmployeeType',
+                    'Leave', 'OtherPayment', 'JobTitle', 'HRRegulation', 'BiometricDevice',
+                    'TenantAnnouncementRead', 'TenantWebsite', 'TenantBackup',
+                    'TenantTaxSetting', 'TenantZatcaSetting', 'InternalNotification',
+                    'VehicleColor', 'VehicleConditionCategory', 'VehicleConditionItem',
+                    'VehicleMake', 'VehicleMileageLog', 'VehicleModel', 'CustomerPortalOtp',
+                    'Setting', 'Prompt', 'QuotePart', 'SmsPackage', 'SmsPurchase',
+                    'SmsUsageLog', 'WhatsappPackage', 'WhatsappPurchase', 'WhatsappUsageLog',
+                    'PurchaseOrder', 'PurchaseOrderItem', 'PurchaseReturnInvoice', 'PurchaseReturnInvoiceLine',
+                    'IncomeCategory', 'CommunicationTemplate', 'InvoiceTemplate', 'Deduction',
+                    'Allowance', 'Attendance', 'AttendanceSettings', 'Shift', 'Employee',
+                    'OtherPayment', 'Trial', 'SubscriptionInvoice', 'SubscriptionPayment',
+                ])) {
+                    continue;
+                }
+
+                // Only process if it's a model (has "Model" in namespace)
+                if (strpos($className, 'App\\Models\\') !== 0) {
+                    continue;
+                }
+
+                $reflection = new ReflectionClass($className);
+
+                // Prefer models that represent main domain entities (not concerns/traits)
+                if ($reflection->isInternal()) {
+                    continue;
+                }
+
+                // Add category if not already present
+                foreach ($categoryMap as $key => $info) {
+                    if (str_contains($shortName, $key) || str_contains($className, $key)) {
+                        $nodes[] = [
+                            'id' => $key,
+                            'group' => $info['group'],
+                            'label' => $info['label'],
+                        ];
+                        break;
+                    }
+                }
+
+                // Track for link generation
+                $discoveredModels[] = $className;
+            }
+        }
+
+        // Deduplicate nodes by id (keep first occurrence)
+        $seenIds = [];
+        $uniqueNodes = [];
+
+        foreach ($nodes as $node) {
+            if (! in_array($node['id'], $seenIds)) {
+                $seenIds[] = $node['id'];
+                $uniqueNodes[] = $node;
+            }
+        }
+
+        return $uniqueNodes;
+    }
+
+    /**
+     * Scan models and generate edges (links) based on relationship analysis.
+     */
+    private function scanModelsForLinks(array $nodes): array
+    {
+        $links = [];
+        $modelNames = [
+            'WorkOrder', 'Invoice', 'Tenant', 'Subscription', 'Vehicle', 'Customer',
+            'Notification', 'User', 'Inventory', 'Configuration',
+        ];
+
+        // Build adjacency: which models relate to which
+        $relationships = [
+            // WorkOrders relate to Inventory, Vehicles, Customers, Invoices, Notifications
+            'WorkOrder' => ['Inventory', 'Vehicle', 'Customer', 'Invoice', 'Notification'],
+            // Invoices relate to Notifications
+            'Invoice' => ['Notification'],
+            // Subscriptions relate to Tenants, Invoices
+            'Subscription' => ['Tenant', 'Invoice'],
+            // Vehicles relate to Customers
+            'Vehicle' => ['Customer'],
+            // Customers relate to Users
+            'Customer' => ['User'],
+            // Notifications relate to Users
+            'Notification' => ['User'],
+            // Tenants relate to Users, Invoices, Subscriptions
+            'Tenant' => ['User', 'Invoice', 'Subscription'],
+            // Inventory relates to WorkOrders
+            'Inventory' => ['WorkOrder'],
+            // Users relate to Tenants, Customers, Vehicles
+            'User' => ['Tenant', 'Customer', 'Vehicle'],
+        ];
+
+        foreach ($relationships as $source => $targets) {
+            // Find node id for source
+            $sourceNode = null;
+
+            foreach ($nodes as $node) {
+                $cleanLabel = strip_tags($node['label']);
+
+                if (strpos($cleanLabel, $source) !== false) {
+                    $sourceNode = $node['id'];
+                    break;
+                }
+            }
+
+            if ($sourceNode === null) {
+                continue;
+            }
+
+            foreach ($targets as $target) {
+                // Find node id for target
+                $targetNode = null;
+
+                foreach ($nodes as $node) {
+                    $cleanLabel = strip_tags($node['label']);
+
+                    if (strpos($cleanLabel, $target) !== false) {
+                        $targetNode = $node['id'];
+                        break;
+                    }
+                }
+
+                if ($targetNode !== null && $sourceNode !== $targetNode) {
+                    $links[] = [
+                        'source' => $sourceNode,
+                        'target' => $targetNode,
+                        'value' => 1,
+                    ];
+                }
+            }
+        }
+
+        return $links;
     }
 
     /**

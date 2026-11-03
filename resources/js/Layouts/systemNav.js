@@ -181,6 +181,11 @@ export const systemNavGroups = [
         requiresSuperAdmin: true,
         items: [
             {
+                href: '/system/activity-log',
+                label: 'activity_log',
+                icon: 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z',
+            },
+            {
                 href: '/system/backups',
                 label: 'backups',
                 icon: 'M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4',

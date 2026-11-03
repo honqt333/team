@@ -154,6 +154,7 @@ Route::get('/', [PublicLandingController::class, 'preview'])->name('home');
 
 Route::get('/landing-preview', [PublicLandingController::class, 'preview'])->name('public.landing.preview');
 Route::post('/landing-preview/contact', [PublicLandingController::class, 'submitContact'])->middleware('throttle:public-landing')->name('public.landing.contact');
+Route::get('/page/{slug}', [PublicLandingController::class, 'showCustomPage'])->name('public.custom_page');
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Tenant Public Sites (Phase 6)
@@ -343,12 +344,15 @@ Route::middleware(['auth', 'verified', EnsureTenantActive::class, EnsureTwoFacto
     // Employee Portal (Self-Service) - requires 'employee' role
     Route::prefix('my')->middleware('role:employee')->group(function () {
         Route::get('/', [EmployeePortalController::class, 'dashboard'])->name('employee.dashboard');
+        Route::get('/tasks', [EmployeePortalController::class, 'tasks'])->name('employee.tasks');
         Route::get('/profile', [EmployeePortalController::class, 'profile'])->name('employee.profile');
         Route::get('/attendance', [EmployeePortalController::class, 'attendance'])->name('employee.attendance');
         Route::get('/leaves', [EmployeePortalController::class, 'leaves'])->name('employee.leaves');
         Route::post('/leaves', [EmployeePortalController::class, 'requestLeave'])->name('employee.leaves.request');
         Route::get('/payslips', [EmployeePortalController::class, 'payslips'])->name('employee.payslips');
         Route::get('/payslips/{payslip}', [EmployeePortalController::class, 'showPayslip'])->name('employee.payslips.show');
+        Route::post('/work-orders/{workOrder}/items/{item}/status', [EmployeePortalController::class, 'updateItemStatus'])->name('employee.work-orders.items.update-status');
+        Route::post('/work-orders/{workOrder}/items/{item}/complete', [EmployeePortalController::class, 'completeItem'])->name('employee.work-orders.items.complete');
     });
 });
 
@@ -1266,8 +1270,8 @@ Route::prefix('system')->middleware(['auth:web,admin', 'system.admin'])->group(f
 
     // Website Settings
     Route::get('/settings/website', [WebsiteSettingsController::class, 'index'])->name('system.settings.website');
-    Route::put('/settings/website', [WebsiteSettingsController::class, 'update'])->name('system.settings.website.update');
-    Route::post('/settings/website/upload-image', [WebsiteSettingsController::class, 'uploadImage'])->name('system.settings.website.upload-image');
+    Route::put('/settings/website', [WebsiteSettingsController::class, 'update'])->name('system.settings.website.update')->middleware('throttle:60,1');
+    Route::post('/settings/website/upload-image', [WebsiteSettingsController::class, 'uploadImage'])->name('system.settings.website.upload-image')->middleware('throttle:30,1');
 
     // Help & Knowledge Base Settings
     Route::get('/settings/help', [HelpSettingsController::class, 'index'])->name('system.settings.help');

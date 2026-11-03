@@ -48,11 +48,11 @@
                     <div class="flex items-start justify-between mb-4">
                         <div>
                             <h3 class="font-bold text-gray-900 dark:text-white">
-                                {{ payslip.payroll_run?.name }}
+                                {{ formatPeriodLabel(payslip.payroll_run) }}
                             </h3>
                             <p class="text-sm text-gray-500 dark:text-gray-400">
-                                {{ payslip.payroll_run?.period_start }} -
-                                {{ payslip.payroll_run?.period_end }}
+                                {{ formatDate(payslip.payroll_run?.period_start) }} -
+                                {{ formatDate(payslip.payroll_run?.period_end) }}
                             </p>
                         </div>
                         <span
@@ -179,5 +179,21 @@ function formatCurrency(amount) {
     return new Intl.NumberFormat('ar-SA-u-nu-latn', { style: 'currency', currency: 'SAR' }).format(
         amount || 0
     );
+}
+
+function formatDate(dateString) {
+    if (!dateString) return '';
+    return new Date(dateString).toLocaleDateString('ar-SA', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+    });
+}
+
+function formatPeriodLabel(payrollRun) {
+    if (!payrollRun?.period_start || !payrollRun?.period_end) return '';
+    const start = new Date(payrollRun.period_start);
+    const end = new Date(payrollRun.period_end);
+    return start.toLocaleDateString('ar-SA', { month: 'long', year: 'numeric' });
 }
 </script>

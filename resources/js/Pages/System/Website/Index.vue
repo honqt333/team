@@ -1,9 +1,10 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useForm } from '@inertiajs/vue3';
 import SystemLayout from '@/Layouts/SystemLayout.vue';
 import { useToast } from '@/Composables/useToast';
+import PreviewPane from '@/Components/System/Website/PreviewPane.vue';
 import GeneralTab from './Tabs/GeneralTab.vue';
 import ListsTab from './Tabs/ListsTab.vue';
 import LandingTab from './Tabs/LandingTab.vue';
@@ -15,8 +16,11 @@ import SeoSocialTab from './Tabs/SeoSocialTab.vue';
 const { t } = useI18n();
 
 const props = defineProps({ settings: Object });
-const { success } = useToast();
+const { success, error } = useToast();
 const activeTab = ref('general');
+const showPreview = ref(window.innerWidth >= 1024);
+const saveStatus = ref('idle'); // 'idle', 'saving', 'saved', 'error'
+const hasChanges = ref(false);
 
 // Each tab has an id (data attribute), a translation key, and an icon
 // path. The icon path stays as a static SVG path; only the label
@@ -98,7 +102,7 @@ const removeItem = (listKey, index) => {
     form.settings[listKey].splice(index, 1);
 };
 
-// Upload an image (logo or favicon) via dedicated endpoint, returns the URL
+// Upload an image (logo, favicon, or banner) via dedicated endpoint, returns the URL
 async function uploadImage(key, file) {
     const fd = new FormData();
     fd.append('key', key);
@@ -107,12 +111,14 @@ async function uploadImage(key, file) {
         method: 'POST',
         headers: {
             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
-            'X-Inertia': 'true',
-            'X-Inertia-Version': document.querySelector('meta[name="inertia"]')?.content || '',
+            Accept: 'application/json',
         },
         body: fd,
     });
-    if (!res.ok) throw new Error('Upload failed');
+    if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.message || 'Upload failed');
+    }
     const json = await res.json();
     return json.url;
 }
@@ -121,22 +127,48 @@ const submit = async () => {
     // 1. Upload any pending file fields first, replace with URLs
     const imageKeys = ['website_logo', 'website_favicon'];
     for (const key of imageKeys) {
-        if (form.settings[key] instanceof File) {
+        if (typeof window !== 'undefined' && form.settings[key] instanceof window.File) {
             try {
                 form.settings[key] = await uploadImage(key, form.settings[key]);
             } catch (e) {
                 console.error('Image upload failed', e);
+                error(t('system.website.upload_error'));
                 return;
             }
         }
     }
 
     // 2. Submit the rest as regular JSON via PUT
+    saveStatus.value = 'saving';
     form.put(route('system.settings.website.update'), {
         preserveScroll: true,
-        onSuccess: () => success(t('system.website.saved')),
+        onSuccess: () => {
+            saveStatus.value = 'saved';
+            hasChanges.value = false;
+            success(t('system.website.saved'));
+            setTimeout(() => {
+                saveStatus.value = 'idle';
+            }, 3000);
+        },
+        onError: () => {
+            saveStatus.value = 'error';
+            error(t('system.website.save_error'));
+        },
     });
 };
+
+const togglePreview = () => {
+    showPreview.value = !showPreview.value;
+};
+
+// Watch for unsaved changes
+watch(
+    () => form.settings,
+    () => {
+        hasChanges.value = true;
+    },
+    { deep: true }
+);
 </script>
 
 <template>
@@ -156,9 +188,122 @@ const submit = async () => {
                         {{ t('system.website.header_subtitle') }}
                     </p>
                 </div>
-                <div class="mt-4 flex md:mt-0 gap-3">
+                <div class="mt-4 flex md:mt-0 gap-3 items-center">
+                    <!-- Save Status Indicator -->
+                    <div
+                        v-if="saveStatus !== 'idle'"
+                        class="flex items-center gap-2 px-3 py-1.5 rounded-md text-sm"
+                    >
+                        <svg
+                            v-if="saveStatus === 'saving'"
+                            class="animate-spin h-4 w-4 text-indigo-600"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                        >
+                            <circle
+                                class="opacity-25"
+                                cx="12"
+                                cy="12"
+                                r="10"
+                                stroke="currentColor"
+                                stroke-width="4"
+                            />
+                            <path
+                                class="opacity-75"
+                                fill="currentColor"
+                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                            />
+                        </svg>
+                        <svg
+                            v-else-if="saveStatus === 'saved'"
+                            class="h-4 w-4 text-green-600"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M5 13l4 4L19 7"
+                            />
+                        </svg>
+                        <svg
+                            v-else
+                            class="h-4 w-4 text-red-600"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M6 18L18 6M6 6l12 12"
+                            />
+                        </svg>
+                        <span
+                            :class="{
+                                'text-indigo-600 dark:text-indigo-400': saveStatus === 'saving',
+                                'text-green-600 dark:text-green-400': saveStatus === 'saved',
+                                'text-red-600 dark:text-red-400': saveStatus === 'error',
+                            }"
+                        >
+                            {{
+                                saveStatus === 'saving'
+                                    ? t('system.website.saving')
+                                    : saveStatus === 'saved'
+                                      ? t('system.website.saved')
+                                      : t('system.website.save_error')
+                            }}
+                        </span>
+                    </div>
+
+                    <!-- Unsaved Changes Indicator -->
+                    <div
+                        v-if="hasChanges && saveStatus === 'idle'"
+                        class="flex items-center gap-2 px-3 py-1.5 bg-yellow-50 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300 rounded-md text-sm"
+                    >
+                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                            />
+                        </svg>
+                        {{ t('system.website.unsaved_changes') }}
+                    </div>
+
+                    <button
+                        @click="togglePreview"
+                        class="btn-outline inline-flex items-center"
+                        :class="showPreview ? 'bg-indigo-50 dark:bg-indigo-900/30' : ''"
+                    >
+                        <svg
+                            class="w-4 h-4 ml-2 -mr-1"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                            />
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                            />
+                        </svg>
+                        {{ t('system.website.preview_toggle') }}
+                    </button>
+
                     <a
-                        :href="route('public.landing.preview')"
+                        :href="route('public.landing.preview', { preview: 1 })"
                         target="_blank"
                         class="btn-outline inline-flex items-center"
                     >
@@ -261,62 +406,79 @@ const submit = async () => {
                     </nav>
                 </div>
 
-                <!-- Content -->
-                <div
-                    class="flex-1 p-6 md:p-10 lg:p-12 overflow-y-auto max-h-[75vh] custom-scrollbar bg-white dark:bg-gray-800"
-                >
-                    <div class="max-w-4xl mx-auto space-y-12 animate-fade-in pb-12">
-                        <GeneralTab v-if="activeTab === 'general'" :form="form" />
+                <!-- Main Content Area -->
+                <div class="flex-1 flex flex-col md:flex-row">
+                    <!-- Form Content -->
+                    <div
+                        class="flex-1 p-6 md:p-10 lg:p-12 overflow-y-auto max-h-[75vh] custom-scrollbar bg-white dark:bg-gray-800"
+                    >
+                        <div class="max-w-4xl mx-auto space-y-12 animate-fade-in pb-12">
+                            <GeneralTab
+                                v-if="activeTab === 'general'"
+                                :form="form"
+                                :uploadImage="uploadImage"
+                            />
 
-                        <ListsTab
-                            v-if="activeTab === 'menus' || activeTab === 'banners'"
-                            :form="form"
-                            :addItem="addItem"
-                            :removeItem="removeItem"
-                            :tab="activeTab"
-                        />
+                            <ListsTab
+                                v-if="activeTab === 'menus' || activeTab === 'banners'"
+                                :form="form"
+                                :addItem="addItem"
+                                :removeItem="removeItem"
+                                :tab="activeTab"
+                                :uploadImage="uploadImage"
+                            />
 
-                        <LandingTab
-                            v-if="
-                                activeTab === 'landing' ||
-                                activeTab === 'features' ||
-                                activeTab === 'pricing' ||
-                                activeTab === 'stats' ||
-                                activeTab === 'testimonials' ||
-                                activeTab === 'faq' ||
-                                activeTab === 'contact'
-                            "
-                            :form="form"
-                            :addItem="addItem"
-                            :removeItem="removeItem"
-                            :tab="activeTab"
-                        />
+                            <LandingTab
+                                v-if="
+                                    activeTab === 'landing' ||
+                                    activeTab === 'features' ||
+                                    activeTab === 'pricing' ||
+                                    activeTab === 'stats' ||
+                                    activeTab === 'testimonials' ||
+                                    activeTab === 'faq' ||
+                                    activeTab === 'contact'
+                                "
+                                :form="form"
+                                :addItem="addItem"
+                                :removeItem="removeItem"
+                                :tab="activeTab"
+                            />
 
-                        <PagesTab
-                            v-if="activeTab === 'pages'"
-                            :form="form"
-                            :addItem="addItem"
-                            :removeItem="removeItem"
-                        />
+                            <PagesTab
+                                v-if="activeTab === 'pages'"
+                                :form="form"
+                                :addItem="addItem"
+                                :removeItem="removeItem"
+                            />
 
-                        <AdvancedTab
-                            v-if="
-                                activeTab === 'maintenance' ||
-                                activeTab === 'footer' ||
-                                activeTab === 'announcement'
-                            "
-                            :form="form"
-                            :tab="activeTab"
-                        />
+                            <AdvancedTab
+                                v-if="
+                                    activeTab === 'maintenance' ||
+                                    activeTab === 'footer' ||
+                                    activeTab === 'announcement'
+                                "
+                                :form="form"
+                                :tab="activeTab"
+                            />
 
-                        <IntegrationsTab v-if="activeTab === 'integrations'" :form="form" />
+                            <IntegrationsTab v-if="activeTab === 'integrations'" :form="form" />
 
-                        <SeoSocialTab
-                            v-if="activeTab === 'seo_social'"
-                            :form="form"
-                            :addItem="addItem"
-                            :removeItem="removeItem"
-                        />
+                            <SeoSocialTab
+                                v-if="activeTab === 'seo_social'"
+                                :form="form"
+                                :addItem="addItem"
+                                :removeItem="removeItem"
+                            />
+                        </div>
+                    </div>
+
+                    <!-- Live Preview Pane (Responsive) -->
+                    <div
+                        v-if="showPreview"
+                        class="flex-1 min-w-0 border-t md:border-t-0 md:border-l border-gray-200 dark:border-gray-700"
+                        style="height: 75vh"
+                    >
+                        <PreviewPane :settings="form.settings" />
                     </div>
                 </div>
             </div>

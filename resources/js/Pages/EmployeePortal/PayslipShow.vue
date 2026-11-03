@@ -29,7 +29,7 @@
                                 {{ $t('hr.payroll.payslip_details') }}
                             </h1>
                             <p class="text-sm text-gray-500 dark:text-gray-400">
-                                {{ payslip?.payroll_run?.name }}
+                                {{ formatPeriodLabel(payslip?.payroll_run) }}
                             </p>
                         </div>
                     </div>
@@ -57,8 +57,8 @@
             >
                 <span class="text-gray-600 dark:text-gray-300">{{ $t('hr.payroll.period') }}:</span>
                 <span class="font-bold text-gray-900 dark:text-white" dir="ltr">
-                    {{ payslip?.payroll_run?.period_start }} —
-                    {{ payslip?.payroll_run?.period_end }}
+                    {{ formatDate(payslip?.payroll_run?.period_start) }} —
+                    {{ formatDate(payslip?.payroll_run?.period_end) }}
                 </span>
             </div>
 
@@ -223,6 +223,22 @@ function formatCurrency(value) {
         currency: 'SAR',
         minimumFractionDigits: 2,
     }).format(Number(value) || 0);
+}
+
+function formatDate(dateString) {
+    if (!dateString) return '';
+    return new Date(dateString).toLocaleDateString('en-SA', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+    });
+}
+
+function formatPeriodLabel(payrollRun) {
+    if (!payrollRun?.period_start || !payrollRun?.period_end) return '';
+    const start = new Date(payrollRun.period_start);
+    const end = new Date(payrollRun.period_end);
+    return start.toLocaleDateString('en-SA', { month: 'long', year: 'numeric' });
 }
 
 function print() {

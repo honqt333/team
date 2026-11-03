@@ -358,7 +358,7 @@ class PayrollController extends Controller
         $this->authorize('view', $employee);
 
         $payrollItems = $employee->payrollItems()
-            ->with(['payrollRun', 'createdBy:id,name'])
+            ->with(['payrollRun:id,period_start,period_end,status', 'createdBy:id,name'])
             ->orderByDesc('created_at')
             ->paginate(12);
 

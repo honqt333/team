@@ -9,6 +9,8 @@ use App\Models\HR\Attendance;
 use App\Models\HR\Employee;
 use App\Models\HR\Leave;
 use App\Models\HR\PayrollItem;
+use App\Models\WorkOrder;
+use App\Models\WorkOrderItem;
 use App\Support\TenancyContext;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -70,7 +72,7 @@ class EmployeePortalController extends Controller
 
         // Recent payslips
         $recentPayslips = PayrollItem::where('employee_id', $employee->id)
-            ->with('payrollRun:id,name,period_start,period_end')
+            ->with('payrollRun:id,period_start,period_end')
             ->orderByDesc('created_at')
             ->take(3)
             ->get();
@@ -234,7 +236,7 @@ class EmployeePortalController extends Controller
         $employee = $this->getEmployee();
 
         $payslips = PayrollItem::where('employee_id', $employee->id)
-            ->with(['payrollRun:id,name,period_start,period_end,status'])
+            ->with(['payrollRun:id,period_start,period_end,status'])
             ->orderByDesc('created_at')
             ->paginate(12);
 
@@ -258,10 +260,132 @@ class EmployeePortalController extends Controller
             abort(403);
         }
 
-        $payslip->load(['payrollRun', 'employee.jobTitle', 'employee.department']);
+        $payslip->load(['payrollRun:id,period_start,period_end,status', 'employee.jobTitle', 'employee.department']);
 
         return Inertia::render('EmployeePortal/PayslipShow', [
             'payslip' => $payslip,
         ]);
+    }
+
+    /**
+     * Technician's assigned work orders (My Tasks)
+     */
+    public function tasks(Request $request)
+    {
+        $this->authorize('viewOwn', Employee::class);
+
+        $employee = $this->getEmployee();
+
+        $status = $request->get('status', 'open');
+
+        // Get work orders with items assigned to this employee
+        $workOrders = WorkOrder::query()
+            ->where('center_id', $employee->center_id)
+            ->whereHas('items', function ($query) use ($employee) {
+                $query->whereHas('technicians', function ($q) use ($employee) {
+                    $q->where('users.id', $employee->id);
+                });
+            })
+            ->with([
+                'vehicle.customer',
+                'items' => fn ($q) => $q
+                    ->whereHas('technicians', function ($query) use ($employee) {
+                        $query->where('users.id', $employee->id);
+                    })
+                    ->with(['parts', 'media', 'technicians:id,name']),
+            ])
+            ->when($status !== 'all', function ($query) use ($status) {
+                $query->where('status', $status);
+            })
+            ->orderByDesc('created_at')
+            ->paginate(15);
+
+        return Inertia::render('EmployeePortal/MyTasks', [
+            'workOrders' => $workOrders,
+            'statusFilter' => $status,
+            'employee' => $employee->only(['id', 'name_ar']),
+        ]);
+    }
+
+    /**
+     * Update work order item status (Technician)
+     */
+    public function updateItemStatus(Request $request, WorkOrder $workOrder, WorkOrderItem $item)
+    {
+        $this->authorize('update', $item);
+
+        $validated = $request->validate([
+            'status' => 'required|in:'.implode(',', WorkOrderItem::STATUSES),
+            'notes' => 'nullable|string|max:500',
+        ]);
+
+        $newStatus = $validated['status'];
+
+        if (! $item->canChangeStatusTo($newStatus)) {
+            $message = __('messages.cannot_change_item_status');
+
+            return $request->expectsJson()
+                ? response()->json(['error' => $message], 422)
+                : redirect()->back()->with('error', $message);
+        }
+
+        $item->update(['status' => $newStatus]);
+
+        $workOrder->logActivity(
+            'item_status_updated',
+            __('work_orders.activities.actions.item_status_updated', [
+                'title' => $item->title,
+                'status' => __('work_orders.item_status.'.$newStatus),
+            ])
+        );
+
+        $message = __('messages.item_status_updated');
+
+        return $request->expectsJson()
+            ? response()->json(['success' => $message, 'item' => $item->fresh()])
+            : redirect()->back()->with('success', $message);
+    }
+
+    /**
+     * Mark work order item as completed (Technician)
+     */
+    public function completeItem(Request $request, WorkOrder $workOrder, WorkOrderItem $item)
+    {
+        $this->authorize('update', $item);
+
+        $validated = $request->validate([
+            'confirm' => 'required|string',
+        ]);
+
+        if ($validated['confirm'] !== 'complete') {
+            return $request->expectsJson()
+                ? response()->json(['error' => __('messages.action_not_confirmed')], 422)
+                : redirect()->back()->with('error', __('messages.action_not_confirmed'));
+        }
+
+        $item->update([
+            'status' => WorkOrderItem::STATUS_COMPLETED,
+            'completed_at' => now(),
+        ]);
+
+        // If all items are completed, auto-advance the work order
+        if ($workOrder->allItemsCompleted()) {
+            if (in_array($workOrder->status, [WorkOrder::STATUS_OPEN, WorkOrder::STATUS_IN_PROGRESS])) {
+                $workOrder->update(['status' => WorkOrder::STATUS_READY_FOR_QC]);
+            }
+        }
+
+        $workOrder->logActivity(
+            'item_completed',
+            __('work_orders.activities.actions.item_completed', [
+                'title' => $item->title,
+            ])
+        );
+
+        $message = __('messages.item_completed');
+
+        return $request->expectsJson()
+            ? response()->json(['success' => $message, 'item' => $item->fresh()])
+            : redirect()->back()->with('success', $message);
     }
 }

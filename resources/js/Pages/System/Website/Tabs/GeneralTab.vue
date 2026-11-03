@@ -1,10 +1,48 @@
 <script setup>
 import { ref } from 'vue';
 
-defineProps({ form: Object });
+const props = defineProps({ form: Object, uploadImage: Function });
 
 const logoInput = ref(null);
 const faviconInput = ref(null);
+const uploadingLogo = ref(false);
+const uploadingFavicon = ref(false);
+
+async function onLogoChange(e) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (props.uploadImage) {
+        uploadingLogo.value = true;
+        try {
+            const url = await props.uploadImage('website_logo', file);
+            props.form.settings.website_logo = url;
+        } catch (err) {
+            console.error('Logo upload failed', err);
+        } finally {
+            uploadingLogo.value = false;
+        }
+    } else {
+        props.form.settings.website_logo = file;
+    }
+}
+
+async function onFaviconChange(e) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (props.uploadImage) {
+        uploadingFavicon.value = true;
+        try {
+            const url = await props.uploadImage('website_favicon', file);
+            props.form.settings.website_favicon = url;
+        } catch (err) {
+            console.error('Favicon upload failed', err);
+        } finally {
+            uploadingFavicon.value = false;
+        }
+    } else {
+        props.form.settings.website_favicon = file;
+    }
+}
 </script>
 
 <template>
@@ -48,7 +86,7 @@ const faviconInput = ref(null);
                     <div class="space-y-3 flex-1 w-full">
                         <input
                             type="file"
-                            @input="form.settings.website_logo = $event.target.files[0]"
+                            @change="onLogoChange"
                             class="hidden"
                             ref="logoInput"
                             accept="image/*"
@@ -56,9 +94,14 @@ const faviconInput = ref(null);
                         <button
                             @click="logoInput.click()"
                             type="button"
-                            class="inline-flex items-center px-3 py-2 border border-gray-300 dark:border-gray-600 shadow-sm text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                            :disabled="uploadingLogo"
+                            class="inline-flex items-center px-3 py-2 border border-gray-300 dark:border-gray-600 shadow-sm text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors disabled:opacity-50"
                         >
-                            {{ $t('tenant_site.general.browse_files') }}
+                            {{
+                                uploadingLogo
+                                    ? $t('system.website.uploading')
+                                    : $t('tenant_site.general.browse_files')
+                            }}
                         </button>
                         <p class="text-xs text-gray-500">
                             {{ $t('tenant_site.general.logo_hint') }}
@@ -66,7 +109,7 @@ const faviconInput = ref(null);
                         <input
                             v-model="form.settings.website_logo"
                             type="text"
-                            placeholder="رابط URL الشعار (بديل)"
+                            :placeholder="$t('system.website.logo_url_placeholder')"
                             class="block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm py-2 px-3 bg-white dark:bg-gray-700 dark:text-white"
                             dir="ltr"
                         />
@@ -92,7 +135,7 @@ const faviconInput = ref(null);
                     class="flex justify-between text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
                     dir="ltr"
                 >
-                    <span>Site Title</span>
+                    <span>{{ $t('system.website.site_title_en') }}</span>
                     <span class="badge-lang">EN</span>
                 </label>
                 <input
@@ -123,7 +166,7 @@ const faviconInput = ref(null);
                     </div>
                     <input
                         type="file"
-                        @input="form.settings.website_favicon = $event.target.files[0]"
+                        @change="onFaviconChange"
                         class="hidden"
                         ref="faviconInput"
                         accept="image/*"
@@ -131,9 +174,14 @@ const faviconInput = ref(null);
                     <button
                         @click="faviconInput.click()"
                         type="button"
-                        class="inline-flex items-center px-3 py-2 border border-gray-300 dark:border-gray-600 shadow-sm text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 flex-1 transition-colors"
+                        :disabled="uploadingFavicon"
+                        class="inline-flex items-center px-3 py-2 border border-gray-300 dark:border-gray-600 shadow-sm text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 flex-1 transition-colors disabled:opacity-50"
                     >
-                        {{ $t('tenant_site.general.update_favicon') }}
+                        {{
+                            uploadingFavicon
+                                ? $t('system.website.uploading')
+                                : $t('tenant_site.general.update_favicon')
+                        }}
                     </button>
                 </div>
             </div>

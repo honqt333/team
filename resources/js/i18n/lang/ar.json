@@ -2128,6 +2128,8 @@
         "cannot_cancel_has_relations": "لا يمكن إلغاء كرت العمل - يرجى حذف جميع الخدمات، القطع، الموظفين المعيّنين، وإعادة أي مدفوعات أولاً",
         "cannot_change_item_status": "لا يمكن تغيير حالة الخدمة - يوجد موظفون معينون أو قطع غيار مرتبطة",
         "cannot_complete_error": "لا يمكن إكمال كرت العمل",
+        "action_not_confirmed": "لم يتم تأكيد الإجراء",
+        "item_completed": "تم إكمال الخدمة بنجاح",
         "cannot_complete_items_pending": "لا يمكن إكمال كرت العمل - هناك خدمات غير مكتملة",
         "cannot_deactivate_self": "لا يمكنك إلغاء تفعيل حسابك بنفسك",
         "cannot_delete_has_users": "لا يمكن الحذف لوجود مستخدمين مرتبطين",
