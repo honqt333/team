@@ -44,7 +44,7 @@ class SmsCreditsController extends Controller
 
         SmsPackage::create($validated);
 
-        return back()->with('success', 'تم إنشاء الباقة بنجاح');
+        return back()->with('success', __('messages.system.credits.created_success'));
     }
 
     /**
@@ -64,7 +64,7 @@ class SmsCreditsController extends Controller
 
         $package->update($validated);
 
-        return back()->with('success', 'تم تحديث الباقة بنجاح');
+        return back()->with('success', __('messages.system.credits.updated_success'));
     }
 
     /**
@@ -74,7 +74,7 @@ class SmsCreditsController extends Controller
     {
         $package->delete();
 
-        return back()->with('success', 'تم حذف الباقة بنجاح');
+        return back()->with('success', __('messages.system.credits.deleted_success'));
     }
 
     /**
@@ -150,7 +150,7 @@ class SmsCreditsController extends Controller
             'payment_details' => ['reason' => $validated['reason'] ?? 'إضافة يدوية'],
         ]);
 
-        return back()->with('success', "تم إضافة {$validated['credits']} رصيد بنجاح");
+        return back()->with('success', __('messages.system.credits.added_success', ['credits' => $validated['credits']]));
     }
 
     /**

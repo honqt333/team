@@ -35,7 +35,7 @@ class AdminUsersController extends Controller
         $admin = auth('admin')->user();
 
         if (! $admin instanceof AdminUser || ! $admin->isSuperAdmin()) {
-            abort(403, 'هذه العملية مخصصة لمديري النظام فقط (super_admin)');
+            abort(403, __('messages.system.admin_users.only_super_admin'));
         }
     }
 
@@ -111,7 +111,7 @@ class AdminUsersController extends Controller
         auth('admin')->user()?->logActivity('create', AdminUser::class, $admin->id);
 
         return redirect()->route('system.admin-users.index')
-            ->with('success', 'تم إنشاء المستخدم بنجاح');
+            ->with('success', __('messages.system.admin_users.created_success'));
     }
 
     /**
@@ -157,7 +157,7 @@ class AdminUsersController extends Controller
 
         auth('admin')->user()?->logActivity('update', AdminUser::class, $adminUser->id);
 
-        return back()->with('success', 'تم تحديث المستخدم بنجاح');
+        return back()->with('success', __('messages.system.admin_users.updated_success'));
     }
 
     /**
@@ -169,7 +169,7 @@ class AdminUsersController extends Controller
 
         // Prevent self-deletion
         if (auth('admin')->id() === $adminUser->id) {
-            return back()->withErrors(['error' => 'لا يمكنك حذف حسابك الحالي']);
+            return back()->withErrors(['error' => __('messages.system.admin_users.cannot_delete_self')]);
         }
 
         auth('admin')->user()?->logActivity('delete', AdminUser::class, $adminUser->id);
@@ -177,7 +177,7 @@ class AdminUsersController extends Controller
         $adminUser->delete();
 
         return redirect()->route('system.admin-users.index')
-            ->with('success', 'تم حذف المستخدم');
+            ->with('success', __('messages.system.admin_users.deleted_success'));
     }
 
     /**

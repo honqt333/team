@@ -187,7 +187,7 @@ class DunningController extends Controller
             ]
         );
 
-        return back()->with('success', 'تم حفظ إعدادات التذكير للمستأجر بنجاح');
+        return back()->with('success', __('messages.system.dunning.tenant_saved'));
     }
 
     /**
@@ -198,6 +198,6 @@ class DunningController extends Controller
     {
         DunningConfig::query()->where('tenant_id', $tenant->id)->delete();
 
-        return back()->with('success', 'تم حذف إعدادات التذكير الخاصة بالمستأجر');
+        return back()->with('success', __('messages.system.dunning.tenant_cleared'));
     }
 }

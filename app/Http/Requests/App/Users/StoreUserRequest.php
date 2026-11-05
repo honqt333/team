@@ -43,7 +43,14 @@ class StoreUserRequest extends FormRequest
             'centers.*' => ['exists:centers,id'],
             'role_id' => ['nullable', 'exists:roles,id'],
             'employee_id' => ['nullable', 'exists:hr_employees,id'],
-            'is_system_admin' => ['forbidden'],
+            // `prohibited`, NOT `forbidden`: Laravel has no `forbidden`
+            // rule, so the validator would raise
+            // BadMethodCallException("Method ...::validateForbidden does
+            // not exist") — a 500 — instead of rejecting the request.
+            // `prohibited` fails whenever the field carries any
+            // non-empty value, which is exactly the intended guard:
+            // the platform-admin flag is not tenant-settable.
+            'is_system_admin' => ['prohibited'],
         ];
     }
 }

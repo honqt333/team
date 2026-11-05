@@ -39,7 +39,7 @@ class ContactMessageController extends Controller
     {
         $contactMessage->update(['is_read' => true]);
 
-        return back()->with('success', 'تم تحديث حالة الرسالة بنجاح.');
+        return back()->with('success', __('messages.system.contact_messages.status_updated'));
     }
 
     /**
@@ -49,6 +49,6 @@ class ContactMessageController extends Controller
     {
         $contactMessage->delete();
 
-        return back()->with('success', 'تم حذف الرسالة بنجاح.');
+        return back()->with('success', __('messages.system.contact_messages.deleted_success'));
     }
 }

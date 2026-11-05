@@ -6,6 +6,7 @@ namespace App\Http\Controllers\System;
 
 use App\Http\Controllers\Controller;
 use App\Models\PaymentSettings;
+use App\Services\System\SystemAuditService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -14,6 +15,10 @@ use Inertia\Response;
 
 class CompanySettingsController extends Controller
 {
+    public function __construct(
+        protected SystemAuditService $audit
+    ) {}
+
     /**
      * Show company settings page.
      *
@@ -92,7 +97,17 @@ class CompanySettingsController extends Controller
         // Clear the shared settings cache so tenant invoices pick up the change
         PaymentSettings::clearCache();
 
-        return back()->with('success', 'تم حفظ معلومات الشركة بنجاح');
+        // These values are rendered on every tenant invoice, so a change
+        // here is a financial-config change and must be traceable.
+        $this->audit->log('company_settings_update', PaymentSettings::class, $settings->id, [
+            'company_legal_name' => $settings->company_legal_name,
+            'company_vat_number' => $settings->company_vat_number,
+            'subscription_vat_enabled' => $settings->subscription_vat_enabled,
+            'subscription_vat_rate' => $settings->subscription_vat_rate,
+            'subscription_vat_inclusive' => $settings->subscription_vat_inclusive,
+        ], $request);
+
+        return back()->with('success', __('messages.system.company.saved'));
     }
 
     /**

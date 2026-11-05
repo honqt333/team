@@ -264,7 +264,7 @@ class TenantsController extends Controller
             'suspension_reason' => $request->reason,
         ]);
 
-        return back()->with('success', 'تم تعليق المستأجر بنجاح');
+        return back()->with('success', __('messages.system.tenants.suspended'));
     }
 
     /**
@@ -283,7 +283,7 @@ class TenantsController extends Controller
             'email_verified_at' => now(),
         ]);
 
-        return back()->with('success', 'تم تفعيل المستأجر وتأكيد البريد الإلكتروني لمستخدميه بنجاح');
+        return back()->with('success', __('messages.system.tenants.activated'));
     }
 
     /**
@@ -313,7 +313,7 @@ class TenantsController extends Controller
                 'trial_ends_at' => $newEndDate,
             ]);
 
-        return back()->with('success', "تم تمديد الفترة التجريبية {$request->days} يوم");
+        return back()->with('success', __('messages.system.tenants.trial_extended', ['days' => $request->days]));
     }
 
     /**
@@ -327,7 +327,7 @@ class TenantsController extends Controller
 
         // Verify confirmation matches tenant name
         if ($request->confirmation !== $tenant->name) {
-            return back()->with('error', 'اسم المستأجر غير متطابق');
+            return back()->with('error', __('messages.system.tenants.name_mismatch'));
         }
 
         // Pre-delete safety net: capture a backup BEFORE the forceDelete
@@ -351,7 +351,7 @@ class TenantsController extends Controller
 
             return back()->with(
                 'error',
-                'فشل إنشاء نسخة احتياطية قبل الحذف — تم إيقاف العملية. الخطأ: '.$e->getMessage()
+                __('messages.system.tenants.backup_failed', ['error' => $e->getMessage()])
             );
         }
 
@@ -380,7 +380,7 @@ class TenantsController extends Controller
             $tenant->forceDelete();
         });
 
-        return redirect()->route('system.tenants.index')->with('success', 'تم حذف المستأجر وجميع بياناته نهائياً');
+        return redirect()->route('system.tenants.index')->with('success', __('messages.system.tenants.deleted'));
     }
 
     /**
@@ -443,7 +443,7 @@ class TenantsController extends Controller
             ]);
         }
 
-        return back()->with('success', 'تم تحديث خيار التذكير للمستأجر');
+        return back()->with('success', __('messages.system.tenants.dunning_opt_out_updated'));
     }
 
     /**
@@ -467,7 +467,7 @@ class TenantsController extends Controller
             && $tenant->suspension_reason === TenantSuspensionService::REASON;
 
         if (! $wasAutoSuspended) {
-            return back()->with('error', 'الحساب ليس معلّقاً تلقائياً — لا حاجة للإجراء');
+            return back()->with('error', __('messages.system.tenants.not_auto_suspended'));
         }
 
         $tenant->forceFill([
@@ -488,6 +488,6 @@ class TenantsController extends Controller
             ]);
         }
 
-        return back()->with('success', 'تم رفع التعليق التلقائي عن المستأجر');
+        return back()->with('success', __('messages.system.tenants.auto_suspension_lifted'));
     }
 }

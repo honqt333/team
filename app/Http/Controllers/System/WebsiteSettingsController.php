@@ -364,7 +364,7 @@ class WebsiteSettingsController extends Controller
             ]);
         }
 
-        return back()->with('success', 'تم تحديث إعدادات الموقع بنجاح');
+        return back()->with('success', __('messages.system.website.saved'));
     }
 
     /**

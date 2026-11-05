@@ -9,12 +9,17 @@ use App\Models\BankTransferReceipt;
 use App\Models\Billing\Plan;
 use App\Models\Billing\Subscription;
 use App\Models\Tenant;
+use App\Services\System\SystemAuditService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class SubscriptionsController extends Controller
 {
+    public function __construct(
+        protected SystemAuditService $audit
+    ) {}
+
     /**
      * Display a listing of subscriptions.
      */
@@ -151,12 +156,12 @@ class SubscriptionsController extends Controller
 
         if ($request->wantsJson() || $request->header('X-Inertia')) {
             if (str_contains(url()->previous(), '/system/tenants/')) {
-                return back()->with('success', 'تم ربط وتفعيل الباقة بنجاح للمستأجر');
+                return back()->with('success', __('messages.system.subscriptions.linked_to_tenant'));
             }
         }
 
         return redirect()->route('system.subscriptions.index')
-            ->with('success', 'تم إنشاء الاشتراك بنجاح');
+            ->with('success', __('messages.system.subscriptions.created_success'));
     }
 
     /**
@@ -171,12 +176,20 @@ class SubscriptionsController extends Controller
      *   - the tenant status (suspended — they keep their data but
      *     can't use the app until they re-subscribe)
      */
-    public function cancel(Subscription $subscription)
+    public function cancel(Request $request, Subscription $subscription)
     {
         $subscription->update([
             'status' => 'cancelled',
             'cancelled_at' => now(),
         ]);
+
+        // `$request->user()` honours the guard activated for this
+        // request by the `auth:web,admin` middleware, so it returns
+        // the AdminUser for an admin session and the tenant User for a
+        // tenant-session system admin. `auth('admin')` only ever looks
+        // at the 'admin' guard, so for a tenant-session admin it
+        // returned null and the superseded receipt lost its reviewer.
+        $reviewerId = $request->user()?->id;
 
         // Close any open invoices on this subscription. Without this the
         // tenant's subscription page would still show a "pending" invoice
@@ -192,7 +205,7 @@ class SubscriptionsController extends Controller
             ->where('status', 'pending')
             ->update([
                 'status' => 'superseded',
-                'reviewed_by' => auth('admin')->id(),
+                'reviewed_by' => $reviewerId,
                 'reviewed_at' => now(),
                 'review_notes' => 'Subscription cancelled by admin — receipt superseded.',
             ]);
@@ -204,13 +217,19 @@ class SubscriptionsController extends Controller
         // should still be able to re-subscribe. Tenant suspension is a
         // separate, explicit action.
 
-        return back()->with('success', 'تم إلغاء الاشتراك');
+        $this->audit->log('subscription_cancel', Subscription::class, $subscription->id, [
+            'tenant_id' => $subscription->tenant_id,
+            'plan_id' => $subscription->plan_id,
+            'previous_status' => $subscription->status,
+        ], $request);
+
+        return back()->with('success', __('messages.system.subscriptions.cancelled_success'));
     }
 
     /**
      * Activate subscription.
      */
-    public function activate(Subscription $subscription)
+    public function activate(Request $request, Subscription $subscription)
     {
         $subscription->update([
             'status' => 'active',
@@ -219,7 +238,12 @@ class SubscriptionsController extends Controller
 
         $subscription->tenant->update(['status' => 'active']);
 
-        return back()->with('success', 'تم تفعيل الاشتراك');
+        $this->audit->log('subscription_activate', Subscription::class, $subscription->id, [
+            'tenant_id' => $subscription->tenant_id,
+            'plan_id' => $subscription->plan_id,
+        ], $request);
+
+        return back()->with('success', __('messages.system.subscriptions.activated'));
     }
 
     /**
@@ -255,6 +279,12 @@ class SubscriptionsController extends Controller
         }
         $subscription->tenant->update($tenantUpdate);
 
-        return back()->with('success', "تم تمديد الاشتراك {$validated['days']} يوم");
+        $this->audit->log('subscription_extend', Subscription::class, $subscription->id, [
+            'tenant_id' => $subscription->tenant_id,
+            'days' => $validated['days'],
+            'ends_at' => $subscription->ends_at?->toDateString(),
+        ], $request);
+
+        return back()->with('success', __('messages.system.subscriptions.extended', ['days' => $validated['days']]));
     }
 }

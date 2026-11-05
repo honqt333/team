@@ -6,12 +6,17 @@ namespace App\Http\Controllers\System;
 
 use App\Http\Controllers\Controller;
 use App\Models\PaymentSettings;
+use App\Services\System\SystemAuditService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class PaymentSettingsController extends Controller
 {
+    public function __construct(
+        protected SystemAuditService $audit
+    ) {}
+
     /**
      * Show payment settings page.
      */
@@ -147,7 +152,20 @@ class PaymentSettingsController extends Controller
         // Clear cache
         PaymentSettings::clearCache();
 
-        return back()->with('success', 'تم حفظ إعدادات الدفع بنجاح');
+        // Payment gateway configuration decides where real money goes.
+        // The audit entry records WHICH gateways were enabled — never
+        // the secret keys themselves.
+        $this->audit->log('payment_settings_update', PaymentSettings::class, $settings->id, [
+            'default_gateway' => $settings->default_gateway,
+            'moyasar_enabled' => (bool) data_get($settings->moyasar, 'enabled'),
+            'tap_enabled' => (bool) data_get($settings->tap, 'enabled'),
+            'paytabs_enabled' => (bool) data_get($settings->paytabs, 'enabled'),
+            'tabby_enabled' => (bool) data_get($settings->tabby, 'enabled'),
+            'tamara_enabled' => (bool) data_get($settings->tamara, 'enabled'),
+            'bank_transfer_enabled' => $settings->bank_transfer_enabled,
+        ], $request);
+
+        return back()->with('success', __('messages.system.payment_settings.saved'));
     }
 
     /**

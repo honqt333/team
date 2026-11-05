@@ -105,12 +105,12 @@ class SubscriptionInvoicesController extends Controller
         $email = $invoice->tenant->email;
 
         if (! $email) {
-            return back()->with('error', 'لا يوجد بريد إلكتروني للمستأجر');
+            return back()->with('error', __('messages.system.tenants.no_email'));
         }
 
         Mail::to($email)->send(new SubscriptionInvoiceMail($invoice));
 
-        return back()->with('success', 'تم إرسال الفاتورة بنجاح');
+        return back()->with('success', __('messages.system.invoices.sent'));
     }
 
     /**
@@ -120,7 +120,7 @@ class SubscriptionInvoicesController extends Controller
     {
         $this->invoiceService->generatePdf($invoice);
 
-        return back()->with('success', 'تم إعادة إنشاء ملف PDF');
+        return back()->with('success', __('messages.system.invoices.pdf_regenerated'));
     }
 
     /**
@@ -133,11 +133,23 @@ class SubscriptionInvoicesController extends Controller
             'notes' => 'nullable|string',
         ]);
 
+        // Identify the acting admin for the audit trail. The invoice
+        // table no longer has a `marked_by` column, so the actor is
+        // folded into the invoice notes by the service. We record both
+        // the table and the id: the /system panel is reachable through
+        // two different guards (an AdminUser on 'admin', or a tenant
+        // User flagged `is_system_admin` on 'web'), and a bare id would
+        // be ambiguous between the two id spaces.
+        $actor = $request->user();
+        $markedBy = $actor
+            ? $actor::class.'#'.$actor->id
+            : 'unknown';
+
         $this->invoiceService->markAsPaid(
             $invoice,
             'manual',
             $validated['reference'] ?? 'MANUAL-'.time(),
-            ['notes' => $validated['notes'] ?? null, 'marked_by' => auth()->id()]
+            ['notes' => $validated['notes'] ?? null, 'marked_by' => $markedBy]
         );
 
         // Activate subscription if pending
@@ -146,7 +158,7 @@ class SubscriptionInvoicesController extends Controller
             $invoice->tenant->update(['status' => 'active']);
         }
 
-        return back()->with('success', 'تم تأكيد الدفع بنجاح');
+        return back()->with('success', __('messages.system.invoices.paid'));
     }
 
     /**
@@ -172,7 +184,7 @@ class SubscriptionInvoicesController extends Controller
     public function cancel(SubscriptionInvoice $invoice)
     {
         if ($invoice->status === 'paid') {
-            return back()->with('error', 'لا يمكن إلغاء فاتورة مدفوعة');
+            return back()->with('error', __('messages.system.invoices.cannot_cancel_paid'));
         }
 
         DB::transaction(function () use ($invoice) {
@@ -222,6 +234,6 @@ class SubscriptionInvoicesController extends Controller
             }
         });
 
-        return back()->with('success', 'تم إلغاء الفاتورة');
+        return back()->with('success', __('messages.system.invoices.cancelled'));
     }
 }

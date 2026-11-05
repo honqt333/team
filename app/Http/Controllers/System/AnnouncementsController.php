@@ -5,11 +5,13 @@ declare(strict_types=1);
 namespace App\Http\Controllers\System;
 
 use App\Http\Controllers\Controller;
+use App\Models\AdminUser;
 use App\Models\NotificationSendLog;
 use App\Models\SystemAnnouncement;
 use App\Models\Tenant;
 use App\Services\Messaging\EmailService;
 use App\Services\Messaging\SmsService;
+use App\Services\System\SystemAuditService;
 use Exception;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -17,6 +19,10 @@ use Inertia\Response;
 
 class AnnouncementsController extends Controller
 {
+    public function __construct(
+        protected SystemAuditService $audit
+    ) {}
+
     /**
      * List announcements.
      */
@@ -66,13 +72,35 @@ class AnnouncementsController extends Controller
             'expires_at' => 'nullable|date',
         ]);
 
-        $validated['admin_user_id'] = auth()->id();
+        // `system_announcements.admin_user_id` is read back through the
+        // `admin` relation, which resolves against the `admin_users`
+        // table (see SystemAnnouncement::admin()). The bare `auth()`
+        // helper resolves the *configured* default guard ('web'), which
+        // is a different id space: for a tenant-session system admin it
+        // returns a `users.id`, so the announcement would point at the
+        // wrong admin — or at nothing at all.
+        //
+        // `$request->user()` honours the guard the `auth:web,admin`
+        // middleware activated for this request, so it returns the
+        // AdminUser for an admin session and the tenant User for a
+        // tenant-session system admin. We only record an id when the
+        // acting identity actually lives in `admin_users`, so the
+        // relation can never resolve a stranger.
+        $actor = $request->user();
+
+        $validated['admin_user_id'] = $actor instanceof AdminUser ? $actor->id : null;
         $validated['channels'] = $validated['channels'] ?? ['in_app'];
 
         $announcement = SystemAnnouncement::create($validated);
 
+        $this->audit->log('announcement_create', SystemAnnouncement::class, $announcement->id, [
+            'title' => $announcement->title,
+            'target' => $announcement->target,
+            'type' => $announcement->type,
+        ], $request);
+
         return redirect()->route('system.announcements.show', $announcement)
-            ->with('success', 'تم إنشاء الإعلان');
+            ->with('success', __('messages.system.announcements.created'));
     }
 
     /**
@@ -109,7 +137,13 @@ class AnnouncementsController extends Controller
         // Send via selected channels
         $this->sendToChannels($announcement);
 
-        return back()->with('success', 'تم نشر الإعلان');
+        $this->audit->log('announcement_publish', SystemAnnouncement::class, $announcement->id, [
+            'title' => $announcement->title,
+            'target' => $announcement->target,
+            'channels' => $announcement->channels,
+        ]);
+
+        return back()->with('success', __('messages.system.announcements.published'));
     }
 
     /**
@@ -119,7 +153,11 @@ class AnnouncementsController extends Controller
     {
         $announcement->update(['is_published' => false]);
 
-        return back()->with('success', 'تم إيقاف الإعلان');
+        $this->audit->log('announcement_unpublish', SystemAnnouncement::class, $announcement->id, [
+            'title' => $announcement->title,
+        ]);
+
+        return back()->with('success', __('messages.system.announcements.unpublished'));
     }
 
     /**
@@ -129,8 +167,12 @@ class AnnouncementsController extends Controller
     {
         $announcement->delete();
 
+        $this->audit->log('announcement_delete', SystemAnnouncement::class, $announcement->id, [
+            'title' => $announcement->title,
+        ]);
+
         return redirect()->route('system.announcements.index')
-            ->with('success', 'تم حذف الإعلان');
+            ->with('success', __('messages.system.announcements.deleted'));
     }
 
     /**

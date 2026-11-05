@@ -32,7 +32,7 @@ class ImpersonationController extends Controller
         }
 
         if (! $tenantUser) {
-            return back()->with('error', 'لا يوجد مستخدمين لهذا المستأجر');
+            return back()->with('error', __('messages.system.impersonation.no_users'));
         }
 
         // The system admin lives on the 'admin' guard (AdminUser), NOT
@@ -46,7 +46,7 @@ class ImpersonationController extends Controller
             // Defensive: without an admin identity there is nothing to
             // return to, so refuse to start rather than trapping the
             // operator inside the tenant account.
-            abort(403, 'لا يمكن بدء الانتحال بدون حساب مدير النظام');
+            abort(403, __('messages.system.impersonation.no_admin'));
         }
 
         // Store the original ADMIN identity so we can restore it later.
@@ -74,7 +74,7 @@ class ImpersonationController extends Controller
         // stop() can put it back.
         Auth::guard('web')->login($tenantUser);
 
-        return redirect('/dashboard')->with('success', "أنت الآن داخل حساب: {$tenant->trade_name}");
+        return redirect('/dashboard')->with('success', __('messages.system.impersonation.inside_account', ['tenant' => $tenant->trade_name]));
     }
 
     /**
@@ -113,7 +113,7 @@ class ImpersonationController extends Controller
             // Nothing to restore (e.g. the session was lost). The admin
             // guard may still be signed in — if so, go back to /system.
             return Auth::guard('admin')->check()
-                ? redirect('/system')->with('success', 'تم العودة للوحة النظام')
+                ? redirect('/system')->with('success', __('messages.system.impersonation.stopped'))
                 : redirect('/login');
         }
 
@@ -124,7 +124,7 @@ class ImpersonationController extends Controller
             Auth::guard('admin')->login($originalAdmin);
         }
 
-        return redirect('/system')->with('success', 'تم العودة للوحة النظام');
+        return redirect('/system')->with('success', __('messages.system.impersonation.stopped'));
     }
 
     /**

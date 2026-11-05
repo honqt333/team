@@ -78,6 +78,18 @@ class SubscriptionInvoiceService
         if (! empty($details['notes'])) {
             $notes .= ', '.$details['notes'];
         }
+
+        // Record WHO marked the invoice as paid. The
+        // `subscription_invoices` table no longer has a `marked_by`
+        // column (dropped by the 2026_07_25_140000 migration), so the
+        // actor used to be passed in `$details['marked_by']` and then
+        // silently DROPPED on the floor — the audit trail for a manual
+        // payment confirmation was never recorded. We fold it into the
+        // notes, which survive on the invoice.
+        if (! empty($details['marked_by'])) {
+            $notes .= ', marked_by='.$details['marked_by'];
+        }
+
         $notes .= ' at '.now()->toIso8601String();
 
         $invoice->update([

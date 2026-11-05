@@ -391,7 +391,7 @@ class HelpSettingsController extends Controller
             Setting::set('help.faqs', json_encode($validated['faqs'], JSON_UNESCAPED_UNICODE), 'help');
         }
 
-        return redirect()->route('system.settings.help')->with('success', 'تم حفظ إعدادات ومحتوى صفحة المساعدة بنجاح.');
+        return redirect()->route('system.settings.help')->with('success', __('messages.system.help.saved'));
     }
 
     /**
@@ -412,7 +412,7 @@ class HelpSettingsController extends Controller
         Setting::set('help.topics', json_encode(self::DEFAULT_TOPICS, JSON_UNESCAPED_UNICODE), 'help');
         Setting::set('help.faqs', json_encode(self::DEFAULT_FAQS, JSON_UNESCAPED_UNICODE), 'help');
 
-        return redirect()->route('system.settings.help')->with('success', 'تمت استعادة الإعدادات الافتراضية لصفحة المساعدة بنجاح.');
+        return redirect()->route('system.settings.help')->with('success', __('messages.system.help.restored'));
     }
 
     /**

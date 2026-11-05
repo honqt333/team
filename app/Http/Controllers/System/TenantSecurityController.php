@@ -22,6 +22,6 @@ class TenantSecurityController extends Controller
 
         $tenant->update($validated);
 
-        return back()->with('success', 'تم تحديث إعدادات المصادقة الثنائية');
+        return back()->with('success', __('messages.system.security.two_factor_updated'));
     }
 }

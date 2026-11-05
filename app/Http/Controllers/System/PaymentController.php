@@ -162,7 +162,7 @@ class PaymentController extends Controller
     public function retry(SubscriptionPayment $payment)
     {
         if ($payment->status !== 'failed') {
-            return back()->with('error', 'لا يمكن إعادة المحاولة لهذه الدفعة');
+            return back()->with('error', __('messages.system.payment.retry_unavailable'));
         }
 
         // Create new payment attempt

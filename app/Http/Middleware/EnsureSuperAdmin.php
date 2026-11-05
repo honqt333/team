@@ -42,13 +42,23 @@ class EnsureSuperAdmin
         }
 
         // The User model can also be a system admin if is_system_admin === true.
-        // For those we additionally require the explicit role to avoid
-        // privilege escalation through stale tokens.
+        //
+        // NOTE: we deliberately do NOT check a Spatie role here.
+        //
+        // Every tenant owner is auto-assigned the tenant-scoped
+        // `super_admin` role during registration (see
+        // RegisteredUserController::store), so `hasRole('super_admin')`
+        // carries no information about platform-level privilege — it is
+        // true for essentially every tenant owner. Requiring it would
+        // either lock out legitimate platform admins (who have the flag
+        // but no such tenant role) or, worse, give a future maintainer
+        // the false impression that the role is what grants access.
+        //
+        // The `is_system_admin` flag IS the platform-level gate. It is
+        // not tenant-settable: StoreUserRequest and UpdateUserRequest
+        // both mark it `forbidden`, so it can only be granted out of
+        // band (seeders / a direct DB write).
         if ($user instanceof User && $user->is_system_admin) {
-            // If the user has a roles relationship loaded and a super_admin
-            // role assignment, allow. We don't require role here because
-            // tenant-level super_admin would match the spatie role name
-            // by accident — the is_system_admin flag is the gate.
             return $next($request);
         }
 

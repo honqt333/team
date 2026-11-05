@@ -95,10 +95,10 @@ class BackupController extends Controller
                 ]);
             }
         } catch (Throwable $e) {
-            return back()->with('error', 'فشل إنشاء النسخة الاحتياطية: '.$e->getMessage());
+            return back()->with('error', __('messages.system.backups.create_failed', ['error' => $e->getMessage()]));
         }
 
-        return back()->with('success', "تم إنشاء النسخة الاحتياطية ({$backup->humanSize()})");
+        return back()->with('success', __('messages.system.backups.created_success', ['size' => $backup->humanSize()]));
     }
 
     /**
@@ -143,6 +143,6 @@ class BackupController extends Controller
             ]);
         }
 
-        return back()->with('success', 'تم حذف النسخة الاحتياطية');
+        return back()->with('success', __('messages.system.backups.deleted_success'));
     }
 }

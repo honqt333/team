@@ -9,6 +9,8 @@ use App\Http\Controllers\Controller;
 use App\Models\AdminUser;
 use App\Models\BankTransferReceipt;
 use App\Models\Billing\Subscription;
+use App\Models\User;
+use App\Services\System\SystemAuditService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -17,6 +19,10 @@ use Inertia\Response;
 
 class BankTransferReceiptsController extends Controller
 {
+    public function __construct(
+        protected SystemAuditService $audit
+    ) {}
+
     /**
      * List pending bank transfer receipts for review.
      */
@@ -121,19 +127,20 @@ class BankTransferReceiptsController extends Controller
             ? round((float) $receipt->transfer_amount - $receipt->expected_amount, 2)
             : null;
 
-        // The reviewer relation is User (not AdminUser) — but the file
-        // is uploaded by tenant staff. If the reviewer is a User we
-        // expose name; if it's an AdminUser we add it. Most approvals
-        // will be by an admin via the admin guard, so look both up.
+        // The reviewer is a system admin (AdminUser) — `reviewed_by`
+        // stores an `admin_users.id`. The model's `reviewer()` relation
+        // resolves against that table. We keep a `User` fallback for
+        // legacy rows written before the relation was corrected, where
+        // the id may point at the `users` table instead.
         $reviewerName = null;
 
         if ($receipt->reviewer) {
-            $reviewerName = $receipt->reviewer->name ?? null;
+            $reviewerName = $receipt->reviewer->name ?? $receipt->reviewer->email;
         }
 
         if (! $reviewerName && $receipt->reviewed_by) {
-            $admin = AdminUser::find($receipt->reviewed_by);
-            $reviewerName = $admin?->name ?? $admin?->email;
+            $legacyUser = User::find($receipt->reviewed_by);
+            $reviewerName = $legacyUser?->name ?? $legacyUser?->email;
         }
 
         return Inertia::render('System/BankTransferReceipts/Show', [
@@ -153,7 +160,7 @@ class BankTransferReceiptsController extends Controller
     public function approve(Request $request, BankTransferReceipt $receipt)
     {
         if ($receipt->status !== 'pending') {
-            return back()->with('error', 'هذا الإيصال تمت مراجعته مسبقاً');
+            return back()->with('error', __('messages.system.receipts.already_reviewed'));
         }
 
         $validated = $request->validate([
@@ -178,12 +185,11 @@ class BankTransferReceiptsController extends Controller
         $diff = $expected !== null ? round($actual - (float) $expected, 2) : null;
 
         if ($diff !== null && abs($diff) > 0.01 && ! ($validated['force_approve'] ?? false)) {
-            return back()->with('error', sprintf(
-                'المبلغ المُحوّل (%.2f) يختلف عن المطلوب (%.2f). فرق: %+.2f. للتأكيد على الرغم من الاختلاف، أعد الإرسال مع force_approve=true.',
-                $actual,
-                (float) $expected,
-                $diff
-            ));
+            return back()->with('error', __('messages.system.receipts.amount_mismatch', [
+                'actual' => number_format($actual, 2),
+                'expected' => number_format((float) $expected, 2),
+                'diff' => sprintf('%+.2f', $diff),
+            ]));
         }
 
         // When the admin uses approved_amount, it must be > 0 and <= what
@@ -195,18 +201,37 @@ class BankTransferReceiptsController extends Controller
             : $actual;
 
         if ($approvedAmount <= 0 || $approvedAmount > $actual + 0.01) {
-            return back()->with('error', sprintf(
-                'المبلغ المعتمد (%.2f) يجب أن يكون بين 0.01 و %.2f (المبلغ المُحوّل).',
-                $approvedAmount,
-                $actual
-            ));
+            return back()->with('error', __('messages.system.receipts.approved_amount_out_of_range', [
+                'approved' => number_format($approvedAmount, 2),
+                'actual' => number_format($actual, 2),
+            ]));
         }
 
         // Initialise outside the transaction so the post-commit
         // ReceiptReviewed event can pass the audit notes too.
         $reviewNotes = $validated['notes'] ?? null;
 
-        DB::transaction(function () use ($receipt, $validated, $diff, $expected, $approvedAmount, $actual, &$reviewNotes) {
+        // The reviewer identity, resolved ONCE and explicitly.
+        //
+        // `$request->user()` honours the guard that the
+        // `auth:web,admin` middleware activated for this request
+        // (Laravel's Authenticate middleware calls `shouldUse($guard)`),
+        // so it returns the AdminUser for an admin session and the
+        // tenant User for a tenant-session system admin.
+        //
+        // The bare `auth()` helper resolves the *configured* default
+        // guard ('web'), which is NOT the same thing: for a pure
+        // admin-guard session it yields null, and for a tenant-session
+        // system admin it yields a `users` id — while `reviewed_by`
+        // is read back as an `admin_users.id`. Writing a `users` id
+        // there made the panel display a different person as the
+        // reviewer. We therefore record the id from whichever table
+        // the acting identity actually lives in, and the model's
+        // `reviewer()` relation resolves the same table.
+        $actor = $request->user();
+        $reviewerId = $actor?->id;
+
+        DB::transaction(function () use ($receipt, $validated, $diff, $expected, $approvedAmount, $actual, &$reviewNotes, $reviewerId) {
             $isPartial = abs($approvedAmount - $actual) > 0.01;
             $isShortVsExpected = $expected !== null && abs($approvedAmount - (float) $expected) > 0.01;
 
@@ -218,7 +243,7 @@ class BankTransferReceiptsController extends Controller
                     (float) $expected,
                     (float) $receipt->transfer_amount,
                     $diff,
-                    auth()->id(),
+                    $reviewerId ?? 0,
                     now()->toIso8601String()
                 );
                 $reviewNotes = $reviewNotes
@@ -234,7 +259,7 @@ class BankTransferReceiptsController extends Controller
                     $approvedAmount,
                     $actual,
                     round($actual - $approvedAmount, 2),
-                    auth()->id(),
+                    $reviewerId ?? 0,
                     now()->toIso8601String()
                 );
                 $reviewNotes = $reviewNotes
@@ -245,7 +270,7 @@ class BankTransferReceiptsController extends Controller
             // Mark receipt as approved
             $receipt->update([
                 'status' => 'approved',
-                'reviewed_by' => auth()->id(),
+                'reviewed_by' => $reviewerId,
                 'reviewed_at' => now(),
                 'review_notes' => $reviewNotes,
             ]);
@@ -312,8 +337,21 @@ class BankTransferReceiptsController extends Controller
         });
 
         $message = $approvedAmount < $actual - 0.01
-            ? sprintf('تمت الموافقة الجزئية بمبلغ %.2f. الفاتورة تبقى مفتوحة للمبلغ المتبقي.', $approvedAmount)
+            ? __('messages.system.receipts.partial_approved', ['amount' => number_format($approvedAmount, 2)])
             : 'تم الموافقة على الإيصال وتفعيل الاشتراك';
+
+        // Audit the decision. A payment approval is a financial event —
+        // it activates a subscription and can activate a tenant — so
+        // "who approved this and for how much" must be answerable.
+        $this->audit->log('receipt_approve', BankTransferReceipt::class, $receipt->id, [
+            'tenant_id' => $receipt->tenant_id,
+            'transfer_amount' => $actual,
+            'approved_amount' => $approvedAmount,
+            'expected_amount' => $expected,
+            'amount_diff' => $diff,
+            'partial' => $approvedAmount < $actual - 0.01,
+            'force_approved' => (bool) ($validated['force_approve'] ?? false),
+        ], $request);
 
         // Notify the tenant of the decision AFTER the transaction
         // commits so the notification carries the canonical review
@@ -334,16 +372,22 @@ class BankTransferReceiptsController extends Controller
     public function reject(Request $request, BankTransferReceipt $receipt)
     {
         if ($receipt->status !== 'pending') {
-            return back()->with('error', 'هذا الإيصال تمت مراجعته مسبقاً');
+            return back()->with('error', __('messages.system.receipts.already_reviewed'));
         }
 
         $validated = $request->validate([
             'notes' => 'required|string|max:1000',
         ]);
 
+        // `$request->user()` honours the guard activated for this
+        // request by the `auth:web,admin` middleware, so the recorded
+        // id belongs to the table the reviewer relation reads back
+        // (`admin_users`). See approve() for the full rationale.
+        $reviewerId = $request->user()?->id;
+
         $receipt->update([
             'status' => 'rejected',
-            'reviewed_by' => auth()->id(),
+            'reviewed_by' => $reviewerId,
             'reviewed_at' => now(),
             'review_notes' => $validated['notes'],
         ]);
@@ -356,7 +400,13 @@ class BankTransferReceiptsController extends Controller
             $validated['notes'],
         ));
 
-        return back()->with('success', 'تم رفض الإيصال');
+        $this->audit->log('receipt_reject', BankTransferReceipt::class, $receipt->id, [
+            'tenant_id' => $receipt->tenant_id,
+            'transfer_amount' => (float) $receipt->transfer_amount,
+            'notes' => $validated['notes'],
+        ], $request);
+
+        return back()->with('success', __('messages.system.receipts.rejected'));
     }
 
     /**

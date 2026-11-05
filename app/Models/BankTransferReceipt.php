@@ -66,9 +66,21 @@ class BankTransferReceipt extends Model
         return $this->belongsTo(SubscriptionPayment::class, 'subscription_payment_id');
     }
 
+    /**
+     * The system admin who reviewed the receipt.
+     *
+     * `reviewed_by` holds an `admin_users.id` — the receipt is reviewed
+     * from the /system panel, whose actors are AdminUser records, not
+     * tenant Users. The column originally carried a `constrained('users')`
+     * foreign key, but that FK is not present in the live schema and
+     * the relation below resolved the id against the WRONG table: it
+     * returned a tenant `User` whose id happened to collide with the
+     * admin's id, so the panel displayed a different person's name as
+     * the reviewer. The audit trail has to name the real reviewer.
+     */
     public function reviewer(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'reviewed_by');
+        return $this->belongsTo(AdminUser::class, 'reviewed_by');
     }
 
     public function getStatusLabelAttribute(): string

@@ -25,11 +25,34 @@ class TwoFactorController extends Controller
     }
 
     /**
+     * Resolve the acting account for the 2FA actions.
+     *
+     * `$request->user()` honours the guard that the `auth:web,admin`
+     * middleware activated for this request, so it returns the
+     * AdminUser for an admin session and the tenant User for a
+     * tenant-session system admin. The bare `auth()` helper resolves
+     * the *configured* default guard ('web') instead, which is not the
+     * same identity space — it can hand back null (a fatal error on
+     * the next line) or the wrong account entirely.
+     *
+     * We fail loudly with a 401 rather than dereferencing null: a
+     * missing identity must never surface as a 500.
+     */
+    private function actor(Request $request): AdminUser|User
+    {
+        $actor = $request->user();
+
+        abort_if(! $actor, 401, 'Unauthenticated');
+
+        return $actor;
+    }
+
+    /**
      * Show 2FA setup page.
      */
-    public function setup(): Response
+    public function setup(Request $request): Response
     {
-        $user = auth()->user();
+        $user = $this->actor($request);
 
         // Generate secret if not already set
         $secret = $user->two_factor_secret;
@@ -63,11 +86,11 @@ class TwoFactorController extends Controller
             'method' => 'required|in:email,sms',
         ]);
 
-        $user = auth()->user();
+        $user = $this->actor($request);
 
         if ($request->method === 'sms') {
             if (! $user->phone) {
-                return back()->withErrors(['method' => 'يجب تسجيل رقم الهاتف أولاً لاستخدام الرسائل النصية']);
+                return back()->withErrors(['method' => __('messages.system.two_factor.phone_required')]);
             }
 
             try {
@@ -76,13 +99,13 @@ class TwoFactorController extends Controller
                 return back()->withErrors(['method' => $e->getMessage()]);
             }
 
-            return back()->with('success', 'تم إرسال رمز التحقق إلى هاتفك');
+            return back()->with('success', __('messages.system.two_factor.code_sent_phone'));
         }
 
         // Email
         $this->twoFactor->sendCodeViaEmail($user);
 
-        return back()->with('success', 'تم إرسال رمز التحقق إلى بريدك الإلكتروني');
+        return back()->with('success', __('messages.system.two_factor.code_sent_email'));
     }
 
     /**
@@ -94,11 +117,11 @@ class TwoFactorController extends Controller
             'code' => 'required|string|size:6',
         ]);
 
-        $user = auth()->user();
+        $user = $this->actor($request);
         $secret = decrypt($user->two_factor_secret);
 
         if (! $this->twoFactor->verify($secret, $request->code)) {
-            return back()->withErrors(['code' => 'رمز التحقق غير صحيح']);
+            return back()->withErrors(['code' => __('messages.system.two_factor.invalid_code')]);
         }
 
         // Generate recovery codes
@@ -109,7 +132,7 @@ class TwoFactorController extends Controller
             'two_factor_recovery_codes' => encrypt(json_encode($recoveryCodes)),
         ]);
 
-        return back()->with('success', 'تم تفعيل المصادقة الثنائية');
+        return back()->with('success', __('messages.system.two_factor.enabled'));
     }
 
     /**
@@ -121,10 +144,10 @@ class TwoFactorController extends Controller
             'password' => 'required|string',
         ]);
 
-        $user = auth()->user();
+        $user = $this->actor($request);
 
         if (! Hash::check($request->password, $user->password)) {
-            return back()->withErrors(['password' => 'كلمة المرور غير صحيحة']);
+            return back()->withErrors(['password' => __('messages.system.two_factor.invalid_password')]);
         }
 
         $user->update([
@@ -133,7 +156,7 @@ class TwoFactorController extends Controller
             'two_factor_confirmed_at' => null,
         ]);
 
-        return back()->with('success', 'تم إلغاء المصادقة الثنائية');
+        return back()->with('success', __('messages.system.two_factor.disabled'));
     }
 
     /**
@@ -145,10 +168,10 @@ class TwoFactorController extends Controller
             'password' => 'required|string',
         ]);
 
-        $user = auth()->user();
+        $user = $this->actor($request);
 
         if (! Hash::check($request->password, $user->password)) {
-            return back()->withErrors(['password' => 'كلمة المرور غير صحيحة']);
+            return back()->withErrors(['password' => __('messages.system.two_factor.invalid_password')]);
         }
 
         $recoveryCodes = $this->twoFactor->generateRecoveryCodes();
@@ -156,7 +179,7 @@ class TwoFactorController extends Controller
             'two_factor_recovery_codes' => encrypt(json_encode($recoveryCodes)),
         ]);
 
-        return back()->with('success', 'تم إنشاء رموز استرداد جديدة');
+        return back()->with('success', __('messages.system.two_factor.codes_regenerated'));
     }
 
     /**
@@ -205,7 +228,7 @@ class TwoFactorController extends Controller
         // Verify TOTP code
         if ($request->code) {
             if (! $this->twoFactor->verify($secret, $request->code)) {
-                return back()->withErrors(['code' => 'رمز التحقق غير صحيح']);
+                return back()->withErrors(['code' => __('messages.system.two_factor.invalid_code')]);
             }
         }
         // Verify recovery code
@@ -213,7 +236,7 @@ class TwoFactorController extends Controller
             $recoveryCodes = json_decode(decrypt($user->two_factor_recovery_codes), true);
 
             if (! $this->twoFactor->verifyRecoveryCode($request->recovery_code, $recoveryCodes)) {
-                return back()->withErrors(['recovery_code' => 'رمز الاسترداد غير صحيح']);
+                return back()->withErrors(['recovery_code' => __('messages.system.two_factor.invalid_recovery_code')]);
             }
 
             // Remove used recovery code
@@ -222,7 +245,7 @@ class TwoFactorController extends Controller
                 'two_factor_recovery_codes' => encrypt(json_encode($newCodes)),
             ]);
         } else {
-            return back()->withErrors(['code' => 'يرجى إدخال رمز التحقق']);
+            return back()->withErrors(['code' => __('messages.system.two_factor.code_required')]);
         }
 
         // Clear 2FA session

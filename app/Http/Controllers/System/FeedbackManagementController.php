@@ -91,7 +91,7 @@ class FeedbackManagementController extends Controller
             'has_user_seen_reply' => false,
         ]);
 
-        return back()->with('success', 'تم إرسال الرد وتحديث حالة البلاغ بنجاح.');
+        return back()->with('success', __('messages.system.feedbacks.replied'));
     }
 
     /**
@@ -105,7 +105,7 @@ class FeedbackManagementController extends Controller
 
         $feedback->update(['status' => $validated['status']]);
 
-        return back()->with('success', 'تم تحديث حالة البلاغ.');
+        return back()->with('success', __('messages.system.feedbacks.status_updated'));
     }
 
     /**
@@ -123,6 +123,6 @@ class FeedbackManagementController extends Controller
 
         $feedback->delete();
 
-        return back()->with('success', 'تم حذف البلاغ بنجاح.');
+        return back()->with('success', __('messages.system.feedbacks.deleted_success'));
     }
 }

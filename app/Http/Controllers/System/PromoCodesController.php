@@ -7,6 +7,7 @@ namespace App\Http\Controllers\System;
 use App\Http\Controllers\Controller;
 use App\Models\Billing\Plan;
 use App\Models\Billing\PromoCode;
+use App\Services\System\SystemAuditService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -14,6 +15,10 @@ use Inertia\Response;
 
 class PromoCodesController extends Controller
 {
+    public function __construct(
+        protected SystemAuditService $audit
+    ) {}
+
     /**
      * Display a listing of promo codes.
      */
@@ -76,12 +81,18 @@ class PromoCodesController extends Controller
 
         // Validate percentage max 100
         if ($validated['discount_type'] === 'percentage' && $validated['discount_value'] > 100) {
-            return back()->withErrors(['discount_value' => 'النسبة يجب أن تكون بين 0 و 100']);
+            return back()->withErrors(['discount_value' => __('messages.system.promo_codes.percentage_range')]);
         }
 
-        PromoCode::create($validated);
+        $promoCode = PromoCode::create($validated);
 
-        return redirect()->route('system.promo-codes.index')->with('success', 'تم إنشاء الرمز الترويجي بنجاح');
+        $this->audit->log('promo_code_create', PromoCode::class, $promoCode->id, [
+            'code' => $promoCode->code,
+            'discount_type' => $promoCode->discount_type,
+            'discount_value' => $promoCode->discount_value,
+        ], $request);
+
+        return redirect()->route('system.promo-codes.index')->with('success', __('messages.system.promo_codes.created_success'));
     }
 
     /**
@@ -118,12 +129,19 @@ class PromoCodesController extends Controller
         ]);
 
         if ($validated['discount_type'] === 'percentage' && $validated['discount_value'] > 100) {
-            return back()->withErrors(['discount_value' => 'النسبة يجب أن تكون بين 0 و 100']);
+            return back()->withErrors(['discount_value' => __('messages.system.promo_codes.percentage_range')]);
         }
 
         $promoCode->update($validated);
 
-        return redirect()->route('system.promo-codes.index')->with('success', 'تم تحديث الرمز الترويجي');
+        $this->audit->log('promo_code_update', PromoCode::class, $promoCode->id, [
+            'code' => $promoCode->code,
+            'discount_type' => $promoCode->discount_type,
+            'discount_value' => $promoCode->discount_value,
+            'is_active' => $promoCode->is_active,
+        ], $request);
+
+        return redirect()->route('system.promo-codes.index')->with('success', __('messages.system.promo_codes.updated_success'));
     }
 
     /**
@@ -133,6 +151,10 @@ class PromoCodesController extends Controller
     {
         $promoCode->delete();
 
-        return redirect()->route('system.promo-codes.index')->with('success', 'تم حذف الرمز الترويجي');
+        $this->audit->log('promo_code_delete', PromoCode::class, $promoCode->id, [
+            'code' => $promoCode->code,
+        ]);
+
+        return redirect()->route('system.promo-codes.index')->with('success', __('messages.system.promo_codes.deleted_success'));
     }
 }

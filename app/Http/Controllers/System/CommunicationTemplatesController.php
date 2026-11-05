@@ -36,6 +36,6 @@ class CommunicationTemplatesController extends Controller
         $template->update($validated);
 
         return redirect()->route('system.communication.templates.index')
-            ->with('success', 'تم تحديث القالب بنجاح');
+            ->with('success', __('messages.system.templates.updated'));
     }
 }

@@ -38,7 +38,7 @@ class WhatsappCreditsController extends Controller
 
         WhatsappPackage::create($validated);
 
-        return back()->with('success', 'تم إنشاء الباقة بنجاح');
+        return back()->with('success', __('messages.system.credits.created_success'));
     }
 
     public function updatePackage(Request $request, WhatsappPackage $package)
@@ -55,14 +55,14 @@ class WhatsappCreditsController extends Controller
 
         $package->update($validated);
 
-        return back()->with('success', 'تم تحديث الباقة بنجاح');
+        return back()->with('success', __('messages.system.credits.updated_success'));
     }
 
     public function destroyPackage(WhatsappPackage $package)
     {
         $package->delete();
 
-        return back()->with('success', 'تم حذف الباقة بنجاح');
+        return back()->with('success', __('messages.system.credits.deleted_success'));
     }
 
     public function balances(Request $request): Response
@@ -111,7 +111,7 @@ class WhatsappCreditsController extends Controller
             'payment_details' => ['reason' => $validated['reason'] ?? 'إضافة يدوية'],
         ]);
 
-        return back()->with('success', "تم إضافة {$validated['credits']} رصيد بنجاح");
+        return back()->with('success', __('messages.system.credits.added_success', ['credits' => $validated['credits']]));
     }
 
     public function usage(Request $request): Response

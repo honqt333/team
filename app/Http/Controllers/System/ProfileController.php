@@ -76,7 +76,7 @@ class ProfileController extends Controller
 
         $admin->update($validated);
 
-        return back()->with('success', 'تم تحديث الملف الشخصي بنجاح');
+        return back()->with('success', __('messages.system.profile.updated'));
     }
 
     /**
@@ -95,6 +95,6 @@ class ProfileController extends Controller
             'password' => Hash::make($request->password),
         ]);
 
-        return back()->with('success', 'تم تحديث كلمة المرور بنجاح');
+        return back()->with('success', __('messages.system.profile.password_updated'));
     }
 }

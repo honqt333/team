@@ -6,6 +6,7 @@ namespace App\Http\Controllers\System;
 
 use App\Http\Controllers\Controller;
 use App\Models\Billing\Plan;
+use App\Services\System\SystemAuditService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -13,6 +14,10 @@ use Inertia\Response;
 
 class PlansController extends Controller
 {
+    public function __construct(
+        protected SystemAuditService $audit
+    ) {}
+
     /**
      * Display a listing of plans.
      */
@@ -77,9 +82,15 @@ class PlansController extends Controller
             'en' => array_values(array_filter($request->input('features_en', []))),
         ];
 
-        Plan::create($validated);
+        $plan = Plan::create($validated);
 
-        return redirect()->route('system.plans.index')->with('success', 'تم إنشاء الباقة بنجاح');
+        $this->audit->log('plan_create', Plan::class, $plan->id, [
+            'name' => $plan->name,
+            'price_yearly' => $plan->price_yearly,
+            'trial_days' => $plan->trial_days,
+        ], $request);
+
+        return redirect()->route('system.plans.index')->with('success', __('messages.system.plans.created'));
     }
 
     /**
@@ -125,7 +136,14 @@ class PlansController extends Controller
 
         $plan->update($validated);
 
-        return redirect()->route('system.plans.index')->with('success', 'تم تحديث الباقة بنجاح');
+        $this->audit->log('plan_update', Plan::class, $plan->id, [
+            'name' => $plan->name,
+            'price_yearly' => $plan->price_yearly,
+            'trial_days' => $plan->trial_days,
+            'is_active' => $plan->is_active,
+        ], $request);
+
+        return redirect()->route('system.plans.index')->with('success', __('messages.system.plans.updated'));
     }
 
     /**
@@ -135,11 +153,16 @@ class PlansController extends Controller
     {
         // Check if plan has active subscriptions
         if ($plan->subscriptions()->whereIn('status', ['active', 'trialing'])->exists()) {
-            return back()->with('error', 'لا يمكن حذف باقة لها اشتراكات نشطة');
+            return back()->with('error', __('messages.system.plans.cannot_delete_active'));
         }
 
         $plan->delete();
 
-        return redirect()->route('system.plans.index')->with('success', 'تم حذف الباقة');
+        $this->audit->log('plan_delete', Plan::class, $plan->id, [
+            'name' => $plan->name,
+            'slug' => $plan->slug,
+        ]);
+
+        return redirect()->route('system.plans.index')->with('success', __('messages.system.plans.deleted_success'));
     }
 }

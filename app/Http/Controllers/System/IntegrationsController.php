@@ -116,7 +116,7 @@ class IntegrationsController extends Controller
         $providers = Integration::getProviders($validated['type']);
 
         if (! isset($providers[$validated['provider']])) {
-            return back()->withErrors(['provider' => 'المزود غير متاح']);
+            return back()->withErrors(['provider' => __('messages.system.integrations.provider_unavailable')]);
         }
 
         $providerInfo = $providers[$validated['provider']];
@@ -132,7 +132,7 @@ class IntegrationsController extends Controller
         );
 
         return redirect()->route('system.integrations.show', $integration)
-            ->with('success', 'تم إضافة التكامل، يرجى إكمال الإعدادات');
+            ->with('success', __('messages.system.integrations.added'));
     }
 
     /**
@@ -214,7 +214,7 @@ class IntegrationsController extends Controller
                 ->update(['is_default' => false]);
         }
 
-        return back()->with('success', 'تم حفظ الإعدادات بنجاح');
+        return back()->with('success', __('messages.system.integrations.settings_saved'));
     }
 
     /**
@@ -242,7 +242,7 @@ class IntegrationsController extends Controller
                 $responseTime
             );
 
-            return back()->with('success', 'تم إرسال رسالة الاختبار بنجاح');
+            return back()->with('success', __('messages.system.integrations.test_sent'));
         } catch (Exception $e) {
             $responseTime = (int) ((microtime(true) - $startTime) * 1000);
 
@@ -256,7 +256,7 @@ class IntegrationsController extends Controller
                 $responseTime
             );
 
-            return back()->withErrors(['test' => 'فشل الاختبار: '.$e->getMessage()]);
+            return back()->withErrors(['test' => __('messages.system.integrations.test_failed', ['error' => $e->getMessage()])]);
         }
     }
 
@@ -268,7 +268,7 @@ class IntegrationsController extends Controller
         $integration->delete();
 
         return redirect()->route('system.integrations.index')
-            ->with('success', 'تم حذف التكامل');
+            ->with('success', __('messages.system.integrations.deleted'));
     }
 
     /**
