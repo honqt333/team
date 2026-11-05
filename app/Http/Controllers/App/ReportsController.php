@@ -11,6 +11,8 @@ use App\Models\Center;
 use App\Models\Customer;
 use App\Models\Department;
 use App\Models\GrnItem;
+use App\Models\HR\Employee;
+use App\Models\HR\JobTitle;
 use App\Models\InventoryCategory;
 use App\Models\InventoryMove;
 use App\Models\Invoice;
@@ -21,6 +23,7 @@ use App\Models\PurchaseReturnInvoice;
 use App\Models\Service;
 use App\Models\Supplier;
 use App\Models\Tenant;
+use App\Models\User;
 use App\Models\VehicleMake;
 use App\Models\VehicleModel;
 use App\Models\Warehouse;
@@ -29,6 +32,7 @@ use App\Models\WorkOrderItem;
 use App\Models\WorkOrderItemPart;
 use App\Support\TenancyContext;
 use Carbon\Carbon;
+use Closure;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -72,7 +76,7 @@ class ReportsController extends Controller
         $customerType = (string) ($request->input('customer_type') ?: 'all');
         $supplierId = (string) ($request->input('supplier_id') ?: 'all');
         $makeId = (string) ($request->input('make_id') ?: 'all');
-        $centerFilter = (string) ($request->input('center_id') ?: 'all');
+        $centerFilter = $this->resolveCenterFilter($request, $centerId);
         $groupBy = (string) ($request->input('group_by') ?: 'none');
         $search = trim((string) ($request->input('search') ?? ''));
 
@@ -274,7 +278,7 @@ class ReportsController extends Controller
         $customerType = (string) ($request->input('customer_type') ?: 'all');
         $supplierId = (string) ($request->input('supplier_id') ?: 'all');
         $makeId = (string) ($request->input('make_id') ?: 'all');
-        $centerFilter = (string) ($request->input('center_id') ?: 'all');
+        $centerFilter = $this->resolveCenterFilter($request, $centerId);
         $search = trim((string) ($request->input('search') ?? ''));
 
         [$from, $to] = $this->resolveDateRange($range, $startDate, $endDate);
@@ -2547,7 +2551,7 @@ class ReportsController extends Controller
         $customerId = (string) ($request->input('customer_id') ?: 'all');
         $customerType = (string) ($request->input('customer_type') ?: 'all');
         $makeId = (string) ($request->input('make_id') ?: 'all');
-        $centerFilter = (string) ($request->input('center_id') ?: 'all');
+        $centerFilter = $this->resolveCenterFilter($request, $centerId);
         $isOverdue = $request->boolean('is_overdue');
         $groupBy = (string) ($request->input('group_by') ?: 'none');
         $search = trim((string) ($request->input('search') ?? ''));
@@ -2810,7 +2814,7 @@ class ReportsController extends Controller
         $customerId = (string) ($request->input('customer_id') ?: 'all');
         $customerType = (string) ($request->input('customer_type') ?: 'all');
         $makeId = (string) ($request->input('make_id') ?: 'all');
-        $centerFilter = (string) ($request->input('center_id') ?: 'all');
+        $centerFilter = $this->resolveCenterFilter($request, $centerId);
         $isOverdue = $request->boolean('is_overdue');
         $search = trim((string) ($request->input('search') ?? ''));
 
@@ -3025,7 +3029,7 @@ class ReportsController extends Controller
         $startDate = $request->input('start_date');
         $endDate = $request->input('end_date');
         $dateType = (string) ($request->input('date_type') ?: 'due_date');
-        $centerFilter = (string) ($request->input('center_id') ?: 'all');
+        $centerFilter = $this->resolveCenterFilter($request, $centerId);
         $departmentId = (string) ($request->input('department_id') ?: 'all');
         $serviceId = (string) ($request->input('service_id') ?: 'all');
         $customerId = (string) ($request->input('customer_id') ?: 'all');
@@ -3310,7 +3314,7 @@ class ReportsController extends Controller
         $startDate = $request->input('start_date');
         $endDate = $request->input('end_date');
         $dateType = (string) ($request->input('date_type') ?: 'due_date');
-        $centerFilter = (string) ($request->input('center_id') ?: 'all');
+        $centerFilter = $this->resolveCenterFilter($request, $centerId);
         $departmentId = (string) ($request->input('department_id') ?: 'all');
         $serviceId = (string) ($request->input('service_id') ?: 'all');
         $customerId = (string) ($request->input('customer_id') ?: 'all');
@@ -4039,5 +4043,624 @@ class ReportsController extends Controller
             'bad_debt' => $badDebt,
             'payment_status' => $paymentStatus,
         ];
+    }
+
+    /**
+     * Dedicated Employees & Technicians Productivity Report unit (matching wrshah /reports/employees).
+     */
+    public function employees(Request $request): Response
+    {
+        $tenantId = auth()->user()->tenant_id;
+        $centerId = TenancyContext::centerId();
+
+        $range = (string) ($request->input('range') ?: 'this_month');
+        $startDate = $request->input('start_date');
+        $endDate = $request->input('end_date');
+        $dateType = (string) ($request->input('date_type') ?: 'service_date');
+        $centerFilter = $this->resolveCenterFilter($request, $centerId);
+        $employeeFilter = (string) ($request->input('employee_id') ?: 'all');
+        $jobTitleFilter = (string) ($request->input('job_title_id') ?: 'all');
+        $departmentFilter = (string) ($request->input('department_id') ?: 'all');
+        $serviceFilter = (string) ($request->input('service_id') ?: 'all');
+        $serviceStatusFilter = (string) ($request->input('service_status') ?: 'all');
+        $makeFilter = (string) ($request->input('make_id') ?: 'all');
+        $modelFilter = (string) ($request->input('model_id') ?: 'all');
+        $ticketNo = trim((string) ($request->input('ticket_no') ?? ''));
+        $isOverdue = $request->boolean('is_overdue');
+        $removeInactiveEmployees = $request->boolean('remove_inactive_employees');
+        $deductTicketDiscount = $request->boolean('deduct_ticket_discount');
+        $groupBy = (string) ($request->input('group_by') ?: 'none');
+        $search = trim((string) ($request->input('search') ?? ''));
+
+        [$from, $to] = $this->resolveDateRange($range, $startDate, $endDate);
+
+        $query = $this->buildEmployeesReportQuery(
+            $tenantId,
+            $centerId,
+            $from,
+            $to,
+            $dateType,
+            $centerFilter,
+            $employeeFilter,
+            $jobTitleFilter,
+            $departmentFilter,
+            $serviceFilter,
+            $serviceStatusFilter,
+            $makeFilter,
+            $modelFilter,
+            $ticketNo,
+            $isOverdue,
+            $removeInactiveEmployees,
+            $search
+        );
+
+        $allRows = (clone $query)
+            ->orderBy('pivot.id', 'desc')
+            ->get();
+
+        $mapRow = $this->getEmployeeRowMapper($deductTicketDiscount);
+        $mappedItems = $allRows->map($mapRow);
+
+        // Overall KPIs calculation
+        $totalRecords = $mappedItems->count();
+        $totalServiceHours = round((float) $mappedItems->sum('service_hours'), 2);
+        $totalAvgPercentContribution = round((float) $mappedItems->sum('avg_percent_contribution'), 2);
+        $totalAvgContributionByServiceHours = $totalServiceHours > 0
+            ? round($totalAvgPercentContribution / $totalServiceHours, 2)
+            : 0.0;
+        $totalWeightedAvgContribution = $totalRecords > 0
+            ? round($totalAvgPercentContribution / $totalRecords, 2)
+            : 0.0;
+        $totalServicePrice = round((float) $mappedItems->sum('service_price'), 2);
+        $totalServiceDiscount = round((float) $mappedItems->sum('service_discount'), 2);
+        $totalServiceCost = round((float) $mappedItems->sum('service_cost'), 2);
+
+        $kpis = [
+            'total_records' => $totalRecords,
+            'total_service_hours' => $totalServiceHours,
+            'total_avg_percent_contribution' => $totalAvgPercentContribution,
+            'total_avg_contribution_by_service_hours' => $totalAvgContributionByServiceHours,
+            'total_weighted_avg_contribution' => $totalWeightedAvgContribution,
+            'total_service_price' => $totalServicePrice,
+            'total_service_discount' => $totalServiceDiscount,
+            'total_service_cost' => $totalServiceCost,
+        ];
+
+        $groupedEmployees = null;
+        $employees = null;
+
+        if ($groupBy !== 'none') {
+            $grouped = $mappedItems->groupBy(function ($item) use ($groupBy) {
+                return match ($groupBy) {
+                    'job_title' => $item['job_title_name'] ?: 'غير محدد',
+                    'employee' => $item['employee_name'] ?: 'غير محدد',
+                    'service_status' => $item['service_status'] ?: 'غير محدد',
+                    'ticket_no' => $item['ticket_no'] ?: 'غير محدد',
+                    'center' => $item['center_name'] ?: 'المركز الرئيسي',
+                    default => 'عام',
+                };
+            });
+
+            $groupSummaryList = [];
+            $groupIdx = 1;
+
+            foreach ($grouped as $groupName => $items) {
+                $groupRecords = $items->count();
+                $groupHours = round((float) $items->sum('service_hours'), 2);
+                $groupAvgContrib = round((float) $items->sum('avg_percent_contribution'), 2);
+                $groupAvgByHours = $groupHours > 0 ? round($groupAvgContrib / $groupHours, 2) : 0.0;
+                $groupWeighted = $groupRecords > 0 ? round($groupAvgContrib / $groupRecords, 2) : 0.0;
+                $groupCost = round((float) $items->sum('service_cost'), 2);
+
+                $groupSummaryList[] = [
+                    'group_id' => $groupIdx++,
+                    'group_name' => $groupName,
+                    'summary' => [
+                        'total_records' => $groupRecords,
+                        'total_service_cost' => $groupCost,
+                        'total_service_hours' => $groupHours,
+                        'total_avg_percent_contribution' => $groupAvgContrib,
+                        'total_avg_contribution_by_service_hours' => $groupAvgByHours,
+                        'total_weighted_avg_contribution' => $groupWeighted,
+                    ],
+                    'items' => $items->values(),
+                ];
+            }
+            $groupedEmployees = $groupSummaryList;
+        } else {
+            $page = max(1, (int) $request->input('page', 1));
+            $perPage = 25;
+            $totalCount = $mappedItems->count();
+            $sliced = $mappedItems->slice(($page - 1) * $perPage, $perPage)->values();
+
+            $employees = new LengthAwarePaginator(
+                $sliced,
+                $totalCount,
+                $perPage,
+                $page,
+                ['path' => $request->url(), 'query' => $request->query()]
+            );
+        }
+
+        $centers = Center::where('tenant_id', $tenantId)->get(['id', 'name']);
+        $employeesList = Employee::where('tenant_id', $tenantId)->get(['id', 'name_ar', 'name_en', 'user_id']);
+        $jobTitles = JobTitle::where('tenant_id', $tenantId)->get(['id', 'name_ar', 'name_en']);
+        $departments = Department::where('tenant_id', $tenantId)->get(['id', 'name_ar', 'name_en']);
+        $services = Service::where('tenant_id', $tenantId)->get(['id', 'name_ar', 'name_en']);
+        $makes = VehicleMake::all(['id', 'name_ar', 'name_en']);
+        $models = VehicleModel::all(['id', 'make_id', 'name_ar', 'name_en']);
+
+        return Inertia::render('Reports/Employees', [
+            'filters' => [
+                'range' => $range,
+                'start_date' => $from?->toDateString(),
+                'end_date' => $to?->toDateString(),
+                'date_type' => $dateType,
+                'center_id' => $centerFilter,
+                'employee_id' => $employeeFilter,
+                'job_title_id' => $jobTitleFilter,
+                'department_id' => $departmentFilter,
+                'service_id' => $serviceFilter,
+                'service_status' => $serviceStatusFilter,
+                'make_id' => $makeFilter,
+                'model_id' => $modelFilter,
+                'ticket_no' => $ticketNo,
+                'is_overdue' => $isOverdue,
+                'remove_inactive_employees' => $removeInactiveEmployees,
+                'deduct_ticket_discount' => $deductTicketDiscount,
+                'group_by' => $groupBy,
+                'search' => $search,
+            ],
+            'kpis' => $kpis,
+            'employees' => $employees,
+            'groupedEmployees' => $groupedEmployees,
+            'centers' => $centers,
+            'employeesList' => $employeesList,
+            'jobTitles' => $jobTitles,
+            'departments' => $departments,
+            'services' => $services,
+            'makes' => $makes,
+            'models' => $models,
+        ]);
+    }
+
+    /**
+     * Export Employees Report as CSV.
+     */
+    public function exportEmployees(Request $request): StreamedResponse
+    {
+        $tenantId = auth()->user()->tenant_id;
+        $centerId = TenancyContext::centerId();
+
+        $range = (string) ($request->input('range') ?: 'this_month');
+        $startDate = $request->input('start_date');
+        $endDate = $request->input('end_date');
+        $dateType = (string) ($request->input('date_type') ?: 'service_date');
+        $centerFilter = $this->resolveCenterFilter($request, $centerId);
+        $employeeFilter = (string) ($request->input('employee_id') ?: 'all');
+        $jobTitleFilter = (string) ($request->input('job_title_id') ?: 'all');
+        $departmentFilter = (string) ($request->input('department_id') ?: 'all');
+        $serviceFilter = (string) ($request->input('service_id') ?: 'all');
+        $serviceStatusFilter = (string) ($request->input('service_status') ?: 'all');
+        $makeFilter = (string) ($request->input('make_id') ?: 'all');
+        $modelFilter = (string) ($request->input('model_id') ?: 'all');
+        $ticketNo = trim((string) ($request->input('ticket_no') ?? ''));
+        $isOverdue = $request->boolean('is_overdue');
+        $removeInactiveEmployees = $request->boolean('remove_inactive_employees');
+        $deductTicketDiscount = $request->boolean('deduct_ticket_discount');
+        $search = trim((string) ($request->input('search') ?? ''));
+
+        [$from, $to] = $this->resolveDateRange($range, $startDate, $endDate);
+
+        $query = $this->buildEmployeesReportQuery(
+            $tenantId,
+            $centerId,
+            $from,
+            $to,
+            $dateType,
+            $centerFilter,
+            $employeeFilter,
+            $jobTitleFilter,
+            $departmentFilter,
+            $serviceFilter,
+            $serviceStatusFilter,
+            $makeFilter,
+            $modelFilter,
+            $ticketNo,
+            $isOverdue,
+            $removeInactiveEmployees,
+            $search
+        );
+
+        $rows = (clone $query)->orderBy('pivot.id', 'desc')->get();
+        $mapRow = $this->getEmployeeRowMapper($deductTicketDiscount);
+
+        $filename = 'employees_report_'.Carbon::now()->format('Y-m-d_His').'.csv';
+
+        return response()->streamDownload(function () use ($rows, $mapRow) {
+            $handle = fopen('php://output', 'w');
+            // Write UTF-8 BOM for Excel
+            fprintf($handle, chr(0xEF).chr(0xBB).chr(0xBF));
+
+            fputcsv($handle, [
+                '#',
+                'الفرع',
+                'الموظف',
+                'المسمى الوظيفي',
+                'الدور في الخدمة',
+                'رقم كارت العمل',
+                'القسم',
+                'الخدمة',
+                'حالة الخدمة',
+                'متأخرة',
+                'المركبة',
+                'رقم اللوحة',
+                'تاريخ الخدمة',
+                'تاريخ الفاتورة',
+                'رقم الفاتورة',
+                'سعر الخدمة',
+                'خصم الخدمة',
+                'تكلفة الخدمة (الصافي)',
+                'مساهمة الخدمة %',
+                'ساعات الخدمة',
+                'الفنيين العاملين',
+                'متوسط المساهمة',
+                'متوسط المساهمة / ساعة',
+                'متوسط المساهمة المرجح',
+            ]);
+
+            $i = 1;
+
+            foreach ($rows as $raw) {
+                $item = $mapRow($raw);
+                fputcsv($handle, [
+                    $i++,
+                    $item['center_name'],
+                    $item['employee_name'],
+                    $item['job_title_name'],
+                    $item['technician_service_role_name'],
+                    $item['ticket_no'],
+                    $item['section_name'],
+                    $item['service_name'],
+                    $item['service_status'],
+                    $item['is_overdue'] ? 'نعم' : 'لا',
+                    $item['vehicle']['display_name'],
+                    $item['vehicle']['plate_number'],
+                    $item['service_date'],
+                    $item['invoice_date'] ?: '-',
+                    $item['invoice_number'] ?: '-',
+                    number_format((float) $item['service_price'], 2, '.', ''),
+                    number_format((float) $item['service_discount'], 2, '.', ''),
+                    number_format((float) $item['service_cost'], 2, '.', ''),
+                    number_format((float) $item['service_contribution'], 2, '.', '').'%',
+                    number_format((float) $item['service_hours'], 2, '.', ''),
+                    $item['working_technicians'],
+                    number_format((float) $item['avg_percent_contribution'], 2, '.', ''),
+                    number_format((float) $item['avg_contribution_by_service_hours'], 2, '.', ''),
+                    number_format((float) $item['weighted_avg_contribution'], 2, '.', ''),
+                ]);
+            }
+
+            fclose($handle);
+        }, $filename, [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+        ]);
+    }
+
+    /**
+     * Build base query for the Employees / Technicians Productivity report.
+     */
+    protected function buildEmployeesReportQuery(
+        int $tenantId,
+        ?int $centerId,
+        ?Carbon $from,
+        ?Carbon $to,
+        string $dateType,
+        string $centerFilter,
+        string $employeeFilter,
+        string $jobTitleFilter,
+        string $departmentFilter,
+        string $serviceFilter,
+        string $serviceStatusFilter,
+        string $makeFilter,
+        string $modelFilter,
+        string $ticketNo,
+        bool $isOverdue,
+        bool $removeInactiveEmployees,
+        string $search
+    ): \Illuminate\Database\Query\Builder {
+        $query = DB::table('work_order_item_technician as pivot')
+            ->join('work_order_items as items', 'items.id', '=', 'pivot.work_order_item_id')
+            ->join('work_orders as wo', 'wo.id', '=', 'items.work_order_id')
+            ->join('users as u', 'u.id', '=', 'pivot.user_id')
+            ->leftJoin('hr_employees as emp', function ($j) {
+                $j->on('emp.user_id', '=', 'u.id')->whereNull('emp.deleted_at');
+            })
+            ->leftJoin('hr_job_titles as jt', 'jt.id', '=', 'emp.job_title_id')
+            ->leftJoin('services as s', 's.id', '=', 'items.service_id')
+            ->leftJoin('departments as d', function ($j) {
+                $j->on('d.id', '=', 'items.department_id')
+                    ->orOn('d.id', '=', 's.department_id');
+            })
+            ->leftJoin('vehicles as v', 'v.id', '=', 'wo.vehicle_id')
+            ->leftJoin('vehicle_makes as vm', 'vm.id', '=', 'v.make_id')
+            ->leftJoin('vehicle_models as vmod', 'vmod.id', '=', 'v.model_id')
+            ->leftJoin('centers as c', 'c.id', '=', 'wo.center_id')
+            ->leftJoin('invoices as inv', function ($j) {
+                $j->on('inv.work_order_id', '=', 'wo.id')
+                    ->where('inv.type', '=', 'invoice')
+                    ->where('inv.status', '!=', 'cancelled');
+            })
+            ->where('wo.tenant_id', $tenantId);
+
+        // Center scoping
+        if ($centerFilter !== 'all' && ! empty($centerFilter)) {
+            $query->where('wo.center_id', (int) $centerFilter);
+        } elseif ($centerId) {
+            $query->where('wo.center_id', $centerId);
+        }
+
+        // Date filter
+        if ($from && $to) {
+            if ($dateType === 'invoice_date') {
+                $query->whereNotNull('inv.issue_date')
+                    ->whereBetween('inv.issue_date', [
+                        $from->copy()->startOfDay()->format('Y-m-d H:i:s'),
+                        $to->copy()->endOfDay()->format('Y-m-d H:i:s'),
+                    ]);
+            } else {
+                $query->where(function ($q) use ($from, $to) {
+                    $start = $from->copy()->startOfDay();
+                    $end = $to->copy()->endOfDay();
+                    $q->whereBetween('items.started_at', [$start, $end])
+                        ->orWhere(function ($q2) use ($start, $end) {
+                            $q2->whereNull('items.started_at')
+                                ->whereBetween('wo.entry_date', [$start->format('Y-m-d'), $end->format('Y-m-d')]);
+                        })
+                        ->orWhere(function ($q3) use ($start, $end) {
+                            $q3->whereNull('items.started_at')
+                                ->whereNull('wo.entry_date')
+                                ->whereBetween('items.created_at', [$start, $end]);
+                        });
+                });
+            }
+        }
+
+        // Employee filter
+        if ($employeeFilter !== 'all') {
+            $query->where(function ($q) use ($employeeFilter) {
+                $q->where('emp.id', (int) $employeeFilter)
+                    ->orWhere('u.id', (int) $employeeFilter);
+            });
+        }
+
+        // Job Title filter
+        if ($jobTitleFilter !== 'all') {
+            $query->where('emp.job_title_id', (int) $jobTitleFilter);
+        }
+
+        // Department filter
+        if ($departmentFilter !== 'all') {
+            $query->where(function ($q) use ($departmentFilter) {
+                $q->where('items.department_id', (int) $departmentFilter)
+                    ->orWhere('s.department_id', (int) $departmentFilter);
+            });
+        }
+
+        // Service filter
+        if ($serviceFilter !== 'all') {
+            $query->where('items.service_id', (int) $serviceFilter);
+        }
+
+        // Service Status filter
+        if ($serviceStatusFilter !== 'all') {
+            $query->where('items.status', $serviceStatusFilter);
+        }
+
+        // Make filter
+        if ($makeFilter !== 'all') {
+            $query->where('v.make_id', (int) $makeFilter);
+        }
+
+        // Model filter
+        if ($modelFilter !== 'all') {
+            $query->where('v.model_id', (int) $modelFilter);
+        }
+
+        // Ticket No filter
+        if ($ticketNo !== '') {
+            $query->where('wo.code', 'like', "%{$ticketNo}%");
+        }
+
+        // Overdue filter
+        if ($isOverdue) {
+            $nowStr = Carbon::now()->toDateTimeString();
+            $query->whereNotNull('items.due_date')
+                ->where('items.due_date', '<', $nowStr)
+                ->whereNotIn('items.status', [WorkOrderItem::STATUS_COMPLETED, WorkOrderItem::STATUS_CANCELLED]);
+        }
+
+        // Remove inactive employees filter
+        if ($removeInactiveEmployees) {
+            $query->where('u.is_active', true)
+                ->where(function ($q) {
+                    $q->whereNull('emp.status')
+                        ->orWhere('emp.status', 'active');
+                });
+        }
+
+        // Direct search
+        if ($search !== '') {
+            $query->where(function ($q) use ($search) {
+                $q->where('u.name', 'like', "%{$search}%")
+                    ->orWhere('emp.name_ar', 'like', "%{$search}%")
+                    ->orWhere('emp.name_en', 'like', "%{$search}%")
+                    ->orWhere('jt.name_ar', 'like', "%{$search}%")
+                    ->orWhere('wo.code', 'like', "%{$search}%")
+                    ->orWhere('s.name_ar', 'like', "%{$search}%")
+                    ->orWhere('s.name_en', 'like', "%{$search}%")
+                    ->orWhere('items.title', 'like', "%{$search}%")
+                    ->orWhere('v.plate_number', 'like', "%{$search}%");
+            });
+        }
+
+        $query->select([
+            'pivot.id as pivot_id',
+            'pivot.work_order_item_id',
+            'pivot.user_id',
+            'pivot.share',
+            'pivot.notes as pivot_notes',
+            'u.name as user_name',
+            'emp.id as employee_id',
+            'emp.name_ar as employee_name_ar',
+            'emp.name_en as employee_name_en',
+            'jt.id as job_title_id',
+            'jt.name_ar as job_title_name_ar',
+            'jt.name_en as job_title_name_en',
+            'wo.id as work_order_id',
+            'wo.code as ticket_no',
+            'wo.status as ticket_status',
+            'wo.entry_date',
+            'wo.expected_end_date',
+            'wo.center_id',
+            'c.name as center_name',
+            'items.id as item_id',
+            'items.title as item_title',
+            'items.status as service_status',
+            'items.unit_price',
+            'items.qty',
+            'items.discount_amount',
+            'items.line_total',
+            'items.actual_duration',
+            'items.estimated_duration',
+            'items.started_at',
+            'items.due_date',
+            'items.completed_at',
+            'items.created_at as item_created_at',
+            's.id as service_id',
+            's.name_ar as service_name_ar',
+            's.name_en as service_name_en',
+            'd.id as department_id',
+            'd.name_ar as department_name_ar',
+            'd.name_en as department_name_en',
+            'v.plate_number',
+            'v.year as vehicle_year',
+            'v.make_other',
+            'v.model_other',
+            'vm.id as make_id',
+            'vm.name_ar as make_name_ar',
+            'vm.name_en as make_name_en',
+            'vmod.id as model_id',
+            'vmod.name_ar as model_name_ar',
+            'vmod.name_en as model_name_en',
+            'inv.id as invoice_id',
+            'inv.invoice_number',
+            'inv.issue_date as invoice_date',
+            DB::raw('(SELECT COUNT(*) FROM work_order_item_technician WHERE work_order_item_id = items.id) as working_technicians_count'),
+            DB::raw(DB::connection()->getDriverName() === 'sqlite'
+                ? '(SELECT COALESCE(SUM((strftime(\'%s\', COALESCE(ended_at, datetime(\'now\'))) - strftime(\'%s\', started_at)) - COALESCE(paused_duration_seconds, 0)), 0) FROM work_order_labor_entries WHERE work_order_item_id = items.id AND user_id = pivot.user_id) as labor_duration_seconds'
+                : '(SELECT COALESCE(SUM(TIMESTAMPDIFF(SECOND, started_at, COALESCE(ended_at, NOW())) - COALESCE(paused_duration_seconds, 0)), 0) FROM work_order_labor_entries WHERE work_order_item_id = items.id AND user_id = pivot.user_id) as labor_duration_seconds'
+            ),
+        ]);
+
+        return $query;
+    }
+
+    /**
+     * Helper to map raw employee assignment records into structured report rows.
+     */
+    protected function getEmployeeRowMapper(bool $deductTicketDiscount): Closure
+    {
+        return function ($row) {
+            $share = floatval($row->share ?: 100);
+            $qty = floatval($row->qty ?: 1);
+            $unitPrice = floatval($row->unit_price ?: 0);
+            $servicePrice = round($unitPrice * $qty, 2);
+            $serviceDiscount = floatval($row->discount_amount ?: 0);
+            $serviceCost = round(floatval($row->line_total ?: ($servicePrice - $serviceDiscount)), 2);
+
+            $workingTechnicians = (int) ($row->working_technicians_count ?: 1);
+
+            // Calculate service hours
+            $laborSeconds = (int) ($row->labor_duration_seconds ?: 0);
+
+            if ($laborSeconds > 0) {
+                $serviceHours = round($laborSeconds / 3600, 2);
+            } elseif (! empty($row->actual_duration) && $row->actual_duration > 0) {
+                $serviceHours = round(($row->actual_duration / 60) * ($share / 100), 2);
+            } elseif (! empty($row->estimated_duration) && $row->estimated_duration > 0) {
+                $serviceHours = round(($row->estimated_duration / 60) * ($share / 100), 2);
+            } else {
+                $serviceHours = 0.0;
+            }
+
+            // Calculate contributions
+            $avgPercentContribution = round($serviceCost * ($share / 100), 2);
+            $avgContributionByServiceHours = $serviceHours > 0 ? round($avgPercentContribution / $serviceHours, 2) : 0.0;
+            $weightedAvgContribution = round($avgPercentContribution * ($share / 100), 2);
+
+            $isOverdue = false;
+
+            if ($row->due_date && Carbon::parse($row->due_date)->isPast() && ! in_array($row->service_status, [WorkOrderItem::STATUS_COMPLETED, WorkOrderItem::STATUS_CANCELLED])) {
+                $isOverdue = true;
+            } elseif (! $row->due_date && $row->expected_end_date && Carbon::parse($row->expected_end_date)->isPast() && ! in_array($row->service_status, [WorkOrderItem::STATUS_COMPLETED, WorkOrderItem::STATUS_CANCELLED])) {
+                $isOverdue = true;
+            }
+
+            $serviceDate = $row->started_at
+                ? Carbon::parse($row->started_at)->format('Y-m-d')
+                : ($row->entry_date
+                    ? Carbon::parse($row->entry_date)->format('Y-m-d')
+                    : ($row->item_created_at ? Carbon::parse($row->item_created_at)->format('Y-m-d') : ''));
+
+            $invoiceDate = $row->invoice_date ? Carbon::parse($row->invoice_date)->format('Y-m-d') : null;
+
+            $makeName = $row->make_name_ar ?: $row->make_name_en ?: $row->make_other ?: '';
+            $modelName = $row->model_name_ar ?: $row->model_name_en ?: $row->model_other ?: '';
+
+            return [
+                'id' => $row->pivot_id,
+                'pivot_id' => $row->pivot_id,
+                'work_order_item_id' => $row->work_order_item_id,
+                'work_order_id' => $row->work_order_id,
+                'ticket_no' => $row->ticket_no,
+                'ticket_status' => $row->ticket_status,
+                'center_id' => $row->center_id,
+                'center_name' => $row->center_name ?: 'المركز الرئيسي',
+                'user_id' => $row->user_id,
+                'employee_id' => $row->employee_id ?: $row->user_id,
+                'employee_name' => $row->employee_name_ar ?: $row->user_name,
+                'job_title_id' => $row->job_title_id,
+                'job_title_name' => $row->job_title_name_ar ?: 'فني صيانة',
+                'technician_service_role_name' => $row->pivot_notes ?: ($share >= 100 ? 'فني رئيسي' : 'فني مشارك'),
+                'service_id' => $row->service_id,
+                'service_name' => $row->item_title ?: ($row->service_name_ar ?: 'خدمة صيانة'),
+                'department_id' => $row->department_id,
+                'section_name' => $row->department_name_ar ?: 'عام',
+                'service_status' => $row->service_status,
+                'is_overdue' => $isOverdue,
+                'vehicle' => [
+                    'make_id' => $row->make_id,
+                    'make_name' => $makeName,
+                    'model_id' => $row->model_id,
+                    'model_name' => $modelName,
+                    'year' => $row->vehicle_year,
+                    'plate_number' => $row->plate_number ?: '',
+                    'display_name' => trim("{$makeName} {$modelName} ".($row->vehicle_year ? "({$row->vehicle_year})" : '')),
+                ],
+                'service_date' => $serviceDate,
+                'invoice_date' => $invoiceDate,
+                'invoice_number' => $row->invoice_number,
+                'service_price' => $servicePrice,
+                'service_discount' => $serviceDiscount,
+                'service_cost' => $serviceCost,
+                'service_contribution' => $share,
+                'service_hours' => $serviceHours,
+                'working_technicians' => $workingTechnicians,
+                'avg_percent_contribution' => $avgPercentContribution,
+                'avg_contribution_by_service_hours' => $avgContributionByServiceHours,
+                'weighted_avg_contribution' => $weightedAvgContribution,
+            ];
+        };
     }
 }

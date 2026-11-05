@@ -1026,6 +1026,8 @@ Route::prefix('app')->middleware(['auth', 'verified', 'tenant.active', 'center.c
         Route::get('/customers/export', [ReportsController::class, 'exportCustomers'])->name('customers.export');
         Route::get('/suppliers', [ReportsController::class, 'suppliers'])->name('suppliers');
         Route::get('/suppliers/export', [ReportsController::class, 'exportSuppliers'])->name('suppliers.export');
+        Route::get('/employees', [ReportsController::class, 'employees'])->name('employees');
+        Route::get('/employees/export', [ReportsController::class, 'exportEmployees'])->name('employees.export');
     });
 
     // ───────────────────────────────────────────────────────────────
@@ -1096,6 +1098,7 @@ Route::prefix('app')->middleware(['auth', 'verified', 'tenant.active', 'center.c
 
 // Wrshah legacy direct report URLs without /app/ prefix
 Route::middleware(['auth', 'verified', 'tenant.active', 'center.context', EnsureTwoFactorEnabled::class])->group(function () {
+    Route::get('/reports/employees', fn () => redirect()->route('app.reports.employees'));
     Route::get('/reports/suppliers', fn () => redirect()->route('app.reports.suppliers'));
     Route::get('/reports/purchaseInvoices', fn () => redirect()->route('app.reports.purchase-invoices'));
     Route::get('/reports/stockActivities', fn () => redirect()->route('app.reports.stock-activities'));
