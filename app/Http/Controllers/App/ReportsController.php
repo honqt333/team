@@ -17,6 +17,7 @@ use App\Models\Invoice;
 use App\Models\Payment;
 use App\Models\PurchaseInvoice;
 use App\Models\PurchaseReturn;
+use App\Models\PurchaseReturnInvoice;
 use App\Models\Service;
 use App\Models\Supplier;
 use App\Models\Tenant;
@@ -30,6 +31,7 @@ use App\Support\TenancyContext;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -1438,6 +1440,7 @@ class ReportsController extends Controller
         $startDate = $request->input('start_date');
         $endDate = $request->input('end_date');
         $paymentStatus = (string) ($request->input('payment_status') ?: 'all');
+        $documentType = (string) ($request->input('document_type') ?: 'all');
         $supplierId = (string) ($request->input('supplier_id') ?: 'all');
         $supplierType = (string) ($request->input('supplier_type') ?: 'all');
         $centerFilter = $this->resolveCenterFilter($request, $centerId);
@@ -1446,7 +1449,7 @@ class ReportsController extends Controller
 
         [$from, $to] = $this->resolveDateRange($range, $startDate, $endDate);
 
-        $query = $this->buildPurchaseInvoicesQuery(
+        $invoiceQuery = $this->buildPurchaseInvoicesQuery(
             $tenantId,
             $centerId,
             $from,
@@ -1461,23 +1464,56 @@ class ReportsController extends Controller
             $search
         );
 
+        $returnQuery = $this->buildPurchaseReturnInvoicesQuery(
+            $tenantId,
+            $centerId,
+            $from,
+            $to,
+            $documentType,
+            $supplierId,
+            $supplierType,
+            $centerFilter,
+            $search
+        );
+
         // Aggregate KPIs
-        $kpiQuery = clone $query;
-        $totalRecords = (int) (clone $kpiQuery)->count();
-        $totalSubtotal = (float) (clone $kpiQuery)->sum('subtotal');
-        $totalDiscount = (float) (clone $kpiQuery)->sum('discount_amount');
-        $totalVat = (float) (clone $kpiQuery)->sum('tax_amount');
-        $totalInvoiceAmount = (float) (clone $kpiQuery)->sum('total');
-        $totalPaymentRemaining = (float) (clone $kpiQuery)->sum('balance');
-        $totalPaid = max(0, round($totalInvoiceAmount - $totalPaymentRemaining, 2));
+        $totalInvoicesCount = (int) (clone $invoiceQuery)->count();
+        $grossSubtotal = (float) (clone $invoiceQuery)->sum('subtotal');
+        $grossDiscount = (float) (clone $invoiceQuery)->sum('discount_amount');
+        $grossVat = (float) (clone $invoiceQuery)->sum('tax_amount');
+        $grossInvoiceAmount = (float) (clone $invoiceQuery)->sum('total');
+        $rawBalance = (float) (clone $invoiceQuery)->sum('balance');
 
-        $relations = [
-            'center:id,name',
-            'supplier:id,name,phone,type,tax_number',
-            'purchaseOrder:id,code',
-        ];
+        $totalReturnsCount = (int) (clone $returnQuery)->count();
+        $returnsSubtotal = (float) (clone $returnQuery)->sum('subtotal');
+        $returnsVat = (float) (clone $returnQuery)->sum('tax_amount');
+        $returnsTotal = (float) (clone $returnQuery)->sum('total');
 
-        $mapSupplierTransaction = function (PurchaseInvoice $inv) {
+        $debitNotesSubQuery = (clone $returnQuery)->where('create_debit_note', true);
+        $totalDebitNotesCount = (int) (clone $debitNotesSubQuery)->count();
+        $totalDebitNotesAmount = (float) (clone $debitNotesSubQuery)->sum('total');
+
+        // Financial Net Totals
+        if ($documentType === 'returns' || $documentType === 'debit_notes') {
+            $totalSubtotal = -$returnsSubtotal;
+            $totalVat = -$returnsVat;
+            $totalInvoiceAmount = -$returnsTotal;
+            $totalDiscount = $returnsTotal;
+            $totalPaid = 0.0;
+            $totalPaymentRemaining = -$returnsTotal;
+            $totalRecords = $documentType === 'debit_notes' ? $totalDebitNotesCount : ($totalReturnsCount - $totalDebitNotesCount);
+        } else {
+            // Net calculation accounting for returns & debit notes
+            $totalSubtotal = round($grossSubtotal - $returnsSubtotal, 2);
+            $totalVat = round($grossVat - $returnsVat, 2);
+            $totalInvoiceAmount = round($grossInvoiceAmount - $returnsTotal, 2);
+            $totalDiscount = round($grossDiscount + $returnsTotal, 2);
+            $totalPaymentRemaining = max(0, round($rawBalance - $totalDebitNotesAmount, 2));
+            $totalPaid = max(0, round($grossInvoiceAmount - $rawBalance, 2));
+            $totalRecords = $documentType === 'invoices' ? $totalInvoicesCount : ($totalInvoicesCount + $totalReturnsCount);
+        }
+
+        $mapSupplierInvoice = function (PurchaseInvoice $inv) {
             $total = (float) $inv->total;
             $balance = (float) $inv->balance;
             $paid = max(0, round($total - $balance, 2));
@@ -1490,8 +1526,15 @@ class ReportsController extends Controller
                 $paymentStatusKey = 'partial';
             }
 
+            $returnsCollection = $inv->returnInvoices ?? collect();
+            $invReturnsTotal = (float) $returnsCollection->sum('total');
+            $invDebitNotesTotal = (float) $returnsCollection->where('create_debit_note', true)->sum('total');
+            $adjustedAmount = (float) $inv->discount_amount + $invReturnsTotal;
+
             return [
-                'id' => $inv->id,
+                'id' => 'inv_'.$inv->id,
+                'raw_id' => $inv->id,
+                'record_type' => 'purchase_invoice',
                 'code' => $inv->code,
                 'invoice_number' => $inv->invoice_number,
                 'issue_date' => $inv->issue_date?->format('Y-m-d'),
@@ -1499,14 +1542,27 @@ class ReportsController extends Controller
                 'status' => $inv->status,
                 'payment_status' => $paymentStatusKey,
                 'subtotal' => (float) $inv->subtotal,
-                'discount_amount' => (float) $inv->discount_amount,
+                'discount_amount' => $adjustedAmount,
+                'raw_discount' => (float) $inv->discount_amount,
                 'tax_amount' => (float) $inv->tax_amount,
                 'total' => $total,
                 'paid' => $paid,
                 'balance' => $balance,
                 'bad_debt' => 0.0,
                 'notes' => $inv->notes,
-                'show_url' => Route::has('app.purchasing.invoices.show') ? route('app.purchasing.invoices.show', $inv->id) : null,
+                'show_url' => Route::has('app.invoices.purchases.show') ? route('app.invoices.purchases.show', $inv->id) : null,
+                'has_returns' => $returnsCollection->isNotEmpty(),
+                'returns_count' => $returnsCollection->count(),
+                'returns_total' => $invReturnsTotal,
+                'debit_notes_total' => $invDebitNotesTotal,
+                'return_invoices' => $returnsCollection->map(fn ($r) => [
+                    'id' => $r->id,
+                    'code' => $r->code,
+                    'total' => (float) $r->total,
+                    'create_debit_note' => (bool) $r->create_debit_note,
+                    'return_date' => $r->return_date?->format('Y-m-d'),
+                    'show_url' => Route::has('app.invoices.purchases.returns.show') ? route('app.invoices.purchases.returns.show', $r->id) : null,
+                ])->values()->all(),
                 'center' => $inv->center ? [
                     'id' => $inv->center->id,
                     'name' => $inv->center->name,
@@ -1521,23 +1577,99 @@ class ReportsController extends Controller
             ];
         };
 
+        $mapSupplierReturn = function (PurchaseReturnInvoice $ret) {
+            $isDebit = (bool) $ret->create_debit_note;
+            $parent = $ret->purchaseInvoice;
+            $sub = (float) $ret->subtotal;
+            $vat = (float) $ret->tax_amount;
+            $tot = (float) $ret->total;
+
+            return [
+                'id' => 'ret_'.$ret->id,
+                'raw_id' => $ret->id,
+                'record_type' => $isDebit ? 'debit_note' : 'return_invoice',
+                'code' => $ret->code,
+                'invoice_number' => ($isDebit ? 'إشعار مدين: ' : 'مرتجع: ').($parent?->code ?: '—'),
+                'issue_date' => $ret->return_date?->format('Y-m-d'),
+                'due_date' => $ret->debit_note_date?->format('Y-m-d') ?? $ret->return_date?->format('Y-m-d'),
+                'status' => $isDebit ? 'debit_note' : 'returned',
+                'payment_status' => $isDebit ? 'debit_note' : 'returned',
+                'subtotal' => -$sub,
+                'discount_amount' => $tot,
+                'raw_discount' => 0.0,
+                'tax_amount' => -$vat,
+                'total' => -$tot,
+                'paid' => 0.0,
+                'balance' => -$tot,
+                'bad_debt' => 0.0,
+                'notes' => $ret->notes,
+                'show_url' => Route::has('app.invoices.purchases.returns.show') ? route('app.invoices.purchases.returns.show', $ret->id) : null,
+                'has_returns' => false,
+                'returns_count' => 0,
+                'returns_total' => 0.0,
+                'debit_notes_total' => 0.0,
+                'return_invoices' => [],
+                'parent_invoice_code' => $parent?->code,
+                'parent_invoice_url' => $parent && Route::has('app.invoices.purchases.show') ? route('app.invoices.purchases.show', $parent->id) : null,
+                'center' => $ret->center ? [
+                    'id' => $ret->center->id,
+                    'name' => $ret->center->name,
+                ] : ($parent?->center ? [
+                    'id' => $parent->center->id,
+                    'name' => $parent->center->name,
+                ] : null),
+                'supplier' => $parent?->supplier ? [
+                    'id' => $parent->supplier->id,
+                    'name' => $parent->supplier->name,
+                    'phone' => $parent->supplier->phone,
+                    'type' => $parent->supplier->type,
+                    'tax_number' => $parent->supplier->tax_number,
+                ] : null,
+            ];
+        };
+
+        // Gather records based on document_type
+        $invoiceItems = collect();
+
+        if ($documentType !== 'returns' && $documentType !== 'debit_notes') {
+            $invoiceItems = (clone $invoiceQuery)
+                ->with([
+                    'center:id,name',
+                    'supplier:id,name,phone,type,tax_number',
+                    'returnInvoices:id,purchase_invoice_id,code,return_date,subtotal,tax_amount,total,create_debit_note',
+                ])
+                ->get()
+                ->map($mapSupplierInvoice);
+        }
+
+        $returnItems = collect();
+
+        if ($documentType !== 'invoices' && ($paymentStatus === 'all' || $paymentStatus === '')) {
+            $returnItems = (clone $returnQuery)
+                ->with([
+                    'center:id,name',
+                    'purchaseInvoice.center:id,name',
+                    'purchaseInvoice.supplier:id,name,phone,type,tax_number',
+                ])
+                ->get()
+                ->map($mapSupplierReturn);
+        }
+
+        $allTransactions = $invoiceItems->concat($returnItems)->sortByDesc(fn ($t) => $t['issue_date'])->values();
+
         $invoices = null;
         $groupedInvoices = null;
 
         if ($groupBy !== 'none') {
-            $allInvoices = (clone $query)
-                ->with($relations)
-                ->orderBy('issue_date', 'desc')
-                ->get()
-                ->map($mapSupplierTransaction);
-
-            $grouped = $allInvoices->groupBy(function ($inv) use ($groupBy) {
+            $grouped = $allTransactions->groupBy(function ($inv) use ($groupBy) {
                 return match ($groupBy) {
                     'center' => $inv['center']['name'] ?? 'المركز الرئيسي',
                     'supplier' => $inv['supplier']['name'] ?? 'مورد غير محدد',
                     'payment_status' => match ($inv['payment_status']) {
                         'paid' => 'مدفوع بالكامل',
                         'partial' => 'مدفوع جزئياً',
+                        'debit_note' => 'إشعار مدين للمورد',
+                        'returned' => 'مرتجع مسجل',
                         default => 'غير مدفوع',
                     },
                     default => 'all',
@@ -1566,13 +1698,16 @@ class ReportsController extends Controller
                 ];
             })->values();
         } else {
-            $paginated = (clone $query)
-                ->with($relations)
-                ->orderBy('issue_date', 'desc')
-                ->paginate(50)
-                ->withQueryString();
-
-            $invoices = $paginated->through($mapSupplierTransaction);
+            $page = (int) ($request->input('page') ?: 1);
+            $perPage = 50;
+            $slice = $allTransactions->forPage($page, $perPage)->values();
+            $invoices = new LengthAwarePaginator(
+                $slice,
+                $allTransactions->count(),
+                $perPage,
+                $page,
+                ['path' => $request->url(), 'query' => $request->query()]
+            );
         }
 
         $suppliers = Supplier::query()
@@ -1593,6 +1728,7 @@ class ReportsController extends Controller
                 'from_date' => $from?->toDateString(),
                 'to_date' => $to?->toDateString(),
                 'payment_status' => $paymentStatus,
+                'document_type' => $documentType,
                 'supplier_id' => $supplierId,
                 'supplier_type' => $supplierType,
                 'center_id' => $centerFilter,
@@ -1601,12 +1737,18 @@ class ReportsController extends Controller
             ],
             'kpis' => [
                 'total_records' => $totalRecords,
+                'total_invoices_count' => $totalInvoicesCount,
+                'total_returns_count' => $totalReturnsCount,
+                'total_debit_notes_count' => $totalDebitNotesCount,
                 'total_subtotal' => round($totalSubtotal, 2),
                 'total_discount' => round($totalDiscount, 2),
                 'total_vat' => round($totalVat, 2),
                 'total_invoice_amount' => round($totalInvoiceAmount, 2),
                 'total_paid' => round($totalPaid, 2),
                 'total_payment_remaining' => round($totalPaymentRemaining, 2),
+                'gross_purchases' => round($grossInvoiceAmount, 2),
+                'total_returns_amount' => round($returnsTotal, 2),
+                'total_debit_notes_amount' => round($totalDebitNotesAmount, 2),
             ],
             'invoices' => $invoices,
             'groupedInvoices' => $groupedInvoices,
@@ -1630,6 +1772,7 @@ class ReportsController extends Controller
         $startDate = $request->input('start_date');
         $endDate = $request->input('end_date');
         $paymentStatus = (string) ($request->input('payment_status') ?: 'all');
+        $documentType = (string) ($request->input('document_type') ?: 'all');
         $supplierId = (string) ($request->input('supplier_id') ?: 'all');
         $supplierType = (string) ($request->input('supplier_type') ?: 'all');
         $centerFilter = $this->resolveCenterFilter($request, $centerId);
@@ -1637,7 +1780,7 @@ class ReportsController extends Controller
 
         [$from, $to] = $this->resolveDateRange($range, $startDate, $endDate);
 
-        $query = $this->buildPurchaseInvoicesQuery(
+        $invoiceQuery = $this->buildPurchaseInvoicesQuery(
             $tenantId,
             $centerId,
             $from,
@@ -1653,73 +1796,199 @@ class ReportsController extends Controller
         )->with([
             'center:id,name',
             'supplier:id,name,phone,type,tax_number',
+            'returnInvoices:id,purchase_invoice_id,code,return_date,subtotal,tax_amount,total,create_debit_note',
         ])
             ->orderBy('issue_date', 'desc');
 
+        $returnQuery = $this->buildPurchaseReturnInvoicesQuery(
+            $tenantId,
+            $centerId,
+            $from,
+            $to,
+            $documentType,
+            $supplierId,
+            $supplierType,
+            $centerFilter,
+            $search
+        )->with([
+            'center:id,name',
+            'purchaseInvoice.center:id,name',
+            'purchaseInvoice.supplier:id,name,phone,type,tax_number',
+        ])
+            ->orderBy('return_date', 'desc');
+
         $filename = 'تقرير_الموردين_'.now()->format('Y-m-d_His').'.csv';
 
-        return response()->streamDownload(function () use ($query) {
+        return response()->streamDownload(function () use ($invoiceQuery, $returnQuery, $documentType, $paymentStatus) {
             $output = fopen('php://output', 'w');
             fwrite($output, "\xEF\xBB\xBF");
 
             fputcsv($output, [
                 '#',
+                'نوع المعاملة',
                 'الفرع / المركز',
-                'رقم الفاتورة في النظام',
+                'رقم الفاتورة / المستند',
                 'رقم مستند المورد / البيان',
+                'الفاتورة الأصلية المرتبطة',
                 'اسم المورد',
                 'هاتف المورد',
                 'الرقم الضريبي للمورد',
-                'تاريخ الفاتورة',
+                'التاريخ',
                 'المجموع قبل الضريبة',
-                'الخصومات والتسويات',
+                'الخصومات والتسويات والمرتجعات',
                 'ضريبة القيمة المضافة',
                 'المستحق / الإجمالي',
                 'المبلغ المسدد',
                 'المتبقي للسداد',
-                'ديون متعثرة',
-                'حالة السداد',
+                'حالة السداد / المعاملة',
             ]);
 
             $index = 1;
-            $query->chunk(200, function ($invoices) use ($output, &$index) {
-                foreach ($invoices as $inv) {
-                    $total = (float) $inv->total;
-                    $balance = (float) $inv->balance;
-                    $paid = max(0, round($total - $balance, 2));
 
-                    $paymentLabel = match (true) {
-                        $inv->status === 'paid' || $balance <= 0.01 => 'مدفوع بالكامل',
-                        $balance < $total - 0.01 => 'مدفوع جزئياً',
-                        default => 'غير مدفوع',
-                    };
+            if ($documentType !== 'returns' && $documentType !== 'debit_notes') {
+                $invoiceQuery->chunk(200, function ($invoices) use ($output, &$index) {
+                    foreach ($invoices as $inv) {
+                        $total = (float) $inv->total;
+                        $balance = (float) $inv->balance;
+                        $paid = max(0, round($total - $balance, 2));
+                        $returnsTotal = (float) ($inv->returnInvoices ? $inv->returnInvoices->sum('total') : 0);
+                        $adjusted = (float) $inv->discount_amount + $returnsTotal;
 
-                    fputcsv($output, [
-                        $index++,
-                        $inv->center?->name ?? 'المركز الرئيسي',
-                        $inv->code,
-                        $inv->invoice_number ?: '—',
-                        $inv->supplier?->name ?? '—',
-                        $inv->supplier?->phone ?? '—',
-                        $inv->supplier?->tax_number ?? '—',
-                        $inv->issue_date?->format('Y-m-d') ?? '—',
-                        number_format((float) $inv->subtotal, 2, '.', ''),
-                        number_format((float) $inv->discount_amount, 2, '.', ''),
-                        number_format((float) $inv->tax_amount, 2, '.', ''),
-                        number_format($total, 2, '.', ''),
-                        number_format($paid, 2, '.', ''),
-                        number_format($balance, 2, '.', ''),
-                        '0.00',
-                        $paymentLabel,
-                    ]);
-                }
-            });
+                        $paymentLabel = match (true) {
+                            $inv->status === 'paid' || $balance <= 0.01 => 'مدفوع بالكامل',
+                            $balance < $total - 0.01 => 'مدفوع جزئياً',
+                            default => 'غير مدفوع',
+                        };
+
+                        fputcsv($output, [
+                            $index++,
+                            'فاتورة شراء',
+                            $inv->center?->name ?? 'المركز الرئيسي',
+                            $inv->code,
+                            $inv->invoice_number ?: '—',
+                            '—',
+                            $inv->supplier?->name ?? '—',
+                            $inv->supplier?->phone ?? '—',
+                            $inv->supplier?->tax_number ?? '—',
+                            $inv->issue_date?->format('Y-m-d') ?? '—',
+                            number_format((float) $inv->subtotal, 2, '.', ''),
+                            number_format($adjusted, 2, '.', ''),
+                            number_format((float) $inv->tax_amount, 2, '.', ''),
+                            number_format($total, 2, '.', ''),
+                            number_format($paid, 2, '.', ''),
+                            number_format($balance, 2, '.', ''),
+                            $paymentLabel,
+                        ]);
+                    }
+                });
+            }
+
+            if ($documentType !== 'invoices' && ($paymentStatus === 'all' || $paymentStatus === '')) {
+                $returnQuery->chunk(200, function ($returns) use ($output, &$index) {
+                    foreach ($returns as $ret) {
+                        $isDebit = (bool) $ret->create_debit_note;
+                        $parent = $ret->purchaseInvoice;
+                        $tot = (float) $ret->total;
+
+                        fputcsv($output, [
+                            $index++,
+                            $isDebit ? 'إشعار مدين للمورد' : 'فاتورة مرتجعة',
+                            $ret->center?->name ?? ($parent?->center?->name ?? 'المركز الرئيسي'),
+                            $ret->code,
+                            $ret->notes ?: ($isDebit ? 'إشعار مدين للمورد' : 'مرتجع بضاعة'),
+                            $parent?->code ?? '—',
+                            $parent?->supplier?->name ?? '—',
+                            $parent?->supplier?->phone ?? '—',
+                            $parent?->supplier?->tax_number ?? '—',
+                            $ret->return_date?->format('Y-m-d') ?? '—',
+                            number_format(-(float) $ret->subtotal, 2, '.', ''),
+                            number_format($tot, 2, '.', ''),
+                            number_format(-(float) $ret->tax_amount, 2, '.', ''),
+                            number_format(-$tot, 2, '.', ''),
+                            '0.00',
+                            number_format(-$tot, 2, '.', ''),
+                            $isDebit ? 'إشعار مدين نشط' : 'مرتجع مسجل',
+                        ]);
+                    }
+                });
+            }
 
             fclose($output);
         }, $filename, [
             'Content-Type' => 'text/csv; charset=UTF-8',
             'Cache-Control' => 'no-store, no-cache',
         ]);
+    }
+
+    /**
+     * Build query for purchase return invoices & debit notes.
+     */
+    private function buildPurchaseReturnInvoicesQuery(
+        int $tenantId,
+        ?int $centerId,
+        ?Carbon $from,
+        ?Carbon $to,
+        string $documentType = 'all',
+        string $supplierId = 'all',
+        string $supplierType = 'all',
+        string $centerFilter = 'all',
+        string $search = ''
+    ) {
+        $supplierId = $supplierId ?: 'all';
+        $supplierType = $supplierType ?: 'all';
+        $centerFilter = $centerFilter ?: 'all';
+        $documentType = $documentType ?: 'all';
+        $search = trim((string) $search);
+
+        $query = PurchaseReturnInvoice::query()->where('tenant_id', $tenantId);
+
+        $accessibleCenterIds = $this->accessibleCenterIds();
+
+        if ($centerFilter !== 'all' && ! empty($centerFilter)) {
+            $requestedCenterId = (int) $centerFilter;
+
+            if ($accessibleCenterIds === null || in_array($requestedCenterId, $accessibleCenterIds, true)) {
+                $query->where('center_id', $requestedCenterId);
+            } else {
+                $query->whereIn('center_id', []);
+            }
+        } elseif ($accessibleCenterIds !== null && ! empty($accessibleCenterIds)) {
+            $query->where(function ($q) use ($accessibleCenterIds) {
+                $q->whereIn('center_id', $accessibleCenterIds)->orWhereNull('center_id');
+            });
+        }
+
+        if ($from && $to) {
+            $query->whereBetween('return_date', [$from, $to]);
+        }
+
+        if ($documentType === 'debit_notes') {
+            $query->where('create_debit_note', true);
+        } elseif ($documentType === 'returns') {
+            $query->where('create_debit_note', false);
+        }
+
+        if ($supplierId !== 'all') {
+            $query->whereHas('purchaseInvoice', fn ($pi) => $pi->where('supplier_id', (int) $supplierId));
+        }
+
+        if ($supplierType !== 'all') {
+            $query->whereHas('purchaseInvoice.supplier', fn ($s) => $s->where('type', $supplierType));
+        }
+
+        if ($search !== '') {
+            $query->where(function ($q) use ($search) {
+                $q->where('code', 'like', "%{$search}%")
+                    ->orWhere('notes', 'like', "%{$search}%")
+                    ->orWhereHas('purchaseInvoice', function ($pi) use ($search) {
+                        $pi->where('code', 'like', "%{$search}%")
+                            ->orWhere('invoice_number', 'like', "%{$search}%")
+                            ->orWhereHas('supplier', fn ($s) => $s->where('name', 'like', "%{$search}%"));
+                    });
+            });
+        }
+
+        return $query;
     }
 
     /**

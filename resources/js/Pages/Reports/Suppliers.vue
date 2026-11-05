@@ -219,9 +219,9 @@
                     </div>
                 </div>
 
-                <!-- Filters Grid: Center, Supplier, Supplier Type, Payment Status, Group By -->
+                <!-- Filters Grid: Center, Supplier, Document Type, Supplier Type, Payment Status, Group By -->
                 <div
-                    class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-3 pt-2 border-t border-gray-100 dark:border-gray-700/50"
+                    class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-3 pt-2 border-t border-gray-100 dark:border-gray-700/50"
                 >
                     <!-- Branch / Center Filter (for multi-branch users) -->
                     <div v-if="centers && centers.length > 1">
@@ -255,6 +255,25 @@
                             option-label="name"
                             option-value="id"
                             :placeholder="$t('reports.suppliers_report.all_suppliers')"
+                            compact
+                            @update:modelValue="applyFilters"
+                            class="w-full text-xs"
+                        />
+                    </div>
+
+                    <!-- Document Type Filter (All, Invoices, Returns, Debit Notes) -->
+                    <div>
+                        <label
+                            class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1"
+                        >
+                            {{ $t('reports.suppliers_report.document_type') }}
+                        </label>
+                        <SearchableSelect
+                            v-model="localFilters.document_type"
+                            :options="documentTypeOptions"
+                            option-label="name"
+                            option-value="id"
+                            :placeholder="$t('reports.suppliers_report.all_documents')"
                             compact
                             @update:modelValue="applyFilters"
                             class="w-full text-xs"
@@ -415,8 +434,8 @@
             </div>
 
             <!-- KPI Summary Cards (Screen Only) -->
-            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 print:hidden">
-                <!-- 1. Total Invoices -->
+            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 gap-3.5 print:hidden">
+                <!-- 1. Total Invoices & Returns -->
                 <div
                     class="bg-gradient-to-br from-rose-500/10 to-red-500/5 dark:from-rose-500/20 dark:to-red-500/10 rounded-2xl p-4 border border-rose-500/20 shadow-sm"
                 >
@@ -448,17 +467,20 @@
                         {{ kpis.total_records }}
                     </div>
                     <div class="mt-1 text-[11px] text-gray-500 dark:text-gray-400">
-                        فاتورة مسجلة
+                        {{ kpis.total_invoices_count || kpis.total_records }} فواتير
+                        <span v-if="kpis.total_returns_count">
+                            | {{ kpis.total_returns_count }} مرتجع
+                        </span>
                     </div>
                 </div>
 
-                <!-- 2. Subtotal -->
+                <!-- 2. Net Subtotal -->
                 <div
                     class="bg-gradient-to-br from-slate-500/10 to-gray-500/5 dark:from-slate-500/20 dark:to-gray-500/10 rounded-2xl p-4 border border-slate-500/20 shadow-sm"
                 >
                     <div class="flex items-center justify-between">
                         <span class="text-xs font-bold text-gray-600 dark:text-gray-300">
-                            {{ $t('reports.suppliers_report.total_subtotal') }}
+                            {{ $t('reports.suppliers_report.subtotal') }}
                         </span>
                         <div
                             class="w-8 h-8 rounded-xl bg-slate-500/20 flex items-center justify-center text-slate-600 dark:text-slate-400"
@@ -483,10 +505,12 @@
                     >
                         {{ formatMoney(kpis.total_subtotal) }}
                     </div>
-                    <div class="mt-1 text-[11px] text-gray-500 dark:text-gray-400">قبل الضريبة</div>
+                    <div class="mt-1 text-[11px] text-gray-500 dark:text-gray-400">
+                        {{ $t('reports.suppliers_report.net_subtotal') }}
+                    </div>
                 </div>
 
-                <!-- 3. Total VAT -->
+                <!-- 3. Net VAT -->
                 <div
                     class="bg-gradient-to-br from-indigo-500/10 to-blue-500/5 dark:from-indigo-500/20 dark:to-blue-500/10 rounded-2xl p-4 border border-indigo-500/20 shadow-sm"
                 >
@@ -518,11 +542,11 @@
                         {{ formatMoney(kpis.total_vat) }}
                     </div>
                     <div class="mt-1 text-[11px] text-gray-500 dark:text-gray-400">
-                        ضريبة القيمة المضافة
+                        {{ $t('reports.suppliers_report.net_vat') }}
                     </div>
                 </div>
 
-                <!-- 4. Total Due (Invoice Amount) -->
+                <!-- 4. Net Due (Invoice Amount) -->
                 <div
                     class="bg-gradient-to-br from-red-500/10 to-rose-500/5 dark:from-red-500/20 dark:to-rose-500/10 rounded-2xl p-4 border border-red-500/20 shadow-sm"
                 >
@@ -552,7 +576,7 @@
                         {{ formatMoney(kpis.total_invoice_amount) }}
                     </div>
                     <div class="mt-1 text-[11px] text-gray-500 dark:text-gray-400">
-                        إجمالي المستحق
+                        {{ $t('reports.suppliers_report.net_due') }}
                     </div>
                 </div>
 
@@ -592,7 +616,43 @@
                     </div>
                 </div>
 
-                <!-- 6. Total Remaining -->
+                <!-- 6. Total Adjustments & Returns -->
+                <div
+                    class="bg-gradient-to-br from-purple-500/10 to-pink-500/5 dark:from-purple-500/20 dark:to-pink-500/10 rounded-2xl p-4 border border-purple-500/20 shadow-sm"
+                >
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-bold text-gray-600 dark:text-gray-300">
+                            {{ $t('reports.suppliers_report.amount_adjusted') }}
+                        </span>
+                        <div
+                            class="w-8 h-8 rounded-xl bg-purple-500/20 flex items-center justify-center text-purple-600 dark:text-purple-400"
+                        >
+                            <svg
+                                class="w-4 h-4"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                                />
+                            </svg>
+                        </div>
+                    </div>
+                    <div
+                        class="mt-2 text-2xl font-black text-purple-700 dark:text-purple-400 font-mono"
+                    >
+                        {{ formatMoney(kpis.total_discount) }}
+                    </div>
+                    <div class="mt-1 text-[11px] text-gray-500 dark:text-gray-400">
+                        {{ $t('reports.suppliers_report.adjusted_and_returns') }}
+                    </div>
+                </div>
+
+                <!-- 7. Net Remaining -->
                 <div
                     class="bg-gradient-to-br from-amber-500/10 to-orange-500/5 dark:from-amber-500/20 dark:to-orange-500/10 rounded-2xl p-4 border border-amber-500/20 shadow-sm"
                 >
@@ -624,8 +684,36 @@
                         {{ formatMoney(kpis.total_payment_remaining) }}
                     </div>
                     <div class="mt-1 text-[11px] text-gray-500 dark:text-gray-400">
-                        متبقي للسداد
+                        صافي المتبقي للسداد
                     </div>
+                </div>
+            </div>
+
+            <!-- Returns & Debit Notes Info Banner (if returns exist) -->
+            <div
+                v-if="kpis.total_returns_amount && kpis.total_returns_amount > 0"
+                class="flex items-center justify-between p-3.5 rounded-2xl bg-purple-50/80 dark:bg-purple-900/20 border border-purple-200/70 dark:border-purple-800/50 text-xs text-purple-900 dark:text-purple-200 shadow-sm print:hidden"
+            >
+                <div class="flex items-center gap-2.5 flex-wrap">
+                    <span class="w-2.5 h-2.5 rounded-full bg-purple-600 animate-pulse"></span>
+                    <span class="font-bold">
+                        {{ $t('reports.suppliers_report.total_returns') }}:
+                    </span>
+                    <span class="font-mono font-black text-purple-800 dark:text-purple-300 text-sm">
+                        {{ formatMoney(kpis.total_returns_amount) }}
+                    </span>
+                    <span class="text-gray-600 dark:text-gray-400">
+                        ({{ kpis.total_returns_count }} مرتجع مسجل منها
+                        {{ kpis.total_debit_notes_count }} إشعار مدين للمورد تم احتسابها وخصمها من
+                        صافي المستحق)
+                    </span>
+                </div>
+                <div
+                    v-if="kpis.total_debit_notes_amount > 0"
+                    class="font-mono text-purple-800 dark:text-purple-300 font-bold hidden sm:block text-xs"
+                >
+                    {{ $t('reports.suppliers_report.total_debit_notes') }}:
+                    {{ formatMoney(kpis.total_debit_notes_amount) }}
                 </div>
             </div>
 
@@ -769,18 +857,19 @@
                             >
                                 <tr>
                                     <th class="py-2.5 px-3 w-12 text-center">#</th>
+                                    <th class="py-2.5 px-3">النوع</th>
                                     <th class="py-2.5 px-3">الفرع</th>
-                                    <th class="py-2.5 px-3">رقم الفاتورة</th>
-                                    <th class="py-2.5 px-3">مستند المورد</th>
+                                    <th class="py-2.5 px-3">رقم المعاملة</th>
+                                    <th class="py-2.5 px-3">مستند المورد / البيان</th>
                                     <th class="py-2.5 px-3">المورد</th>
-                                    <th class="py-2.5 px-3">تاريخ الفاتورة</th>
+                                    <th class="py-2.5 px-3">التاريخ</th>
                                     <th class="py-2.5 px-3 text-center">قبل الضريبة</th>
                                     <th class="py-2.5 px-3 text-center">الضريبة</th>
                                     <th class="py-2.5 px-3 text-center">المستحق</th>
                                     <th class="py-2.5 px-3 text-center">المسدد</th>
-                                    <th class="py-2.5 px-3 text-center">الخصم</th>
+                                    <th class="py-2.5 px-3 text-center">التسويات / الإرجاع</th>
                                     <th class="py-2.5 px-3 text-center">المتبقي</th>
-                                    <th class="py-2.5 px-3 text-center">حالة السداد</th>
+                                    <th class="py-2.5 px-3 text-center">حالة المعاملة</th>
                                 </tr>
                             </thead>
                             <tbody
@@ -794,6 +883,14 @@
                                     <td class="py-2.5 px-3 text-center text-gray-400">
                                         {{ itemIdx + 1 }}
                                     </td>
+                                    <td class="py-2.5 px-3">
+                                        <span
+                                            class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold"
+                                            :class="getDocumentTypeBadgeClasses(inv.record_type)"
+                                        >
+                                            {{ getDocumentTypeLabel(inv.record_type) }}
+                                        </span>
+                                    </td>
                                     <td class="py-2.5 px-3 text-gray-700 dark:text-gray-300">
                                         {{ inv.center?.name || '—' }}
                                     </td>
@@ -801,7 +898,7 @@
                                         <a
                                             v-if="inv.show_url"
                                             :href="inv.show_url"
-                                            class="font-mono font-bold text-rose-600 hover:text-rose-800 hover:underline"
+                                            class="font-mono font-bold text-rose-600 hover:text-rose-800 hover:underline flex items-center gap-1"
                                         >
                                             {{ inv.code }}
                                         </a>
@@ -811,6 +908,44 @@
                                         >
                                             {{ inv.code }}
                                         </span>
+
+                                        <!-- Returns attached to this invoice -->
+                                        <div
+                                            v-if="inv.has_returns && inv.return_invoices?.length"
+                                            class="mt-1 flex flex-col gap-0.5"
+                                        >
+                                            <a
+                                                v-for="ret in inv.return_invoices"
+                                                :key="ret.id"
+                                                :href="ret.show_url"
+                                                class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 hover:underline border border-amber-200 dark:border-amber-800/50"
+                                            >
+                                                <span
+                                                    class="w-1.5 h-1.5 rounded-full bg-amber-500"
+                                                ></span>
+                                                {{
+                                                    ret.create_debit_note ? 'إشعار مدين' : 'مرتجع'
+                                                }}: {{ ret.code }} ({{ formatMoney(ret.total) }})
+                                            </a>
+                                        </div>
+
+                                        <!-- Parent invoice for return/debit note -->
+                                        <div
+                                            v-if="inv.parent_invoice_code"
+                                            class="mt-0.5 text-[10px] text-gray-500 dark:text-gray-400"
+                                        >
+                                            {{ $t('reports.suppliers_report.parent_invoice') }}:
+                                            <a
+                                                v-if="inv.parent_invoice_url"
+                                                :href="inv.parent_invoice_url"
+                                                class="font-mono font-bold text-rose-600 hover:underline"
+                                            >
+                                                {{ inv.parent_invoice_code }}
+                                            </a>
+                                            <span v-else class="font-mono font-bold">
+                                                {{ inv.parent_invoice_code }}
+                                            </span>
+                                        </div>
                                     </td>
                                     <td
                                         class="py-2.5 px-3 font-mono text-gray-600 dark:text-gray-400"
@@ -825,14 +960,29 @@
                                     >
                                         {{ inv.issue_date || '—' }}
                                     </td>
-                                    <td class="py-2.5 px-3 text-center font-mono">
+                                    <td
+                                        class="py-2.5 px-3 text-center font-mono"
+                                        :class="{ 'text-rose-600 font-bold': inv.subtotal < 0 }"
+                                    >
                                         {{ formatMoney(inv.subtotal) }}
                                     </td>
-                                    <td class="py-2.5 px-3 text-center font-mono text-indigo-600">
+                                    <td
+                                        class="py-2.5 px-3 text-center font-mono"
+                                        :class="
+                                            inv.tax_amount < 0
+                                                ? 'text-rose-600 font-bold'
+                                                : 'text-indigo-600'
+                                        "
+                                    >
                                         {{ formatMoney(inv.tax_amount) }}
                                     </td>
                                     <td
-                                        class="py-2.5 px-3 text-center font-mono font-bold text-rose-700 dark:text-rose-400"
+                                        class="py-2.5 px-3 text-center font-mono font-bold"
+                                        :class="
+                                            inv.total < 0
+                                                ? 'text-rose-600 dark:text-rose-400'
+                                                : 'text-rose-700 dark:text-rose-400'
+                                        "
                                     >
                                         {{ formatMoney(inv.total) }}
                                     </td>
@@ -841,13 +991,24 @@
                                     >
                                         {{ formatMoney(inv.paid) }}
                                     </td>
-                                    <td class="py-2.5 px-3 text-center font-mono text-gray-500">
+                                    <td
+                                        class="py-2.5 px-3 text-center font-mono"
+                                        :class="
+                                            inv.discount_amount > 0
+                                                ? 'text-purple-600 dark:text-purple-400 font-bold'
+                                                : 'text-gray-500'
+                                        "
+                                    >
                                         {{ formatMoney(inv.discount_amount) }}
                                     </td>
                                     <td
                                         class="py-2.5 px-3 text-center font-mono font-bold"
                                         :class="
-                                            inv.balance > 0 ? 'text-amber-600' : 'text-gray-400'
+                                            inv.balance < 0
+                                                ? 'text-purple-600'
+                                                : inv.balance > 0
+                                                  ? 'text-amber-600'
+                                                  : 'text-gray-400'
                                         "
                                     >
                                         {{ formatMoney(inv.balance) }}
@@ -879,6 +1040,7 @@
                         >
                             <tr>
                                 <th class="py-3 px-3 w-12 text-center">#</th>
+                                <th class="py-3 px-3">النوع</th>
                                 <th class="py-3 px-3">
                                     {{ $t('reports.suppliers_report.center') }}
                                 </th>
@@ -929,6 +1091,14 @@
                                 <td class="py-3 px-3 text-center text-gray-400">
                                     {{ (invoices.current_page - 1) * invoices.per_page + idx + 1 }}
                                 </td>
+                                <td class="py-3 px-3">
+                                    <span
+                                        class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold"
+                                        :class="getDocumentTypeBadgeClasses(inv.record_type)"
+                                    >
+                                        {{ getDocumentTypeLabel(inv.record_type) }}
+                                    </span>
+                                </td>
                                 <td class="py-3 px-3 text-gray-700 dark:text-gray-300">
                                     {{ inv.center?.name || '—' }}
                                 </td>
@@ -936,7 +1106,7 @@
                                     <a
                                         v-if="inv.show_url"
                                         :href="inv.show_url"
-                                        class="font-mono font-bold text-rose-600 hover:text-rose-800 hover:underline"
+                                        class="font-mono font-bold text-rose-600 hover:text-rose-800 hover:underline flex items-center gap-1"
                                     >
                                         {{ inv.code }}
                                     </a>
@@ -946,6 +1116,43 @@
                                     >
                                         {{ inv.code }}
                                     </span>
+
+                                    <!-- Returns attached to this invoice -->
+                                    <div
+                                        v-if="inv.has_returns && inv.return_invoices?.length"
+                                        class="mt-1 flex flex-col gap-0.5"
+                                    >
+                                        <a
+                                            v-for="ret in inv.return_invoices"
+                                            :key="ret.id"
+                                            :href="ret.show_url"
+                                            class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 hover:underline border border-amber-200 dark:border-amber-800/50"
+                                        >
+                                            <span
+                                                class="w-1.5 h-1.5 rounded-full bg-amber-500"
+                                            ></span>
+                                            {{ ret.create_debit_note ? 'إشعار مدين' : 'مرتجع' }}:
+                                            {{ ret.code }} ({{ formatMoney(ret.total) }})
+                                        </a>
+                                    </div>
+
+                                    <!-- Parent invoice for return/debit note -->
+                                    <div
+                                        v-if="inv.parent_invoice_code"
+                                        class="mt-0.5 text-[10px] text-gray-500 dark:text-gray-400"
+                                    >
+                                        {{ $t('reports.suppliers_report.parent_invoice') }}:
+                                        <a
+                                            v-if="inv.parent_invoice_url"
+                                            :href="inv.parent_invoice_url"
+                                            class="font-mono font-bold text-rose-600 hover:underline"
+                                        >
+                                            {{ inv.parent_invoice_code }}
+                                        </a>
+                                        <span v-else class="font-mono font-bold">
+                                            {{ inv.parent_invoice_code }}
+                                        </span>
+                                    </div>
                                 </td>
                                 <td class="py-3 px-3 font-mono text-gray-600 dark:text-gray-400">
                                     {{ inv.invoice_number || '—' }}
@@ -964,14 +1171,29 @@
                                 <td class="py-3 px-3 font-mono text-gray-600 dark:text-gray-300">
                                     {{ inv.issue_date || '—' }}
                                 </td>
-                                <td class="py-3 px-3 text-center font-mono">
+                                <td
+                                    class="py-3 px-3 text-center font-mono"
+                                    :class="{ 'text-rose-600 font-bold': inv.subtotal < 0 }"
+                                >
                                     {{ formatMoney(inv.subtotal) }}
                                 </td>
-                                <td class="py-3 px-3 text-center font-mono text-indigo-600">
+                                <td
+                                    class="py-3 px-3 text-center font-mono"
+                                    :class="
+                                        inv.tax_amount < 0
+                                            ? 'text-rose-600 font-bold'
+                                            : 'text-indigo-600'
+                                    "
+                                >
                                     {{ formatMoney(inv.tax_amount) }}
                                 </td>
                                 <td
-                                    class="py-3 px-3 text-center font-mono font-bold text-rose-700 dark:text-rose-400"
+                                    class="py-3 px-3 text-center font-mono font-bold"
+                                    :class="
+                                        inv.total < 0
+                                            ? 'text-rose-600 dark:text-rose-400'
+                                            : 'text-rose-700 dark:text-rose-400'
+                                    "
                                 >
                                     {{ formatMoney(inv.total) }}
                                 </td>
@@ -980,12 +1202,25 @@
                                 >
                                     {{ formatMoney(inv.paid) }}
                                 </td>
-                                <td class="py-3 px-3 text-center font-mono text-gray-500">
+                                <td
+                                    class="py-3 px-3 text-center font-mono"
+                                    :class="
+                                        inv.discount_amount > 0
+                                            ? 'text-purple-600 dark:text-purple-400 font-bold'
+                                            : 'text-gray-500'
+                                    "
+                                >
                                     {{ formatMoney(inv.discount_amount) }}
                                 </td>
                                 <td
                                     class="py-3 px-3 text-center font-mono font-bold"
-                                    :class="inv.balance > 0 ? 'text-amber-600' : 'text-gray-400'"
+                                    :class="
+                                        inv.balance < 0
+                                            ? 'text-purple-600'
+                                            : inv.balance > 0
+                                              ? 'text-amber-600'
+                                              : 'text-gray-400'
+                                    "
                                 >
                                     {{ formatMoney(inv.balance) }}
                                 </td>
@@ -1002,7 +1237,7 @@
                         <tbody v-else>
                             <tr>
                                 <td
-                                    colspan="13"
+                                    colspan="14"
                                     class="py-12 text-center text-gray-400 dark:text-gray-500"
                                 >
                                     <div class="flex flex-col items-center justify-center gap-2">
@@ -1144,6 +1379,7 @@ const localFilters = reactive({
     start_date: props.filters.range === 'custom' ? props.filters.start_date || '' : '',
     end_date: props.filters.range === 'custom' ? props.filters.end_date || '' : '',
     payment_status: String(props.filters.payment_status || 'all'),
+    document_type: String(props.filters.document_type || 'all'),
     supplier_id: String(props.filters.supplier_id || 'all'),
     supplier_type: String(props.filters.supplier_type || 'all'),
     center_id: String(props.filters.center_id || 'all'),
@@ -1160,6 +1396,7 @@ watch(
         localFilters.start_date = newFilters.range === 'custom' ? newFilters.start_date || '' : '';
         localFilters.end_date = newFilters.range === 'custom' ? newFilters.end_date || '' : '';
         localFilters.payment_status = String(newFilters.payment_status || 'all');
+        localFilters.document_type = String(newFilters.document_type || 'all');
         localFilters.supplier_id = String(newFilters.supplier_id || 'all');
         localFilters.supplier_type = String(newFilters.supplier_type || 'all');
         localFilters.center_id = String(newFilters.center_id || 'all');
@@ -1271,6 +1508,33 @@ const supplierTypeOptions = computed(() => [
     },
 ]);
 
+const documentTypeOptions = computed(() => [
+    {
+        id: 'all',
+        value: 'all',
+        name: t('reports.suppliers_report.all_documents'),
+        label: t('reports.suppliers_report.all_documents'),
+    },
+    {
+        id: 'invoices',
+        value: 'invoices',
+        name: t('reports.suppliers_report.purchase_invoices_only'),
+        label: t('reports.suppliers_report.purchase_invoices_only'),
+    },
+    {
+        id: 'returns',
+        value: 'returns',
+        name: t('reports.suppliers_report.returns_only'),
+        label: t('reports.suppliers_report.returns_only'),
+    },
+    {
+        id: 'debit_notes',
+        value: 'debit_notes',
+        name: t('reports.suppliers_report.debit_notes_only'),
+        label: t('reports.suppliers_report.debit_notes_only'),
+    },
+]);
+
 const paymentStatusOptions = computed(() => [
     {
         id: 'all',
@@ -1334,6 +1598,8 @@ const applyFilters = () => {
         end_date: isCustom ? localFilters.end_date || undefined : undefined,
         payment_status:
             localFilters.payment_status !== 'all' ? localFilters.payment_status : undefined,
+        document_type:
+            localFilters.document_type !== 'all' ? localFilters.document_type : undefined,
         supplier_id: localFilters.supplier_id !== 'all' ? localFilters.supplier_id : undefined,
         supplier_type:
             localFilters.supplier_type !== 'all' ? localFilters.supplier_type : undefined,
@@ -1354,6 +1620,7 @@ const resetFilters = () => {
     localFilters.start_date = '';
     localFilters.end_date = '';
     localFilters.payment_status = 'all';
+    localFilters.document_type = 'all';
     localFilters.supplier_id = 'all';
     localFilters.supplier_type = 'all';
     localFilters.center_id = 'all';
@@ -1372,6 +1639,8 @@ const exportUrl = computed(() => {
     }
     if (localFilters.payment_status && localFilters.payment_status !== 'all')
         query.set('payment_status', localFilters.payment_status);
+    if (localFilters.document_type && localFilters.document_type !== 'all')
+        query.set('document_type', localFilters.document_type);
     if (localFilters.supplier_id && localFilters.supplier_id !== 'all')
         query.set('supplier_id', localFilters.supplier_id);
     if (localFilters.supplier_type && localFilters.supplier_type !== 'all')
@@ -1388,12 +1657,16 @@ const handlePrint = () => {
     window.print();
 };
 
-// Badge helper
+// Badge helpers
 const getPaymentBadgeClasses = (status) => {
     switch (status) {
         case 'paid':
             return 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/60 dark:text-emerald-300';
         case 'partial':
+            return 'bg-amber-100 text-amber-800 dark:bg-amber-900/60 dark:text-amber-300';
+        case 'debit_note':
+            return 'bg-purple-100 text-purple-800 dark:bg-purple-900/60 dark:text-purple-300';
+        case 'returned':
             return 'bg-amber-100 text-amber-800 dark:bg-amber-900/60 dark:text-amber-300';
         case 'unpaid':
         default:
@@ -1407,9 +1680,37 @@ const getPaymentStatusLabel = (status) => {
             return t('reports.suppliers_report.status_paid');
         case 'partial':
             return t('reports.suppliers_report.status_partial');
+        case 'debit_note':
+            return t('reports.suppliers_report.doc_debit_note');
+        case 'returned':
+            return t('reports.suppliers_report.doc_return_invoice');
         case 'unpaid':
         default:
             return t('reports.suppliers_report.status_unpaid');
+    }
+};
+
+const getDocumentTypeBadgeClasses = (recordType) => {
+    switch (recordType) {
+        case 'debit_note':
+            return 'bg-purple-50 text-purple-700 ring-1 ring-purple-600/20 dark:bg-purple-900/30 dark:text-purple-300';
+        case 'return_invoice':
+            return 'bg-amber-50 text-amber-700 ring-1 ring-amber-600/20 dark:bg-amber-900/30 dark:text-amber-300';
+        case 'purchase_invoice':
+        default:
+            return 'bg-sky-50 text-sky-700 ring-1 ring-sky-600/20 dark:bg-sky-900/30 dark:text-sky-300';
+    }
+};
+
+const getDocumentTypeLabel = (recordType) => {
+    switch (recordType) {
+        case 'debit_note':
+            return t('reports.suppliers_report.doc_debit_note');
+        case 'return_invoice':
+            return t('reports.suppliers_report.doc_return_invoice');
+        case 'purchase_invoice':
+        default:
+            return t('reports.suppliers_report.doc_purchase_invoice');
     }
 };
 
