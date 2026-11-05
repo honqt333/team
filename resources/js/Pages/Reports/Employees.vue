@@ -934,9 +934,7 @@
                                                 {{ getStatusLabel(row.service_status) }}
                                             </span>
                                             <a
-                                                :href="
-                                                    route('app.work-orders.show', row.work_order_id)
-                                                "
+                                                :href="getWorkOrderUrl(row.work_order_id)"
                                                 class="font-mono font-bold text-orange-600 dark:text-orange-400 hover:underline"
                                             >
                                                 {{ row.ticket_no }}
@@ -1166,7 +1164,7 @@
                                             {{ getStatusLabel(row.service_status) }}
                                         </span>
                                         <a
-                                            :href="route('app.work-orders.show', row.work_order_id)"
+                                            :href="getWorkOrderUrl(row.work_order_id)"
                                             class="font-mono font-bold text-orange-600 dark:text-orange-400 hover:underline"
                                         >
                                             {{ row.ticket_no }}
@@ -1677,5 +1675,14 @@ const getStatusLabel = (status) => {
         default:
             return status || 'غير محدد';
     }
+};
+
+const getWorkOrderUrl = (id) => {
+    try {
+        if (typeof route === 'function' && route().has('work-orders.show')) {
+            return route('work-orders.show', id);
+        }
+    } catch (e) {}
+    return `/app/work-orders/${id}`;
 };
 </script>
