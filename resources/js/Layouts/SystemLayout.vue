@@ -42,6 +42,15 @@
                         </p>
                     </div>
                 </div>
+                <!-- Page Title (optional) -->
+                <div
+                    v-if="props.title"
+                    class="px-4 py-2 border-b border-gray-200 dark:border-gray-700 flex-shrink-0"
+                >
+                    <p class="text-xs font-semibold text-gray-500 dark:text-gray-400 truncate">
+                        {{ props.title }}
+                    </p>
+                </div>
 
                 <!-- Navigation (shared with mobile drawer) -->
                 <nav class="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
@@ -256,6 +265,28 @@
                                 </div>
                             </div>
                         </div>
+
+                        <!-- Language Toggle — mirrors the tenant AppLayout
+                             pattern: POST the new locale to the global
+                             `locale.set` route (CSRF-exempt, session-backed),
+                             then flip the client-side i18n locale so the
+                             whole panel re-renders without a full reload.
+                             `setLocale()` also persists the choice to
+                             localStorage and syncs <html lang/dir>.
+
+                             The label is the language you switch TO (not
+                             the current one) — same convention as the
+                             tenant panel. Each locale file carries its
+                             own target name in `system.theme.language`,
+                             so the button always reads in the language
+                             the user is currently looking at. -->
+                        <button
+                            @click="toggleLocale"
+                            class="px-3 py-1.5 rounded-lg text-sm font-medium text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                            :title="$t('system.theme.language_tooltip')"
+                        >
+                            {{ $t('system.theme.language') }}
+                        </button>
 
                         <!-- Theme Toggle -->
                         <button
@@ -545,11 +576,16 @@
 <script setup>
 const { t } = useI18n();
 
+const props = defineProps({
+    title: { type: String, default: '' },
+});
+
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue';
 import { usePage, router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import { useTheme } from '@/Composables/useTheme';
 import { useToast } from '@/Composables/useToast';
+import { setLocale } from '@/i18n/index.js';
 import ConfirmModal from '@/Components/ConfirmModal.vue';
 import Toast from '@/Components/Toast.vue';
 import { systemNavGroups } from '@/Layouts/systemNav.js';
@@ -703,13 +739,20 @@ const formattedDate = ref('');
 // implementation's behaviour.
 let intervalId;
 onMounted(() => {
+    // The date follows the active locale — hard-coding 'ar-SA' would
+    // render an Arabic date even in the English UI. The 'u-nu-latn'
+    // suffix keeps Western digits in the Arabic locale, which is what
+    // the rest of the panel expects.
     const update = () => {
-        formattedDate.value = new Date().toLocaleDateString('ar-SA-u-nu-latn', {
-            weekday: 'long',
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric',
-        });
+        formattedDate.value = new Date().toLocaleDateString(
+            locale.value === 'ar' ? 'ar-SA-u-nu-latn' : 'en-US',
+            {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+            }
+        );
     };
     update();
     intervalId = setInterval(update, 60000);
@@ -742,6 +785,43 @@ watch(notifMenuOpen, (open) => {
 const handleLogout = () => {
     router.post(route('logout'));
 };
+
+// ── Language Toggle ───────────────────────────────────────────────────
+// Mirrors the tenant AppLayout implementation so both panels behave
+// identically:
+//
+//   1. POST the new locale to the global `locale.set` route. The route
+//      is CSRF-exempt and stores the value in the session, so the
+//      server-side locale (used by `__()` in PHP and by the
+//      `SetLocale` middleware on the next request) matches what the
+//      browser renders.
+//   2. On success, flip the client-side vue-i18n locale via
+//      `setLocale()`. That helper also writes `app.locale` to
+//      localStorage (the axios interceptor sends it as the `X-Locale`
+//      header) and rewrites `<html lang>` / `<html dir>`.
+//
+// The `onError` branch restores the previous locale because a failed
+// POST leaves the server session on the old locale — without the
+// rollback the UI and the session would drift apart.
+function toggleLocale() {
+    const newLocale = locale.value === 'ar' ? 'en' : 'ar';
+    const previousLocale = locale.value;
+
+    router.post(
+        route('locale.set'),
+        { locale: newLocale },
+        {
+            onSuccess: () => {
+                setLocale(newLocale);
+            },
+            onError: () => {
+                // Put the client back in sync with the server session.
+                setLocale(previousLocale);
+                toastError(t('system.theme.language_switch_failed'));
+            },
+        }
+    );
+}
 
 const isActive = (href) => {
     const currentPath = page.url;
