@@ -72,7 +72,8 @@ const getOptionLabel = (option) => {
         if (typeof props.optionLabel === 'function') {
             return props.optionLabel(option);
         }
-        return toEnglish(option[props.optionLabel]);
+        const val = option[props.optionLabel] ?? option.label ?? option.name ?? option.title;
+        return toEnglish(val !== undefined && val !== null ? String(val) : '');
     }
     return toEnglish(String(option));
 };
@@ -84,9 +85,24 @@ const getOptionValue = (option) => {
         if (typeof props.optionValue === 'function') {
             return props.optionValue(option);
         }
-        return option[props.optionValue];
+        return option[props.optionValue] ?? option.id ?? option.value ?? option.key;
     }
     return option;
+};
+
+// Determine if an option is selected (handles strict equality and string/number coercion)
+const isOptionSelected = (option) => {
+    const optVal = getOptionValue(option);
+    if (optVal === props.modelValue) return true;
+    if (
+        optVal !== null &&
+        optVal !== undefined &&
+        props.modelValue !== null &&
+        props.modelValue !== undefined
+    ) {
+        return String(optVal) === String(props.modelValue);
+    }
+    return false;
 };
 
 // Filtered options based on search
@@ -115,7 +131,7 @@ watch(searchQuery, (val) => {
 
 // Selected option object
 const selectedOption = computed(() => {
-    return props.options.find((opt) => getOptionValue(opt) === props.modelValue);
+    return props.options.find((opt) => isOptionSelected(opt));
 });
 
 // Watch filtering to reset highlight
@@ -351,7 +367,7 @@ const scrollToHighlighted = () => {
                         highlightedIndex === index
                             ? 'bg-violet-50 dark:bg-violet-900/50 text-violet-700 dark:text-violet-300'
                             : 'text-gray-700 dark:text-gray-300 hover:bg-violet-50 dark:hover:bg-violet-900/50 hover:text-violet-700 dark:hover:text-violet-300',
-                        { 'font-medium': getOptionValue(option) === modelValue },
+                        { 'font-medium': isOptionSelected(option) },
                     ]"
                 >
                     <slot name="option" :option="option">
@@ -361,7 +377,7 @@ const scrollToHighlighted = () => {
                         </div>
                     </slot>
                     <svg
-                        v-if="getOptionValue(option) === modelValue"
+                        v-if="isOptionSelected(option)"
                         class="w-4 h-4"
                         fill="none"
                         stroke="currentColor"
