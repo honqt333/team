@@ -353,6 +353,16 @@ Route::middleware(['auth', 'verified', EnsureTenantActive::class, EnsureTwoFacto
         Route::get('/payslips/{payslip}', [EmployeePortalController::class, 'showPayslip'])->name('employee.payslips.show');
         Route::post('/work-orders/{workOrder}/items/{item}/status', [EmployeePortalController::class, 'updateItemStatus'])->name('employee.work-orders.items.update-status');
         Route::post('/work-orders/{workOrder}/items/{item}/complete', [EmployeePortalController::class, 'completeItem'])->name('employee.work-orders.items.complete');
+
+        // Technician features
+        Route::post('/work-orders/{workOrder}/items/{item}/notes', [EmployeePortalController::class, 'updateNotes'])->name('employee.work-orders.items.notes');
+        Route::post('/work-orders/{workOrder}/items/{item}/media', [EmployeePortalController::class, 'uploadMedia'])->name('employee.work-orders.items.media');
+        Route::delete('/work-orders/{workOrder}/items/{item}/photos/{photo}', [EmployeePortalController::class, 'deletePhoto'])->name('employee.work-orders.items.photos.delete');
+        Route::post('/work-orders/{workOrder}/items/{item}/checklist', [EmployeePortalController::class, 'updateChecklist'])->name('employee.work-orders.items.checklist');
+        Route::post('/work-orders/{workOrder}/items/{item}/timer/start', [EmployeePortalController::class, 'startTimer'])->name('employee.work-orders.items.timer.start');
+        Route::post('/work-orders/{workOrder}/items/{item}/timer/pause', [EmployeePortalController::class, 'pauseTimer'])->name('employee.work-orders.items.timer.pause');
+        Route::post('/work-orders/{workOrder}/items/{item}/timer/resume', [EmployeePortalController::class, 'resumeTimer'])->name('employee.work-orders.items.timer.resume');
+        Route::post('/work-orders/{workOrder}/items/{item}/priority', [EmployeePortalController::class, 'updatePriority'])->name('employee.work-orders.items.priority');
     });
 });
 
@@ -999,6 +1009,14 @@ Route::prefix('app')->middleware(['auth', 'verified', 'tenant.active', 'center.c
         Route::get('/', [ReportsController::class, 'hub'])->name('hub');
         Route::get('/payments', [ReportsController::class, 'payments'])->name('payments');
         Route::get('/payments/export', [ReportsController::class, 'exportPayments'])->name('payments.export');
+        Route::get('/invoices', [ReportsController::class, 'invoices'])->name('invoices');
+        Route::get('/invoices/export', [ReportsController::class, 'exportInvoices'])->name('invoices.export');
+        Route::get('/purchase-invoices', [ReportsController::class, 'purchaseInvoices'])->name('purchase-invoices');
+        Route::get('/purchase-invoices/export', [ReportsController::class, 'exportPurchaseInvoices'])->name('purchase-invoices.export');
+        Route::get('/purchaseInvoices', fn () => redirect()->route('app.reports.purchase-invoices'));
+        Route::get('/stock-activities', [ReportsController::class, 'stockActivities'])->name('stock-activities');
+        Route::get('/stock-activities/export', [ReportsController::class, 'exportStockActivities'])->name('stock-activities.export');
+        Route::get('/stockActivities', fn () => redirect()->route('app.reports.stock-activities'));
         Route::get('/tickets', [ReportsController::class, 'tickets'])->name('tickets');
         Route::get('/tickets/export', [ReportsController::class, 'exportTickets'])->name('tickets.export');
         Route::get('/orders', fn () => redirect()->route('app.reports.tickets'))->name('orders');
@@ -1006,6 +1024,8 @@ Route::prefix('app')->middleware(['auth', 'verified', 'tenant.active', 'center.c
         Route::get('/services/export', [ReportsController::class, 'exportServices'])->name('services.export');
         Route::get('/customers', [ReportsController::class, 'customers'])->name('customers');
         Route::get('/customers/export', [ReportsController::class, 'exportCustomers'])->name('customers.export');
+        Route::get('/suppliers', [ReportsController::class, 'suppliers'])->name('suppliers');
+        Route::get('/suppliers/export', [ReportsController::class, 'exportSuppliers'])->name('suppliers.export');
     });
 
     // ───────────────────────────────────────────────────────────────
@@ -1024,7 +1044,7 @@ Route::prefix('app')->middleware(['auth', 'verified', 'tenant.active', 'center.c
         Route::post('/{feedback}/seen-reply', [FeedbackController::class, 'markReplySeen'])->name('seen-reply');
         Route::delete('/{feedback}', [FeedbackController::class, 'destroy'])->name('destroy');
     });
-    Route::get('/feedbacks', fn () => redirect()->route('app.feedback.index'));
+    Route::get('/feedbacks', fn () => redirect()->route('app.feedback.index'))->name('app.feedback.redirect');
 
     // ───────────────────────────────────────────────────────────────
     // Invoices & Payments
@@ -1072,6 +1092,13 @@ Route::prefix('app')->middleware(['auth', 'verified', 'tenant.active', 'center.c
     Route::get('/work-orders/{workOrder}/proforma', [InvoicesController::class, 'printProforma'])->name('app.work-orders.proforma');
     Route::get('/work-orders/{workOrder}/credit-note/summary', [InvoicesController::class, 'creditNoteSummary'])->name('app.work-orders.credit-note.summary');
     Route::post('/work-orders/{workOrder}/credit-note', [InvoicesController::class, 'storeCreditNote'])->name('app.work-orders.credit-note.store');
+});
+
+// Wrshah legacy direct report URLs without /app/ prefix
+Route::middleware(['auth', 'verified', 'tenant.active', 'center.context', EnsureTwoFactorEnabled::class])->group(function () {
+    Route::get('/reports/suppliers', fn () => redirect()->route('app.reports.suppliers'));
+    Route::get('/reports/purchaseInvoices', fn () => redirect()->route('app.reports.purchase-invoices'));
+    Route::get('/reports/stockActivities', fn () => redirect()->route('app.reports.stock-activities'));
 });
 
 // Test routes for tenancy middleware (testing environment only)
@@ -1292,8 +1319,8 @@ Route::prefix('system')->middleware(['auth:web,admin', 'system.admin'])->group(f
         Route::put('/{feedback}/status', [FeedbackManagementController::class, 'updateStatus'])->name('update-status');
         Route::delete('/{feedback}', [FeedbackManagementController::class, 'destroy'])->name('destroy');
     });
-    Route::get('/feedbacks', fn () => redirect()->route('system.feedbacks.index'));
-    Route::get('/feedback', fn () => redirect()->route('system.feedbacks.index'));
+    Route::get('/feedbacks', fn () => redirect()->route('system.feedbacks.index'))->name('system.feedback.redirect');
+    Route::get('/feedback', fn () => redirect()->route('system.feedbacks.index'))->name('system.feedback.shortcut');
 
     // Subscription Invoices
     Route::get('/invoices', [SubscriptionInvoicesController::class, 'index'])->name('system.invoices.index');

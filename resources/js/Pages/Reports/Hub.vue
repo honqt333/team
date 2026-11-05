@@ -138,9 +138,9 @@
                 </Link>
 
                 <!-- Invoices -->
-                <a
-                    href="#"
-                    class="group relative bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 rounded-2xl p-7 border border-green-200 dark:border-green-800 hover:border-green-400 dark:hover:border-green-600 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 text-center cursor-not-allowed"
+                <Link
+                    :href="route('app.reports.invoices')"
+                    class="group relative bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 rounded-2xl p-7 border border-green-200 dark:border-green-800 hover:border-green-400 dark:hover:border-green-600 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 text-center"
                 >
                     <div
                         class="w-16 h-16 mx-auto rounded-2xl bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center shadow-lg shadow-green-500/30 group-hover:scale-110 transition-all duration-300"
@@ -164,13 +164,17 @@
                     >
                         {{ $t('reports.invoices') }}
                     </h3>
-                    <ComingSoonBadge />
-                </a>
+                    <span
+                        class="mt-2 inline-block px-2.5 py-0.5 text-[10px] font-semibold rounded-full bg-green-100 dark:bg-green-900/60 text-green-700 dark:text-green-300"
+                    >
+                        متاح الآن
+                    </span>
+                </Link>
 
                 <!-- Purchase Invoices -->
-                <a
-                    href="#"
-                    class="group relative bg-gradient-to-br from-violet-50 to-purple-50 dark:from-violet-900/20 dark:to-purple-900/20 rounded-2xl p-7 border border-violet-200 dark:border-violet-800 hover:border-violet-400 dark:hover:border-violet-600 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 text-center cursor-not-allowed"
+                <Link
+                    :href="route('app.reports.purchase-invoices')"
+                    class="group relative bg-gradient-to-br from-violet-50 to-purple-50 dark:from-violet-900/20 dark:to-purple-900/20 rounded-2xl p-7 border border-violet-200 dark:border-violet-800 hover:border-violet-400 dark:hover:border-violet-600 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 text-center"
                 >
                     <div
                         class="w-16 h-16 mx-auto rounded-2xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-lg shadow-violet-500/30 group-hover:scale-110 transition-all duration-300"
@@ -194,13 +198,17 @@
                     >
                         {{ $t('reports.purchase_invoices') }}
                     </h3>
-                    <ComingSoonBadge />
-                </a>
+                    <span
+                        class="mt-2 inline-block px-2.5 py-0.5 text-[10px] font-semibold rounded-full bg-violet-100 dark:bg-violet-900/60 text-violet-700 dark:text-violet-300"
+                    >
+                        متاح الآن
+                    </span>
+                </Link>
 
                 <!-- Inventory Activities -->
-                <a
-                    href="#"
-                    class="group relative bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 rounded-2xl p-7 border border-amber-200 dark:border-amber-800 hover:border-amber-400 dark:hover:border-amber-600 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 text-center cursor-not-allowed"
+                <Link
+                    :href="route('app.reports.stock-activities')"
+                    class="group relative bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 rounded-2xl p-7 border border-amber-200 dark:border-amber-800 hover:border-amber-400 dark:hover:border-amber-600 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 text-center"
                 >
                     <div
                         class="w-16 h-16 mx-auto rounded-2xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center shadow-lg shadow-amber-500/30 group-hover:scale-110 transition-all duration-300"
@@ -224,8 +232,12 @@
                     >
                         {{ $t('reports.inventory_activities') }}
                     </h3>
-                    <ComingSoonBadge />
-                </a>
+                    <span
+                        class="mt-2 inline-block px-2.5 py-0.5 text-[10px] font-semibold rounded-full bg-amber-100 dark:bg-amber-900/60 text-amber-700 dark:text-amber-300"
+                    >
+                        متاح الآن
+                    </span>
+                </Link>
 
                 <!-- Customers -->
                 <Link
@@ -293,8 +305,8 @@
 
                 <!-- Suppliers -->
                 <a
-                    href="#"
-                    class="group relative bg-gradient-to-br from-rose-50 to-red-50 dark:from-rose-900/20 dark:to-red-900/20 rounded-2xl p-7 border border-rose-200 dark:border-rose-800 hover:border-rose-400 dark:hover:border-rose-600 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 text-center cursor-not-allowed"
+                    :href="route('app.reports.suppliers')"
+                    class="group relative bg-gradient-to-br from-rose-50 to-red-50 dark:from-rose-900/20 dark:to-red-900/20 rounded-2xl p-7 border border-rose-200 dark:border-rose-800 hover:border-rose-400 dark:hover:border-rose-600 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 text-center"
                 >
                     <div
                         class="w-16 h-16 mx-auto rounded-2xl bg-gradient-to-br from-rose-500 to-red-600 flex items-center justify-center shadow-lg shadow-rose-500/30 group-hover:scale-110 transition-all duration-300"
@@ -318,7 +330,12 @@
                     >
                         {{ $t('reports.suppliers') }}
                     </h3>
-                    <ComingSoonBadge />
+                    <span
+                        class="mt-3 inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20"
+                    >
+                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                        متاح الآن
+                    </span>
                 </a>
 
                 <!-- Employees / Workers -->

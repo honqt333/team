@@ -4,24 +4,34 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\App;
 
+use App\Enums\InvoiceType;
 use App\Enums\PaymentType;
 use App\Http\Controllers\Controller;
 use App\Models\Center;
 use App\Models\Customer;
 use App\Models\Department;
+use App\Models\GrnItem;
+use App\Models\InventoryCategory;
+use App\Models\InventoryMove;
+use App\Models\Invoice;
 use App\Models\Payment;
+use App\Models\PurchaseInvoice;
+use App\Models\PurchaseReturn;
 use App\Models\Service;
 use App\Models\Supplier;
 use App\Models\Tenant;
 use App\Models\VehicleMake;
 use App\Models\VehicleModel;
+use App\Models\Warehouse;
 use App\Models\WorkOrder;
 use App\Models\WorkOrderItem;
+use App\Models\WorkOrderItemPart;
 use App\Support\TenancyContext;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use Inertia\Response;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -392,7 +402,7 @@ class ReportsController extends Controller
             return null;
         }
 
-        if ($user->hasRole('super_admin')) {
+        if ($user->is_system_admin || $user->hasRole('super_admin')) {
             return null;
         }
 
@@ -402,10 +412,72 @@ class ReportsController extends Controller
             ->all();
 
         if ($centerIds === []) {
+            if ($user->current_center_id) {
+                return [(int) $user->current_center_id];
+            }
+
             return null;
         }
 
         return array_values(array_unique($centerIds));
+    }
+
+    /**
+     * Resolve the center filter:
+     * - Explicit center request parameter takes precedence
+     * - Defaults to currently active center context (TenancyContext::centerId())
+     * - Falls back to 'all' if no center context exists
+     */
+    private function resolveCenterFilter(Request $request, ?int $activeCenterId): string
+    {
+        if ($request->has('center_id') && $request->input('center_id') !== null && $request->input('center_id') !== '') {
+            return (string) $request->input('center_id');
+        }
+
+        if ($activeCenterId !== null) {
+            return (string) $activeCenterId;
+        }
+
+        return 'all';
+    }
+
+    /**
+     * Resolve the collection of centers accessible to the signed-in user.
+     */
+    private function resolveAccessibleCenters(int $tenantId)
+    {
+        $accessibleCenterIds = $this->accessibleCenterIds();
+
+        return Center::query()
+            ->where('tenant_id', $tenantId)
+            ->when($accessibleCenterIds !== null, fn ($q) => $q->whereIn('id', $accessibleCenterIds))
+            ->select('id', 'name')
+            ->orderBy('name')
+            ->get();
+    }
+
+    /**
+     * Resolve company info for reports, aligning branch name to filtered/current center.
+     */
+    private function resolveReportCompanyInfo(Tenant $tenant, string $centerFilter, ?int $activeCenterId): array
+    {
+        $targetCenterId = ($centerFilter !== 'all' && is_numeric($centerFilter))
+            ? (int) $centerFilter
+            : $activeCenterId;
+
+        $targetCenter = $targetCenterId ? Center::find($targetCenterId) : null;
+
+        return [
+            'name' => $tenant->legal_name ?: $tenant->name,
+            'commercial_register' => $tenant->cr_number ?? null,
+            'cr_number' => $tenant->cr_number ?? '',
+            'tax_number' => $tenant->taxSettings?->tax_number ?? $tenant->tax_number ?? $tenant->vat_number ?? null,
+            'vat_number' => $tenant->taxSettings?->tax_number ?? $tenant->tax_number ?? $tenant->vat_number ?? '',
+            'address' => $tenant->address ?? null,
+            'phone' => $tenant->phone ?? null,
+            'logo_path' => $tenant->logo_path ?? '',
+            'center_name' => $targetCenter?->name ?? '',
+        ];
     }
 
     private function buildPaymentsQuery(
@@ -529,7 +601,11 @@ class ReportsController extends Controller
         $now = Carbon::now();
         $range = $range ?: 'this_month';
 
-        if ($range === 'custom' || (! empty($start) || ! empty($end))) {
+        if ($range === 'all' || $range === 'all_time') {
+            return [null, null];
+        }
+
+        if ($range === 'custom' || (empty($range) && (! empty($start) || ! empty($end)))) {
             $parsedStart = null;
             $parsedEnd = null;
 
@@ -558,9 +634,1631 @@ class ReportsController extends Controller
             'this_week' => [$now->copy()->startOfWeek(), $now->copy()->endOfWeek()],
             'this_month' => [$now->copy()->startOfMonth(), $now->copy()->endOfMonth()],
             'this_year' => [$now->copy()->startOfYear(), $now->copy()->endOfYear()],
-            'all' => [null, null],
+            'all', 'all_time' => [null, null],
             default => [$now->copy()->startOfMonth(), $now->copy()->endOfMonth()],
         };
+    }
+
+    /**
+     * Dedicated Invoices Report unit.
+     */
+    public function invoices(Request $request): Response
+    {
+        $this->authorize('viewAny', Invoice::class);
+
+        $tenantId = auth()->user()->tenant_id;
+        $centerId = TenancyContext::centerId();
+
+        $range = (string) ($request->input('range') ?: 'this_month');
+        $startDate = $request->input('start_date');
+        $endDate = $request->input('end_date');
+        $dateType = (string) ($request->input('date_type') ?: 'issue_date');
+        $type = (string) ($request->input('type') ?: 'all');
+        $subtype = (string) ($request->input('subtype') ?: 'all');
+        $paymentStatus = (string) ($request->input('payment_status') ?: 'all');
+        $customerId = (string) ($request->input('customer_id') ?: 'all');
+        $customerType = (string) ($request->input('customer_type') ?: 'all');
+        $centerFilter = $this->resolveCenterFilter($request, $centerId);
+        $isOverdue = $request->boolean('is_overdue');
+        $groupBy = (string) ($request->input('group_by') ?: 'none');
+        $search = trim((string) ($request->input('search') ?? ''));
+
+        [$from, $to] = $this->resolveDateRange($range, $startDate, $endDate);
+
+        $query = $this->buildInvoicesQuery(
+            $tenantId,
+            $centerId,
+            $from,
+            $to,
+            $dateType,
+            $type,
+            $subtype,
+            $paymentStatus,
+            $customerId,
+            $customerType,
+            $centerFilter,
+            $isOverdue,
+            $search
+        );
+
+        // Aggregate KPIs on filtered dataset
+        $kpiQuery = clone $query;
+        $totalRecords = (int) (clone $kpiQuery)->count();
+        $totalSubtotal = (float) (clone $kpiQuery)->sum('total_excl_tax');
+        $totalVat = (float) (clone $kpiQuery)->sum('total_tax');
+        $totalInvoiceAmount = (float) (clone $kpiQuery)->sum('total_incl_tax');
+        $totalPaid = (float) (clone $kpiQuery)->sum('total_paid');
+        $totalPaymentRemaining = (float) ((clone $kpiQuery)->selectRaw('SUM(CASE WHEN (total_incl_tax - total_paid) > 0 THEN (total_incl_tax - total_paid) ELSE 0 END) as rem')->value('rem') ?? 0);
+
+        $totalDiscount = (float) DB::table('invoice_lines')
+            ->whereIn('invoice_id', (clone $kpiQuery)->select('id'))
+            ->sum('discount_amount');
+
+        $relations = [
+            'center:id,name',
+            'customer:id,name,phone,type,tax_number',
+            'workOrder:id,code,vehicle_id',
+            'workOrder.vehicle:id,plate_number,make_id,model_id,make_other,model_other,year',
+            'workOrder.vehicle.make:id,name_ar,name_en,logo_path',
+            'workOrder.vehicle.model:id,name_ar,name_en',
+        ];
+
+        $mapInvoice = function (Invoice $inv) {
+            $discount = (float) ($inv->total_discount ?? 0);
+            $remaining = max(0, (float) $inv->total_incl_tax - (float) $inv->total_paid);
+            $isOverdue = $inv->due_date && $inv->due_date->isPast() && $inv->payment_status !== 'paid';
+
+            return [
+                'id' => $inv->id,
+                'invoice_number' => $inv->invoice_number,
+                'type' => $inv->type instanceof InvoiceType ? $inv->type->value : (string) $inv->type,
+                'subtype' => $inv->subtype,
+                'status' => $inv->status,
+                'payment_status' => $inv->payment_status,
+                'payment_status_label' => $inv->payment_status_label,
+                'issue_date' => $inv->issue_date?->format('Y-m-d H:i') ?? $inv->created_at?->format('Y-m-d H:i'),
+                'due_date' => $inv->due_date?->format('Y-m-d'),
+                'supply_date' => $inv->supply_date?->format('Y-m-d'),
+                'is_overdue' => $isOverdue,
+                'center' => $inv->center ? [
+                    'id' => $inv->center->id,
+                    'name' => $inv->center->name,
+                ] : null,
+                'customer' => $inv->customer ? [
+                    'id' => $inv->customer->id,
+                    'name' => $inv->customer->name,
+                    'phone' => $inv->customer->phone,
+                    'type' => $inv->customer->type,
+                    'tax_number' => $inv->customer->tax_number,
+                ] : [
+                    'name' => $inv->customer_name_snapshot ?? 'عميل غير مسجل',
+                    'phone' => null,
+                    'type' => 'individual',
+                    'tax_number' => $inv->customer_vat_snapshot,
+                ],
+                'work_order' => $inv->workOrder ? [
+                    'id' => $inv->workOrder->id,
+                    'code' => $inv->workOrder->code,
+                    'vehicle' => $inv->workOrder->vehicle ? [
+                        'id' => $inv->workOrder->vehicle->id,
+                        'plate_number' => $inv->workOrder->vehicle->plate_number,
+                        'make' => $inv->workOrder->vehicle->make?->name_ar ?? $inv->workOrder->vehicle->make_other,
+                        'model' => $inv->workOrder->vehicle->model?->name_ar ?? $inv->workOrder->vehicle->model_other,
+                        'year' => $inv->workOrder->vehicle->year,
+                    ] : null,
+                ] : null,
+                'total_excl_tax' => (float) $inv->total_excl_tax,
+                'total_discount' => $discount,
+                'total_tax' => (float) $inv->total_tax,
+                'total_incl_tax' => (float) $inv->total_incl_tax,
+                'total_paid' => (float) $inv->total_paid,
+                'remaining' => $remaining,
+            ];
+        };
+
+        $invoices = null;
+        $groupedInvoices = null;
+
+        if ($groupBy !== 'none') {
+            $allInvoices = (clone $query)
+                ->with($relations)
+                ->withSum('lines as total_discount', 'discount_amount')
+                ->orderBy('issue_date', 'desc')
+                ->limit(2000)
+                ->get()
+                ->map($mapInvoice);
+
+            $grouped = $allInvoices->groupBy(function ($inv) use ($groupBy) {
+                return match ($groupBy) {
+                    'center' => $inv['center']['name'] ?? 'المركز الرئيسي',
+                    'customer' => $inv['customer']['name'] ?? 'عميل غير محدد',
+                    'customer_type' => ($inv['customer']['type'] ?? '') === 'company' ? 'شركة / منشأة' : 'فرد',
+                    'payment_status' => match ($inv['payment_status']) {
+                        'paid' => 'مدفوع بالكامل',
+                        'partial' => 'مدفوع جزئياً',
+                        'unpaid' => 'غير مدفوع',
+                        default => 'أخرى',
+                    },
+                    'type' => match ($inv['type']) {
+                        'credit_note' => 'إشعار دائن',
+                        'debit_note' => 'إشعار مدين',
+                        default => 'فاتورة ضريبية',
+                    },
+                    default => 'all',
+                };
+            });
+
+            $groupedInvoices = $grouped->map(function ($items, $key) {
+                return [
+                    'group_key' => $key,
+                    'group_name' => (string) $key,
+                    'total_records' => $items->count(),
+                    'total_subtotal' => (float) $items->sum('total_excl_tax'),
+                    'total_discount' => (float) $items->sum('total_discount'),
+                    'total_vat' => (float) $items->sum('total_tax'),
+                    'total_invoice_amount' => (float) $items->sum('total_incl_tax'),
+                    'total_paid' => (float) $items->sum('total_paid'),
+                    'total_payment_remaining' => (float) $items->sum('remaining'),
+                    'items' => $items->values(),
+                ];
+            })->values();
+        } else {
+            $paginated = (clone $query)
+                ->with($relations)
+                ->withSum('lines as total_discount', 'discount_amount')
+                ->orderBy('issue_date', 'desc')
+                ->paginate(25)
+                ->withQueryString();
+
+            $invoices = $paginated->through($mapInvoice);
+        }
+
+        $customers = Customer::query()
+            ->where('tenant_id', $tenantId)
+            ->select('id', 'name', 'phone', 'type')
+            ->orderBy('name')
+            ->limit(300)
+            ->get();
+
+        $centers = $this->resolveAccessibleCenters($tenantId);
+        $tenant = auth()->user()->tenant;
+
+        return Inertia::render('Reports/Invoices', [
+            'filters' => [
+                'range' => $range,
+                'start_date' => $startDate,
+                'end_date' => $endDate,
+                'date_type' => $dateType,
+                'type' => $type,
+                'subtype' => $subtype,
+                'payment_status' => $paymentStatus,
+                'customer_id' => $customerId,
+                'customer_type' => $customerType,
+                'center_id' => $centerFilter,
+                'is_overdue' => $isOverdue,
+                'group_by' => $groupBy,
+                'search' => $search,
+            ],
+            'kpis' => [
+                'total_records' => $totalRecords,
+                'total_subtotal' => $totalSubtotal,
+                'total_discount' => $totalDiscount,
+                'total_vat' => $totalVat,
+                'total_invoice_amount' => $totalInvoiceAmount,
+                'total_paid' => $totalPaid,
+                'total_payment_remaining' => $totalPaymentRemaining,
+            ],
+            'invoices' => $invoices,
+            'groupedInvoices' => $groupedInvoices,
+            'customers' => $customers,
+            'centers' => $centers,
+            'companyInfo' => $this->resolveReportCompanyInfo($tenant, $centerFilter, $centerId),
+        ]);
+    }
+
+    /**
+     * Export Invoices Report as CSV (with UTF-8 BOM for Arabic Excel support).
+     */
+    public function exportInvoices(Request $request): StreamedResponse
+    {
+        $this->authorize('viewAny', Invoice::class);
+
+        $tenantId = auth()->user()->tenant_id;
+        $centerId = TenancyContext::centerId();
+
+        $range = (string) ($request->input('range') ?: 'this_month');
+        $startDate = $request->input('start_date');
+        $endDate = $request->input('end_date');
+        $dateType = (string) ($request->input('date_type') ?: 'issue_date');
+        $type = (string) ($request->input('type') ?: 'all');
+        $subtype = (string) ($request->input('subtype') ?: 'all');
+        $paymentStatus = (string) ($request->input('payment_status') ?: 'all');
+        $customerId = (string) ($request->input('customer_id') ?: 'all');
+        $customerType = (string) ($request->input('customer_type') ?: 'all');
+        $centerFilter = $this->resolveCenterFilter($request, $centerId);
+        $isOverdue = $request->boolean('is_overdue');
+        $search = trim((string) ($request->input('search') ?? ''));
+
+        [$from, $to] = $this->resolveDateRange($range, $startDate, $endDate);
+
+        $query = $this->buildInvoicesQuery(
+            $tenantId,
+            $centerId,
+            $from,
+            $to,
+            $dateType,
+            $type,
+            $subtype,
+            $paymentStatus,
+            $customerId,
+            $customerType,
+            $centerFilter,
+            $isOverdue,
+            $search
+        )->with([
+            'center:id,name',
+            'customer:id,name,phone,type,tax_number',
+            'workOrder:id,code,vehicle_id',
+            'workOrder.vehicle:id,plate_number',
+        ])
+            ->withSum('lines as total_discount', 'discount_amount')
+            ->orderBy('issue_date', 'desc');
+
+        $filename = 'تقرير_الفواتير_'.now()->format('Y-m-d_His').'.csv';
+
+        return response()->streamDownload(function () use ($query) {
+            $output = fopen('php://output', 'w');
+            fwrite($output, "\xEF\xBB\xBF");
+
+            // CSV Header
+            fputcsv($output, [
+                '#',
+                'الفرع',
+                'رقم الفاتورة',
+                'نوع الفاتورة',
+                'رقم كرت العمل',
+                'تاريخ الإصدار',
+                'تاريخ الاستحقاق',
+                'العميل',
+                'نوع العميل',
+                'هاتف العميل',
+                'الرقم الضريبي للعميل',
+                'رقم اللوحة',
+                'المجموع قبل الضريبة',
+                'الخصم',
+                'الضريبة',
+                'الإجمالي شامل الضريبة',
+                'المدفوع',
+                'المتبقي',
+                'حالة السداد',
+                'متأخرة عن السداد',
+            ]);
+
+            $index = 1;
+            $query->chunk(200, function ($invoices) use ($output, &$index) {
+                foreach ($invoices as $inv) {
+                    $discount = (float) ($inv->total_discount ?? 0);
+                    $remaining = max(0, (float) $inv->total_incl_tax - (float) $inv->total_paid);
+                    $isOverdue = $inv->due_date && $inv->due_date->isPast() && $inv->payment_status !== 'paid';
+
+                    $customerName = $inv->customer?->name ?? $inv->customer_name_snapshot ?? '—';
+                    $customerType = ($inv->customer?->type ?? '') === 'company' ? 'شركة / منشأة' : 'فرد';
+                    $customerPhone = $inv->customer?->phone ?? '—';
+                    $customerVat = $inv->customer?->tax_number ?? $inv->customer_vat_snapshot ?? '—';
+
+                    $invType = match ($inv->type instanceof InvoiceType ? $inv->type->value : (string) $inv->type) {
+                        'credit_note' => 'إشعار دائن',
+                        'debit_note' => 'إشعار مدين',
+                        default => $inv->subtype === 'standard' ? 'فاتورة ضريبية قياسية' : 'فاتورة ضريبية مبسطة',
+                    };
+
+                    $paymentLabel = match ($inv->payment_status) {
+                        'paid' => 'مدفوع بالكامل',
+                        'partial' => 'مدفوع جزئياً',
+                        'unpaid' => 'غير مدفوع',
+                        default => (string) $inv->payment_status,
+                    };
+
+                    fputcsv($output, [
+                        $index++,
+                        $inv->center?->name ?? 'المركز الرئيسي',
+                        $inv->invoice_number,
+                        $invType,
+                        $inv->workOrder?->code ?: '—',
+                        $inv->issue_date?->format('Y-m-d H:i') ?? $inv->created_at?->format('Y-m-d H:i'),
+                        $inv->due_date?->format('Y-m-d') ?? '—',
+                        $customerName,
+                        $customerType,
+                        $customerPhone,
+                        $customerVat,
+                        $inv->workOrder?->vehicle?->plate_number ?? '—',
+                        number_format((float) $inv->total_excl_tax, 2, '.', ''),
+                        number_format($discount, 2, '.', ''),
+                        number_format((float) $inv->total_tax, 2, '.', ''),
+                        number_format((float) $inv->total_incl_tax, 2, '.', ''),
+                        number_format((float) $inv->total_paid, 2, '.', ''),
+                        number_format($remaining, 2, '.', ''),
+                        $paymentLabel,
+                        $isOverdue ? 'نعم' : 'لا',
+                    ]);
+                }
+            });
+
+            fclose($output);
+        }, $filename, [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+            'Cache-Control' => 'no-store, no-cache',
+        ]);
+    }
+
+    /**
+     * Build reusable invoices query with multi-tenancy, center and filters.
+     */
+    private function buildInvoicesQuery(
+        int $tenantId,
+        ?int $centerId,
+        ?Carbon $from,
+        ?Carbon $to,
+        string $dateType = 'issue_date',
+        ?string $type = 'all',
+        ?string $subtype = 'all',
+        ?string $paymentStatus = 'all',
+        ?string $customerId = 'all',
+        ?string $customerType = 'all',
+        ?string $centerFilter = 'all',
+        bool $isOverdue = false,
+        ?string $search = ''
+    ): Builder {
+        $dateType = in_array($dateType, ['issue_date', 'due_date'], true) ? $dateType : 'issue_date';
+        $type = $type ?: 'all';
+        $subtype = $subtype ?: 'all';
+        $paymentStatus = $paymentStatus ?: 'all';
+        $customerId = $customerId ?: 'all';
+        $customerType = $customerType ?: 'all';
+        $centerFilter = $centerFilter ?: 'all';
+        $search = trim((string) $search);
+
+        $query = Invoice::query()->where('tenant_id', $tenantId);
+
+        $accessibleCenterIds = $this->accessibleCenterIds();
+
+        // Branch Isolation: if restricted, must stay within accessible centers
+        if ($accessibleCenterIds !== null) {
+            $query->whereIn('center_id', $accessibleCenterIds);
+        }
+
+        // Branch Filter
+        if ($centerFilter !== 'all' && is_numeric($centerFilter)) {
+            $query->where('center_id', (int) $centerFilter);
+        }
+
+        // Date Range
+        if ($dateType === 'due_date') {
+            if ($from && $to) {
+                $query->whereBetween('due_date', [$from->toDateString(), $to->toDateString()]);
+            } elseif ($from) {
+                $query->where('due_date', '>=', $from->toDateString());
+            } elseif ($to) {
+                $query->where('due_date', '<=', $to->toDateString());
+            }
+        } else {
+            if ($from && $to) {
+                $query->whereBetween('issue_date', [$from, $to]);
+            } elseif ($from) {
+                $query->where('issue_date', '>=', $from);
+            } elseif ($to) {
+                $query->where('issue_date', '<=', $to);
+            }
+        }
+
+        // Type
+        if ($type !== 'all') {
+            $query->where('type', $type);
+        }
+
+        // Subtype
+        if ($subtype !== 'all') {
+            $query->where('subtype', $subtype);
+        }
+
+        // Payment Status
+        if ($paymentStatus !== 'all') {
+            $query->where('payment_status', $paymentStatus);
+        }
+
+        // Overdue (due_date < today && payment_status != 'paid')
+        if ($isOverdue) {
+            $query->whereNotNull('due_date')
+                ->where('due_date', '<', now()->toDateString())
+                ->where('payment_status', '!=', 'paid');
+        }
+
+        // Customer
+        if ($customerId !== 'all' && is_numeric($customerId)) {
+            $query->where('customer_id', (int) $customerId);
+        }
+
+        // Customer Type
+        if ($customerType !== 'all') {
+            $query->whereHas('customer', fn ($q) => $q->where('type', $customerType));
+        }
+
+        // Search
+        if ($search !== '') {
+            $query->where(function (Builder $sub) use ($search) {
+                $sub->where('invoice_number', 'like', "%{$search}%")
+                    ->orWhere('customer_name_snapshot', 'like', "%{$search}%")
+                    ->orWhereHas('customer', function (Builder $cq) use ($search) {
+                        $cq->where('name', 'like', "%{$search}%")
+                            ->orWhere('phone', 'like', "%{$search}%")
+                            ->orWhere('tax_number', 'like', "%{$search}%");
+                    })
+                    ->orWhereHas('workOrder', function (Builder $wq) use ($search) {
+                        $wq->where('code', 'like', "%{$search}%")
+                            ->orWhereHas('vehicle', function (Builder $vq) use ($search) {
+                                $vq->where('plate_number', 'like', "%{$search}%");
+                            });
+                    });
+            });
+        }
+
+        return $query;
+    }
+
+    /**
+     * Dedicated Purchase Invoices Report unit.
+     */
+    public function purchaseInvoices(Request $request): Response
+    {
+        $this->authorize('viewAny', PurchaseInvoice::class);
+
+        $tenantId = auth()->user()->tenant_id;
+        $centerId = TenancyContext::centerId();
+
+        $range = (string) ($request->input('range') ?: 'this_month');
+        $startDate = $request->input('start_date');
+        $endDate = $request->input('end_date');
+        $dateType = (string) ($request->input('date_type') ?: 'issue_date');
+        $status = (string) ($request->input('status') ?: 'all');
+        $paymentStatus = (string) ($request->input('payment_status') ?: 'all');
+        $supplierId = (string) ($request->input('supplier_id') ?: 'all');
+        $supplierType = (string) ($request->input('supplier_type') ?: 'all');
+        $centerFilter = $this->resolveCenterFilter($request, $centerId);
+        $isOverdue = $request->boolean('is_overdue');
+        $groupBy = (string) ($request->input('group_by') ?: 'none');
+        $search = trim((string) ($request->input('search') ?? ''));
+
+        [$from, $to] = $this->resolveDateRange($range, $startDate, $endDate);
+
+        $query = $this->buildPurchaseInvoicesQuery(
+            $tenantId,
+            $centerId,
+            $from,
+            $to,
+            $dateType,
+            $status,
+            $paymentStatus,
+            $supplierId,
+            $supplierType,
+            $centerFilter,
+            $isOverdue,
+            $search
+        );
+
+        // Aggregate KPIs on filtered dataset
+        $kpiQuery = clone $query;
+        $totalRecords = (int) (clone $kpiQuery)->count();
+        $totalSubtotal = (float) (clone $kpiQuery)->sum('subtotal');
+        $totalDiscount = (float) (clone $kpiQuery)->sum('discount_amount');
+        $totalVat = (float) (clone $kpiQuery)->sum('tax_amount');
+        $totalInvoiceAmount = (float) (clone $kpiQuery)->sum('total');
+        $totalPaymentRemaining = (float) (clone $kpiQuery)->sum('balance');
+        $totalPaid = (float) ((clone $kpiQuery)->selectRaw('SUM(total - balance) as paid')->value('paid') ?? 0);
+
+        $relations = [
+            'center:id,name',
+            'supplier:id,name,phone,type,tax_number,cr_number',
+            'purchaseOrder:id,code',
+        ];
+
+        $mapPurchaseInvoice = function (PurchaseInvoice $inv) {
+            $total = (float) $inv->total;
+            $balance = (float) $inv->balance;
+            $paid = max(0, $total - $balance);
+            $isOverdue = $inv->due_date && $inv->due_date->isPast() && $balance > 0;
+
+            // Compute payment status
+            $paymentStatusKey = 'unpaid';
+
+            if ($inv->status === 'paid' || $balance <= 0.01) {
+                $paymentStatusKey = 'paid';
+            } elseif ($balance < $total - 0.01) {
+                $paymentStatusKey = 'partial';
+            }
+
+            return [
+                'id' => $inv->id,
+                'code' => $inv->code,
+                'invoice_number' => $inv->invoice_number,
+                'issue_date' => $inv->issue_date?->format('Y-m-d'),
+                'due_date' => $inv->due_date?->format('Y-m-d'),
+                'status' => $inv->status,
+                'payment_status' => $paymentStatusKey,
+                'is_overdue' => $isOverdue,
+                'subtotal' => (float) $inv->subtotal,
+                'discount_amount' => (float) $inv->discount_amount,
+                'tax_amount' => (float) $inv->tax_amount,
+                'total' => $total,
+                'paid' => $paid,
+                'balance' => $balance,
+                'notes' => $inv->notes,
+                'center' => $inv->center ? [
+                    'id' => $inv->center->id,
+                    'name' => $inv->center->name,
+                ] : null,
+                'supplier' => $inv->supplier ? [
+                    'id' => $inv->supplier->id,
+                    'name' => $inv->supplier->name,
+                    'phone' => $inv->supplier->phone,
+                    'type' => $inv->supplier->type,
+                    'tax_number' => $inv->supplier->tax_number,
+                ] : null,
+                'purchase_order' => $inv->purchaseOrder ? [
+                    'id' => $inv->purchaseOrder->id,
+                    'code' => $inv->purchaseOrder->code,
+                ] : null,
+            ];
+        };
+
+        $invoices = null;
+        $groupedInvoices = null;
+
+        if ($groupBy !== 'none') {
+            $allInvoices = (clone $query)
+                ->with($relations)
+                ->orderBy('issue_date', 'desc')
+                ->limit(2000)
+                ->get()
+                ->map($mapPurchaseInvoice);
+
+            $grouped = $allInvoices->groupBy(function ($inv) use ($groupBy) {
+                return match ($groupBy) {
+                    'center' => $inv['center']['name'] ?? 'المركز الرئيسي',
+                    'supplier' => $inv['supplier']['name'] ?? 'مورد غير محدد',
+                    'payment_status' => match ($inv['payment_status']) {
+                        'paid' => 'مدفوع بالكامل',
+                        'partial' => 'مدفوع جزئياً',
+                        'unpaid' => 'غير مدفوع',
+                        default => 'أخرى',
+                    },
+                    'status' => match ($inv['status']) {
+                        'paid' => 'مسددة',
+                        'open' => 'مفتوحة / مستحقة',
+                        'draft' => 'مسودة',
+                        'cancelled' => 'ملغاة',
+                        default => (string) $inv['status'],
+                    },
+                    default => 'all',
+                };
+            });
+
+            $groupedInvoices = $grouped->map(function ($items, $key) {
+                return [
+                    'group_key' => $key,
+                    'group_name' => (string) $key,
+                    'total_records' => $items->count(),
+                    'total_subtotal' => (float) $items->sum('subtotal'),
+                    'total_discount' => (float) $items->sum('discount_amount'),
+                    'total_vat' => (float) $items->sum('tax_amount'),
+                    'total_invoice_amount' => (float) $items->sum('total'),
+                    'total_paid' => (float) $items->sum('paid'),
+                    'total_payment_remaining' => (float) $items->sum('balance'),
+                    'items' => $items->values(),
+                ];
+            })->values();
+        } else {
+            $paginated = (clone $query)
+                ->with($relations)
+                ->orderBy('issue_date', 'desc')
+                ->paginate(25)
+                ->withQueryString();
+
+            $invoices = $paginated->through($mapPurchaseInvoice);
+        }
+
+        $suppliers = Supplier::query()
+            ->where('tenant_id', $tenantId)
+            ->select('id', 'name', 'phone', 'type')
+            ->orderBy('name')
+            ->limit(300)
+            ->get();
+
+        $centers = $this->resolveAccessibleCenters($tenantId);
+        $tenant = auth()->user()->tenant;
+
+        return Inertia::render('Reports/PurchaseInvoices', [
+            'filters' => [
+                'range' => $range,
+                'start_date' => $startDate,
+                'end_date' => $endDate,
+                'date_type' => $dateType,
+                'status' => $status,
+                'payment_status' => $paymentStatus,
+                'supplier_id' => $supplierId,
+                'supplier_type' => $supplierType,
+                'center_id' => $centerFilter,
+                'is_overdue' => $isOverdue,
+                'group_by' => $groupBy,
+                'search' => $search,
+            ],
+            'kpis' => [
+                'total_records' => $totalRecords,
+                'total_subtotal' => $totalSubtotal,
+                'total_discount' => $totalDiscount,
+                'total_vat' => $totalVat,
+                'total_invoice_amount' => $totalInvoiceAmount,
+                'total_paid' => $totalPaid,
+                'total_payment_remaining' => $totalPaymentRemaining,
+            ],
+            'invoices' => $invoices,
+            'groupedInvoices' => $groupedInvoices,
+            'suppliers' => $suppliers,
+            'centers' => $centers,
+            'companyInfo' => $this->resolveReportCompanyInfo($tenant, $centerFilter, $centerId),
+        ]);
+    }
+
+    /**
+     * Export Purchase Invoices Report as CSV (with UTF-8 BOM for Arabic Excel support).
+     */
+    public function exportPurchaseInvoices(Request $request): StreamedResponse
+    {
+        $this->authorize('viewAny', PurchaseInvoice::class);
+
+        $tenantId = auth()->user()->tenant_id;
+        $centerId = TenancyContext::centerId();
+
+        $range = (string) ($request->input('range') ?: 'this_month');
+        $startDate = $request->input('start_date');
+        $endDate = $request->input('end_date');
+        $dateType = (string) ($request->input('date_type') ?: 'issue_date');
+        $status = (string) ($request->input('status') ?: 'all');
+        $paymentStatus = (string) ($request->input('payment_status') ?: 'all');
+        $supplierId = (string) ($request->input('supplier_id') ?: 'all');
+        $supplierType = (string) ($request->input('supplier_type') ?: 'all');
+        $centerFilter = $this->resolveCenterFilter($request, $centerId);
+        $isOverdue = $request->boolean('is_overdue');
+        $search = trim((string) ($request->input('search') ?? ''));
+
+        [$from, $to] = $this->resolveDateRange($range, $startDate, $endDate);
+
+        $query = $this->buildPurchaseInvoicesQuery(
+            $tenantId,
+            $centerId,
+            $from,
+            $to,
+            $dateType,
+            $status,
+            $paymentStatus,
+            $supplierId,
+            $supplierType,
+            $centerFilter,
+            $isOverdue,
+            $search
+        )->with([
+            'center:id,name',
+            'supplier:id,name,phone,type,tax_number',
+            'purchaseOrder:id,code',
+        ])
+            ->orderBy('issue_date', 'desc');
+
+        $filename = 'تقرير_فواتير_الشراء_'.now()->format('Y-m-d_His').'.csv';
+
+        return response()->streamDownload(function () use ($query) {
+            $output = fopen('php://output', 'w');
+            fwrite($output, "\xEF\xBB\xBF");
+
+            // CSV Header
+            fputcsv($output, [
+                '#',
+                'الفرع',
+                'رقم الفاتورة الداخلي',
+                'رقم مستند المورد',
+                'أمر الشراء',
+                'المورد',
+                'هاتف المورد',
+                'الرقم الضريبي للمورد',
+                'تاريخ الفاتورة',
+                'تاريخ الاستحقاق',
+                'المجموع قبل الضريبة',
+                'الخصم',
+                'ضريبة القيمة المضافة',
+                'الإجمالي شامل الضريبة',
+                'المبلغ المسدد',
+                'المتبقي للمورد',
+                'حالة السداد',
+                'متأخرة عن السداد',
+            ]);
+
+            $index = 1;
+            $query->chunk(200, function ($invoices) use ($output, &$index) {
+                foreach ($invoices as $inv) {
+                    $total = (float) $inv->total;
+                    $balance = (float) $inv->balance;
+                    $paid = max(0, $total - $balance);
+                    $isOverdue = $inv->due_date && $inv->due_date->isPast() && $balance > 0;
+
+                    $paymentLabel = match (true) {
+                        $inv->status === 'paid' || $balance <= 0.01 => 'مدفوع بالكامل',
+                        $balance < $total - 0.01 => 'مدفوع جزئياً',
+                        default => 'غير مدفوع',
+                    };
+
+                    fputcsv($output, [
+                        $index++,
+                        $inv->center?->name ?? 'المركز الرئيسي',
+                        $inv->code,
+                        $inv->invoice_number ?: '—',
+                        $inv->purchaseOrder?->code ?: '—',
+                        $inv->supplier?->name ?? '—',
+                        $inv->supplier?->phone ?? '—',
+                        $inv->supplier?->tax_number ?? '—',
+                        $inv->issue_date?->format('Y-m-d') ?? '—',
+                        $inv->due_date?->format('Y-m-d') ?? '—',
+                        number_format((float) $inv->subtotal, 2, '.', ''),
+                        number_format((float) $inv->discount_amount, 2, '.', ''),
+                        number_format((float) $inv->tax_amount, 2, '.', ''),
+                        number_format($total, 2, '.', ''),
+                        number_format($paid, 2, '.', ''),
+                        number_format($balance, 2, '.', ''),
+                        $paymentLabel,
+                        $isOverdue ? 'نعم' : 'لا',
+                    ]);
+                }
+            });
+
+            fclose($output);
+        }, $filename, [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+            'Cache-Control' => 'no-store, no-cache',
+        ]);
+    }
+
+    /**
+     * Dedicated Suppliers Report unit (wrshah /reports/suppliers equivalent).
+     */
+    public function suppliers(Request $request): Response
+    {
+        $this->authorize('viewAny', PurchaseInvoice::class);
+
+        $tenantId = auth()->user()->tenant_id;
+        $centerId = TenancyContext::centerId();
+
+        $range = (string) ($request->input('range') ?: 'this_month');
+        $startDate = $request->input('start_date');
+        $endDate = $request->input('end_date');
+        $paymentStatus = (string) ($request->input('payment_status') ?: 'all');
+        $supplierId = (string) ($request->input('supplier_id') ?: 'all');
+        $supplierType = (string) ($request->input('supplier_type') ?: 'all');
+        $centerFilter = $this->resolveCenterFilter($request, $centerId);
+        $groupBy = (string) ($request->input('group_by') ?: 'none');
+        $search = trim((string) ($request->input('search') ?? ''));
+
+        [$from, $to] = $this->resolveDateRange($range, $startDate, $endDate);
+
+        $query = $this->buildPurchaseInvoicesQuery(
+            $tenantId,
+            $centerId,
+            $from,
+            $to,
+            'issue_date',
+            'all',
+            $paymentStatus,
+            $supplierId,
+            $supplierType,
+            $centerFilter,
+            false,
+            $search
+        );
+
+        // Aggregate KPIs
+        $kpiQuery = clone $query;
+        $totalRecords = (int) (clone $kpiQuery)->count();
+        $totalSubtotal = (float) (clone $kpiQuery)->sum('subtotal');
+        $totalDiscount = (float) (clone $kpiQuery)->sum('discount_amount');
+        $totalVat = (float) (clone $kpiQuery)->sum('tax_amount');
+        $totalInvoiceAmount = (float) (clone $kpiQuery)->sum('total');
+        $totalPaymentRemaining = (float) (clone $kpiQuery)->sum('balance');
+        $totalPaid = max(0, round($totalInvoiceAmount - $totalPaymentRemaining, 2));
+
+        $relations = [
+            'center:id,name',
+            'supplier:id,name,phone,type,tax_number',
+            'purchaseOrder:id,code',
+        ];
+
+        $mapSupplierTransaction = function (PurchaseInvoice $inv) {
+            $total = (float) $inv->total;
+            $balance = (float) $inv->balance;
+            $paid = max(0, round($total - $balance, 2));
+
+            $paymentStatusKey = 'unpaid';
+
+            if ($inv->status === 'paid' || $balance <= 0.01) {
+                $paymentStatusKey = 'paid';
+            } elseif ($balance < $total - 0.01) {
+                $paymentStatusKey = 'partial';
+            }
+
+            return [
+                'id' => $inv->id,
+                'code' => $inv->code,
+                'invoice_number' => $inv->invoice_number,
+                'issue_date' => $inv->issue_date?->format('Y-m-d'),
+                'due_date' => $inv->due_date?->format('Y-m-d'),
+                'status' => $inv->status,
+                'payment_status' => $paymentStatusKey,
+                'subtotal' => (float) $inv->subtotal,
+                'discount_amount' => (float) $inv->discount_amount,
+                'tax_amount' => (float) $inv->tax_amount,
+                'total' => $total,
+                'paid' => $paid,
+                'balance' => $balance,
+                'bad_debt' => 0.0,
+                'notes' => $inv->notes,
+                'show_url' => Route::has('app.purchasing.invoices.show') ? route('app.purchasing.invoices.show', $inv->id) : null,
+                'center' => $inv->center ? [
+                    'id' => $inv->center->id,
+                    'name' => $inv->center->name,
+                ] : null,
+                'supplier' => $inv->supplier ? [
+                    'id' => $inv->supplier->id,
+                    'name' => $inv->supplier->name,
+                    'phone' => $inv->supplier->phone,
+                    'type' => $inv->supplier->type,
+                    'tax_number' => $inv->supplier->tax_number,
+                ] : null,
+            ];
+        };
+
+        $invoices = null;
+        $groupedInvoices = null;
+
+        if ($groupBy !== 'none') {
+            $allInvoices = (clone $query)
+                ->with($relations)
+                ->orderBy('issue_date', 'desc')
+                ->get()
+                ->map($mapSupplierTransaction);
+
+            $grouped = $allInvoices->groupBy(function ($inv) use ($groupBy) {
+                return match ($groupBy) {
+                    'center' => $inv['center']['name'] ?? 'المركز الرئيسي',
+                    'supplier' => $inv['supplier']['name'] ?? 'مورد غير محدد',
+                    'payment_status' => match ($inv['payment_status']) {
+                        'paid' => 'مدفوع بالكامل',
+                        'partial' => 'مدفوع جزئياً',
+                        default => 'غير مدفوع',
+                    },
+                    default => 'all',
+                };
+            });
+
+            $groupedInvoices = $grouped->map(function ($items, $key) {
+                $subtotal = (float) $items->sum('subtotal');
+                $discount = (float) $items->sum('discount_amount');
+                $vat = (float) $items->sum('tax_amount');
+                $total = (float) $items->sum('total');
+                $paid = (float) $items->sum('paid');
+                $balance = (float) $items->sum('balance');
+
+                return [
+                    'group_key' => $key,
+                    'group_name' => (string) $key,
+                    'total_records' => $items->count(),
+                    'total_subtotal' => $subtotal,
+                    'total_discount' => $discount,
+                    'total_vat' => $vat,
+                    'total_invoice_amount' => $total,
+                    'total_paid' => $paid,
+                    'total_payment_remaining' => $balance,
+                    'items' => $items->values(),
+                ];
+            })->values();
+        } else {
+            $paginated = (clone $query)
+                ->with($relations)
+                ->orderBy('issue_date', 'desc')
+                ->paginate(50)
+                ->withQueryString();
+
+            $invoices = $paginated->through($mapSupplierTransaction);
+        }
+
+        $suppliers = Supplier::query()
+            ->where('tenant_id', $tenantId)
+            ->select('id', 'name', 'phone', 'type')
+            ->orderBy('name')
+            ->limit(300)
+            ->get();
+
+        $centers = $this->resolveAccessibleCenters($tenantId);
+        $tenant = auth()->user()->tenant;
+
+        return Inertia::render('Reports/Suppliers', [
+            'filters' => [
+                'range' => $range,
+                'start_date' => $range === 'custom' ? $startDate : '',
+                'end_date' => $range === 'custom' ? $endDate : '',
+                'from_date' => $from?->toDateString(),
+                'to_date' => $to?->toDateString(),
+                'payment_status' => $paymentStatus,
+                'supplier_id' => $supplierId,
+                'supplier_type' => $supplierType,
+                'center_id' => $centerFilter,
+                'group_by' => $groupBy,
+                'search' => $search,
+            ],
+            'kpis' => [
+                'total_records' => $totalRecords,
+                'total_subtotal' => round($totalSubtotal, 2),
+                'total_discount' => round($totalDiscount, 2),
+                'total_vat' => round($totalVat, 2),
+                'total_invoice_amount' => round($totalInvoiceAmount, 2),
+                'total_paid' => round($totalPaid, 2),
+                'total_payment_remaining' => round($totalPaymentRemaining, 2),
+            ],
+            'invoices' => $invoices,
+            'groupedInvoices' => $groupedInvoices,
+            'suppliers' => $suppliers,
+            'centers' => $centers,
+            'companyInfo' => $this->resolveReportCompanyInfo($tenant, $centerFilter, $centerId),
+        ]);
+    }
+
+    /**
+     * Export Suppliers Report as CSV with UTF-8 BOM.
+     */
+    public function exportSuppliers(Request $request): StreamedResponse
+    {
+        $this->authorize('viewAny', PurchaseInvoice::class);
+
+        $tenantId = auth()->user()->tenant_id;
+        $centerId = TenancyContext::centerId();
+
+        $range = (string) ($request->input('range') ?: 'this_month');
+        $startDate = $request->input('start_date');
+        $endDate = $request->input('end_date');
+        $paymentStatus = (string) ($request->input('payment_status') ?: 'all');
+        $supplierId = (string) ($request->input('supplier_id') ?: 'all');
+        $supplierType = (string) ($request->input('supplier_type') ?: 'all');
+        $centerFilter = $this->resolveCenterFilter($request, $centerId);
+        $search = trim((string) ($request->input('search') ?? ''));
+
+        [$from, $to] = $this->resolveDateRange($range, $startDate, $endDate);
+
+        $query = $this->buildPurchaseInvoicesQuery(
+            $tenantId,
+            $centerId,
+            $from,
+            $to,
+            'issue_date',
+            'all',
+            $paymentStatus,
+            $supplierId,
+            $supplierType,
+            $centerFilter,
+            false,
+            $search
+        )->with([
+            'center:id,name',
+            'supplier:id,name,phone,type,tax_number',
+        ])
+            ->orderBy('issue_date', 'desc');
+
+        $filename = 'تقرير_الموردين_'.now()->format('Y-m-d_His').'.csv';
+
+        return response()->streamDownload(function () use ($query) {
+            $output = fopen('php://output', 'w');
+            fwrite($output, "\xEF\xBB\xBF");
+
+            fputcsv($output, [
+                '#',
+                'الفرع / المركز',
+                'رقم الفاتورة في النظام',
+                'رقم مستند المورد / البيان',
+                'اسم المورد',
+                'هاتف المورد',
+                'الرقم الضريبي للمورد',
+                'تاريخ الفاتورة',
+                'المجموع قبل الضريبة',
+                'الخصومات والتسويات',
+                'ضريبة القيمة المضافة',
+                'المستحق / الإجمالي',
+                'المبلغ المسدد',
+                'المتبقي للسداد',
+                'ديون متعثرة',
+                'حالة السداد',
+            ]);
+
+            $index = 1;
+            $query->chunk(200, function ($invoices) use ($output, &$index) {
+                foreach ($invoices as $inv) {
+                    $total = (float) $inv->total;
+                    $balance = (float) $inv->balance;
+                    $paid = max(0, round($total - $balance, 2));
+
+                    $paymentLabel = match (true) {
+                        $inv->status === 'paid' || $balance <= 0.01 => 'مدفوع بالكامل',
+                        $balance < $total - 0.01 => 'مدفوع جزئياً',
+                        default => 'غير مدفوع',
+                    };
+
+                    fputcsv($output, [
+                        $index++,
+                        $inv->center?->name ?? 'المركز الرئيسي',
+                        $inv->code,
+                        $inv->invoice_number ?: '—',
+                        $inv->supplier?->name ?? '—',
+                        $inv->supplier?->phone ?? '—',
+                        $inv->supplier?->tax_number ?? '—',
+                        $inv->issue_date?->format('Y-m-d') ?? '—',
+                        number_format((float) $inv->subtotal, 2, '.', ''),
+                        number_format((float) $inv->discount_amount, 2, '.', ''),
+                        number_format((float) $inv->tax_amount, 2, '.', ''),
+                        number_format($total, 2, '.', ''),
+                        number_format($paid, 2, '.', ''),
+                        number_format($balance, 2, '.', ''),
+                        '0.00',
+                        $paymentLabel,
+                    ]);
+                }
+            });
+
+            fclose($output);
+        }, $filename, [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+            'Cache-Control' => 'no-store, no-cache',
+        ]);
+    }
+
+    /**
+     * Build reusable purchase invoices query with multi-tenancy, center and filters.
+     */
+    private function buildPurchaseInvoicesQuery(
+        int $tenantId,
+        ?int $centerId,
+        ?Carbon $from,
+        ?Carbon $to,
+        string $dateType = 'issue_date',
+        ?string $status = 'all',
+        ?string $paymentStatus = 'all',
+        ?string $supplierId = 'all',
+        ?string $supplierType = 'all',
+        ?string $centerFilter = 'all',
+        bool $isOverdue = false,
+        ?string $search = ''
+    ): Builder {
+        $dateType = in_array($dateType, ['issue_date', 'due_date'], true) ? $dateType : 'issue_date';
+        $status = $status ?: 'all';
+        $paymentStatus = $paymentStatus ?: 'all';
+        $supplierId = $supplierId ?: 'all';
+        $supplierType = $supplierType ?: 'all';
+        $centerFilter = $centerFilter ?: 'all';
+        $search = trim((string) $search);
+
+        $query = PurchaseInvoice::query()->where('tenant_id', $tenantId);
+
+        $accessibleCenterIds = $this->accessibleCenterIds();
+
+        if ($accessibleCenterIds !== null) {
+            $query->whereIn('center_id', $accessibleCenterIds);
+        }
+
+        if ($centerFilter !== 'all' && is_numeric($centerFilter)) {
+            $query->where('center_id', (int) $centerFilter);
+        }
+
+        if ($dateType === 'due_date') {
+            if ($from && $to) {
+                $query->whereBetween('due_date', [$from->toDateString(), $to->toDateString()]);
+            } elseif ($from) {
+                $query->where('due_date', '>=', $from->toDateString());
+            } elseif ($to) {
+                $query->where('due_date', '<=', $to->toDateString());
+            }
+        } else {
+            if ($from && $to) {
+                $query->whereBetween('issue_date', [$from->toDateString(), $to->toDateString()]);
+            } elseif ($from) {
+                $query->where('issue_date', '>=', $from->toDateString());
+            } elseif ($to) {
+                $query->where('issue_date', '<=', $to->toDateString());
+            }
+        }
+
+        if ($status !== 'all') {
+            $query->where('status', $status);
+        }
+
+        if ($paymentStatus !== 'all') {
+            if ($paymentStatus === 'paid') {
+                $query->where(function (Builder $q) {
+                    $q->where('status', 'paid')->orWhere('balance', '<=', 0);
+                });
+            } elseif ($paymentStatus === 'partial') {
+                $query->where('balance', '>', 0)->whereRaw('balance < total');
+            } elseif ($paymentStatus === 'unpaid') {
+                $query->whereRaw('balance >= total')->where('total', '>', 0);
+            }
+        }
+
+        if ($isOverdue) {
+            $query->whereNotNull('due_date')
+                ->where('due_date', '<', now()->toDateString())
+                ->where('balance', '>', 0);
+        }
+
+        if ($supplierId !== 'all' && is_numeric($supplierId)) {
+            $query->where('supplier_id', (int) $supplierId);
+        }
+
+        if ($supplierType !== 'all') {
+            $query->whereHas('supplier', fn ($q) => $q->where('type', $supplierType));
+        }
+
+        if ($search !== '') {
+            $query->where(function (Builder $sub) use ($search) {
+                $sub->where('code', 'like', "%{$search}%")
+                    ->orWhere('invoice_number', 'like', "%{$search}%")
+                    ->orWhere('notes', 'like', "%{$search}%")
+                    ->orWhereHas('supplier', function (Builder $sq) use ($search) {
+                        $sq->where('name', 'like', "%{$search}%")
+                            ->orWhere('phone', 'like', "%{$search}%")
+                            ->orWhere('tax_number', 'like', "%{$search}%");
+                    })
+                    ->orWhereHas('purchaseOrder', function (Builder $poq) use ($search) {
+                        $poq->where('code', 'like', "%{$search}%");
+                    });
+            });
+        }
+
+        return $query;
+    }
+
+    /**
+     * Dedicated Stock Activities Report unit.
+     */
+    public function stockActivities(Request $request): Response
+    {
+        $this->authorize('viewAny', InventoryMove::class);
+
+        $tenantId = auth()->user()->tenant_id;
+        $centerId = TenancyContext::centerId();
+
+        $range = (string) ($request->input('range') ?: 'this_month');
+        $startDate = $request->input('start_date');
+        $endDate = $request->input('end_date');
+        $moveType = (string) ($request->input('move_type') ?: 'all');
+        $warehouseId = (string) ($request->input('warehouse_id') ?: 'all');
+        $categoryId = (string) ($request->input('category_id') ?: 'all');
+        $partId = (string) ($request->input('part_id') ?: 'all');
+        $centerFilter = $this->resolveCenterFilter($request, $centerId);
+        $groupBy = (string) ($request->input('group_by') ?: 'none');
+        $search = trim((string) ($request->input('search') ?? ''));
+
+        [$from, $to] = $this->resolveDateRange($range, $startDate, $endDate);
+
+        $query = $this->buildStockActivitiesQuery(
+            $tenantId,
+            $centerId,
+            $from,
+            $to,
+            $moveType,
+            $warehouseId,
+            $categoryId,
+            $partId,
+            $centerFilter,
+            $search
+        );
+
+        // Aggregate KPIs
+        $kpiQuery = clone $query;
+        $totalRecords = (int) (clone $kpiQuery)->count();
+        $totalCost = (float) (clone $kpiQuery)->sum('total_cost');
+        $totalIncomingQty = (float) ((clone $kpiQuery)->where('qty', '>', 0)->sum('qty') ?? 0);
+        $totalOutgoingQty = (float) ((clone $kpiQuery)->where('qty', '<', 0)->sum(DB::raw('ABS(qty)')) ?? 0);
+        $netQty = round($totalIncomingQty - $totalOutgoingQty, 3);
+
+        $relations = [
+            'center:id,name',
+            'warehouse:id,name,code',
+            'part:id,sku,barcode,name_ar,name_en,category_id,default_sale_price,unit_id',
+            'part.unit:id,name_ar,name_en',
+            'part.category:id,name_ar,name_en',
+            'postedByUser:id,name',
+            'reference',
+        ];
+
+        $mapStockActivity = function (InventoryMove $move) {
+            $qty = (float) $move->qty;
+            $balanceAfter = (float) $move->balance_after;
+            $balanceBefore = round($balanceAfter - $qty, 3);
+            $unitCost = (float) $move->unit_cost;
+            $totalCost = (float) $move->total_cost;
+
+            $refLabel = '—';
+            $refCode = '—';
+            $refUrl = null;
+
+            try {
+                $ref = $move->reference;
+            } catch (Throwable) {
+                $ref = null;
+            }
+
+            if ($ref instanceof WorkOrderItemPart) {
+                $refLabel = 'أمر عمل';
+                $wo = $move->work_order;
+                $refCode = $wo?->code ?? ('#'.($ref->work_order_id ?? $move->reference_id));
+                $refUrl = $wo && Route::has('work-orders.show') ? route('work-orders.show', $wo->id) : null;
+            } elseif ($ref instanceof Invoice) {
+                $isCreditNote = ($ref->type === 'credit_note' || (is_object($ref->type) && $ref->type->value === 'credit_note'));
+                $refLabel = $isCreditNote ? 'إشعار دائن' : 'فاتورة مبيعات';
+                $refCode = $ref->invoice_number ?: ('#'.$ref->id);
+                $refUrl = $ref && Route::has('app.invoices.show') ? route('app.invoices.show', $ref->id) : null;
+            } elseif ($ref instanceof GrnItem) {
+                $refLabel = 'سند استلام';
+                $grn = $ref->goodsReceivedNote;
+                $refCode = $grn?->code ?: ('#'.($ref->goods_received_note_id ?? $move->reference_id));
+                $refUrl = $grn && Route::has('app.purchasing.grn.show') ? route('app.purchasing.grn.show', $grn->id) : null;
+            } elseif ($ref instanceof PurchaseReturn) {
+                $refLabel = 'مرتجع شراء';
+                $refCode = $ref->code ?: ('#'.$move->reference_id);
+            } elseif (! empty($move->notes)) {
+                $refLabel = 'ملاحظة';
+                $refCode = $move->notes;
+            }
+
+            $salePrice = null;
+            $totalSaleAmount = null;
+
+            if ($ref instanceof WorkOrderItemPart) {
+                $salePrice = (float) $ref->unit_price;
+                $totalSaleAmount = (float) $ref->total;
+            } elseif ($move->part && $move->part->default_sale_price) {
+                $salePrice = (float) $move->part->default_sale_price;
+                $totalSaleAmount = round(abs($qty) * $salePrice, 2);
+            }
+
+            return [
+                'id' => $move->id,
+                'move_type' => $move->move_type,
+                'move_type_label' => InventoryMove::getMoveTypeLabel($move->move_type),
+                'is_incoming' => $qty > 0,
+                'qty' => $qty,
+                'unit_cost' => $unitCost,
+                'total_cost' => $totalCost,
+                'sale_price' => $salePrice,
+                'total_sale_amount' => $totalSaleAmount,
+                'balance_before' => $balanceBefore,
+                'balance_after' => $balanceAfter,
+                'posted_at' => $move->posted_at?->format('Y-m-d H:i') ?? $move->created_at?->format('Y-m-d H:i'),
+                'notes' => $move->notes,
+                'reference_label' => $refLabel,
+                'reference_code' => $refCode,
+                'reference_url' => $refUrl,
+                'center' => $move->center ? [
+                    'id' => $move->center->id,
+                    'name' => $move->center->name,
+                ] : null,
+                'warehouse' => $move->warehouse ? [
+                    'id' => $move->warehouse->id,
+                    'name' => $move->warehouse->name,
+                    'code' => $move->warehouse->code,
+                ] : null,
+                'part' => $move->part ? [
+                    'id' => $move->part->id,
+                    'sku' => $move->part->sku,
+                    'barcode' => $move->part->barcode,
+                    'name_ar' => $move->part->name_ar,
+                    'name_en' => $move->part->name_en,
+                    'unit_name' => $move->part->unit?->name_ar ?? $move->part->unit?->name_en ?? 'حبة',
+                    'category_name' => $move->part->category?->name_ar ?? $move->part->category?->name_en ?? '—',
+                ] : null,
+                'posted_by' => $move->postedByUser ? [
+                    'id' => $move->postedByUser->id,
+                    'name' => $move->postedByUser->name,
+                ] : null,
+            ];
+        };
+
+        $moves = null;
+        $groupedMoves = null;
+
+        if ($groupBy !== 'none') {
+            $allMoves = (clone $query)
+                ->with($relations)
+                ->orderBy('posted_at', 'desc')
+                ->limit(2000)
+                ->get()
+                ->map($mapStockActivity);
+
+            $grouped = $allMoves->groupBy(function ($m) use ($groupBy) {
+                return match ($groupBy) {
+                    'center' => $m['center']['name'] ?? 'المركز الرئيسي',
+                    'part' => ($m['part']['name_ar'] ?? $m['part']['name_en'] ?? 'قطعة').' ('.($m['part']['sku'] ?? '-').')',
+                    'warehouse' => $m['warehouse']['name'] ?? 'المستودع الرئيسي',
+                    'move_type' => $m['move_type_label'] ?? 'أخرى',
+                    default => 'all',
+                };
+            });
+
+            $groupedMoves = $grouped->map(function ($items, $key) {
+                $incoming = (float) $items->where('qty', '>', 0)->sum('qty');
+                $outgoing = (float) $items->where('qty', '<', 0)->sum(fn ($i) => abs($i['qty']));
+
+                return [
+                    'group_key' => $key,
+                    'group_name' => (string) $key,
+                    'total_records' => $items->count(),
+                    'total_incoming' => $incoming,
+                    'total_outgoing' => $outgoing,
+                    'net_qty' => round($incoming - $outgoing, 3),
+                    'total_cost' => (float) $items->sum('total_cost'),
+                    'items' => $items->values(),
+                ];
+            })->values();
+        } else {
+            $paginated = (clone $query)
+                ->with($relations)
+                ->orderBy('posted_at', 'desc')
+                ->paginate(50)
+                ->withQueryString();
+
+            $moves = $paginated->through($mapStockActivity);
+        }
+
+        $centers = $this->resolveAccessibleCenters($tenantId);
+        $warehouses = Warehouse::where('tenant_id', $tenantId)->select('id', 'name', 'code', 'center_id')->get();
+        $categories = InventoryCategory::where('tenant_id', $tenantId)->select('id', 'name_ar', 'name_en')->get();
+
+        $moveTypes = [
+            ['id' => 'all', 'value' => 'all', 'name' => 'كافة أنواع الحركات', 'label' => 'كافة أنواع الحركات'],
+            ['id' => InventoryMove::TYPE_RECEIPT, 'value' => InventoryMove::TYPE_RECEIPT, 'name' => 'استلام / شراء', 'label' => 'استلام / شراء'],
+            ['id' => InventoryMove::TYPE_ISSUE_TO_WORKORDER, 'value' => InventoryMove::TYPE_ISSUE_TO_WORKORDER, 'name' => 'صرف لكرت عمل', 'label' => 'صرف لكرت عمل'],
+            ['id' => InventoryMove::TYPE_SALE, 'value' => InventoryMove::TYPE_SALE, 'name' => 'بيع مباشر', 'label' => 'بيع مباشر'],
+            ['id' => InventoryMove::TYPE_ADJUSTMENT_IN, 'value' => InventoryMove::TYPE_ADJUSTMENT_IN, 'name' => 'تسوية زيادة', 'label' => 'تسوية زيادة'],
+            ['id' => InventoryMove::TYPE_ADJUSTMENT_OUT, 'value' => InventoryMove::TYPE_ADJUSTMENT_OUT, 'name' => 'تسوية عجز', 'label' => 'تسوية عجز'],
+            ['id' => InventoryMove::TYPE_TRANSFER_IN, 'value' => InventoryMove::TYPE_TRANSFER_IN, 'name' => 'تحويل وارد', 'label' => 'تحويل وارد'],
+            ['id' => InventoryMove::TYPE_TRANSFER_OUT, 'value' => InventoryMove::TYPE_TRANSFER_OUT, 'name' => 'تحويل صادر', 'label' => 'تحويل صادر'],
+            ['id' => InventoryMove::TYPE_PURCHASE_RETURN, 'value' => InventoryMove::TYPE_PURCHASE_RETURN, 'name' => 'مرتجع شراء', 'label' => 'مرتجع شراء'],
+            ['id' => InventoryMove::TYPE_REVERSAL, 'value' => InventoryMove::TYPE_REVERSAL, 'name' => 'عكس حركة', 'label' => 'عكس حركة'],
+        ];
+
+        return Inertia::render('Reports/StockActivities', [
+            'filters' => [
+                'range' => $range,
+                'start_date' => $range === 'custom' ? $startDate : '',
+                'end_date' => $range === 'custom' ? $endDate : '',
+                'from_date' => $from?->toDateString(),
+                'to_date' => $to?->toDateString(),
+                'move_type' => $moveType,
+                'warehouse_id' => $warehouseId,
+                'category_id' => $categoryId,
+                'part_id' => $partId,
+                'center_id' => $centerFilter,
+                'group_by' => $groupBy,
+                'search' => $search,
+            ],
+            'kpis' => [
+                'total_records' => $totalRecords,
+                'total_cost' => round($totalCost, 2),
+                'total_incoming_qty' => round($totalIncomingQty, 3),
+                'total_outgoing_qty' => round($totalOutgoingQty, 3),
+                'net_qty' => $netQty,
+            ],
+            'moves' => $moves,
+            'groupedMoves' => $groupedMoves,
+            'centers' => $centers,
+            'warehouses' => $warehouses,
+            'categories' => $categories,
+            'moveTypes' => $moveTypes,
+            'currentCenterId' => $centerId,
+        ]);
+    }
+
+    /**
+     * Export Stock Activities to CSV.
+     */
+    public function exportStockActivities(Request $request): StreamedResponse
+    {
+        $this->authorize('viewAny', InventoryMove::class);
+
+        $tenantId = auth()->user()->tenant_id;
+        $centerId = TenancyContext::centerId();
+
+        $range = (string) ($request->input('range') ?: 'this_month');
+        $startDate = $request->input('start_date');
+        $endDate = $request->input('end_date');
+        $moveType = (string) ($request->input('move_type') ?: 'all');
+        $warehouseId = (string) ($request->input('warehouse_id') ?: 'all');
+        $categoryId = (string) ($request->input('category_id') ?: 'all');
+        $partId = (string) ($request->input('part_id') ?: 'all');
+        $centerFilter = $this->resolveCenterFilter($request, $centerId);
+        $search = trim((string) ($request->input('search') ?? ''));
+
+        [$from, $to] = $this->resolveDateRange($range, $startDate, $endDate);
+
+        $query = $this->buildStockActivitiesQuery(
+            $tenantId,
+            $centerId,
+            $from,
+            $to,
+            $moveType,
+            $warehouseId,
+            $categoryId,
+            $partId,
+            $centerFilter,
+            $search
+        )->with([
+            'center:id,name',
+            'warehouse:id,name,code',
+            'part:id,sku,name_ar,name_en,category_id,unit_id',
+            'part.unit:id,name_ar',
+            'part.category:id,name_ar',
+            'postedByUser:id,name',
+            'reference',
+        ])
+            ->orderBy('posted_at', 'desc');
+
+        $filename = 'تقرير_حركة_المخزون_'.now()->format('Y-m-d_His').'.csv';
+
+        return response()->streamDownload(function () use ($query) {
+            $output = fopen('php://output', 'w');
+            fwrite($output, "\xEF\xBB\xBF");
+
+            // CSV Header
+            fputcsv($output, [
+                '#',
+                'الفرع',
+                'المستودع',
+                'كود القطعة (SKU)',
+                'اسم القطعة',
+                'التصنيف',
+                'نوع الحركة',
+                'التاريخ والوقت',
+                'الرصيد قبل',
+                'الكمية',
+                'الرصيد بعد',
+                'تكلفة الوحدة',
+                'إجمالي التكلفة',
+                'المرجع',
+                'الملاحظات',
+                'بواسطة',
+            ]);
+
+            $index = 1;
+            $query->chunk(200, function ($moves) use ($output, &$index) {
+                foreach ($moves as $m) {
+                    $qty = (float) $m->qty;
+                    $after = (float) $m->balance_after;
+                    $before = round($after - $qty, 3);
+
+                    $refText = '—';
+
+                    try {
+                        $ref = $m->reference;
+                    } catch (Throwable) {
+                        $ref = null;
+                    }
+
+                    if ($ref instanceof WorkOrderItemPart) {
+                        $refText = 'كرت عمل: '.($m->work_order?->code ?? ('#'.$ref->work_order_id));
+                    } elseif ($ref instanceof Invoice) {
+                        $isCreditNote = ($ref->type === 'credit_note' || (is_object($ref->type) && $ref->type->value === 'credit_note'));
+                        $refText = ($isCreditNote ? 'إشعار دائن: ' : 'فاتورة مبيعات: ').($ref->invoice_number ?: ('#'.$ref->id));
+                    } elseif ($ref instanceof GrnItem) {
+                        $refText = 'سند استلام: '.($ref->goodsReceivedNote?->code ?: ('#'.$ref->goods_received_note_id));
+                    } elseif (! empty($m->notes)) {
+                        $refText = $m->notes;
+                    }
+
+                    fputcsv($output, [
+                        $index++,
+                        $m->center?->name ?? 'المركز الرئيسي',
+                        $m->warehouse?->name ?? 'المستودع الرئيسي',
+                        $m->part?->sku ?? '—',
+                        $m->part?->name_ar ?? $m->part?->name_en ?? '—',
+                        $m->part?->category?->name_ar ?? '—',
+                        InventoryMove::getMoveTypeLabel($m->move_type),
+                        $m->posted_at?->format('Y-m-d H:i') ?? '—',
+                        number_format($before, 3, '.', ''),
+                        number_format($qty, 3, '.', ''),
+                        number_format($after, 3, '.', ''),
+                        number_format((float) $m->unit_cost, 2, '.', ''),
+                        number_format((float) $m->total_cost, 2, '.', ''),
+                        $refText,
+                        $m->notes ?: '—',
+                        $m->postedByUser?->name ?? '—',
+                    ]);
+                }
+            });
+
+            fclose($output);
+        }, $filename, [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+            'Cache-Control' => 'no-store, no-cache',
+        ]);
+    }
+
+    /**
+     * Build reusable stock activities query with multi-tenancy, center and filters.
+     */
+    private function buildStockActivitiesQuery(
+        int $tenantId,
+        ?int $centerId,
+        ?Carbon $from,
+        ?Carbon $to,
+        string $moveType,
+        string $warehouseId,
+        string $categoryId,
+        string $partId,
+        string $centerFilter,
+        string $search
+    ): Builder {
+        $query = InventoryMove::withoutGlobalScope('center_scoped')
+            ->where('inventory_moves.tenant_id', $tenantId)
+            ->whereNotNull('inventory_moves.posted_at');
+
+        $accessibleCenterIds = $this->accessibleCenterIds();
+
+        if ($accessibleCenterIds !== null) {
+            $query->whereIn('inventory_moves.center_id', $accessibleCenterIds);
+        }
+
+        if ($centerFilter !== 'all' && is_numeric($centerFilter)) {
+            $query->where('inventory_moves.center_id', (int) $centerFilter);
+        }
+
+        if ($from && $to) {
+            $query->whereBetween('inventory_moves.posted_at', [$from, $to]);
+        } elseif ($from) {
+            $query->where('inventory_moves.posted_at', '>=', $from);
+        } elseif ($to) {
+            $query->where('inventory_moves.posted_at', '<=', $to);
+        }
+
+        if ($moveType !== 'all') {
+            $query->where('inventory_moves.move_type', $moveType);
+        }
+
+        if ($warehouseId !== 'all' && is_numeric($warehouseId)) {
+            $query->where('inventory_moves.warehouse_id', (int) $warehouseId);
+        }
+
+        if ($categoryId !== 'all' && is_numeric($categoryId)) {
+            $query->whereHas('part', fn ($pq) => $pq->where('category_id', (int) $categoryId));
+        }
+
+        if ($partId !== 'all' && is_numeric($partId)) {
+            $query->where('inventory_moves.part_id', (int) $partId);
+        }
+
+        if ($search !== '') {
+            $query->where(function (Builder $sub) use ($search) {
+                $sub->where('inventory_moves.notes', 'like', "%{$search}%")
+                    ->orWhere('inventory_moves.reference_id', 'like', "%{$search}%")
+                    ->orWhereHas('part', function (Builder $pq) use ($search) {
+                        $pq->where('sku', 'like', "%{$search}%")
+                            ->orWhere('barcode', 'like', "%{$search}%")
+                            ->orWhere('name_ar', 'like', "%{$search}%")
+                            ->orWhere('name_en', 'like', "%{$search}%");
+                    });
+            });
+        }
+
+        return $query;
     }
 
     /**
