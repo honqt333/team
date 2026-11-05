@@ -151,6 +151,7 @@ Route::prefix('view')->name('public.')->group(function () {
 });
 
 Route::get('/', [PublicLandingController::class, 'preview'])->name('home');
+Route::get('/userProfile', fn () => redirect()->route('app.profile'));
 
 Route::get('/landing-preview', [PublicLandingController::class, 'preview'])->name('public.landing.preview');
 Route::post('/landing-preview/contact', [PublicLandingController::class, 'submitContact'])->middleware('throttle:public-landing')->name('public.landing.contact');
@@ -323,8 +324,10 @@ Route::middleware(['auth', 'verified', EnsureTenantActive::class, EnsureTwoFacto
     // Profile
     Route::get('/profile', [App\Http\Controllers\App\ProfileController::class, 'index'])->name('app.profile');
     Route::patch('/profile', [App\Http\Controllers\App\ProfileController::class, 'update'])->name('app.profile.update');
+    Route::post('/profile/preferences', [App\Http\Controllers\App\ProfileController::class, 'updatePreferences'])->name('app.profile.preferences');
     Route::post('/profile/photo', [App\Http\Controllers\App\ProfileController::class, 'updatePhoto'])->middleware('throttle:uploads')->name('app.profile.photo.update');
     Route::post('/profile/switch-center', [ProfileController::class, 'switchCenter'])->name('profile.switch-center');
+    Route::get('/userProfile', fn () => redirect()->route('app.profile'));
 
     // Two-Factor Authentication (Tenant App)
     //

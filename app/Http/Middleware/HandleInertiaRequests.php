@@ -8,6 +8,7 @@ use App\Models\AdminUser;
 use App\Models\ContactMessage;
 use App\Models\InternalNotification;
 use App\Models\Quote;
+use App\Models\Setting;
 use App\Models\SystemAnnouncement;
 use App\Models\Tenant;
 use App\Models\User;
@@ -79,6 +80,13 @@ class HandleInertiaRequests extends Middleware
                     ? ContactMessage::where('is_read', false)->count()
                     : 0,
             ],
+            'preferences' => ($user && $isTenantUser && $user->tenant_id)
+                ? rescue(function () use ($user) {
+                    $raw = Setting::forTenant($user->tenant_id, 'user_preferences.'.$user->id);
+
+                    return $raw ? json_decode((string) $raw, true) : null;
+                })
+                : null,
             'flash' => [
                 'success' => fn () => $request->session()->get('success'),
                 'error' => fn () => $request->session()->get('error'),

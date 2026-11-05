@@ -38,7 +38,7 @@
         >
             <!-- Desktop Sidebar -->
             <aside
-                v-if="!hideSidebar"
+                v-if="!hideSidebar && !isTopNav"
                 :class="[
                     'hidden md:flex md:w-64 md:shrink-0 md:flex-col bg-white dark:bg-gray-800 print:hidden',
                     isRtl
@@ -904,12 +904,12 @@
             </aside>
 
             <!-- Main Content -->
-            <div class="flex-1 min-w-0 flex flex-col">
+            <div class="flex-1 min-w-0 flex flex-col h-full min-h-0">
                 <SystemAnnouncementBanner v-if="$page.props.system_announcements?.length > 0" />
 
                 <!-- Top bar -->
                 <header
-                    class="h-14 flex items-center justify-between px-4 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 flex-shrink-0"
+                    class="relative z-50 h-14 flex items-center justify-between px-4 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 flex-shrink-0"
                 >
                     <!-- Mobile hamburger -->
                     <button
@@ -926,7 +926,51 @@
                         </svg>
                     </button>
 
-                    <div class="hidden md:block"></div>
+                    <!-- Brand info on desktop when isTopNav is active, or empty spacer when in side nav -->
+                    <div v-if="isTopNav" class="hidden md:flex items-center gap-3">
+                        <div
+                            class="w-8 h-8 rounded-lg bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 flex items-center justify-center overflow-hidden shrink-0"
+                        >
+                            <img
+                                v-if="page.props.tenant?.logo_url"
+                                :src="page.props.tenant.logo_url"
+                                :alt="page.props.tenant?.name"
+                                class="w-full h-full object-contain"
+                            />
+                            <svg
+                                v-else
+                                class="w-4 h-4 text-gray-400"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
+                                />
+                            </svg>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span
+                                class="text-sm font-bold text-gray-900 dark:text-white truncate max-w-[200px]"
+                            >
+                                {{
+                                    page.props.tenant?.trade_name ||
+                                    page.props.tenant?.name ||
+                                    $t('nav.brand')
+                                }}
+                            </span>
+                            <span
+                                v-if="page.props.center?.id"
+                                class="text-xs text-gray-400 dark:text-gray-500 font-mono"
+                            >
+                                #{{ page.props.center.id }}
+                            </span>
+                        </div>
+                    </div>
+                    <div v-else class="hidden md:block"></div>
 
                     <div class="flex items-center gap-1">
                         <!-- Center Switcher -->
@@ -935,7 +979,7 @@
                             class="relative mx-1"
                         >
                             <button
-                                @click="centerMenuOpen = !centerMenuOpen"
+                                @click="toggleCenterMenu"
                                 class="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors border border-transparent hover:border-gray-200 dark:hover:border-gray-600"
                             >
                                 <span class="hidden sm:inline-block max-w-[150px] truncate">
@@ -1017,6 +1061,47 @@
                         >
                             {{ isRtl ? page.props.center.name_ar : page.props.center.name_en }}
                         </div>
+                        <!-- Nav Layout Switcher (Top vs Side) -->
+                        <button
+                            type="button"
+                            @click="toggleNavLayout"
+                            class="hidden md:flex p-2 rounded-lg text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                            :title="
+                                isTopNav
+                                    ? $t('profile.preferences.layout_side')
+                                    : $t('profile.preferences.layout_top')
+                            "
+                        >
+                            <svg
+                                v-if="isTopNav"
+                                class="w-5 h-5"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M4 6h16M4 12h16M4 18h7"
+                                />
+                            </svg>
+                            <svg
+                                v-else
+                                class="w-5 h-5"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M4 6h16M4 10h16M4 14h16M4 18h16"
+                                />
+                            </svg>
+                        </button>
+
                         <!-- Language toggle -->
                         <button
                             @click="toggleLocale"
@@ -1067,7 +1152,7 @@
                         <!-- User Dropdown -->
                         <div class="relative">
                             <button
-                                @click="userMenuOpen = !userMenuOpen"
+                                @click="toggleUserMenu"
                                 class="flex items-center gap-2 p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
                             >
                                 <img
@@ -1092,7 +1177,7 @@
                                 <div
                                     v-if="userMenuOpen"
                                     :class="[
-                                        'absolute top-full mt-2 w-48 bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 py-1 z-50',
+                                        'absolute top-full mt-2 w-48 bg-white dark:bg-gray-800 rounded-xl shadow-2xl border border-gray-200 dark:border-gray-700 py-1 z-50',
                                         isRtl ? 'left-0' : 'right-0',
                                     ]"
                                 >
@@ -1172,6 +1257,1006 @@
                         </div>
                     </div>
                 </header>
+
+                <!-- Horizontal Top Navigation Bar (Active in Top Nav Mode on Desktop) -->
+                <nav
+                    v-if="isTopNav"
+                    class="relative z-40 hidden md:flex items-center gap-1 px-4 py-1.5 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 flex-shrink-0 flex-wrap lg:flex-nowrap"
+                    aria-label="Top Navigation"
+                >
+                    <!-- 1. Dashboard -->
+                    <a
+                        href="/dashboard"
+                        :class="[
+                            'flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors shrink-0',
+                            isActive('/dashboard')
+                                ? 'bg-indigo-50 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300 font-semibold'
+                                : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700',
+                        ]"
+                    >
+                        <svg
+                            class="w-4 h-4 flex-shrink-0"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
+                            />
+                        </svg>
+                        <span>{{ $t('nav.dashboard') }}</span>
+                    </a>
+
+                    <!-- 2. Operations / Workshop Dropdown -->
+                    <div
+                        v-if="
+                            can('crm.work_orders.view') ||
+                            can('quotes.view') ||
+                            can('crm.appointments.manage')
+                        "
+                        class="relative topnav-dropdown shrink-0"
+                    >
+                        <button
+                            type="button"
+                            @click="toggleTopNavDropdown('workshop')"
+                            :class="[
+                                'flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors',
+                                isAnyActive([
+                                    '/app/work-orders',
+                                    '/app/workshop',
+                                    '/app/quotes',
+                                    '/app/appointments',
+                                    '/app/communications/appointment-messages',
+                                ])
+                                    ? 'bg-indigo-50 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300 font-semibold'
+                                    : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700',
+                            ]"
+                        >
+                            <svg
+                                class="w-4 h-4 flex-shrink-0"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"
+                                />
+                            </svg>
+                            <span>{{ $t('nav.work_orders') }}</span>
+                            <span
+                                v-if="page.props.auth?.approved_quotes_count > 0"
+                                class="px-1.5 py-0.5 text-[10px] font-bold rounded-full bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300"
+                            >
+                                {{ page.props.auth.approved_quotes_count }}
+                            </span>
+                            <svg
+                                class="w-3.5 h-3.5 transition-transform"
+                                :class="{ 'rotate-180': openTopNavDropdown === 'workshop' }"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M19 9l-7 7-7-7"
+                                />
+                            </svg>
+                        </button>
+
+                        <Transition name="dropdown">
+                            <div
+                                v-if="openTopNavDropdown === 'workshop'"
+                                :class="[
+                                    'absolute top-full mt-1.5 w-52 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-100 dark:border-gray-700 py-1.5 z-50',
+                                    isRtl ? 'right-0' : 'left-0',
+                                ]"
+                            >
+                                <Link
+                                    v-if="can('crm.work_orders.view')"
+                                    :href="route('work-orders.index')"
+                                    @click="closeTopNavDropdown"
+                                    :class="[
+                                        'flex items-center gap-2.5 px-3 py-2 text-xs font-medium transition-colors',
+                                        isActive('/app/work-orders')
+                                            ? 'bg-indigo-50 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300'
+                                            : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-750',
+                                    ]"
+                                >
+                                    <svg
+                                        class="w-4 h-4 flex-shrink-0"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"
+                                        />
+                                    </svg>
+                                    <span>{{ $t('nav.work_orders') }}</span>
+                                </Link>
+
+                                <a
+                                    v-if="can('quotes.view')"
+                                    href="/app/quotes"
+                                    @click="closeTopNavDropdown"
+                                    :class="[
+                                        'flex items-center justify-between px-3 py-2 text-xs font-medium transition-colors',
+                                        isActive('/app/quotes')
+                                            ? 'bg-amber-50 dark:bg-amber-900/50 text-amber-700 dark:text-amber-300'
+                                            : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-750',
+                                    ]"
+                                >
+                                    <div class="flex items-center gap-2.5">
+                                        <svg
+                                            class="w-4 h-4 flex-shrink-0"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            viewBox="0 0 24 24"
+                                        >
+                                            <path
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                stroke-width="2"
+                                                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                                            />
+                                        </svg>
+                                        <span>{{ $t('nav.quotes') }}</span>
+                                    </div>
+                                    <span
+                                        v-if="page.props.auth?.approved_quotes_count > 0"
+                                        class="px-1.5 py-0.5 text-[10px] font-bold rounded-full bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300"
+                                    >
+                                        {{ page.props.auth.approved_quotes_count }}
+                                    </span>
+                                </a>
+
+                                <Link
+                                    v-if="can('crm.work_orders.view')"
+                                    :href="route('app.workshop.index')"
+                                    @click="closeTopNavDropdown"
+                                    :class="[
+                                        'flex items-center gap-2.5 px-3 py-2 text-xs font-medium transition-colors',
+                                        isActive('/app/workshop')
+                                            ? 'bg-emerald-50 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300'
+                                            : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-750',
+                                    ]"
+                                >
+                                    <svg
+                                        class="w-4 h-4 flex-shrink-0"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M4 6h6v6H4V6zm0 10h6v4H4v-4zm10-10h6v4h-6V6zm0 8h6v6h-6v-6z"
+                                        />
+                                    </svg>
+                                    <span>{{ $t('workshop.board.title') }}</span>
+                                </Link>
+
+                                <Link
+                                    v-if="can('crm.appointments.manage')"
+                                    :href="route('appointments.index')"
+                                    @click="closeTopNavDropdown"
+                                    :class="[
+                                        'flex items-center gap-2.5 px-3 py-2 text-xs font-medium transition-colors',
+                                        isActive('/app/appointments')
+                                            ? 'bg-emerald-50 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300'
+                                            : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-750',
+                                    ]"
+                                >
+                                    <svg
+                                        class="w-4 h-4 flex-shrink-0"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                                        />
+                                    </svg>
+                                    <span>{{ $t('appointments.title') }}</span>
+                                </Link>
+
+                                <Link
+                                    v-if="can('crm.appointments.manage')"
+                                    :href="route('communications.appointment-messages.index')"
+                                    @click="closeTopNavDropdown"
+                                    :class="[
+                                        'flex items-center gap-2.5 px-3 py-2 text-xs font-medium transition-colors',
+                                        isActive('/app/communications/appointment-messages')
+                                            ? 'bg-sky-50 dark:bg-sky-900/50 text-sky-700 dark:text-sky-300'
+                                            : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-750',
+                                    ]"
+                                >
+                                    <svg
+                                        class="w-4 h-4 flex-shrink-0"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M8 10h.01M12 10h.01M16 10h.01M21 12c0 4.418-4.03 8-9 8a9.86 9.86 0 01-4.39-1.03L3 20l1.39-3.94A7.96 7.96 0 013 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
+                                        />
+                                    </svg>
+                                    <span>
+                                        {{ $t('communications.appointment_messages.title') }}
+                                    </span>
+                                </Link>
+                            </div>
+                        </Transition>
+                    </div>
+
+                    <!-- 3. CRM (Customers & Vehicles) Dropdown -->
+                    <div
+                        v-if="can('crm.customers.view') || can('crm.vehicles.view')"
+                        class="relative topnav-dropdown shrink-0"
+                    >
+                        <button
+                            type="button"
+                            @click="toggleTopNavDropdown('crm')"
+                            :class="[
+                                'flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors',
+                                isAnyActive(['/app/customers', '/app/vehicles'])
+                                    ? 'bg-indigo-50 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300 font-semibold'
+                                    : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700',
+                            ]"
+                        >
+                            <svg
+                                class="w-4 h-4 flex-shrink-0"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
+                                />
+                            </svg>
+                            <span>{{ $t('nav.customers') }}</span>
+                            <svg
+                                class="w-3.5 h-3.5 transition-transform"
+                                :class="{ 'rotate-180': openTopNavDropdown === 'crm' }"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M19 9l-7 7-7-7"
+                                />
+                            </svg>
+                        </button>
+
+                        <Transition name="dropdown">
+                            <div
+                                v-if="openTopNavDropdown === 'crm'"
+                                :class="[
+                                    'absolute top-full mt-1.5 w-48 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-100 dark:border-gray-700 py-1.5 z-50',
+                                    isRtl ? 'right-0' : 'left-0',
+                                ]"
+                            >
+                                <a
+                                    v-if="can('crm.customers.view')"
+                                    href="/app/customers"
+                                    @click="closeTopNavDropdown"
+                                    :class="[
+                                        'flex items-center gap-2.5 px-3 py-2 text-xs font-medium transition-colors',
+                                        isActive('/app/customers')
+                                            ? 'bg-indigo-50 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300'
+                                            : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-750',
+                                    ]"
+                                >
+                                    <svg
+                                        class="w-4 h-4 flex-shrink-0"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
+                                        />
+                                    </svg>
+                                    <span>{{ $t('nav.customers') }}</span>
+                                </a>
+                                <a
+                                    v-if="can('crm.vehicles.view')"
+                                    href="/app/vehicles"
+                                    @click="closeTopNavDropdown"
+                                    :class="[
+                                        'flex items-center gap-2.5 px-3 py-2 text-xs font-medium transition-colors',
+                                        isActive('/app/vehicles')
+                                            ? 'bg-indigo-50 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300'
+                                            : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-750',
+                                    ]"
+                                >
+                                    <svg
+                                        class="w-4 h-4 flex-shrink-0"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z"
+                                        />
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0"
+                                        />
+                                    </svg>
+                                    <span>{{ $t('nav.vehicles') }}</span>
+                                </a>
+                            </div>
+                        </Transition>
+                    </div>
+
+                    <!-- 4. Services -->
+                    <a
+                        v-if="can('services.view')"
+                        href="/app/services"
+                        :class="[
+                            'flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors shrink-0',
+                            isActive('/app/services')
+                                ? 'bg-teal-50 dark:bg-teal-900/50 text-teal-700 dark:text-teal-300 font-semibold'
+                                : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700',
+                        ]"
+                    >
+                        <svg
+                            class="w-4 h-4 flex-shrink-0"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
+                            />
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                            />
+                        </svg>
+                        <span>{{ $t('nav.services') }}</span>
+                    </a>
+
+                    <!-- 5. Invoices -->
+                    <Link
+                        v-if="can('invoices.view')"
+                        :href="route('app.invoices.hub')"
+                        :class="[
+                            'flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors shrink-0',
+                            isActive('/app/invoices')
+                                ? 'bg-green-50 dark:bg-green-900/50 text-green-700 dark:text-green-300 font-semibold'
+                                : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700',
+                        ]"
+                    >
+                        <svg
+                            class="w-4 h-4 flex-shrink-0"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"
+                            />
+                        </svg>
+                        <span>{{ $t('nav.invoices') }}</span>
+                    </Link>
+
+                    <!-- 6. Purchasing Dropdown -->
+                    <div
+                        v-if="can('purchasing.suppliers.view')"
+                        class="relative topnav-dropdown shrink-0"
+                    >
+                        <button
+                            type="button"
+                            @click="toggleTopNavDropdown('purchasing')"
+                            :class="[
+                                'flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors',
+                                isAnyActive(['/app/purchasing'])
+                                    ? 'bg-violet-50 dark:bg-violet-900/50 text-violet-700 dark:text-violet-300 font-semibold'
+                                    : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700',
+                            ]"
+                        >
+                            <svg
+                                class="w-4 h-4 flex-shrink-0"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"
+                                />
+                            </svg>
+                            <span>{{ $t('purchasing.title') }}</span>
+                            <svg
+                                class="w-3.5 h-3.5 transition-transform"
+                                :class="{ 'rotate-180': openTopNavDropdown === 'purchasing' }"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M19 9l-7 7-7-7"
+                                />
+                            </svg>
+                        </button>
+
+                        <Transition name="dropdown">
+                            <div
+                                v-if="openTopNavDropdown === 'purchasing'"
+                                :class="[
+                                    'absolute top-full mt-1.5 w-48 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-100 dark:border-gray-700 py-1.5 z-50',
+                                    isRtl ? 'right-0' : 'left-0',
+                                ]"
+                            >
+                                <a
+                                    href="/app/purchasing"
+                                    @click="closeTopNavDropdown"
+                                    :class="[
+                                        'flex items-center gap-2.5 px-3 py-2 text-xs font-medium transition-colors',
+                                        isActive('/app/purchasing') &&
+                                        !isActive('/app/purchasing/suppliers')
+                                            ? 'bg-violet-50 dark:bg-violet-900/50 text-violet-700 dark:text-violet-300'
+                                            : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-750',
+                                    ]"
+                                >
+                                    <svg
+                                        class="w-4 h-4 flex-shrink-0"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"
+                                        />
+                                    </svg>
+                                    <span>{{ $t('purchasing.title') }}</span>
+                                </a>
+                                <a
+                                    href="/app/purchasing/suppliers"
+                                    @click="closeTopNavDropdown"
+                                    :class="[
+                                        'flex items-center gap-2.5 px-3 py-2 text-xs font-medium transition-colors',
+                                        isActive('/app/purchasing/suppliers')
+                                            ? 'bg-violet-50 dark:bg-violet-900/50 text-violet-700 dark:text-violet-300'
+                                            : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-750',
+                                    ]"
+                                >
+                                    <svg
+                                        class="w-4 h-4 flex-shrink-0"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
+                                        />
+                                    </svg>
+                                    <span>{{ $t('purchasing.suppliers.title') }}</span>
+                                </a>
+                            </div>
+                        </Transition>
+                    </div>
+
+                    <!-- 7. Inventory Dropdown -->
+                    <div v-if="can('inventory.view')" class="relative topnav-dropdown shrink-0">
+                        <button
+                            type="button"
+                            @click="toggleTopNavDropdown('inventory')"
+                            :class="[
+                                'flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors',
+                                isAnyActive(['/app/inventory'])
+                                    ? 'bg-emerald-50 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300 font-semibold'
+                                    : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700',
+                            ]"
+                        >
+                            <svg
+                                class="w-4 h-4 flex-shrink-0"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
+                                />
+                            </svg>
+                            <span>{{ $t('inventory.title') }}</span>
+                            <svg
+                                class="w-3.5 h-3.5 transition-transform"
+                                :class="{ 'rotate-180': openTopNavDropdown === 'inventory' }"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M19 9l-7 7-7-7"
+                                />
+                            </svg>
+                        </button>
+
+                        <Transition name="dropdown">
+                            <div
+                                v-if="openTopNavDropdown === 'inventory'"
+                                :class="[
+                                    'absolute top-full mt-1.5 w-48 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-100 dark:border-gray-700 py-1.5 z-50',
+                                    isRtl ? 'right-0' : 'left-0',
+                                ]"
+                            >
+                                <a
+                                    href="/app/inventory/parts"
+                                    @click="closeTopNavDropdown"
+                                    :class="[
+                                        'flex items-center gap-2.5 px-3 py-2 text-xs font-medium transition-colors',
+                                        isActive('/app/inventory/parts')
+                                            ? 'bg-emerald-50 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300'
+                                            : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-750',
+                                    ]"
+                                >
+                                    <svg
+                                        class="w-4 h-4 flex-shrink-0"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
+                                        />
+                                    </svg>
+                                    <span>{{ $t('inventory.parts.title') }}</span>
+                                </a>
+                                <a
+                                    v-if="can('inventory.stock.view')"
+                                    href="/app/inventory/stock"
+                                    @click="closeTopNavDropdown"
+                                    :class="[
+                                        'flex items-center gap-2.5 px-3 py-2 text-xs font-medium transition-colors',
+                                        isActive('/app/inventory/stock')
+                                            ? 'bg-emerald-50 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300'
+                                            : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-750',
+                                    ]"
+                                >
+                                    <svg
+                                        class="w-4 h-4 flex-shrink-0"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
+                                        />
+                                    </svg>
+                                    <span>{{ $t('inventory.stock.title') }}</span>
+                                </a>
+                                <a
+                                    v-if="can('inventory.moves.view')"
+                                    href="/app/inventory/moves"
+                                    @click="closeTopNavDropdown"
+                                    :class="[
+                                        'flex items-center gap-2.5 px-3 py-2 text-xs font-medium transition-colors',
+                                        isActive('/app/inventory/moves')
+                                            ? 'bg-emerald-50 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300'
+                                            : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-750',
+                                    ]"
+                                >
+                                    <svg
+                                        class="w-4 h-4 flex-shrink-0"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"
+                                        />
+                                    </svg>
+                                    <span>{{ $t('inventory.moves.title') }}</span>
+                                </a>
+                                <a
+                                    v-if="can('inventory.moves.view')"
+                                    href="/app/inventory/transfers"
+                                    @click="closeTopNavDropdown"
+                                    :class="[
+                                        'flex items-center gap-2.5 px-3 py-2 text-xs font-medium transition-colors',
+                                        isActive('/app/inventory/transfers')
+                                            ? 'bg-emerald-50 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300'
+                                            : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-750',
+                                    ]"
+                                >
+                                    <svg
+                                        class="w-4 h-4 flex-shrink-0"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"
+                                        />
+                                    </svg>
+                                    <span>{{ $t('inventory.transfers.title') }}</span>
+                                </a>
+                                <a
+                                    v-if="can('inventory.settings.manage')"
+                                    href="/app/inventory/settings"
+                                    @click="closeTopNavDropdown"
+                                    :class="[
+                                        'flex items-center gap-2.5 px-3 py-2 text-xs font-medium transition-colors',
+                                        isActive('/app/inventory/settings')
+                                            ? 'bg-emerald-50 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300'
+                                            : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-750',
+                                    ]"
+                                >
+                                    <svg
+                                        class="w-4 h-4 flex-shrink-0"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
+                                        />
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                                        />
+                                    </svg>
+                                    <span>{{ $t('inventory.settings.title') }}</span>
+                                </a>
+                            </div>
+                        </Transition>
+                    </div>
+
+                    <!-- 8. HR Dropdown -->
+                    <div v-if="can('hr.view')" class="relative topnav-dropdown shrink-0">
+                        <button
+                            type="button"
+                            @click="toggleTopNavDropdown('hr')"
+                            :class="[
+                                'flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors',
+                                isAnyActive(['/app/hr'])
+                                    ? 'bg-violet-50 dark:bg-violet-900/50 text-violet-700 dark:text-violet-300 font-semibold'
+                                    : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700',
+                            ]"
+                        >
+                            <svg
+                                class="w-4 h-4 flex-shrink-0"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"
+                                />
+                            </svg>
+                            <span>{{ $t('hr.title') }}</span>
+                            <svg
+                                class="w-3.5 h-3.5 transition-transform"
+                                :class="{ 'rotate-180': openTopNavDropdown === 'hr' }"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M19 9l-7 7-7-7"
+                                />
+                            </svg>
+                        </button>
+
+                        <Transition name="dropdown">
+                            <div
+                                v-if="openTopNavDropdown === 'hr'"
+                                :class="[
+                                    'absolute top-full mt-1.5 w-48 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-100 dark:border-gray-700 py-1.5 z-50',
+                                    isRtl ? 'right-0' : 'left-0',
+                                ]"
+                            >
+                                <a
+                                    href="/app/hr/employees"
+                                    @click="closeTopNavDropdown"
+                                    :class="[
+                                        'flex items-center gap-2.5 px-3 py-2 text-xs font-medium transition-colors',
+                                        isActive('/app/hr/employees')
+                                            ? 'bg-violet-50 dark:bg-violet-900/50 text-violet-700 dark:text-violet-300'
+                                            : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-750',
+                                    ]"
+                                >
+                                    <svg
+                                        class="w-4 h-4 flex-shrink-0"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"
+                                        />
+                                    </svg>
+                                    <span>{{ $t('hr.employees.title') }}</span>
+                                </a>
+                                <a
+                                    href="/app/hr/attendance"
+                                    @click="closeTopNavDropdown"
+                                    :class="[
+                                        'flex items-center gap-2.5 px-3 py-2 text-xs font-medium transition-colors',
+                                        isActive('/app/hr/attendance')
+                                            ? 'bg-violet-50 dark:bg-violet-900/50 text-violet-700 dark:text-violet-300'
+                                            : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-750',
+                                    ]"
+                                >
+                                    <svg
+                                        class="w-4 h-4 flex-shrink-0"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                                        />
+                                    </svg>
+                                    <span>{{ $t('hr.attendance.title') }}</span>
+                                </a>
+                                <a
+                                    v-if="can('hr.payroll.view')"
+                                    href="/app/hr/payroll"
+                                    @click="closeTopNavDropdown"
+                                    :class="[
+                                        'flex items-center gap-2.5 px-3 py-2 text-xs font-medium transition-colors',
+                                        isActive('/app/hr/payroll')
+                                            ? 'bg-violet-50 dark:bg-violet-900/50 text-violet-700 dark:text-violet-300'
+                                            : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-750',
+                                    ]"
+                                >
+                                    <svg
+                                        class="w-4 h-4 flex-shrink-0"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"
+                                        />
+                                    </svg>
+                                    <span>{{ $t('nav.payroll') }}</span>
+                                </a>
+                                <a
+                                    href="/app/hr/settings"
+                                    @click="closeTopNavDropdown"
+                                    :class="[
+                                        'flex items-center gap-2.5 px-3 py-2 text-xs font-medium transition-colors',
+                                        isActive('/app/hr/settings')
+                                            ? 'bg-violet-50 dark:bg-violet-900/50 text-violet-700 dark:text-violet-300'
+                                            : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-750',
+                                    ]"
+                                >
+                                    <svg
+                                        class="w-4 h-4 flex-shrink-0"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
+                                        />
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                                        />
+                                    </svg>
+                                    <span>{{ $t('hr.settings.title') }}</span>
+                                </a>
+                            </div>
+                        </Transition>
+                    </div>
+
+                    <!-- 9. Reports -->
+                    <a
+                        href="/app/reports"
+                        :class="[
+                            'flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors shrink-0',
+                            isActive('/app/reports')
+                                ? 'bg-violet-50 dark:bg-violet-900/50 text-violet-700 dark:text-violet-300 font-semibold'
+                                : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700',
+                        ]"
+                    >
+                        <svg
+                            class="w-4 h-4 flex-shrink-0"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
+                            />
+                        </svg>
+                        <span>{{ $t('nav.reports') }}</span>
+                    </a>
+
+                    <!-- 10. Integrations -->
+                    <a
+                        href="/app/settings/integrations"
+                        :class="[
+                            'flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors shrink-0',
+                            isActive('/app/settings/integrations')
+                                ? 'bg-indigo-50 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300 font-semibold'
+                                : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700',
+                        ]"
+                    >
+                        <svg
+                            class="w-4 h-4 flex-shrink-0"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M11 4a2 2 0 114 0v1a1 1 0 001 1h3a1 1 0 011 1v3a1 1 0 01-1 1h-1a2 2 0 100 4h1a1 1 0 011 1v3a1 1 0 01-1 1h-3a1 1 0 01-1-1v-1a2 2 0 10-4 0v1a1 1 0 01-1 1H7a1 1 0 01-1-1v-3a1 1 0 00-1-1H4a2 2 0 110-4h1a1 1 0 001-1V7a1 1 0 011-1h3a1 1 0 001-1V4z"
+                            />
+                        </svg>
+                        <span>{{ $t('nav.integrations') }}</span>
+                    </a>
+
+                    <!-- 11. Employee Portal (if employee) -->
+                    <a
+                        v-if="hasRole('employee')"
+                        href="/app/my"
+                        :class="[
+                            'flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors shrink-0',
+                            isActive('/app/my')
+                                ? 'bg-cyan-50 dark:bg-cyan-900/50 text-cyan-700 dark:text-cyan-300 font-semibold'
+                                : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700',
+                        ]"
+                    >
+                        <svg
+                            class="w-4 h-4 flex-shrink-0"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                            />
+                        </svg>
+                        <span>{{ $t('nav.employee_portal') }}</span>
+                    </a>
+
+                    <!-- 12. Settings -->
+                    <a
+                        v-if="
+                            can('settings.company.manage') ||
+                            can('settings.centers.view') ||
+                            can('users.view') ||
+                            can('crm.vehicles.settings.view')
+                        "
+                        href="/app/settings"
+                        :class="[
+                            'flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors shrink-0',
+                            isActive('/app/settings') && !isActive('/app/settings/integrations')
+                                ? 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white font-semibold'
+                                : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700',
+                        ]"
+                    >
+                        <svg
+                            class="w-4 h-4 flex-shrink-0"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
+                            />
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                            />
+                        </svg>
+                        <span>{{ $t('nav.settings') }}</span>
+                    </a>
+                </nav>
 
                 <!-- Subscription/Trial Expiration Notice Banner -->
                 <div
@@ -2374,13 +3459,98 @@ watch(
     { immediate: true }
 );
 
-// Close user menu when clicking outside
+// Close user menu and top nav dropdowns when clicking outside
 function handleClickOutside(event) {
     if ((userMenuOpen.value || centerMenuOpen.value) && !event.target.closest('.relative')) {
         userMenuOpen.value = false;
         centerMenuOpen.value = false;
     }
+    if (openTopNavDropdown.value && !event.target.closest('.topnav-dropdown')) {
+        openTopNavDropdown.value = null;
+    }
 }
+
+function handleKeyDown(event) {
+    if (event.key === 'Escape') {
+        userMenuOpen.value = false;
+        centerMenuOpen.value = false;
+        openTopNavDropdown.value = null;
+    }
+}
+
+// ─── Top Navigation Mode & Preferences ─────────────────────────────────────────
+const localNavLayout = ref(
+    typeof window !== 'undefined' ? localStorage.getItem('user_nav_layout') : null
+);
+
+const layoutMode = computed(() => {
+    if (localNavLayout.value) {
+        return localNavLayout.value;
+    }
+    return page.props.preferences?.layout || 'side';
+});
+
+const isTopNav = computed(() => layoutMode.value === 'top');
+
+const openTopNavDropdown = ref(null);
+
+function toggleUserMenu() {
+    openTopNavDropdown.value = null;
+    centerMenuOpen.value = false;
+    userMenuOpen.value = !userMenuOpen.value;
+}
+
+function toggleCenterMenu() {
+    openTopNavDropdown.value = null;
+    userMenuOpen.value = false;
+    centerMenuOpen.value = !centerMenuOpen.value;
+}
+
+function toggleTopNavDropdown(name) {
+    userMenuOpen.value = false;
+    centerMenuOpen.value = false;
+    openTopNavDropdown.value = openTopNavDropdown.value === name ? null : name;
+}
+
+function closeTopNavDropdown() {
+    openTopNavDropdown.value = null;
+}
+
+function isAnyActive(paths) {
+    if (typeof window === 'undefined') return false;
+    return paths.some((p) => isActive(p));
+}
+
+function toggleNavLayout() {
+    const next = isTopNav.value ? 'side' : 'top';
+    localNavLayout.value = next;
+    if (typeof window !== 'undefined') {
+        localStorage.setItem('user_nav_layout', next);
+    }
+    router.post(
+        '/app/profile/preferences',
+        {
+            layout: next,
+        },
+        {
+            preserveScroll: true,
+            preserveState: true,
+        }
+    );
+}
+
+watch(
+    () => page.props.preferences?.layout,
+    (serverLayout) => {
+        if (serverLayout && typeof window !== 'undefined') {
+            localNavLayout.value = serverLayout;
+            localStorage.setItem('user_nav_layout', serverLayout);
+        }
+    }
+);
+
+// Close open dropdowns on Inertia page navigation
+let unregisterNavListener = null;
 
 onMounted(() => {
     currentLocale.value = getCurrentLocale();
@@ -2389,10 +3559,20 @@ onMounted(() => {
     document.documentElement.lang = currentLocale.value;
 
     document.addEventListener('click', handleClickOutside);
+    document.addEventListener('keydown', handleKeyDown);
+
+    unregisterNavListener = router.on('navigate', () => {
+        openTopNavDropdown.value = null;
+        mobileMenuOpen.value = false;
+    });
 });
 
 onUnmounted(() => {
     document.removeEventListener('click', handleClickOutside);
+    document.removeEventListener('keydown', handleKeyDown);
+    if (unregisterNavListener) {
+        unregisterNavListener();
+    }
 });
 
 // toggleThemeHandler is provided by useTheme() above (named `toggle`).

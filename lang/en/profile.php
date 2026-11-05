@@ -1,17 +1,83 @@
 <?php
 
-return array (
-  'info' => 
-  array (
-    'email' => 'Email',
-    'name' => 'Name',
-    'phone' => 'Phone',
-    'phone_hint' => 'Phone Hint',
-    'save_changes' => 'Save Changes',
-    'title' => 'Title',
-  ),
-  'photo' => 
-  array (
-    'hr_locked' => 'Hr Locked',
-  ),
-);
+declare(strict_types=1);
+
+return [
+    'title' => 'User Profile',
+    'info' => [
+        'email' => 'Email',
+        'name' => 'Name',
+        'phone' => 'Phone',
+        'phone_hint' => 'Registered phone number (Read-only)',
+        'save_changes' => 'Save Changes',
+        'title' => 'Profile Information',
+    ],
+    'photo' => [
+        'hr_locked' => 'Photo is managed via HR employee profile',
+        'success' => 'Profile photo updated successfully',
+        'update' => 'Update Photo',
+    ],
+    'tabs' => [
+        'info' => 'Profile',
+        'security' => 'Security',
+        'password' => 'Password',
+        'preferences' => 'User Preferences',
+        'sign_in_history' => 'Sign-in History',
+    ],
+    'header' => [
+        'job_title' => 'Job Title',
+        'department' => 'Department',
+        'change_password' => 'Change Password',
+        'view_permissions' => 'View Permissions',
+        'full_access' => 'Full Access',
+        'limited_access' => 'Limited Access',
+        'roles' => 'Roles',
+    ],
+    'preferences' => [
+        'title' => 'User & Interface Preferences',
+        'subtitle' => 'Customize your browsing experience and WhatsApp integration',
+        'layout' => 'Navigation Layout',
+        'layout_side' => 'Side Navigation',
+        'layout_top' => 'Top Navigation',
+        'whatsapp_section' => 'WhatsApp Options',
+        'whatsapp_open_via' => 'Open WhatsApp Via',
+        'whatsapp_app' => 'WhatsApp App',
+        'whatsapp_web' => 'WhatsApp Web',
+        'whatsapp_sharing' => 'Sharing Preference',
+        'whatsapp_share_form' => 'Show confirmation form',
+        'whatsapp_share_direct' => 'Direct send',
+        'floating_section' => 'Floating Buttons',
+        'hide_floating_button' => 'Hide quick action floating button',
+        'hide_floating_contact' => 'Hide WhatsApp contact floating button',
+        'save' => 'Save Preferences',
+        'saved_success' => 'Preferences saved successfully',
+    ],
+    'cache' => [
+        'title' => 'Application Cache',
+        'clear_button' => 'Clear Application Cache',
+        'confirm_title' => 'Confirm Clear Cache',
+        'confirm_message' => 'This will clear all application caches from your browser and reload the page. Do you want to proceed?',
+        'explanation1' => 'Clearing application cache helps resolve outdated view states, menu items, or settings.',
+        'explanation2' => 'This action does not delete any server-side data.',
+        'cleared_success' => 'Application cache cleared successfully, reloading...',
+    ],
+    'sign_in_history' => [
+        'title' => 'Sign-in History & Active Sessions',
+        'subtitle' => 'Recent sessions and IP addresses recorded for your account',
+        'index' => '#',
+        'date' => 'Date & Time',
+        'ip' => 'IP Address',
+        'device' => 'Device & Browser',
+        'activity' => 'Last Activity',
+        'no_records' => 'No recorded sessions',
+    ],
+    'permissions_modal' => [
+        'title' => 'User Permissions',
+        'subtitle' => 'List of permissions granted to your account in the system',
+        'all_permissions' => 'This account has full administrative access to all system modules.',
+        'search_placeholder' => 'Search granted permissions...',
+        'no_matches' => 'No permissions match your search query',
+        'close' => 'Close',
+    ],
+    'updated_success' => 'Profile updated successfully',
+];
