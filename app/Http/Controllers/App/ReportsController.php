@@ -5155,4 +5155,683 @@ class ReportsController extends Controller
             DB::raw("{$partsSubquery} as spare_part_cost"),
         ]);
     }
+
+    /**
+     * Dedicated Financial Summary & P&L Statement Report.
+     */
+    public function financialSummary(Request $request): Response
+    {
+        $this->authorize('viewAny', Invoice::class);
+
+        $tenantId = (int) auth()->user()->tenant_id;
+        $centerId = TenancyContext::centerId();
+
+        $range = (string) ($request->input('range') ?: 'this_month');
+        $startDate = $request->input('start_date');
+        $endDate = $request->input('end_date');
+        $centerFilter = $this->resolveCenterFilter($request, $centerId);
+        $storeSalesOnly = $request->boolean('store_sales_only');
+
+        [$from, $to] = $this->resolveDateRange($range, $startDate, $endDate);
+
+        $accessibleCenters = $this->resolveAccessibleCenters($tenantId);
+
+        $targetCenters = $accessibleCenters;
+
+        if ($centerFilter !== 'all' && is_numeric($centerFilter)) {
+            $targetCenters = $accessibleCenters->where('id', (int) $centerFilter);
+        }
+
+        $results = [];
+        $overall = [
+            'invoicesServicesSumGrossAmount' => 0.0,
+            'invoicesServicesSumDiscountAmount' => 0.0,
+            'invoicesServicesSumSubTotal' => 0.0,
+            'invoicesServicesSumVATAmount' => 0.0,
+            'invoicesServicesSumNetAmount' => 0.0,
+
+            'invoicesSparePartsSumGrossAmount' => 0.0,
+            'invoicesSparePartsSumDiscountAmount' => 0.0,
+            'invoicesSparePartsSumSubTotal' => 0.0,
+            'invoicesSparePartsSumVATAmount' => 0.0,
+            'invoicesSparePartsSumNetAmount' => 0.0,
+
+            'invoicesSumGrossAmount' => 0.0,
+            'invoicesSumDiscountAmount' => 0.0,
+            'invoicesSumSubTotal' => 0.0,
+            'invoicesSumVATAmount' => 0.0,
+            'invoicesSumNetAmount' => 0.0,
+
+            'returnInvoicesServicesSumGrossAmount' => 0.0,
+            'returnInvoicesServicesSumDiscountAmount' => 0.0,
+            'returnInvoicesServicesSumSubTotal' => 0.0,
+            'returnInvoicesServicesSumVATAmount' => 0.0,
+            'returnInvoicesServicesSumNetAmount' => 0.0,
+
+            'returnInvoicesSparePartsSumGrossAmount' => 0.0,
+            'returnInvoicesSparePartsSumDiscountAmount' => 0.0,
+            'returnInvoicesSparePartsSumSubTotal' => 0.0,
+            'returnInvoicesSparePartsSumVATAmount' => 0.0,
+            'returnInvoicesSparePartsSumNetAmount' => 0.0,
+
+            'returnInvoicesSumGrossAmount' => 0.0,
+            'returnInvoicesSumDiscountAmount' => 0.0,
+            'returnInvoicesSumSubTotal' => 0.0,
+            'returnInvoicesSumVATAmount' => 0.0,
+            'returnInvoicesSumNetAmount' => 0.0,
+
+            'receivedSparePartsSumGrossAmount' => 0.0,
+            'receivedSparePartsSumDiscountAmount' => 0.0,
+            'receivedSparePartsSumSubTotal' => 0.0,
+            'receivedSparePartsSumVATAmount' => 0.0,
+            'receivedSparePartsSumNetAmount' => 0.0,
+
+            'returnedSparePartsSumGrossAmount' => 0.0,
+            'returnedSparePartsSumDiscountAmount' => 0.0,
+            'returnedSparePartsSumSubTotal' => 0.0,
+            'returnedSparePartsSumVATAmount' => 0.0,
+            'returnedSparePartsSumNetAmount' => 0.0,
+
+            'purchaseSparePartsSumGrossAmount' => 0.0,
+            'purchaseSparePartsSumDiscountAmount' => 0.0,
+            'purchaseSparePartsSumSubTotal' => 0.0,
+            'purchaseSparePartsSumVATAmount' => 0.0,
+            'purchaseSparePartsSumNetAmount' => 0.0,
+
+            'incomeSumGrossAmount' => 0.0,
+            'incomeSumDiscountAmount' => 0.0,
+            'incomeSumSubTotal' => 0.0,
+            'incomeSumVATAmount' => 0.0,
+            'incomeSumNetAmount' => 0.0,
+
+            'expenseSumGrossAmount' => 0.0,
+            'expenseSumDiscountAmount' => 0.0,
+            'expenseSumSubTotal' => 0.0,
+            'expenseSumVATAmount' => 0.0,
+            'expenseSumNetAmount' => 0.0,
+
+            'incomeExpenseSumGrossAmount' => 0.0,
+            'incomeExpenseSumDiscountAmount' => 0.0,
+            'incomeExpenseSumSubTotal' => 0.0,
+            'incomeExpenseSumVATAmount' => 0.0,
+            'incomeExpenseSumNetAmount' => 0.0,
+
+            'sumGrossAmount' => 0.0,
+            'sumDiscountAmount' => 0.0,
+            'sumSubTotal' => 0.0,
+            'sumVATAmount' => 0.0,
+            'sumNetAmount' => 0.0,
+
+            'totalPayrollSalaryPayments' => 0.0,
+            'totalOtherSalaryPayments' => 0.0,
+            'totalSalary' => 0.0,
+            'sumBadDebt' => 0.0,
+            'sumFinalAmount' => 0.0,
+            'profit' => 0.0,
+        ];
+
+        foreach ($targetCenters as $c) {
+            $statement = $this->computeCenterFinancialStatement($tenantId, (int) $c->id, $from, $to, $storeSalesOnly);
+            $results[] = [
+                'shop' => [
+                    'id' => $c->id,
+                    'name' => $c->name,
+                    'address' => $c->address ?? '',
+                    'postalCode' => $c->postal_code ?? '',
+                    'city' => $c->city ?? '',
+                    'region' => $c->region ?? '',
+                    'country' => 'SA',
+                    'isWorkShop' => true,
+                    'commercial_register' => $c->cr_number ?? '',
+                    'vat_number' => $c->vat_number ?? '',
+                    'phone' => $c->phone ?? '',
+                ],
+                'shopFinancialSummary' => $statement,
+            ];
+
+            foreach ($overall as $key => $val) {
+                if (isset($statement[$key])) {
+                    $overall[$key] += (float) $statement[$key];
+                }
+            }
+        }
+
+        $tenant = auth()->user()->tenant;
+
+        return Inertia::render('Reports/FinancialSummary', [
+            'filters' => [
+                'range' => $range,
+                'start_date' => $startDate,
+                'end_date' => $endDate,
+                'center_id' => $centerFilter,
+                'store_sales_only' => $storeSalesOnly,
+            ],
+            'reportTitle' => __('reports.financial_summary_report.title'),
+            'result' => $results,
+            'overallSummary' => $overall,
+            'centers' => $accessibleCenters,
+            'companyInfo' => $this->resolveReportCompanyInfo($tenant, $centerFilter, $centerId),
+        ]);
+    }
+
+    /**
+     * Export Financial Summary Report as CSV (UTF-8 BOM).
+     */
+    public function exportFinancialSummary(Request $request): StreamedResponse
+    {
+        $this->authorize('viewAny', Invoice::class);
+
+        $tenantId = (int) auth()->user()->tenant_id;
+        $centerId = TenancyContext::centerId();
+
+        $range = (string) ($request->input('range') ?: 'this_month');
+        $startDate = $request->input('start_date');
+        $endDate = $request->input('end_date');
+        $centerFilter = $this->resolveCenterFilter($request, $centerId);
+        $storeSalesOnly = $request->boolean('store_sales_only');
+
+        [$from, $to] = $this->resolveDateRange($range, $startDate, $endDate);
+
+        $accessibleCenters = $this->resolveAccessibleCenters($tenantId);
+        $targetCenters = $accessibleCenters;
+
+        if ($centerFilter !== 'all' && is_numeric($centerFilter)) {
+            $targetCenters = $accessibleCenters->where('id', (int) $centerFilter);
+        }
+
+        $headers = [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+            'Content-Disposition' => 'attachment; filename="financial_summary_'.date('Y-m-d_His').'.csv"',
+        ];
+
+        return response()->stream(function () use ($targetCenters, $tenantId, $from, $to, $storeSalesOnly) {
+            $handle = fopen('php://output', 'w');
+            fprintf($handle, chr(0xEF).chr(0xBB).chr(0xBF));
+
+            fputcsv($handle, [
+                'الفرع',
+                'التصنيف الرئيسي',
+                'البند التفصيلي',
+                'المبلغ الإجمالي',
+                'الخصم',
+                'المجموع الخاضع للضريبة',
+                'ضريبة القيمة المضافة',
+                'الصافي شامل الضريبة',
+            ]);
+
+            foreach ($targetCenters as $c) {
+                $st = $this->computeCenterFinancialStatement($tenantId, (int) $c->id, $from, $to, $storeSalesOnly);
+                $shopName = $c->name;
+
+                $rows = [
+                    ['فواتير المبيعات', 'الخدمات', $st['invoicesServicesSumGrossAmount'], $st['invoicesServicesSumDiscountAmount'], $st['invoicesServicesSumSubTotal'], $st['invoicesServicesSumVATAmount'], $st['invoicesServicesSumNetAmount']],
+                    ['فواتير المبيعات', 'قطع الغيار', $st['invoicesSparePartsSumGrossAmount'], $st['invoicesSparePartsSumDiscountAmount'], $st['invoicesSparePartsSumSubTotal'], $st['invoicesSparePartsSumVATAmount'], $st['invoicesSparePartsSumNetAmount']],
+                    ['فواتير المبيعات', 'إجمالي المبيعات', $st['invoicesSumGrossAmount'], $st['invoicesSumDiscountAmount'], $st['invoicesSumSubTotal'], $st['invoicesSumVATAmount'], $st['invoicesSumNetAmount']],
+
+                    ['فواتير المرتجعات', 'الخدمات المرتجعة', $st['returnInvoicesServicesSumGrossAmount'], $st['returnInvoicesServicesSumDiscountAmount'], $st['returnInvoicesServicesSumSubTotal'], $st['returnInvoicesServicesSumVATAmount'], $st['returnInvoicesServicesSumNetAmount']],
+                    ['فواتير المرتجعات', 'قطع الغيار المرتجعة', $st['returnInvoicesSparePartsSumGrossAmount'], $st['returnInvoicesSparePartsSumDiscountAmount'], $st['returnInvoicesSparePartsSumSubTotal'], $st['returnInvoicesSparePartsSumVATAmount'], $st['returnInvoicesSparePartsSumNetAmount']],
+                    ['فواتير المرتجعات', 'إجمالي المرتجعات', $st['returnInvoicesSumGrossAmount'], $st['returnInvoicesSumDiscountAmount'], $st['returnInvoicesSumSubTotal'], $st['returnInvoicesSumVATAmount'], $st['returnInvoicesSumNetAmount']],
+
+                    ['حركات المخزون والمشتريات', 'المستلم من الموردين', $st['receivedSparePartsSumGrossAmount'], $st['receivedSparePartsSumDiscountAmount'], $st['receivedSparePartsSumSubTotal'], $st['receivedSparePartsSumVATAmount'], $st['receivedSparePartsSumNetAmount']],
+                    ['حركات المخزون والمشتريات', 'المرتجع إلى الموردين', $st['returnedSparePartsSumGrossAmount'], $st['returnedSparePartsSumDiscountAmount'], $st['returnedSparePartsSumSubTotal'], $st['returnedSparePartsSumVATAmount'], $st['returnedSparePartsSumNetAmount']],
+                    ['حركات المخزون والمشتريات', 'صافي المشتريات', $st['purchaseSparePartsSumGrossAmount'], $st['purchaseSparePartsSumDiscountAmount'], $st['purchaseSparePartsSumSubTotal'], $st['purchaseSparePartsSumVATAmount'], $st['purchaseSparePartsSumNetAmount']],
+
+                    ['الإيرادات والمصروفات الأخرى', 'إيرادات أخرى', $st['incomeSumGrossAmount'], $st['incomeSumDiscountAmount'], $st['incomeSumSubTotal'], $st['incomeSumVATAmount'], $st['incomeSumNetAmount']],
+                    ['الإيرادات والمصروفات الأخرى', 'مصروفات تشغيلية', $st['expenseSumGrossAmount'], $st['expenseSumDiscountAmount'], $st['expenseSumSubTotal'], $st['expenseSumVATAmount'], $st['expenseSumNetAmount']],
+                    ['الإيرادات والمصروفات الأخرى', 'صافي الإيرادات والمصروفات', $st['incomeExpenseSumGrossAmount'], $st['incomeExpenseSumDiscountAmount'], $st['incomeExpenseSumSubTotal'], $st['incomeExpenseSumVATAmount'], $st['incomeExpenseSumNetAmount']],
+
+                    ['إجمالي العمليات', 'إجمالي العمليات التشغيلية', $st['sumGrossAmount'], $st['sumDiscountAmount'], $st['sumSubTotal'], $st['sumVATAmount'], $st['sumNetAmount']],
+
+                    ['الرواتب والأجور', 'مسير الرواتب المعتمد', 0.0, 0.0, 0.0, 0.0, $st['totalPayrollSalaryPayments']],
+                    ['الرواتب والأجور', 'مكافآت ومدفوعات أخرى', 0.0, 0.0, 0.0, 0.0, $st['totalOtherSalaryPayments']],
+                    ['الرواتب والأجور', 'إجمالي الرواتب والأجور', 0.0, 0.0, 0.0, 0.0, $st['totalSalary']],
+
+                    ['الديون المعدومة', 'الديون المعدومة', 0.0, 0.0, 0.0, 0.0, $st['sumBadDebt']],
+
+                    ['الخلاصة المالية', 'المبلغ الإجمالي الصافي', 0.0, 0.0, 0.0, 0.0, $st['sumFinalAmount']],
+                    ['الخلاصة المالية', 'ضريبة القيمة المضافة المستحقة', 0.0, 0.0, 0.0, $st['sumVATAmount'], -$st['sumVATAmount']],
+                    ['الخلاصة المالية', 'صافي الربح التشغيلي', 0.0, 0.0, 0.0, 0.0, $st['profit']],
+                ];
+
+                foreach ($rows as $row) {
+                    fputcsv($handle, [
+                        $shopName,
+                        $row[0],
+                        $row[1],
+                        number_format((float) $row[2], 2, '.', ''),
+                        number_format((float) $row[3], 2, '.', ''),
+                        number_format((float) $row[4], 2, '.', ''),
+                        number_format((float) $row[5], 2, '.', ''),
+                        number_format((float) $row[6], 2, '.', ''),
+                    ]);
+                }
+            }
+
+            fclose($handle);
+        }, 200, $headers);
+    }
+
+    /**
+     * Compute full P&L financial statement breakdown for a single center.
+     */
+    private function computeCenterFinancialStatement(
+        int $tenantId,
+        int $centerId,
+        ?Carbon $from,
+        ?Carbon $to,
+        bool $storeSalesOnly
+    ): array {
+        // 1. Sales Invoices Lines (Services vs Parts)
+        $invServicesQuery = DB::table('invoice_lines')
+            ->join('invoices', 'invoices.id', '=', 'invoice_lines.invoice_id')
+            ->where('invoices.tenant_id', $tenantId)
+            ->where('invoices.center_id', $centerId)
+            ->where('invoices.type', 'invoice')
+            ->whereNull('invoices.deleted_at')
+            ->where('invoice_lines.is_part', 0);
+
+        $invPartsQuery = DB::table('invoice_lines')
+            ->join('invoices', 'invoices.id', '=', 'invoice_lines.invoice_id')
+            ->where('invoices.tenant_id', $tenantId)
+            ->where('invoices.center_id', $centerId)
+            ->where('invoices.type', 'invoice')
+            ->whereNull('invoices.deleted_at')
+            ->where('invoice_lines.is_part', 1);
+
+        if ($storeSalesOnly) {
+            $invServicesQuery->whereNull('invoices.work_order_id');
+            $invPartsQuery->whereNull('invoices.work_order_id');
+        }
+
+        if ($from) {
+            $invServicesQuery->whereDate('invoices.issue_date', '>=', $from->toDateString());
+            $invPartsQuery->whereDate('invoices.issue_date', '>=', $from->toDateString());
+        }
+
+        if ($to) {
+            $invServicesQuery->whereDate('invoices.issue_date', '<=', $to->toDateString());
+            $invPartsQuery->whereDate('invoices.issue_date', '<=', $to->toDateString());
+        }
+
+        $invServices = (array) $invServicesQuery->selectRaw('
+            COALESCE(SUM(invoice_lines.qty * invoice_lines.unit_price), 0) as gross,
+            COALESCE(SUM(invoice_lines.discount_amount), 0) as discount,
+            COALESCE(SUM(invoice_lines.line_total_excl_tax), 0) as subtotal,
+            COALESCE(SUM(invoice_lines.tax_amount), 0) as vat,
+            COALESCE(SUM(invoice_lines.line_total_incl_tax), 0) as net
+        ')->first();
+
+        $invParts = (array) $invPartsQuery->selectRaw('
+            COALESCE(SUM(invoice_lines.qty * invoice_lines.unit_price), 0) as gross,
+            COALESCE(SUM(invoice_lines.discount_amount), 0) as discount,
+            COALESCE(SUM(invoice_lines.line_total_excl_tax), 0) as subtotal,
+            COALESCE(SUM(invoice_lines.tax_amount), 0) as vat,
+            COALESCE(SUM(invoice_lines.line_total_incl_tax), 0) as net
+        ')->first();
+
+        // 2. Return Invoices Lines (Credit Notes)
+        $retServicesQuery = DB::table('invoice_lines')
+            ->join('invoices', 'invoices.id', '=', 'invoice_lines.invoice_id')
+            ->where('invoices.tenant_id', $tenantId)
+            ->where('invoices.center_id', $centerId)
+            ->where('invoices.type', 'credit_note')
+            ->whereNull('invoices.deleted_at')
+            ->where('invoice_lines.is_part', 0);
+
+        $retPartsQuery = DB::table('invoice_lines')
+            ->join('invoices', 'invoices.id', '=', 'invoice_lines.invoice_id')
+            ->where('invoices.tenant_id', $tenantId)
+            ->where('invoices.center_id', $centerId)
+            ->where('invoices.type', 'credit_note')
+            ->whereNull('invoices.deleted_at')
+            ->where('invoice_lines.is_part', 1);
+
+        if ($storeSalesOnly) {
+            $retServicesQuery->whereNull('invoices.work_order_id');
+            $retPartsQuery->whereNull('invoices.work_order_id');
+        }
+
+        if ($from) {
+            $retServicesQuery->whereDate('invoices.issue_date', '>=', $from->toDateString());
+            $retPartsQuery->whereDate('invoices.issue_date', '>=', $from->toDateString());
+        }
+
+        if ($to) {
+            $retServicesQuery->whereDate('invoices.issue_date', '<=', $to->toDateString());
+            $retPartsQuery->whereDate('invoices.issue_date', '<=', $to->toDateString());
+        }
+
+        $retServices = (array) $retServicesQuery->selectRaw('
+            COALESCE(SUM(invoice_lines.qty * invoice_lines.unit_price), 0) as gross,
+            COALESCE(SUM(invoice_lines.discount_amount), 0) as discount,
+            COALESCE(SUM(invoice_lines.line_total_excl_tax), 0) as subtotal,
+            COALESCE(SUM(invoice_lines.tax_amount), 0) as vat,
+            COALESCE(SUM(invoice_lines.line_total_incl_tax), 0) as net
+        ')->first();
+
+        $retParts = (array) $retPartsQuery->selectRaw('
+            COALESCE(SUM(invoice_lines.qty * invoice_lines.unit_price), 0) as gross,
+            COALESCE(SUM(invoice_lines.discount_amount), 0) as discount,
+            COALESCE(SUM(invoice_lines.line_total_excl_tax), 0) as subtotal,
+            COALESCE(SUM(invoice_lines.tax_amount), 0) as vat,
+            COALESCE(SUM(invoice_lines.line_total_incl_tax), 0) as net
+        ')->first();
+
+        // 3. Purchases & Returns from Suppliers
+        $purchQuery = DB::table('purchase_invoices')
+            ->where('tenant_id', $tenantId)
+            ->where('center_id', $centerId)
+            ->whereNull('deleted_at');
+
+        if ($from) {
+            $purchQuery->where(function ($sub) use ($from) {
+                $sub->whereDate('issue_date', '>=', $from->toDateString())
+                    ->orWhere(function ($s2) use ($from) {
+                        $s2->whereNull('issue_date')->whereDate('created_at', '>=', $from->toDateString());
+                    });
+            });
+        }
+
+        if ($to) {
+            $purchQuery->where(function ($sub) use ($to) {
+                $sub->whereDate('issue_date', '<=', $to->toDateString())
+                    ->orWhere(function ($s2) use ($to) {
+                        $s2->whereNull('issue_date')->whereDate('created_at', '<=', $to->toDateString());
+                    });
+            });
+        }
+
+        $purchases = (array) $purchQuery->selectRaw('
+            COALESCE(SUM(subtotal + discount_amount), 0) as gross,
+            COALESCE(SUM(discount_amount), 0) as discount,
+            COALESCE(SUM(subtotal), 0) as subtotal,
+            COALESCE(SUM(tax_amount), 0) as vat,
+            COALESCE(SUM(total), 0) as net
+        ')->first();
+
+        $purchRetQuery = DB::table('purchase_return_invoices')
+            ->where('tenant_id', $tenantId)
+            ->where('center_id', $centerId)
+            ->whereNull('deleted_at');
+
+        if ($from) {
+            $purchRetQuery->where(function ($sub) use ($from) {
+                $sub->whereDate('return_date', '>=', $from->toDateString())
+                    ->orWhere(function ($s2) use ($from) {
+                        $s2->whereNull('return_date')->whereDate('created_at', '>=', $from->toDateString());
+                    });
+            });
+        }
+
+        if ($to) {
+            $purchRetQuery->where(function ($sub) use ($to) {
+                $sub->whereDate('return_date', '<=', $to->toDateString())
+                    ->orWhere(function ($s2) use ($to) {
+                        $s2->whereNull('return_date')->whereDate('created_at', '<=', $to->toDateString());
+                    });
+            });
+        }
+
+        $purchReturns = (array) $purchRetQuery->selectRaw('
+            COALESCE(SUM(subtotal), 0) as gross,
+            0 as discount,
+            COALESCE(SUM(subtotal), 0) as subtotal,
+            COALESCE(SUM(tax_amount), 0) as vat,
+            COALESCE(SUM(total), 0) as net
+        ')->first();
+
+        // 4. Other Income & Expenses (Company Transactions)
+        $incQuery = DB::table('company_transactions')
+            ->where('tenant_id', $tenantId)
+            ->where('center_id', $centerId)
+            ->where('transaction_type', 'revenue')
+            ->whereNull('deleted_at');
+
+        $expQuery = DB::table('company_transactions')
+            ->where('tenant_id', $tenantId)
+            ->where('center_id', $centerId)
+            ->where('transaction_type', 'expense')
+            ->whereNull('deleted_at');
+
+        if ($from) {
+            $incQuery->where(function ($sub) use ($from) {
+                $sub->whereDate('transaction_date', '>=', $from->toDateString())
+                    ->orWhere(function ($s2) use ($from) {
+                        $s2->whereNull('transaction_date')->whereDate('created_at', '>=', $from->toDateString());
+                    });
+            });
+            $expQuery->where(function ($sub) use ($from) {
+                $sub->whereDate('transaction_date', '>=', $from->toDateString())
+                    ->orWhere(function ($s2) use ($from) {
+                        $s2->whereNull('transaction_date')->whereDate('created_at', '>=', $from->toDateString());
+                    });
+            });
+        }
+
+        if ($to) {
+            $incQuery->where(function ($sub) use ($to) {
+                $sub->whereDate('transaction_date', '<=', $to->toDateString())
+                    ->orWhere(function ($s2) use ($to) {
+                        $s2->whereNull('transaction_date')->whereDate('created_at', '<=', $to->toDateString());
+                    });
+            });
+            $expQuery->where(function ($sub) use ($to) {
+                $sub->whereDate('transaction_date', '<=', $to->toDateString())
+                    ->orWhere(function ($s2) use ($to) {
+                        $s2->whereNull('transaction_date')->whereDate('created_at', '<=', $to->toDateString());
+                    });
+            });
+        }
+
+        $income = (array) $incQuery->selectRaw('
+            COALESCE(SUM(amount), 0) as gross,
+            0 as discount,
+            COALESCE(SUM(amount), 0) as subtotal,
+            COALESCE(SUM(tax_amount), 0) as vat,
+            COALESCE(SUM(total_amount), 0) as net
+        ')->first();
+
+        $expense = (array) $expQuery->selectRaw('
+            COALESCE(SUM(amount), 0) as gross,
+            0 as discount,
+            COALESCE(SUM(amount), 0) as subtotal,
+            COALESCE(SUM(tax_amount), 0) as vat,
+            COALESCE(SUM(total_amount), 0) as net
+        ')->first();
+
+        // 5. Salaries (Payroll & Other HR Payments)
+        $payrollQuery = DB::table('hr_payrolls')
+            ->where('tenant_id', $tenantId)
+            ->where('center_id', $centerId)
+            ->where('status', '!=', 'draft');
+
+        $otherSalaryQuery = DB::table('hr_other_payments')
+            ->where('tenant_id', $tenantId)
+            ->where('center_id', $centerId)
+            ->where('status', '!=', 'rejected')
+            ->whereNull('deleted_at');
+
+        if ($from) {
+            $payrollQuery->where(function ($sub) use ($from) {
+                $sub->whereDate('paid_at', '>=', $from->toDateString())
+                    ->orWhere(function ($s2) use ($from) {
+                        $s2->whereNull('paid_at')->whereDate('created_at', '>=', $from->toDateString());
+                    });
+            });
+            $otherSalaryQuery->where(function ($sub) use ($from) {
+                $sub->whereDate('payment_date', '>=', $from->toDateString())
+                    ->orWhere(function ($s2) use ($from) {
+                        $s2->whereNull('payment_date')->whereDate('created_at', '>=', $from->toDateString());
+                    });
+            });
+        }
+
+        if ($to) {
+            $payrollQuery->where(function ($sub) use ($to) {
+                $sub->whereDate('paid_at', '<=', $to->toDateString())
+                    ->orWhere(function ($s2) use ($to) {
+                        $s2->whereNull('paid_at')->whereDate('created_at', '<=', $to->toDateString());
+                    });
+            });
+            $otherSalaryQuery->where(function ($sub) use ($to) {
+                $sub->whereDate('payment_date', '<=', $to->toDateString())
+                    ->orWhere(function ($s2) use ($to) {
+                        $s2->whereNull('payment_date')->whereDate('created_at', '<=', $to->toDateString());
+                    });
+            });
+        }
+
+        $totalPayrollSalaryPayments = (float) ($payrollQuery->sum('net_total') ?? 0);
+        $totalOtherSalaryPayments = (float) ($otherSalaryQuery->sum('amount') ?? 0);
+        $totalSalary = $totalPayrollSalaryPayments + $totalOtherSalaryPayments;
+
+        // 6. Bad Debt
+        $badDebtQuery = DB::table('payments')
+            ->where('tenant_id', $tenantId)
+            ->where('center_id', $centerId)
+            ->where('type', 'bad_debt')
+            ->whereNull('deleted_at');
+
+        if ($from) {
+            $badDebtQuery->where(function ($sub) use ($from) {
+                $sub->whereDate('payment_date', '>=', $from->toDateString())
+                    ->orWhere(function ($s2) use ($from) {
+                        $s2->whereNull('payment_date')->whereDate('created_at', '>=', $from->toDateString());
+                    });
+            });
+        }
+
+        if ($to) {
+            $badDebtQuery->where(function ($sub) use ($to) {
+                $sub->whereDate('payment_date', '<=', $to->toDateString())
+                    ->orWhere(function ($s2) use ($to) {
+                        $s2->whereNull('payment_date')->whereDate('created_at', '<=', $to->toDateString());
+                    });
+            });
+        }
+
+        $sumBadDebt = (float) ($badDebtQuery->sum('amount') ?? 0);
+
+        // Compile totals
+        $invSumGross = (float) ($invServices['gross'] ?? 0) + (float) ($invParts['gross'] ?? 0);
+        $invSumDiscount = (float) ($invServices['discount'] ?? 0) + (float) ($invParts['discount'] ?? 0);
+        $invSumSubtotal = (float) ($invServices['subtotal'] ?? 0) + (float) ($invParts['subtotal'] ?? 0);
+        $invSumVat = (float) ($invServices['vat'] ?? 0) + (float) ($invParts['vat'] ?? 0);
+        $invSumNet = (float) ($invServices['net'] ?? 0) + (float) ($invParts['net'] ?? 0);
+
+        $retSumGross = (float) ($retServices['gross'] ?? 0) + (float) ($retParts['gross'] ?? 0);
+        $retSumDiscount = (float) ($retServices['discount'] ?? 0) + (float) ($retParts['discount'] ?? 0);
+        $retSumSubtotal = (float) ($retServices['subtotal'] ?? 0) + (float) ($retParts['subtotal'] ?? 0);
+        $retSumVat = (float) ($retServices['vat'] ?? 0) + (float) ($retParts['vat'] ?? 0);
+        $retSumNet = (float) ($retServices['net'] ?? 0) + (float) ($retParts['net'] ?? 0);
+
+        $purchSumGross = (float) ($purchases['gross'] ?? 0) - (float) ($purchReturns['gross'] ?? 0);
+        $purchSumDiscount = (float) ($purchases['discount'] ?? 0) - (float) ($purchReturns['discount'] ?? 0);
+        $purchSumSubtotal = (float) ($purchases['subtotal'] ?? 0) - (float) ($purchReturns['subtotal'] ?? 0);
+        $purchSumVat = (float) ($purchases['vat'] ?? 0) - (float) ($purchReturns['vat'] ?? 0);
+        $purchSumNet = (float) ($purchases['net'] ?? 0) - (float) ($purchReturns['net'] ?? 0);
+
+        $incExpGross = (float) ($income['gross'] ?? 0) - (float) ($expense['gross'] ?? 0);
+        $incExpDiscount = (float) ($income['discount'] ?? 0) - (float) ($expense['discount'] ?? 0);
+        $incExpSubtotal = (float) ($income['subtotal'] ?? 0) - (float) ($expense['subtotal'] ?? 0);
+        $incExpVat = (float) ($income['vat'] ?? 0) - (float) ($expense['vat'] ?? 0);
+        $incExpNet = (float) ($income['net'] ?? 0) - (float) ($expense['net'] ?? 0);
+
+        // Sum of operations
+        $sumGrossAmount = $invSumGross - $retSumGross - (float) ($purchases['gross'] ?? 0) + (float) ($purchReturns['gross'] ?? 0) + $incExpGross;
+        $sumDiscountAmount = $invSumDiscount - $retSumDiscount - (float) ($purchases['discount'] ?? 0) + (float) ($purchReturns['discount'] ?? 0) + $incExpDiscount;
+        $sumSubTotal = $invSumSubtotal - $retSumSubtotal - (float) ($purchases['subtotal'] ?? 0) + (float) ($purchReturns['subtotal'] ?? 0) + $incExpSubtotal;
+        $sumVATAmount = $invSumVat - $retSumVat - (float) ($purchases['vat'] ?? 0) + (float) ($purchReturns['vat'] ?? 0) + $incExpVat;
+        $sumNetAmount = $invSumNet - $retSumNet - (float) ($purchases['net'] ?? 0) + (float) ($purchReturns['net'] ?? 0) + $incExpNet;
+
+        $sumFinalAmount = $sumNetAmount - $totalSalary - $sumBadDebt;
+        $profit = $sumFinalAmount - $sumVATAmount;
+
+        return [
+            'invoicesServicesSumGrossAmount' => (float) ($invServices['gross'] ?? 0),
+            'invoicesServicesSumDiscountAmount' => (float) ($invServices['discount'] ?? 0),
+            'invoicesServicesSumSubTotal' => (float) ($invServices['subtotal'] ?? 0),
+            'invoicesServicesSumVATAmount' => (float) ($invServices['vat'] ?? 0),
+            'invoicesServicesSumNetAmount' => (float) ($invServices['net'] ?? 0),
+
+            'invoicesSparePartsSumGrossAmount' => (float) ($invParts['gross'] ?? 0),
+            'invoicesSparePartsSumDiscountAmount' => (float) ($invParts['discount'] ?? 0),
+            'invoicesSparePartsSumSubTotal' => (float) ($invParts['subtotal'] ?? 0),
+            'invoicesSparePartsSumVATAmount' => (float) ($invParts['vat'] ?? 0),
+            'invoicesSparePartsSumNetAmount' => (float) ($invParts['net'] ?? 0),
+
+            'invoicesSumGrossAmount' => $invSumGross,
+            'invoicesSumDiscountAmount' => $invSumDiscount,
+            'invoicesSumSubTotal' => $invSumSubtotal,
+            'invoicesSumVATAmount' => $invSumVat,
+            'invoicesSumNetAmount' => $invSumNet,
+
+            'returnInvoicesServicesSumGrossAmount' => (float) ($retServices['gross'] ?? 0),
+            'returnInvoicesServicesSumDiscountAmount' => (float) ($retServices['discount'] ?? 0),
+            'returnInvoicesServicesSumSubTotal' => (float) ($retServices['subtotal'] ?? 0),
+            'returnInvoicesServicesSumVATAmount' => (float) ($retServices['vat'] ?? 0),
+            'returnInvoicesServicesSumNetAmount' => (float) ($retServices['net'] ?? 0),
+
+            'returnInvoicesSparePartsSumGrossAmount' => (float) ($retParts['gross'] ?? 0),
+            'returnInvoicesSparePartsSumDiscountAmount' => (float) ($retParts['discount'] ?? 0),
+            'returnInvoicesSparePartsSumSubTotal' => (float) ($retParts['subtotal'] ?? 0),
+            'returnInvoicesSparePartsSumVATAmount' => (float) ($retParts['vat'] ?? 0),
+            'returnInvoicesSparePartsSumNetAmount' => (float) ($retParts['net'] ?? 0),
+
+            'returnInvoicesSumGrossAmount' => $retSumGross,
+            'returnInvoicesSumDiscountAmount' => $retSumDiscount,
+            'returnInvoicesSumSubTotal' => $retSumSubtotal,
+            'returnInvoicesSumVATAmount' => $retSumVat,
+            'returnInvoicesSumNetAmount' => $retSumNet,
+
+            'receivedSparePartsSumGrossAmount' => (float) ($purchases['gross'] ?? 0),
+            'receivedSparePartsSumDiscountAmount' => (float) ($purchases['discount'] ?? 0),
+            'receivedSparePartsSumSubTotal' => (float) ($purchases['subtotal'] ?? 0),
+            'receivedSparePartsSumVATAmount' => (float) ($purchases['vat'] ?? 0),
+            'receivedSparePartsSumNetAmount' => (float) ($purchases['net'] ?? 0),
+
+            'returnedSparePartsSumGrossAmount' => (float) ($purchReturns['gross'] ?? 0),
+            'returnedSparePartsSumDiscountAmount' => (float) ($purchReturns['discount'] ?? 0),
+            'returnedSparePartsSumSubTotal' => (float) ($purchReturns['subtotal'] ?? 0),
+            'returnedSparePartsSumVATAmount' => (float) ($purchReturns['vat'] ?? 0),
+            'returnedSparePartsSumNetAmount' => (float) ($purchReturns['net'] ?? 0),
+
+            'purchaseSparePartsSumGrossAmount' => $purchSumGross,
+            'purchaseSparePartsSumDiscountAmount' => $purchSumDiscount,
+            'purchaseSparePartsSumSubTotal' => $purchSumSubtotal,
+            'purchaseSparePartsSumVATAmount' => $purchSumVat,
+            'purchaseSparePartsSumNetAmount' => $purchSumNet,
+
+            'incomeSumGrossAmount' => (float) ($income['gross'] ?? 0),
+            'incomeSumDiscountAmount' => (float) ($income['discount'] ?? 0),
+            'incomeSumSubTotal' => (float) ($income['subtotal'] ?? 0),
+            'incomeSumVATAmount' => (float) ($income['vat'] ?? 0),
+            'incomeSumNetAmount' => (float) ($income['net'] ?? 0),
+
+            'expenseSumGrossAmount' => (float) ($expense['gross'] ?? 0),
+            'expenseSumDiscountAmount' => (float) ($expense['discount'] ?? 0),
+            'expenseSumSubTotal' => (float) ($expense['subtotal'] ?? 0),
+            'expenseSumVATAmount' => (float) ($expense['vat'] ?? 0),
+            'expenseSumNetAmount' => (float) ($expense['net'] ?? 0),
+
+            'incomeExpenseSumGrossAmount' => $incExpGross,
+            'incomeExpenseSumDiscountAmount' => $incExpDiscount,
+            'incomeExpenseSumSubTotal' => $incExpSubtotal,
+            'incomeExpenseSumVATAmount' => $incExpVat,
+            'incomeExpenseSumNetAmount' => $incExpNet,
+
+            'sumGrossAmount' => $sumGrossAmount,
+            'sumDiscountAmount' => $sumDiscountAmount,
+            'sumSubTotal' => $sumSubTotal,
+            'sumVATAmount' => $sumVATAmount,
+            'sumNetAmount' => $sumNetAmount,
+
+            'totalPayrollSalaryPayments' => $totalPayrollSalaryPayments,
+            'totalOtherSalaryPayments' => $totalOtherSalaryPayments,
+            'totalSalary' => $totalSalary,
+            'sumBadDebt' => $sumBadDebt,
+            'sumFinalAmount' => $sumFinalAmount,
+            'profit' => $profit,
+        ];
+    }
 }

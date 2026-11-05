@@ -415,9 +415,9 @@
                 </Link>
 
                 <!-- Financial Summary -->
-                <a
-                    href="#"
-                    class="group relative bg-gradient-to-br from-lime-50 to-green-50 dark:from-lime-900/20 dark:to-green-900/20 rounded-2xl p-7 border border-lime-200 dark:border-lime-800 hover:border-lime-400 dark:hover:border-lime-600 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 text-center cursor-not-allowed"
+                <Link
+                    :href="route('app.reports.financial-summary')"
+                    class="group relative bg-gradient-to-br from-lime-50 to-green-50 dark:from-lime-900/20 dark:to-green-900/20 rounded-2xl p-7 border border-lime-200 dark:border-lime-800 hover:border-lime-400 dark:hover:border-lime-600 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 text-center"
                 >
                     <div
                         class="w-16 h-16 mx-auto rounded-2xl bg-gradient-to-br from-lime-500 to-green-600 flex items-center justify-center shadow-lg shadow-lime-500/30 group-hover:scale-110 transition-all duration-300"
@@ -441,8 +441,13 @@
                     >
                         {{ $t('reports.financial_summary') }}
                     </h3>
-                    <ComingSoonBadge />
-                </a>
+                    <span
+                        class="mt-3 inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800 dark:bg-emerald-900/50 dark:text-emerald-300"
+                    >
+                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                        متاح الآن
+                    </span>
+                </Link>
 
                 <!-- Cash Flow (Beta) -->
                 <a

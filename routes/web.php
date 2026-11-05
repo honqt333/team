@@ -1030,6 +1030,9 @@ Route::prefix('app')->middleware(['auth', 'verified', 'tenant.active', 'center.c
         Route::get('/employees/export', [ReportsController::class, 'exportEmployees'])->name('employees.export');
         Route::get('/vehicles', [ReportsController::class, 'vehicles'])->name('vehicles');
         Route::get('/vehicles/export', [ReportsController::class, 'exportVehicles'])->name('vehicles.export');
+        Route::get('/financial-summary', [ReportsController::class, 'financialSummary'])->name('financial-summary');
+        Route::get('/financial-summary/export', [ReportsController::class, 'exportFinancialSummary'])->name('financial-summary.export');
+        Route::get('/financialSummary', fn () => redirect()->route('app.reports.financial-summary'));
     });
 
     // ───────────────────────────────────────────────────────────────
@@ -1105,6 +1108,7 @@ Route::middleware(['auth', 'verified', 'tenant.active', 'center.context', Ensure
     Route::get('/reports/purchaseInvoices', fn () => redirect()->route('app.reports.purchase-invoices'));
     Route::get('/reports/stockActivities', fn () => redirect()->route('app.reports.stock-activities'));
     Route::get('/reports/vehicles', fn () => redirect()->route('app.reports.vehicles'));
+    Route::get('/reports/financialSummary', fn () => redirect()->route('app.reports.financial-summary'));
 });
 
 // Test routes for tenancy middleware (testing environment only)
