@@ -167,10 +167,10 @@
                             </td>
                             <td class="border border-gray-400 p-1">{{ row.description }}</td>
                             <td class="border border-gray-400 p-1 text-center">
-                                {{ row.category_label }}
+                                {{ getCategoryLabel(row.category, row.category_label) }}
                             </td>
                             <td class="border border-gray-400 p-1 text-center">
-                                {{ row.payment_mode_label }}
+                                {{ getMethodLabel(row.payment_mode, row.payment_mode_label) }}
                             </td>
                             <td class="border border-gray-400 p-1 text-center font-mono">
                                 {{ row.transaction_date }}
@@ -587,7 +587,7 @@
                                             class="inline-block px-2.5 py-0.5 rounded-full text-[11px] font-bold"
                                             :class="categoryBadgeClass(row.category)"
                                         >
-                                            {{ row.category_label }}
+                                            {{ getCategoryLabel(row.category, row.category_label) }}
                                         </span>
                                     </td>
 
@@ -596,7 +596,12 @@
                                         <span
                                             class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg text-[11px] font-medium bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300"
                                         >
-                                            {{ row.payment_mode_label }}
+                                            {{
+                                                getMethodLabel(
+                                                    row.payment_mode,
+                                                    row.payment_mode_label
+                                                )
+                                            }}
                                         </span>
                                     </td>
 
@@ -740,8 +745,10 @@ const searchInput = ref(props.filters.search || '');
 const datePresets = computed(() => [
     { id: 'today', label: t('reports.cash_register_report.today') },
     { id: 'yesterday', label: t('reports.cash_register_report.yesterday') },
+    { id: 'last_7_days', label: t('reports.cash_register_report.last_7_days') },
     { id: 'this_week', label: t('reports.cash_register_report.this_week') },
     { id: 'this_month', label: t('reports.cash_register_report.this_month') },
+    { id: 'last_month', label: t('reports.cash_register_report.last_month') },
     { id: 'this_year', label: t('reports.cash_register_report.this_year') },
     { id: 'all_time', label: t('reports.cash_register_report.all_time') },
     { id: 'custom', label: t('reports.cash_register_report.custom') },
@@ -752,6 +759,23 @@ const selectPreset = (presetId) => {
     if (presetId !== 'custom') {
         applyFilters();
     }
+};
+
+// Category and Payment Method Translation Helpers
+const getCategoryLabel = (category, fallback) => {
+    if (!category) return fallback || '';
+    const key = 'reports.cash_register_report.categories.' + category;
+    const translated = t(key);
+    if (translated && translated !== key) return translated;
+    return fallback || category;
+};
+
+const getMethodLabel = (method, fallback) => {
+    if (!method) return fallback || '';
+    const key = 'reports.cash_register_report.methods.' + method;
+    const translated = t(key);
+    if (translated && translated !== key) return translated;
+    return fallback || method;
 };
 
 // Center Options
@@ -813,7 +837,13 @@ const dateRangeSubtitle = computed(() => {
     if (props.filters.start_date && props.filters.end_date) {
         return `من ${props.filters.start_date} إلى ${props.filters.end_date}`;
     }
-    return t('reports.cash_register_report.' + currentRange.value) || 'الشهر الحالي';
+    const preset = datePresets.value.find((p) => p.id === currentRange.value);
+    if (preset) return preset.label;
+    const key = 'reports.cash_register_report.' + currentRange.value;
+    const translated = t(key);
+    return translated && translated !== key
+        ? translated
+        : t('reports.cash_register_report.this_month');
 });
 
 // Category Badges

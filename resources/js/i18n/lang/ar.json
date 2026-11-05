@@ -4058,7 +4058,15 @@
             "ticket_status_done": "مكتمل",
             "ticket_status_ready_for_qc": "جاهز للفحص",
             "ticket_status_cancelled": "ملغي",
-            "warehouse_parts_only": "قطع الغيار من المستودع فقط"
+            "warehouse_parts_only": "قطع الغيار من المستودع فقط",
+            "ticket_status_closed": "مغلق",
+            "ticket_status_delivered": "تم التسليم",
+            "ticket_status_invoiced": "مفوتر",
+            "ticket_status_waiting_parts": "بانتظار القطع",
+            "ticket_status_approved": "معتمد",
+            "status_waiting_parts": "بانتظار القطع",
+            "status_approved": "معتمد",
+            "status_delivered": "تم التسليم"
         },
         "financial_summary_report": {
             "title": "تقرير الملخص المالي وقائمة الدخل",
@@ -4128,7 +4136,9 @@
             "close_details": "إغلاق التفاصيل",
             "details_of": "تفاصيل",
             "no_records": "لا توجد معاملات مالية مسجلة لهذه الفترة",
-            "branch_financial_statement": "القائمة المالية لفرع: {name}"
+            "branch_financial_statement": "القائمة المالية لفرع: {name}",
+            "last_7_days": "آخر 7 أيام",
+            "last_month": "الشهر الماضي"
         },
         "cash_register_report": {
             "title": "تقرير حركة الصندوق والخزينة",
@@ -4198,7 +4208,24 @@
                 "tabby": "تابي",
                 "tamara": "تمارا",
                 "other": "أخرى"
-            }
+            },
+            "last_7_days": "آخر 7 أيام",
+            "last_month": "الشهر الماضي",
+            "custom_range": "فترة مخصصة",
+            "sales_payment_desc": "قبض مبيعات -",
+            "purchase_payment_desc": "سداد مشتريات - مورد:",
+            "refund_desc": "استرداد دفعة -",
+            "bad_debt_desc": "دين معدوم -",
+            "revenue_prefix": "إيراد:",
+            "expense_prefix": "مصروف:",
+            "operating_revenue": "إيراد تشغيلي",
+            "general_expense": "مصروف عام",
+            "cash_customer": "عميل نقد",
+            "general_customer": "عميل",
+            "general_supplier": "مورد",
+            "system_admin": "مدير النظام",
+            "financial_officer": "المشرف المالي",
+            "main_center": "المركز الرئيسي"
         }
     },
     "roles": {

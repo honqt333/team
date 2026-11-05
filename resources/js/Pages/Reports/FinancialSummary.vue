@@ -2106,7 +2106,13 @@ const dateRangeSubtitle = computed(() => {
     if (props.filters.start_date && props.filters.end_date) {
         return `من ${props.filters.start_date} إلى ${props.filters.end_date}`;
     }
-    return t('reports.financial_summary_report.' + currentRange.value) || 'الشهر الحالي';
+    const preset = datePresets.value.find((p) => p.id === currentRange.value);
+    if (preset) return preset.label;
+    const key = 'reports.financial_summary_report.' + currentRange.value;
+    const translated = t(key);
+    return translated && translated !== key
+        ? translated
+        : t('reports.financial_summary_report.this_month');
 });
 
 // Filter Application

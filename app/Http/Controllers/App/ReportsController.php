@@ -6140,26 +6140,26 @@ class ReportsController extends Controller
                 $debit = (float) $p->amount;
                 $credit = 0.0;
                 $refNo = $p->invoice?->invoice_number ?? ($p->workOrder?->code ?? ($p->reference ?: 'PAY-'.str_pad((string) $p->id, 5, '0', STR_PAD_LEFT)));
-                $desc = 'قبض مبيعات - '.($p->invoice?->customer?->name ?? $p->workOrder?->customer?->name ?? 'عميل نقد');
+                $desc = __('reports.cash_register_report.sales_payment_desc').' '.($p->invoice?->customer?->name ?? $p->workOrder?->customer?->name ?? __('reports.cash_register_report.cash_customer'));
 
                 if ($isPurchase) {
                     $cat = 'purchase_payment';
                     $debit = 0.0;
                     $credit = (float) $p->amount;
                     $refNo = $p->purchaseInvoice?->code ?? ($p->purchaseInvoice?->invoice_number ?? ($p->reference ?: 'PAY-'.$p->id));
-                    $desc = 'سداد مشتريات - مورد: '.($p->purchaseInvoice?->supplier?->name ?? 'مورد');
+                    $desc = __('reports.cash_register_report.purchase_payment_desc').' '.($p->purchaseInvoice?->supplier?->name ?? __('reports.cash_register_report.general_supplier'));
                 } elseif ($isRefund) {
                     $cat = 'refund';
                     $debit = 0.0;
                     $credit = (float) $p->amount;
                     $refNo = $p->reference ?: ($p->invoice?->invoice_number ?: 'REF-'.$p->id);
-                    $desc = 'استرداد دفعة - '.($p->invoice?->customer?->name ?? $p->workOrder?->customer?->name ?? 'عميل');
+                    $desc = __('reports.cash_register_report.refund_desc').' '.($p->invoice?->customer?->name ?? $p->workOrder?->customer?->name ?? __('reports.cash_register_report.general_customer'));
                 } elseif ($isBadDebt) {
                     $cat = 'bad_debt';
                     $debit = 0.0;
                     $credit = (float) $p->amount;
                     $refNo = $p->reference ?: 'BD-'.$p->id;
-                    $desc = 'دين معدوم - '.($p->invoice?->customer?->name ?? 'عميل');
+                    $desc = __('reports.cash_register_report.bad_debt_desc').' '.($p->invoice?->customer?->name ?? __('reports.cash_register_report.general_customer'));
                 }
 
                 $items->push([
@@ -6177,10 +6177,10 @@ class ReportsController extends Controller
                     'debit' => $debit,
                     'credit' => $credit,
                     'user_id' => $p->received_by,
-                    'user_name' => $p->receivedBy?->name ?? 'مدير النظام',
+                    'user_name' => $p->receivedBy?->name ?? __('reports.cash_register_report.system_admin'),
                     'user_photo' => $p->receivedBy?->photo_url ?? null,
                     'center_id' => $p->center_id,
-                    'center_name' => $p->center?->name ?? 'المركز الرئيسي',
+                    'center_name' => $p->center?->name ?? __('reports.cash_register_report.main_center'),
                 ]);
             }
         }
@@ -6228,7 +6228,7 @@ class ReportsController extends Controller
                 $debit = $isRev ? (float) $trx->total_amount : 0.0;
                 $credit = $isRev ? 0.0 : (float) $trx->total_amount;
                 $refNo = 'TRX-'.($isRev ? 'REV-' : 'EXP-').str_pad((string) $trx->id, 5, '0', STR_PAD_LEFT);
-                $desc = ($isRev ? 'إيراد: ' : 'مصروف: ').($trx->title ?: ($isRev ? 'إيراد تشغيلي' : 'مصروف عام'));
+                $desc = ($isRev ? __('reports.cash_register_report.revenue_prefix').' ' : __('reports.cash_register_report.expense_prefix').' ').($trx->title ?: ($isRev ? __('reports.cash_register_report.operating_revenue') : __('reports.cash_register_report.general_expense')));
 
                 $items->push([
                     'id' => 'trx_'.$trx->id,
@@ -6245,7 +6245,7 @@ class ReportsController extends Controller
                     'debit' => $debit,
                     'credit' => $credit,
                     'user_id' => $trx->approved_by ?? $trx->updated_by,
-                    'user_name' => 'المشرف المالي',
+                    'user_name' => __('reports.cash_register_report.financial_officer'),
                     'user_photo' => null,
                     'center_id' => $trx->center_id,
                     'center_name' => $trx->center?->name ?? 'المركز الرئيسي',

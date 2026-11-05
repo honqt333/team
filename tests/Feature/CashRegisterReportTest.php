@@ -137,15 +137,23 @@ class CashRegisterReportTest extends TestCase
         $response = $this->actingAs($user)->get('/app/reports/cash-register?range=this_month&center_id='.$center->id);
 
         $response->assertStatus(200);
-        $response->assertInertia(fn ($page) => $page
-            ->component('Reports/CashRegister')
-            ->where('kpis.total_records', 3)
-            ->where('kpis.total_debit', 1150)
-            ->where('kpis.total_credit', 200)
-            ->where('kpis.net_balance', 950)
-            ->where('kpis.cash_balance', 600) // 800 - 200
-            ->where('kpis.electronic_balance', 350) // 350 mada
-        );
+        $response->assertInertia(function ($page) {
+            $page->component('Reports/CashRegister')
+                ->where('kpis.total_records', 3)
+                ->where('kpis.total_debit', 1150)
+                ->where('kpis.total_credit', 200)
+                ->where('kpis.net_balance', 950)
+                ->where('kpis.cash_balance', 600) // 800 - 200
+                ->where('kpis.electronic_balance', 350); // 350 mada
+
+            $items = $page->toArray()['props']['items']['data'];
+            $this->assertNotEmpty($items);
+
+            foreach ($items as $item) {
+                $this->assertStringNotContainsString('reports.', $item['category_label']);
+                $this->assertStringNotContainsString('reports.', $item['payment_mode_label']);
+            }
+        });
     }
 
     public function test_cash_register_filters_by_payment_method(): void

@@ -4058,7 +4058,15 @@
             "ticket_status_done": "Completed",
             "ticket_status_ready_for_qc": "Ready for QC",
             "ticket_status_cancelled": "Cancelled",
-            "warehouse_parts_only": "Warehouse Spare Parts Only"
+            "warehouse_parts_only": "Warehouse Spare Parts Only",
+            "ticket_status_closed": "Closed",
+            "ticket_status_delivered": "Delivered",
+            "ticket_status_invoiced": "Invoiced",
+            "ticket_status_waiting_parts": "Waiting for Parts",
+            "ticket_status_approved": "Approved",
+            "status_waiting_parts": "Waiting for Parts",
+            "status_approved": "Approved",
+            "status_delivered": "Delivered"
         },
         "financial_summary_report": {
             "title": "Financial Summary & P&L Report",
@@ -4128,7 +4136,9 @@
             "close_details": "Close Details",
             "details_of": "Details of",
             "no_records": "No financial transactions recorded for this period",
-            "branch_financial_statement": "Financial Statement for: {name}"
+            "branch_financial_statement": "Financial Statement for: {name}",
+            "last_7_days": "Last 7 Days",
+            "last_month": "Last Month"
         },
         "cash_register_report": {
             "title": "Cash Register Report",
@@ -4198,7 +4208,24 @@
                 "tabby": "Tabby",
                 "tamara": "Tamara",
                 "other": "Other"
-            }
+            },
+            "last_7_days": "Last 7 Days",
+            "last_month": "Last Month",
+            "custom_range": "Custom Range",
+            "sales_payment_desc": "Sales Receipt -",
+            "purchase_payment_desc": "Purchase Payment - Supplier:",
+            "refund_desc": "Payment Refund -",
+            "bad_debt_desc": "Bad Debt -",
+            "revenue_prefix": "Revenue:",
+            "expense_prefix": "Expense:",
+            "operating_revenue": "Operating Revenue",
+            "general_expense": "General Expense",
+            "cash_customer": "Cash Customer",
+            "general_customer": "Customer",
+            "general_supplier": "Supplier",
+            "system_admin": "System Admin",
+            "financial_officer": "Financial Officer",
+            "main_center": "Main Center"
         }
     },
     "roles": {
