@@ -4682,6 +4682,7 @@ class ReportsController extends Controller
         $ticketNo = trim((string) ($request->input('ticket_no') ?? ''));
         $plateNo = trim((string) ($request->input('plate_no') ?? ''));
         $isOverdue = $request->boolean('is_overdue');
+        $warehousePartsOnly = $request->boolean('warehouse_parts_only');
         $groupBy = (string) ($request->input('group_by') ?: 'none');
         $search = trim((string) ($request->input('search') ?? ''));
 
@@ -4699,6 +4700,7 @@ class ReportsController extends Controller
             $ticketNo,
             $plateNo,
             $isOverdue,
+            $warehousePartsOnly,
             $search
         );
 
@@ -4845,6 +4847,7 @@ class ReportsController extends Controller
                 'ticket_no' => $ticketNo,
                 'plate_no' => $plateNo,
                 'is_overdue' => $isOverdue,
+                'warehouse_parts_only' => $warehousePartsOnly,
                 'group_by' => $groupBy,
                 'search' => $search,
             ],
@@ -4888,6 +4891,7 @@ class ReportsController extends Controller
         $ticketNo = trim((string) ($request->input('ticket_no') ?? ''));
         $plateNo = trim((string) ($request->input('plate_no') ?? ''));
         $isOverdue = $request->boolean('is_overdue');
+        $warehousePartsOnly = $request->boolean('warehouse_parts_only');
         $search = trim((string) ($request->input('search') ?? ''));
 
         [$from, $to] = $this->resolveDateRange($range, $startDate, $endDate);
@@ -4904,6 +4908,7 @@ class ReportsController extends Controller
             $ticketNo,
             $plateNo,
             $isOverdue,
+            $warehousePartsOnly,
             $search
         )->orderBy('work_order_items.id', 'desc');
 
@@ -5012,6 +5017,7 @@ class ReportsController extends Controller
         string $ticketNo,
         string $plateNo,
         bool $isOverdue,
+        bool $warehousePartsOnly,
         string $search
     ): \Illuminate\Database\Query\Builder {
         $user = auth()->user();
@@ -5077,6 +5083,18 @@ class ReportsController extends Controller
             $query->whereRaw("{$effectiveDateExpr} < ? AND work_order_items.status NOT IN ('completed', 'cancelled') AND work_orders.status NOT IN ('done', 'cancelled')", [$today]);
         }
 
+        // Warehouse parts only filter
+        if ($warehousePartsOnly) {
+            $query->whereExists(function ($subQuery) {
+                $subQuery->select(DB::raw(1))
+                    ->from('work_order_item_parts as woip')
+                    ->whereRaw('(woip.work_order_item_id = work_order_items.id OR (woip.work_order_item_id IS NULL AND woip.work_order_id = work_orders.id))')
+                    ->where('woip.source', WorkOrderItemPart::SOURCE_WAREHOUSE)
+                    ->whereNotIn('woip.status', ['cancelled', 'reversed'])
+                    ->whereNull('woip.deleted_at');
+            });
+        }
+
         // Direct search
         if ($search !== '') {
             $query->where(function ($sq) use ($search) {
@@ -5097,7 +5115,8 @@ class ReportsController extends Controller
             });
         }
 
-        $partsSubquery = "(SELECT COALESCE(SUM(woip.total), 0) FROM work_order_item_parts woip WHERE (woip.work_order_item_id = work_order_items.id OR (woip.work_order_item_id IS NULL AND woip.work_order_id = work_orders.id AND work_order_items.id = (SELECT MIN(sub_woi.id) FROM work_order_items sub_woi WHERE sub_woi.work_order_id = work_orders.id AND sub_woi.status != 'cancelled'))) AND woip.status NOT IN ('cancelled', 'reversed') AND woip.deleted_at IS NULL)";
+        $sourceCondition = $warehousePartsOnly ? "AND woip.source = 'warehouse'" : '';
+        $partsSubquery = "(SELECT COALESCE(SUM(woip.total), 0) FROM work_order_item_parts woip WHERE (woip.work_order_item_id = work_order_items.id OR (woip.work_order_item_id IS NULL AND woip.work_order_id = work_orders.id AND work_order_items.id = (SELECT MIN(sub_woi.id) FROM work_order_items sub_woi WHERE sub_woi.work_order_id = work_orders.id AND sub_woi.status != 'cancelled'))) AND woip.status NOT IN ('cancelled', 'reversed') AND woip.deleted_at IS NULL {$sourceCondition})";
 
         return $query->select([
             'work_order_items.id as item_id',

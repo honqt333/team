@@ -4055,7 +4055,8 @@
             "ticket_status_on_hold": "معلق",
             "ticket_status_done": "مكتمل",
             "ticket_status_ready_for_qc": "جاهز للفحص",
-            "ticket_status_cancelled": "ملغي"
+            "ticket_status_cancelled": "ملغي",
+            "warehouse_parts_only": "قطع الغيار من المستودع فقط"
         }
     },
     "roles": {

@@ -750,8 +750,9 @@
                         </div>
                     </div>
 
-                    <!-- Overdue Toggle -->
-                    <div class="flex items-center pt-5">
+                    <!-- Overdue & Warehouse Parts Toggles -->
+                    <div class="flex flex-wrap items-center gap-4 pt-5 sm:col-span-2 lg:col-span-2">
+                        <!-- Overdue Toggle -->
                         <label class="relative inline-flex items-center cursor-pointer">
                             <input
                                 type="checkbox"
@@ -764,6 +765,22 @@
                             ></div>
                             <span class="ms-2.5 text-xs font-bold text-gray-700 dark:text-gray-300">
                                 {{ $t('reports.vehicles_report.overdue') }}
+                            </span>
+                        </label>
+
+                        <!-- Warehouse Parts Only Toggle -->
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input
+                                type="checkbox"
+                                v-model="warehousePartsOnlyInput"
+                                @change="applyFilters"
+                                class="sr-only peer"
+                            />
+                            <div
+                                class="w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-600 peer-checked:bg-emerald-600"
+                            ></div>
+                            <span class="ms-2.5 text-xs font-bold text-gray-700 dark:text-gray-300">
+                                {{ $t('reports.vehicles_report.warehouse_parts_only') }}
                             </span>
                         </label>
                     </div>
@@ -1347,6 +1364,7 @@ const selectedGroupBy = ref(props.filters.group_by || 'none');
 const ticketNoInput = ref(props.filters.ticket_no || '');
 const plateNoInput = ref(props.filters.plate_no || '');
 const isOverdueInput = ref(Boolean(props.filters.is_overdue));
+const warehousePartsOnlyInput = ref(Boolean(props.filters.warehouse_parts_only));
 const searchInput = ref(props.filters.search || '');
 
 // Group Collapse State (All open by default)
@@ -1519,6 +1537,7 @@ const applyFilters = () => {
             ticket_no: ticketNoInput.value || null,
             plate_no: plateNoInput.value || null,
             is_overdue: isOverdueInput.value ? 1 : null,
+            warehouse_parts_only: warehousePartsOnlyInput.value ? 1 : null,
             search: searchInput.value || null,
         },
         {
@@ -1541,6 +1560,7 @@ const resetFilters = () => {
     ticketNoInput.value = '';
     plateNoInput.value = '';
     isOverdueInput.value = false;
+    warehousePartsOnlyInput.value = false;
     searchInput.value = '';
 
     router.get(
@@ -1593,6 +1613,7 @@ const exportUrl = computed(() => {
     if (ticketNoInput.value) params.set('ticket_no', ticketNoInput.value);
     if (plateNoInput.value) params.set('plate_no', plateNoInput.value);
     if (isOverdueInput.value) params.set('is_overdue', '1');
+    if (warehousePartsOnlyInput.value) params.set('warehouse_parts_only', '1');
     if (searchInput.value) params.set('search', searchInput.value);
 
     return route('app.reports.vehicles.export') + '?' + params.toString();

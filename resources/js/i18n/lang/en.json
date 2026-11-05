@@ -4057,7 +4057,8 @@
             "ticket_status_on_hold": "On Hold",
             "ticket_status_done": "Completed",
             "ticket_status_ready_for_qc": "Ready for QC",
-            "ticket_status_cancelled": "Cancelled"
+            "ticket_status_cancelled": "Cancelled",
+            "warehouse_parts_only": "Warehouse Spare Parts Only"
         }
     },
     "roles": {

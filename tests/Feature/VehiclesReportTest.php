@@ -338,4 +338,106 @@ class VehiclesReportTest extends TestCase
         $this->assertStringContainsString('رقم اللوحة', $content);
         $this->assertStringContainsString('رقم كرت العمل', $content);
     }
+
+    public function test_vehicles_report_filters_by_warehouse_parts_only(): void
+    {
+        app(PerformanceBaselineSeeder::class)->run();
+
+        $tenant = Tenant::first();
+        $center = Center::where('tenant_id', $tenant->id)->first();
+        $user = User::where('tenant_id', $tenant->id)->where('is_system_admin', true)->first();
+
+        $customer = Customer::create([
+            'tenant_id' => $tenant->id,
+            'center_id' => $center->id,
+            'name' => 'عميل قطع غيار',
+            'phone' => '0507776655',
+        ]);
+
+        $vehicle = Vehicle::create([
+            'tenant_id' => $tenant->id,
+            'center_id' => $center->id,
+            'customer_id' => $customer->id,
+            'plate_number' => '7777 WRP',
+        ]);
+
+        $wo = WorkOrder::create([
+            'tenant_id' => $tenant->id,
+            'center_id' => $center->id,
+            'customer_id' => $customer->id,
+            'vehicle_id' => $vehicle->id,
+            'code' => 'WO-WH-001',
+            'status' => WorkOrder::STATUS_IN_PROGRESS,
+            'entry_date' => now()->toDateString(),
+        ]);
+
+        // Item 1: Has warehouse part
+        $item1 = WorkOrderItem::create([
+            'work_order_id' => $wo->id,
+            'tenant_id' => $tenant->id,
+            'center_id' => $center->id,
+            'title' => 'خدمة بقطع من المستودع',
+            'qty' => 1,
+            'unit_price' => 100.00,
+            'total' => 100.00,
+            'status' => WorkOrderItem::STATUS_COMPLETED,
+            'due_date' => now()->toDateString(),
+        ]);
+
+        WorkOrderItemPart::create([
+            'work_order_id' => $wo->id,
+            'work_order_item_id' => $item1->id,
+            'tenant_id' => $tenant->id,
+            'center_id' => $center->id,
+            'name' => 'قطعة مستودع',
+            'part_number' => 'WH-01',
+            'source' => WorkOrderItemPart::SOURCE_WAREHOUSE,
+            'qty' => 1,
+            'unit_price' => 80.00,
+            'total' => 80.00,
+            'status' => 'issued',
+        ]);
+
+        // Item 2: Has external part only
+        $item2 = WorkOrderItem::create([
+            'work_order_id' => $wo->id,
+            'tenant_id' => $tenant->id,
+            'center_id' => $center->id,
+            'title' => 'خدمة بقطع خارجية',
+            'qty' => 1,
+            'unit_price' => 120.00,
+            'total' => 120.00,
+            'status' => WorkOrderItem::STATUS_COMPLETED,
+            'due_date' => now()->toDateString(),
+        ]);
+
+        WorkOrderItemPart::create([
+            'work_order_id' => $wo->id,
+            'work_order_item_id' => $item2->id,
+            'tenant_id' => $tenant->id,
+            'center_id' => $center->id,
+            'name' => 'قطعة خارجية',
+            'part_number' => 'EXT-01',
+            'source' => WorkOrderItemPart::SOURCE_EXTERNAL,
+            'qty' => 1,
+            'unit_price' => 50.00,
+            'total' => 50.00,
+            'status' => 'issued',
+        ]);
+
+        // Request with warehouse_parts_only = 1
+        $response = $this->actingAs($user)->get(route('app.reports.vehicles', [
+            'ticket_no' => 'WO-WH-001',
+            'warehouse_parts_only' => 1,
+        ]));
+
+        $response->assertStatus(200);
+        $response->assertInertia(fn ($page) => $page
+            ->where('kpis.total_records', 1)
+            ->where('kpis.total_service_cost', 100)
+            ->where('kpis.total_spare_part_cost', 80)
+            ->where('kpis.grand_total', 180)
+            ->where('items.data.0.service_name', 'خدمة بقطع من المستودع')
+        );
+    }
 }
