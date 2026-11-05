@@ -1028,6 +1028,8 @@ Route::prefix('app')->middleware(['auth', 'verified', 'tenant.active', 'center.c
         Route::get('/suppliers/export', [ReportsController::class, 'exportSuppliers'])->name('suppliers.export');
         Route::get('/employees', [ReportsController::class, 'employees'])->name('employees');
         Route::get('/employees/export', [ReportsController::class, 'exportEmployees'])->name('employees.export');
+        Route::get('/vehicles', [ReportsController::class, 'vehicles'])->name('vehicles');
+        Route::get('/vehicles/export', [ReportsController::class, 'exportVehicles'])->name('vehicles.export');
     });
 
     // ───────────────────────────────────────────────────────────────
@@ -1102,6 +1104,7 @@ Route::middleware(['auth', 'verified', 'tenant.active', 'center.context', Ensure
     Route::get('/reports/suppliers', fn () => redirect()->route('app.reports.suppliers'));
     Route::get('/reports/purchaseInvoices', fn () => redirect()->route('app.reports.purchase-invoices'));
     Route::get('/reports/stockActivities', fn () => redirect()->route('app.reports.stock-activities'));
+    Route::get('/reports/vehicles', fn () => redirect()->route('app.reports.vehicles'));
 });
 
 // Test routes for tenancy middleware (testing environment only)

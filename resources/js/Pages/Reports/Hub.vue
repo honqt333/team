@@ -374,9 +374,9 @@
                 </a>
 
                 <!-- Vehicles -->
-                <a
-                    href="#"
-                    class="group relative bg-gradient-to-br from-cyan-50 to-sky-50 dark:from-cyan-900/20 dark:to-sky-900/20 rounded-2xl p-7 border border-cyan-200 dark:border-cyan-800 hover:border-cyan-400 dark:hover:border-cyan-600 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 text-center cursor-not-allowed"
+                <Link
+                    :href="route('app.reports.vehicles')"
+                    class="group relative bg-gradient-to-br from-cyan-50 to-sky-50 dark:from-cyan-900/20 dark:to-sky-900/20 rounded-2xl p-7 border border-cyan-200 dark:border-cyan-800 hover:border-cyan-400 dark:hover:border-cyan-600 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 text-center"
                 >
                     <div
                         class="w-16 h-16 mx-auto rounded-2xl bg-gradient-to-br from-cyan-500 to-sky-600 flex items-center justify-center shadow-lg shadow-cyan-500/30 group-hover:scale-110 transition-all duration-300"
@@ -406,8 +406,13 @@
                     >
                         {{ $t('reports.vehicles') }}
                     </h3>
-                    <ComingSoonBadge />
-                </a>
+                    <span
+                        class="mt-3 inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800 dark:bg-emerald-900/50 dark:text-emerald-300"
+                    >
+                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                        متاح الآن
+                    </span>
+                </Link>
 
                 <!-- Financial Summary -->
                 <a

@@ -4663,4 +4663,477 @@ class ReportsController extends Controller
             ];
         };
     }
+
+    /**
+     * Dedicated Vehicles Report unit (matching wrshah /reports/vehicles).
+     */
+    public function vehicles(Request $request): Response
+    {
+        $tenantId = auth()->user()->tenant_id;
+        $centerId = TenancyContext::centerId();
+
+        $range = (string) ($request->input('range') ?: 'this_month');
+        $startDate = $request->input('start_date');
+        $endDate = $request->input('end_date');
+        $centerFilter = $this->resolveCenterFilter($request, $centerId);
+        $makeFilter = (string) ($request->input('make_id') ?: 'all');
+        $modelFilter = (string) ($request->input('model_id') ?: 'all');
+        $serviceStatusFilter = (string) ($request->input('service_status') ?: 'all');
+        $ticketNo = trim((string) ($request->input('ticket_no') ?? ''));
+        $plateNo = trim((string) ($request->input('plate_no') ?? ''));
+        $isOverdue = $request->boolean('is_overdue');
+        $groupBy = (string) ($request->input('group_by') ?: 'none');
+        $search = trim((string) ($request->input('search') ?? ''));
+
+        [$from, $to] = $this->resolveDateRange($range, $startDate, $endDate);
+
+        $query = $this->buildVehiclesReportQuery(
+            $tenantId,
+            $centerId,
+            $from,
+            $to,
+            $centerFilter,
+            $makeFilter,
+            $modelFilter,
+            $serviceStatusFilter,
+            $ticketNo,
+            $plateNo,
+            $isOverdue,
+            $search
+        );
+
+        $allRows = (clone $query)
+            ->orderBy('work_order_items.id', 'desc')
+            ->get();
+
+        $mappedItems = $allRows->map(function ($row) {
+            $makeName = $row->make_name_ar ?: ($row->make_name_en ?: ($row->make_other ?: ''));
+            $modelName = $row->model_name_ar ?: ($row->model_name_en ?: ($row->model_other ?: ''));
+            $vehicleDisplayName = trim("{$makeName} {$modelName} ".($row->vehicle_year ? "({$row->vehicle_year})" : ''));
+            $serviceCost = round((float) ($row->item_total ?? $row->line_total ?? ($row->unit_price * $row->qty)), 2);
+            $sparePartCost = round((float) $row->spare_part_cost, 2);
+            $total = round($serviceCost + $sparePartCost, 2);
+
+            $dueDate = $row->item_due_date ?: ($row->expected_end_date ? Carbon::parse($row->expected_end_date)->format('Y-m-d') : ($row->entry_date ?: ($row->ticket_created_at ? Carbon::parse($row->ticket_created_at)->format('Y-m-d') : '')));
+
+            $isOverdue = false;
+
+            if ($dueDate && ! in_array($row->service_status, ['completed', 'cancelled']) && ! in_array($row->ticket_status, ['done', 'cancelled'])) {
+                $isOverdue = Carbon::parse($dueDate)->isPast();
+            }
+
+            return [
+                'id' => $row->item_id,
+                'work_order_id' => $row->work_order_id,
+                'ticket_no' => $row->ticket_no,
+                'ticket_status' => $row->ticket_status,
+                'is_ticket_closed' => in_array($row->ticket_status, [WorkOrder::STATUS_DONE, WorkOrder::STATUS_CANCELLED]),
+                'center_id' => $row->center_id,
+                'shop_name' => $row->shop_name ?: 'المركز الرئيسي',
+                'vehicle_id' => $row->vehicle_id,
+                'plate_no' => $row->plate_no ?: '',
+                'make_id' => $row->make_id ?? null,
+                'make_name' => $makeName,
+                'model_id' => $row->model_id ?? null,
+                'model_name' => $modelName,
+                'vehicle_year' => $row->vehicle_year,
+                'vehicle_display_name' => $vehicleDisplayName,
+                'odometer_km' => $row->ticket_odometer ?: ($row->vehicle_odometer ?: null),
+                'details' => $row->vehicle_notes ?: ($row->ticket_notes ?: ''),
+                'section_name' => $row->section_name ?: 'عام',
+                'service_name' => $row->item_title ?: ($row->service_name ?: 'خدمة صيانة'),
+                'service_status' => $row->service_status,
+                'due_date' => $dueDate,
+                'service_cost' => $serviceCost,
+                'spare_part_cost' => $sparePartCost,
+                'total' => $total,
+                'is_overdue' => $isOverdue,
+            ];
+        });
+
+        // Overall KPIs calculation
+        $totalRecords = $mappedItems->count();
+        $totalVehicles = $mappedItems->pluck('vehicle_id')->unique()->filter()->count();
+        $totalTickets = $mappedItems->pluck('work_order_id')->unique()->filter()->count();
+        $totalServiceCost = round((float) $mappedItems->sum('service_cost'), 2);
+        $totalSparePartCost = round((float) $mappedItems->sum('spare_part_cost'), 2);
+        $grandTotal = round((float) $mappedItems->sum('total'), 2);
+
+        $kpis = [
+            'total_records' => $totalRecords,
+            'total_vehicles' => $totalVehicles,
+            'total_tickets' => $totalTickets,
+            'total_service_cost' => $totalServiceCost,
+            'total_spare_part_cost' => $totalSparePartCost,
+            'grand_total' => $grandTotal,
+        ];
+
+        // Grouping
+        $groups = null;
+
+        if ($groupBy !== 'none') {
+            $groupedCollection = $mappedItems->groupBy(function ($item) use ($groupBy) {
+                return match ($groupBy) {
+                    'shopName' => $item['shop_name'],
+                    'plateNo' => $item['plate_no'] ?: 'بدون لوحة',
+                    'serviceStatusName' => $item['service_status'],
+                    default => 'all',
+                };
+            });
+
+            $groups = $groupedCollection->map(function ($items, $key) use ($groupBy) {
+                $groupName = match ($groupBy) {
+                    'shopName' => $key,
+                    'plateNo' => $key,
+                    'serviceStatusName' => match ($key) {
+                        'pending' => 'قيد الانتظار',
+                        'in_progress' => 'قيد التنفيذ',
+                        'ready_for_qc' => 'جاهز للفحص',
+                        'completed' => 'مكتمل',
+                        'on_hold' => 'معلق',
+                        'cancelled' => 'ملغي',
+                        default => $key,
+                    },
+                    default => $key,
+                };
+
+                $totalCost = round((float) $items->sum('service_cost'), 2);
+                $totalParts = round((float) $items->sum('spare_part_cost'), 2);
+
+                return [
+                    'group_key' => (string) $key,
+                    'group_name' => $groupName,
+                    'items' => $items->values()->all(),
+                    'summary' => [
+                        'total_records' => $items->count(),
+                        'total_service_cost' => $totalCost,
+                        'total_spare_part_cost' => $totalParts,
+                        'grand_total' => round($totalCost + $totalParts, 2),
+                    ],
+                ];
+            })->values()->all();
+        }
+
+        // Pagination for flat table
+        $page = (int) ($request->input('page') ?: 1);
+        $perPage = (int) ($request->input('per_page') ?: 25);
+        $paginatedItems = new LengthAwarePaginator(
+            $mappedItems->forPage($page, $perPage)->values(),
+            $totalRecords,
+            $perPage,
+            $page,
+            ['path' => $request->url(), 'query' => $request->query()]
+        );
+
+        $tenant = Tenant::find($tenantId);
+        $centers = $tenant?->centers()->select('id', 'name')->get() ?? collect();
+        $makes = VehicleMake::orderBy('name_ar')->get(['id', 'name_ar', 'name_en']);
+        $models = VehicleModel::orderBy('name_ar')->get(['id', 'make_id', 'name_ar', 'name_en']);
+
+        return Inertia::render('Reports/Vehicles', [
+            'items' => $paginatedItems,
+            'groups' => $groups,
+            'kpis' => $kpis,
+            'filters' => [
+                'range' => $range,
+                'start_date' => $startDate ?: ($from ? $from->toDateString() : null),
+                'end_date' => $endDate ?: ($to ? $to->toDateString() : null),
+                'center_id' => $centerFilter,
+                'make_id' => $makeFilter,
+                'model_id' => $modelFilter,
+                'service_status' => $serviceStatusFilter,
+                'ticket_no' => $ticketNo,
+                'plate_no' => $plateNo,
+                'is_overdue' => $isOverdue,
+                'group_by' => $groupBy,
+                'search' => $search,
+            ],
+            'lookups' => [
+                'centers' => $centers,
+                'makes' => $makes,
+                'models' => $models,
+                'service_statuses' => [
+                    ['id' => 'pending', 'label' => 'قيد الانتظار'],
+                    ['id' => 'in_progress', 'label' => 'قيد التنفيذ'],
+                    ['id' => 'ready_for_qc', 'label' => 'جاهز للفحص'],
+                    ['id' => 'completed', 'label' => 'مكتمل'],
+                    ['id' => 'on_hold', 'label' => 'معلق'],
+                    ['id' => 'cancelled', 'label' => 'ملغي'],
+                ],
+                'groups' => [
+                    ['id' => 'none', 'label' => 'بدون تجميع (قائمة مسطحة)'],
+                    ['id' => 'shopName', 'label' => 'الفرع / المركز'],
+                    ['id' => 'plateNo', 'label' => 'المركبة'],
+                    ['id' => 'serviceStatusName', 'label' => 'حالة الخدمة'],
+                ],
+            ],
+        ]);
+    }
+
+    /**
+     * Export Vehicles Report as CSV with UTF-8 BOM.
+     */
+    public function exportVehicles(Request $request): StreamedResponse
+    {
+        $tenantId = auth()->user()->tenant_id;
+        $centerId = TenancyContext::centerId();
+
+        $range = (string) ($request->input('range') ?: 'this_month');
+        $startDate = $request->input('start_date');
+        $endDate = $request->input('end_date');
+        $centerFilter = $this->resolveCenterFilter($request, $centerId);
+        $makeFilter = (string) ($request->input('make_id') ?: 'all');
+        $modelFilter = (string) ($request->input('model_id') ?: 'all');
+        $serviceStatusFilter = (string) ($request->input('service_status') ?: 'all');
+        $ticketNo = trim((string) ($request->input('ticket_no') ?? ''));
+        $plateNo = trim((string) ($request->input('plate_no') ?? ''));
+        $isOverdue = $request->boolean('is_overdue');
+        $search = trim((string) ($request->input('search') ?? ''));
+
+        [$from, $to] = $this->resolveDateRange($range, $startDate, $endDate);
+
+        $query = $this->buildVehiclesReportQuery(
+            $tenantId,
+            $centerId,
+            $from,
+            $to,
+            $centerFilter,
+            $makeFilter,
+            $modelFilter,
+            $serviceStatusFilter,
+            $ticketNo,
+            $plateNo,
+            $isOverdue,
+            $search
+        )->orderBy('work_order_items.id', 'desc');
+
+        $headers = [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+            'Content-Disposition' => 'attachment; filename="vehicles_report_'.now()->format('Y-m-d_His').'.csv"',
+            'Pragma' => 'no-cache',
+            'Cache-Control' => 'must-revalidate, post-check=0, pre-check=0',
+            'Expires' => '0',
+        ];
+
+        return response()->stream(function () use ($query) {
+            $handle = fopen('php://output', 'w');
+            // Write UTF-8 BOM for Excel compatibility
+            fwrite($handle, "\xEF\xBB\xBF");
+
+            fputcsv($handle, [
+                '#',
+                'الفرع',
+                'المركبة',
+                'رقم اللوحة',
+                'سنة الصنع',
+                'قراءة العداد (كم)',
+                'رقم كرت العمل',
+                'حالة كرت العمل',
+                'القسم',
+                'الخدمة',
+                'حالة الخدمة',
+                'تاريخ الاستحقاق',
+                'تكلفة الخدمة (ر.س)',
+                'تكلفة قطع الغيار (ر.س)',
+                'الإجمالي (ر.س)',
+                'الملاحظات',
+            ]);
+
+            $rowNumber = 1;
+            $query->chunk(250, function ($rows) use ($handle, &$rowNumber) {
+                foreach ($rows as $row) {
+                    $makeName = $row->make_name_ar ?: ($row->make_name_en ?: ($row->make_other ?: ''));
+                    $modelName = $row->model_name_ar ?: ($row->model_name_en ?: ($row->model_other ?: ''));
+                    $vehicleDisplayName = trim("{$makeName} {$modelName}");
+                    $serviceCost = round((float) ($row->item_total ?? $row->line_total ?? ($row->unit_price * $row->qty)), 2);
+                    $sparePartCost = round((float) $row->spare_part_cost, 2);
+                    $total = round($serviceCost + $sparePartCost, 2);
+
+                    $dueDate = $row->item_due_date ?: ($row->expected_end_date ? Carbon::parse($row->expected_end_date)->format('Y-m-d') : ($row->entry_date ?: ($row->ticket_created_at ? Carbon::parse($row->ticket_created_at)->format('Y-m-d') : '')));
+
+                    $serviceStatusLabel = match ($row->service_status) {
+                        'pending' => 'قيد الانتظار',
+                        'in_progress' => 'قيد التنفيذ',
+                        'ready_for_qc' => 'جاهز للفحص',
+                        'completed' => 'مكتمل',
+                        'on_hold' => 'معلق',
+                        'cancelled' => 'ملغي',
+                        default => $row->service_status,
+                    };
+
+                    $ticketStatusLabel = match ($row->ticket_status) {
+                        'draft' => 'مسودة',
+                        'open' => 'مفتوح',
+                        'in_progress' => 'قيد العمل',
+                        'on_hold' => 'معلق',
+                        'done' => 'مكتمل',
+                        'ready_for_qc' => 'جاهز للفحص',
+                        'cancelled' => 'ملغي',
+                        default => $row->ticket_status,
+                    };
+
+                    fputcsv($handle, [
+                        $rowNumber++,
+                        $row->shop_name ?: 'المركز الرئيسي',
+                        $vehicleDisplayName,
+                        $row->plate_no ?: '',
+                        $row->vehicle_year ?: '',
+                        $row->ticket_odometer ?: ($row->vehicle_odometer ?: ''),
+                        $row->ticket_no ?: '',
+                        $ticketStatusLabel,
+                        $row->section_name ?: 'عام',
+                        $row->item_title ?: ($row->service_name ?: 'خدمة صيانة'),
+                        $serviceStatusLabel,
+                        $dueDate,
+                        number_format($serviceCost, 2, '.', ''),
+                        number_format($sparePartCost, 2, '.', ''),
+                        number_format($total, 2, '.', ''),
+                        $row->vehicle_notes ?: ($row->ticket_notes ?: ''),
+                    ]);
+                }
+            });
+
+            fclose($handle);
+        }, 200, $headers);
+    }
+
+    /**
+     * Build the filtered Query for Vehicles Report (matching wrshah /reports/vehicles).
+     */
+    private function buildVehiclesReportQuery(
+        int $tenantId,
+        ?int $centerId,
+        ?Carbon $from,
+        ?Carbon $to,
+        string $centerFilter,
+        string $makeFilter,
+        string $modelFilter,
+        string $serviceStatusFilter,
+        string $ticketNo,
+        string $plateNo,
+        bool $isOverdue,
+        string $search
+    ): \Illuminate\Database\Query\Builder {
+        $user = auth()->user();
+        $userCenterIds = $user?->centers()->pluck('centers.id')->toArray() ?? [];
+
+        $query = DB::table('work_order_items')
+            ->join('work_orders', 'work_order_items.work_order_id', '=', 'work_orders.id')
+            ->join('vehicles', 'work_orders.vehicle_id', '=', 'vehicles.id')
+            ->leftJoin('centers', 'work_orders.center_id', '=', 'centers.id')
+            ->leftJoin('vehicle_makes', 'vehicles.make_id', '=', 'vehicle_makes.id')
+            ->leftJoin('vehicle_models', 'vehicles.model_id', '=', 'vehicle_models.id')
+            ->leftJoin('departments', 'work_order_items.department_id', '=', 'departments.id')
+            ->leftJoin('services', 'work_order_items.service_id', '=', 'services.id')
+            ->leftJoin('customers', 'work_orders.customer_id', '=', 'customers.id')
+            ->where('work_order_items.tenant_id', $tenantId)
+            ->whereNull('work_orders.deleted_at')
+            ->whereNull('vehicles.deleted_at');
+
+        // Center scoping
+        if ($centerFilter !== 'all' && ! empty($centerFilter)) {
+            $query->where('work_orders.center_id', (int) $centerFilter);
+        } else {
+            if (! empty($userCenterIds)) {
+                $query->whereIn('work_orders.center_id', $userCenterIds);
+            }
+        }
+
+        // Date Range (due_date / expected_end_date / entry_date / created_at)
+        $effectiveDateExpr = 'COALESCE(work_order_items.due_date, DATE(work_orders.expected_end_date), work_orders.entry_date, DATE(work_order_items.created_at))';
+
+        if ($from && $to) {
+            $query->whereRaw("{$effectiveDateExpr} BETWEEN ? AND ?", [$from->toDateString(), $to->toDateString()]);
+        }
+
+        // Make filter
+        if ($makeFilter !== 'all' && ! empty($makeFilter)) {
+            $query->where('vehicles.make_id', (int) $makeFilter);
+        }
+
+        // Model filter
+        if ($modelFilter !== 'all' && ! empty($modelFilter)) {
+            $query->where('vehicles.model_id', (int) $modelFilter);
+        }
+
+        // Service Status filter
+        if ($serviceStatusFilter !== 'all' && ! empty($serviceStatusFilter)) {
+            $query->where('work_order_items.status', $serviceStatusFilter);
+        }
+
+        // Ticket number filter
+        if ($ticketNo !== '') {
+            $query->where('work_orders.code', 'like', "%{$ticketNo}%");
+        }
+
+        // Plate number filter
+        if ($plateNo !== '') {
+            $query->where('vehicles.plate_number', 'like', "%{$plateNo}%");
+        }
+
+        // Overdue filter
+        if ($isOverdue) {
+            $today = now()->toDateString();
+            $query->whereRaw("{$effectiveDateExpr} < ? AND work_order_items.status NOT IN ('completed', 'cancelled') AND work_orders.status NOT IN ('done', 'cancelled')", [$today]);
+        }
+
+        // Direct search
+        if ($search !== '') {
+            $query->where(function ($sq) use ($search) {
+                $sq->where('work_orders.code', 'like', "%{$search}%")
+                    ->orWhere('vehicles.plate_number', 'like', "%{$search}%")
+                    ->orWhere('vehicle_makes.name_ar', 'like', "%{$search}%")
+                    ->orWhere('vehicle_makes.name_en', 'like', "%{$search}%")
+                    ->orWhere('vehicle_models.name_ar', 'like', "%{$search}%")
+                    ->orWhere('vehicle_models.name_en', 'like', "%{$search}%")
+                    ->orWhere('vehicles.make_other', 'like', "%{$search}%")
+                    ->orWhere('vehicles.model_other', 'like', "%{$search}%")
+                    ->orWhere('work_order_items.title', 'like', "%{$search}%")
+                    ->orWhere('services.name_ar', 'like', "%{$search}%")
+                    ->orWhere('services.name_en', 'like', "%{$search}%")
+                    ->orWhere('departments.name_ar', 'like', "%{$search}%")
+                    ->orWhere('customers.name', 'like', "%{$search}%")
+                    ->orWhere('customers.phone', 'like', "%{$search}%");
+            });
+        }
+
+        $partsSubquery = "(SELECT COALESCE(SUM(woip.total), 0) FROM work_order_item_parts woip WHERE (woip.work_order_item_id = work_order_items.id OR (woip.work_order_item_id IS NULL AND woip.work_order_id = work_orders.id AND work_order_items.id = (SELECT MIN(sub_woi.id) FROM work_order_items sub_woi WHERE sub_woi.work_order_id = work_orders.id AND sub_woi.status != 'cancelled'))) AND woip.status NOT IN ('cancelled', 'reversed') AND woip.deleted_at IS NULL)";
+
+        return $query->select([
+            'work_order_items.id as item_id',
+            'work_order_items.work_order_id',
+            'work_order_items.service_id',
+            'work_order_items.department_id',
+            'work_order_items.title as item_title',
+            'work_order_items.status as service_status',
+            'work_order_items.total as item_total',
+            'work_order_items.line_total',
+            'work_order_items.unit_price',
+            'work_order_items.qty',
+            'work_order_items.due_date as item_due_date',
+            'work_orders.code as ticket_no',
+            'work_orders.status as ticket_status',
+            'work_orders.center_id',
+            'work_orders.expected_end_date',
+            'work_orders.entry_date',
+            'work_orders.created_at as ticket_created_at',
+            'work_orders.odometer as ticket_odometer',
+            'work_orders.notes as ticket_notes',
+            'centers.name as shop_name',
+            'vehicles.id as vehicle_id',
+            'vehicles.plate_number as plate_no',
+            'vehicles.year as vehicle_year',
+            'vehicles.odometer as vehicle_odometer',
+            'vehicles.notes as vehicle_notes',
+            'vehicle_makes.name_ar as make_name_ar',
+            'vehicle_makes.name_en as make_name_en',
+            'vehicles.make_other',
+            'vehicle_models.name_ar as model_name_ar',
+            'vehicle_models.name_en as model_name_en',
+            'vehicles.model_other',
+            'departments.name_ar as section_name',
+            'services.name_ar as service_name',
+            DB::raw("{$partsSubquery} as spare_part_cost"),
+        ]);
+    }
 }
