@@ -449,10 +449,10 @@
                     </span>
                 </Link>
 
-                <!-- Cash Flow (Beta) -->
-                <a
-                    href="#"
-                    class="group relative bg-gradient-to-br from-slate-50 to-gray-100 dark:from-slate-900/20 dark:to-gray-800/20 rounded-2xl p-7 border border-slate-200 dark:border-slate-700 hover:border-slate-400 dark:hover:border-slate-600 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 text-center cursor-not-allowed"
+                <!-- Cash Register / Cash Flow -->
+                <Link
+                    :href="route('app.reports.cash-register')"
+                    class="group relative bg-gradient-to-br from-slate-50 to-gray-100 dark:from-slate-900/20 dark:to-gray-800/20 rounded-2xl p-7 border border-slate-200 dark:border-slate-700 hover:border-slate-400 dark:hover:border-slate-600 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 text-center"
                 >
                     <div
                         class="w-16 h-16 mx-auto rounded-2xl bg-gradient-to-br from-slate-500 to-gray-700 flex items-center justify-center shadow-lg shadow-slate-500/30 group-hover:scale-110 transition-all duration-300"
@@ -482,8 +482,13 @@
                     >
                         Beta
                     </div>
-                    <ComingSoonBadge />
-                </a>
+                    <span
+                        class="mt-3 inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800 dark:bg-emerald-900/50 dark:text-emerald-300"
+                    >
+                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                        متاح الآن
+                    </span>
+                </Link>
             </div>
         </div>
     </AppLayout>

@@ -8,6 +8,7 @@ use App\Enums\InvoiceType;
 use App\Enums\PaymentType;
 use App\Http\Controllers\Controller;
 use App\Models\Center;
+use App\Models\CompanyTransaction;
 use App\Models\Customer;
 use App\Models\Department;
 use App\Models\GrnItem;
@@ -36,6 +37,7 @@ use Closure;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -5869,5 +5871,388 @@ class ReportsController extends Controller
             'sumFinalAmount' => $sumFinalAmount,
             'profit' => $profit,
         ];
+    }
+
+    /**
+     * Dedicated Cash Register & Daily Cash Flow Report.
+     */
+    public function cashRegister(Request $request): Response
+    {
+        $this->authorize('viewAny', Payment::class);
+
+        $tenantId = (int) auth()->user()->tenant_id;
+        $centerId = TenancyContext::centerId();
+
+        $range = (string) ($request->input('range') ?: 'this_month');
+        $startDate = $request->input('start_date');
+        $endDate = $request->input('end_date');
+        $centerFilter = $this->resolveCenterFilter($request, $centerId);
+        $paymentMethod = (string) ($request->input('payment_method') ?: 'all');
+        $transactionType = (string) ($request->input('transaction_type') ?: 'all');
+        $userFilter = (string) ($request->input('user_id') ?: 'all');
+        $search = trim((string) ($request->input('search') ?? ''));
+        $sortBy = (string) ($request->input('sort_by') ?: 'transaction_date');
+        $sortOrder = strtolower((string) ($request->input('sort_order') ?: 'desc'));
+
+        [$from, $to] = $this->resolveDateRange($range, $startDate, $endDate);
+
+        $items = $this->buildCashRegisterData(
+            $tenantId,
+            $centerId,
+            $from,
+            $to,
+            $paymentMethod,
+            $transactionType,
+            $userFilter,
+            $centerFilter,
+            $search
+        );
+
+        // Sorting
+        $sortedItems = $items->sortBy([
+            [$sortBy === 'transaction_date' ? 'timestamp' : $sortBy, $sortOrder === 'asc' ? 'asc' : 'desc'],
+        ])->values();
+
+        // Calculate KPIs
+        $totalRecords = $sortedItems->count();
+        $totalDebit = (float) $sortedItems->sum('debit');
+        $totalCredit = (float) $sortedItems->sum('credit');
+        $netBalance = $totalDebit - $totalCredit;
+        $cashBalance = (float) $sortedItems->where('payment_mode', 'cash')->sum(fn ($i) => $i['debit'] - $i['credit']);
+        $electronicBalance = $netBalance - $cashBalance;
+
+        // Paginate
+        $currentPage = LengthAwarePaginator::resolveCurrentPage('page');
+        $perPage = 25;
+        $currentPageItems = $sortedItems->slice(($currentPage - 1) * $perPage, $perPage)->values();
+
+        $paginated = new LengthAwarePaginator(
+            $currentPageItems,
+            $totalRecords,
+            $perPage,
+            $currentPage,
+            ['path' => LengthAwarePaginator::resolveCurrentPath()]
+        );
+        $paginated->withQueryString();
+
+        $accessibleCenters = $this->resolveAccessibleCenters($tenantId);
+        $tenantUsers = User::query()
+            ->where('tenant_id', $tenantId)
+            ->select('id', 'name')
+            ->orderBy('name')
+            ->get();
+
+        $tenant = auth()->user()->tenant;
+
+        return Inertia::render('Reports/CashRegister', [
+            'filters' => [
+                'range' => $range,
+                'start_date' => $startDate,
+                'end_date' => $endDate,
+                'center_id' => $centerFilter,
+                'payment_method' => $paymentMethod,
+                'transaction_type' => $transactionType,
+                'user_id' => $userFilter,
+                'search' => $search,
+                'sort_by' => $sortBy,
+                'sort_order' => $sortOrder,
+            ],
+            'kpis' => [
+                'total_records' => $totalRecords,
+                'total_debit' => $totalDebit,
+                'total_credit' => $totalCredit,
+                'net_balance' => $netBalance,
+                'cash_balance' => $cashBalance,
+                'electronic_balance' => $electronicBalance,
+            ],
+            'items' => $paginated,
+            'centers' => $accessibleCenters,
+            'users' => $tenantUsers,
+            'companyInfo' => $this->resolveReportCompanyInfo($tenant, $centerFilter, $centerId),
+        ]);
+    }
+
+    /**
+     * Export Cash Register Report as CSV (UTF-8 BOM).
+     */
+    public function exportCashRegister(Request $request): StreamedResponse
+    {
+        $this->authorize('viewAny', Payment::class);
+
+        $tenantId = (int) auth()->user()->tenant_id;
+        $centerId = TenancyContext::centerId();
+
+        $range = (string) ($request->input('range') ?: 'this_month');
+        $startDate = $request->input('start_date');
+        $endDate = $request->input('end_date');
+        $centerFilter = $this->resolveCenterFilter($request, $centerId);
+        $paymentMethod = (string) ($request->input('payment_method') ?: 'all');
+        $transactionType = (string) ($request->input('transaction_type') ?: 'all');
+        $userFilter = (string) ($request->input('user_id') ?: 'all');
+        $search = trim((string) ($request->input('search') ?? ''));
+        $sortBy = (string) ($request->input('sort_by') ?: 'transaction_date');
+        $sortOrder = strtolower((string) ($request->input('sort_order') ?: 'desc'));
+
+        [$from, $to] = $this->resolveDateRange($range, $startDate, $endDate);
+
+        $items = $this->buildCashRegisterData(
+            $tenantId,
+            $centerId,
+            $from,
+            $to,
+            $paymentMethod,
+            $transactionType,
+            $userFilter,
+            $centerFilter,
+            $search
+        );
+
+        $sortedItems = $items->sortBy([
+            [$sortBy === 'transaction_date' ? 'timestamp' : $sortBy, $sortOrder === 'asc' ? 'asc' : 'desc'],
+        ])->values();
+
+        $headers = [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+            'Content-Disposition' => 'attachment; filename="cash_register_'.date('Y-m-d_His').'.csv"',
+        ];
+
+        return response()->stream(function () use ($sortedItems) {
+            $handle = fopen('php://output', 'w');
+            fprintf($handle, chr(0xEF).chr(0xBB).chr(0xBF));
+
+            fputcsv($handle, [
+                '#',
+                'الفرع',
+                'رقم المرجع',
+                'البيان / الوصف',
+                'نوع الحركة / التصنيف',
+                'طريقة الدفع',
+                'تاريخ ووقت المعاملة',
+                'المبلغ المقبوض (وارد)',
+                'المبلغ المدفوع (صادر)',
+                'المستخدم المسؤول',
+            ]);
+
+            $index = 1;
+
+            foreach ($sortedItems as $row) {
+                fputcsv($handle, [
+                    $index++,
+                    $row['center_name'],
+                    $row['ref_no'],
+                    $row['description'],
+                    $row['category_label'],
+                    $row['payment_mode_label'],
+                    $row['transaction_date'],
+                    number_format((float) $row['debit'], 2, '.', ''),
+                    number_format((float) $row['credit'], 2, '.', ''),
+                    $row['user_name'],
+                ]);
+            }
+
+            fclose($handle);
+        }, 200, $headers);
+    }
+
+    /**
+     * Build unified cash register movements dataset across payments and company transactions.
+     */
+    private function buildCashRegisterData(
+        int $tenantId,
+        ?int $centerId,
+        ?Carbon $from,
+        ?Carbon $to,
+        string $paymentMethod = 'all',
+        string $transactionType = 'all',
+        string $userFilter = 'all',
+        string $centerFilter = 'all',
+        string $search = ''
+    ): Collection {
+        $accessibleCenterIds = $this->accessibleCenterIds();
+        $targetCenterIds = null;
+
+        if ($centerFilter !== 'all' && is_numeric($centerFilter)) {
+            $cId = (int) $centerFilter;
+
+            if ($accessibleCenterIds === null || in_array($cId, $accessibleCenterIds, true)) {
+                $targetCenterIds = [$cId];
+            } else {
+                $targetCenterIds = [];
+            }
+        } elseif ($accessibleCenterIds !== null) {
+            $targetCenterIds = $accessibleCenterIds;
+        }
+
+        $items = collect();
+
+        // 1. Payments Table Records
+        if ($transactionType === 'all' || in_array($transactionType, ['sales_payment', 'purchase_payment', 'refund', 'bad_debt'], true)) {
+            $payQuery = Payment::query()
+                ->where('tenant_id', $tenantId)
+                ->with(['invoice.customer', 'purchaseInvoice.supplier', 'workOrder.customer', 'receivedBy', 'center']);
+
+            if ($targetCenterIds !== null) {
+                $payQuery->where(function ($q) use ($targetCenterIds) {
+                    $q->whereIn('center_id', $targetCenterIds)->orWhereNull('center_id');
+                });
+            }
+
+            if ($from && $to) {
+                $payQuery->whereBetween('payment_date', [$from, $to]);
+            }
+
+            if ($paymentMethod !== 'all') {
+                $payQuery->where('payment_method', $paymentMethod);
+            }
+
+            if ($userFilter !== 'all' && is_numeric($userFilter)) {
+                $payQuery->where('received_by', (int) $userFilter);
+            }
+
+            if ($transactionType === 'sales_payment') {
+                $payQuery->whereNull('purchase_invoice_id')->where('type', 'payment');
+            } elseif ($transactionType === 'purchase_payment') {
+                $payQuery->whereNotNull('purchase_invoice_id');
+            } elseif ($transactionType === 'refund') {
+                $payQuery->where('type', 'refund');
+            } elseif ($transactionType === 'bad_debt') {
+                $payQuery->where('type', 'bad_debt');
+            }
+
+            if (! empty($search)) {
+                $payQuery->where(function ($q) use ($search) {
+                    $q->where('reference', 'like', "%{$search}%")
+                        ->orWhere('notes', 'like', "%{$search}%")
+                        ->orWhereHas('invoice', fn ($iq) => $iq->where('invoice_number', 'like', "%{$search}%")->orWhereHas('customer', fn ($cq) => $cq->where('name', 'like', "%{$search}%")))
+                        ->orWhereHas('workOrder', fn ($wq) => $wq->where('code', 'like', "%{$search}%")->orWhereHas('customer', fn ($cq) => $cq->where('name', 'like', "%{$search}%")))
+                        ->orWhereHas('purchaseInvoice', fn ($piq) => $piq->where('code', 'like', "%{$search}%")->orWhere('invoice_number', 'like', "%{$search}%")->orWhereHas('supplier', fn ($sq) => $sq->where('name', 'like', "%{$search}%")));
+                });
+            }
+
+            $payments = $payQuery->get();
+
+            foreach ($payments as $p) {
+                $isPurchase = ! empty($p->purchase_invoice_id);
+                $isRefund = ($p->type?->value ?? $p->type) === 'refund';
+                $isBadDebt = ($p->type?->value ?? $p->type) === 'bad_debt';
+
+                $cat = 'sales_payment';
+                $debit = (float) $p->amount;
+                $credit = 0.0;
+                $refNo = $p->invoice?->invoice_number ?? ($p->workOrder?->code ?? ($p->reference ?: 'PAY-'.str_pad((string) $p->id, 5, '0', STR_PAD_LEFT)));
+                $desc = 'قبض مبيعات - '.($p->invoice?->customer?->name ?? $p->workOrder?->customer?->name ?? 'عميل نقد');
+
+                if ($isPurchase) {
+                    $cat = 'purchase_payment';
+                    $debit = 0.0;
+                    $credit = (float) $p->amount;
+                    $refNo = $p->purchaseInvoice?->code ?? ($p->purchaseInvoice?->invoice_number ?? ($p->reference ?: 'PAY-'.$p->id));
+                    $desc = 'سداد مشتريات - مورد: '.($p->purchaseInvoice?->supplier?->name ?? 'مورد');
+                } elseif ($isRefund) {
+                    $cat = 'refund';
+                    $debit = 0.0;
+                    $credit = (float) $p->amount;
+                    $refNo = $p->reference ?: ($p->invoice?->invoice_number ?: 'REF-'.$p->id);
+                    $desc = 'استرداد دفعة - '.($p->invoice?->customer?->name ?? $p->workOrder?->customer?->name ?? 'عميل');
+                } elseif ($isBadDebt) {
+                    $cat = 'bad_debt';
+                    $debit = 0.0;
+                    $credit = (float) $p->amount;
+                    $refNo = $p->reference ?: 'BD-'.$p->id;
+                    $desc = 'دين معدوم - '.($p->invoice?->customer?->name ?? 'عميل');
+                }
+
+                $items->push([
+                    'id' => 'pay_'.$p->id,
+                    'raw_id' => $p->id,
+                    'type_group' => 'payment',
+                    'ref_no' => $refNo,
+                    'description' => $desc,
+                    'category' => $cat,
+                    'category_label' => __('reports.cash_register_report.categories.'.$cat),
+                    'payment_mode' => $p->payment_method ?: 'cash',
+                    'payment_mode_label' => __('reports.cash_register_report.methods.'.($p->payment_method ?: 'cash')),
+                    'transaction_date' => $p->payment_date ? Carbon::parse($p->payment_date)->format('Y-m-d H:i') : Carbon::parse($p->created_at)->format('Y-m-d H:i'),
+                    'timestamp' => $p->payment_date ? Carbon::parse($p->payment_date)->timestamp : Carbon::parse($p->created_at)->timestamp,
+                    'debit' => $debit,
+                    'credit' => $credit,
+                    'user_id' => $p->received_by,
+                    'user_name' => $p->receivedBy?->name ?? 'مدير النظام',
+                    'user_photo' => $p->receivedBy?->photo_url ?? null,
+                    'center_id' => $p->center_id,
+                    'center_name' => $p->center?->name ?? 'المركز الرئيسي',
+                ]);
+            }
+        }
+
+        // 2. Company Transactions (Revenue & Expenses)
+        if ($transactionType === 'all' || in_array($transactionType, ['revenue', 'expense'], true)) {
+            $trxQuery = CompanyTransaction::query()
+                ->where('tenant_id', $tenantId)
+                ->with(['center']);
+
+            if ($targetCenterIds !== null) {
+                $trxQuery->where(function ($q) use ($targetCenterIds) {
+                    $q->whereIn('center_id', $targetCenterIds)->orWhereNull('center_id');
+                });
+            }
+
+            if ($from && $to) {
+                $trxQuery->whereBetween('transaction_date', [$from->toDateString(), $to->toDateString()]);
+            }
+
+            if ($userFilter !== 'all' && is_numeric($userFilter)) {
+                $trxQuery->where(function ($q) use ($userFilter) {
+                    $q->where('approved_by', (int) $userFilter)->orWhere('updated_by', (int) $userFilter);
+                });
+            }
+
+            if ($transactionType === 'revenue') {
+                $trxQuery->where('transaction_type', 'revenue');
+            } elseif ($transactionType === 'expense') {
+                $trxQuery->where('transaction_type', 'expense');
+            }
+
+            if (! empty($search)) {
+                $trxQuery->where(function ($q) use ($search) {
+                    $q->where('title', 'like', "%{$search}%")
+                        ->orWhere('notes', 'like', "%{$search}%");
+                });
+            }
+
+            $transactions = $trxQuery->get();
+
+            foreach ($transactions as $trx) {
+                $isRev = $trx->transaction_type === 'revenue';
+                $cat = $isRev ? 'revenue' : 'expense';
+                $debit = $isRev ? (float) $trx->total_amount : 0.0;
+                $credit = $isRev ? 0.0 : (float) $trx->total_amount;
+                $refNo = 'TRX-'.($isRev ? 'REV-' : 'EXP-').str_pad((string) $trx->id, 5, '0', STR_PAD_LEFT);
+                $desc = ($isRev ? 'إيراد: ' : 'مصروف: ').($trx->title ?: ($isRev ? 'إيراد تشغيلي' : 'مصروف عام'));
+
+                $items->push([
+                    'id' => 'trx_'.$trx->id,
+                    'raw_id' => $trx->id,
+                    'type_group' => 'company_transaction',
+                    'ref_no' => $refNo,
+                    'description' => $desc,
+                    'category' => $cat,
+                    'category_label' => __('reports.cash_register_report.categories.'.$cat),
+                    'payment_mode' => 'cash',
+                    'payment_mode_label' => __('reports.cash_register_report.methods.cash'),
+                    'transaction_date' => Carbon::parse($trx->transaction_date)->format('Y-m-d').' 12:00',
+                    'timestamp' => Carbon::parse($trx->transaction_date)->timestamp,
+                    'debit' => $debit,
+                    'credit' => $credit,
+                    'user_id' => $trx->approved_by ?? $trx->updated_by,
+                    'user_name' => 'المشرف المالي',
+                    'user_photo' => null,
+                    'center_id' => $trx->center_id,
+                    'center_name' => $trx->center?->name ?? 'المركز الرئيسي',
+                ]);
+            }
+        }
+
+        return $items;
     }
 }
