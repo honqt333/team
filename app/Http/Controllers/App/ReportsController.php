@@ -5270,21 +5270,59 @@ class ReportsController extends Controller
             'profit' => 0.0,
         ];
 
+        $targetCenters->load('address');
+        $tenant = auth()->user()->tenant;
+
         foreach ($targetCenters as $c) {
             $statement = $this->computeCenterFinancialStatement($tenantId, (int) $c->id, $from, $to, $storeSalesOnly);
+
+            $addr = $c->address;
+            $addressParts = [];
+
+            if ($addr) {
+                if (! empty($addr->city)) {
+                    $addressParts[] = $addr->city;
+                }
+
+                if (! empty($addr->district)) {
+                    $addressParts[] = 'حي '.$addr->district;
+                }
+
+                if (! empty($addr->street)) {
+                    $addressParts[] = 'شارع '.$addr->street;
+                }
+
+                if (! empty($addr->building_number)) {
+                    $addressParts[] = 'مبنى '.$addr->building_number;
+                }
+
+                if (! empty($addr->address_line)) {
+                    $addressParts[] = $addr->address_line;
+                }
+            }
+            $formattedAddress = implode('، ', $addressParts);
+
             $results[] = [
                 'shop' => [
                     'id' => $c->id,
                     'name' => $c->name,
-                    'address' => $c->address ?? '',
-                    'postalCode' => $c->postal_code ?? '',
-                    'city' => $c->city ?? '',
-                    'region' => $c->region ?? '',
-                    'country' => 'SA',
+                    'address' => $formattedAddress,
+                    'address_details' => $addr ? [
+                        'city' => $addr->city,
+                        'district' => $addr->district,
+                        'street' => $addr->street,
+                        'building_number' => $addr->building_number,
+                        'postal_code' => $addr->postal_code,
+                    ] : null,
+                    'postalCode' => $addr?->postal_code ?? '',
+                    'city' => $addr?->city ?? '',
+                    'district' => $addr?->district ?? '',
+                    'region' => $addr?->city ?? '',
+                    'country' => 'المملكة العربية السعودية',
                     'isWorkShop' => true,
-                    'commercial_register' => $c->cr_number ?? '',
-                    'vat_number' => $c->vat_number ?? '',
-                    'phone' => $c->phone ?? '',
+                    'commercial_register' => $c->license_number ?: ($tenant->cr_number ?? ''),
+                    'vat_number' => $c->vat_number ?: ($tenant->vat_number ?? ''),
+                    'phone' => $c->phone ?: ($tenant->phone ?? ''),
                 ],
                 'shopFinancialSummary' => $statement,
             ];
@@ -5295,8 +5333,6 @@ class ReportsController extends Controller
                 }
             }
         }
-
-        $tenant = auth()->user()->tenant;
 
         return Inertia::render('Reports/FinancialSummary', [
             'filters' => [

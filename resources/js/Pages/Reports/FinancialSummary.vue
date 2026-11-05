@@ -963,7 +963,7 @@
                                 class="mt-1 flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400 flex-wrap"
                             >
                                 <span
-                                    v-if="item.shop.address"
+                                    v-if="formatShopAddress(item.shop)"
                                     class="inline-flex items-center gap-1"
                                 >
                                     <svg
@@ -985,7 +985,7 @@
                                             d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
                                         />
                                     </svg>
-                                    {{ item.shop.address }}
+                                    {{ formatShopAddress(item.shop) }}
                                 </span>
                                 <span v-if="item.shop.vat_number" class="font-mono">
                                     {{ $t('reports.financial_summary_report.vat_amount') }}:
@@ -2039,6 +2039,25 @@ const handlePrint = () => {
 
 const formatCurrency = (val) => {
     return printFormatCurrency(Number(val) || 0);
+};
+
+const formatShopAddress = (shop) => {
+    if (!shop) return '';
+    if (typeof shop.address === 'string' && shop.address.trim()) {
+        return shop.address;
+    }
+    const addr = shop.address_details || (typeof shop.address === 'object' ? shop.address : null);
+    if (addr) {
+        const parts = [];
+        if (addr.city) parts.push(addr.city);
+        if (addr.district) parts.push('حي ' + addr.district);
+        if (addr.street) parts.push('شارع ' + addr.street);
+        if (addr.building_number) parts.push('مبنى ' + addr.building_number);
+        if (addr.address_line) parts.push(addr.address_line);
+        if (parts.length > 0) return parts.join('، ');
+    }
+    const fallback = [shop.city, shop.district, shop.postalCode].filter(Boolean);
+    return fallback.join('، ');
 };
 
 // Filter State
