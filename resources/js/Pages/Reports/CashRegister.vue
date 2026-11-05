@@ -794,6 +794,7 @@ const methodOptions = computed(() => [
     { value: 'mada', label: t('reports.cash_register_report.methods.mada') },
     { value: 'visa', label: t('reports.cash_register_report.methods.visa') },
     { value: 'transfer', label: t('reports.cash_register_report.methods.transfer') },
+    { value: 'credit', label: t('reports.cash_register_report.methods.credit') },
     { value: 'cheque', label: t('reports.cash_register_report.methods.cheque') },
     { value: 'apple_pay', label: t('reports.cash_register_report.methods.apple_pay') },
     { value: 'stc_pay', label: t('reports.cash_register_report.methods.stc_pay') },

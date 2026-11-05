@@ -4197,8 +4197,8 @@
             "methods": {
                 "cash": "Cash",
                 "mada": "Mada",
-                "visa": "Visa / Mastercard",
-                "mastercard": "Mastercard",
+                "visa": "Visa / MasterCard",
+                "mastercard": "MasterCard",
                 "transfer": "Bank Transfer",
                 "bank_transfer": "Bank Transfer",
                 "cheque": "Cheque",
@@ -4207,7 +4207,10 @@
                 "stc_pay": "STC Pay",
                 "tabby": "Tabby",
                 "tamara": "Tamara",
-                "other": "Other"
+                "other": "Other",
+                "credit": "Credit (On Account)",
+                "card": "Card",
+                "debit_note": "Debit Note"
             },
             "last_7_days": "Last 7 Days",
             "last_month": "Last Month",
