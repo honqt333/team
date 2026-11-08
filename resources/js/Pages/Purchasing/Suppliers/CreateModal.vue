@@ -7,7 +7,7 @@
         <template #content>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <!-- Type -->
-                <div class="md:col-span-2">
+                <div class="md:col-span-2" data-field="type">
                     <SearchableSelect
                         v-model="form.type"
                         :options="supplierTypeOptions"
@@ -26,6 +26,7 @@
                         <span class="text-red-500">*</span>
                     </label>
                     <input
+                        name="name"
                         v-model="form.name"
                         type="text"
                         :class="[
@@ -49,6 +50,7 @@
                         <span class="text-red-500">*</span>
                     </label>
                     <input
+                        name="contact_person"
                         v-model="form.contact_person"
                         type="text"
                         :class="[
@@ -70,14 +72,16 @@
                     >
                         {{ $t('purchasing.suppliers.phone') }}
                     </label>
-                    <vue-tel-input
-                        v-model="form.phone"
-                        @on-input="(value) => onPhoneInput('phone', value)"
-                        :inputOptions="{ placeholder: '05xxxxxxxx' }"
-                        mode="international"
-                        :validCharactersOnly="false"
-                        class="w-full text-sm rounded-xl bg-white dark:bg-gray-900 border-gray-300 dark:border-gray-600 focus-within:ring-2 focus-within:ring-indigo-500 focus-within:border-transparent transition-all ltr"
-                    ></vue-tel-input>
+                    <div data-field="phone">
+                        <vue-tel-input
+                            v-model="form.phone"
+                            @on-input="(value) => onPhoneInput('phone', value)"
+                            :inputOptions="{ placeholder: '05xxxxxxxx' }"
+                            mode="international"
+                            :validCharactersOnly="false"
+                            class="w-full text-sm rounded-xl bg-white dark:bg-gray-900 border-gray-300 dark:border-gray-600 focus-within:ring-2 focus-within:ring-indigo-500 focus-within:border-transparent transition-all ltr"
+                        ></vue-tel-input>
+                    </div>
                     <p
                         v-if="form.errors.phone"
                         class="mt-1.5 text-sm text-red-600 dark:text-red-400"
@@ -104,14 +108,16 @@
                             {{ $t('customers.form.copy_from_phone') }}
                         </button>
                     </div>
-                    <vue-tel-input
-                        v-model="form.whatsapp"
-                        @on-input="(value) => onPhoneInput('whatsapp', value)"
-                        :inputOptions="{ placeholder: '05xxxxxxxx' }"
-                        mode="international"
-                        :validCharactersOnly="false"
-                        class="w-full text-sm rounded-xl bg-white dark:bg-gray-900 border-gray-300 dark:border-gray-600 focus-within:ring-2 focus-within:ring-indigo-500 focus-within:border-transparent transition-all ltr"
-                    ></vue-tel-input>
+                    <div data-field="whatsapp">
+                        <vue-tel-input
+                            v-model="form.whatsapp"
+                            @on-input="(value) => onPhoneInput('whatsapp', value)"
+                            :inputOptions="{ placeholder: '05xxxxxxxx' }"
+                            mode="international"
+                            :validCharactersOnly="false"
+                            class="w-full text-sm rounded-xl bg-white dark:bg-gray-900 border-gray-300 dark:border-gray-600 focus-within:ring-2 focus-within:ring-indigo-500 focus-within:border-transparent transition-all ltr"
+                        ></vue-tel-input>
+                    </div>
                     <p
                         v-if="form.errors.whatsapp"
                         class="mt-1.5 text-sm text-red-600 dark:text-red-400"
@@ -128,6 +134,7 @@
                         {{ $t('purchasing.suppliers.tax_number') }}
                     </label>
                     <input
+                        name="tax_number"
                         v-model="form.tax_number"
                         type="text"
                         dir="ltr"
@@ -152,6 +159,7 @@
                         {{ $t('purchasing.suppliers.cr_number') }}
                     </label>
                     <input
+                        name="cr_number"
                         v-model="form.cr_number"
                         type="text"
                         dir="ltr"
@@ -170,6 +178,7 @@
                         {{ $t('purchasing.suppliers.email') }}
                     </label>
                     <input
+                        name="email"
                         v-model="form.email"
                         type="email"
                         dir="ltr"
@@ -282,6 +291,7 @@
                                     {{ $t('purchasing.suppliers.address_line') }}
                                 </label>
                                 <textarea
+                                    name="address"
                                     v-model="form.address"
                                     rows="2"
                                     class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 shadow-sm transition-all resize-none placeholder-gray-400 dark:placeholder-gray-600"
@@ -297,6 +307,7 @@
                                         {{ $t('purchasing.suppliers.building_number') }}
                                     </label>
                                     <input
+                                        name="building_number"
                                         v-model="form.building_number"
                                         type="text"
                                         class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 shadow-sm transition-all"
@@ -309,6 +320,7 @@
                                         {{ $t('purchasing.suppliers.postal_code') }}
                                     </label>
                                     <input
+                                        name="postal_code"
                                         v-model="form.postal_code"
                                         type="text"
                                         class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 shadow-sm transition-all"
@@ -321,6 +333,7 @@
                                         {{ $t('purchasing.suppliers.district') }}
                                     </label>
                                     <input
+                                        name="district"
                                         v-model="form.district"
                                         type="text"
                                         class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 shadow-sm transition-all"
@@ -337,6 +350,7 @@
                                         {{ $t('purchasing.suppliers.city') }}
                                     </label>
                                     <input
+                                        name="city"
                                         v-model="form.city"
                                         type="text"
                                         class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 shadow-sm transition-all"
@@ -349,6 +363,7 @@
                                         {{ $t('purchasing.suppliers.region') }}
                                     </label>
                                     <input
+                                        name="region"
                                         v-model="form.region"
                                         type="text"
                                         class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 shadow-sm transition-all"
@@ -361,6 +376,7 @@
                                         {{ $t('purchasing.suppliers.country') }}
                                     </label>
                                     <input
+                                        name="country"
                                         v-model="form.country"
                                         type="text"
                                         class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 shadow-sm transition-all"
@@ -386,6 +402,7 @@
                         {{ $t('purchasing.suppliers.bank_name') }}
                     </label>
                     <input
+                        name="bank_name"
                         v-model="form.bank_name"
                         type="text"
                         class="w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500/20 dark:focus:ring-indigo-500/20 focus:border-indigo-500 dark:focus:border-indigo-500 shadow-sm transition-all placeholder-gray-400 dark:placeholder-gray-600"
@@ -400,6 +417,7 @@
                         {{ $t('purchasing.suppliers.iban') }}
                     </label>
                     <input
+                        name="iban"
                         v-model="form.iban"
                         type="text"
                         dir="ltr"
@@ -416,6 +434,7 @@
                         {{ $t('common.notes') }}
                     </label>
                     <textarea
+                        name="notes"
                         v-model="form.notes"
                         rows="2"
                         class="w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500/20 dark:focus:ring-indigo-500/20 focus:border-indigo-500 dark:focus:border-indigo-500 shadow-sm transition-all resize-none placeholder-gray-400 dark:placeholder-gray-600"
@@ -452,17 +471,38 @@
         </template>
 
         <template #footer>
-            <SecondaryButton @click="handleClose">
-                {{ $t('common.cancel') }}
-            </SecondaryButton>
-            <AppButton
-                variant="action-xl"
-                @click="submit"
-                :disabled="form.processing"
-                :loading="form.processing"
-            >
-                {{ $t('common.save') }}
-            </AppButton>
+            <div class="flex items-center justify-between w-full">
+                <div>
+                    <span
+                        v-if="Object.keys(form.errors).length > 0"
+                        class="text-xs text-red-500 font-medium inline-flex items-center gap-1.5"
+                    >
+                        <svg class="w-4 h-4 shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                            <path
+                                fill-rule="evenodd"
+                                d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                                clip-rule="evenodd"
+                            />
+                        </svg>
+                        {{
+                            $t('common.form_has_errors', { count: Object.keys(form.errors).length })
+                        }}
+                    </span>
+                </div>
+                <div class="flex items-center gap-3">
+                    <SecondaryButton @click="handleClose">
+                        {{ $t('common.cancel') }}
+                    </SecondaryButton>
+                    <AppButton
+                        variant="action-xl"
+                        @click="submit"
+                        :disabled="form.processing"
+                        :loading="form.processing"
+                    >
+                        {{ $t('common.save') }}
+                    </AppButton>
+                </div>
+            </div>
         </template>
     </DialogModal>
 </template>
@@ -474,6 +514,7 @@ import SearchableSelect from '@/Components/SearchableSelect.vue';
 import { ref, watch, nextTick, onUnmounted, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useConfirm } from '@/Composables/useConfirm';
+import { useFormScrollToError } from '@/Composables/useFormScrollToError';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import AppButton from '@/Components/App/AppButton.vue';
@@ -495,6 +536,7 @@ const props = defineProps({
 const emit = defineEmits(['close', 'saved']);
 const { locale, t } = useI18n();
 const { confirm } = useConfirm();
+const { scrollToError } = useFormScrollToError();
 
 const supplierTypeOptions = computed(() => [
     { id: 'parts', name: t('purchasing.suppliers.type_parts') },
@@ -940,6 +982,7 @@ const submit = () => {
         form.put(route('app.purchasing.suppliers.update', form.id), {
             preserveScroll: true,
             onSuccess: () => close(),
+            onError: (errors) => scrollToError(errors),
         });
     } else {
         form.post(route('app.purchasing.suppliers.store'), {
@@ -948,6 +991,7 @@ const submit = () => {
                 emit('saved', page.props.flash?.data || form.data());
                 close();
             },
+            onError: (errors) => scrollToError(errors),
         });
     }
 };
