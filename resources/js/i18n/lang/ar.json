@@ -5524,7 +5524,8 @@
             "backups": "النسخ الاحتياطية",
             "feedbacks_support": "البلاغات ومكتب الدعم",
             "activity_log": "سجل النشاط",
-            "system_settings": "إعدادات المنظومة"
+            "system_settings": "إعدادات المنظومة",
+            "support_hub": "مكتب الدعم والرسائل"
         },
         "notifications": {
             "title": "الإشعارات",
@@ -7168,6 +7169,15 @@
         "security": {
             "system_2fa_challenge": "التحقق بخطوتين - لوحة النظام",
             "two-factor_authentication": "التحقق بخطوتين"
+        },
+        "support": {
+            "hub_title": "مكتب الدعم والرسائل",
+            "hub_subtitle": "إدارة بلاغات الورش، طلبات الدعم، رسائل زوار الموقع، ومحتوى مركز المساعدة",
+            "tabs": {
+                "feedbacks": "البلاغات والدعم الفني",
+                "contact_messages": "رسائل الزوار",
+                "help": "مركز المساعدة والشروحات"
+            }
         }
     },
     "subscription": {

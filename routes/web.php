@@ -131,6 +131,7 @@ use App\Http\Controllers\System\PromoCodesController;
 use App\Http\Controllers\System\SmsCreditsController;
 use App\Http\Controllers\System\SubscriptionInvoicesController;
 use App\Http\Controllers\System\SubscriptionsController;
+use App\Http\Controllers\System\SupportHubController;
 use App\Http\Controllers\System\SystemDashboardController;
 use App\Http\Controllers\System\SystemSettingsHubController;
 use App\Http\Controllers\System\TenantsController;
@@ -1347,14 +1348,17 @@ Route::prefix('system')->middleware(['auth:web,admin', 'system.admin'])->group(f
     Route::post('/settings/help/fetch-video-meta', [HelpSettingsController::class, 'fetchVideoMeta'])->name('system.settings.help.fetch_video_meta')->middleware('system.permission:system.settings.manage');
     Route::get('/help', fn () => redirect()->route('system.settings.help'))->name('system.help')->middleware('system.permission:system.settings.manage');
 
+    // Support & Feedback Hub
+    Route::get('/support', [SupportHubController::class, 'index'])->name('system.support.index')->middleware('system.permission:system.feedbacks.manage');
+
     // Contact Messages
-    Route::get('/settings/contact-messages', [ContactMessageController::class, 'index'])->name('system.contact_messages.index')->middleware('system.permission:system.contact_messages.manage');
+    Route::get('/settings/contact-messages', fn () => redirect()->route('system.support.index', ['tab' => 'contact_messages']))->name('system.contact_messages.index')->middleware('system.permission:system.contact_messages.manage');
     Route::put('/settings/contact-messages/{contactMessage}/read', [ContactMessageController::class, 'markAsRead'])->name('system.contact_messages.read')->middleware('system.permission:system.contact_messages.manage');
     Route::delete('/settings/contact-messages/{contactMessage}', [ContactMessageController::class, 'destroy'])->name('system.contact_messages.destroy')->middleware('system.permission:system.contact_messages.manage');
 
     // Feedbacks & Support Desk
     Route::prefix('settings/feedbacks')->name('system.feedbacks.')->group(function () {
-        Route::get('/', [FeedbackManagementController::class, 'index'])->name('index')
+        Route::get('/', fn () => redirect()->route('system.support.index', ['tab' => 'feedbacks']))->name('index')
             ->middleware('system.permission:system.feedbacks.manage');
         Route::post('/{feedback}/reply', [FeedbackManagementController::class, 'reply'])->name('reply')
             ->middleware('system.permission:system.feedbacks.manage');
@@ -1363,8 +1367,8 @@ Route::prefix('system')->middleware(['auth:web,admin', 'system.admin'])->group(f
         Route::delete('/{feedback}', [FeedbackManagementController::class, 'destroy'])->name('destroy')
             ->middleware('system.permission:system.feedbacks.manage');
     });
-    Route::get('/feedbacks', fn () => redirect()->route('system.feedbacks.index'))->name('system.feedback.redirect')->middleware('system.permission:system.feedbacks.manage');
-    Route::get('/feedback', fn () => redirect()->route('system.feedbacks.index'))->name('system.feedback.shortcut')->middleware('system.permission:system.feedbacks.manage');
+    Route::get('/feedbacks', fn () => redirect()->route('system.support.index', ['tab' => 'feedbacks']))->name('system.feedback.redirect')->middleware('system.permission:system.feedbacks.manage');
+    Route::get('/feedback', fn () => redirect()->route('system.support.index', ['tab' => 'feedbacks']))->name('system.feedback.shortcut')->middleware('system.permission:system.feedbacks.manage');
 
     // Subscription Invoices
     Route::get('/invoices', [SubscriptionInvoicesController::class, 'index'])->name('system.invoices.index')->middleware('system.permission:system.invoices.view');

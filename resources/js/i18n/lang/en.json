@@ -5524,7 +5524,8 @@
             "backups": "Backups",
             "feedbacks_support": "Feedbacks & Support",
             "activity_log": "Activity Log",
-            "system_settings": "System Settings"
+            "system_settings": "System Settings",
+            "support_hub": "Support & Messages"
         },
         "notifications": {
             "title": "Notifications",
@@ -7168,6 +7169,15 @@
         "security": {
             "system_2fa_challenge": "System 2FA Challenge",
             "two-factor_authentication": "Two-Factor Authentication"
+        },
+        "support": {
+            "hub_title": "Support & Messages",
+            "hub_subtitle": "Manage workshop feedbacks, support inquiries, contact form messages, and help center content",
+            "tabs": {
+                "feedbacks": "Feedbacks & Support",
+                "contact_messages": "Contact Messages",
+                "help": "Help Center"
+            }
         }
     },
     "subscription": {

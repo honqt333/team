@@ -29,20 +29,10 @@ export const systemNavGroups = [
         label: 'support',
         items: [
             {
-                href: '/system/settings/feedbacks',
-                label: 'feedbacks_support',
-                icon: 'M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z',
-            },
-            {
-                href: '/system/settings/help',
-                label: 'help_center',
-                icon: 'M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z',
-            },
-            {
-                href: '/system/settings/contact-messages',
-                label: 'contact_messages',
+                href: '/system/support',
+                label: 'support_hub',
                 showBadge: 'unread_contact_messages_count',
-                icon: 'M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z',
+                icon: 'M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z',
             },
         ],
     },
