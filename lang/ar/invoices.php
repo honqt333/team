@@ -102,6 +102,7 @@ return [
     'received_items' => 'الأصناف المستلمة',
     'received_qty' => 'الكمية المستلمة',
     'refund_amount' => 'مبلغ الاسترجاع',
+    'refund_exceeds_net_due' => 'مبلغ الاسترداد المالي لا يمكن أن يتجاوز القيمة المستحقة للإشعار الدائن.',
     'refund_and_totals' => 'الاسترجاع والإجمالي',
     'refund_desc' => 'وصف الاسترجاع',
     'refund_details' => 'تفاصيل الاسترجاع',

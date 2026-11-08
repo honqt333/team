@@ -916,4 +916,74 @@ class WorkOrderCreditNoteTest extends TestCase
 
         $res3->assertForbidden();
     }
+
+    public function test_cannot_refund_more_than_net_refund_due_during_credit_note_creation(): void
+    {
+        $ctx = $this->createTenantContext();
+
+        $wo = WorkOrder::create([
+            'tenant_id' => $ctx['tenant']->id,
+            'center_id' => $ctx['center']->id,
+            'customer_id' => $ctx['customer']->id,
+            'vehicle_id' => $ctx['vehicle']->id,
+            'code' => 'WO-REFUND-CAP-01',
+            'status' => 'done',
+            'tax_enabled_snapshot' => true,
+            'pricing_mode_snapshot' => 'exclusive',
+            'tax_rate_snapshot' => 15.00,
+        ]);
+
+        $svc = WorkOrderItem::create([
+            'tenant_id' => $ctx['tenant']->id,
+            'center_id' => $ctx['center']->id,
+            'work_order_id' => $wo->id,
+            'title' => 'Brake Pad Replacement Service',
+            'status' => 'completed',
+            'qty' => 1,
+            'unit_price' => 100.00,
+            'line_total' => 100.00,
+            'total' => 115.00,
+            'tax_amount' => 15.00,
+            'line_total_excl_tax' => 100.00,
+            'line_total_incl_tax' => 115.00,
+        ]);
+
+        $invoice = Invoice::create([
+            'tenant_id' => $ctx['tenant']->id,
+            'center_id' => $ctx['center']->id,
+            'customer_id' => $ctx['customer']->id,
+            'work_order_id' => $wo->id,
+            'invoice_number' => 'INV-CAP-0001',
+            'type' => 'invoice',
+            'status' => 'valid',
+            'issue_date' => now(),
+            'supply_date' => now(),
+            'total_excl_tax' => 100.00,
+            'total_tax' => 15.00,
+            'total_incl_tax' => 115.00,
+            'total_paid' => 115.00,
+            'payment_status' => 'paid',
+            'tax_enabled_snapshot' => true,
+            'pricing_mode_snapshot' => 'exclusive',
+            'tax_rate_snapshot' => 15.00,
+        ]);
+
+        // Trying to refund 250.00 when net refund due is 115.00
+        $res = $this->actingAs($ctx['user'])
+            ->postJson(route('app.work-orders.credit-note.store', $wo->id), [
+                'services' => [
+                    ['id' => $svc->id, 'return_amount' => 100.00],
+                ],
+                'parts' => [],
+                'refund_payment' => [
+                    'amount' => 250.00,
+                    'payment_method' => 'cash',
+                ],
+            ]);
+
+        $res->assertUnprocessable();
+        $res->assertJsonFragment([
+            'message' => __('invoices.refund_exceeds_net_due'),
+        ]);
+    }
 }

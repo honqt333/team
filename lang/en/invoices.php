@@ -102,6 +102,7 @@ return [
     'received_items' => 'Received Items',
     'received_qty' => 'Received Qty',
     'refund_amount' => 'Refund Amount',
+    'refund_exceeds_net_due' => 'The refund payment amount cannot exceed the net refund due for this credit note.',
     'refund_and_totals' => 'Refund And Totals',
     'refund_desc' => 'Refund Desc',
     'refund_details' => 'Refund Details',

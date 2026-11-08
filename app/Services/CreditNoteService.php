@@ -460,6 +460,10 @@ class CreditNoteService
             $hasRefundPayment = $refundPayment && ! empty($refundPayment['amount']) && (float) $refundPayment['amount'] > 0;
             $hasDirectRefund = ! empty($data['record_refund']) && $netRefundDue > 0;
 
+            if ($hasRefundPayment && (float) $refundPayment['amount'] > ($netRefundDue + 0.001)) {
+                throw new InvalidArgumentException(__('invoices.refund_exceeds_net_due'));
+            }
+
             if ($hasRefundPayment || $hasDirectRefund) {
                 $paymentAmount = $hasRefundPayment ? (float) $refundPayment['amount'] : $netRefundDue;
                 $paymentMethod = $hasRefundPayment ? ($refundPayment['payment_method'] ?? 'cash') : ($data['refund_payment_method'] ?? 'cash');
@@ -916,6 +920,10 @@ class CreditNoteService
             $refundPayment = $data['refund_payment'] ?? null;
             $hasRefundPayment = $refundPayment && ! empty($refundPayment['amount']) && (float) $refundPayment['amount'] > 0;
             $hasDirectRefund = ! empty($data['record_refund']) && $netRefundDue > 0;
+
+            if ($hasRefundPayment && (float) $refundPayment['amount'] > ($netRefundDue + 0.001)) {
+                throw new InvalidArgumentException(__('invoices.refund_exceeds_net_due'));
+            }
 
             if ($hasRefundPayment || $hasDirectRefund) {
                 $paymentAmount = $hasRefundPayment ? (float) $refundPayment['amount'] : $netRefundDue;
