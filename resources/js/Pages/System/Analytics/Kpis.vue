@@ -113,8 +113,62 @@
                     <h2 class="text-sm font-bold uppercase tracking-wider text-gray-500">
                         {{ $t('system.analytics.best_plans') }}
                     </h2>
-                    <div v-if="!topPlans.length" class="mt-6 text-center text-sm text-gray-500">
-                        —
+                    <div
+                        v-if="!topPlans.length"
+                        class="mt-4 flex flex-col items-center justify-center p-6 text-center rounded-xl bg-gray-50/60 dark:bg-gray-700/30 border border-dashed border-gray-200 dark:border-gray-700"
+                    >
+                        <div
+                            class="w-10 h-10 rounded-full bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 flex items-center justify-center mb-2"
+                        >
+                            <svg
+                                class="w-5 h-5"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
+                                />
+                            </svg>
+                        </div>
+                        <p class="text-xs font-semibold text-gray-700 dark:text-gray-200">
+                            {{
+                                locale === 'ar'
+                                    ? 'لا توجد باقات نشطة حالياً'
+                                    : 'No active plans found'
+                            }}
+                        </p>
+                        <p class="text-[11px] text-gray-500 dark:text-gray-400 mt-0.5 max-w-xs">
+                            {{
+                                locale === 'ar'
+                                    ? 'أضف باقات اشتراك لعرض ترتيبها هنا'
+                                    : 'Create plans to track their subscriber counts'
+                            }}
+                        </p>
+                        <Link
+                            :href="route('system.plans.index')"
+                            class="mt-3 inline-flex items-center gap-1.5 text-xs font-medium text-indigo-600 dark:text-indigo-400 hover:underline"
+                        >
+                            <span>
+                                {{ locale === 'ar' ? 'إدارة باقات الاشتراك' : 'Manage Plans' }}
+                            </span>
+                            <svg
+                                class="w-3.5 h-3.5 rtl:rotate-180"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M9 5l7 7-7 7"
+                                />
+                            </svg>
+                        </Link>
                     </div>
                     <ul v-else class="mt-4 space-y-2">
                         <li
@@ -155,8 +209,41 @@
                     <h2 class="text-sm font-bold uppercase tracking-wider text-gray-500">
                         {{ $t('system.analytics.payment_methods_distribution') }}
                     </h2>
-                    <div v-if="!paymentMix.length" class="mt-6 text-center text-sm text-gray-500">
-                        —
+                    <div
+                        v-if="!paymentMix.length"
+                        class="mt-4 flex flex-col items-center justify-center p-6 text-center rounded-xl bg-gray-50/60 dark:bg-gray-700/30 border border-dashed border-gray-200 dark:border-gray-700"
+                    >
+                        <div
+                            class="w-10 h-10 rounded-full bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 flex items-center justify-center mb-2"
+                        >
+                            <svg
+                                class="w-5 h-5"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"
+                                />
+                            </svg>
+                        </div>
+                        <p class="text-xs font-semibold text-gray-700 dark:text-gray-200">
+                            {{
+                                locale === 'ar'
+                                    ? 'لا توجد عمليات دفع مسجلة بعد'
+                                    : 'No payment data yet'
+                            }}
+                        </p>
+                        <p class="text-[11px] text-gray-500 dark:text-gray-400 mt-0.5 max-w-xs">
+                            {{
+                                locale === 'ar'
+                                    ? 'ستظهر حصص بوابات الدفع تلقائياً عند سداد الاشتراكات'
+                                    : 'Payment breakdown will appear as tenants pay invoices'
+                            }}
+                        </p>
                     </div>
                     <ul v-else class="mt-4 space-y-3">
                         <li v-for="row in paymentMix" :key="row.gateway" class="space-y-1">
@@ -188,7 +275,7 @@ import { useI18n } from 'vue-i18n';
 const { t } = useI18n();
 
 import { computed, onMounted, ref } from 'vue';
-import { Head } from '@inertiajs/vue3';
+import { Head, Link } from '@inertiajs/vue3';
 import SystemLayout from '@/Layouts/SystemLayout.vue';
 import PageHeader from '@/Components/PageHeader.vue';
 import KpiCard from '@/Components/System/KpiCard.vue';

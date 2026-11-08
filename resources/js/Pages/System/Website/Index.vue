@@ -505,6 +505,72 @@ watch(
                         <PreviewPane :settings="form.settings" />
                     </div>
                 </div>
+
+                <!-- Sticky Bottom Action Bar for Easy Saving -->
+                <div
+                    class="sticky bottom-0 z-30 -mx-4 sm:-mx-6 px-4 sm:px-6 py-3.5 bg-white/95 dark:bg-gray-800/95 backdrop-blur-md border-t border-gray-200 dark:border-gray-700 shadow-lg flex items-center justify-between transition-all rounded-b-2xl"
+                >
+                    <div class="flex items-center gap-2.5 text-xs text-gray-500 dark:text-gray-400">
+                        <span
+                            class="inline-block w-2 h-2 rounded-full bg-emerald-500 animate-pulse"
+                        ></span>
+                        <span>
+                            {{
+                                t('system.website.save_all_hint') ||
+                                'يتم حفظ كافة التبويبات والإعدادات معاً بنقرة واحدة'
+                            }}
+                        </span>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <button
+                            type="button"
+                            @click="submit"
+                            :disabled="form.processing"
+                            class="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white rounded-xl text-sm font-semibold transition-all shadow-md hover:shadow-indigo-500/25 active:scale-95 disabled:opacity-50"
+                        >
+                            <svg
+                                v-if="!form.processing"
+                                class="w-4 h-4"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M5 13l4 4L19 7"
+                                />
+                            </svg>
+                            <svg
+                                v-else
+                                class="w-4 h-4 animate-spin"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <circle
+                                    class="opacity-25"
+                                    cx="12"
+                                    cy="12"
+                                    r="10"
+                                    stroke="currentColor"
+                                    stroke-width="4"
+                                />
+                                <path
+                                    class="opacity-75"
+                                    fill="currentColor"
+                                    d="M4 12a8 8 0 018-8v8H4z"
+                                />
+                            </svg>
+                            <span>
+                                {{
+                                    form.processing ? t('common.saving') : t('system.website.save')
+                                }}
+                            </span>
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
     </SystemLayout>
