@@ -38,13 +38,19 @@
                 :key="tab.id"
                 @click="activeTab = tab.id"
                 :class="[
-                    'flex-1 py-2.5 px-4 text-sm font-bold rounded-xl transition-all duration-300 whitespace-nowrap flex items-center justify-center gap-2',
+                    'relative flex-1 py-2.5 px-4 text-sm font-bold rounded-xl transition-all duration-300 whitespace-nowrap flex items-center justify-center gap-2',
                     activeTab === tab.id
                         ? 'bg-white dark:bg-gray-700 text-indigo-600 dark:text-indigo-400 shadow-sm'
                         : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 hover:bg-gray-200/50 dark:hover:bg-gray-700/50',
                 ]"
             >
                 {{ tab.name }}
+                <span
+                    v-if="tabErrorCount[tab.id] > 0"
+                    class="inline-flex items-center justify-center min-w-[16px] h-4 px-1 text-[10px] font-bold text-white bg-red-500 rounded-full"
+                >
+                    {{ tabErrorCount[tab.id] }}
+                </span>
                 <span
                     v-if="tab.id === 'parts' && (linkedParts.length > 0 || pendingParts.length > 0)"
                     class="ms-2 px-2 py-0.5 text-xs rounded-full bg-gray-100 dark:bg-gray-800"
@@ -76,7 +82,7 @@
                 <form @submit.prevent="submitForm" class="space-y-4">
                     <!-- Service Select (Read-only for edit, editable for add) and Description -->
                     <div class="space-y-4">
-                        <div>
+                        <div data-field="service_id">
                             <label
                                 class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
                             >
@@ -85,6 +91,8 @@
                             <SearchableSelect
                                 v-if="!item && !isReadOnly"
                                 v-model="form.service_id"
+                                name="service_id"
+                                data-field="service_id"
                                 :options="serviceOptions"
                                 option-label="label"
                                 option-value="value"
@@ -249,16 +257,11 @@
                                     >
                                         {{ $t('services_management.apply_warranty_to_service') }}
                                     </span>
-                                    <label class="relative inline-flex items-center cursor-pointer">
-                                        <input
-                                            type="checkbox"
-                                            v-model="form.is_warranty"
-                                            class="sr-only peer"
-                                        />
-                                        <div
-                                            class="w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-600 peer-checked:bg-emerald-600"
-                                        ></div>
-                                    </label>
+                                    <AppToggle
+                                        v-model="form.is_warranty"
+                                        size="sm"
+                                        color="success"
+                                    />
                                 </div>
                             </div>
 
@@ -332,7 +335,7 @@
                         </div>
 
                         <!-- Description/Title -->
-                        <div>
+                        <div data-field="title">
                             <label
                                 class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
                             >
@@ -340,6 +343,8 @@
                             </label>
                             <textarea
                                 v-model="form.title"
+                                name="title"
+                                data-field="title"
                                 rows="2"
                                 :disabled="isDescriptionDisabled || isReadOnly"
                                 class="w-full px-4 py-2.5 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 resize-none text-sm disabled:bg-gray-100 disabled:text-gray-500 disabled:cursor-not-allowed dark:disabled:bg-gray-900"
@@ -355,7 +360,7 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <!-- Service Duration -->
                         <div class="grid grid-cols-2 gap-2">
-                            <div>
+                            <div data-field="duration_value">
                                 <label
                                     class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
                                 >
@@ -364,6 +369,8 @@
                                 <input
                                     type="number"
                                     v-model="form.duration_value"
+                                    name="duration_value"
+                                    data-field="duration_value"
                                     :disabled="isDurationDisabled || isReadOnly"
                                     class="w-full px-4 py-2.5 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 text-sm disabled:bg-gray-100 disabled:text-gray-500 disabled:cursor-not-allowed dark:disabled:bg-gray-900"
                                 />
@@ -374,7 +381,7 @@
                                     {{ form.errors.duration_value }}
                                 </p>
                             </div>
-                            <div>
+                            <div data-field="duration_unit">
                                 <label
                                     class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
                                 >
@@ -382,6 +389,8 @@
                                 </label>
                                 <SearchableSelect
                                     v-model="form.duration_unit"
+                                    name="duration_unit"
+                                    data-field="duration_unit"
                                     :options="durationUnitOptions"
                                     option-label="label"
                                     option-value="value"
@@ -393,7 +402,7 @@
 
                         <!-- Service Warranty -->
                         <div v-if="!form.is_warranty" class="grid grid-cols-2 gap-2">
-                            <div>
+                            <div data-field="warranty_value_snapshot">
                                 <label
                                     class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
                                 >
@@ -402,6 +411,8 @@
                                 <input
                                     type="number"
                                     v-model="form.warranty_value_snapshot"
+                                    name="warranty_value_snapshot"
+                                    data-field="warranty_value_snapshot"
                                     :disabled="isWarrantyDisabled || isReadOnly"
                                     class="w-full px-4 py-2.5 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 text-sm disabled:bg-gray-100 disabled:text-gray-500 disabled:cursor-not-allowed dark:disabled:bg-gray-900"
                                 />
@@ -412,7 +423,7 @@
                                     {{ form.errors.warranty_value_snapshot }}
                                 </p>
                             </div>
-                            <div>
+                            <div data-field="warranty_unit_snapshot">
                                 <label
                                     class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
                                 >
@@ -420,6 +431,8 @@
                                 </label>
                                 <SearchableSelect
                                     v-model="form.warranty_unit_snapshot"
+                                    name="warranty_unit_snapshot"
+                                    data-field="warranty_unit_snapshot"
                                     :options="warrantyUnitOptions"
                                     option-label="label"
                                     option-value="value"
@@ -454,7 +467,7 @@
                             </h4>
 
                             <!-- Start Date -->
-                            <div>
+                            <div data-field="started_at">
                                 <label
                                     class="block text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1"
                                 >
@@ -462,6 +475,7 @@
                                 </label>
                                 <CustomDatePicker
                                     v-model="form.started_at"
+                                    name="started_at"
                                     :disabled="isReadOnly"
                                     :min-date="workOrder?.entry_date"
                                 />
@@ -471,7 +485,7 @@
                             </div>
 
                             <!-- Due Date -->
-                            <div>
+                            <div data-field="due_date">
                                 <label
                                     class="block text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1"
                                 >
@@ -479,6 +493,7 @@
                                 </label>
                                 <CustomDatePicker
                                     v-model="form.due_date"
+                                    name="due_date"
                                     :disabled="isReadOnly"
                                     :min-date="form.started_at || workOrder?.entry_date"
                                 />
@@ -530,7 +545,7 @@
                             </h4>
 
                             <!-- Price -->
-                            <div>
+                            <div data-field="unit_price">
                                 <label
                                     class="block text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1"
                                 >
@@ -541,6 +556,8 @@
                                         type="text"
                                         inputmode="decimal"
                                         v-model="form.unit_price"
+                                        name="unit_price"
+                                        data-field="unit_price"
                                         dir="ltr"
                                         @input="
                                             form.unit_price = toEnglish($event.target.value)
@@ -635,11 +652,16 @@
                                 </div>
 
                                 <!-- Discount Value Input -->
-                                <div v-if="form.discount_type !== 'none'">
+                                <div
+                                    v-if="form.discount_type !== 'none'"
+                                    data-field="discount_value"
+                                >
                                     <input
                                         type="text"
                                         inputmode="decimal"
                                         v-model="form.discount_value"
+                                        name="discount_value"
+                                        data-field="discount_value"
                                         dir="ltr"
                                         :disabled="isReadOnly"
                                         @input="
@@ -917,22 +939,71 @@
         </div>
 
         <template #footer>
-            <button
-                type="button"
-                @click="$emit('close')"
-                class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
-            >
-                {{ $t('common.close') }}
-            </button>
-            <button
-                v-if="!isReadOnly"
-                type="button"
-                @click="submitForm"
-                :disabled="saving || isPriceBelowMinimum || isTechniciansShareInvalid"
-                class="px-6 py-2 bg-gradient-to-r from-indigo-500 to-purple-500 text-white rounded-lg hover:from-indigo-600 hover:to-purple-600 disabled:opacity-50 transition-all"
-            >
-                {{ saving ? $t('common.loading') : $t('common.save') }}
-            </button>
+            <div class="flex items-center justify-between w-full">
+                <div class="flex items-center gap-2">
+                    <button
+                        type="button"
+                        @click="$emit('close')"
+                        class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                    >
+                        {{ $t('common.close') }}
+                    </button>
+                    <span
+                        v-if="Object.keys(form.errors).length > 0"
+                        class="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold rounded-lg bg-red-50 text-red-700 dark:bg-red-950/50 dark:text-red-300 border border-red-200 dark:border-red-900"
+                    >
+                        <svg
+                            class="w-3.5 h-3.5 text-red-500"
+                            fill="currentColor"
+                            viewBox="0 0 20 20"
+                        >
+                            <path
+                                fill-rule="evenodd"
+                                d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                                clip-rule="evenodd"
+                            />
+                        </svg>
+                        {{
+                            $t(
+                                'common.fix_errors_count',
+                                { count: Object.keys(form.errors).length },
+                                `${Object.keys(form.errors).length} أخطاء تحتاج تصحيح`
+                            )
+                        }}
+                    </span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button
+                        v-if="!isReadOnly"
+                        type="button"
+                        @click="submitForm"
+                        :disabled="saving || isPriceBelowMinimum || isTechniciansShareInvalid"
+                        class="px-6 py-2 bg-gradient-to-r from-indigo-500 to-purple-500 text-white rounded-lg hover:from-indigo-600 hover:to-purple-600 disabled:opacity-50 transition-all flex items-center gap-2"
+                    >
+                        <svg
+                            v-if="saving"
+                            class="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                        >
+                            <circle
+                                class="opacity-25"
+                                cx="12"
+                                cy="12"
+                                r="10"
+                                stroke="currentColor"
+                                stroke-width="4"
+                            ></circle>
+                            <path
+                                class="opacity-75"
+                                fill="currentColor"
+                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                            ></path>
+                        </svg>
+                        {{ saving ? $t('common.loading') : $t('common.save') }}
+                    </button>
+                </div>
+            </div>
         </template>
 
         <!-- Add Note Modal -->
@@ -1018,12 +1089,15 @@ import WorkOrderIssueMoreModal from '@/Components/WorkOrders/WorkOrderIssueMoreM
 import WorkOrderReturnModal from '@/Components/WorkOrders/WorkOrderReturnModal.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 import CustomDatePicker from '@/Components/CustomDatePicker.vue';
+import AppToggle from '@/Components/Common/AppToggle.vue';
+import { useFormScrollToError } from '@/Composables/useFormScrollToError';
 import axios from 'axios';
 import { useToast } from '@/Composables/useToast';
 import { useConfirm } from '@/Composables/useConfirm';
 
 const { success: toastSuccess } = useToast();
 const { confirm } = useConfirm();
+const { scrollToError } = useFormScrollToError();
 
 const props = defineProps({
     show: Boolean,
@@ -1325,6 +1399,40 @@ const tabs = computed(() => [
     { id: 'technicians', name: t('work_orders.item.tab_technicians') },
     { id: 'notes', name: t('work_orders.item.tab_notes') },
 ]);
+
+const serviceModalTabMap = {
+    service_id: 'service',
+    title: 'service',
+    duration_value: 'service',
+    duration_unit: 'service',
+    warranty_value_snapshot: 'service',
+    warranty_unit_snapshot: 'service',
+    started_at: 'service',
+    due_date: 'service',
+    unit_price: 'service',
+    discount_value: 'service',
+    pending_parts: 'parts',
+    technicians: 'technicians',
+    notes: 'notes',
+};
+
+const tabErrorCount = computed(() => ({
+    service: [
+        'service_id',
+        'title',
+        'duration_value',
+        'duration_unit',
+        'warranty_value_snapshot',
+        'warranty_unit_snapshot',
+        'started_at',
+        'due_date',
+        'unit_price',
+        'discount_value',
+    ].filter((k) => form.errors[k]).length,
+    parts: form.errors.pending_parts ? 1 : 0,
+    technicians: form.errors.technicians ? 1 : 0,
+    notes: form.errors.notes ? 1 : 0,
+}));
 
 const statuses = computed(() => [
     {
@@ -1755,6 +1863,10 @@ function submitForm() {
     if (form.service_id === 'other' && !form.title?.trim()) {
         form.setError('title', t('validation.required'));
         saving.value = false;
+        scrollToError(
+            { title: t('validation.required') },
+            { tabMap: serviceModalTabMap, onSwitchTab: (t) => (activeTab.value = t) }
+        );
         return;
     }
 
@@ -1766,6 +1878,10 @@ function submitForm() {
         if (cardEntryTime && startTime < cardEntryTime) {
             form.setError('started_at', t('validation.before_card_entry_date'));
             saving.value = false;
+            scrollToError(
+                { started_at: t('validation.before_card_entry_date') },
+                { tabMap: serviceModalTabMap, onSwitchTab: (t) => (activeTab.value = t) }
+            );
             return;
         }
     }
@@ -1775,6 +1891,10 @@ function submitForm() {
         if (cardEntryTime && dueTime < cardEntryTime) {
             form.setError('due_date', t('validation.before_card_entry_date'));
             saving.value = false;
+            scrollToError(
+                { due_date: t('validation.before_card_entry_date') },
+                { tabMap: serviceModalTabMap, onSwitchTab: (t) => (activeTab.value = t) }
+            );
             return;
         }
 
@@ -1783,6 +1903,10 @@ function submitForm() {
             if (dueTime < startTime) {
                 form.setError('due_date', t('validation.due_date_before_start'));
                 saving.value = false;
+                scrollToError(
+                    { due_date: t('validation.due_date_before_start') },
+                    { tabMap: serviceModalTabMap, onSwitchTab: (t) => (activeTab.value = t) }
+                );
                 return;
             }
         }
@@ -1811,6 +1935,12 @@ function submitForm() {
                     emit('saved');
                     emit('close');
                 },
+                onError: (errors) => {
+                    scrollToError(errors, {
+                        tabMap: serviceModalTabMap,
+                        onSwitchTab: (t) => (activeTab.value = t),
+                    });
+                },
                 onFinish: () => {
                     saving.value = false;
                 },
@@ -1825,6 +1955,12 @@ function submitForm() {
                 onSuccess: () => {
                     emit('saved');
                     emit('close');
+                },
+                onError: (errors) => {
+                    scrollToError(errors, {
+                        tabMap: serviceModalTabMap,
+                        onSwitchTab: (t) => (activeTab.value = t),
+                    });
                 },
                 onFinish: () => {
                     saving.value = false;
