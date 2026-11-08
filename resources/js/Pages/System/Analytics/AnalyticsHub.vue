@@ -46,7 +46,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
 import { Head, router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import SystemLayout from '@/Layouts/SystemLayout.vue';
@@ -64,18 +64,30 @@ const props = defineProps({
 
 const currentTab = ref(props.tab || 'kpis');
 
+watch(
+    () => props.tab,
+    (newTab) => {
+        if (newTab && newTab !== currentTab.value) {
+            currentTab.value = newTab;
+        }
+    }
+);
+
 const tabs = computed(() => [
     {
         id: 'kpis',
+        label: t('system.analytics.tabs.kpis'),
         name: t('system.analytics.tabs.kpis'),
     },
     {
         id: 'reports',
+        label: t('system.analytics.tabs.reports'),
         name: t('system.analytics.tabs.reports'),
     },
 ]);
 
 const handleTabChange = (tabId) => {
+    currentTab.value = tabId;
     router.get(
         '/system/analytics',
         { tab: tabId },

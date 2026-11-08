@@ -86,7 +86,7 @@ const selectTab = (tab) => {
                     </span>
                 </slot>
 
-                <span>{{ tab.label }}</span>
+                <span>{{ tab.label || tab.name || tab.title }}</span>
 
                 <!-- Count Badge -->
                 <span
@@ -126,7 +126,7 @@ const selectTab = (tab) => {
             role="tab"
             :aria-selected="modelValue === tab.id"
         >
-            <span>{{ tab.label }}</span>
+            <span>{{ tab.label || tab.name || tab.title }}</span>
             <span
                 v-if="tab.count !== undefined && tab.count !== null"
                 class="ms-1.5 py-0.5 px-2 rounded-full text-xs font-semibold"

@@ -100,7 +100,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
 import { Head, router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import SystemLayout from '@/Layouts/SystemLayout.vue';
@@ -127,30 +127,44 @@ const currentTab = ref(props.tab || 'packages');
 const packagesTabRef = ref(null);
 const balancesTabRef = ref(null);
 
+watch(
+    () => props.tab,
+    (newTab) => {
+        if (newTab && newTab !== currentTab.value) {
+            currentTab.value = newTab;
+        }
+    }
+);
+
 const tabs = computed(() => [
     {
         id: 'packages',
+        label: t('system.credits.tabs.packages'),
         name: t('system.credits.tabs.packages'),
         count: props.packages?.length || null,
     },
     {
         id: 'balances',
+        label: t('system.credits.tabs.balances'),
         name: t('system.credits.tabs.balances'),
         count: props.balances?.total || null,
     },
     {
         id: 'purchases',
+        label: t('system.credits.tabs.purchases'),
         name: t('system.credits.tabs.purchases'),
         count: props.purchases?.total || null,
     },
     {
         id: 'usage',
+        label: t('system.credits.tabs.usage'),
         name: t('system.credits.tabs.usage'),
         count: props.logs?.total || null,
     },
 ]);
 
 const handleTabChange = (tabId) => {
+    currentTab.value = tabId;
     router.get(
         '/system/sms',
         { tab: tabId },

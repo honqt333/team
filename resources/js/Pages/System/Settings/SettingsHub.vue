@@ -68,7 +68,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
 import { Head, router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import SystemLayout from '@/Layouts/SystemLayout.vue';
@@ -96,26 +96,40 @@ const props = defineProps({
 
 const currentTab = ref(props.tab || 'general');
 
+watch(
+    () => props.tab,
+    (newTab) => {
+        if (newTab && newTab !== currentTab.value) {
+            currentTab.value = newTab;
+        }
+    }
+);
+
 const tabs = computed(() => [
     {
         id: 'general',
+        label: t('system.settings.tabs.general'),
         name: t('system.settings.tabs.general'),
     },
     {
         id: 'company',
+        label: t('system.settings.tabs.company'),
         name: t('system.settings.tabs.company'),
     },
     {
         id: 'payment',
+        label: t('system.settings.tabs.payment'),
         name: t('system.settings.tabs.payment'),
     },
     {
         id: 'dunning',
+        label: t('system.settings.tabs.dunning'),
         name: t('system.settings.tabs.dunning'),
     },
 ]);
 
 const handleTabChange = (tabId) => {
+    currentTab.value = tabId;
     router.get(
         '/system/settings',
         { tab: tabId },
