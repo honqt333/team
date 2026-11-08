@@ -505,73 +505,99 @@ watch(
                         <PreviewPane :settings="form.settings" />
                     </div>
                 </div>
+            </div>
 
-                <!-- Sticky Bottom Action Bar for Easy Saving -->
-                <div
-                    class="sticky bottom-0 z-30 -mx-4 sm:-mx-6 px-4 sm:px-6 py-3.5 bg-white/95 dark:bg-gray-800/95 backdrop-blur-md border-t border-gray-200 dark:border-gray-700 shadow-lg flex items-center justify-between transition-all rounded-b-2xl"
+            <!-- Truly Floating Bottom Action Bar via Teleport -->
+            <Teleport to="body">
+                <Transition
+                    enter-active-class="transition duration-300 ease-out"
+                    enter-from-class="transform translate-y-16 opacity-0"
+                    enter-to-class="transform translate-y-0 opacity-100"
+                    leave-active-class="transition duration-200 ease-in"
+                    leave-from-class="transform translate-y-0 opacity-100"
+                    leave-to-class="transform translate-y-16 opacity-0"
                 >
-                    <div class="flex items-center gap-2.5 text-xs text-gray-500 dark:text-gray-400">
-                        <span
-                            class="inline-block w-2 h-2 rounded-full bg-emerald-500 animate-pulse"
-                        ></span>
-                        <span>
-                            {{
-                                t('system.website.save_all_hint') ||
-                                'يتم حفظ كافة التبويبات والإعدادات معاً بنقرة واحدة'
-                            }}
-                        </span>
-                    </div>
-                    <div class="flex items-center gap-3">
-                        <button
-                            type="button"
-                            @click="submit"
-                            :disabled="form.processing"
-                            class="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white rounded-xl text-sm font-semibold transition-all shadow-md hover:shadow-indigo-500/25 active:scale-95 disabled:opacity-50"
+                    <div
+                        class="fixed bottom-6 start-4 end-4 md:start-auto md:end-8 z-50 px-4 py-3 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md border border-gray-200/80 dark:border-gray-700/80 shadow-2xl rounded-2xl flex items-center justify-between gap-4 md:min-w-[400px]"
+                    >
+                        <div
+                            class="flex items-center gap-2.5 text-xs text-gray-600 dark:text-gray-300 min-w-0"
                         >
-                            <svg
-                                v-if="!form.processing"
-                                class="w-4 h-4"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                            >
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    stroke-width="2"
-                                    d="M5 13l4 4L19 7"
-                                />
-                            </svg>
-                            <svg
-                                v-else
-                                class="w-4 h-4 animate-spin"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                            >
-                                <circle
-                                    class="opacity-25"
-                                    cx="12"
-                                    cy="12"
-                                    r="10"
-                                    stroke="currentColor"
-                                    stroke-width="4"
-                                />
-                                <path
-                                    class="opacity-75"
-                                    fill="currentColor"
-                                    d="M4 12a8 8 0 018-8v8H4z"
-                                />
-                            </svg>
-                            <span>
+                            <span
+                                class="inline-block w-2.5 h-2.5 rounded-full shrink-0"
+                                :class="
+                                    hasChanges
+                                        ? 'bg-amber-500 animate-pulse'
+                                        : saveStatus === 'saved'
+                                          ? 'bg-emerald-500'
+                                          : 'bg-indigo-500'
+                                "
+                            ></span>
+                            <span class="truncate font-medium">
                                 {{
-                                    form.processing ? t('common.saving') : t('system.website.save')
+                                    hasChanges
+                                        ? t('system.website.unsaved_changes') ||
+                                          'يوجد تعديلات غير محفوظة'
+                                        : saveStatus === 'saved'
+                                          ? t('system.website.saved') || 'تم حفظ التعديلات بنجاح'
+                                          : t('system.website.save_all_hint') || 'جاهز للحفظ'
                                 }}
                             </span>
-                        </button>
+                        </div>
+                        <div class="flex items-center gap-2 shrink-0">
+                            <button
+                                type="button"
+                                @click="submit"
+                                :disabled="form.processing"
+                                class="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white rounded-xl text-sm font-semibold transition-all shadow-md hover:shadow-indigo-500/25 active:scale-95 disabled:opacity-50 cursor-pointer"
+                            >
+                                <svg
+                                    v-if="!form.processing"
+                                    class="w-4 h-4"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2"
+                                        d="M5 13l4 4L19 7"
+                                    />
+                                </svg>
+                                <svg
+                                    v-else
+                                    class="w-4 h-4 animate-spin"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <circle
+                                        class="opacity-25"
+                                        cx="12"
+                                        cy="12"
+                                        r="10"
+                                        stroke="currentColor"
+                                        stroke-width="4"
+                                    />
+                                    <path
+                                        class="opacity-75"
+                                        fill="currentColor"
+                                        d="M4 12a8 8 0 018-8v8H4z"
+                                    />
+                                </svg>
+                                <span>
+                                    {{
+                                        form.processing
+                                            ? t('system.website.saving')
+                                            : t('system.website.save')
+                                    }}
+                                </span>
+                            </button>
+                        </div>
                     </div>
-                </div>
-            </div>
+                </Transition>
+            </Teleport>
         </div>
     </SystemLayout>
 </template>
