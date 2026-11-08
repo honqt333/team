@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\App;
 
+use App\Actions\CompanyProfile\UpdateCompanyProfileSectionAction;
 use App\Http\Controllers\Controller;
 use App\Models\Billing\Plan;
 use App\Models\CompanyTransaction;
@@ -12,16 +13,12 @@ use App\Models\Invoice;
 use App\Models\PaymentSettings;
 use App\Models\PurchaseInvoice;
 use App\Models\Tenant;
-use App\Models\TenantAddress;
-use App\Models\TenantTaxSetting;
-use App\Models\TenantZatcaSetting;
 use App\Services\Payment\PaymentManager;
 use App\Services\Zatca\ZatcaOnboardingService;
 use App\Support\Media\ImageType;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -317,7 +314,7 @@ class CompanyProfileController extends Controller
      * Update company settings by section.
      * Expects: { section: 'profile'|'contact'|'address'|'vat'|'zatca'|'numbering', data: {...} }
      */
-    public function update(Request $request)
+    public function update(Request $request, UpdateCompanyProfileSectionAction $action)
     {
         $request->validate([
             'section' => 'required|in:profile,contact,address,vat,zatca,numbering,workflow,notifications',
@@ -328,114 +325,7 @@ class CompanyProfileController extends Controller
         $data = $request->input('data');
         $tenant = auth()->user()->tenant;
 
-        $errors = $this->validateSection($section, $data, $tenant);
-
-        if ($errors) {
-            return back()->withErrors($errors);
-        }
-
-        switch ($section) {
-            case 'profile':
-                $tenant->update([
-                    'legal_name' => $data['legal_name'] ?? $tenant->legal_name,
-                    'legal_name_en' => $data['legal_name_en'] ?? null,
-                    'trade_name' => $data['trade_name'] ?? null,
-                    'owner_name' => $data['owner_name'] ?? null,
-                    'vat_number' => $data['vat_number'] ?? null,
-                    'cr_number' => $data['cr_number'] ?? null,
-                    'iban' => $data['iban'] ?? null,
-                    'country' => $data['country'] ?? $tenant->country ?? 'SA',
-                    'currency' => $data['currency'] ?? $tenant->currency ?? 'SAR',
-                ]);
-                break;
-
-            case 'contact':
-                $tenant->update([
-                    'phone' => $data['phone'] ?? null,
-                    'email' => $data['email'] ?? null,
-                ]);
-                break;
-
-            case 'address':
-                TenantAddress::updateOrCreate(
-                    ['tenant_id' => $tenant->id],
-                    [
-                        'address_line' => $data['address_line'] ?? null,
-                        'street' => $data['street'] ?? null,
-                        'city' => $data['city'] ?? null,
-                        'district' => $data['district'] ?? null,
-                        'building_number' => $data['building_number'] ?? null,
-                        'postal_code' => $data['postal_code'] ?? null,
-                        'latitude' => $data['latitude'] ?? null,
-                        'longitude' => $data['longitude'] ?? null,
-                    ]
-                );
-                break;
-
-            case 'vat':
-                // Enforce 15% VAT rate for Saudi Arabia ('SA')
-                $servicesVatRate = $data['services_vat_rate'] ?? 15;
-                $partsVatRate = $data['parts_vat_rate'] ?? 15;
-
-                // Currently SA is the only supported country, so we lock to 15
-                $servicesVatRate = 15;
-                $partsVatRate = 15;
-
-                TenantTaxSetting::updateOrCreate(
-                    ['tenant_id' => $tenant->id],
-                    [
-                        'vat_enabled' => $data['vat_enabled'] ?? false,
-                        'services_vat_rate' => $servicesVatRate,
-                        'parts_vat_rate' => $partsVatRate,
-                        'services_inclusive' => $data['services_inclusive'] ?? false,
-                        'parts_inclusive' => $data['parts_inclusive'] ?? false,
-                        'show_amount_before_vat' => $data['show_amount_before_vat'] ?? true,
-                    ]
-                );
-
-                // Update VAT number on tenant profile if provided
-                if (isset($data['vat_number'])) {
-                    $tenant->update(['vat_number' => $data['vat_number']]);
-                }
-                break;
-
-            case 'zatca':
-                TenantZatcaSetting::updateOrCreate(
-                    ['tenant_id' => $tenant->id],
-                    ['qr_enabled' => $data['qr_enabled'] ?? false]
-                );
-                break;
-
-            case 'numbering':
-                $tenant->update([
-                    'invoice_number_format' => $data['invoice_number_format'] ?? 'INV-{CENTER}-{YYYY}-{SEQ}',
-                    'work_order_number_format' => $data['work_order_number_format'] ?? 'WO-{SEQ}',
-                    'quote_number_format' => $data['quote_number_format'] ?? 'QT-{SEQ}',
-                ]);
-                break;
-
-            case 'workflow':
-                $tenant->update([
-                    'workflow_settings' => [
-                        'allow_lower_odometer' => (bool) ($data['allow_lower_odometer'] ?? false),
-                        'max_discount_percentage' => (int) ($data['max_discount_percentage'] ?? 15),
-                        'require_phone_on_creation' => (bool) ($data['require_phone_on_creation'] ?? true),
-                        'default_warranty_days' => (int) ($data['default_warranty_days'] ?? 30),
-                    ],
-                ]);
-                break;
-
-            case 'notifications':
-                $tenant->update([
-                    'notification_templates' => [
-                        'work_order_created' => $data['work_order_created'] ?? '',
-                        'work_order_completed' => $data['work_order_completed'] ?? '',
-                        'quote_shared' => $data['quote_shared'] ?? '',
-                        'invoice_issued' => $data['invoice_issued'] ?? '',
-                    ],
-                ]);
-                break;
-        }
+        $action->execute($tenant, $section, $data);
 
         // For VAT section, logout the user and redirect to login
         if ($section === 'vat') {
@@ -452,104 +342,6 @@ class CompanyProfileController extends Controller
         }
 
         return back()->with('success', __('common.saved_success'));
-    }
-
-    /**
-     * Validate section data.
-     */
-    private function validateSection(string $section, array $data, Tenant $tenant): ?array
-    {
-        $rules = [];
-        $messages = [];
-
-        switch ($section) {
-            case 'profile':
-                $rules = [
-                    'legal_name' => 'required|string|max:255',
-                    'legal_name_en' => 'required|string|max:255',
-                    'trade_name' => 'required|string|max:255',
-                    'owner_name' => 'required|string|max:255',
-                    'cr_number' => 'nullable|string|max:20',
-                    'iban' => 'nullable|string|max:34',
-                ];
-                break;
-
-            case 'vat':
-                $rules = [
-                    'vat_enabled' => 'required|boolean',
-                    'services_vat_rate' => 'required_if:vat_enabled,true|numeric|min:0|max:100',
-                    'parts_vat_rate' => 'required_if:vat_enabled,true|numeric|min:0|max:100',
-                    'services_inclusive' => 'boolean',
-                    'parts_inclusive' => 'boolean',
-                    'show_amount_before_vat' => 'boolean',
-                    'vat_number' => 'nullable|string',
-                ];
-
-                // If VAT is enabled, VAT number is required and must be exactly 15 digits starting and ending with 3 (ZATCA Rule)
-                if ($data['vat_enabled'] ?? false) {
-                    $rules['vat_number'] = ['required', 'string', 'size:15', 'regex:/^3[0-9]{13}3$/'];
-                    $messages = [
-                        'vat_number.required' => __('validation.required', ['attribute' => __('purchasing.tax_number')]),
-                        'vat_number.size' => __('validation.tax_number_invalid'),
-                        'vat_number.regex' => __('validation.tax_number_invalid'),
-                    ];
-                }
-                break;
-
-            case 'numbering':
-                $formatValidator = function ($attribute, $value, $fail) {
-                    if (strpos((string) $value, '{SEQ}') === false) {
-                        $fail(__('company_profile.numbering.seq_required'));
-                    }
-                    $allowed = ['{SEQ}', '{YYYY}', '{YY}', '{MM}', '{DD}', '{CENTER}'];
-                    $cleaned = (string) $value;
-
-                    foreach ($allowed as $token) {
-                        $cleaned = str_replace($token, '', $cleaned);
-                    }
-
-                    if (preg_match('/\{[^}]+\}/', $cleaned)) {
-                        $fail(__('company_profile.numbering.invalid_tokens'));
-                    }
-                };
-
-                $rules = [
-                    'invoice_number_format' => ['required', 'string', 'max:100', $formatValidator],
-                    'work_order_number_format' => ['nullable', 'string', 'max:100', $formatValidator],
-                    'quote_number_format' => ['nullable', 'string', 'max:100', $formatValidator],
-                ];
-                break;
-
-            case 'workflow':
-                $rules = [
-                    'allow_lower_odometer' => 'boolean',
-                    'max_discount_percentage' => 'nullable|integer|min:0|max:100',
-                    'require_phone_on_creation' => 'boolean',
-                    'default_warranty_days' => 'nullable|integer|min:0|max:3650',
-                ];
-                break;
-
-            case 'notifications':
-                $rules = [
-                    'work_order_created' => 'nullable|string|max:1000',
-                    'work_order_completed' => 'nullable|string|max:1000',
-                    'quote_shared' => 'nullable|string|max:1000',
-                    'invoice_issued' => 'nullable|string|max:1000',
-                ];
-                break;
-        }
-
-        if (empty($rules)) {
-            return null;
-        }
-
-        $validator = Validator::make($data, $rules, $messages);
-
-        if ($validator->fails()) {
-            return $validator->errors()->toArray();
-        }
-
-        return null;
     }
 
     /**
