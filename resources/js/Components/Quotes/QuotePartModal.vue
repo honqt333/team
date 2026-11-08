@@ -93,7 +93,7 @@
             <!-- Content Container -->
             <div class="space-y-4">
                 <!-- Warehouse Search -->
-                <div v-if="form.source === 'warehouse' && !selectedPart">
+                <div v-if="form.source === 'warehouse' && !selectedPart" data-field="part_id">
                     <label
                         class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1"
                     >
@@ -101,6 +101,8 @@
                     </label>
                     <SearchableSelect
                         v-model="form.part_id"
+                        name="part_id"
+                        data-field="part_id"
                         :options="searchResults"
                         :async-search="true"
                         @search="handleAsyncSearch"
@@ -213,7 +215,7 @@
                 <div v-if="selectedPart || form.source !== 'warehouse'" class="space-y-3">
                     <!-- Row 1: Part Number & Unit -->
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        <div>
+                        <div data-field="part_number">
                             <label
                                 class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1"
                             >
@@ -222,12 +224,14 @@
                             <input
                                 type="text"
                                 v-model="form.part_number"
+                                name="part_number"
+                                data-field="part_number"
                                 dir="ltr"
                                 :disabled="isReadOnly || form.source === 'warehouse'"
                                 class="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white font-mono text-xs focus:ring-2 focus:ring-emerald-500 disabled:bg-gray-100 dark:disabled:bg-gray-900 disabled:opacity-60"
                             />
                         </div>
-                        <div>
+                        <div data-field="unit_id">
                             <label
                                 class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1"
                             >
@@ -235,6 +239,8 @@
                             </label>
                             <SearchableSelect
                                 v-model="form.unit_id"
+                                name="unit_id"
+                                data-field="unit_id"
                                 :options="unitOptions"
                                 option-label="label"
                                 :disabled="isReadOnly || form.source === 'warehouse'"
@@ -246,7 +252,7 @@
                     </div>
 
                     <!-- Row 2: Part Name -->
-                    <div>
+                    <div data-field="name">
                         <label
                             class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1"
                         >
@@ -256,6 +262,8 @@
                         <input
                             type="text"
                             v-model="form.name"
+                            name="name"
+                            data-field="name"
                             required
                             :disabled="isReadOnly || form.source === 'warehouse'"
                             class="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-xs font-bold focus:ring-2 focus:ring-emerald-500 disabled:bg-gray-100 dark:disabled:bg-gray-900 disabled:opacity-60"
@@ -269,7 +277,7 @@
                             showServiceSelect ? 'grid-cols-1 sm:grid-cols-2' : 'grid-cols-1',
                         ]"
                     >
-                        <div v-if="showServiceSelect">
+                        <div v-if="showServiceSelect" data-field="quote_line_id">
                             <label
                                 class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1"
                             >
@@ -277,6 +285,8 @@
                             </label>
                             <SearchableSelect
                                 v-model="form.quote_line_id"
+                                name="quote_line_id"
+                                data-field="quote_line_id"
                                 :options="serviceOptions"
                                 option-label="label"
                                 :disabled="isReadOnly"
@@ -285,7 +295,7 @@
                                 class="w-full text-xs"
                             />
                         </div>
-                        <div>
+                        <div data-field="description">
                             <label
                                 class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1"
                             >
@@ -294,6 +304,8 @@
                             <input
                                 type="text"
                                 v-model="form.description"
+                                name="description"
+                                data-field="description"
                                 :disabled="isReadOnly || form.source === 'warehouse'"
                                 class="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-xs focus:ring-2 focus:ring-emerald-500 disabled:bg-gray-100 dark:disabled:bg-gray-900 disabled:opacity-60"
                                 :placeholder="$t('inventory.parts.description_placeholder')"
@@ -307,7 +319,7 @@
                     class="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-gray-50/80 dark:bg-gray-900/40 p-3 rounded-xl border border-gray-200 dark:border-gray-700"
                 >
                     <!-- 1. Price -->
-                    <div>
+                    <div data-field="unit_price">
                         <label
                             class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1"
                         >
@@ -319,6 +331,8 @@
                                 type="text"
                                 inputmode="decimal"
                                 v-model="form.unit_price"
+                                name="unit_price"
+                                data-field="unit_price"
                                 dir="ltr"
                                 @input="
                                     form.unit_price = toEnglish($event.target.value).replace(
@@ -356,7 +370,7 @@
                     </div>
 
                     <!-- 2. Discount -->
-                    <div>
+                    <div data-field="discount_value">
                         <div class="flex items-center justify-between mb-1">
                             <label class="text-xs font-semibold text-gray-700 dark:text-gray-300">
                                 {{ $t('quotes.service_modal.discount') }}
@@ -392,6 +406,8 @@
                             type="text"
                             inputmode="decimal"
                             v-model="form.discount_value"
+                            name="discount_value"
+                            data-field="discount_value"
                             dir="ltr"
                             @input="
                                 form.discount_value = toEnglish($event.target.value).replace(
@@ -413,7 +429,7 @@
                     </div>
 
                     <!-- 3. Quantity -->
-                    <div>
+                    <div data-field="qty">
                         <label
                             class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1"
                         >
@@ -424,6 +440,8 @@
                             type="text"
                             inputmode="decimal"
                             v-model="form.qty"
+                            name="qty"
+                            data-field="qty"
                             dir="ltr"
                             :disabled="isReadOnly"
                             @input="
@@ -524,13 +542,38 @@
         <!-- Footer -->
         <template #footer>
             <div class="flex items-center justify-between w-full">
-                <button
-                    type="button"
-                    @click="$emit('close')"
-                    class="px-6 py-2.5 text-xs font-bold text-gray-500 hover:text-red-500 transition-all uppercase tracking-widest"
-                >
-                    {{ isReadOnly ? $t('common.close') : $t('common.cancel') }}
-                </button>
+                <div class="flex items-center gap-2">
+                    <button
+                        type="button"
+                        @click="$emit('close')"
+                        class="px-6 py-2.5 text-xs font-bold text-gray-500 hover:text-red-500 transition-all uppercase tracking-widest"
+                    >
+                        {{ isReadOnly ? $t('common.close') : $t('common.cancel') }}
+                    </button>
+                    <span
+                        v-if="Object.keys(form.errors).length > 0"
+                        class="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold rounded-lg bg-red-50 text-red-700 dark:bg-red-950/50 dark:text-red-300 border border-red-200 dark:border-red-900"
+                    >
+                        <svg
+                            class="w-3.5 h-3.5 text-red-500"
+                            fill="currentColor"
+                            viewBox="0 0 20 20"
+                        >
+                            <path
+                                fill-rule="evenodd"
+                                d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                                clip-rule="evenodd"
+                            />
+                        </svg>
+                        {{
+                            $t(
+                                'common.fix_errors_count',
+                                { count: Object.keys(form.errors).length },
+                                `${Object.keys(form.errors).length} أخطاء تحتاج تصحيح`
+                            )
+                        }}
+                    </span>
+                </div>
                 <button
                     v-if="!isReadOnly"
                     type="button"
@@ -544,8 +587,28 @@
                         (form.source !== 'warehouse' && !form.unit_id) ||
                         isPriceBelowMinimum
                     "
-                    class="px-10 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl font-black uppercase tracking-widest text-xs transition-all shadow-lg shadow-emerald-500/20 disabled:opacity-50"
+                    class="px-10 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl font-black uppercase tracking-widest text-xs transition-all shadow-lg shadow-emerald-500/20 disabled:opacity-50 flex items-center gap-2"
                 >
+                    <svg
+                        v-if="form.processing"
+                        class="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                    >
+                        <circle
+                            class="opacity-25"
+                            cx="12"
+                            cy="12"
+                            r="10"
+                            stroke="currentColor"
+                            stroke-width="4"
+                        ></circle>
+                        <path
+                            class="opacity-75"
+                            fill="currentColor"
+                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                        ></path>
+                    </svg>
                     {{
                         form.processing
                             ? $t('common.loading')
@@ -565,6 +628,7 @@ import { useForm } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import { useLocalized } from '@/Composables/useLocalized';
 import { useNumberFormat } from '@/Composables/useNumberFormat';
+import { useFormScrollToError } from '@/Composables/useFormScrollToError';
 import BaseModal from '@/Components/BaseModal.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 import { useToast } from '@/Composables/useToast';
@@ -580,6 +644,7 @@ function debounce(fn, delay) {
 }
 
 const { formatCurrency, formatQuantity, toEnglish } = useNumberFormat();
+const { scrollToError } = useFormScrollToError();
 
 const props = defineProps({
     show: Boolean,
@@ -907,7 +972,12 @@ function submitForm() {
         : route('app.quotes.parts.store', { quote: props.quote.id });
 
     const method = props.part ? 'put' : 'post';
-    form[method](url, { onSuccess: () => emit('saved') });
+    form[method](url, {
+        onSuccess: () => emit('saved'),
+        onError: (errors) => {
+            scrollToError(errors);
+        },
+    });
 }
 
 // Watchers
