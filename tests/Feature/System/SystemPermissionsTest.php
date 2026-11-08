@@ -316,7 +316,7 @@ class SystemPermissionsTest extends TestCase
         $response = $this->actingAs($admin, 'admin')
             ->get(route('system.settings.payment'));
 
-        $response->assertOk();
+        $response->assertRedirect(route('system.settings.index', ['tab' => 'payment']));
     }
 
     public function test_the_admin_roster_can_be_read_but_not_changed_without_the_manage_ability(): void
@@ -360,7 +360,7 @@ class SystemPermissionsTest extends TestCase
         $response = $this->actingAs($owner, 'web')
             ->get(route('system.settings.payment'));
 
-        $response->assertOk();
+        $response->assertRedirect(route('system.settings.index', ['tab' => 'payment']));
     }
 
     public function test_a_route_without_an_ability_is_not_affected_by_the_middleware(): void

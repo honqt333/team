@@ -6,8 +6,10 @@ namespace App\Http\Controllers\System;
 
 use App\Http\Controllers\Controller;
 use App\Models\AdminActivityLog;
+use App\Models\AdminUser;
 use App\Models\Tenant;
 use App\Models\TenantBackup;
+use App\Models\User;
 use App\Services\Backup\TenantBackupService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -62,6 +64,8 @@ class BackupController extends Controller
      */
     public function store(Request $request, Tenant $tenant): RedirectResponse
     {
+        $this->authorizeSuperAdmin($request);
+
         $request->validate([
             'name' => 'nullable|string|max:255',
         ]);
@@ -106,6 +110,8 @@ class BackupController extends Controller
      */
     public function download(Request $request, TenantBackup $backup)
     {
+        $this->authorizeSuperAdmin($request);
+
         if ($adminId = Auth::guard('admin')->id()) {
             AdminActivityLog::create([
                 'admin_user_id' => $adminId,
@@ -126,6 +132,8 @@ class BackupController extends Controller
      */
     public function destroy(Request $request, TenantBackup $backup): RedirectResponse
     {
+        $this->authorizeSuperAdmin($request);
+
         $tenantId = $backup->tenant_id;
         $backupName = $backup->name;
 
@@ -144,5 +152,17 @@ class BackupController extends Controller
         }
 
         return back()->with('success', __('messages.system.backups.deleted_success'));
+    }
+
+    private function authorizeSuperAdmin(Request $request): void
+    {
+        $user = $request->user('admin') ?? $request->user();
+
+        $isSuper = ($user instanceof AdminUser && $user->isSuperAdmin())
+            || ($user instanceof User && (bool) $user->is_system_admin);
+
+        if (! $isSuper) {
+            abort(403, 'Unauthorized. Super Admin access required.');
+        }
     }
 }

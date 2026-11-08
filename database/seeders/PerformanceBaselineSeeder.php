@@ -38,8 +38,8 @@ class PerformanceBaselineSeeder extends Seeder
             $user = User::factory()->create([
                 'tenant_id' => $tenant->id,
                 'current_center_id' => $centerId,
-                'is_system_admin' => true,
             ]);
+            $user->forceFill(['is_system_admin' => true])->save();
 
             DB::table('center_user')->insert([
                 'tenant_id' => $tenant->id,

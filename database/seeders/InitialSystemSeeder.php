@@ -51,19 +51,14 @@ class InitialSystemSeeder extends Seeder
                 'current_center_id' => $center->id,
                 'password' => Hash::make('11223344'),
                 'email_verified_at' => now(),
-                // The main admin must be a real system admin so they
-                // can reach /system/* (system-wide management panel).
-                // The tenant-scope `super_admin` role is NOT enough
-                // after the 2026-07-06 security hardening.
-                'is_system_admin' => true,
             ]
         );
 
-        // Backfill the is_system_admin flag on the row if it was
-        // created by an older version of this seeder that did not
-        // set it. Without this, the existing main admin can no
-        // longer reach /system/* after the 2026-07-06 security
-        // hardening.
+        // The main admin must be a real system admin so they can reach
+        // /system/* (system-wide management panel). The tenant-scope
+        // `super_admin` role is NOT enough after the 2026-07-06 security
+        // hardening. `is_system_admin` is no longer mass-assignable, so
+        // it must be set explicitly via forceFill.
         if (! $user->is_system_admin) {
             $user->forceFill(['is_system_admin' => true])->save();
         }

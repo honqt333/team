@@ -1233,7 +1233,7 @@ Route::prefix('system')->middleware(['auth:web,admin', 'system.admin'])->group(f
         Route::delete('/tenants/{tenant}', [TenantsController::class, 'destroy'])->name('system.tenants.destroy')->middleware('system.permission:system.tenants.delete');
         Route::put('/tenants/{tenant}/security', [TenantSecurityController::class, 'update2FASettings'])->name('system.tenants.security.update')->middleware('system.permission:system.tenants.manage');
         // Impersonation is super_admin only — powerful debugging affordance.
-        Route::post('/tenants/{tenant}/impersonate', [ImpersonationController::class, 'start'])->name('system.impersonate.start')->middleware('system.permission:system.tenants.impersonate');
+        Route::post('/tenants/{tenant}/impersonate', [ImpersonationController::class, 'start'])->name('system.impersonate.start')->middleware(['super_admin', 'system.permission:system.tenants.impersonate']);
 
         // Bank Transfer Receipts Review
         Route::prefix('bank-transfer-receipts')->name('system.bank-receipts.')->group(function () {
@@ -1248,7 +1248,7 @@ Route::prefix('system')->middleware(['auth:web,admin', 'system.admin'])->group(f
         // a tenant's full data set, and the file itself is held on
         // shared storage. Both pre-delete (automatic) and manual
         // backups go through this controller.
-        Route::post('/tenants/{tenant}/backups', [BackupController::class, 'store'])->name('system.tenants.backups.store')->middleware('system.permission:system.tenants.view');
+        Route::post('/tenants/{tenant}/backups', [BackupController::class, 'store'])->name('system.tenants.backups.store')->middleware(['super_admin', 'system.permission:system.tenants.view']);
     });
 
     // Admin notification bell endpoints (Phase 4). Polling-based:
@@ -1335,7 +1335,7 @@ Route::prefix('system')->middleware(['auth:web,admin', 'system.admin'])->group(f
 
     // General Settings
     Route::get('/settings/general', fn () => redirect()->route('system.settings.index', ['tab' => 'general']))->name('system.settings.general')->middleware('system.permission:system.settings.manage');
-    Route::put('/settings/general', [GeneralSettingsController::class, 'update'])->name('system.settings.general.update')->middleware('system.permission:system.settings.manage');
+    Route::put('/settings/general', [GeneralSettingsController::class, 'update'])->name('system.settings.general.update')->middleware(['super_admin', 'system.permission:system.settings.manage']);
 
     // Website Settings
     Route::get('/settings/website', [WebsiteSettingsController::class, 'index'])->name('system.settings.website')->middleware('system.permission:system.settings.manage');

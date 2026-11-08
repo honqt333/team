@@ -42,9 +42,11 @@ class ImpersonationController extends Controller
         }
 
         $isAdminUser = $actingUser instanceof AdminUser;
-        $isSystemAdmin = $actingUser instanceof User && $actingUser->is_system_admin;
+        $isSystemAdmin = $actingUser instanceof User && (bool) $actingUser->is_system_admin;
 
-        if (! $isAdminUser && ! $isSystemAdmin) {
+        $isSuperAdmin = ($isAdminUser && $actingUser->isSuperAdmin()) || $isSystemAdmin;
+
+        if (! $isSuperAdmin) {
             abort(403, __('messages.system.impersonation.no_admin'));
         }
 

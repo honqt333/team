@@ -44,7 +44,6 @@ class User extends Authenticatable implements MustVerifyEmail
         'phone',
         'photo_path',
         'is_active',
-        'is_system_admin',
         'tenant_id',
         'current_center_id',
     ];

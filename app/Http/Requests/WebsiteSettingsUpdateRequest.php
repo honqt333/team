@@ -21,8 +21,8 @@ class WebsiteSettingsUpdateRequest extends FormRequest
             'settings' => 'required|array',
 
             // Images — stored as URLs after upload, validated as string paths/URLs here
-            'settings.website_logo' => 'nullable|string|max:2048',
-            'settings.website_favicon' => 'nullable|string|max:2048',
+            'settings.website_logo' => ['nullable', 'string', 'max:2048', 'regex:/^(?!\\s*(javascript|data|vbscript):)/i'],
+            'settings.website_favicon' => ['nullable', 'string', 'max:2048', 'regex:/^(?!\\s*(javascript|data|vbscript):)/i'],
 
             // Text fields with length caps
             'settings.website_title_ar' => 'nullable|string|max:500',
@@ -42,11 +42,11 @@ class WebsiteSettingsUpdateRequest extends FormRequest
             'settings.website_announcement_text_color' => ['nullable', 'string', 'max:20', 'regex:/^#([0-9a-fA-F]{6}|[0-9a-fA-F]{3})$/'],
 
             // URLs and Links (supports full URLs and internal paths/anchors)
-            'settings.website_announcement_url' => 'nullable|string|max:2048',
-            'settings.website_facebook_url' => 'nullable|string|max:2048',
-            'settings.website_twitter_url' => 'nullable|string|max:2048',
-            'settings.website_instagram_url' => 'nullable|string|max:2048',
-            'settings.website_linkedin_url' => 'nullable|string|max:2048',
+            'settings.website_announcement_url' => ['nullable', 'string', 'max:2048', 'regex:/^(?!\\s*(javascript|data|vbscript):)/i'],
+            'settings.website_facebook_url' => ['nullable', 'string', 'max:2048', 'regex:/^(?!\\s*(javascript|data|vbscript):)/i'],
+            'settings.website_twitter_url' => ['nullable', 'string', 'max:2048', 'regex:/^(?!\\s*(javascript|data|vbscript):)/i'],
+            'settings.website_instagram_url' => ['nullable', 'string', 'max:2048', 'regex:/^(?!\\s*(javascript|data|vbscript):)/i'],
+            'settings.website_linkedin_url' => ['nullable', 'string', 'max:2048', 'regex:/^(?!\\s*(javascript|data|vbscript):)/i'],
 
             // Scripts — allow HTML but cap size to prevent abuse
             'settings.website_scripts_header' => 'nullable|string|max:100000',

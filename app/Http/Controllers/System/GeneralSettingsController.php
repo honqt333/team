@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace App\Http\Controllers\System;
 
 use App\Http\Controllers\Controller;
+use App\Models\AdminUser;
 use App\Models\Setting;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
@@ -49,6 +51,14 @@ class GeneralSettingsController extends Controller
      */
     public function update(Request $request)
     {
+        $user = $request->user('admin') ?? $request->user();
+        $isSuperAdmin = ($user instanceof AdminUser && $user->isSuperAdmin())
+            || ($user instanceof User && (bool) $user->is_system_admin);
+
+        if (! $isSuperAdmin) {
+            abort(403, 'Unauthorized. Super Admin access required.');
+        }
+
         $validated = $request->validate([
             'key' => 'required|string',
             'value' => 'present',
