@@ -1,6 +1,9 @@
 <template>
     <AppLayout>
         <div class="space-y-6">
+            <!-- Breadcrumbs -->
+            <Breadcrumb :items="breadcrumbItems" class="px-1" />
+
             <!-- Modern High-Density Header -->
             <div
                 class="relative bg-white dark:bg-gray-800 rounded-3xl p-6 shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden group"
@@ -16,24 +19,7 @@
                     <div class="flex items-center gap-6">
                         <!-- Back Button & Part Image -->
                         <div class="flex items-center gap-4">
-                            <Link
-                                :href="route('app.inventory.stock.index')"
-                                class="p-2 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 rounded-full transition-all"
-                            >
-                                <svg
-                                    class="w-6 h-6 rtl:rotate-180"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        stroke-width="2.5"
-                                        d="M15 19l-7-7 7-7"
-                                    />
-                                </svg>
-                            </Link>
+                            <BackButton :href="route('app.inventory.parts.index')" />
 
                             <div class="relative flex-shrink-0">
                                 <img
@@ -134,30 +120,61 @@
                     </div>
 
                     <div class="flex items-center gap-3">
-                        <button
-                            v-if="can('inventory.parts.edit')"
-                            @click="editPart"
-                            class="flex items-center gap-2 px-5 py-2.5 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-xl text-sm font-bold text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600 transition-all shadow-sm hover:shadow active:scale-95"
+                        <!-- Glass Toolbar -->
+                        <div
+                            class="flex items-center gap-2 p-1.5 bg-gray-50/80 dark:bg-gray-800/80 backdrop-blur-md rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm"
                         >
-                            <svg
-                                class="w-4 h-4"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
+                            <button
+                                v-if="can('inventory.parts.edit')"
+                                @click="editPart"
+                                :title="$t('common.edit')"
+                                class="inline-flex items-center gap-2 px-3 py-2 rounded-xl font-black text-xs border border-indigo-100/70 dark:border-indigo-800/30 bg-indigo-50/70 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-300 hover:bg-white dark:hover:bg-indigo-900/30 hover:shadow-md transition-all"
                             >
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    stroke-width="2"
-                                    d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-                                />
-                            </svg>
-                            {{ $t('common.edit') }}
-                        </button>
+                                <svg
+                                    class="w-4 h-4"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2"
+                                        d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                                    />
+                                </svg>
+                                <span>{{ $t('common.edit') }}</span>
+                            </button>
+
+                            <button
+                                @click="printBarcode"
+                                :title="$t('inventory.parts.print_barcode')"
+                                class="inline-flex items-center gap-2 px-3 py-2 rounded-xl font-black text-xs border border-gray-200/70 dark:border-gray-700 bg-white/70 dark:bg-gray-700/50 text-gray-700 dark:text-gray-300 hover:bg-white dark:hover:bg-gray-700 hover:shadow-md transition-all"
+                            >
+                                <svg
+                                    class="w-4 h-4"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2"
+                                        d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"
+                                    />
+                                </svg>
+                                <span class="hidden sm:inline">
+                                    {{ $t('inventory.parts.print_barcode') }}
+                                </span>
+                            </button>
+                        </div>
+
+                        <!-- Primary CTA Button -->
                         <button
                             v-if="can('inventory.parts.edit')"
                             @click="openStockModal"
-                            class="flex items-center gap-2 px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-sm font-bold transition-all shadow-lg active:scale-95"
+                            class="inline-flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl text-xs sm:text-sm font-black shadow-md shadow-indigo-500/25 hover:shadow-lg hover:shadow-indigo-500/35 active:scale-95 transition-all"
                         >
                             <svg
                                 class="w-4 h-4"
@@ -168,30 +185,11 @@
                                 <path
                                     stroke-linecap="round"
                                     stroke-linejoin="round"
-                                    stroke-width="2"
+                                    stroke-width="2.5"
                                     d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
                                 />
                             </svg>
-                            {{ $t('inventory.parts.warehouse_stock') }}
-                        </button>
-                        <button
-                            class="flex items-center gap-2 px-5 py-2.5 bg-gray-900 dark:bg-gray-600 text-white rounded-xl text-sm font-bold transition-all shadow-lg active:scale-95"
-                            @click="printBarcode"
-                        >
-                            <svg
-                                class="w-4 h-4"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                            >
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    stroke-width="2"
-                                    d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"
-                                />
-                            </svg>
-                            {{ $t('inventory.parts.print_barcode') }}
+                            <span>{{ $t('inventory.parts.warehouse_stock') }}</span>
                         </button>
                     </div>
                 </div>
@@ -428,11 +426,33 @@
                                 </div>
                             </div>
                         </div>
-                        <div
-                            v-if="!balances.length"
-                            class="p-8 text-center text-gray-500 dark:text-gray-400"
-                        >
-                            {{ $t('inventory.stock.empty') }}
+                        <div v-if="!balances.length" class="p-6">
+                            <AppEmptyState
+                                :title="$t('inventory.stock.empty')"
+                                :description="$t('inventory.stock.no_balances_desc')"
+                                :action-text="
+                                    can('inventory.parts.edit')
+                                        ? $t('inventory.parts.warehouse_stock')
+                                        : ''
+                                "
+                                @action="openStockModal"
+                            >
+                                <template #icon>
+                                    <svg
+                                        class="w-7 h-7 sm:w-8 sm:h-8"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="1.75"
+                                            d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
+                                        />
+                                    </svg>
+                                </template>
+                            </AppEmptyState>
                         </div>
                     </div>
                 </div>
@@ -693,16 +713,61 @@
                                         </div>
                                     </td>
                                 </tr>
-                                <tr v-if="!moves.data.length">
-                                    <td
-                                        colspan="14"
-                                        class="px-4 py-8 text-center text-gray-500 dark:text-gray-400 align-middle"
-                                    >
-                                        {{ $t('inventory.moves.empty') }}
-                                    </td>
-                                </tr>
                             </tbody>
                         </table>
+                    </div>
+
+                    <!-- Empty State for Movements -->
+                    <div v-if="!moves.data.length" class="p-6">
+                        <AppEmptyState
+                            :title="$t('inventory.moves.empty')"
+                            :description="$t('inventory.moves.no_moves_desc')"
+                        >
+                            <template #icon>
+                                <svg
+                                    class="w-7 h-7 sm:w-8 sm:h-8"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="1.75"
+                                        d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"
+                                    />
+                                </svg>
+                            </template>
+                        </AppEmptyState>
+                    </div>
+
+                    <!-- Movements Pagination -->
+                    <div
+                        v-if="moves.links?.length > 3"
+                        class="px-4 py-3 border-t border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/30 flex items-center justify-between flex-wrap gap-3"
+                    >
+                        <span class="text-xs text-gray-500 dark:text-gray-400">
+                            {{ $t('common.showing') }} {{ toEnglish(moves.from) }} -
+                            {{ toEnglish(moves.to) }} {{ $t('common.of') }}
+                            {{ toEnglish(moves.total) }}
+                        </span>
+                        <div class="flex gap-1">
+                            <Link
+                                v-for="link in moves.links"
+                                :key="link.label"
+                                :href="link.url || '#'"
+                                preserve-scroll
+                                :class="[
+                                    'px-2.5 py-1 rounded-lg text-xs font-medium transition-all',
+                                    link.active
+                                        ? 'bg-indigo-600 text-white shadow-sm font-bold'
+                                        : link.url
+                                          ? 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600'
+                                          : 'bg-gray-50 dark:bg-gray-800 text-gray-300 dark:text-gray-600 cursor-not-allowed border border-gray-100 dark:border-gray-700',
+                                ]"
+                                v-safe-html="link.label"
+                            />
+                        </div>
                     </div>
                 </div>
             </div>
@@ -725,6 +790,8 @@
                 :existing-balances="balances"
                 @close="showStockModal = false"
             />
+
+            <ConfirmModal />
         </div>
     </AppLayout>
 </template>
@@ -733,6 +800,10 @@
 import { ref, computed } from 'vue';
 import { Link, usePage } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
+import Breadcrumb from '@/Components/Breadcrumb.vue';
+import BackButton from '@/Components/BackButton.vue';
+import AppEmptyState from '@/Components/Common/AppEmptyState.vue';
+import ConfirmModal from '@/Components/ConfirmModal.vue';
 import { useI18n } from 'vue-i18n';
 import CreateModal from './CreateModal.vue';
 import StockModal from './StockModal.vue';
@@ -752,8 +823,19 @@ const props = defineProps({
 
 const { t, locale } = useI18n();
 const page = usePage();
-const { formatQuantity, formatCurrency } = useNumberFormat();
+const { formatQuantity, formatCurrency, toEnglish } = useNumberFormat();
 const can = (permission) => page.props.auth?.permissions?.includes(permission) ?? false;
+
+const breadcrumbItems = computed(() => [
+    { label: t('inventory.hub.title', 'المخزون'), href: route('app.inventory.hub') },
+    { label: t('inventory.parts.title', 'قطع الغيار'), href: route('app.inventory.parts.index') },
+    {
+        label:
+            locale.value === 'ar'
+                ? props.part?.name_ar || props.part?.name_en
+                : props.part?.name_en || props.part?.name_ar,
+    },
+]);
 
 const showEditModal = ref(false);
 const showStockModal = ref(false);
