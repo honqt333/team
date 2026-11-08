@@ -259,7 +259,7 @@
         "only": "Only",
         "no_data_available": "No data available",
         "no_records": "No records found",
-        "no_results": "No results found",
+        "no_results": "No matching results found",
         "no_results_found": "No results found",
         "no_return_attachments_desc": "You can upload a document or return receipt image here.",
         "none": "None",
@@ -297,7 +297,6 @@
         "saving": "Saving...",
         "search": "Search...",
         "quick_search": "Quick search...",
-        "no_results": "No matching results found",
         "search_permissions": "Search permissions...",
         "select": "Choose",
         "select_all": "Select All",
@@ -433,7 +432,9 @@
         "prepared_by": "Prepared by",
         "previous": "Previous",
         "time": "Time",
-        "view_mode": "View mode"
+        "view_mode": "View mode",
+        "form_has_errors": "Please check fields with errors ({count})",
+        "remaining_required": "{count} required fields remaining"
     },
     "company_profile": {
         "address": {

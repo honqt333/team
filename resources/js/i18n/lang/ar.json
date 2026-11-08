@@ -259,7 +259,7 @@
         "only": "فقط",
         "no_data_available": "لا توجد بيانات متاحة",
         "no_records": "لا يوجد سجلات",
-        "no_results": "لا توجد نتائج",
+        "no_results": "لم يتم العثور على نتائج",
         "no_results_found": "لم يتم العثور على نتائج",
         "no_return_attachments_desc": "يمكنك رفع مستند أو صورة إيصال الاستلام الخاص بالارتجاع هنا.",
         "none": "لا يوجد",
@@ -297,7 +297,6 @@
         "saving": "جاري الحفظ...",
         "search": "بحث",
         "quick_search": "بحث سريع...",
-        "no_results": "لم يتم العثور على نتائج",
         "search_permissions": "بحث في الصلاحيات...",
         "select": "اختر",
         "select_all": "تحديد الكل",
@@ -433,7 +432,9 @@
         "prepared_by": "تمت الطباعة بواسطة",
         "previous": "السابق",
         "time": "الوقت",
-        "view_mode": "طريقة العرض"
+        "view_mode": "طريقة العرض",
+        "form_has_errors": "يرجى مراجعة الحقول التي بها أخطاء ({count})",
+        "remaining_required": "متبقي {count} حقل إلزامي"
     },
     "company_profile": {
         "address": {
