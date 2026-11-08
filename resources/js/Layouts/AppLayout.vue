@@ -4,6 +4,8 @@
         <Toast />
         <!-- Global Confirm Modal -->
         <ConfirmModal />
+        <!-- Quick Command Palette (Cmd+K) -->
+        <CommandPalette ref="commandPaletteRef" />
 
         <!-- Impersonation Warning Banner -->
         <div
@@ -970,7 +972,33 @@
                             </span>
                         </div>
                     </div>
-                    <div v-else class="hidden md:block"></div>
+                    <!-- Quick Search / Command Palette trigger -->
+                    <button
+                        type="button"
+                        @click="openCommandPalette"
+                        class="hidden md:inline-flex items-center gap-2.5 px-3 py-1.5 text-xs text-gray-500 dark:text-gray-400 bg-gray-100/80 dark:bg-gray-700/50 hover:bg-gray-200/80 dark:hover:bg-gray-700 rounded-xl border border-gray-200/80 dark:border-gray-600 transition-all cursor-pointer"
+                        title="Command + K"
+                    >
+                        <svg
+                            class="w-4 h-4 text-gray-400"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                            />
+                        </svg>
+                        <span>{{ $t('common.quick_search') || 'بحث سريع...' }}</span>
+                        <kbd
+                            class="px-1.5 py-0.5 text-[10px] font-mono bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400 rounded-md border border-gray-200 dark:border-gray-700 shadow-xs"
+                        >
+                            ⌘K
+                        </kbd>
+                    </button>
 
                     <div class="flex items-center gap-1">
                         <!-- Center Switcher -->
@@ -3330,6 +3358,7 @@ import { useTheme } from '@/Composables/useTheme';
 import { setLocale, getCurrentLocale } from '@/i18n/index.js';
 import Toast from '@/Components/Toast.vue';
 import ConfirmModal from '@/Components/ConfirmModal.vue';
+import CommandPalette from '@/Components/Common/CommandPalette.vue';
 import SystemAnnouncementBanner from '@/Components/SystemAnnouncementBanner.vue';
 import NotificationBell from '@/Components/NotificationBell.vue';
 import { usePermission } from '@/Composables/usePermission';
@@ -3343,6 +3372,11 @@ const { locale } = useI18n();
 const page = usePage();
 const { can, hasRole, isAnyAdmin } = usePermission();
 const { success: toastSuccess, error: toastError } = useToast();
+
+const commandPaletteRef = ref(null);
+const openCommandPalette = () => {
+    commandPaletteRef.value?.open();
+};
 
 // ─── Global Flash Handler ─────────────────────────────────────────────────────
 // Automatically display server flash messages as toasts on every Inertia

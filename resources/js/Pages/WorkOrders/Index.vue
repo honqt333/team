@@ -461,29 +461,20 @@
 
             <!-- List/Grid View Section (visible only when status filter is active) -->
             <div v-if="statusFilter" class="space-y-6">
-                <!-- Loading State -->
-                <div v-if="!workOrders" class="flex flex-col items-center justify-center py-16">
-                    <div class="relative">
-                        <div
-                            class="w-12 h-12 border-4 border-indigo-200 dark:border-indigo-900 rounded-full"
-                        ></div>
-                        <div
-                            class="absolute top-0 left-0 w-12 h-12 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin"
-                        ></div>
-                    </div>
-                    <p class="mt-4 text-gray-500 dark:text-gray-400">{{ $t('common.loading') }}</p>
-                </div>
+                <!-- Loading Skeleton State -->
+                <AppTableSkeleton v-if="!workOrders" :rows="8" :cols="6" />
 
                 <!-- Empty State -->
-                <div
+                <AppEmptyState
                     v-else-if="workOrders.data.length === 0"
-                    class="bg-white dark:bg-gray-800 rounded-2xl p-12 text-center border border-gray-200 dark:border-gray-700"
+                    :title="$t('work_orders.empty')"
+                    :description="$t('work_orders.empty_hint')"
+                    :action-text="$t('work_orders.add')"
+                    @action="showCreateModal = true"
                 >
-                    <div
-                        class="w-16 h-16 mx-auto rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center mb-4"
-                    >
+                    <template #icon>
                         <svg
-                            class="w-8 h-8 text-gray-400"
+                            class="w-8 h-8 text-indigo-500"
                             fill="none"
                             stroke="currentColor"
                             viewBox="0 0 24 24"
@@ -491,32 +482,12 @@
                             <path
                                 stroke-linecap="round"
                                 stroke-linejoin="round"
-                                stroke-width="1.5"
+                                stroke-width="1.75"
                                 d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
                             />
                         </svg>
-                    </div>
-                    <p class="text-lg font-medium text-gray-900 dark:text-white mb-1">
-                        {{ $t('work_orders.empty') }}
-                    </p>
-                    <p class="text-gray-500 dark:text-gray-400 mb-6">
-                        {{ $t('work_orders.empty_hint') }}
-                    </p>
-                    <button
-                        @click="showCreateModal = true"
-                        class="inline-flex items-center gap-2 px-5 py-2.5 bg-indigo-600 text-white rounded-xl font-medium hover:bg-indigo-700 transition-colors"
-                    >
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M12 4v16m8-8H4"
-                            />
-                        </svg>
-                        {{ $t('work_orders.add') }}
-                    </button>
-                </div>
+                    </template>
+                </AppEmptyState>
 
                 <!-- Grid View: Modern Beautiful Cards -->
                 <div
@@ -1207,6 +1178,8 @@
 import BackButton from '@/Components/BackButton.vue';
 import AppPrintButton from '@/Components/Common/AppPrintButton.vue';
 import AppViewModeToggle from '@/Components/Common/AppViewModeToggle.vue';
+import AppEmptyState from '@/Components/Common/AppEmptyState.vue';
+import AppTableSkeleton from '@/Components/Common/AppTableSkeleton.vue';
 import { ref, watch, computed, onMounted, onUnmounted, h } from 'vue';
 import { Head, Link, router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';

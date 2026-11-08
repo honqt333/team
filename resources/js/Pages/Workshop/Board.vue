@@ -35,7 +35,16 @@
                 <div
                     v-for="column in boardColumns"
                     :key="column.key"
-                    class="flex flex-col rounded-2xl border border-gray-200 dark:border-gray-700 bg-gray-50/60 dark:bg-gray-800/40 backdrop-blur-sm min-h-[60vh]"
+                    @dragover="onDragOver(column.key, $event)"
+                    @dragenter.prevent
+                    @dragleave="onDragLeave(column.key)"
+                    @drop="onDrop(column.key, $event)"
+                    :class="[
+                        'flex flex-col rounded-2xl border bg-gray-50/60 dark:bg-gray-800/40 backdrop-blur-sm min-h-[60vh] transition-all duration-200',
+                        activeDropTarget === column.key
+                            ? 'border-emerald-500 ring-2 ring-emerald-500/30 bg-emerald-50/20 dark:bg-emerald-950/20 shadow-lg'
+                            : 'border-gray-200 dark:border-gray-700',
+                    ]"
                 >
                     <!-- Column Header -->
                     <div
@@ -57,37 +66,84 @@
                                 column.badgeClass,
                             ]"
                         >
-                            {{ toEnglish(columns[column.key].length) }}
+                            {{ toEnglish(localColumns[column.key]?.length || 0) }}
                         </span>
                     </div>
 
                     <!-- Cards -->
                     <div class="flex-1 p-3 space-y-3 overflow-y-auto">
-                        <Link
-                            v-for="card in columns[column.key]"
+                        <div
+                            v-for="card in localColumns[column.key]"
                             :key="card.id"
-                            :href="
-                                card.work_order_id
-                                    ? route('work-orders.show', {
-                                          workOrder: card.work_order_id,
-                                      })
-                                    : '#'
-                            "
-                            class="block group rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:border-emerald-400 dark:hover:border-emerald-500 shadow-sm hover:shadow-md transition-all p-3.5 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                            draggable="true"
+                            @dragstart="onDragStart(card, column.key, $event)"
+                            @dragend="onDragEnd"
+                            :class="[
+                                'cursor-grab active:cursor-grabbing transition-opacity',
+                                draggedCard?.id === card.id ? 'opacity-30 scale-95' : 'opacity-100',
+                            ]"
                         >
-                            <!-- Row 1: WO code + overdue badge -->
-                            <div class="flex items-start justify-between gap-2 mb-2">
-                                <span
-                                    class="text-[11px] font-mono font-semibold text-gray-500 dark:text-gray-400 truncate"
+                            <Link
+                                :href="
+                                    card.work_order_id
+                                        ? route('work-orders.show', {
+                                              workOrder: card.work_order_id,
+                                          })
+                                        : '#'
+                                "
+                                class="block group rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:border-emerald-400 dark:hover:border-emerald-500 shadow-sm hover:shadow-md transition-all p-3.5 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                            >
+                                <!-- Row 1: WO code + overdue badge -->
+                                <div class="flex items-start justify-between gap-2 mb-2">
+                                    <span
+                                        class="text-[11px] font-mono font-semibold text-gray-500 dark:text-gray-400 truncate"
+                                    >
+                                        {{ card.work_order_code || '—' }}
+                                    </span>
+                                    <span
+                                        v-if="card.is_overdue"
+                                        class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-bold bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300 flex-shrink-0"
+                                    >
+                                        <svg
+                                            class="w-3 h-3"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            viewBox="0 0 24 24"
+                                        >
+                                            <path
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                stroke-width="2.5"
+                                                d="M12 9v2m0 4h.01M5 19h14a2 2 0 001.84-2.75L13.74 4a2 2 0 00-3.48 0L3.16 16.25A2 2 0 005 19z"
+                                            />
+                                        </svg>
+                                        {{ $t('workshop.board.overdue_badge') }}
+                                    </span>
+                                </div>
+
+                                <!-- Service title -->
+                                <h3
+                                    class="text-sm font-semibold text-gray-900 dark:text-gray-100 leading-snug mb-1.5 line-clamp-2"
                                 >
-                                    {{ card.work_order_code || '—' }}
-                                </span>
-                                <span
-                                    v-if="card.is_overdue"
-                                    class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-bold bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300 flex-shrink-0"
+                                    {{ card.service_name || card.title || '—' }}
+                                </h3>
+                                <p
+                                    v-if="
+                                        card.service_name &&
+                                        card.title &&
+                                        card.service_name !== card.title
+                                    "
+                                    class="text-xs text-gray-500 dark:text-gray-400 mb-1.5 line-clamp-1"
+                                >
+                                    {{ card.title }}
+                                </p>
+
+                                <!-- Customer + plate -->
+                                <div
+                                    class="flex items-center gap-2 text-xs text-gray-600 dark:text-gray-300 mb-2"
                                 >
                                     <svg
-                                        class="w-3 h-3"
+                                        class="w-3.5 h-3.5 flex-shrink-0 text-gray-400"
                                         fill="none"
                                         stroke="currentColor"
                                         viewBox="0 0 24 24"
@@ -95,172 +151,137 @@
                                         <path
                                             stroke-linecap="round"
                                             stroke-linejoin="round"
-                                            stroke-width="2.5"
-                                            d="M12 9v2m0 4h.01M5 19h14a2 2 0 001.84-2.75L13.74 4a2 2 0 00-3.48 0L3.16 16.25A2 2 0 005 19z"
+                                            stroke-width="2"
+                                            d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
                                         />
                                     </svg>
-                                    {{ $t('workshop.board.overdue_badge') }}
-                                </span>
-                            </div>
+                                    <span class="truncate flex-1">
+                                        {{ card.customer_name || '—' }}
+                                    </span>
+                                    <span
+                                        v-if="card.vehicle_plate"
+                                        class="inline-flex items-center px-1.5 py-0.5 rounded font-mono text-[10px] font-semibold bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 flex-shrink-0"
+                                        dir="ltr"
+                                    >
+                                        {{ card.vehicle_plate }}
+                                    </span>
+                                </div>
 
-                            <!-- Service title -->
-                            <h3
-                                class="text-sm font-semibold text-gray-900 dark:text-gray-100 leading-snug mb-1.5 line-clamp-2"
-                            >
-                                {{ card.service_name || card.title || '—' }}
-                            </h3>
-                            <p
-                                v-if="
-                                    card.service_name &&
-                                    card.title &&
-                                    card.service_name !== card.title
-                                "
-                                class="text-xs text-gray-500 dark:text-gray-400 mb-1.5 line-clamp-1"
-                            >
-                                {{ card.title }}
-                            </p>
+                                <!-- Technicians -->
+                                <div
+                                    class="flex items-center gap-1.5 text-xs text-gray-600 dark:text-gray-300 mb-2"
+                                >
+                                    <svg
+                                        class="w-3.5 h-3.5 flex-shrink-0 text-gray-400"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z"
+                                        />
+                                    </svg>
+                                    <span v-if="card.technicians.length" class="truncate">
+                                        {{ card.technicians.map((t) => t.name).join('، ') }}
+                                    </span>
+                                    <span v-else class="italic text-gray-400">
+                                        {{ $t('workshop.board.no_technicians') }}
+                                    </span>
+                                </div>
 
-                            <!-- Customer + plate -->
-                            <div
-                                class="flex items-center gap-2 text-xs text-gray-600 dark:text-gray-300 mb-2"
-                            >
-                                <svg
-                                    class="w-3.5 h-3.5 flex-shrink-0 text-gray-400"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
+                                <!-- Hold reason (only when on_hold and present) -->
+                                <div
+                                    v-if="card.status === 'on_hold' && card.work_order_hold_reason"
+                                    class="mb-2 p-2 rounded-md bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800"
                                 >
-                                    <path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        stroke-width="2"
-                                        d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                                    />
-                                </svg>
-                                <span class="truncate flex-1">
-                                    {{ card.customer_name || '—' }}
-                                </span>
-                                <span
-                                    v-if="card.vehicle_plate"
-                                    class="inline-flex items-center px-1.5 py-0.5 rounded font-mono text-[10px] font-semibold bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 flex-shrink-0"
-                                    dir="ltr"
-                                >
-                                    {{ card.vehicle_plate }}
-                                </span>
-                            </div>
+                                    <p
+                                        class="text-[10px] font-semibold text-amber-700 dark:text-amber-300 uppercase tracking-wide"
+                                    >
+                                        {{ $t('workshop.board.hold_reason_label') }}
+                                    </p>
+                                    <p
+                                        class="text-xs text-amber-900 dark:text-amber-100 line-clamp-2 mt-0.5"
+                                    >
+                                        {{ card.work_order_hold_reason }}
+                                    </p>
+                                </div>
 
-                            <!-- Technicians -->
-                            <div
-                                class="flex items-center gap-1.5 text-xs text-gray-600 dark:text-gray-300 mb-2"
-                            >
-                                <svg
-                                    class="w-3.5 h-3.5 flex-shrink-0 text-gray-400"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        stroke-width="2"
-                                        d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z"
-                                    />
-                                </svg>
-                                <span v-if="card.technicians.length" class="truncate">
-                                    {{ card.technicians.map((t) => t.name).join('، ') }}
-                                </span>
-                                <span v-else class="italic text-gray-400">
-                                    {{ $t('workshop.board.no_technicians') }}
-                                </span>
-                            </div>
-
-                            <!-- Hold reason (only when on_hold and present) -->
-                            <div
-                                v-if="card.status === 'on_hold' && card.work_order_hold_reason"
-                                class="mb-2 p-2 rounded-md bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800"
-                            >
-                                <p
-                                    class="text-[10px] font-semibold text-amber-700 dark:text-amber-300 uppercase tracking-wide"
-                                >
-                                    {{ $t('workshop.board.hold_reason_label') }}
-                                </p>
-                                <p
-                                    class="text-xs text-amber-900 dark:text-amber-100 line-clamp-2 mt-0.5"
-                                >
-                                    {{ card.work_order_hold_reason }}
-                                </p>
-                            </div>
-
-                            <!-- Labor chip (only if someone is on a timer) -->
-                            <div
-                                v-if="card.labor && card.labor.active_user_name"
-                                class="mb-2 flex items-center gap-1.5"
-                            >
-                                <span
-                                    :class="[
-                                        'inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-bold',
-                                        card.labor.active_status === 'running'
-                                            ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300'
-                                            : 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300',
-                                    ]"
+                                <!-- Labor chip (only if someone is on a timer) -->
+                                <div
+                                    v-if="card.labor && card.labor.active_user_name"
+                                    class="mb-2 flex items-center gap-1.5"
                                 >
                                     <span
                                         :class="[
-                                            'w-1.5 h-1.5 rounded-full',
+                                            'inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-bold',
                                             card.labor.active_status === 'running'
-                                                ? 'bg-emerald-500 animate-pulse'
-                                                : 'bg-amber-500',
+                                                ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300'
+                                                : 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300',
                                         ]"
-                                    ></span>
-                                    {{
-                                        card.labor.active_status === 'running'
-                                            ? $t('workshop.board.labor_running')
-                                            : $t('workshop.board.labor_paused')
-                                    }}
-                                </span>
-                                <span class="text-[10px] text-gray-600 dark:text-gray-300 truncate">
-                                    {{ card.labor.active_user_name }}
-                                </span>
-                                <span
-                                    v-if="card.labor.total_seconds > 0"
-                                    class="text-[10px] text-gray-400 dark:text-gray-500 font-mono"
-                                    dir="ltr"
-                                >
-                                    · {{ formatHms(card.labor.total_seconds) }}
-                                </span>
-                            </div>
+                                    >
+                                        <span
+                                            :class="[
+                                                'w-1.5 h-1.5 rounded-full',
+                                                card.labor.active_status === 'running'
+                                                    ? 'bg-emerald-500 animate-pulse'
+                                                    : 'bg-amber-500',
+                                            ]"
+                                        ></span>
+                                        {{
+                                            card.labor.active_status === 'running'
+                                                ? $t('workshop.board.labor_running')
+                                                : $t('workshop.board.labor_paused')
+                                        }}
+                                    </span>
+                                    <span
+                                        class="text-[10px] text-gray-600 dark:text-gray-300 truncate"
+                                    >
+                                        {{ card.labor.active_user_name }}
+                                    </span>
+                                    <span
+                                        v-if="card.labor.total_seconds > 0"
+                                        class="text-[10px] text-gray-400 dark:text-gray-500 font-mono"
+                                        dir="ltr"
+                                    >
+                                        · {{ formatHms(card.labor.total_seconds) }}
+                                    </span>
+                                </div>
 
-                            <!-- Footer: started + due -->
-                            <div
-                                class="flex items-center justify-between gap-2 pt-2 mt-1 border-t border-gray-100 dark:border-gray-700 text-[11px] text-gray-500 dark:text-gray-400"
-                            >
-                                <span class="truncate">
-                                    <template v-if="card.started_at">
-                                        {{ $t('workshop.board.started_at') }}:
-                                        {{ formatDate(card.started_at) }}
-                                    </template>
-                                    <template v-else>
-                                        {{ $t('workshop.board.not_started') }}
-                                    </template>
-                                </span>
-                                <span
-                                    v-if="card.due_date"
-                                    :class="[
-                                        'font-mono flex-shrink-0',
-                                        card.is_overdue
-                                            ? 'text-red-600 dark:text-red-400 font-semibold'
-                                            : '',
-                                    ]"
+                                <!-- Footer: started + due -->
+                                <div
+                                    class="flex items-center justify-between gap-2 pt-2 mt-1 border-t border-gray-100 dark:border-gray-700 text-[11px] text-gray-500 dark:text-gray-400"
                                 >
-                                    {{ formatDate(card.due_date) }}
-                                </span>
-                            </div>
-                        </Link>
+                                    <span class="truncate">
+                                        <template v-if="card.started_at">
+                                            {{ $t('workshop.board.started_at') }}:
+                                            {{ formatDate(card.started_at) }}
+                                        </template>
+                                        <template v-else>
+                                            {{ $t('workshop.board.not_started') }}
+                                        </template>
+                                    </span>
+                                    <span
+                                        v-if="card.due_date"
+                                        :class="[
+                                            'font-mono flex-shrink-0',
+                                            card.is_overdue
+                                                ? 'text-red-600 dark:text-red-400 font-semibold'
+                                                : '',
+                                        ]"
+                                    >
+                                        {{ formatDate(card.due_date) }}
+                                    </span>
+                                </div>
+                            </Link>
+                        </div>
 
-                        <!-- Empty state -->
+                        <!-- Empty state with drag cue -->
                         <div
-                            v-if="columns[column.key].length === 0"
-                            class="flex flex-col items-center justify-center py-10 text-center"
+                            v-if="(localColumns[column.key]?.length || 0) === 0"
+                            class="flex flex-col items-center justify-center py-10 px-4 text-center rounded-xl border border-dashed border-gray-200 dark:border-gray-700/60"
                         >
                             <div
                                 class="w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-700/50 flex items-center justify-center mb-2"
@@ -279,9 +300,12 @@
                                     />
                                 </svg>
                             </div>
-                            <p class="text-xs text-gray-400 dark:text-gray-500">
+                            <p class="text-xs text-gray-500 dark:text-gray-400 font-medium">
                                 {{ $t('workshop.board.empty_column') }}
                             </p>
+                            <span class="text-[10px] text-gray-400 dark:text-gray-500 mt-1">
+                                اسحب الكرت وأفلته هنا للنقل
+                            </span>
                         </div>
                     </div>
                 </div>
@@ -291,15 +315,18 @@
 </template>
 
 <script setup>
-import { computed } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { Head, Link } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
+import axios from 'axios';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import PageHeader from '@/Components/PageHeader.vue';
 import { useNumberFormat } from '@/Composables/useNumberFormat';
+import { useToast } from '@/Composables/useToast';
 
 const { t } = useI18n();
 const { toEnglish } = useNumberFormat();
+const { success: toastSuccess, error: toastError } = useToast();
 
 const props = defineProps({
     columns: { type: Object, required: true },
@@ -308,6 +335,103 @@ const props = defineProps({
     todayAppointments: { type: Array, default: () => [] },
     canManageAppointments: { type: Boolean, default: false },
 });
+
+const localColumns = ref({ ...props.columns });
+
+watch(
+    () => props.columns,
+    (newVal) => {
+        localColumns.value = { ...newVal };
+    },
+    { deep: true }
+);
+
+const draggedCard = ref(null);
+const draggedSourceColumn = ref(null);
+const activeDropTarget = ref(null);
+const isUpdatingStatus = ref(false);
+
+function onDragStart(card, columnKey, e) {
+    draggedCard.value = card;
+    draggedSourceColumn.value = columnKey;
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', JSON.stringify({ cardId: card.id, source: columnKey }));
+}
+
+function onDragEnd() {
+    draggedCard.value = null;
+    draggedSourceColumn.value = null;
+    activeDropTarget.value = null;
+}
+
+function onDragOver(columnKey, e) {
+    if (!draggedCard.value || draggedSourceColumn.value === columnKey) return;
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    activeDropTarget.value = columnKey;
+}
+
+function onDragLeave(columnKey) {
+    if (activeDropTarget.value === columnKey) {
+        activeDropTarget.value = null;
+    }
+}
+
+async function onDrop(targetColumnKey, e) {
+    e.preventDefault();
+    activeDropTarget.value = null;
+
+    if (!draggedCard.value || draggedSourceColumn.value === targetColumnKey) {
+        return;
+    }
+
+    const card = draggedCard.value;
+    const sourceKey = draggedSourceColumn.value;
+
+    const sourceList = localColumns.value[sourceKey] || [];
+    const targetList = localColumns.value[targetColumnKey] || [];
+
+    const index = sourceList.findIndex((c) => c.id === card.id);
+    if (index === -1) return;
+
+    // Optimistically move card in UI
+    const [movedCard] = sourceList.splice(index, 1);
+    movedCard.status = targetColumnKey;
+    targetList.unshift(movedCard);
+
+    isUpdatingStatus.value = true;
+
+    try {
+        await axios.patch(
+            route('work-orders.items.status', {
+                work_order: card.work_order_id,
+                item: card.id,
+            }),
+            {
+                status: targetColumnKey,
+            }
+        );
+        toastSuccess(t('messages.status_updated') || 'تم تحديث حالة كرت العمل بنجاح');
+    } catch (err) {
+        // Rollback on failure
+        const rollbackIdx = targetList.findIndex((c) => c.id === card.id);
+        if (rollbackIdx !== -1) {
+            targetList.splice(rollbackIdx, 1);
+        }
+        movedCard.status = sourceKey;
+        sourceList.splice(index, 0, movedCard);
+
+        const msg =
+            err.response?.data?.message ||
+            t('messages.cannot_change_item_status') ||
+            'تعذر تغيير الحالة';
+        toastError(msg);
+    } finally {
+        isUpdatingStatus.value = false;
+        draggedCard.value = null;
+        draggedSourceColumn.value = null;
+    }
+}
 
 // Column definitions — single source of truth for the visual order,
 // labels and the dot/header color of each status column.

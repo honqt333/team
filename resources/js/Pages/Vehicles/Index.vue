@@ -154,29 +154,20 @@
                 </template>
             </PageHeader>
 
-            <!-- Loading State -->
-            <div v-if="!vehicles" class="flex flex-col items-center justify-center py-16">
-                <div class="relative">
-                    <div
-                        class="w-12 h-12 border-4 border-blue-200 dark:border-blue-900 rounded-full"
-                    ></div>
-                    <div
-                        class="absolute top-0 left-0 w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"
-                    ></div>
-                </div>
-                <p class="mt-4 text-gray-500 dark:text-gray-400">{{ $t('common.loading') }}</p>
-            </div>
+            <!-- Loading Skeleton State -->
+            <AppTableSkeleton v-if="!vehicles" :rows="6" :cols="6" />
 
             <!-- Empty State -->
-            <div
+            <AppEmptyState
                 v-else-if="vehicles.data.length === 0"
-                class="bg-white dark:bg-gray-800 rounded-2xl p-12 text-center border border-gray-200 dark:border-gray-700"
+                :title="$t('vehicles.empty')"
+                :description="$t('vehicles.empty_hint')"
+                :action-text="can('crm.vehicles.create') || isAnyAdmin() ? $t('vehicles.add') : ''"
+                @action="openCreateModal"
             >
-                <div
-                    class="w-16 h-16 mx-auto rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center mb-4"
-                >
+                <template #icon>
                     <svg
-                        class="w-8 h-8 text-gray-400"
+                        class="w-8 h-8 text-blue-500"
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
@@ -184,37 +175,12 @@
                         <path
                             stroke-linecap="round"
                             stroke-linejoin="round"
-                            stroke-width="1.5"
-                            d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z"
-                        />
-                        <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            stroke-width="1.5"
+                            stroke-width="1.75"
                             d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0"
                         />
                     </svg>
-                </div>
-                <p class="text-lg font-medium text-gray-900 dark:text-white mb-1">
-                    {{ $t('vehicles.empty') }}
-                </p>
-                <p class="text-gray-500 dark:text-gray-400 mb-6">{{ $t('vehicles.empty_hint') }}</p>
-                <button
-                    v-if="can('crm.vehicles.create') || isAnyAdmin()"
-                    @click="openCreateModal"
-                    class="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl font-medium shadow-lg shadow-indigo-500/30 hover:shadow-xl transition-all"
-                >
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            stroke-width="2"
-                            d="M12 4v16m8-8H4"
-                        />
-                    </svg>
-                    {{ $t('vehicles.add') }}
-                </button>
-            </div>
+                </template>
+            </AppEmptyState>
 
             <!-- Grid View -->
             <div
@@ -575,6 +541,8 @@ import AppLayout from '@/Layouts/AppLayout.vue';
 import PageHeader from '@/Components/PageHeader.vue';
 import AppPrintButton from '@/Components/Common/AppPrintButton.vue';
 import AppViewModeToggle from '@/Components/Common/AppViewModeToggle.vue';
+import AppEmptyState from '@/Components/Common/AppEmptyState.vue';
+import AppTableSkeleton from '@/Components/Common/AppTableSkeleton.vue';
 import VehicleFormModal from '@/Components/Vehicles/VehicleFormModal.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 import CustomDatePicker from '@/Components/CustomDatePicker.vue';

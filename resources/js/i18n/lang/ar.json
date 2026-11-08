@@ -296,6 +296,8 @@
         "saved_success": "تم الحفظ بنجاح",
         "saving": "جاري الحفظ...",
         "search": "بحث",
+        "quick_search": "بحث سريع...",
+        "no_results": "لم يتم العثور على نتائج",
         "search_permissions": "بحث في الصلاحيات...",
         "select": "اختر",
         "select_all": "تحديد الكل",

@@ -191,12 +191,19 @@
                 <!-- INVOICES TAB -->
                 <div v-show="activeTab === 'invoices'">
                     <!-- Empty State -->
-                    <div v-if="!invoices.data?.length" class="py-20 text-center">
-                        <div
-                            class="w-16 h-16 mx-auto rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center mb-4"
-                        >
+                    <AppEmptyState
+                        v-if="!invoices.data?.length"
+                        :title="$t('invoices.sales.title')"
+                        :description="
+                            $t('invoices.sales.empty_hint') ||
+                            'لا توجد فواتير مبيعات مطابقة لمعايير البحث الحالية.'
+                        "
+                        :action-text="$t('nav.work_orders')"
+                        :action-href="route('work-orders.index')"
+                    >
+                        <template #icon>
                             <svg
-                                class="w-8 h-8 text-gray-400"
+                                class="w-8 h-8 text-blue-500"
                                 fill="none"
                                 stroke="currentColor"
                                 viewBox="0 0 24 24"
@@ -204,15 +211,12 @@
                                 <path
                                     stroke-linecap="round"
                                     stroke-linejoin="round"
-                                    stroke-width="1.5"
+                                    stroke-width="1.75"
                                     d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
                                 />
                             </svg>
-                        </div>
-                        <p class="text-lg font-medium text-gray-900 dark:text-white mb-1">
-                            {{ $t('common.no_data') }}
-                        </p>
-                    </div>
+                        </template>
+                    </AppEmptyState>
 
                     <!-- Grid View -->
                     <div
@@ -593,12 +597,14 @@
                 <!-- RETURNS TAB -->
                 <div v-show="activeTab === 'returns'">
                     <!-- Empty State -->
-                    <div v-if="!returns?.data?.length" class="py-20 text-center">
-                        <div
-                            class="w-16 h-16 mx-auto rounded-2xl bg-rose-50 dark:bg-rose-900/20 flex items-center justify-center mb-4"
-                        >
+                    <AppEmptyState
+                        v-if="!returns?.data?.length"
+                        :title="$t('invoices.sales.no_returns')"
+                        :description="'لا توجد إشعارات دائنة أو مرتجعات مسجلة في هذا القسم حالياً.'"
+                    >
+                        <template #icon>
                             <svg
-                                class="w-8 h-8 text-rose-400"
+                                class="w-8 h-8 text-rose-500"
                                 fill="none"
                                 stroke="currentColor"
                                 viewBox="0 0 24 24"
@@ -606,15 +612,12 @@
                                 <path
                                     stroke-linecap="round"
                                     stroke-linejoin="round"
-                                    stroke-width="2"
+                                    stroke-width="1.75"
                                     d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"
                                 />
                             </svg>
-                        </div>
-                        <p class="text-gray-500 dark:text-gray-400 font-medium">
-                            {{ $t('invoices.sales.no_returns') }}
-                        </p>
-                    </div>
+                        </template>
+                    </AppEmptyState>
 
                     <!-- Returns Grid View -->
                     <div
@@ -974,6 +977,8 @@ import { useI18n } from 'vue-i18n';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import PageHeader from '@/Components/PageHeader.vue';
 import AppViewModeToggle from '@/Components/Common/AppViewModeToggle.vue';
+import AppEmptyState from '@/Components/Common/AppEmptyState.vue';
+import AppTableSkeleton from '@/Components/Common/AppTableSkeleton.vue';
 import BackButton from '@/Components/BackButton.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 import CustomDatePicker from '@/Components/CustomDatePicker.vue';

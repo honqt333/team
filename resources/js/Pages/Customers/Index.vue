@@ -166,29 +166,22 @@
                 </template>
             </PageHeader>
 
-            <!-- Loading State -->
-            <div v-if="!customers" class="flex flex-col items-center justify-center py-16">
-                <div class="relative">
-                    <div
-                        class="w-12 h-12 border-4 border-indigo-200 dark:border-indigo-900 rounded-full"
-                    ></div>
-                    <div
-                        class="absolute top-0 left-0 w-12 h-12 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin"
-                    ></div>
-                </div>
-                <p class="mt-4 text-gray-500 dark:text-gray-400">{{ $t('common.loading') }}</p>
-            </div>
+            <!-- Loading Skeleton State -->
+            <AppTableSkeleton v-if="!customers" :rows="6" :cols="6" />
 
             <!-- Empty State -->
-            <div
+            <AppEmptyState
                 v-else-if="customers.data.length === 0"
-                class="bg-white dark:bg-gray-800 rounded-2xl p-12 text-center border border-gray-200 dark:border-gray-700"
+                :title="$t('customers.empty')"
+                :description="$t('customers.empty_hint')"
+                :action-text="
+                    can('crm.customers.create') || isAnyAdmin() ? $t('customers.add') : ''
+                "
+                @action="openCreateModal"
             >
-                <div
-                    class="w-16 h-16 mx-auto rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center mb-4"
-                >
+                <template #icon>
                     <svg
-                        class="w-8 h-8 text-gray-400"
+                        class="w-8 h-8 text-indigo-500"
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
@@ -196,33 +189,12 @@
                         <path
                             stroke-linecap="round"
                             stroke-linejoin="round"
-                            stroke-width="1.5"
+                            stroke-width="1.75"
                             d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"
                         />
                     </svg>
-                </div>
-                <p class="text-lg font-medium text-gray-900 dark:text-white mb-1">
-                    {{ $t('customers.empty') }}
-                </p>
-                <p class="text-gray-500 dark:text-gray-400 mb-6">
-                    {{ $t('customers.empty_hint') }}
-                </p>
-                <button
-                    v-if="can('crm.customers.create') || isAnyAdmin()"
-                    @click="openCreateModal"
-                    class="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl font-medium shadow-lg shadow-indigo-500/30 hover:shadow-xl hover:shadow-indigo-500/40 hover:-translate-y-0.5 transition-all"
-                >
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            stroke-width="2"
-                            d="M12 4v16m8-8H4"
-                        />
-                    </svg>
-                    {{ $t('customers.add') }}
-                </button>
-            </div>
+                </template>
+            </AppEmptyState>
 
             <!-- Grid View -->
             <div
@@ -762,6 +734,8 @@ import AppLayout from '@/Layouts/AppLayout.vue';
 import PageHeader from '@/Components/PageHeader.vue';
 import AppPrintButton from '@/Components/Common/AppPrintButton.vue';
 import AppViewModeToggle from '@/Components/Common/AppViewModeToggle.vue';
+import AppEmptyState from '@/Components/Common/AppEmptyState.vue';
+import AppTableSkeleton from '@/Components/Common/AppTableSkeleton.vue';
 import CustomerFormModal from '@/Components/Customers/CustomerFormModal.vue';
 import CustomerImportModal from '@/Components/Customers/CustomerImportModal.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';

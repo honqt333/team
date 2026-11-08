@@ -296,6 +296,8 @@
         "saved_success": "Saved successfully",
         "saving": "Saving...",
         "search": "Search...",
+        "quick_search": "Quick search...",
+        "no_results": "No matching results found",
         "search_permissions": "Search permissions...",
         "select": "Choose",
         "select_all": "Select All",
