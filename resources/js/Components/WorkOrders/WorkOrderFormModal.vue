@@ -32,7 +32,7 @@
                     type="button"
                     @click="activeTab = tab.key"
                     :class="[
-                        'flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 px-2 sm:px-3 py-2 text-xs sm:text-sm font-medium rounded-lg transition-all flex-1 sm:flex-none',
+                        'relative flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 px-2 sm:px-3 py-2 text-xs sm:text-sm font-medium rounded-lg transition-all flex-1 sm:flex-none',
                         activeTab === tab.key
                             ? 'bg-white dark:bg-gray-800 text-indigo-600 dark:text-indigo-400 shadow-sm'
                             : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300',
@@ -41,6 +41,12 @@
                     <component :is="tab.icon" class="w-4 h-4 flex-shrink-0" />
                     <span class="text-[10px] sm:text-sm text-center leading-tight">
                         {{ tab.label }}
+                    </span>
+                    <span
+                        v-if="tabErrorCount[tab.key] > 0"
+                        class="inline-flex items-center justify-center min-w-[16px] h-4 px-1 text-[10px] font-bold text-white bg-red-500 rounded-full"
+                    >
+                        {{ tabErrorCount[tab.key] }}
                     </span>
                 </button>
             </div>
@@ -52,6 +58,7 @@
                     <!-- Search Section (Hide if pre-selected vehicle exists and not editing) -->
                     <div
                         v-if="!vehicle && (!workOrder || !selectedVehicle)"
+                        data-field="vehicle_id"
                         class="relative bg-gray-50 dark:bg-gray-900/50 rounded-xl p-4 border border-gray-200 dark:border-gray-700"
                     >
                         <div class="flex items-center justify-between mb-3">
@@ -84,6 +91,7 @@
                         <div class="relative">
                             <input
                                 v-model="searchQuery"
+                                name="vehicle_id"
                                 type="text"
                                 @input="debouncedSearch"
                                 @focus="showResults = true"
@@ -551,6 +559,7 @@
                     <!-- Odometer (standalone like Quote form) -->
                     <div
                         v-if="selectedVehicle"
+                        data-field="odometer"
                         class="bg-gray-50 dark:bg-gray-900/50 rounded-xl p-4 border border-gray-200 dark:border-gray-700"
                     >
                         <div class="flex items-center justify-between mb-1.5">
@@ -560,26 +569,13 @@
                                 {{ $t('work_orders.form.odometer') }}
                             </label>
                             <div class="flex items-center gap-3">
-                                <label
+                                <AppToggle
                                     v-if="selectedVehicle && lastVehicleOdometer > 0"
-                                    class="flex items-center gap-2 cursor-pointer group"
-                                >
-                                    <div class="relative">
-                                        <input
-                                            type="checkbox"
-                                            v-model="form.allow_lower_odometer"
-                                            class="sr-only peer"
-                                        />
-                                        <div
-                                            class="w-8 h-4 bg-gray-200 dark:bg-gray-700 rounded-full peer peer-checked:bg-indigo-500 transition-all after:content-[''] after:absolute after:top-0.5 after:start-0.5 after:bg-white after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:after:translate-x-4 rtl:peer-checked:after:-translate-x-4"
-                                        ></div>
-                                    </div>
-                                    <span
-                                        class="text-[10px] font-bold text-gray-500 group-hover:text-indigo-600 transition-colors uppercase tracking-wider"
-                                    >
-                                        {{ $t('quotes.allow_lower_odometer') }}
-                                    </span>
-                                </label>
+                                    v-model="form.allow_lower_odometer"
+                                    size="sm"
+                                    color="warning"
+                                    :label="$t('quotes.allow_lower_odometer')"
+                                />
                                 <button
                                     type="button"
                                     @click="showMileageModal = true"
@@ -605,6 +601,7 @@
                         <div class="relative">
                             <input
                                 v-model="form.odometer"
+                                name="odometer"
                                 type="text"
                                 inputmode="numeric"
                                 @input="
@@ -672,23 +669,26 @@
                     <!-- Dates Grid -->
                     <div v-if="selectedVehicle" class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <!-- Entry Date -->
-                        <div>
+                        <div data-field="entry_date">
                             <label
                                 class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5"
                             >
                                 {{ $t('work_orders.form.entry_date') }}
                             </label>
-                            <CustomDatePicker v-model="form.entry_date" />
+                            <CustomDatePicker v-model="form.entry_date" name="entry_date" />
                         </div>
 
                         <!-- Expected End Date -->
-                        <div>
+                        <div data-field="expected_end_date">
                             <label
                                 class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5"
                             >
                                 {{ $t('work_orders.form.expected_end_date') }}
                             </label>
-                            <CustomDatePicker v-model="form.expected_end_date" />
+                            <CustomDatePicker
+                                v-model="form.expected_end_date"
+                                name="expected_end_date"
+                            />
                         </div>
                     </div>
                 </div>
@@ -696,6 +696,7 @@
                 <!-- Tab 2: Customer Complaint -->
                 <div v-show="activeTab === 'customer_complaint'" class="space-y-4">
                     <div
+                        data-field="customer_complaint"
                         class="bg-gray-50 dark:bg-gray-900/50 rounded-xl p-4 border border-gray-200 dark:border-gray-700"
                     >
                         <label
@@ -705,6 +706,7 @@
                         </label>
                         <textarea
                             v-model="form.customer_complaint"
+                            name="customer_complaint"
                             rows="10"
                             :placeholder="$t('quotes.form_tabs.customer_complaint_placeholder')"
                             class="w-full px-4 py-3 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 resize-none"
@@ -715,6 +717,7 @@
                 <!-- Tab 3: Initial Assessment -->
                 <div v-show="activeTab === 'initial_assessment'" class="space-y-4">
                     <div
+                        data-field="initial_assessment"
                         class="bg-gray-50 dark:bg-gray-900/50 rounded-xl p-4 border border-gray-200 dark:border-gray-700"
                     >
                         <label
@@ -724,6 +727,7 @@
                         </label>
                         <textarea
                             v-model="form.initial_assessment"
+                            name="initial_assessment"
                             rows="10"
                             :placeholder="$t('quotes.form_tabs.initial_assessment_placeholder')"
                             class="w-full px-4 py-3 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 resize-none"
@@ -777,25 +781,74 @@
         </form>
 
         <template #footer>
-            <button
-                type="button"
-                @click="$emit('close')"
-                class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
-            >
-                {{ $t('common.cancel') }}
-            </button>
-            <button
-                type="button"
-                @click="submitForm"
-                :disabled="
-                    form.processing ||
-                    !selectedVehicle ||
-                    (showOdometerWarning && !form.allow_lower_odometer)
-                "
-                class="px-6 py-2 bg-gradient-to-r from-indigo-500 to-purple-500 text-white rounded-lg hover:from-indigo-600 hover:to-purple-600 disabled:opacity-50 transition-all"
-            >
-                {{ form.processing ? $t('common.loading') : $t('common.save') }}
-            </button>
+            <div class="flex items-center justify-between w-full">
+                <div class="flex items-center gap-2">
+                    <span
+                        v-if="Object.keys(form.errors).length > 0"
+                        class="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold rounded-lg bg-red-50 text-red-700 dark:bg-red-950/50 dark:text-red-300 border border-red-200 dark:border-red-900"
+                    >
+                        <svg
+                            class="w-3.5 h-3.5 text-red-500"
+                            fill="currentColor"
+                            viewBox="0 0 20 20"
+                        >
+                            <path
+                                fill-rule="evenodd"
+                                d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                                clip-rule="evenodd"
+                            />
+                        </svg>
+                        {{
+                            $t(
+                                'common.fix_errors_count',
+                                { count: Object.keys(form.errors).length },
+                                `${Object.keys(form.errors).length} أخطاء تحتاج تصحيح`
+                            )
+                        }}
+                    </span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button
+                        type="button"
+                        @click="$emit('close')"
+                        class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                    >
+                        {{ $t('common.cancel') }}
+                    </button>
+                    <button
+                        type="button"
+                        @click="submitForm"
+                        :disabled="
+                            form.processing ||
+                            !selectedVehicle ||
+                            (showOdometerWarning && !form.allow_lower_odometer)
+                        "
+                        class="px-6 py-2 bg-gradient-to-r from-indigo-500 to-purple-500 text-white rounded-lg hover:from-indigo-600 hover:to-purple-600 disabled:opacity-50 transition-all flex items-center gap-2"
+                    >
+                        <svg
+                            v-if="form.processing"
+                            class="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                        >
+                            <circle
+                                class="opacity-25"
+                                cx="12"
+                                cy="12"
+                                r="10"
+                                stroke="currentColor"
+                                stroke-width="4"
+                            ></circle>
+                            <path
+                                class="opacity-75"
+                                fill="currentColor"
+                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                            ></path>
+                        </svg>
+                        {{ form.processing ? $t('common.loading') : $t('common.save') }}
+                    </button>
+                </div>
+            </div>
         </template>
     </BaseModal>
 
@@ -828,12 +881,14 @@ import { useI18n } from 'vue-i18n';
 import { useLocalized } from '@/Composables/useLocalized';
 import { useNumberFormat } from '@/Composables/useNumberFormat';
 import SaudiPlateDisplay from '@/Components/Vehicles/SaudiPlateDisplay.vue';
+import AppToggle from '@/Components/Common/AppToggle.vue';
 import BaseModal from '@/Components/BaseModal.vue';
 import VehicleFormModal from '@/Components/Vehicles/VehicleFormModal.vue';
 import VehicleMileageModal from '@/Components/Vehicles/VehicleMileageModal.vue';
 import VehicleConditionReport from '@/Components/WorkOrders/VehicleConditionReport.vue';
 import VehiclePhotoUploader from '@/Components/WorkOrders/VehiclePhotoUploader.vue';
 import CustomDatePicker from '@/Components/CustomDatePicker.vue';
+import { useFormScrollToError } from '@/Composables/useFormScrollToError';
 import axios from 'axios';
 
 const props = defineProps({
@@ -851,6 +906,24 @@ const emit = defineEmits(['close', 'saved']);
 const { t } = useI18n();
 const { getName } = useLocalized();
 const { toEnglish } = useNumberFormat();
+const { scrollToError } = useFormScrollToError();
+
+const workOrderTabMap = {
+    customer_id: 'main_info',
+    vehicle_id: 'main_info',
+    odometer: 'main_info',
+    contact_name: 'main_info',
+    contact_phone: 'main_info',
+    entry_date: 'main_info',
+    expected_end_date: 'main_info',
+    customer_complaint: 'customer_complaint',
+    initial_assessment: 'initial_assessment',
+    damage_marks: 'condition_report',
+    fuel_level: 'condition_report',
+    photos: 'photos',
+    departments: 'departments',
+    notes: 'main_info',
+};
 
 // Tab Icons as inline SVG components (Render functions for Vue 3 SFC compatibility)
 const createIcon =
@@ -969,6 +1042,24 @@ const form = useForm({
     photos: [],
     notes: props.workOrder?.notes || '',
 });
+
+const tabErrorCount = computed(() => ({
+    main_info: [
+        'customer_id',
+        'vehicle_id',
+        'odometer',
+        'contact_name',
+        'contact_phone',
+        'entry_date',
+        'expected_end_date',
+        'notes',
+    ].filter((k) => form.errors[k]).length,
+    customer_complaint: form.errors.customer_complaint ? 1 : 0,
+    initial_assessment: form.errors.initial_assessment ? 1 : 0,
+    condition_report: form.errors.damage_marks || form.errors.fuel_level ? 1 : 0,
+    photos: form.errors.photos ? 1 : 0,
+    departments: form.errors.departments ? 1 : 0,
+}));
 
 const availableDepartmentsList = computed(() => {
     const list = [...(props.departments || [])];
@@ -1225,6 +1316,14 @@ function submitForm() {
             form.reset();
             emit('saved');
             emit('close');
+        },
+        onError: (errors) => {
+            scrollToError(errors, {
+                tabMap: workOrderTabMap,
+                onSwitchTab: (targetTab) => {
+                    activeTab.value = targetTab;
+                },
+            });
         },
         forceFormData: true,
     };
