@@ -25,7 +25,7 @@ class WhatsappCreditsController extends Controller
 
         $packages = WhatsappPackage::orderBy('sort_order')->get();
 
-        $balances = null;
+        $balances = ['data' => [], 'total' => 0, 'links' => []];
 
         if ($tab === 'balances') {
             $balancesQuery = TenantWhatsappBalance::with('tenant');
@@ -37,7 +37,7 @@ class WhatsappCreditsController extends Controller
             $balances = $balancesQuery->orderByDesc('balance')->paginate(20, ['*'], 'page')->withQueryString();
         }
 
-        $purchases = null;
+        $purchases = ['data' => [], 'total' => 0, 'links' => []];
 
         if ($tab === 'purchases') {
             $purchasesQuery = WhatsappPurchase::with(['tenant', 'package']);
@@ -61,7 +61,7 @@ class WhatsappCreditsController extends Controller
             $purchases = $purchasesQuery->orderBy('created_at', 'desc')->paginate(20, ['*'], 'page')->withQueryString();
         }
 
-        $logs = null;
+        $logs = ['data' => [], 'total' => 0, 'links' => []];
 
         if ($tab === 'usage') {
             $usageQuery = WhatsappUsageLog::with(['tenant', 'center']);

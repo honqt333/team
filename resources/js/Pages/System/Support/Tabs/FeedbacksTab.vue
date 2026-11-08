@@ -10,7 +10,7 @@
                         {{ $t('system.feedbacks.stats.total') }}
                     </div>
                     <div class="mt-2 text-xl font-bold text-gray-900 dark:text-white">
-                        {{ stats.total }}
+                        {{ stats?.total || 0 }}
                     </div>
                 </div>
                 <div
@@ -20,7 +20,7 @@
                         {{ $t('system.feedbacks.stats.pending') }}
                     </div>
                     <div class="mt-2 text-xl font-bold text-amber-600 dark:text-amber-400">
-                        {{ stats.pending }}
+                        {{ stats?.pending || 0 }}
                     </div>
                 </div>
                 <div
@@ -30,7 +30,7 @@
                         {{ $t('system.feedbacks.stats.in_progress') }}
                     </div>
                     <div class="mt-2 text-xl font-bold text-sky-600 dark:text-sky-400">
-                        {{ stats.in_progress }}
+                        {{ stats?.in_progress || 0 }}
                     </div>
                 </div>
                 <div
@@ -40,7 +40,7 @@
                         {{ $t('system.feedbacks.stats.resolved') }}
                     </div>
                     <div class="mt-2 text-xl font-bold text-emerald-600 dark:text-emerald-400">
-                        {{ stats.resolved }}
+                        {{ stats?.resolved || 0 }}
                     </div>
                 </div>
                 <div
@@ -50,7 +50,7 @@
                         {{ $t('system.feedbacks.stats.bugs') }}
                     </div>
                     <div class="mt-2 text-xl font-bold text-rose-600 dark:text-rose-400">
-                        {{ stats.bugs }}
+                        {{ stats?.bugs || 0 }}
                     </div>
                 </div>
             </div>
@@ -112,7 +112,7 @@
                         </thead>
                         <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
                             <tr
-                                v-for="item in feedbacks.data"
+                                v-for="item in feedbacks?.data || []"
                                 :key="item.id"
                                 class="hover:bg-gray-50/50 dark:hover:bg-gray-700/30"
                             >
@@ -215,7 +215,7 @@
                                     </div>
                                 </td>
                             </tr>
-                            <tr v-if="!feedbacks.data || feedbacks.data.length === 0">
+                            <tr v-if="!feedbacks?.data || feedbacks.data.length === 0">
                                 <td colspan="7" class="p-8 text-center text-gray-400">
                                     {{ $t('system.feedbacks.table.empty') }}
                                 </td>
@@ -227,7 +227,7 @@
 
             <!-- Pagination -->
             <div
-                v-if="feedbacks.links && feedbacks.links.length > 3"
+                v-if="feedbacks?.links && feedbacks.links.length > 3"
                 class="flex justify-center pt-2"
             >
                 <nav class="flex items-center gap-1">

@@ -59,7 +59,7 @@
                         class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700"
                     >
                         <tr
-                            v-for="message in messages.data"
+                            v-for="message in messages?.data || []"
                             :key="message.id"
                             :class="{ 'bg-blue-50 dark:bg-blue-900/10': !message.is_read }"
                             class="hover:bg-gray-50 dark:hover:bg-gray-700/30 cursor-pointer transition-colors"
@@ -156,7 +156,7 @@
                                 </div>
                             </td>
                         </tr>
-                        <tr v-if="messages.data.length === 0">
+                        <tr v-if="!messages?.data || messages.data.length === 0">
                             <td
                                 colspan="5"
                                 class="px-6 py-12 text-center text-gray-500 dark:text-gray-400"
@@ -170,7 +170,7 @@
 
             <!-- Pagination -->
             <div
-                v-if="messages.links?.length > 3"
+                v-if="messages?.links && messages.links.length > 3"
                 class="px-6 py-4 border-t border-gray-200 dark:border-gray-700 flex justify-center"
             >
                 <div class="flex gap-1">

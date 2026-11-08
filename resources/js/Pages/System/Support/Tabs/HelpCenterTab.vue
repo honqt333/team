@@ -1480,18 +1480,18 @@ const selectedCategoryFilter = ref('all');
 
 // Reactive form with all help settings
 const form = useForm({
-    contact_whatsapp: props.settings.contact_whatsapp || '+966 555 785 658',
-    contact_phone: props.settings.contact_phone || '920000000',
-    contact_email: props.settings.contact_email || 'support@carag.sa',
-    contact_hours: props.settings.contact_hours || t('help.support.hours'),
-    contact_whatsapp_enabled: props.settings.contact_whatsapp_enabled !== false,
-    contact_ticket_url: props.settings.contact_ticket_url || '',
+    contact_whatsapp: props.settings?.contact_whatsapp || '+966 555 785 658',
+    contact_phone: props.settings?.contact_phone || '920000000',
+    contact_email: props.settings?.contact_email || 'support@carag.sa',
+    contact_hours: props.settings?.contact_hours || t('help.support.hours'),
+    contact_whatsapp_enabled: props.settings?.contact_whatsapp_enabled !== false,
+    contact_ticket_url: props.settings?.contact_ticket_url || '',
 
-    quick_start_items: JSON.parse(JSON.stringify(props.settings.quick_start_items || [])),
-    video_tutorials: JSON.parse(JSON.stringify(props.settings.video_tutorials || [])),
-    categories: JSON.parse(JSON.stringify(props.settings.categories || [])),
-    topics: JSON.parse(JSON.stringify(props.settings.topics || [])),
-    faqs: JSON.parse(JSON.stringify(props.settings.faqs || [])),
+    quick_start_items: JSON.parse(JSON.stringify(props.settings?.quick_start_items || [])),
+    video_tutorials: JSON.parse(JSON.stringify(props.settings?.video_tutorials || [])),
+    categories: JSON.parse(JSON.stringify(props.settings?.categories || [])),
+    topics: JSON.parse(JSON.stringify(props.settings?.topics || [])),
+    faqs: JSON.parse(JSON.stringify(props.settings?.faqs || [])),
 });
 
 const categoryFilterOptions = computed(() => [
