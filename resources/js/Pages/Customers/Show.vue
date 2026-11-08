@@ -1,6 +1,9 @@
 <template>
     <AppLayout>
-        <div class="space-y-8">
+        <div class="space-y-6">
+            <!-- Breadcrumbs -->
+            <Breadcrumb :items="breadcrumbItems" class="px-1" />
+
             <div class="relative group">
                 <div
                     class="absolute -inset-1 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-[2.5rem] blur opacity-[0.06] group-hover:opacity-[0.10] transition duration-700"
@@ -117,6 +120,27 @@
                                     />
                                 </svg>
                                 <span class="hidden sm:inline">{{ $t('common.delete') }}</span>
+                            </button>
+
+                            <button
+                                v-if="can('crm.vehicles.create') || isAnyAdmin()"
+                                @click="openVehicleModal"
+                                class="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl font-black text-xs bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-md shadow-indigo-500/25 hover:shadow-lg hover:shadow-indigo-500/35 active:scale-95 transition-all"
+                            >
+                                <svg
+                                    class="w-4 h-4"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2.5"
+                                        d="M12 4v16m8-8H4"
+                                    />
+                                </svg>
+                                <span>{{ $t('vehicles.add') }}</span>
                             </button>
                         </div>
                     </div>
@@ -674,46 +698,11 @@
                                     />
                                 </div>
                                 <!-- View Toggle -->
-                                <div class="flex rounded-lg bg-gray-100 dark:bg-gray-900 p-1">
-                                    <button
-                                        @click="vehicleViewMode = 'grid'"
-                                        :class="[
-                                            'px-2 py-1 rounded transition-colors',
-                                            vehicleViewMode === 'grid'
-                                                ? 'bg-white dark:bg-gray-800 shadow-sm text-gray-900 dark:text-white'
-                                                : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200',
-                                        ]"
-                                    >
-                                        <svg
-                                            class="w-4 h-4"
-                                            fill="currentColor"
-                                            viewBox="0 0 24 24"
-                                        >
-                                            <path
-                                                d="M3 3h8v8H3V3zm10 0h8v8h-8V3zM3 13h8v8H3v-8zm10 0h8v8h-8v-8z"
-                                            />
-                                        </svg>
-                                    </button>
-                                    <button
-                                        @click="vehicleViewMode = 'list'"
-                                        :class="[
-                                            'px-2 py-1 rounded transition-colors',
-                                            vehicleViewMode === 'list'
-                                                ? 'bg-white dark:bg-gray-800 shadow-sm text-gray-900 dark:text-white'
-                                                : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200',
-                                        ]"
-                                    >
-                                        <svg
-                                            class="w-4 h-4"
-                                            fill="currentColor"
-                                            viewBox="0 0 24 24"
-                                        >
-                                            <path
-                                                d="M3 4h18v2H3V4zm0 7h18v2H3v-2zm0 7h18v2H3v-2z"
-                                            />
-                                        </svg>
-                                    </button>
-                                </div>
+                                <AppViewModeToggle
+                                    v-model="vehicleViewMode"
+                                    storage-key="customer_vehicle_view_mode"
+                                    size="sm"
+                                />
                             </div>
                             <!-- Add Button -->
                             <button
@@ -1030,12 +1019,22 @@
                         </div>
 
                         <!-- Empty State -->
-                        <div v-else class="text-center py-12">
-                            <div
-                                class="w-16 h-16 mx-auto rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center mb-4"
-                            >
+                        <AppEmptyState
+                            v-else
+                            :title="
+                                vehicleSearch
+                                    ? $t('common.no_results')
+                                    : $t('customers.no_vehicles')
+                            "
+                            :description="vehicleSearch ? $t('common.try_adjusting_search') : ''"
+                            :action-text="
+                                can('crm.vehicles.create') || isAnyAdmin() ? $t('vehicles.add') : ''
+                            "
+                            @action="openVehicleModal"
+                        >
+                            <template #icon>
                                 <svg
-                                    class="w-8 h-8 text-gray-400"
+                                    class="w-7 h-7 sm:w-8 sm:h-8"
                                     fill="none"
                                     stroke="currentColor"
                                     viewBox="0 0 24 24"
@@ -1043,35 +1042,12 @@
                                     <path
                                         stroke-linecap="round"
                                         stroke-linejoin="round"
-                                        stroke-width="1.5"
+                                        stroke-width="1.75"
                                         d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z"
                                     />
                                 </svg>
-                            </div>
-                            <p class="text-gray-500 dark:text-gray-400 mb-4">
-                                {{ $t('customers.no_vehicles') }}
-                            </p>
-                            <button
-                                v-if="can('crm.vehicles.create') || isAnyAdmin()"
-                                @click="openVehicleModal"
-                                class="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl font-medium shadow-lg shadow-indigo-500/30"
-                            >
-                                <svg
-                                    class="w-5 h-5"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        stroke-width="2"
-                                        d="M12 4v16m8-8H4"
-                                    />
-                                </svg>
-                                {{ $t('vehicles.add') }}
-                            </button>
-                        </div>
+                            </template>
+                        </AppEmptyState>
                     </div>
 
                     <!-- ========== WORK ORDERS TAB ========== -->
@@ -1106,46 +1082,11 @@
                                         class="w-full sm:w-48 ps-10 pe-4 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500"
                                     />
                                 </div>
-                                <div class="flex rounded-lg bg-gray-100 dark:bg-gray-900 p-1">
-                                    <button
-                                        @click="workOrderViewMode = 'grid'"
-                                        :class="[
-                                            'px-2 py-1 rounded transition-colors',
-                                            workOrderViewMode === 'grid'
-                                                ? 'bg-white dark:bg-gray-800 shadow-sm text-gray-900 dark:text-white'
-                                                : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200',
-                                        ]"
-                                    >
-                                        <svg
-                                            class="w-4 h-4"
-                                            fill="currentColor"
-                                            viewBox="0 0 24 24"
-                                        >
-                                            <path
-                                                d="M3 3h8v8H3V3zm10 0h8v8h-8V3zM3 13h8v8H3v-8zm10 0h8v8h-8v-8z"
-                                            />
-                                        </svg>
-                                    </button>
-                                    <button
-                                        @click="workOrderViewMode = 'list'"
-                                        :class="[
-                                            'px-2 py-1 rounded transition-colors',
-                                            workOrderViewMode === 'list'
-                                                ? 'bg-white dark:bg-gray-800 shadow-sm text-gray-900 dark:text-white'
-                                                : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200',
-                                        ]"
-                                    >
-                                        <svg
-                                            class="w-4 h-4"
-                                            fill="currentColor"
-                                            viewBox="0 0 24 24"
-                                        >
-                                            <path
-                                                d="M3 4h18v2H3V4zm0 7h18v2H3v-2zm0 7h18v2H3v-2z"
-                                            />
-                                        </svg>
-                                    </button>
-                                </div>
+                                <AppViewModeToggle
+                                    v-model="workOrderViewMode"
+                                    storage-key="customer_work_order_view_mode"
+                                    size="sm"
+                                />
                             </div>
                         </div>
 
@@ -1441,12 +1382,24 @@
                         </div>
 
                         <!-- Empty State -->
-                        <div v-else-if="filteredWorkOrders.length === 0" class="text-center py-12">
-                            <div
-                                class="w-16 h-16 mx-auto rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center mb-4"
-                            >
+                        <AppEmptyState
+                            v-else-if="filteredWorkOrders.length === 0"
+                            :title="
+                                workOrderSearch
+                                    ? $t('common.no_results')
+                                    : $t('customers.no_work_orders')
+                            "
+                            :description="workOrderSearch ? $t('common.try_adjusting_search') : ''"
+                            :action-text="
+                                can('crm.work_orders.create') || isAnyAdmin()
+                                    ? $t('work_orders.add')
+                                    : ''
+                            "
+                            @action="openWorkOrderModal(null)"
+                        >
+                            <template #icon>
                                 <svg
-                                    class="w-8 h-8 text-gray-400"
+                                    class="w-7 h-7 sm:w-8 sm:h-8"
                                     fill="none"
                                     stroke="currentColor"
                                     viewBox="0 0 24 24"
@@ -1454,15 +1407,12 @@
                                     <path
                                         stroke-linecap="round"
                                         stroke-linejoin="round"
-                                        stroke-width="1.5"
-                                        d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"
+                                        stroke-width="1.75"
+                                        d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
                                     />
                                 </svg>
-                            </div>
-                            <p class="text-gray-500 dark:text-gray-400 mb-4">
-                                {{ $t('customers.no_work_orders') }}
-                            </p>
-                        </div>
+                            </template>
+                        </AppEmptyState>
                     </div>
 
                     <!-- ========== QUOTES TAB ========== -->
@@ -1497,46 +1447,11 @@
                                         class="w-full sm:w-48 ps-10 pe-4 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-amber-500"
                                     />
                                 </div>
-                                <div class="flex rounded-lg bg-gray-100 dark:bg-gray-900 p-1">
-                                    <button
-                                        @click="quoteViewMode = 'grid'"
-                                        :class="[
-                                            'px-2 py-1 rounded transition-colors',
-                                            quoteViewMode === 'grid'
-                                                ? 'bg-white dark:bg-gray-800 shadow-sm text-gray-900 dark:text-white'
-                                                : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200',
-                                        ]"
-                                    >
-                                        <svg
-                                            class="w-4 h-4"
-                                            fill="currentColor"
-                                            viewBox="0 0 24 24"
-                                        >
-                                            <path
-                                                d="M3 3h8v8H3V3zm10 0h8v8h-8V3zM3 13h8v8H3v-8zm10 0h8v8h-8v-8z"
-                                            />
-                                        </svg>
-                                    </button>
-                                    <button
-                                        @click="quoteViewMode = 'list'"
-                                        :class="[
-                                            'px-2 py-1 rounded transition-colors',
-                                            quoteViewMode === 'list'
-                                                ? 'bg-white dark:bg-gray-800 shadow-sm text-gray-900 dark:text-white'
-                                                : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200',
-                                        ]"
-                                    >
-                                        <svg
-                                            class="w-4 h-4"
-                                            fill="currentColor"
-                                            viewBox="0 0 24 24"
-                                        >
-                                            <path
-                                                d="M3 4h18v2H3V4zm0 7h18v2H3v-2zm0 7h18v2H3v-2z"
-                                            />
-                                        </svg>
-                                    </button>
-                                </div>
+                                <AppViewModeToggle
+                                    v-model="quoteViewMode"
+                                    storage-key="customer_quote_view_mode"
+                                    size="sm"
+                                />
                             </div>
                         </div>
 
@@ -1740,12 +1655,20 @@
                         </div>
 
                         <!-- Empty State -->
-                        <div v-else-if="filteredQuotes.length === 0" class="text-center py-12">
-                            <div
-                                class="w-16 h-16 mx-auto rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center mb-4"
-                            >
+                        <AppEmptyState
+                            v-else-if="filteredQuotes.length === 0"
+                            :title="
+                                quoteSearch ? $t('common.no_results') : $t('customers.no_quotes')
+                            "
+                            :description="quoteSearch ? $t('common.try_adjusting_search') : ''"
+                            :action-text="
+                                can('crm.quotes.create') || isAnyAdmin() ? $t('quotes.add') : ''
+                            "
+                            @action="openQuoteModal(null)"
+                        >
+                            <template #icon>
                                 <svg
-                                    class="w-8 h-8 text-gray-400"
+                                    class="w-7 h-7 sm:w-8 sm:h-8"
                                     fill="none"
                                     stroke="currentColor"
                                     viewBox="0 0 24 24"
@@ -1753,15 +1676,12 @@
                                     <path
                                         stroke-linecap="round"
                                         stroke-linejoin="round"
-                                        stroke-width="1.5"
+                                        stroke-width="1.75"
                                         d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
                                     />
                                 </svg>
-                            </div>
-                            <p class="text-gray-500 dark:text-gray-400 mb-4">
-                                {{ $t('customers.no_quotes') }}
-                            </p>
-                        </div>
+                            </template>
+                        </AppEmptyState>
                     </div>
 
                     <!-- ========== INVOICES TAB ========== -->
@@ -1923,12 +1843,16 @@
                         </div>
 
                         <!-- Empty State -->
-                        <div v-else class="text-center py-12">
-                            <div
-                                class="w-16 h-16 mx-auto rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center mb-4"
-                            >
+                        <AppEmptyState
+                            v-else
+                            :title="
+                                invoiceSearch ? $t('common.no_results') : $t('invoices.no_invoices')
+                            "
+                            :description="invoiceSearch ? $t('common.try_adjusting_search') : ''"
+                        >
+                            <template #icon>
                                 <svg
-                                    class="w-8 h-8 text-gray-400"
+                                    class="w-7 h-7 sm:w-8 sm:h-8"
                                     fill="none"
                                     stroke="currentColor"
                                     viewBox="0 0 24 24"
@@ -1936,15 +1860,12 @@
                                     <path
                                         stroke-linecap="round"
                                         stroke-linejoin="round"
-                                        stroke-width="1.5"
+                                        stroke-width="1.75"
                                         d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2z"
                                     />
                                 </svg>
-                            </div>
-                            <p class="text-gray-500 dark:text-gray-400 mb-4">
-                                {{ $t('invoices.no_invoices') }}
-                            </p>
-                        </div>
+                            </template>
+                        </AppEmptyState>
                     </div>
 
                     <!-- ========== PAYMENTS TAB ========== -->
@@ -2143,12 +2064,16 @@
                         </div>
 
                         <!-- Empty State -->
-                        <div v-else class="text-center py-12">
-                            <div
-                                class="w-16 h-16 mx-auto rounded-full bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center mb-4"
-                            >
+                        <AppEmptyState
+                            v-else
+                            :title="
+                                paymentSearch ? $t('common.no_results') : $t('payments.no_payments')
+                            "
+                            :description="paymentSearch ? $t('common.try_adjusting_search') : ''"
+                        >
+                            <template #icon>
                                 <svg
-                                    class="w-8 h-8 text-purple-500"
+                                    class="w-7 h-7 sm:w-8 sm:h-8 text-purple-500"
                                     fill="none"
                                     stroke="currentColor"
                                     viewBox="0 0 24 24"
@@ -2156,18 +2081,12 @@
                                     <path
                                         stroke-linecap="round"
                                         stroke-linejoin="round"
-                                        stroke-width="1.5"
+                                        stroke-width="1.75"
                                         d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"
                                     />
                                 </svg>
-                            </div>
-                            <p class="text-lg font-medium text-gray-900 dark:text-white mb-1">
-                                {{ $t('customers.payments') }}
-                            </p>
-                            <p class="text-gray-500 dark:text-gray-400">
-                                {{ $t('payments.no_payments') }}
-                            </p>
-                        </div>
+                            </template>
+                        </AppEmptyState>
                     </div>
                 </div>
             </div>
@@ -2237,11 +2156,14 @@
 </template>
 
 <script setup>
-import { ref, computed, h, watch } from 'vue';
+import { ref, computed, h, watch, onMounted } from 'vue';
 import { Head, Link, router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import AppLayout from '@/Layouts/AppLayout.vue';
+import Breadcrumb from '@/Components/Breadcrumb.vue';
 import BackButton from '@/Components/BackButton.vue';
+import AppEmptyState from '@/Components/Common/AppEmptyState.vue';
+import AppViewModeToggle from '@/Components/Common/AppViewModeToggle.vue';
 import CustomerFormModal from '@/Components/Customers/CustomerFormModal.vue';
 import VehicleFormModal from '@/Components/Vehicles/VehicleFormModal.vue';
 import WorkOrderFormModal from '@/Components/WorkOrders/WorkOrderFormModal.vue';
@@ -2286,6 +2208,11 @@ const { confirm } = useConfirm();
 const { can, isAnyAdmin } = usePermission();
 const { toEnglish, formatNumber } = useNumberFormat();
 
+const breadcrumbItems = computed(() => [
+    { label: t('customers.title'), href: route('customers.index') },
+    { label: props.customer?.name || '' },
+]);
+
 const headerEmail = computed(() => (props.customer?.email || '').trim());
 const headerAddress = computed(() => {
     const c = props.customer || {};
@@ -2313,7 +2240,21 @@ const showMergeModal = ref(false);
 const selectedVehicle = ref(null);
 
 // Tab & view states
-const activeTab = ref(localStorage.getItem('customer_active_tab') || 'vehicles');
+const getInitialTab = () => {
+    if (typeof window !== 'undefined') {
+        const urlParams = new URLSearchParams(window.location.search);
+        const tabFromUrl = urlParams.get('tab');
+        if (
+            tabFromUrl &&
+            ['vehicles', 'workOrders', 'quotes', 'invoices', 'payments'].includes(tabFromUrl)
+        ) {
+            return tabFromUrl;
+        }
+    }
+    return localStorage.getItem('customer_active_tab') || 'vehicles';
+};
+
+const activeTab = ref(getInitialTab());
 const vehicleViewMode = ref(localStorage.getItem('customer_vehicle_view_mode') || 'grid');
 const workOrderViewMode = ref(localStorage.getItem('customer_work_order_view_mode') || 'grid');
 const quoteViewMode = ref(localStorage.getItem('customer_quote_view_mode') || 'grid');
@@ -2325,8 +2266,30 @@ const quoteSearch = ref('');
 const paymentSearch = ref('');
 const invoiceSearch = ref('');
 
-// Persistence watchers
-watch(activeTab, (val) => localStorage.setItem('customer_active_tab', val));
+// Persistence & URL sync watchers
+onMounted(() => {
+    if (typeof window !== 'undefined') {
+        const urlParams = new URLSearchParams(window.location.search);
+        const tabFromUrl = urlParams.get('tab');
+        if (
+            tabFromUrl &&
+            ['vehicles', 'workOrders', 'quotes', 'invoices', 'payments'].includes(tabFromUrl)
+        ) {
+            activeTab.value = tabFromUrl;
+        }
+    }
+});
+
+watch(activeTab, (val) => {
+    localStorage.setItem('customer_active_tab', val);
+    if (typeof window !== 'undefined') {
+        const url = new URL(window.location.href);
+        if (url.searchParams.get('tab') !== val) {
+            url.searchParams.set('tab', val);
+            window.history.replaceState({}, '', url.toString());
+        }
+    }
+});
 watch(vehicleViewMode, (val) => localStorage.setItem('customer_vehicle_view_mode', val));
 watch(workOrderViewMode, (val) => localStorage.setItem('customer_work_order_view_mode', val));
 watch(quoteViewMode, (val) => localStorage.setItem('customer_quote_view_mode', val));
