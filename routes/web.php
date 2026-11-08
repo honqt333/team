@@ -61,6 +61,7 @@ use App\Http\Controllers\App\Quotes\QuoteController;
 use App\Http\Controllers\App\Quotes\QuotePartsController;
 use App\Http\Controllers\App\Quotes\QuotePrintController;
 use App\Http\Controllers\App\Quotes\QuoteServiceController;
+use App\Http\Controllers\App\Reports\FinancialReportsController;
 use App\Http\Controllers\App\Reports\TaxPeriodsController;
 use App\Http\Controllers\App\ReportsController;
 use App\Http\Controllers\App\RoleController;
@@ -1036,11 +1037,11 @@ Route::prefix('app')->middleware(['auth', 'verified', 'tenant.active', 'center.c
         Route::get('/employees/export', [ReportsController::class, 'exportEmployees'])->name('employees.export');
         Route::get('/vehicles', [ReportsController::class, 'vehicles'])->name('vehicles');
         Route::get('/vehicles/export', [ReportsController::class, 'exportVehicles'])->name('vehicles.export');
-        Route::get('/financial-summary', [ReportsController::class, 'financialSummary'])->name('financial-summary');
-        Route::get('/financial-summary/export', [ReportsController::class, 'exportFinancialSummary'])->name('financial-summary.export');
+        Route::get('/financial-summary', [FinancialReportsController::class, 'financialSummary'])->name('financial-summary');
+        Route::get('/financial-summary/export', [FinancialReportsController::class, 'exportFinancialSummary'])->name('financial-summary.export');
         Route::get('/financialSummary', fn () => redirect()->route('app.reports.financial-summary'));
-        Route::get('/cash-register', [ReportsController::class, 'cashRegister'])->name('cash-register');
-        Route::get('/cash-register/export', [ReportsController::class, 'exportCashRegister'])->name('cash-register.export');
+        Route::get('/cash-register', [FinancialReportsController::class, 'cashRegister'])->name('cash-register');
+        Route::get('/cash-register/export', [FinancialReportsController::class, 'exportCashRegister'])->name('cash-register.export');
         Route::get('/cashRegister', fn () => redirect()->route('app.reports.cash-register'));
 
         // Tax Periods (الفترات والإقرارات الضريبية)
