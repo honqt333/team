@@ -43,7 +43,14 @@ const map = JSON.parse(readFileSync('/tmp/system-i18n-map.json', 'utf8'));
 
 // ── Options ────────────────────────────────────────────────────────────────
 const only = (process.argv.find((a) => a.startsWith('--files=')) ?? '').replace('--files=', '');
-const onlyFiles = only ? new Set(only.split(',').map((f) => f.trim()).filter(Boolean)) : null;
+const onlyFiles = only
+    ? new Set(
+          only
+              .split(',')
+              .map((f) => f.trim())
+              .filter(Boolean)
+      )
+    : null;
 
 // ── Helpers ────────────────────────────────────────────────────────────────
 const ARABIC = /[؀-ۿ]/;
@@ -236,7 +243,7 @@ const PARAM_NAMES = {
     'formatCurrency(diff)': 'amount',
     'formatCurrency(partialShortfall)': 'amount',
     'formatCurrency(-difference)': 'amount',
-    'variable': 'variable',
+    variable: 'variable',
     'pkg.name_ar': 'name',
     'invoice.invoice_number': 'number',
     'tenant.name': 'name',
@@ -555,7 +562,12 @@ for (const [file, entries] of byFile) {
 
         stats.skipped++;
         stats.skippedList ??= [];
-        stats.skippedList.push({ file, value: entry.value, kind: entry.kind, context: entry.context });
+        stats.skippedList.push({
+            file,
+            value: entry.value,
+            kind: entry.kind,
+            context: entry.context,
+        });
     }
 
     if (edits.length === 0) {
@@ -613,10 +625,25 @@ function findTemplateEndOffset(source) {
  *
  * The template is the region between `<template>` and `</template>`;
  * everything else — `<script>`, `<script setup>` — is script.
+ *
+ * THE LAST `</template>` IS THE ONE THAT MATTERS
+ *
+ * A component can nest a slot template inside the root one:
+ *
+ *     <template>
+ *         <PageHeader>
+ *             <template #icon> ... </template>   <-- line 24
+ *         </PageHeader>
+ *         ...
+ *     </template>                               <-- line 271
+ *
+ * `indexOf('</template>')` finds the NESTED one, so everything after
+ * it looks like script, and the template got `t()` instead of `$t()`.
+ * The root template is closed by the LAST `</template>` in the file.
  */
 function isInScript(source, offset) {
     const templateStart = source.indexOf('<template>');
-    const templateEnd = source.indexOf('</template>');
+    const templateEnd = source.lastIndexOf('</template>');
 
     if (templateStart === -1 || templateEnd === -1) {
         return true;

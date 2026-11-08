@@ -30,6 +30,19 @@ export const MISSING_KEYS = {
     'common.time': { ar: 'الوقت', en: 'Time' },
     'common.view_mode': { ar: 'طريقة العرض', en: 'View mode' },
 
+    // The subtitle of the "Today's schedule" card in the tenant
+    // dashboard.
+    'dashboard.today': { ar: 'اليوم', en: 'Today' },
+
+    // This one lives in lang/{ar,en}/common.php as well. A component
+    // cannot read the PHP locale files, so it needs its own copy in
+    // the Vue JSON: without it the English UI fell back to the
+    // Arabic text the component carried inline.
+    'common.secure_payment_note': {
+        ar: 'الدفع آمن ومشفر (PCI DSS)',
+        en: 'Secure, encrypted payment (PCI DSS)',
+    },
+
     // ── customers (print view) ─────────────────────────────────────────────
     'customers.print.balance': { ar: 'الرصيد', en: 'Balance' },
     'customers.print.customer_code': { ar: 'كود العميل', en: 'Customer code' },
@@ -41,11 +54,17 @@ export const MISSING_KEYS = {
     'customers.print.vehicles_count': { ar: 'عدد المركبات', en: 'Vehicles count' },
 
     // ── departments ────────────────────────────────────────────────────────
-    'departments.subtitle': { ar: 'إدارة الأقسام وفئات العمل', en: 'Manage departments and work categories' },
+    'departments.subtitle': {
+        ar: 'إدارة الأقسام وفئات العمل',
+        en: 'Manage departments and work categories',
+    },
 
     // ── employee portal ────────────────────────────────────────────────────
     'employee_portal.checklist': { ar: 'قائمة المهام', en: 'Checklist' },
-    'employee_portal.no_tasks_filtered': { ar: 'لا توجد مهام مطابقة للفلاتر', en: 'No tasks match the filters' },
+    'employee_portal.no_tasks_filtered': {
+        ar: 'لا توجد مهام مطابقة للفلاتر',
+        en: 'No tasks match the filters',
+    },
     'employee_portal.notes': { ar: 'الملاحظات', en: 'Notes' },
     'employee_portal.photos': { ar: 'الصور', en: 'Photos' },
     'employee_portal.search_tasks_placeholder': { ar: 'ابحث في المهام...', en: 'Search tasks...' },
@@ -54,20 +73,35 @@ export const MISSING_KEYS = {
     'financial.bank_transfer': { ar: 'تحويل بنكي', en: 'Bank transfer' },
 
     // ── print settings ─────────────────────────────────────────────────────
-    'print_settings.custom_template_active': { ar: 'القالب المخصص المستخدم حالياً', en: 'Custom template currently active' },
-    'print_settings.default_global_template': { ar: 'القالب العام الافتراضي', en: 'Default global template' },
-    'print_settings.document_template_select': { ar: 'اختر قالب المستند', en: 'Select the document template' },
+    'print_settings.custom_template_active': {
+        ar: 'القالب المخصص المستخدم حالياً',
+        en: 'Custom template currently active',
+    },
+    'print_settings.default_global_template': {
+        ar: 'القالب العام الافتراضي',
+        en: 'Default global template',
+    },
+    'print_settings.document_template_select': {
+        ar: 'اختر قالب المستند',
+        en: 'Select the document template',
+    },
     'print_settings.select_document_hint': {
         ar: 'القالب المختار يُطبَّق على كل المستندات المطبوعة من هذا القسم',
         en: 'The selected template applies to every document printed from this section',
     },
-    'print_settings.using_global_template': { ar: 'يستخدم القالب العام', en: 'Using the global template' },
+    'print_settings.using_global_template': {
+        ar: 'يستخدم القالب العام',
+        en: 'Using the global template',
+    },
 
     // ── quotes ─────────────────────────────────────────────────────────────
     'quotes.service_modal.add_and_another': { ar: 'إضافة والاستمرار', en: 'Add and continue' },
 
     // ── settings / integrations ────────────────────────────────────────────
-    'settings.integrations.manage_print': { ar: 'إدارة إعدادات الطباعة', en: 'Manage the print settings' },
+    'settings.integrations.manage_print': {
+        ar: 'إدارة إعدادات الطباعة',
+        en: 'Manage the print settings',
+    },
     'settings.integrations.print_desc': {
         ar: 'اختر القوالب المستخدمة في طباعة المستندات والفواتير والتقارير',
         en: 'Choose the templates used to print documents, invoices and reports',
@@ -77,7 +111,10 @@ export const MISSING_KEYS = {
     // ── system / credits ───────────────────────────────────────────────────
     'system.credits.active_workshops': { ar: 'ورش نشطة', en: 'Active workshops' },
     'system.credits.add': { ar: 'إضافة', en: 'Add' },
-    'system.credits.add_manual_sms_credit': { ar: 'إضافة رصيد SMS يدوي', en: 'Add manual SMS credit' },
+    'system.credits.add_manual_sms_credit': {
+        ar: 'إضافة رصيد SMS يدوي',
+        en: 'Add manual SMS credit',
+    },
     'system.credits.adding': { ar: 'جارٍ الإضافة...', en: 'Adding...' },
     'system.credits.critically_low': { ar: 'حرج منخفض', en: 'Critically low' },
     'system.credits.custom_package': { ar: 'باقة مخصصة', en: 'Custom package' },
@@ -88,12 +125,18 @@ export const MISSING_KEYS = {
     'system.credits.messages_count': { ar: 'عدد الرسائل', en: 'Message count' },
     'system.credits.messages_sent': { ar: 'الرسائل المرسلة', en: 'Messages sent' },
     'system.credits.no_data_available': { ar: 'لا توجد بيانات متاحة', en: 'No data available' },
-    'system.credits.no_messages_recorded': { ar: 'لا توجد رسائل مسجلة', en: 'No messages recorded' },
+    'system.credits.no_messages_recorded': {
+        ar: 'لا توجد رسائل مسجلة',
+        en: 'No messages recorded',
+    },
     'system.credits.no_operations_found': { ar: 'لا توجد عمليات', en: 'No operations found' },
     'system.credits.popular': { ar: 'الأكثر مبيعاً', en: 'Best seller' },
     'system.credits.reason_placeholder': { ar: 'مثال: هدية ترحيبية', en: 'e.g. Welcome bonus' },
     'system.credits.recipient': { ar: 'المستلم', en: 'Recipient' },
-    'system.credits.search_workshop': { ar: 'ابحث باسم الورشة...', en: 'Search by workshop name...' },
+    'system.credits.search_workshop': {
+        ar: 'ابحث باسم الورشة...',
+        en: 'Search by workshop name...',
+    },
     'system.credits.status': { ar: 'الحالة', en: 'Status' },
     'system.credits.tenant_id': { ar: 'رقم المستأجر', en: 'Tenant ID' },
     'system.credits.tenant_label': { ar: 'المستأجر #{id}', en: 'Tenant #{id}' },
@@ -111,7 +154,10 @@ export const MISSING_KEYS = {
     'system.settings.channel_matrix': { ar: 'مصفوفة القنوات', en: 'Channel matrix' },
     'system.settings.days_overdue': { ar: 'متأخرة {days} يوم', en: '{days} days overdue' },
     'system.settings.days_overdue_2': { ar: 'يوم تأخير', en: 'days overdue' },
-    'system.settings.quiet_hours_ksa': { ar: 'ساعات الصمت (توقيت السعودية)', en: 'Quiet hours (KSA)' },
+    'system.settings.quiet_hours_ksa': {
+        ar: 'ساعات الصمت (توقيت السعودية)',
+        en: 'Quiet hours (KSA)',
+    },
     'system.settings.select_which_channels_are_used_for_each_tier': {
         ar: 'اختر القنوات المستخدمة في كل مستوى تذكير',
         en: 'Select the channels used for each reminder tier',
@@ -147,7 +193,10 @@ export const MISSING_KEYS = {
         en: 'No sales invoices match the current search criteria.',
     },
 
-    'messages.status_updated': { ar: 'تم تحديث حالة كرت العمل بنجاح', en: 'The work order status was updated' },
+    'messages.status_updated': {
+        ar: 'تم تحديث حالة كرت العمل بنجاح',
+        en: 'The work order status was updated',
+    },
 
     'nav.groups.general': { ar: 'الرئيسية', en: 'Home' },
     'nav.groups.operations': { ar: 'العمليات', en: 'Operations' },
@@ -157,6 +206,11 @@ export const MISSING_KEYS = {
     'nav.groups.finance': { ar: 'المالية والفواتير', en: 'Finance and invoices' },
     'nav.groups.reports': { ar: 'التقارير', en: 'Reports' },
     'nav.inventory': { ar: 'المستودع وقطع الغيار', en: 'Warehouse and parts' },
+
+    'hr.settings.attendance_settings.save_hint': {
+        ar: 'احفظ إعدادات الحضور والانصراف لتطبيقها على سجلات الدوام',
+        en: 'Save the attendance and departure settings to apply them to the time records',
+    },
 
     'tenant_site.admin.auto_apply_hint': {
         ar: 'جميع التعديلات يتم حفظها وتطبيقها فوراً على الموقع العام',

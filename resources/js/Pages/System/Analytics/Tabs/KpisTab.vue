@@ -103,13 +103,17 @@
                     </div>
                     <p class="text-xs font-semibold text-gray-700 dark:text-gray-200">
                         {{
-                            locale === 'ar' ? 'لا توجد باقات نشطة حالياً' : 'No active plans found'
+                            locale === 'ar'
+                                ? $t('system.analytics.no_active_plans_found')
+                                : 'No active plans found'
                         }}
                     </p>
                     <p class="text-[11px] text-gray-500 dark:text-gray-400 mt-0.5 max-w-xs">
                         {{
                             locale === 'ar'
-                                ? 'أضف باقات اشتراك لعرض ترتيبها هنا'
+                                ? $t(
+                                      'system.analytics.create_plans_to_track_their_subscriber_counts'
+                                  )
                                 : 'Create plans to track their subscriber counts'
                         }}
                     </p>
@@ -117,7 +121,13 @@
                         :href="route('system.plans.index')"
                         class="mt-3 inline-flex items-center gap-1.5 text-xs font-medium text-indigo-600 dark:text-indigo-400 hover:underline"
                     >
-                        <span>{{ locale === 'ar' ? 'إدارة باقات الاشتراك' : 'Manage Plans' }}</span>
+                        <span>
+                            {{
+                                locale === 'ar'
+                                    ? $t('system.analytics.manage_plans')
+                                    : 'Manage Plans'
+                            }}
+                        </span>
                         <svg
                             class="w-3.5 h-3.5 rtl:rotate-180"
                             fill="none"
@@ -188,13 +198,17 @@
                     </div>
                     <p class="text-xs font-semibold text-gray-700 dark:text-gray-200">
                         {{
-                            locale === 'ar' ? 'لا توجد عمليات دفع مسجلة بعد' : 'No payment data yet'
+                            locale === 'ar'
+                                ? $t('system.analytics.no_payment_data_yet')
+                                : 'No payment data yet'
                         }}
                     </p>
                     <p class="text-[11px] text-gray-500 dark:text-gray-400 mt-0.5 max-w-xs">
                         {{
                             locale === 'ar'
-                                ? 'ستظهر حصص بوابات الدفع تلقائياً عند سداد الاشتراكات'
+                                ? $t(
+                                      'system.analytics.payment_breakdown_will_appear_as_tenants_pay_inv'
+                                  )
                                 : 'Payment breakdown will appear as tenants pay invoices'
                         }}
                     </p>

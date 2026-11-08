@@ -184,7 +184,9 @@ function englishFor(file, arabicValue, offset) {
 
     // A ternary `cond ? 'arabic' : 'english'` — the string is the
     // FIRST branch.
-    const ternaryFirst = new RegExp(`(['"\`])${escapeRe(arabicValue)}\\1\\s*:\\s*(['"\`])([^'"\`]*)\\2`);
+    const ternaryFirst = new RegExp(
+        `(['"\`])${escapeRe(arabicValue)}\\1\\s*:\\s*(['"\`])([^'"\`]*)\\2`
+    );
 
     const t = window.match(ternaryFirst);
 
@@ -194,7 +196,9 @@ function englishFor(file, arabicValue, offset) {
 
     // A ternary `cond ? 'english' : 'arabic'` — the string is the
     // SECOND branch.
-    const ternarySecond = new RegExp(`(['"\`])([^'"\`]*)\\1\\s*:\\s*(['"\`])${escapeRe(arabicValue)}\\3`);
+    const ternarySecond = new RegExp(
+        `(['"\`])([^'"\`]*)\\1\\s*:\\s*(['"\`])${escapeRe(arabicValue)}\\3`
+    );
 
     const s = window.match(ternarySecond);
 
@@ -222,7 +226,6 @@ function escapeRe(value) {
     return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
-
 /**
  * Is this string a fragment of a template literal?
  *
@@ -249,7 +252,14 @@ for (const detail of data.detail) {
     const ns = namespaceFor(detail.file);
 
     for (const item of detail.strings) {
-        const assignKey = `${detail.file}||${item.value}`;
+        // The same ARABIC STRING gets the same key, in every file.
+        //
+        // Keying by file produced `no_active_plans_found` and
+        // `no_active_plans_found_2` for one sentence that appears in
+        // two components, and the lang file carried the copy twice.
+        // The Arabic is the identity of the string; the file it
+        // happens to live in is not.
+        const assignKey = `value||${item.value}`;
         const already = assigned.get(assignKey);
 
         if (already) {
@@ -339,7 +349,8 @@ for (const detail of data.detail) {
         // over the file. The file's own English is the fallback for
         // the strings the dictionary does not cover.
         const english = fromDict ?? fromFile;
-        const slug = slugFor(english ?? '') ?? slugFor(item.value) ?? fallbackSlug(item.kind, item.context);
+        const slug =
+            slugFor(english ?? '') ?? slugFor(item.value) ?? fallbackSlug(item.kind, item.context);
 
         let candidate = `${ns}.${slug}`;
         let n = 2;

@@ -435,7 +435,8 @@
         "view_mode": "طريقة العرض",
         "form_has_errors": "يرجى مراجعة الحقول التي بها أخطاء ({count})",
         "remaining_required": "متبقي {count} حقل إلزامي",
-        "try_adjusting_search": "جرّب تعديل البحث"
+        "try_adjusting_search": "جرّب تعديل البحث",
+        "secure_payment_note": "الدفع آمن ومشفر (PCI DSS)"
     },
     "company_profile": {
         "address": {
@@ -1077,7 +1078,8 @@
         "vs_last_period": "مقابل :value",
         "weekly_work_orders": "أوامر العمل الأسبوعية",
         "work_orders_status": "توزيع أوامر العمل",
-        "work_orders_this_month": "أوامر عمل الشهر"
+        "work_orders_this_month": "أوامر عمل الشهر",
+        "today": "اليوم"
     },
     "departments": {
         "add": "إضافة قسم",
@@ -1505,7 +1507,8 @@
                 "overtime_rate": "معدل العمل الإضافي",
                 "subtitle": "تخصيص سياسات التأخير والغياب والعمل الإضافي لهذا المركز",
                 "title": "إعدادات الحضور",
-                "working_days": "أيام العمل"
+                "working_days": "أيام العمل",
+                "save_hint": "احفظ إعدادات الحضور والانصراف لتطبيقها على سجلات الدوام"
             },
             "biometric_devices": {
                 "device": "جهاز بصمة",
@@ -7020,7 +7023,12 @@
             "tabs": {
                 "kpis": "المؤشرات الحية (KPIs)",
                 "reports": "التقارير والتصدير"
-            }
+            },
+            "no_active_plans_found": "لا توجد باقات نشطة حالياً",
+            "create_plans_to_track_their_subscriber_counts": "أضف باقات اشتراك لعرض ترتيبها هنا",
+            "manage_plans": "إدارة باقات الاشتراك",
+            "no_payment_data_yet": "لا توجد عمليات دفع مسجلة بعد",
+            "payment_breakdown_will_appear_as_tenants_pay_inv": "ستظهر حصص بوابات الدفع تلقائياً عند سداد الاشتراكات"
         },
         "communication": {
             "templates_subtitle": "إدارة وتخصيص قوالب الرسائل البريدية والإشعارات الآلية للنظام.",

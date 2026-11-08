@@ -435,7 +435,8 @@
         "view_mode": "View mode",
         "form_has_errors": "Please check fields with errors ({count})",
         "remaining_required": "{count} required fields remaining",
-        "try_adjusting_search": "Try adjusting the search"
+        "try_adjusting_search": "Try adjusting the search",
+        "secure_payment_note": "Secure, encrypted payment (PCI DSS)"
     },
     "company_profile": {
         "address": {
@@ -1077,7 +1078,8 @@
         "vs_last_period": "vs :value",
         "weekly_work_orders": "Weekly Work Orders",
         "work_orders_status": "Work Orders by Status",
-        "work_orders_this_month": "Work Orders This Month"
+        "work_orders_this_month": "Work Orders This Month",
+        "today": "Today"
     },
     "departments": {
         "add": "Add section",
@@ -1505,7 +1507,8 @@
                 "overtime_rate": "Overtime rate",
                 "subtitle": "Customize latency, absence, and overtime policies for this center",
                 "title": "Attendance settings",
-                "working_days": "Working days"
+                "working_days": "Working days",
+                "save_hint": "Save the attendance and departure settings to apply them to the time records"
             },
             "biometric_devices": {
                 "device": "Fingerprint device",
@@ -7020,7 +7023,12 @@
             "tabs": {
                 "kpis": "Live KPIs",
                 "reports": "Reports & Exports"
-            }
+            },
+            "no_active_plans_found": "No active plans found",
+            "create_plans_to_track_their_subscriber_counts": "Create plans to track their subscriber counts",
+            "manage_plans": "Manage Plans",
+            "no_payment_data_yet": "No payment data yet",
+            "payment_breakdown_will_appear_as_tenants_pay_inv": "Payment breakdown will appear as tenants pay invoices"
         },
         "communication": {
             "templates_subtitle": "Manage and customise the email templates and the automated system notifications.",
