@@ -90,12 +90,12 @@
                                     {{
                                         Number(subscription.price) > 0
                                             ? subscription.price +
-                                              $t('system.subscriptions.expression_literal')
+                                              $t('system.subscriptions.currency_suffix')
                                             : subscription.billing_cycle === 'yearly'
                                               ? (subscription.plan?.price_yearly ?? 0) +
-                                                $t('system.subscriptions.expression_literal')
+                                                $t('system.subscriptions.currency_suffix')
                                               : (subscription.plan?.price_monthly ?? 0) +
-                                                $t('system.subscriptions.expression_literal')
+                                                $t('system.subscriptions.currency_suffix')
                                     }}
                                 </p>
                             </div>

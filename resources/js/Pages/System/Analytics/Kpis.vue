@@ -28,7 +28,7 @@
             <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 <!-- MRR -->
                 <KpiCard
-                    :label="locale === 'ar' ? $t('system.analytics.expression_literal') : 'MRR'"
+                    :label="locale === 'ar' ? $t('system.analytics.mrr_label') : 'MRR'"
                     :value="formatCurrency(kpis.mrr) + ' SAR'"
                     :sub="
                         locale === 'ar'

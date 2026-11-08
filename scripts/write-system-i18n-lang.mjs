@@ -101,10 +101,10 @@ for (const entry of map.newKeys) {
     // sentence and cannot be a translation on its own. Its key is the
     // COMPOSED one, written above from the template-literal table.
     //
-    // The fragment is recognised by its key: the composed table owns
-    // that key, so writing it here would overwrite the composed
-    // sentence with the fragment.
-    if (composedKeys.has(entry.key)) {
+    // Writing the fragment here would put a broken half-sentence in
+    // the lang file AND overwrite the composed key when the two
+    // collide.
+    if (entry.isFragment || composedKeys.has(entry.key)) {
         continue;
     }
 

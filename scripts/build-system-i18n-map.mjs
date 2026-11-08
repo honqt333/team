@@ -101,13 +101,19 @@ function namespaceFor(file) {
 function slugFor(value) {
     const ascii = value
         .replace(/[^\x20-\x7E]/g, ' ')
-        .replace(/[^\w\s.-]/g, '')
+        // A dot in a key is the PATH SEPARATOR in the lang file, so
+        // `Search by tenant name...` must not become
+        // `search_by_tenant_name...` — the writer would turn it into
+        // three nested objects.
+        .replace(/[^\w\s-]/g, '')
         .trim()
         .replace(/\s+/g, '_')
+        .replace(/-+/g, '_')
+        .replace(/^_+|_+$/g, '')
         .toLowerCase();
 
-    if (ascii.length >= 4) {
-        return ascii.slice(0, 48);
+    if (ascii.length >= 3) {
+        return ascii.slice(0, 48).replace(/_+$/, '');
     }
 
     return null;
@@ -216,6 +222,22 @@ function escapeRe(value) {
     return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
+
+/**
+ * Is this string a fragment of a template literal?
+ *
+ * A fragment is the tail of a sentence with a hole in it:
+ * `هل تريد حذف باقة "${pkg.name_ar}"؟` is TWO fragments, and the
+ * sentence between them is the composed key.
+ */
+function isTemplateLiteralFragment(file, item) {
+    const source = readFileSync(file, 'utf8');
+    const after = source.slice(item.end, item.end + 4);
+    const before = source.slice(Math.max(0, item.start - 60), item.start);
+
+    return /^\$\{/.test(after) || /\$\{[^}]*\}\s*$/.test(before);
+}
+
 const used = new Set();
 const map = [];
 const newKeys = [];
@@ -317,7 +339,7 @@ for (const detail of data.detail) {
         // over the file. The file's own English is the fallback for
         // the strings the dictionary does not cover.
         const english = fromDict ?? fromFile;
-        const slug = slugFor(english ?? '') ?? fallbackSlug(item.kind, item.context);
+        const slug = slugFor(english ?? '') ?? slugFor(item.value) ?? fallbackSlug(item.kind, item.context);
 
         let candidate = `${ns}.${slug}`;
         let n = 2;
@@ -340,6 +362,11 @@ for (const detail of data.detail) {
             status: 'new',
             en: english,
             needsEnglish: !english,
+            // A FRAGMENT of a template literal is not a sentence. Its
+            // key is the COMPOSED one, written from the
+            // template-literal table, and this fragment must not
+            // create a key of its own.
+            isFragment: isTemplateLiteralFragment(detail.file, item),
         };
 
         assigned.set(assignKey, entry);

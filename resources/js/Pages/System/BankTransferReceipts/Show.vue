@@ -1,8 +1,11 @@
 <script setup>
 import { ref, computed, watch } from 'vue';
 import { Head, router, Link } from '@inertiajs/vue3';
+import { useI18n } from 'vue-i18n';
 import SystemLayout from '@/Layouts/SystemLayout.vue';
 import PageHeader from '@/Components/PageHeader.vue';
+
+const { t } = useI18n();
 
 const props = defineProps({
     receipt: { type: Object, required: true },
@@ -65,9 +68,9 @@ const statusColors = {
 };
 
 const statusLabels = {
-    pending: { ar: $t('system.bank_transfer_receipts.pending_2'), en: 'Pending' },
-    approved: { ar: $t('system.bank_transfer_receipts.approved_3'), en: 'Approved' },
-    rejected: { ar: $t('system.bank_transfer_receipts.rejected_3'), en: 'Rejected' },
+    pending: { ar: t('system.bank_transfer_receipts.pending_2'), en: 'Pending' },
+    approved: { ar: t('system.bank_transfer_receipts.approved_3'), en: 'Approved' },
+    rejected: { ar: t('system.bank_transfer_receipts.rejected_3'), en: 'Rejected' },
 };
 
 const formatDate = (dateStr) => {
@@ -175,7 +178,7 @@ const amountState = computed(() => {
             expected: Number(props.receipt.expected_amount),
             message:
                 locale.value === 'ar'
-                    ? $t('system.bank_transfer_receipts.transferred_less_than_required', {
+                    ? t('system.bank_transfer_receipts.transferred_less_than_required', {
                           amount: formatCurrency(-diff),
                       })
                     : `Transferred amount is ${formatCurrency(-diff)} SAR short`,
@@ -187,7 +190,7 @@ const amountState = computed(() => {
         expected: Number(props.receipt.expected_amount),
         message:
             locale.value === 'ar'
-                ? $t('system.bank_transfer_receipts.transferred_more_than_required', {
+                ? t('system.bank_transfer_receipts.transferred_more_than_required', {
                       amount: formatCurrency(diff),
                   })
                 : `Transferred amount is ${formatCurrency(diff)} SAR over (credit will be recorded)`,

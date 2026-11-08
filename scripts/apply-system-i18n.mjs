@@ -408,7 +408,7 @@ for (const [file, entries] of byFile) {
             continue;
         }
 
-        const inTemplate = entry.start < templateEnd;
+        const inTemplate = !isInScript(source, entry.start);
         const t = inTemplate ? '$t' : 't';
 
         // ── A template literal ──────────────────────────────────────────
@@ -592,15 +592,37 @@ for (const [file, entries] of byFile) {
 }
 
 /**
- * The offset where the template block ends and the script begins.
+ * The offset where the TEMPLATE block ends.
  *
  * A span before it is in the template and uses `$t`; a span after it
  * is in a script and uses `t`.
+ *
+ * The blocks can come in ANY order. Most pages put `<script setup>`
+ * first and `<template>` second, and a file where the script comes
+ * first used to get `$t()` inside the script — where `$t` does not
+ * exist in `<script setup>` and the page throws on load.
  */
 function findTemplateEndOffset(source) {
     const match = source.match(/<\/template>/);
 
     return match ? match.index + match[0].length : 0;
+}
+
+/**
+ * Is this offset inside a SCRIPT block?
+ *
+ * The template is the region between `<template>` and `</template>`;
+ * everything else — `<script>`, `<script setup>` — is script.
+ */
+function isInScript(source, offset) {
+    const templateStart = source.indexOf('<template>');
+    const templateEnd = source.indexOf('</template>');
+
+    if (templateStart === -1 || templateEnd === -1) {
+        return true;
+    }
+
+    return offset < templateStart || offset > templateEnd;
 }
 
 /**

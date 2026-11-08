@@ -178,7 +178,7 @@
                                     @click="openAddModal(item)"
                                     class="text-emerald-600 hover:text-emerald-800 text-sm"
                                 >
-                                    {{ $t('system.credits.static_template_text') }}
+                                    {{ $t('system.credits.add_label') }}
                                 </button>
                             </td>
                         </tr>

@@ -313,7 +313,7 @@
                                     plan.name_ar ||
                                     plan.name_en + $t('system.tenants.yearly_subscription')
                                 }}
-                                {{ plan.price_yearly + $t('system.tenants.static_template_text') }}
+                                {{ plan.price_yearly + $t('system.tenants.price_closing') }}
                             </option>
                         </select>
                     </div>

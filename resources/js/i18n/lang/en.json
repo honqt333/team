@@ -5939,7 +5939,6 @@
             "select_the_package": "Select the package",
             "--_select_a_package_--": "-- Select a package --",
             "yearly_subscription": " (yearly subscription:",
-            "static_template_text": " SAR)",
             "billing_cycle": "Billing cycle",
             "yearly_subscription_12_months": "Yearly subscription (12 months)",
             "package_type": "Package type:",
@@ -5948,7 +5947,8 @@
             "full_year_12_months": "Full year (12 months)",
             "total_amount": "Total amount:",
             "the_subscription_will_be_activated_for_the_tenan": "* The subscription will be activated for the tenant right away and its status set to (active), archiving any previously active subscription.",
-            "confirm_and_activate_the_package": "Confirm and activate the package"
+            "confirm_and_activate_the_package": "Confirm and activate the package",
+            "price_closing": " SAR)"
         },
         "subscriptions": {
             "title": "Subscriptions",
@@ -5997,7 +5997,6 @@
             "subscription_details": "Subscription details",
             "subscription_information": "Subscription information",
             "price": "Price",
-            "expression_literal": " SAR",
             "auto-renewal": "Auto-renewal",
             "disabled": "Disabled",
             "dates": "Dates",
@@ -6016,7 +6015,8 @@
             "discount": "Discount",
             "number_of_days": "Number of days",
             "extend": "Extend",
-            "do_you_want_to_cancel_this_subscription": "Do you want to cancel this subscription?"
+            "do_you_want_to_cancel_this_subscription": "Do you want to cancel this subscription?",
+            "currency_suffix": " SAR"
         },
         "plans": {
             "title": "Plans",
@@ -6193,7 +6193,6 @@
             "global_baseline_reference": "Global baseline (reference)",
             "active_tiers": "Active tiers",
             "quiet_hours_2": "Quiet hours",
-            "expression_literal": "Off",
             "per-tenant_override": "Per-tenant override",
             "empty_fields_fall_back_to_the_general_settings": {
                 "_": "Empty fields fall back to the general settings. Press \"Save\" to apply the override."
@@ -6203,7 +6202,8 @@
             "active_tiers_2": "Active tiers",
             "quiet_hours_optional": "Quiet hours (optional)",
             "remove_override": "Remove override",
-            "remove_the_override": "Remove the override?"
+            "remove_the_override": "Remove the override?",
+            "disabled_label": "Off"
         },
         "website": {
             "title": "Website CMS",
@@ -6400,7 +6400,6 @@
             "name_english": "Name (English)",
             "message_count_2": "Message count",
             "price_sar": "Price (SAR)",
-            "template_literal_chunk": "\"?",
             "all_statuses": "All statuses",
             "tenant_2": "Tenant",
             "credit": "Credit",
@@ -6429,7 +6428,6 @@
             "total_purchases_2": "Total purchases",
             "current_balance_2": "Current balance",
             "tenant_4": "Tenant",
-            "static_template_text": "+ Add",
             "add_whatsapp_credit": "Add WhatsApp credit",
             "message_count_3": "Message count",
             "reason": "Reason",
@@ -6447,7 +6445,6 @@
             "message_count_4": "Message count",
             "price_sar_2": "Price (SAR)",
             "delete_package_2": "Delete package \"",
-            "template_literal_chunk_2": "\"?",
             "total_messages_2": "Total messages",
             "delivered_2": "Delivered",
             "read": "Read",
@@ -6457,7 +6454,8 @@
             "template": "Template",
             "credit_3": "Credit",
             "sent_2": "Sent",
-            "pending_2": "Pending"
+            "pending_2": "Pending",
+            "add_label": "+ Add"
         },
         "announcements": {
             "title": "Announcements & Notifications",
@@ -6906,7 +6904,6 @@
             "tenants_report_desc": "A list of tenants, plans, subscriptions and the status of each subscription.",
             "aging_report": "Debt aging report",
             "aging_report_desc": "Overdue receivables broken down by the periods they are due in.",
-            "expression_literal": "MRR",
             "sum_of_active_subscriptions_yearly_12": "Sum of active subscriptions (yearly ÷ 12)",
             "churn_rate": "Churn rate",
             "new_tenants": "New tenants",
@@ -6916,7 +6913,8 @@
             "trial_tenants": "Trial tenants",
             "near-term_mrr_signal": "Near-term MRR signal",
             "last_month_churn": "Last month churn",
-            "for_comparison_with_current_month": "For comparison with current month"
+            "for_comparison_with_current_month": "For comparison with current month",
+            "mrr_label": "MRR"
         },
         "communication": {
             "templates_subtitle": "Manage and customise the email templates and the automated system notifications.",
@@ -6932,7 +6930,6 @@
             "code": "Code:",
             "type": "Type:",
             "email": "Email",
-            "expression_literal": "SMS",
             "enable_template": "Enable template",
             "available_variables_click_to_copy": "Available Variables (Click to copy)",
             "no_variables_defined_for_this_template": {
@@ -6943,7 +6940,8 @@
             "subject": "Subject",
             "content": "Content",
             "subject_2": "Subject:",
-            "communication_templates_2": "Communication Templates"
+            "communication_templates_2": "Communication Templates",
+            "sms_label": "SMS"
         },
         "payment": {
             "failed_message": "Sorry, we could not complete the payment",

@@ -5939,7 +5939,6 @@
             "select_the_package": "اختر الباقة",
             "--_select_a_package_--": "-- حدد الباقة --",
             "yearly_subscription": "(الاشتراك السنوي:",
-            "static_template_text": "ر.س)",
             "billing_cycle": "دورة الفوترة",
             "yearly_subscription_12_months": "اشتراك سنوي (12 شهر)",
             "package_type": "نوع الباقة:",
@@ -5948,7 +5947,8 @@
             "full_year_12_months": "سنة كاملة (12 شهر)",
             "total_amount": "المبلغ الإجمالي:",
             "the_subscription_will_be_activated_for_the_tenan": "* سيتم تفعيل الاشتراك مباشرة للمستأجر وتحديث حالته إلى (نشط)، مع أرشفة أي\n                        اشتراك سابق نشط.",
-            "confirm_and_activate_the_package": "تأكيد وتفعيل الباقة"
+            "confirm_and_activate_the_package": "تأكيد وتفعيل الباقة",
+            "price_closing": "ر.س)"
         },
         "subscriptions": {
             "title": "الاشتراكات",
@@ -5997,7 +5997,6 @@
             "subscription_details": "تفاصيل الاشتراك",
             "subscription_information": "معلومات الاشتراك",
             "price": "السعر",
-            "expression_literal": " ر.س",
             "auto-renewal": "التجديد التلقائي",
             "disabled": "معطّل",
             "dates": "التواريخ",
@@ -6016,7 +6015,8 @@
             "discount": "خصم",
             "number_of_days": "عدد الأيام",
             "extend": "تمديد",
-            "do_you_want_to_cancel_this_subscription": "هل تريد إلغاء هذا الاشتراك؟"
+            "do_you_want_to_cancel_this_subscription": "هل تريد إلغاء هذا الاشتراك؟",
+            "currency_suffix": " ر.س"
         },
         "plans": {
             "title": "الباقات",
@@ -6174,7 +6174,6 @@
             "global_baseline_reference": "الإعدادات العامة (مرجعية)",
             "active_tiers": "المستويات",
             "quiet_hours_2": "ساعات الصمت",
-            "expression_literal": "معطّلة",
             "per-tenant_override": "تجاوز على مستوى المستأجر",
             "empty_fields_fall_back_to_the_general_settings": {
                 "_": "الحقول الفارغة ترجع للإعدادات العامة. اضغط \"حفظ\" لتفعيل التجاوز."
@@ -6184,7 +6183,8 @@
             "active_tiers_2": "المستويات المفعّلة",
             "quiet_hours_optional": "ساعات الصمت (اختياري)",
             "remove_override": "حذف التجاوز",
-            "remove_the_override": "حذف التجاوز؟"
+            "remove_the_override": "حذف التجاوز؟",
+            "disabled_label": "معطّلة"
         },
         "integrations": {
             "title": "التكاملات",
@@ -6400,7 +6400,6 @@
             "name_english": "الاسم (إنجليزي)",
             "message_count_2": "عدد الرسائل",
             "price_sar": "السعر (ر.س)",
-            "template_literal_chunk": "\"؟",
             "all_statuses": "كل الحالات",
             "tenant_2": "المستأجر",
             "credit": "الرصيد",
@@ -6429,7 +6428,6 @@
             "total_purchases_2": "إجمالي المشتريات",
             "current_balance_2": "الرصيد الحالي",
             "tenant_4": "المستأجر",
-            "static_template_text": "+ إضافة",
             "add_whatsapp_credit": "إضافة رصيد WhatsApp",
             "message_count_3": "عدد الرسائل",
             "reason": "السبب",
@@ -6447,7 +6445,6 @@
             "message_count_4": "عدد الرسائل",
             "price_sar_2": "السعر (ر.س)",
             "delete_package_2": "هل تريد حذف باقة \"",
-            "template_literal_chunk_2": "\"؟",
             "total_messages_2": "إجمالي الرسائل",
             "delivered_2": "تم التسليم",
             "read": "مقروء",
@@ -6457,7 +6454,8 @@
             "template": "القالب",
             "credit_3": "الرصيد",
             "sent_2": "مرسل",
-            "pending_2": "قيد الإرسال"
+            "pending_2": "قيد الإرسال",
+            "add_label": "+ إضافة"
         },
         "announcements": {
             "title": "الإعلانات والإشعارات",
@@ -6906,7 +6904,6 @@
             "tenants_report_desc": "قائمة المستأجرين والباقات والاشتراكات وحالة كل اشتراك.",
             "aging_report": "تقرير أعمار الديون",
             "aging_report_desc": "المستحقات المتأخرة موزعة على فترات الاستحقاق.",
-            "expression_literal": "الإيراد الشهري المتكرر",
             "sum_of_active_subscriptions_yearly_12": "مجموع الاشتراكات النشطة (شهري / 12 سنوياً)",
             "churn_rate": "معدل الإلغاء",
             "new_tenants": "مستأجرين جدد",
@@ -6916,7 +6913,8 @@
             "trial_tenants": "في فترة التجربة",
             "near-term_mrr_signal": "إشارة لإيراد قريب",
             "last_month_churn": "إلغاء الشهر الماضي",
-            "for_comparison_with_current_month": "للمقارنة بالشهر الحالي"
+            "for_comparison_with_current_month": "للمقارنة بالشهر الحالي",
+            "mrr_label": "الإيراد الشهري المتكرر"
         },
         "communication": {
             "templates_subtitle": "إدارة وتخصيص قوالب الرسائل البريدية والإشعارات الآلية للنظام.",
@@ -6932,7 +6930,6 @@
             "code": "الكود التعريفي:",
             "type": "النوع:",
             "email": "بريد إلكتروني",
-            "expression_literal": "رسالة نصية",
             "enable_template": "تفعيل القالب في النظام",
             "available_variables_click_to_copy": "المتغيرات المتاحة (انقر للنسخ)",
             "no_variables_defined_for_this_template": {
@@ -6943,7 +6940,8 @@
             "subject": "عنوان الرسالة (Subject)",
             "content": "محتوى الرسالة",
             "subject_2": "العنوان:",
-            "communication_templates_2": "قوالب التواصل"
+            "communication_templates_2": "قوالب التواصل",
+            "sms_label": "رسالة نصية"
         },
         "payment": {
             "failed_message": "عذراً، لم نتمكن من إتمام عملية الدفع",
