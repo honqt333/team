@@ -472,6 +472,7 @@
                                     <div class="flex items-center gap-2">
                                         <input
                                             type="number"
+                                            name="grace_period_minutes"
                                             v-model="attendanceSettingsForm.grace_period_minutes"
                                             min="0"
                                             max="60"
@@ -500,6 +501,7 @@
                                     <div class="flex items-center gap-2">
                                         <input
                                             type="number"
+                                            name="late_deduction_per_minute"
                                             v-model="
                                                 attendanceSettingsForm.late_deduction_per_minute
                                             "
@@ -565,6 +567,7 @@
                                     <div class="flex items-center gap-2">
                                         <input
                                             type="number"
+                                            name="absence_deduction_value"
                                             v-model="attendanceSettingsForm.absence_deduction_value"
                                             min="0"
                                             step="0.01"
@@ -606,6 +609,7 @@
                                     <div class="flex items-center gap-2">
                                         <input
                                             type="number"
+                                            name="overtime_rate_per_hour"
                                             v-model="attendanceSettingsForm.overtime_rate_per_hour"
                                             min="0"
                                             step="0.01"
@@ -665,18 +669,51 @@
                                 </div>
                             </div>
 
-                            <div class="flex justify-end">
-                                <button
-                                    type="submit"
-                                    :disabled="savingAttendanceSettings"
-                                    class="px-6 py-2.5 bg-violet-600 text-white rounded-xl font-medium hover:bg-violet-700 disabled:opacity-50"
-                                >
+                            <!-- Sticky Action Bar for Attendance Settings -->
+                            <div
+                                class="sticky bottom-0 z-20 mt-8 -mx-8 -mb-8 p-4 bg-white/95 dark:bg-gray-800/95 backdrop-blur-md border-t border-gray-200 dark:border-gray-700 flex items-center justify-between gap-4 flex-wrap rounded-b-2xl shadow-lg"
+                            >
+                                <span class="text-xs text-gray-400 dark:text-gray-500">
                                     {{
-                                        savingAttendanceSettings
-                                            ? $t('common.saving')
-                                            : $t('common.save')
+                                        $t(
+                                            'hr.settings.attendance_settings.save_hint',
+                                            'احفظ إعدادات الحضور والانصراف لتطبيقها على سجلات الدوام'
+                                        )
                                     }}
-                                </button>
+                                </span>
+                                <div class="flex items-center gap-3">
+                                    <button
+                                        type="submit"
+                                        :disabled="savingAttendanceSettings"
+                                        class="inline-flex items-center gap-2 px-6 py-2.5 bg-violet-600 hover:bg-violet-700 text-white font-bold text-sm rounded-xl transition-all shadow-md shadow-violet-500/20 active:scale-95 disabled:opacity-50"
+                                    >
+                                        <svg
+                                            v-if="savingAttendanceSettings"
+                                            class="w-4 h-4 animate-spin -ml-1 mr-2 text-white"
+                                            fill="none"
+                                            viewBox="0 0 24 24"
+                                        >
+                                            <circle
+                                                class="opacity-25"
+                                                cx="12"
+                                                cy="12"
+                                                r="10"
+                                                stroke="currentColor"
+                                                stroke-width="4"
+                                            ></circle>
+                                            <path
+                                                class="opacity-75"
+                                                fill="currentColor"
+                                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                                            ></path>
+                                        </svg>
+                                        {{
+                                            savingAttendanceSettings
+                                                ? $t('common.saving')
+                                                : $t('common.save')
+                                        }}
+                                    </button>
+                                </div>
                             </div>
                         </form>
                     </div>
@@ -1058,11 +1095,13 @@ import SearchableSelect from '@/Components/SearchableSelect.vue';
 import { useToast } from '@/Composables/useToast';
 import { useConfirm } from '@/Composables/useConfirm';
 import { usePermission } from '@/Composables/usePermission';
+import { useFormScrollToError } from '@/Composables/useFormScrollToError';
 
 const { t } = useI18n();
 const { success } = useToast();
 const { confirm } = useConfirm();
 const { can, isAnyAdmin } = usePermission();
+const { scrollToError } = useFormScrollToError();
 
 const props = defineProps({
     employeeTypes: Array,
@@ -1360,8 +1399,9 @@ function saveAttendanceSettings() {
             success(t('common.saved_success'));
             savingAttendanceSettings.value = false;
         },
-        onError: () => {
+        onError: (errors) => {
             savingAttendanceSettings.value = false;
+            scrollToError(errors);
         },
     });
 }
