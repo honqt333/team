@@ -102,6 +102,7 @@ export const pageManifest = {
     'Public/landing/FaqSection': () => import('./Public/landing/FaqSection.vue'),
     'Public/landing/FeaturesSection': () => import('./Public/landing/FeaturesSection.vue'),
     'Public/landing/HeroSection': () => import('./Public/landing/HeroSection.vue'),
+    'Public/landing/HowItWorksSection': () => import('./Public/landing/HowItWorksSection.vue'),
     'Public/landing/LandingFooter': () => import('./Public/landing/LandingFooter.vue'),
     'Public/landing/LandingHeader': () => import('./Public/landing/LandingHeader.vue'),
     'Public/landing/LegalModal': () => import('./Public/landing/LegalModal.vue'),
@@ -189,8 +190,10 @@ export const pageManifest = {
     'Settings/Zatca/Index': () => import('./Settings/Zatca/Index.vue'),
     'System/AdminUsers/ActivityLog': () => import('./System/AdminUsers/ActivityLog.vue'),
     'System/AdminUsers/Index': () => import('./System/AdminUsers/Index.vue'),
+    'System/Analytics/AnalyticsHub': () => import('./System/Analytics/AnalyticsHub.vue'),
     'System/Analytics/Kpis': () => import('./System/Analytics/Kpis.vue'),
-    'System/Analytics/Reports': () => import('./System/Analytics/Reports.vue'),
+    'System/Analytics/Tabs/KpisTab': () => import('./System/Analytics/Tabs/KpisTab.vue'),
+    'System/Analytics/Tabs/ReportsTab': () => import('./System/Analytics/Tabs/ReportsTab.vue'),
     'System/Announcements/Create': () => import('./System/Announcements/Create.vue'),
     'System/Announcements/Index': () => import('./System/Announcements/Index.vue'),
     'System/Announcements/Show': () => import('./System/Announcements/Show.vue'),
@@ -203,10 +206,25 @@ export const pageManifest = {
         import('./System/Communication/Templates/Index.vue'),
     'System/ContactMessages/Index': () => import('./System/ContactMessages/Index.vue'),
     'System/Credits/SmsBalances': () => import('./System/Credits/SmsBalances.vue'),
+    'System/Credits/SmsHub': () => import('./System/Credits/SmsHub.vue'),
     'System/Credits/SmsPackages': () => import('./System/Credits/SmsPackages.vue'),
     'System/Credits/SmsPurchases': () => import('./System/Credits/SmsPurchases.vue'),
     'System/Credits/SmsUsage': () => import('./System/Credits/SmsUsage.vue'),
+    'System/Credits/Tabs/SmsBalancesTab': () => import('./System/Credits/Tabs/SmsBalancesTab.vue'),
+    'System/Credits/Tabs/SmsPackagesTab': () => import('./System/Credits/Tabs/SmsPackagesTab.vue'),
+    'System/Credits/Tabs/SmsPurchasesTab': () =>
+        import('./System/Credits/Tabs/SmsPurchasesTab.vue'),
+    'System/Credits/Tabs/SmsUsageTab': () => import('./System/Credits/Tabs/SmsUsageTab.vue'),
+    'System/Credits/Tabs/WhatsappBalancesTab': () =>
+        import('./System/Credits/Tabs/WhatsappBalancesTab.vue'),
+    'System/Credits/Tabs/WhatsappPackagesTab': () =>
+        import('./System/Credits/Tabs/WhatsappPackagesTab.vue'),
+    'System/Credits/Tabs/WhatsappPurchasesTab': () =>
+        import('./System/Credits/Tabs/WhatsappPurchasesTab.vue'),
+    'System/Credits/Tabs/WhatsappUsageTab': () =>
+        import('./System/Credits/Tabs/WhatsappUsageTab.vue'),
     'System/Credits/WhatsappBalances': () => import('./System/Credits/WhatsappBalances.vue'),
+    'System/Credits/WhatsappHub': () => import('./System/Credits/WhatsappHub.vue'),
     'System/Credits/WhatsappPackages': () => import('./System/Credits/WhatsappPackages.vue'),
     'System/Credits/WhatsappPurchases': () => import('./System/Credits/WhatsappPurchases.vue'),
     'System/Credits/WhatsappUsage': () => import('./System/Credits/WhatsappUsage.vue'),
@@ -232,10 +250,24 @@ export const pageManifest = {
     'System/Settings/DunningSettings': () => import('./System/Settings/DunningSettings.vue'),
     'System/Settings/GeneralSettings': () => import('./System/Settings/GeneralSettings.vue'),
     'System/Settings/PaymentSettings': () => import('./System/Settings/PaymentSettings.vue'),
+    'System/Settings/SettingsHub': () => import('./System/Settings/SettingsHub.vue'),
+    'System/Settings/Tabs/CompanySettingsTab': () =>
+        import('./System/Settings/Tabs/CompanySettingsTab.vue'),
+    'System/Settings/Tabs/DunningSettingsTab': () =>
+        import('./System/Settings/Tabs/DunningSettingsTab.vue'),
+    'System/Settings/Tabs/GeneralSettingsTab': () =>
+        import('./System/Settings/Tabs/GeneralSettingsTab.vue'),
+    'System/Settings/Tabs/PaymentSettingsTab': () =>
+        import('./System/Settings/Tabs/PaymentSettingsTab.vue'),
     'System/Settings/TenantDunning': () => import('./System/Settings/TenantDunning.vue'),
     'System/Subscriptions/Create': () => import('./System/Subscriptions/Create.vue'),
     'System/Subscriptions/Index': () => import('./System/Subscriptions/Index.vue'),
     'System/Subscriptions/Show': () => import('./System/Subscriptions/Show.vue'),
+    'System/Support/SupportHub': () => import('./System/Support/SupportHub.vue'),
+    'System/Support/Tabs/ContactMessagesTab': () =>
+        import('./System/Support/Tabs/ContactMessagesTab.vue'),
+    'System/Support/Tabs/FeedbacksTab': () => import('./System/Support/Tabs/FeedbacksTab.vue'),
+    'System/Support/Tabs/HelpCenterTab': () => import('./System/Support/Tabs/HelpCenterTab.vue'),
     'System/Tenants/Index': () => import('./System/Tenants/Index.vue'),
     'System/Tenants/Show': () => import('./System/Tenants/Show.vue'),
     'System/Tenants/ShowComponents/TenantAnalyticsCards': () =>
