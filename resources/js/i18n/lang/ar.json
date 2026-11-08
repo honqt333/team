@@ -5523,7 +5523,8 @@
             "back_to_app": "العودة للتطبيق",
             "backups": "النسخ الاحتياطية",
             "feedbacks_support": "البلاغات ومكتب الدعم",
-            "activity_log": "سجل النشاط"
+            "activity_log": "سجل النشاط",
+            "system_settings": "إعدادات المنظومة"
         },
         "notifications": {
             "title": "الإشعارات",
@@ -6184,7 +6185,15 @@
             "quiet_hours_optional": "ساعات الصمت (اختياري)",
             "remove_override": "حذف التجاوز",
             "remove_the_override": "حذف التجاوز؟",
-            "disabled_label": "معطّلة"
+            "disabled_label": "معطّلة",
+            "hub_title": "إعدادات المنظومة",
+            "hub_subtitle": "إدارة إعدادات المنصة، بيانات المنشأة، بوابات الدفع، والتحصيل الآلي",
+            "tabs": {
+                "general": "الإعدادات العامة",
+                "company": "معلومات الشركة",
+                "payment": "إعدادات الدفع",
+                "dunning": "المطالبات والتحصيل"
+            }
         },
         "integrations": {
             "title": "التكاملات",

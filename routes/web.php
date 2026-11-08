@@ -132,6 +132,7 @@ use App\Http\Controllers\System\SmsCreditsController;
 use App\Http\Controllers\System\SubscriptionInvoicesController;
 use App\Http\Controllers\System\SubscriptionsController;
 use App\Http\Controllers\System\SystemDashboardController;
+use App\Http\Controllers\System\SystemSettingsHubController;
 use App\Http\Controllers\System\TenantsController;
 use App\Http\Controllers\System\TenantSecurityController;
 use App\Http\Controllers\System\WebsiteSettingsController;
@@ -1313,17 +1314,20 @@ Route::prefix('system')->middleware(['auth:web,admin', 'system.admin'])->group(f
     Route::get('/payment/failed/{payment}', [PaymentController::class, 'failed'])->name('system.payment.failed')->middleware('system.permission:system.subscriptions.view');
     Route::post('/payment/retry/{payment}', [PaymentController::class, 'retry'])->name('system.payment.retry')->middleware('system.permission:system.payment.retry');
 
+    // System Settings Hub
+    Route::get('/settings', [SystemSettingsHubController::class, 'index'])->name('system.settings.index')->middleware('system.permission:system.settings.manage');
+
     // Payment Settings
-    Route::get('/settings/payment', [PaymentSettingsController::class, 'index'])->name('system.settings.payment')->middleware('system.permission:system.payment.settings');
+    Route::get('/settings/payment', fn () => redirect()->route('system.settings.index', ['tab' => 'payment']))->name('system.settings.payment')->middleware('system.permission:system.payment.settings');
     Route::put('/settings/payment', [PaymentSettingsController::class, 'update'])->name('system.settings.payment.update')->middleware('system.permission:system.payment.settings');
 
     // Dunning Settings (Phase 6 — collection automation)
-    Route::get('/settings/dunning', [DunningController::class, 'settings'])->name('system.settings.dunning')->middleware('system.permission:system.settings.manage');
+    Route::get('/settings/dunning', fn () => redirect()->route('system.settings.index', ['tab' => 'dunning']))->name('system.settings.dunning')->middleware('system.permission:system.settings.manage');
     Route::put('/settings/dunning', [DunningController::class, 'updateSettings'])->name('system.settings.dunning.update')->middleware('system.permission:system.settings.manage');
-    Route::get('/billing/dunning-log', [DunningController::class, 'log'])->name('system.billing.dunning-log')->middleware('system.permission:system.settings.manage');
+    Route::get('/billing/dunning-log', fn () => redirect()->route('system.settings.index', ['tab' => 'dunning', 'sub' => 'log']))->name('system.billing.dunning-log')->middleware('system.permission:system.settings.manage');
 
     // Company Settings
-    Route::get('/settings/company', [CompanySettingsController::class, 'index'])->name('system.settings.company')->middleware('system.permission:system.settings.manage');
+    Route::get('/settings/company', fn () => redirect()->route('system.settings.index', ['tab' => 'company']))->name('system.settings.company')->middleware('system.permission:system.settings.manage');
     Route::put('/settings/company', [CompanySettingsController::class, 'update'])->name('system.settings.company.update')->middleware('system.permission:system.settings.manage');
     Route::post('/settings/company/upload-logo', [CompanySettingsController::class, 'uploadLogo'])->name('system.settings.company.upload-logo')->middleware('system.permission:system.settings.manage');
     Route::delete('/settings/company/logo', [CompanySettingsController::class, 'removeLogo'])->name('system.settings.company.remove-logo')->middleware('system.permission:system.settings.manage');
@@ -1331,7 +1335,7 @@ Route::prefix('system')->middleware(['auth:web,admin', 'system.admin'])->group(f
     Route::delete('/settings/company/stamp', [CompanySettingsController::class, 'removeStamp'])->name('system.settings.company.remove-stamp')->middleware('system.permission:system.settings.manage');
 
     // General Settings
-    Route::get('/settings/general', [GeneralSettingsController::class, 'index'])->name('system.settings.general')->middleware('system.permission:system.settings.manage');
+    Route::get('/settings/general', fn () => redirect()->route('system.settings.index', ['tab' => 'general']))->name('system.settings.general')->middleware('system.permission:system.settings.manage');
     Route::put('/settings/general', [GeneralSettingsController::class, 'update'])->name('system.settings.general.update')->middleware('system.permission:system.settings.manage');
 
     // Website Settings

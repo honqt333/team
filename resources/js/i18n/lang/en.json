@@ -5523,7 +5523,8 @@
             "back_to_app": "Back to App",
             "backups": "Backups",
             "feedbacks_support": "Feedbacks & Support",
-            "activity_log": "Activity Log"
+            "activity_log": "Activity Log",
+            "system_settings": "System Settings"
         },
         "notifications": {
             "title": "Notifications",
@@ -6203,7 +6204,15 @@
             "quiet_hours_optional": "Quiet hours (optional)",
             "remove_override": "Remove override",
             "remove_the_override": "Remove the override?",
-            "disabled_label": "Off"
+            "disabled_label": "Off",
+            "hub_title": "System Settings",
+            "hub_subtitle": "Manage platform settings, company profile, payment gateways, and automated collection",
+            "tabs": {
+                "general": "General Settings",
+                "company": "Company Details",
+                "payment": "Payment Gateways",
+                "dunning": "Dunning & Collection"
+            }
         },
         "website": {
             "title": "Website CMS",
