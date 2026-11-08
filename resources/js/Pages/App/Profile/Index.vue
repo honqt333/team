@@ -8,6 +8,7 @@ import AppLayout from '@/Layouts/AppLayout.vue';
 import PageHeader from '@/Components/PageHeader.vue';
 import { useToast } from '@/Composables/useToast';
 import { useConfirm } from '@/Composables/useConfirm';
+import { useFormScrollToError } from '@/Composables/useFormScrollToError';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import SecondaryButton from '@/Components/SecondaryButton.vue';
 import DangerButton from '@/Components/DangerButton.vue';
@@ -31,8 +32,23 @@ const props = defineProps({
 
 const { success, error } = useToast();
 const { confirm } = useConfirm();
+const { scrollToError } = useFormScrollToError();
 const page = usePage();
 const user = computed(() => page.props.auth.user);
+
+const profileTabMap = {
+    name: 'profile',
+    email: 'profile',
+    photo: 'profile',
+    layout: 'preferences',
+    open_whatsapp: 'preferences',
+    whatsapp_sharing_preference: 'preferences',
+    hide_floating_button: 'preferences',
+    hide_floating_contact: 'preferences',
+    current_password: 'password',
+    password: 'password',
+    password_confirmation: 'password',
+};
 
 // Active Tab
 const activeTab = ref('profile');
@@ -104,10 +120,22 @@ const photoForm = useForm({
     photo: null,
 });
 
+const tabErrorCount = computed(() => ({
+    profile: Object.keys(profileForm.errors).length,
+    password: Object.keys(passwordForm.errors).length,
+    preferences: Object.keys(preferencesForm.errors).length,
+}));
+
 const updateProfile = () => {
     profileForm.patch(route('app.profile.update'), {
         preserveScroll: true,
         onSuccess: () => success(t('profile.updated_success')),
+        onError: (errors) => {
+            scrollToError(errors, {
+                tabMap: profileTabMap,
+                onSwitchTab: (k) => (activeTab.value = k),
+            });
+        },
     });
 };
 
@@ -124,6 +152,12 @@ const updatePassword = () => {
         onSuccess: () => {
             passwordForm.reset();
             success(t('security.password_changed_success'));
+        },
+        onError: (errors) => {
+            scrollToError(errors, {
+                tabMap: profileTabMap,
+                onSwitchTab: (k) => (activeTab.value = k),
+            });
         },
     });
 };
@@ -145,6 +179,12 @@ const savePreferences = () => {
                 localStorage.setItem('user_nav_layout', preferencesForm.layout);
             }
             success(t('profile.preferences.saved_success'));
+        },
+        onError: (errors) => {
+            scrollToError(errors, {
+                tabMap: profileTabMap,
+                onSwitchTab: (k) => (activeTab.value = k),
+            });
         },
     });
 };
@@ -592,6 +632,14 @@ const regenerateCodes = () =>
                                 {{ tab.badge }}
                             </span>
 
+                            <!-- Tab Errors Counter Badge -->
+                            <span
+                                v-if="tabErrorCount[tab.key] > 0"
+                                class="px-1.5 py-0.5 text-[10px] font-bold rounded-full bg-red-500 text-white shadow-sm animate-pulse"
+                            >
+                                {{ tabErrorCount[tab.key] }}
+                            </span>
+
                             <!-- Active Bottom Glowing Indicator -->
                             <div
                                 v-if="activeTab === tab.key"
@@ -645,6 +693,7 @@ const regenerateCodes = () =>
                                     </div>
                                     <input
                                         type="text"
+                                        name="name"
                                         v-model="profileForm.name"
                                         class="w-full ps-10 rounded-xl border-gray-300 dark:border-gray-600 dark:bg-gray-700/80 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm"
                                         required
@@ -684,6 +733,7 @@ const regenerateCodes = () =>
                                     </div>
                                     <input
                                         type="email"
+                                        name="email"
                                         v-model="profileForm.email"
                                         class="w-full ps-10 rounded-xl border-gray-300 dark:border-gray-600 dark:bg-gray-700/80 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm"
                                         required
@@ -783,6 +833,7 @@ const regenerateCodes = () =>
                                     >
                                         <input
                                             type="radio"
+                                            name="layout"
                                             v-model="preferencesForm.layout"
                                             value="side"
                                             class="sr-only"
@@ -1560,6 +1611,7 @@ const regenerateCodes = () =>
                                     </div>
                                     <input
                                         type="password"
+                                        name="current_password"
                                         v-model="passwordForm.current_password"
                                         class="w-full ps-10 rounded-xl border-gray-300 dark:border-gray-600 dark:bg-gray-700/80 dark:text-white focus:ring-2 focus:ring-indigo-500 text-sm"
                                         required
@@ -1599,6 +1651,7 @@ const regenerateCodes = () =>
                                     </div>
                                     <input
                                         type="password"
+                                        name="password"
                                         v-model="passwordForm.password"
                                         class="w-full ps-10 rounded-xl border-gray-300 dark:border-gray-600 dark:bg-gray-700/80 dark:text-white focus:ring-2 focus:ring-indigo-500 text-sm"
                                         required
@@ -1638,6 +1691,7 @@ const regenerateCodes = () =>
                                     </div>
                                     <input
                                         type="password"
+                                        name="password_confirmation"
                                         v-model="passwordForm.password_confirmation"
                                         class="w-full ps-10 rounded-xl border-gray-300 dark:border-gray-600 dark:bg-gray-700/80 dark:text-white focus:ring-2 focus:ring-indigo-500 text-sm"
                                         required
