@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Service;
 use App\Models\TenantWebsite;
 use App\Support\Media\ImageType;
+use App\Support\Permissions;
 use App\Support\TenantWebsite\ThemeRegistry;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -45,6 +46,8 @@ class TenantWebsiteSettingsController extends Controller
      */
     public function edit(): Response
     {
+        $this->authorize(Permissions::WEBSITE_VIEW);
+
         $tenantId = $this->currentTenantId();
         $website = $this->getOrCreateWebsite($tenantId);
 
@@ -84,6 +87,8 @@ class TenantWebsiteSettingsController extends Controller
      */
     public function update(Request $request): RedirectResponse
     {
+        $this->authorize(Permissions::WEBSITE_MANAGE);
+
         $tenantId = $this->currentTenantId();
         $website = $this->getOrCreateWebsite($tenantId);
 
@@ -124,6 +129,8 @@ class TenantWebsiteSettingsController extends Controller
      */
     public function deleteImage(Request $request): JsonResponse
     {
+        $this->authorize(Permissions::WEBSITE_MANAGE);
+
         $request->validate([
             'key' => ['required', 'string', Rule::in(['logo', 'cover'])],
         ]);
@@ -149,6 +156,8 @@ class TenantWebsiteSettingsController extends Controller
      */
     public function uploadBannerImage(Request $request): JsonResponse
     {
+        $this->authorize(Permissions::WEBSITE_MANAGE);
+
         $request->validate([
             'image' => ['required', 'image', 'mimes:png,jpg,jpeg,webp', 'max:4096'],
         ]);
