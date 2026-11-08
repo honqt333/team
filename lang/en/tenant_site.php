@@ -15,6 +15,9 @@ return [
         'whatsapp_cta' => 'WhatsApp',
         'book_cta' => 'Book appointment',
     ],
+    'json_ld' => [
+        'service_catalog' => 'Our service catalog',
+    ],
     'pricing' => [
         'starting_from' => 'Starting from :price SAR',
         'upon_inspection' => 'Price upon inspection',

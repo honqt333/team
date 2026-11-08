@@ -23,11 +23,100 @@ class PublicLandingController extends Controller
 
         $isAdminPreview = $isSystemAdmin && $request->has('preview');
 
+        /*
+         * The page is reachable at both `/` and `/landing-preview`, and both
+         * serve the SAME content. That is duplicate content: the search
+         * engines have to pick one, and the ranking signal is split
+         * between them.
+         *
+         * The canonical URL points at `/`, so a plain visit to
+         * `/landing-preview` is redirected there instead. The `?preview=1`
+         * variant is kept as-is: that is the CMS live-preview iframe, and
+         * it must not bounce the operator back to the homepage.
+         */
+        if (! $request->has('preview') && $request->is('landing-preview')) {
+            return redirect('/');
+        }
+
+        $settings = $this->getWebsiteSettings();
+
         return Inertia::render('Public/LandingPreview', [
-            'settings' => $this->getWebsiteSettings(),
+            'settings' => $settings,
             'plans' => Plan::where('is_active', true)->orderBy('sort_order')->get(),
             'isAdminPreview' => $isAdminPreview,
+            /*
+             * The canonical URL.
+             *
+             * The page is reachable at both `/` and `/landing-preview`. The
+             * canonical URL points at `/` so the search engines index the
+             * one that is meant to be the homepage.
+             */
+            'canonicalUrl' => url('/'),
+            /*
+             * Structured data.
+             *
+             * `SoftwareApplication` describes the product and `FAQPage`
+             * exposes the questions already rendered on the page. The FAQ
+             * markup is what can earn a rich result in search.
+             */
+            'jsonLd' => $this->buildJsonLd($settings, url('/')),
         ]);
+    }
+
+    /**
+     * Build the schema.org JSON-LD graph for the landing page.
+     *
+     * @param array<string, mixed> $settings
+     * @return array<string, mixed>
+     */
+    private function buildJsonLd(array $settings, string $url): array
+    {
+        $graph = [
+            [
+                '@context' => 'https://schema.org',
+                '@type' => 'SoftwareApplication',
+                'name' => $settings['title_ar'] ?? config('app.name'),
+                'url' => $url,
+                'applicationCategory' => 'BusinessApplication',
+                'operatingSystem' => 'Web',
+                'inLanguage' => ['ar', 'en'],
+            ],
+        ];
+
+        /*
+         * The FAQ block is only emitted when there ARE questions. An empty
+         * FAQPage is invalid structured data and search engines penalise
+         * it, so it is omitted rather than emitted empty.
+         */
+        $faq = [];
+
+        foreach (($settings['faq_list'] ?? []) as $item) {
+            $question = $item['q_ar'] ?? '';
+            $answer = $item['a_ar'] ?? '';
+
+            if ($question === '' || $answer === '') {
+                continue;
+            }
+
+            $faq[] = [
+                '@type' => 'Question',
+                'name' => $question,
+                'acceptedAnswer' => [
+                    '@type' => 'Answer',
+                    'text' => $answer,
+                ],
+            ];
+        }
+
+        if ($faq !== []) {
+            $graph[] = [
+                '@context' => 'https://schema.org',
+                '@type' => 'FAQPage',
+                'mainEntity' => $faq,
+            ];
+        }
+
+        return count($graph) === 1 ? $graph[0] : ['@graph' => $graph];
     }
 
     /**

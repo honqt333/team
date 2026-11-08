@@ -26,14 +26,28 @@ const emit = defineEmits(['toggle-theme', 'toggle-mobile', 'switch-lang']);
         <nav class="lp-nav" :aria-label="isRtl ? 'التنقل الرئيسي' : 'Main navigation'">
             <a href="#" class="lp-logo">
                 <span class="logo-mark">
-                    <img
-                        v-if="settings.logo"
-                        :src="settings.logo"
-                        :alt="t('title_ar', 'title_en')"
-                        width="44"
-                        height="44"
-                    />
-                    <span v-else aria-hidden="true">C</span>
+                    <!--
+                        The logo comes from the CMS, so it can be any file.
+                        The optimised WebP is offered first and the original
+                        PNG/SVG is the fallback — the CMS keeps working, and
+                        browsers that support WebP get the small file.
+                    -->
+                    <picture>
+                        <source
+                            v-if="settings.logo"
+                            type="image/webp"
+                            srcset="/images/landing/logo.webp"
+                        />
+                        <img
+                            v-if="settings.logo"
+                            :src="settings.logo"
+                            :alt="t('title_ar', 'title_en')"
+                            width="44"
+                            height="44"
+                            decoding="async"
+                        />
+                    </picture>
+                    <span v-if="!settings.logo" aria-hidden="true">C</span>
                 </span>
                 <span class="logo-name">{{ t('title_ar', 'title_en') }}</span>
             </a>

@@ -61,6 +61,7 @@ export default [
                 ResizeObserver: 'readonly',
                 IntersectionObserver: 'readonly',
                 MutationObserver: 'readonly',
+                performance: 'readonly',
                 requestAnimationFrame: 'readonly',
                 cancelAnimationFrame: 'readonly',
                 requestIdleCallback: 'readonly',

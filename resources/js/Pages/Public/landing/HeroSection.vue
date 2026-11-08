@@ -74,10 +74,18 @@ onUnmounted(() => {
     if (rotationTimer) clearInterval(rotationTimer);
 });
 
+/*
+ * The trust row.
+ *
+ * These used to be "No contracts / Free trial / 24/7 support" — the three
+ * most generic reassurance bullets on the internet. They are now specific
+ * to what a workshop owner actually worries about: getting the data in,
+ * what the trial costs, and whether someone will help when the phone rings.
+ */
 const trustItems = computed(() =>
     props.isRtl
-        ? ['بدون عقود', 'تجربة مجانية', 'دعم فني بالعربي']
-        : ['No contracts', 'Free trial', 'Arabic support']
+        ? ['إدخال بياناتك من Excel', 'تجربة بدون بطاقة ائتمان', 'دعم بالعربي']
+        : ['Import from Excel', 'No credit card needed', 'Arabic support']
 );
 </script>
 

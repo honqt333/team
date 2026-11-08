@@ -328,7 +328,8 @@ html {
 .btn-primary-sm {
     padding: 0.625rem 1.5rem;
     border-radius: 12px;
-    background: var(--primary);
+    /* See `.btn-cta` — the brand colour is darkened for white text. */
+    background: var(--primary-strong);
     color: #fff;
     font-size: 0.875rem;
     font-weight: 700;
@@ -339,7 +340,7 @@ html {
 }
 
 .btn-primary-sm:hover {
-    background: #4f46e5;
+    background: var(--primary-strong);
     transform: translateY(-1px);
     box-shadow: 0 12px 32px rgba(var(--primary-rgb), 0.4);
 }
@@ -647,7 +648,13 @@ html {
     gap: 0.625rem;
     padding: 1rem 2rem;
     border-radius: 16px;
-    background: linear-gradient(135deg, var(--primary), #8b5cf6);
+    /*
+     * `--primary-strong` is the brand colour darkened until WHITE text on
+     * top of it clears 4.5:1. The brand colour comes from the CMS, and a
+     * light one (a gold `#e5a448`, for instance) put white text on a
+     * background at 2.15:1.
+     */
+    background: linear-gradient(135deg, var(--primary-strong), #8b5cf6);
     color: #fff;
     font-size: 1rem;
     font-weight: 700;

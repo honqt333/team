@@ -56,6 +56,13 @@
     --color-focus-ring: #fbbf24;
     --color-focus-ring-soft: rgba(251, 191, 36, 0.4);
 
+    /* --- Selection & Toggle states --- */
+    --color-selection-bg: var(--color-action-primary-soft);
+    --color-selection-text: var(--color-action-primary-hover);
+    --color-selection-ring: var(--color-action-primary);
+    --color-toggle-off-bg: var(--color-border);
+    --color-toggle-thumb: #ffffff;
+
     /* --- Spacing --- */
     --space-0: 0;
     --space-1: 0.25rem;
@@ -100,9 +107,11 @@
     --line-height-normal: 1.5;
     --line-height-relaxed: 1.625;
 
-    --font-family-sans: 'IBM Plex Sans Arabic', 'Tajawal', 'Noto Kufi Arabic', 'Inter', system-ui,
+    /* IBM Plex Sans Arabic is the only webfont of the project.
+     * The rest are local fallbacks — nothing is downloaded for them. */
+    --font-family-sans: 'IBM Plex Sans Arabic', 'Noto Kufi Arabic', 'Inter', system-ui,
         -apple-system, sans-serif;
-    --font-family-display: 'IBM Plex Sans Arabic', 'Tajawal', 'Noto Kufi Arabic', system-ui,
+    --font-family-display: 'IBM Plex Sans Arabic', 'Noto Kufi Arabic', system-ui,
         sans-serif;
     --font-family-mono: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace;
 
@@ -178,6 +187,13 @@
     --color-action-primary-soft: rgba(99, 102, 241, 0.16);
     --color-action-primary-soft-dark: rgba(99, 102, 241, 0.16);
     --color-action-on: #ffffff;
+
+    /* --- Selection & Toggle states (Dark) --- */
+    --color-selection-bg: var(--color-action-primary-soft);
+    --color-selection-text: var(--color-action-primary-hover);
+    --color-selection-ring: var(--color-action-primary);
+    --color-toggle-off-bg: var(--color-border);
+    --color-toggle-thumb: #ffffff;
 
     --shadow-xs: 0 1px 2px 0 rgba(0, 0, 0, 0.4);
     --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.45), 0 1px 2px 0 rgba(0, 0, 0, 0.35);

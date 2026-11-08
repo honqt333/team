@@ -22,10 +22,11 @@
  *   5. Accessibility: <main> landmark, real heading order, labelled form
  *      fields, named icon buttons and social links, and a fixed contrast ratio.
  */
-import { Head, usePage, useForm, router } from '@inertiajs/vue3';
+import { Head, useForm, router } from '@inertiajs/vue3';
 import { ref, computed, onMounted, onUnmounted, watch, defineAsyncComponent } from 'vue';
 import { useLanding } from './landing/useLanding';
 import { getSocialIcon } from './landing/socialIcons';
+import { darkenForWhiteText } from '@/Support/colourHelpers';
 
 import '../../../css/landing.css';
 
@@ -35,6 +36,7 @@ import HeroSection from './landing/HeroSection.vue';
 
 // ── Lazy: below the fold, parsed only when needed ──────────────────────────
 const FeaturesSection = defineAsyncComponent(() => import('./landing/FeaturesSection.vue'));
+const HowItWorksSection = defineAsyncComponent(() => import('./landing/HowItWorksSection.vue'));
 const StatsSection = defineAsyncComponent(() => import('./landing/StatsSection.vue'));
 const PricingSection = defineAsyncComponent(() => import('./landing/PricingSection.vue'));
 const FaqSection = defineAsyncComponent(() => import('./landing/FaqSection.vue'));
@@ -48,9 +50,28 @@ const props = defineProps({
     settings: { type: Object, required: true },
     plans: { type: Array, default: () => [] },
     isAdminPreview: { type: Boolean, default: false },
+    /** The canonical URL of this page (built server-side). */
+    canonicalUrl: { type: String, default: '' },
+    /** The schema.org JSON-LD graph (built server-side). */
+    jsonLd: { type: Object, default: null },
 });
 
-const page = usePage();
+/**
+ * The CSS custom properties for the page.
+ *
+ * `--primary` is the brand colour from the CMS. `--primary-strong` is the
+ * same colour darkened until WHITE text on top of it clears 4.5:1 — the
+ * primary call-to-action buttons carry white text, and a light brand colour
+ * (a gold `#e5a448`, for instance) put that text at 2.15:1.
+ */
+const cssVars = computed(() => {
+    const primary = settings.value.primary_color || '#4f46e5';
+
+    return {
+        '--primary': primary,
+        '--primary-strong': darkenForWhiteText(primary, 4.5),
+    };
+});
 
 // ── Live settings (synced from the CMS editor via postMessage) ─────────────
 const liveSettings = ref({ ...(props.settings || {}) });
@@ -74,7 +95,6 @@ const {
     t,
     li,
     toggleTheme,
-    applyTheme,
 } = useLanding(settings);
 
 // ── Contact form ───────────────────────────────────────────────────────────
@@ -164,14 +184,52 @@ onUnmounted(() => {
         <meta v-if="settings.keywords" name="keywords" :content="settings.keywords" />
         <meta property="og:title" :content="t('title_ar', 'title_en')" />
         <meta property="og:description" :content="t('description_ar', 'description_en')" />
+        <!--
+            The share image points at the optimised WebP, not the original
+            1.6 MB PNG in the CMS. Social platforms fetch this URL, and the
+            PNG was the single heaviest asset on the page.
+        -->
         <meta
             v-if="settings.banners_list && settings.banners_list[0]"
             property="og:image"
-            :content="settings.banners_list[0].image"
+            content="/images/landing/FXHzyVlYFrkltsYphSMwQJs5tN5b5RjkAvAQw1wo.webp"
         />
+        <meta property="og:image:width" content="1408" />
+        <meta property="og:image:height" content="736" />
         <meta property="og:type" content="website" />
         <meta property="og:locale" :content="isRtl ? 'ar_SA' : 'en_US'" />
+        <meta property="og:locale:alternate" :content="isRtl ? 'en_US' : 'ar_SA'" />
         <link v-if="settings.favicon" rel="icon" :href="settings.favicon" type="image/x-icon" />
+
+        <!--
+            Canonical URL and language alternates.
+
+            The page is served at both `/` and `/landing-preview`, so a
+            canonical URL is what tells the search engines which one to
+            index. The alternates declare that the same page serves Arabic
+            and English.
+        -->
+        <link rel="canonical" :href="canonicalUrl" />
+        <link rel="alternate" hreflang="ar" :href="canonicalUrl" />
+        <link rel="alternate" hreflang="en" :href="canonicalUrl" />
+        <link rel="alternate" hreflang="x-default" :href="canonicalUrl" />
+
+        <!--
+            Social share card. Without the Twitter tags the share falls back
+            to a plain text link with no image.
+        -->
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" :content="t('title_ar', 'title_en')" />
+        <meta name="twitter:description" :content="t('description_ar', 'description_en')" />
+        <meta
+            v-if="settings.banners_list && settings.banners_list[0]"
+            name="twitter:image"
+            content="/images/landing/FXHzyVlYFrkltsYphSMwQJs5tN5b5RjkAvAQw1wo.webp"
+        />
+
+        <!--
+            The JSON-LD graph is rendered server-side by app.blade.php.
+        -->
 
         <!--
             The hero image is the LCP candidate. Preloading the AVIF source
@@ -187,28 +245,18 @@ onUnmounted(() => {
         />
 
         <!--
-            Fonts are self-hosted (public/fonts). The old implementation pulled
-            Cairo + Outfit with 7 weights each from Google Fonts — 14 font
-            files, render-blocking, on a third-party origin.
-
-            Only the Arabic subset of weight 400 is preloaded: that is the
-            subset the default (Arabic) page actually renders. The Latin
-            subset loads on its own when a Latin glyph is needed.
+            Fonts are self-hosted and preloaded globally from app.blade.php
+            (public/css/fonts.css). The old implementation pulled Cairo +
+            Outfit with 7 weights each from Google Fonts — 14 font files,
+            render-blocking, on a third-party origin.
         -->
-        <link
-            rel="preload"
-            as="font"
-            type="font/woff2"
-            href="/fonts/ibm-plex-sans-arabic-arabic-400.woff2"
-            crossorigin
-        />
     </Head>
 
     <div
         class="lp-root min-h-screen overflow-x-hidden"
         :data-theme="isDark ? 'dark' : 'light'"
         :dir="isRtl ? 'rtl' : 'ltr'"
-        :style="{ '--primary': settings.primary_color || '#4f46e5' }"
+        :style="cssVars"
     >
         <!-- Admin preview notice when maintenance mode is ON -->
         <div
@@ -308,6 +356,7 @@ onUnmounted(() => {
                     :t="t"
                     :li="li"
                 />
+                <HowItWorksSection :settings="settings" :is-rtl="isRtl" />
                 <StatsSection v-if="settings.stats_enabled" :settings="settings" :is-rtl="isRtl" />
                 <PricingSection
                     v-if="settings.pricing_enabled"

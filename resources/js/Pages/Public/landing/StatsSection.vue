@@ -17,13 +17,35 @@ const counters = ref({});
 let observer = null;
 let frameId = null;
 
+/**
+ * Is this value an animated counter, or a label with a unit attached?
+ *
+ * "500", "+1M" and "1" are counters — they animate up.
+ * "24/7", "ZATCA" and "SAR" are not — they are text, and animating them
+ * produces nonsense ("24/7" would become "24/7" with the slash mangled into
+ * the suffix, and "SAR" would count up from 0).
+ *
+ * A value is a counter only when it is ENTIRELY numeric (with an optional
+ * sign, thousands separators and a trailing unit made of %/+/x characters).
+ */
+function isCounterValue(raw) {
+    return /^[+-]?\d[\d,]*(\.\d+)?\s*[%+xX]?$/.test(raw.trim());
+}
+
 function runCounters() {
     const list = props.settings.stats_list || [];
 
     list.forEach((stat, i) => {
         const raw = String(stat.value ?? '');
+
+        if (!isCounterValue(raw)) {
+            // Pure text (e.g. "ZATCA", "24/7"): show it as-is, no animation.
+            counters.value[i] = raw;
+            return;
+        }
+
         const num = parseFloat(raw.replace(/[^\d.]/g, '')) || 0;
-        const suffix = raw.replace(/[\d.]/g, '');
+        const suffix = raw.replace(/[\d.,\s]/g, '');
         const duration = 1800;
         const start = performance.now();
 
@@ -44,12 +66,23 @@ onMounted(() => {
     const el = document.getElementById('stats-section');
     if (!el) return;
 
-    (props.settings.stats_list || []).forEach((_, i) => {
-        counters.value[i] = '0';
+    const list = props.settings.stats_list || [];
+
+    /*
+     * Seed the counters.
+     *
+     * Numeric values start at '0' and animate up when the band scrolls into
+     * view. Values that do not start with a digit ("ZATCA", "SAR", "24/7")
+     * are NOT counters — they must show their real value immediately, or the
+     * band would display "0" for them until the observer fired.
+     */
+    list.forEach((stat, i) => {
+        const raw = String(stat.value ?? '');
+        counters.value[i] = isCounterValue(raw) ? '0' : raw;
     });
 
     if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) {
-        (props.settings.stats_list || []).forEach((stat, i) => {
+        list.forEach((stat, i) => {
             counters.value[i] = stat.value;
         });
         return;

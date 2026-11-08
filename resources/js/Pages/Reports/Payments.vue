@@ -1154,7 +1154,7 @@ const getMethodBadgeClass = (m) => {
     body {
         background: white !important;
         color: black !important;
-        font-family: 'Tajawal', 'Noto Kufi Arabic', sans-serif !important;
+        font-family: 'IBM Plex Sans Arabic', 'Noto Kufi Arabic', sans-serif !important;
     }
 
     .print-section {

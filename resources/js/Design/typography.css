@@ -9,11 +9,22 @@
  * between mobile (320px) and desktop (1440px).
  * ============================================================ */
 
-/* Webfonts: load IBM Plex Sans Arabic (Latin + Arabic) and Tajawal
- * as a display fallback. Using <link> is preferable, but importing
- * here keeps Phase-1 self-contained. The @import is non-blocking
- * for build (Vite will inline or warn at most). */
-@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Tajawal:wght@400;500;700&display=swap');
+/* Webfonts: IBM Plex Sans Arabic is self-hosted.
+ *
+ * This file used to @import the Google Fonts stylesheet for IBM Plex Sans
+ * Arabic + Tajawal. A CSS @import is the worst possible way to load a
+ * font: the browser only discovers it AFTER this stylesheet has downloaded,
+ * then it has to open a connection to a third-party origin and download
+ * the font files from there — which delays the first paint on every page.
+ *
+ * Measured on the tenant site: 8 files / 164 KiB from fonts.gstatic.com,
+ * including Tajawal — a parallel font the project constitution forbids —
+ * and the same IBM Plex families that are already self-hosted, so the page
+ * downloaded them twice.
+ *
+ * The @font-face declarations live in /public/css/fonts.css, which the
+ * layout links in <head> with a preload for the two critical subsets.
+ */
 
 html {
     font-family: var(--font-family-sans);

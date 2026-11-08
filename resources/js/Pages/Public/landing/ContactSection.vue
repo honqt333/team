@@ -7,7 +7,6 @@
  * with their inputs, so axe reported 4+ `label` failures and screen readers
  * announced the fields as unlabelled.
  */
-import { ref } from 'vue';
 
 const props = defineProps({
     settings: { type: Object, required: true },

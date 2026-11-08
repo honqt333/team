@@ -7,7 +7,7 @@
  */
 import { onMounted, onUnmounted } from 'vue';
 
-const props = defineProps({
+defineProps({
     settings: { type: Object, required: true },
     isRtl: { type: Boolean, default: false },
     activeLegalPage: { type: String, default: null },

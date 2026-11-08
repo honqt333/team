@@ -31,7 +31,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>500 - {{ $t['title'] }}</title>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/fonts.css">
     <style>
         * {
             margin: 0;
@@ -40,7 +40,7 @@
         }
 
         body {
-            font-family: 'Cairo', sans-serif;
+            font-family: 'IBM Plex Sans Arabic', 'Noto Kufi Arabic', system-ui, sans-serif;
             min-height: 100vh;
             background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
             display: flex;

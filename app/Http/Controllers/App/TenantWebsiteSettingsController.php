@@ -7,6 +7,7 @@ namespace App\Http\Controllers\App;
 use App\Http\Controllers\Controller;
 use App\Models\Service;
 use App\Models\TenantWebsite;
+use App\Services\Media\ImageOptimizer;
 use App\Support\Media\ImageType;
 use App\Support\Permissions;
 use App\Support\TenantWebsite\ThemeRegistry;
@@ -285,6 +286,11 @@ class TenantWebsiteSettingsController extends Controller
      * never used here: the type is read from the bytes, and the extension
      * written to disk comes from that. SVG is refused — it is served
      * straight from the public disk, and it can carry scripts.
+     *
+     * Large PNG/JPEG uploads are re-encoded to WebP before they are stored.
+     * A tenant's promotional banner was measured at 422 KB as a PNG; as
+     * WebP it is 65 KB. Every visitor of that workshop's public site was
+     * downloading the 422 KB version.
      */
     private function storeImage(UploadedFile $file, int $tenantId, string $slot, ?string $oldPath): string
     {
@@ -305,8 +311,13 @@ class TenantWebsiteSettingsController extends Controller
             Storage::disk('public')->delete($oldPath);
         }
 
-        $filename = $slot.'_'.time().'.'.$extension;
         $directory = "tenants/{$tenantId}/website";
+
+        $optimised = ImageOptimizer::optimize($binary, ImageType::detect($binary));
+        $binary = $optimised->binary;
+        $extension = $optimised->extension;
+
+        $filename = $slot.'_'.time().'.'.$extension;
 
         Storage::disk('public')->put("{$directory}/{$filename}", $binary);
 

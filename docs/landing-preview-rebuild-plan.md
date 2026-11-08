@@ -339,3 +339,321 @@
 > **عند كل إضافة جديدة، اسأل: "هل تخدم هذه العناصر الزائر أم تخدم PGA؟"**
 > الجواب في 90% من الحالات الأولى هو: تخدم PGA.
 > حذف ما لا يخدم الزائر — وستجد أن الصفحة صارت أسرع وأجمل وأكثر مبيعاً في الوقت نفسه.
+
+---
+---
+
+# 📊 تقرير التنفيذ الفعلي (2026-11-08)
+
+> هذه القائمة تضيف ما **تم تنفيذه فعلياً**، بالأرقام المقيسة، وما بقي.
+
+## ✅ النتيجة النهائية
+
+| المقياس | قبل | بعد | الهدف | الحالة |
+| :--- | ---: | ---: | ---: | :--- |
+| **Performance (Desktop)** | **49%** | **91–98%** | 85% | ✅ |
+| **Performance (Mobile)** | — | **100%** | 85% | ✅ |
+| **Accessibility** | **75%** | **100%** | 95% | ✅ |
+| **Best Practices** | **81%** | **100%** | 95% | ✅ |
+| **SEO** | **92%** | **100%** | 95% | ✅ |
+| First Contentful Paint | 1.8 s | **0.7 s** | < 2.5 s | ✅ |
+| Largest Contentful Paint | 1.8 s | **0.9 s** | < 4 s | ✅ |
+| Total Blocking Time | 1,130 ms | **0–30 ms** | < 200 ms | ✅ |
+| Time to Interactive | 7.2 s | **0.7 s** | < 5 s | ✅ |
+| Max Potential FID | 1,180 ms | **30 ms** | < 300 ms | ✅ |
+| Cumulative Layout Shift | 0.01 | **0.008** | < 0.1 | ✅ |
+| حجم الصفحة | 3,623 KiB | **928 KiB** | < 1,500 KiB | ✅ |
+| عدد الطلبات | 362 | **57** | — | ✅ |
+| إخفاقات Axe | 11 | **0** | 0 | ✅ |
+
+> ملاحظة: **Performance يتذبذب بين 91% و 98%** بين التشغيلات (قياس حقيقي، لا محاكاة).
+> الـ budgets في `lighthouserc.cjs` تفشل البناء إذا انخفض الأداء تحت 70%.
+
+---
+
+## 🔍 اكتشاف الجذر — القصة الحقيقية
+
+التشخيص الأول ظن أن المشكلة في ملف الـ Vue الكبير (2,962 سطر). **كان جزئياً فقط.**
+
+السبب الحقيقي كان أعمق:
+
+> `resources/js/app.js` كان يستخدم `import.meta.glob('./Pages/**/*.vue')` —
+> وهو النمط القياسي في Inertia. لكن هذا الـ glob يجعل Vite **يُرفق قائمة تبعيات كاملة**
+> (`__vite__mapDeps([...])`) بكل صفحة في السجل. المتصفح كان **يُحمّل 345 ملفاً**
+> من كل تطبيق: `TenantHealthScore`، `Payments`، `Proforma`، `PrintEngine`،
+> ولوحة تحكم الفروع كاملة — **ولا شيء منها يمسه زائر صفحة الهبوط إطلاقاً**.
+
+**الحل** (ثلاث خطوات):
+1. `scripts/generate-page-manifest.mjs` — سجل صفحات صريح يُولَّد تلقائياً.
+2. `manualChunks` في `vite.config.js` — يعطي السجل chunk مستقلاً.
+3. النتيجة: **345 طلباً → 0 طلباً غير لازم**.
+
+هذا وحده كان responsible عن تحسّن الـ byte-weight من 2.1 MB إلى 928 KB.
+
+---
+
+## ✅ ما تم تنفيذه
+
+### المرحلة 0 — خط الأساس
+- `docs/landing-preview/baseline/baseline.json` — الخط الأساس المحفوظ.
+- `lighthouserc.cjs` — budgets صارمة (الأداء ≥ 70%، الوصولية ≥ 95%، TBT ≤ 300ms…).
+- `npm run lhci` — أمر تشغيل Lighthouse محلياً.
+- `@lhci/cli` devDependency.
+
+### المرحلة 1 — الأداء
+- **الـ LCP**: كان `.typed-line` (نص يتغير كل 90ms). صار **صورة المنتج الحقيقية** بصيغة AVIF/WebP.
+- **تقسيم الملف**: `LandingPreview.vue` من 2,962 سطر → 500 سطر + 10 مكونات في `Pages/Public/landing/`.
+- **Lazy loading**: كل قسم بـ `defineAsyncComponent` (1–4 KB لكل chunk).
+- **CSS**: 1,680 سطر → `resources/css/landing.css` (مُضاف لـ `tailwind.config.js` content).
+- **حذف**: canvas particles، cursor-glow، aurora متحركة، 6 من 7 `backdrop-filter`.
+- **الخطوط**: 14 ملف Google Fonts → 4 أوزان مستضافة ذاتياً (236 KB) عبر `public/css/fonts.css`.
+- **الصور**: PNG بحجم 1.6 MB → AVIF 41 KB / WebP 63 KB.
+- **تسريب الـ chunks**: `page-manifest.js` + `manualChunks` (345 → 0).
+- **Batch reads**: `getBoundingClientRect()` مجمّع (39ms forced reflow → 0).
+
+### المرحلة 2 — الوصولية (100%)
+- `<main>` landmark (كان مفقوداً تماماً).
+- ترتيب العناوين: `<h4>` بلا أب → كلها `<h2>`.
+- `<label for>` حقيقي لكل حقل فورم + `id` + `aria-describedby`.
+- `aria-label` لكل زر أيقوني وروابط السوشيال.
+- `role="switch"` + `aria-checked` لمفتاح الفوترة.
+- `role="dialog"` + `aria-modal` + Escape للإغلاق.
+- تباين: `#4f46e5` (3.23:1) → tokens خاصة بكل ثيم (`--primary-heading`, `--accent-check`).
+- `opacity: 0.5` على حقوق النشر → token لون (2.13:1 → 4.6:1).
+- `prefers-reduced-motion` — يحترم الإعداد ويمنع بقاء المحتوى `opacity: 0`.
+- `.no-js` fallback — المحتوى يظهر حتى لو فشل JavaScript.
+
+### المرحلة 3 — كسر قالب الـ AI
+- **حذف الشارات الوهمية**: "⚡ 99.9%" و "🚀 +500" (أرقام بلا مصدر).
+- **حذف الـ mockup**: نافذة المتصفح المصطنعة → **صورة الهوية الحقيقية** من CMS.
+- **حذف العملاء المخترعين**: `AutoCare` / `SpeedFix` / `ProGarage` / `StarMotors` — أسماء مخترعة
+  كانت تُعرض مع **شعارات منافسين** من ويكيميديا (BMW, Mercedes, Volkswagen, Suzuki).
+  القسم الآن مخفي حتى يضيف المدير عملاءه الحقيقيين.
+- **استبدال الأرقام**: `+500` / `+1M` / `+100K` / `%99.9` → `ZATCA` / `SAR` / `24/7` / `1`
+  (أرقام صادقة: **قاعدة البيانات فيها 4 مستأجرين و9 كروت عمل فقط**).
+- **العنوان**: "مرحباً بك في عصر الإدارة الذكية للورش" → "أدر مركز صيانتك بكرت عمل واحد".
+- **المزايا**: 4 مزايا عامة → **6 مزايا خاصة بمركز صيانة** (كرت العمل، المخزون، الزكاة والدخل، الفروع، ساعات العمل، تقارير الأرباح).
+- **الأسئلة الشائعة**: 3 أسئلة عامة → **4 أسئلة حقيقية** (من واقع تشغيل النظام).
+- **قسم جديد "كم يستغرق التشغيل؟"** — جدول زمني صادق (يوم / 3 أيام / أسبوع). **لا يوجد في أي قالب.**
+- **شريط الثقة**: "بلا عقود / تجربة مجانية" → "استيراد من Excel / بدون بطاقة ائتمان / دعم بالعربي".
+- FAQ كـ `<details>` — يعمل بدون JavaScript وقابل للت crawling.
+
+### البنية التحتية
+- `scripts/generate-page-manifest.mjs` — يولّد سجل الصفحات تلقائياً.
+- `npm run build:manifest` — يُشغَّل تلقائياً قبل كل build.
+- `public/fonts/` — 4 أوزان × مقطعين (عربي + لاتيني).
+- `public/images/landing/` — AVIF + WebP + fallback PNG.
+- `public/css/fonts.css` — خطوط مستضافة ذاتياً للتطبيق كله.
+
+---
+
+## 🧪 الاختبارات
+
+| الملف | التغطية |
+| :--- | :--- |
+| `tests/Feature/PublicLandingPageTest.php` | 10 اختبارات — الرندر، props، CMS override، fallback، الفورم، **وحارس الأرقام المزعومة** |
+| `tests/Feature/LandingPerformanceGuardTest.php` | 9 اختبارات — حارس ضد كل أنماط الانحدار التي عالجناها |
+| `resources/js/test/setup.js` | إصلاح polyfill لـ `localStorage.clear()` (كان يسبب فشل اختبارين) |
+
+**الحارس (#2) هو الأهم** — يمنع عودة:
+- الـ glob في سجل الصفحات
+- page manifest ناقص (اكتشف 3 صفحات ناقصة من parallel process)
+- canvas particles أو cursor-glow
+- أكثر من `backdrop-filter` واحد
+- غياب `prefers-reduced-motion`
+- شعارات العملاء المخترعين أو الأرقام المزعومة
+
+---
+
+## 📁 الملفات الجديدة/المعدّلة
+
+**جديد:**
+```
+resources/js/Pages/Public/landing/
+    HeroSection.vue  FeaturesSection.vue  StatsSection.vue
+    PricingSection.vue  FaqSection.vue  ClientsSection.vue
+    ContactSection.vue  CtaSection.vue  HowItWorksSection.vue
+    LandingHeader.vue  LandingFooter.vue  LegalModal.vue
+    useLanding.js  socialIcons.js
+resources/js/Pages/page-manifest.js        (مولَّد)
+resources/css/landing.css
+public/css/fonts.css
+public/fonts/ibm-plex-sans-arabic-*.woff2
+public/images/landing/*.avif *.webp
+scripts/generate-page-manifest.mjs
+lighthouserc.cjs
+tests/Feature/PublicLandingPageTest.php
+tests/Feature/LandingPerformanceGuardTest.php
+docs/landing-preview/baseline/baseline.json
+```
+
+**معدّل:**
+```
+resources/js/Pages/Public/LandingPreview.vue   (2,962 → ~500 سطر)
+resources/js/app.js                              (سجل الصفحات)
+vite.config.js  tailwind.config.js  package.json
+resources/views/app.blade.php                    (خطوط ذاتية + no-js)
+app/Http/Controllers/Public/PublicLandingController.php
+app/Http/Controllers/System/WebsiteSettingsController.php
+```
+
+---
+
+## ⚠️ ملاحظات مهمّة
+
+1. **إخفاقان في `php artisan test` غير متعلقين بهذا العمل:**
+   - `FeedbackTest > system admin can view all feedbacks and reply` → 302 بدل 200
+   - `PolicyPermissionReferenceTest`
+   - **تم التحقق**: فشلان قبل تغييراتي أيضاً (تم التأكد عبر `git stash`).
+   - السبب: commit `82c92ec5` (من الـ parallel process) غيّر مسارات `/system/settings/feedbacks`
+     بدون تحديث الاختبار.
+
+2. **الـ parallel process يعمل على نفس الـ working tree.**
+   - استخدم `git add <path>` صريحاً — **لا `git add -A`**.
+   - لا `git reset --hard` (مُسح عملهم من قبل).
+   - `resources/js/Pages/page-manifest.js` يجب إعادة توليده بعد إضافة أي صفحة:
+     `npm run build:manifest`.
+
+3. **لم تُلمس المخططات (migrations).** لم يحتج أي تغيير في قاعدة البيانات.
+
+4. **لم يُلمس أي نص من `resources/js/i18n/lang/*.json`** — محتوى الصفحة يأتي من CMS
+   (`landing.*` settings) كما كان، لكن الآن بمحتوى صادق.
+
+---
+
+## 🔜 ما يمكن أن يتبع
+
+| الأولوية | المهمة | الجهد |
+| :--- | :--- | :--- |
+| ⭐ | **شهادات عملاء حقيقية** — اطلبها من 3 عملاء مع صورهم | يحتاج تواصل |
+| ⭐ | **صيغة "مناسب لمن"** — يقلل الحضور غير المناسب ويزيد التحويل | ساعتان |
+| 🟡 | **JSON-LD** (`SoftwareApplication` + `FAQPage`) — FAQ موجود فعلاً | ساعة |
+| 🟡 | **CTA tracking** — أحداث GA4 على كل زر | ساعتان |
+| 🟡 | **تبديل `/` للصفحة الجديدة** خلف feature flag | ساعتان |
+| 🟢 | **صور OG** 1200×630 + `hreflang` ar/en | 30 دقيقة |
+
+---
+---
+
+# 📊 الجولة الثانية — موقع كل ورشة + SEO (2026-11-08)
+
+> بعد إتمام إعادة بناء صفحة الهبوط، تبيّن أن **الموقع العام لكل ورشة** (`/{tenant}`)
+> — وهو الواجهة التي يراها **العميل الفعلي** — كان في حالة أسوأ، وأن فيه عملاً
+> لم يكن مغطّى بالخطة الأولى.
+
+## النتيجة
+
+| الصفحة | Performance | Accessibility | Best Practices | SEO | الحجم |
+| :--- | ---: | ---: | ---: | ---: | ---: |
+| `/` (الصفحة الرئيسية) | 49% → **97%** | 75% → **100%** | 81% → **100%** | 92% → **100%** | 3,623 → **933 KiB** |
+| `/{tenant}` (موقع الورشة) | 73% → **99%** | 93% → **100%** | 78% → **100%** | 92% → **100%** | 1,271 → **918 KiB** |
+
+---
+
+## 🔴 اكتشاف مهم: `./landing-preview` كان محتوى مكرراً
+
+الصفحة كانت تُخدَم على **عنوانين**: `/` و `/landing-preview` — بنفس المحتوى تماماً.
+هذا **duplicate content**: محركات البحث تختار واحداً وتsplit إشارة الترتيب بينهما.
+
+**الحل:** `/landing-preview` صار يحوّل (302) إلى `/` — **إلا** مع `?preview=1` الذي
+يستخدمه iframe المعاينة في CMS (لو حوّلناه لأصبح المعاينة معطوبة).
+
+---
+
+## 🖼️ الصور: من 422 KB إلى 67 KB
+
+المشكلة: بانر ورشة مرفوع كـ PNG بحجم **422 KB**، يُقدَّم لكل زائر، ويظهر خلف
+طبقة تدرّج بشفافية **25%** — أي أن معظمه غير مرئي أصلاً.
+
+**الحل (ثلاث طبقات):**
+
+1. **`app/Services/Media/ImageOptimizer.php`** — خدمة تعيد ترميز PNG/JPEG إلى WebP
+   عبر GD (المشروع يدعم WebP و AVIF).
+   - **422 KB → 65 KB** (تقليل 85%) في ~150ms.
+   - تعالج حالة **الصور الفهرسية (palette)** — وهي الحالة الطبيعية لصور PNG
+     المموَّجة، و GD لا يستطيع ترميزها إلى WebP قبل تحويلها إلى truecolor.
+   - لا تلمس الصور الصغيرة (الترميز قد يجعلها أكبر)، ولا WebP أصلاً.
+2. **`TenantWebsiteSettingsController::storeImage()`** — كل رفع جديد يمرّ عبر الخدمة.
+3. **`php artisan website:optimize-images`** — أمر ترحيل يحوّل ما هو موجود مسبقاً
+   (مع `--dry-run` للمعاينة، وحذف الملف القديم **بعد** كتابة الجديد فقط).
+
+---
+
+## 🎨 التباين: لون العلامة التجارية يختاره العميل
+
+العميل يختار لون مركزه. كان ذلك اللون يُستخدم **كنص** فوق خلفيات شفافة،
+فتعطل التباين:
+
+| الحالة | قبل | بعد |
+| :--- | ---: | ---: |
+| شارة الفرع الرئيسي | **2.16:1** ❌ | **8.28:1** ✅ |
+| زر CTA أبيض على لون ذهبي `#e5a448` | **2.15:1** ❌ | **4.52:1** ✅ |
+
+**الحل** — `resources/js/Support/colourHelpers.js`:
+- `readableVariant()` — يزيح لون العلامة نحو الأبيض/الأسود حتى يتجاوز 4.5:1،
+  **ويُبقي لون العميل كما هو إن كان صالحاً أصلاً**.
+- `darkenForWhiteText()` — يعتمده حتى يستقيم النص الأبيض فوقه.
+- `mixColors()` — يحوّل `color-mix` الشفاف إلى **لون صلب**، فيصبح الضمان
+  قابلاً للحساب بدقة بدل التخمين.
+
+---
+
+## 🔎 SEO
+
+| العنصر | الحالة |
+| :--- | :--- |
+| `meta description` | كان **فارغاً** → الآن يُبنى من اسم الورشة + tagline + الخدمات + المدينة |
+| `canonical` | كان غائباً → الآن على `/` (الصفحة الرئيسية) و `/{tenant}` |
+| `hreflang` | ar / en / x-default |
+| `og:image` | كان **نسبياً** (`/storage/...`) — منصات التواصل تتجاهله → الآن **مطلق** |
+| `og:image` للصفحة الرئيسية | كان يشير إلى PNG بحجم **1.6 MB** → الآن WebP بحجم 63 KB |
+| `twitter:card` | كان غائباً → `summary_large_image` |
+| **JSON-LD** | `SoftwareApplication` + `FAQPage` (الصفحة الرئيسية) · `AutoRepair` + `hasOfferCatalog` (موقع الورشة) |
+
+> **لماذا JSON-LD في الـ blade وليس في المكوّن؟**
+> Inertia's `<Head>` يرسم `<script>` بمحتوى `v-text` **فارغاً** — الـ binding
+> يطبّقه Vue عند التركيب، لكن Inertia يسلّم الوسم قبل ذلك. الرسم **server-side**
+> يضعه في المستند من أول paint، والزاحف الذي لا ينفّذ JavaScript يراه أيضاً.
+
+> **لا يوجد `aggregateRating`** — تقييم غير مدعوم بتقييمات حقيقية هو ادعاء
+> ملفّق، ومحركات البحث تعتبره إشارة سبام.
+
+---
+
+## 🧪 الاختبارات
+
+| الملف | التغطية |
+| :--- | :--- |
+| `tests/Unit/ImageOptimizerTest.php` | 6 اختبارات — التحويل، حالة palette، الصور الصغيرة، WebP، رفض غير الصور، تحجيم العرض |
+| `tests/Feature/PublicPageSeoTest.php` | 7 اختبارات — التوجيه، المعاينة، JSON-LD للصفحتين، الوصف، canonical |
+| `tests/Feature/PublicLandingPageTest.php` | مُحدَّث على `/` (العنوان الجديد) |
+
+**المجموع: 73 اختبار في الملفات المتأثرة — كلها تمر.**
+
+---
+
+## 🛠️ أداة قياس موثوقة
+
+```bash
+scripts/measure.sh https://carag-v2.test/
+```
+
+توقف dev server، **تزيل `public/hot`**، تقيس على **البناء الإنتاجي** بـ 3 تشغيلات،
+وتعرض **الوسيط** (representative run).
+
+> **لماذا؟** عند تشغيل dev server، Laravel يوجّه `@vite` إلى المنفذ 5173
+> والمتصفح يحمّل **الكود المصدري** بدل البناء. النتيجة: الموقع العام قِيس
+> **4,900 KiB** على dev مقابل **1,271 KiB** على الإنتاج — فرق 4x لنفس الصفحة.
+>
+> وقتل dev server يترك `public/hot` خلفه، فيبقى Laravel يخدم من رابط ميت
+> **وتتعطل الصفحة كلياً** — وهذا ما حدث فعلاً أثناء العمل على هذه الجولة.
+
+---
+
+## ⚠️ ملاحظات تشغيلية
+
+1. **`public/hot`**: أي شخص يقتل dev server يجب أن يحذف `public/hot`
+   (`scripts/measure.sh` يتكفّل بذلك).
+2. **الأمر يحتاج `php artisan optimize:clear`** بعد أي تغيير على الـ blade.
+3. **الصور الجديدة تُحفظ كـ WebP** — أي كود يفترض امتداد `.png` يجب تحديثه.
+4. `resources/js/Support/colourHelpers.js` مشترك بين الصفحة الرئيسية وموقع الورشة.
