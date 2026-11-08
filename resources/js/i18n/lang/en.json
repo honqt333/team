@@ -434,7 +434,8 @@
         "time": "Time",
         "view_mode": "View mode",
         "form_has_errors": "Please check fields with errors ({count})",
-        "remaining_required": "{count} required fields remaining"
+        "remaining_required": "{count} required fields remaining",
+        "try_adjusting_search": "Try adjusting the search"
     },
     "company_profile": {
         "address": {
@@ -512,7 +513,8 @@
             "email": "Email",
             "phone": "Phone number",
             "save_button": "Save contact information",
-            "title": "Contact information"
+            "title": "Contact information",
+            "save_hint": "Save the contact details and the national address to update the invoices and reports"
         },
         "invoices_tab": {
             "purchases_title": "Admin Purchase Invoices",
@@ -2037,7 +2039,8 @@
             "subtitle": "Manage sales invoices and credit notes",
             "tab_invoices": "Sales Invoices",
             "tab_returns": "Credit Notes",
-            "title": "Sales Invoices"
+            "title": "Sales Invoices",
+            "empty_hint": "No sales invoices match the current search criteria."
         },
         "set_return_details": "Set Return Details",
         "status": {
@@ -2210,7 +2213,8 @@
         "work_order_on_hold": "Work order put on hold",
         "work_order_resumed": "Work order resumed",
         "work_order_started": "Work Order Started",
-        "work_order_updated": "Work order updated successfully"
+        "work_order_updated": "Work order updated successfully",
+        "status_updated": "The work order status was updated"
     },
     "nav": {
         "brand": "Khidmh Pro",
@@ -2245,7 +2249,17 @@
             "financial_reports": "Complete financial reports"
         },
         "day_suffix": "d",
-        "year_suffix": "y"
+        "year_suffix": "y",
+        "groups": {
+            "general": "Home",
+            "operations": "Operations",
+            "crm": "Customers",
+            "inventory": "Inventory",
+            "hr": "Human resources",
+            "finance": "Finance and invoices",
+            "reports": "Reports"
+        },
+        "inventory": "Warehouse and parts"
     },
     "notifications": {
         "days_ago": "{count} days ago",

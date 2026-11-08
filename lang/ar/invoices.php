@@ -67,6 +67,7 @@ return [
     'original_attachment_ref' => 'مرفق الفاتورة الأصلية',
     'original_cost' => 'التكلفة الأصلية',
     'original_invoice' => 'الفاتورة الأصلية',
+    'original_invoice_not_found' => 'الفاتورة الأصلية غير موجودة',
     'paid' => 'المدفوع',
     'payments_history' => 'سجل الدفعات',
     'print' => 'طباعة الفاتورة',

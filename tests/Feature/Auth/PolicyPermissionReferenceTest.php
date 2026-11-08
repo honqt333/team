@@ -103,7 +103,20 @@ class PolicyPermissionReferenceTest extends TestCase
 
             // Skip policies that intentionally only do tenant
             // scoping without per-action permissions.
-            if (in_array($base, ['GoodsReceivedNotePolicy', 'UserPolicy'], true)) {
+            //
+            // FeedbackPolicy is one of them, and on purpose. A
+            // feedback ticket belongs to the workshop that raised it,
+            // and every tenant user may raise one — a permission for
+            // "may report a problem" would gate a feature that the
+            // product gives to everyone. The management side is
+            // gated separately, by the `system.feedbacks.manage`
+            // ability on the system-panel routes.
+            //
+            // Using `system.feedbacks.manage` here instead would be a
+            // privilege escalation: every new tenant signup is
+            // assigned a tenant role, so a system-panel ability
+            // handed to a tenant role would leak it.
+            if (in_array($base, ['FeedbackPolicy', 'GoodsReceivedNotePolicy', 'UserPolicy'], true)) {
                 continue;
             }
 

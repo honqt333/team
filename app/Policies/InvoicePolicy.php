@@ -19,7 +19,7 @@ class InvoicePolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->can(Permissions::INVOICES_VIEW) || $user->can('crm.invoices.view');
+        return $user->can(Permissions::INVOICES_VIEW);
     }
 
     /**
@@ -28,8 +28,7 @@ class InvoicePolicy
     public function view(User $user, Invoice $invoice): bool
     {
         $hasPermission = $user->can(Permissions::INVOICES_VIEW)
-            || $user->can('crm.invoices.view')
-            || ($invoice->work_order_id && $user->can('crm.work_orders.view'));
+            || ($invoice->work_order_id && $user->can(Permissions::WORK_ORDERS_VIEW));
 
         return $hasPermission
             && $user->tenant_id === $invoice->tenant_id
@@ -104,8 +103,7 @@ class InvoicePolicy
     public function createCreditNote(User $user, Invoice $invoice): bool
     {
         $hasPermission = $user->can(Permissions::INVOICES_CREATE)
-            || $user->can('crm.invoices.create')
-            || ($invoice->work_order_id && $user->can('crm.work_orders.update'));
+            || ($invoice->work_order_id && $user->can(Permissions::WORK_ORDERS_UPDATE));
 
         return $hasPermission
             && $user->tenant_id === $invoice->tenant_id

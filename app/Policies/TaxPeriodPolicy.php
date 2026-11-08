@@ -15,12 +15,12 @@ class TaxPeriodPolicy
 
     public function viewAny(User $user): bool
     {
-        return $user->can(Permissions::INVOICES_VIEW) || $user->can('crm.invoices.view');
+        return $user->can(Permissions::INVOICES_VIEW);
     }
 
     public function view(User $user, TaxPeriod $taxPeriod): bool
     {
-        return ($user->can(Permissions::INVOICES_VIEW) || $user->can('crm.invoices.view'))
+        return $user->can(Permissions::INVOICES_VIEW)
             && (int) $user->tenant_id === (int) $taxPeriod->tenant_id;
     }
 

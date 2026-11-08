@@ -67,6 +67,7 @@ return [
     'original_attachment_ref' => 'Original Attachment Ref',
     'original_cost' => 'Original Cost',
     'original_invoice' => 'Original Invoice',
+    'original_invoice_not_found' => 'The original invoice was not found',
     'paid' => 'Paid',
     'payments_history' => 'Payments History',
     'print' => 'Print Invoice',

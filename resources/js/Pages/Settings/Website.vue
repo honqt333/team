@@ -140,7 +140,13 @@
                         <component :is="tab.icon" class="w-4 h-4" />
                         <span>{{ tab.label }}</span>
                         <span
-                            v-if="tab.badge"
+                            v-if="tab.errorCount > 0"
+                            class="text-[10px] px-1.5 py-0.5 rounded-full font-bold bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-300"
+                        >
+                            {{ tab.errorCount }}
+                        </span>
+                        <span
+                            v-else-if="tab.badge"
                             class="text-[10px] px-1.5 py-0.5 rounded-full font-bold uppercase tracking-wider"
                             :class="
                                 activeTab === tab.id
@@ -1666,19 +1672,58 @@
 
                 <!-- Bottom Sticky Save Bar -->
                 <div
-                    class="sticky bottom-4 z-30 p-4 rounded-2xl bg-white/90 dark:bg-gray-850/90 backdrop-blur-md border border-gray-200 dark:border-gray-700 shadow-xl flex items-center justify-between gap-4"
+                    class="sticky bottom-4 z-30 p-4 rounded-2xl bg-white/95 dark:bg-gray-800/95 backdrop-blur-md border border-gray-200 dark:border-gray-700 shadow-xl flex items-center justify-between gap-4 flex-wrap"
                 >
-                    <div class="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
-                        <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
-                        <span>جميع التعديلات يتم حفظها وتطبيقها فوراً على الموقع العام</span>
+                    <div class="flex items-center gap-3">
+                        <span
+                            v-if="totalErrorsCount > 0"
+                            class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-800/50"
+                        >
+                            <svg
+                                class="w-4 h-4 text-red-500 animate-pulse"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                                />
+                            </svg>
+                            {{ $t('common.form_has_errors', { count: totalErrorsCount }) }}
+                        </span>
+                        <div
+                            v-else
+                            class="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400"
+                        >
+                            <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                            <span>
+                                {{
+                                    t(
+                                        'tenant_site.admin.auto_apply_hint',
+                                        'جميع التعديلات يتم حفظها وتطبيقها فوراً على الموقع العام'
+                                    )
+                                }}
+                            </span>
+                        </div>
                     </div>
 
                     <div class="flex items-center gap-3">
                         <button
                             type="button"
+                            @click="form.reset()"
+                            :disabled="form.processing || !form.isDirty"
+                            class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl transition-all disabled:opacity-40"
+                        >
+                            {{ $t('common.cancel') }}
+                        </button>
+                        <button
+                            type="button"
                             @click="submit"
                             :disabled="form.processing"
-                            class="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl text-white font-semibold text-sm shadow-md transition-all disabled:opacity-60"
+                            class="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl text-white font-semibold text-sm shadow-md transition-all disabled:opacity-60 active:scale-95"
                             :style="{ backgroundColor: form.primary_color || '#4f46e5' }"
                         >
                             <svg
@@ -1715,7 +1760,9 @@
                                     d="M5 13l4 4L19 7"
                                 />
                             </svg>
-                            {{ t('tenant_site.admin.save') }}
+                            {{
+                                form.processing ? $t('common.saving') : t('tenant_site.admin.save')
+                            }}
                         </button>
                     </div>
                 </div>
@@ -1732,6 +1779,7 @@ import SearchableSelect from '@/Components/SearchableSelect.vue';
 import { useI18n } from 'vue-i18n';
 import { usePage, useForm } from '@inertiajs/vue3';
 import { computed, ref, h } from 'vue';
+import { useFormScrollToError } from '@/Composables/useFormScrollToError';
 
 const props = defineProps({
     website: { type: Object, default: () => ({}) },
@@ -1821,23 +1869,79 @@ const IconStar = () =>
         }),
     ]);
 
+const { scrollToError } = useFormScrollToError();
+
+const websiteTabMap = {
+    site_name: 'branding',
+    headline: 'branding',
+    subheadline: 'branding',
+    about_text: 'branding',
+    primary_color: 'branding',
+    theme: 'branding',
+    banners: 'banners',
+    selected_service_ids: 'services',
+    featured_service_ids: 'services',
+    phone: 'contact',
+    whatsapp: 'contact',
+    email: 'contact',
+    address: 'contact',
+    google_maps_url: 'contact',
+    instagram_url: 'contact',
+    twitter_url: 'contact',
+    facebook_url: 'contact',
+    tiktok_url: 'contact',
+    working_hours: 'contact',
+    custom_domain: 'domain_seo',
+    meta_title: 'domain_seo',
+    meta_description: 'domain_seo',
+    meta_keywords: 'domain_seo',
+};
+
+const tabErrorCount = (tabId) => {
+    return Object.keys(form.errors).filter((field) => websiteTabMap[field] === tabId).length;
+};
+
+const totalErrorsCount = computed(() => Object.keys(form.errors).length);
+
 const tabs = computed(() => [
-    { id: 'branding', label: t('tenant_site.admin.tabs.branding'), icon: IconPaint },
+    {
+        id: 'branding',
+        label: t('tenant_site.admin.tabs.branding'),
+        icon: IconPaint,
+        errorCount: tabErrorCount('branding'),
+    },
     {
         id: 'banners',
         label: t('tenant_site.admin.tabs.banners'),
         icon: IconSpeaker,
         badge: form.banners?.length ? String(form.banners.length) : null,
+        errorCount: tabErrorCount('banners'),
     },
-    { id: 'services', label: t('tenant_site.admin.tabs.services'), icon: IconWrench },
-    { id: 'contact', label: t('tenant_site.admin.tabs.contact'), icon: IconBuilding },
+    {
+        id: 'services',
+        label: t('tenant_site.admin.tabs.services'),
+        icon: IconWrench,
+        errorCount: tabErrorCount('services'),
+    },
+    {
+        id: 'contact',
+        label: t('tenant_site.admin.tabs.contact'),
+        icon: IconBuilding,
+        errorCount: tabErrorCount('contact'),
+    },
     {
         id: 'domain_seo',
         label: t('tenant_site.admin.tabs.domain_seo'),
         icon: IconGlobe,
         badge: form.custom_domain ? 'مربوط' : null,
+        errorCount: tabErrorCount('domain_seo'),
     },
-    { id: 'features', label: t('tenant_site.admin.tabs.features'), icon: IconStar },
+    {
+        id: 'features',
+        label: t('tenant_site.admin.tabs.features'),
+        icon: IconStar,
+        errorCount: tabErrorCount('features'),
+    },
 ]);
 
 const themeOptions = computed(() => props.theme_options);
@@ -2133,6 +2237,14 @@ function submit() {
         _method: 'put',
     })).post(route('settings.website.update'), {
         preserveScroll: true,
+        onError: (errors) => {
+            scrollToError(errors, {
+                tabMap: websiteTabMap,
+                onSwitchTab: (tabId) => {
+                    activeTab.value = tabId;
+                },
+            });
+        },
     });
 }
 

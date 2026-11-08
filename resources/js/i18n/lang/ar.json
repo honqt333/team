@@ -434,7 +434,8 @@
         "time": "الوقت",
         "view_mode": "طريقة العرض",
         "form_has_errors": "يرجى مراجعة الحقول التي بها أخطاء ({count})",
-        "remaining_required": "متبقي {count} حقل إلزامي"
+        "remaining_required": "متبقي {count} حقل إلزامي",
+        "try_adjusting_search": "جرّب تعديل البحث"
     },
     "company_profile": {
         "address": {
@@ -512,7 +513,8 @@
             "email": "البريد الإلكتروني",
             "phone": "رقم الهاتف",
             "save_button": "حفظ معلومات التواصل",
-            "title": "بيانات التواصل"
+            "title": "بيانات التواصل",
+            "save_hint": "احفظ معلومات الاتصال والعنوان الوطني لتحديث الفواتير والتقارير"
         },
         "invoices_tab": {
             "purchases_title": "فواتير مشتريات الإدارة",
@@ -2037,7 +2039,8 @@
             "subtitle": "إدارة فواتير البيع والفواتير المرجعة",
             "tab_invoices": "فواتير المبيعات",
             "tab_returns": "الفواتير المرجعة",
-            "title": "فواتير المبيعات"
+            "title": "فواتير المبيعات",
+            "empty_hint": "لا توجد فواتير مبيعات مطابقة لمعايير البحث الحالية."
         },
         "set_return_details": "تحديد تفاصيل إرجاع الصنف",
         "status": {
@@ -2210,7 +2213,8 @@
         "work_order_on_hold": "تم تعليق كرت العمل",
         "work_order_resumed": "تم استئناف كرت العمل",
         "work_order_started": "تم بدء العمل",
-        "work_order_updated": "تم تحديث كرت العمل بنجاح"
+        "work_order_updated": "تم تحديث كرت العمل بنجاح",
+        "status_updated": "تم تحديث حالة كرت العمل بنجاح"
     },
     "nav": {
         "brand": "خدمة برو",
@@ -2245,7 +2249,17 @@
             "financial_reports": "تقارير مالية متكاملة"
         },
         "day_suffix": "د",
-        "year_suffix": "س"
+        "year_suffix": "س",
+        "groups": {
+            "general": "الرئيسية",
+            "operations": "العمليات",
+            "crm": "العملاء",
+            "inventory": "المخزون",
+            "hr": "الموارد البشرية",
+            "finance": "المالية والفواتير",
+            "reports": "التقارير"
+        },
+        "inventory": "المستودع وقطع الغيار"
     },
     "notifications": {
         "days_ago": "قبل {count} يوم",
