@@ -125,6 +125,7 @@
                                     </div>
                                     <input
                                         v-model="form.contact.phone"
+                                        name="phone"
                                         type="tel"
                                         dir="ltr"
                                         placeholder="+966 500 152 900"
@@ -142,6 +143,7 @@
                                 </label>
                                 <input
                                     v-model="form.contact.email"
+                                    name="email"
                                     type="email"
                                     dir="ltr"
                                     placeholder="admin@team-group.com"
@@ -222,6 +224,7 @@
                                     </label>
                                     <input
                                         v-model="form.address.city"
+                                        name="city"
                                         type="text"
                                         :placeholder="
                                             $t('company_profile.address.city_placeholder')
@@ -239,6 +242,7 @@
                                     </label>
                                     <input
                                         v-model="form.address.district"
+                                        name="district"
                                         type="text"
                                         :placeholder="
                                             $t('company_profile.address.district_placeholder')
@@ -259,6 +263,7 @@
                                     </label>
                                     <input
                                         v-model="form.address.street"
+                                        name="street"
                                         type="text"
                                         :placeholder="
                                             $t('company_profile.address.address_placeholder')
@@ -276,6 +281,7 @@
                                     </label>
                                     <input
                                         v-model="form.address.building_number"
+                                        name="building_number"
                                         type="text"
                                         placeholder="8545"
                                         class="w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
@@ -294,6 +300,7 @@
                                     </label>
                                     <input
                                         v-model="form.address.postal_code"
+                                        name="postal_code"
                                         type="text"
                                         placeholder="23455"
                                         class="w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
@@ -340,6 +347,7 @@
                                 </label>
                                 <input
                                     v-model="form.address.address_line"
+                                    name="address_line"
                                     type="text"
                                     :placeholder="$t('company_profile.address.address_placeholder')"
                                     class="w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:border-transparent font-medium"
@@ -378,15 +386,27 @@
                             </p>
                         </div>
 
-                        <div class="flex justify-end pt-4">
-                            <button
-                                @click="saveContactAndAddress()"
-                                :disabled="saving"
-                                class="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-lg transition-colors disabled:opacity-50"
-                            >
-                                <span v-if="saving" class="flex items-center gap-2">
+                        <!-- Sticky Action Bar for Contact & Address Section -->
+                        <div
+                            class="sticky bottom-0 z-20 mt-8 -mx-8 -mb-8 p-4 bg-white/95 dark:bg-gray-800/95 backdrop-blur-md border-t border-gray-200 dark:border-gray-700 flex items-center justify-between gap-4 flex-wrap rounded-b-2xl shadow-lg"
+                        >
+                            <span class="text-xs text-gray-400 dark:text-gray-500">
+                                {{
+                                    $t(
+                                        'company_profile.contact.save_hint',
+                                        'احفظ معلومات الاتصال والعنوان الوطني لتحديث الفواتير والتقارير'
+                                    )
+                                }}
+                            </span>
+                            <div class="flex items-center gap-3">
+                                <button
+                                    @click="saveContactAndAddress()"
+                                    :disabled="saving"
+                                    class="inline-flex items-center gap-2 px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm rounded-xl transition-all shadow-md shadow-emerald-500/20 active:scale-95 disabled:opacity-50"
+                                >
                                     <svg
-                                        class="w-4 h-4 animate-spin"
+                                        v-if="saving"
+                                        class="w-4 h-4 animate-spin -ml-1 mr-2 text-white"
                                         fill="none"
                                         viewBox="0 0 24 24"
                                     >
@@ -404,10 +424,12 @@
                                             d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                                         ></path>
                                     </svg>
-                                    {{ $t('common.loading') }}
-                                </span>
-                                <span v-else>{{ $t('company_profile.contact.save_button') }}</span>
-                            </button>
+                                    <span v-if="saving">{{ $t('common.loading') }}</span>
+                                    <span v-else>
+                                        {{ $t('company_profile.contact.save_button') }}
+                                    </span>
+                                </button>
+                            </div>
                         </div>
                     </div>
 
@@ -2697,6 +2719,7 @@ import CompanyAdminUserTab from '@/Components/Settings/Company/CompanyAdminUserT
 import CompanyBranchesTab from '@/Components/Settings/Company/CompanyBranchesTab.vue';
 import CompanyTransactionsTab from '@/Components/Settings/Company/CompanyTransactionsTab.vue';
 import CompanySubscriptionTab from '@/Components/Settings/Company/CompanySubscriptionTab.vue';
+import { useFormScrollToError } from '@/Composables/useFormScrollToError';
 import axios from 'axios';
 
 // Fix Leaflet default marker icon issue
@@ -2710,6 +2733,7 @@ L.Icon.Default.mergeOptions({
 const { t, locale } = useI18n();
 const { success, error } = useToast();
 const { confirm } = useConfirm();
+const { scrollToError } = useFormScrollToError();
 const page = usePage();
 const tenantId = computed(() => page.props.auth?.user?.tenant_id || page.props.tenant?.id);
 
@@ -2952,6 +2976,9 @@ function saveSection(section) {
                     errorMessages.push(t('common.validation.required', { field: fieldLabel }));
                 }
                 error(errorMessages.join('، ') || t('common.validation.required_fields'));
+
+                // Auto-scroll to first error
+                scrollToError(errors);
             },
             onFinish: () => (saving.value = false),
         }
@@ -2978,6 +3005,7 @@ function saveContactAndAddress() {
                         },
                         onError: (errors) => {
                             error(Object.values(errors).flat().join(', '));
+                            scrollToError(errors);
                         },
                         onFinish: () => (saving.value = false),
                     }
@@ -2986,6 +3014,7 @@ function saveContactAndAddress() {
             onError: (errors) => {
                 error(Object.values(errors).flat().join(', '));
                 saving.value = false;
+                scrollToError(errors);
             },
         }
     );
