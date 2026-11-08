@@ -15,6 +15,85 @@ use Inertia\Response;
 
 class SmsCreditsController extends Controller
 {
+    public function index(Request $request): Response
+    {
+        $tab = $request->query('tab', 'packages');
+
+        if (! in_array($tab, ['packages', 'balances', 'purchases', 'usage'], true)) {
+            $tab = 'packages';
+        }
+
+        $packages = SmsPackage::orderBy('sort_order')->get();
+
+        $balances = null;
+
+        if ($tab === 'balances') {
+            $balancesQuery = TenantSmsBalance::with('tenant');
+
+            if ($request->search) {
+                $search = $request->search;
+                $balancesQuery->whereHas('tenant', fn ($q) => $q->where('trade_name', 'like', "%{$search}%"));
+            }
+            $balances = $balancesQuery->orderByDesc('balance')->paginate(20, ['*'], 'page')->withQueryString();
+        }
+
+        $purchases = null;
+
+        if ($tab === 'purchases') {
+            $purchasesQuery = SmsPurchase::with(['tenant', 'package']);
+
+            if ($request->search) {
+                $search = $request->search;
+                $purchasesQuery->where(function ($q) use ($search) {
+                    $q->whereHas('tenant', fn ($t) => $t->where('trade_name', 'like', "%{$search}%")
+                        ->orWhere('name', 'like', "%{$search}%"))
+                        ->orWhere('payment_reference', 'like', "%{$search}%");
+                });
+            }
+
+            if ($request->status && $request->status !== 'all') {
+                $purchasesQuery->where('status', $request->status);
+            }
+
+            if ($request->gateway && $request->gateway !== 'all') {
+                $purchasesQuery->where('payment_gateway', $request->gateway);
+            }
+            $purchases = $purchasesQuery->orderBy('created_at', 'desc')->paginate(20, ['*'], 'page')->withQueryString();
+        }
+
+        $logs = null;
+
+        if ($tab === 'usage') {
+            $usageQuery = SmsUsageLog::with(['tenant', 'center']);
+
+            if ($request->status) {
+                $usageQuery->where('status', $request->status);
+            }
+            $logs = $usageQuery->latest()->paginate(50, ['*'], 'page')->withQueryString();
+        }
+
+        $stats = [
+            'total_purchased' => TenantSmsBalance::sum('total_purchased'),
+            'total_used' => TenantSmsBalance::sum('total_used'),
+            'total_balance' => TenantSmsBalance::sum('balance'),
+            'total_revenue' => (float) SmsPurchase::where('status', 'paid')->sum('amount'),
+            'total_credits_sold' => (int) SmsPurchase::where('status', 'paid')->sum('credits'),
+            'delivered' => SmsUsageLog::where('status', 'delivered')->count(),
+            'failed' => SmsUsageLog::where('status', 'failed')->count(),
+            'packages_count' => $packages->count(),
+        ];
+
+        return Inertia::render('System/Credits/SmsHub', [
+            'tab' => $tab,
+            'packages' => $packages,
+            'balances' => $balances,
+            'purchases' => $purchases,
+            'logs' => $logs,
+            'stats' => $stats,
+            'filters' => $request->only(['search', 'status', 'gateway']),
+        ]);
+    }
+
     /**
      * List SMS packages.
      */

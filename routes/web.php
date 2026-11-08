@@ -1377,24 +1377,26 @@ Route::prefix('system')->middleware(['auth:web,admin', 'system.admin'])->group(f
     // Installments — removed (replaced by Tabby/Tamara BNPL)
 
     // SMS Credits
-    Route::get('/sms/packages', [SmsCreditsController::class, 'packages'])->name('system.sms.packages')->middleware('system.permission:system.credits.manage');
+    Route::get('/sms', [SmsCreditsController::class, 'index'])->name('system.sms.index')->middleware('system.permission:system.credits.manage');
+    Route::get('/sms/packages', fn () => redirect()->route('system.sms.index', ['tab' => 'packages']))->name('system.sms.packages');
     Route::post('/sms/packages', [SmsCreditsController::class, 'storePackage'])->name('system.sms.packages.store')->middleware('system.permission:system.credits.manage');
     Route::put('/sms/packages/{package}', [SmsCreditsController::class, 'updatePackage'])->name('system.sms.packages.update')->middleware('system.permission:system.credits.manage');
     Route::delete('/sms/packages/{package}', [SmsCreditsController::class, 'destroyPackage'])->name('system.sms.packages.destroy')->middleware('system.permission:system.credits.manage');
-    Route::get('/sms/balances', [SmsCreditsController::class, 'balances'])->name('system.sms.balances')->middleware('system.permission:system.credits.manage');
+    Route::get('/sms/balances', fn () => redirect()->route('system.sms.index', ['tab' => 'balances']))->name('system.sms.balances');
     Route::post('/sms/add-credits', [SmsCreditsController::class, 'addCredits'])->name('system.sms.add-credits')->middleware('system.permission:system.credits.manage');
-    Route::get('/sms/purchases', [SmsCreditsController::class, 'purchases'])->name('system.sms.purchases')->middleware('system.permission:system.credits.manage');
-    Route::get('/sms/usage', [SmsCreditsController::class, 'usage'])->name('system.sms.usage')->middleware('system.permission:system.credits.manage');
+    Route::get('/sms/purchases', fn () => redirect()->route('system.sms.index', ['tab' => 'purchases']))->name('system.sms.purchases');
+    Route::get('/sms/usage', fn () => redirect()->route('system.sms.index', ['tab' => 'usage']))->name('system.sms.usage');
 
     // WhatsApp Credits
-    Route::get('/whatsapp/packages', [WhatsappCreditsController::class, 'packages'])->name('system.whatsapp.packages')->middleware('system.permission:system.credits.manage');
+    Route::get('/whatsapp', [WhatsappCreditsController::class, 'index'])->name('system.whatsapp.index')->middleware('system.permission:system.credits.manage');
+    Route::get('/whatsapp/packages', fn () => redirect()->route('system.whatsapp.index', ['tab' => 'packages']))->name('system.whatsapp.packages');
     Route::post('/whatsapp/packages', [WhatsappCreditsController::class, 'storePackage'])->name('system.whatsapp.packages.store')->middleware('system.permission:system.credits.manage');
     Route::put('/whatsapp/packages/{package}', [WhatsappCreditsController::class, 'updatePackage'])->name('system.whatsapp.packages.update')->middleware('system.permission:system.credits.manage');
     Route::delete('/whatsapp/packages/{package}', [WhatsappCreditsController::class, 'destroyPackage'])->name('system.whatsapp.packages.destroy')->middleware('system.permission:system.credits.manage');
-    Route::get('/whatsapp/balances', [WhatsappCreditsController::class, 'balances'])->name('system.whatsapp.balances')->middleware('system.permission:system.credits.manage');
+    Route::get('/whatsapp/balances', fn () => redirect()->route('system.whatsapp.index', ['tab' => 'balances']))->name('system.whatsapp.balances');
     Route::post('/whatsapp/add-credits', [WhatsappCreditsController::class, 'addCredits'])->name('system.whatsapp.add-credits')->middleware('system.permission:system.credits.manage');
-    Route::get('/whatsapp/usage', [WhatsappCreditsController::class, 'usage'])->name('system.whatsapp.usage')->middleware('system.permission:system.credits.manage');
-    Route::get('/whatsapp/purchases', [WhatsappCreditsController::class, 'purchases'])->name('system.whatsapp.purchases')->middleware('system.permission:system.credits.manage');
+    Route::get('/whatsapp/usage', fn () => redirect()->route('system.whatsapp.index', ['tab' => 'usage']))->name('system.whatsapp.usage');
+    Route::get('/whatsapp/purchases', fn () => redirect()->route('system.whatsapp.index', ['tab' => 'purchases']))->name('system.whatsapp.purchases');
 
     // Integrations
     Route::get('/integrations', [IntegrationsController::class, 'index'])->name('system.integrations.index')->middleware('system.permission:system.integrations.manage');
