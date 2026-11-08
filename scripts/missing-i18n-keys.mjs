@@ -30,6 +30,14 @@ export const MISSING_KEYS = {
     'common.time': { ar: 'الوقت', en: 'Time' },
     'common.view_mode': { ar: 'طريقة العرض', en: 'View mode' },
 
+    // The count of validation errors under a form title. The call
+    // site passes `{ count }`, so the placeholder has to be exactly
+    // that name in both languages.
+    'common.fix_errors_count': {
+        ar: '{count} أخطاء تحتاج تصحيح',
+        en: '{count} errors need fixing',
+    },
+
     // The subtitle of the "Today's schedule" card in the tenant
     // dashboard.
     'dashboard.today': { ar: 'اليوم', en: 'Today' },

@@ -436,7 +436,8 @@
         "form_has_errors": "يرجى مراجعة الحقول التي بها أخطاء ({count})",
         "remaining_required": "متبقي {count} حقل إلزامي",
         "try_adjusting_search": "جرّب تعديل البحث",
-        "secure_payment_note": "الدفع آمن ومشفر (PCI DSS)"
+        "secure_payment_note": "الدفع آمن ومشفر (PCI DSS)",
+        "fix_errors_count": "{count} أخطاء تحتاج تصحيح"
     },
     "company_profile": {
         "address": {

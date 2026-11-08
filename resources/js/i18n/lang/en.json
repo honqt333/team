@@ -436,7 +436,8 @@
         "form_has_errors": "Please check fields with errors ({count})",
         "remaining_required": "{count} required fields remaining",
         "try_adjusting_search": "Try adjusting the search",
-        "secure_payment_note": "Secure, encrypted payment (PCI DSS)"
+        "secure_payment_note": "Secure, encrypted payment (PCI DSS)",
+        "fix_errors_count": "{count} errors need fixing"
     },
     "company_profile": {
         "address": {
