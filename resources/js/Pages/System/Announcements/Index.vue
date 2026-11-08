@@ -3,27 +3,41 @@
         <Head :title="$t('system.announcements.title')" />
 
         <div class="space-y-6">
-            <div class="flex items-center justify-between">
-                <div>
-                    <h1 class="text-2xl font-bold text-gray-900 dark:text-white">
-                        {{ $t('system.announcements.title') }}
-                    </h1>
-                    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                        {{ $t('system.announcements.subtitle') }}
-                    </p>
-                </div>
-                <Link :href="route('system.announcements.create')" class="btn-primary">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <!-- Page Header -->
+            <PageHeader
+                :title="$t('system.announcements.title')"
+                :subtitle="$t('system.announcements.subtitle')"
+                :totalCount="announcements?.total != null ? toEnglish(announcements.total) : null"
+                :countLabel="$t('system.announcements.title')"
+            >
+                <template #icon>
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path
                             stroke-linecap="round"
                             stroke-linejoin="round"
                             stroke-width="2"
-                            d="M12 4v16m8-8H4"
+                            d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z"
                         />
                     </svg>
-                    {{ $t('system.announcements.create') }}
-                </Link>
-            </div>
+                </template>
+
+                <template #actions>
+                    <Link
+                        :href="route('system.announcements.create')"
+                        class="inline-flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white rounded-xl text-sm font-semibold transition-all shadow-md hover:shadow-indigo-500/25 active:scale-95"
+                    >
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M12 4v16m8-8H4"
+                            />
+                        </svg>
+                        {{ $t('system.announcements.create') }}
+                    </Link>
+                </template>
+            </PageHeader>
 
             <!-- Filters -->
             <div class="flex gap-4">
@@ -206,10 +220,13 @@ import { useI18n } from 'vue-i18n';
 import { Head, Link, router } from '@inertiajs/vue3';
 import SystemLayout from '@/Layouts/SystemLayout.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
+import PageHeader from '@/Components/PageHeader.vue';
 import { useConfirm } from '@/Composables/useConfirm';
+import { useNumberFormat } from '@/Composables/useNumberFormat';
 
 const { t } = useI18n();
 const { confirm } = useConfirm();
+const { toEnglish } = useNumberFormat();
 
 const props = defineProps({
     announcements: Object,

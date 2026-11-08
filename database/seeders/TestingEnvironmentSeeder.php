@@ -25,6 +25,8 @@ use App\Models\User;
 use App\Models\Vehicle;
 use App\Models\VehicleMake;
 use App\Models\Warehouse;
+use App\Models\WorkOrder;
+use App\Models\WorkOrderItem;
 use App\Services\TenantSetupService;
 use App\Support\Permissions;
 use Illuminate\Database\Seeder;
@@ -64,6 +66,9 @@ class TestingEnvironmentSeeder extends Seeder
 
         $this->command->info('📦 Seeding spare parts, warehouses, and starting inventory balances...');
         $this->seedInventoryAndParts($activeTenant, $activeCenter);
+
+        $this->command->info('🔧 Seeding work orders with technician assignments...');
+        $this->seedWorkOrdersWithTechnicians($activeTenant, $activeCenter);
 
         $this->command->info('✅ System successfully initialized and seeded for comprehensive testing!');
     }
@@ -197,7 +202,7 @@ class TestingEnvironmentSeeder extends Seeder
         // 1. المستأجر الرئيسي والمفعل (Active Subscriber)
         // -------------------------------------------------------------
         $activeTenant = Tenant::create([
-            'name' => 'مركز الخدمة المتقدمة (Active Workshop)',
+            'name' => 'مركز الخدمة المتقدمة',
             'slug' => 'active-workshop',
             'legal_name' => 'شركة الخدمة المتقدمة لصيانة السيارات',
             'trade_name' => 'Advanced Service Center',
@@ -1500,6 +1505,68 @@ class TestingEnvironmentSeeder extends Seeder
                 'city' => 'الرياض',
                 'district' => 'الملز',
             ]);
+        }
+    }
+
+    /**
+     * Seed work orders with technician assignments for testing Technician Portal.
+     */
+    private function seedWorkOrdersWithTechnicians(Tenant $tenant, Center $center): void
+    {
+        $customer = Customer::factory()->create([
+            'tenant_id' => $tenant->id,
+            'center_id' => $center->id,
+        ]);
+
+        $vehicle = Vehicle::factory()->create([
+            'tenant_id' => $tenant->id,
+            'center_id' => $center->id,
+            'customer_id' => $customer->id,
+        ]);
+
+        $services = Service::where('tenant_id', $tenant->id)->where('is_active', true)->get();
+        $technicians = User::whereHas('roles', function ($q) {
+            $q->where('name', 'technician');
+        })->where('tenant_id', $tenant->id)->get();
+
+        if ($technicians->isEmpty() || $services->isEmpty()) {
+            return;
+        }
+
+        // Create 5 work orders with items assigned to technicians
+        for ($i = 0; $i < 5; $i++) {
+            $workOrder = WorkOrder::factory()->create([
+                'tenant_id' => $tenant->id,
+                'center_id' => $center->id,
+                'customer_id' => $customer->id,
+                'vehicle_id' => $vehicle->id,
+                'status' => collect(['open', 'in_progress', 'on_hold', 'ready_for_qc'])->random(),
+            ]);
+
+            // Create 2-3 items per work order
+            $itemCount = rand(2, 3);
+
+            for ($j = 0; $j < $itemCount; $j++) {
+                $service = $services->random();
+                $item = WorkOrderItem::factory()->create([
+                    'work_order_id' => $workOrder->id,
+                    'service_id' => $service->id,
+                    'tenant_id' => $tenant->id,
+                    'center_id' => $center->id,
+                    'title' => $service->name_ar,
+                    'qty' => 1,
+                    'unit_price' => $service->default_price ?? 100,
+                    'status' => $workOrder->status,
+                ]);
+
+                // Assign random technician to this item
+                $tech = $technicians->random();
+                $item->technicians()->attach($tech->id, [
+                    'assigned_at' => now()->subDays(rand(0, 5)),
+                    'notes' => 'مُسند عبر Seeder للاختبار',
+                    'share' => 100,
+                ]);
+            }
         }
     }
 }

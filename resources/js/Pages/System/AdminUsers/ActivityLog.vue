@@ -20,7 +20,7 @@
                         :options="admins"
                         option-label="name"
                         option-value="id"
-                        placeholder="كل المسؤولين"
+                        :placeholder="$t('system.admin_users.all_administrators')"
                         compact
                     />
                 </div>
@@ -30,7 +30,7 @@
                         :options="actionOptions"
                         option-label="label"
                         option-value="value"
-                        placeholder="كل الإجراءات"
+                        :placeholder="$t('system.admin_users.all_actions')"
                         compact
                     />
                 </div>

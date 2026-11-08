@@ -100,7 +100,15 @@
                             ? isRtl
                                 ? 'المورد'
                                 : 'Supplier'
-                            : $t('work_orders.print_view.customer')
+                            : ['payslip', 'employee', 'attendance'].includes(documentType)
+                              ? isRtl
+                                  ? 'الموظف'
+                                  : 'Employee'
+                              : ['payroll', 'customers', 'vehicles'].includes(documentType)
+                                ? isRtl
+                                    ? 'معلومات التقرير'
+                                    : 'Report Info'
+                                : $t('work_orders.print_view.customer')
                     }}:
                 </span>
                 <span class="font-bold text-gray-900">
@@ -123,7 +131,17 @@
             </div>
             <template
                 v-if="
-                    !['parts_invoice', 'purchase_invoice', 'purchase_return'].includes(documentType)
+                    ![
+                        'parts_invoice',
+                        'purchase_invoice',
+                        'purchase_return',
+                        'payslip',
+                        'payroll',
+                        'attendance',
+                        'employee',
+                        'customers',
+                        'vehicles',
+                    ].includes(documentType)
                 "
             >
                 <div class="flex justify-between items-center">
@@ -212,6 +230,10 @@
                         'parts_invoice',
                         'purchase_invoice',
                         'purchase_return',
+                        'credit_note',
+                        'subscription_invoice',
+                        'delivery_note',
+                        'receipt',
                     ].includes(documentType)
                 "
                 class="space-y-4"

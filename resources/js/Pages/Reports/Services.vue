@@ -83,29 +83,10 @@
             </PageHeader>
 
             <!-- Print Header -->
-            <div class="print-header hidden pb-4 border-b-2 border-gray-800 mb-6">
-                <div class="flex justify-between items-center">
-                    <div>
-                        <h1 class="text-xl font-bold text-gray-900">{{ meta?.tenant_name }}</h1>
-                        <p class="text-xs text-gray-600">{{ meta?.center_name }}</p>
-                        <p class="text-sm font-bold text-teal-800 mt-1">
-                            {{ $t('reports.services_report.official_report') }}
-                        </p>
-                    </div>
-                    <div class="text-end text-xs text-gray-600">
-                        <p>
-                            {{ $t('reports.payments_report.printed_at') }}: {{ meta?.printed_at }}
-                        </p>
-                        <p>
-                            {{ $t('reports.payments_report.prepared_by') }}: {{ meta?.prepared_by }}
-                        </p>
-                        <p v-if="filters.start_date || filters.end_date">
-                            {{ $t('reports.payments_report.report_period') }}:
-                            {{ filters.start_date || '...' }} إلى {{ filters.end_date || '...' }}
-                        </p>
-                    </div>
-                </div>
-            </div>
+            <StandardReportHeader
+                class="hidden print:block mb-6"
+                :title="$t('reports.services_report.official_report')"
+            />
 
             <!-- Horizontal KPI Strip (matching wrshah /reports/services) -->
             <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
@@ -1282,27 +1263,8 @@
                 </div>
             </div>
 
-            <!-- Print Signatures Section -->
-            <div class="print-section hidden pt-8 mt-8 border-t-2 border-gray-300">
-                <div class="grid grid-cols-2 gap-8 text-center text-xs">
-                    <div>
-                        <p class="font-bold text-gray-700 mb-8">
-                            {{ $t('reports.payments_report.prepared_by') }}
-                        </p>
-                        <p class="border-t border-dashed border-gray-400 pt-1 text-gray-500">
-                            التوقيع والاعتماد
-                        </p>
-                    </div>
-                    <div>
-                        <p class="font-bold text-gray-700 mb-8">
-                            {{ $t('reports.payments_report.official_seal') }}
-                        </p>
-                        <p class="border-t border-dashed border-gray-400 pt-1 text-gray-500">
-                            الختم الرسمي للمركز
-                        </p>
-                    </div>
-                </div>
-            </div>
+            <!-- Unified Print Footer (no signatures/stamps) -->
+            <StandardReportFooter class="hidden print:block pt-8 mt-8 border-t-2 border-gray-300" />
         </div>
     </AppLayout>
 </template>
@@ -1316,6 +1278,8 @@ import PageHeader from '@/Components/PageHeader.vue';
 import BackButton from '@/Components/BackButton.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 import CustomDatePicker from '@/Components/CustomDatePicker.vue';
+import StandardReportHeader from '@/Components/Print/StandardReportHeader.vue';
+import StandardReportFooter from '@/Components/Print/StandardReportFooter.vue';
 
 const { t, te } = useI18n();
 

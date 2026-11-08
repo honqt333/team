@@ -11,7 +11,7 @@
                         {{ $t('settings.print.signatures.subtitle') }}
                     </p>
                 </div>
-                <BackButton :url="route('settings.print')" />
+                <BackButton :href="route('settings.print')" />
             </div>
 
             <!-- Empty state -->

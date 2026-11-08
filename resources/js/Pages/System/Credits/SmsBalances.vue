@@ -5,14 +5,18 @@
             <!-- Header -->
             <div class="flex items-center justify-between">
                 <div>
-                    <h1 class="text-2xl font-bold text-gray-900 dark:text-white">أرصدة SMS</h1>
-                    <p class="text-gray-500 dark:text-gray-400">رصيد الرسائل النصية لكل مستأجر</p>
+                    <h1 class="text-2xl font-bold text-gray-900 dark:text-white">
+                        {{ $t('system.credits.sms_balances_title') }}
+                    </h1>
+                    <p class="text-gray-500 dark:text-gray-400">
+                        {{ $t('system.credits.sms_credit_balance_per_tenant') }}
+                    </p>
                 </div>
                 <button
                     @click="showAddModal = true"
                     class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-sm font-medium"
                 >
-                    + إضافة رصيد يدوي
+                    {{ $t('system.credits.add_manual_credit') }}
                 </button>
             </div>
 
@@ -72,7 +76,7 @@
                     <p class="text-2xl font-bold text-indigo-600">
                         {{ stats.total_purchased?.toLocaleString() }}
                     </p>
-                    <p class="text-sm text-gray-500">إجمالي المشتريات</p>
+                    <p class="text-sm text-gray-500">{{ $t('system.credits.total_purchases') }}</p>
                 </div>
                 <div
                     class="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700"
@@ -80,7 +84,7 @@
                     <p class="text-2xl font-bold text-amber-600">
                         {{ stats.total_used?.toLocaleString() }}
                     </p>
-                    <p class="text-sm text-gray-500">إجمالي المستخدم</p>
+                    <p class="text-sm text-gray-500">{{ $t('system.credits.total_used') }}</p>
                 </div>
                 <div
                     class="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700"
@@ -88,7 +92,7 @@
                     <p class="text-2xl font-bold text-emerald-600">
                         {{ stats.total_balance?.toLocaleString() }}
                     </p>
-                    <p class="text-sm text-gray-500">الرصيد الحالي</p>
+                    <p class="text-sm text-gray-500">{{ $t('system.credits.current_balance') }}</p>
                 </div>
                 <div
                     class="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700"
@@ -96,7 +100,7 @@
                     <p class="text-2xl font-bold text-gray-900 dark:text-white">
                         {{ formatCurrency(stats.total_revenue) }}
                     </p>
-                    <p class="text-sm text-gray-500">الإيرادات</p>
+                    <p class="text-sm text-gray-500">{{ $t('system.credits.revenue') }}</p>
                 </div>
             </div>
 
@@ -105,7 +109,7 @@
                 <input
                     type="text"
                     v-model="search"
-                    placeholder="بحث باسم المستأجر..."
+                    :placeholder="$t('system.credits.search_by_tenant_name...')"
                     class="w-full md:w-80 rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                     @keyup.enter="applySearch"
                 />
@@ -119,19 +123,19 @@
                     <thead class="bg-gray-50 dark:bg-gray-700/50">
                         <tr>
                             <th class="px-4 py-3 text-right text-xs font-medium text-gray-500">
-                                المستأجر
+                                {{ $t('system.credits.tenant') }}
                             </th>
                             <th class="px-4 py-3 text-right text-xs font-medium text-gray-500">
-                                الرصيد الحالي
+                                {{ $t('system.credits.current_balance') }}
                             </th>
                             <th class="px-4 py-3 text-right text-xs font-medium text-gray-500">
-                                إجمالي المشتريات
+                                {{ $t('system.credits.total_purchases') }}
                             </th>
                             <th class="px-4 py-3 text-right text-xs font-medium text-gray-500">
-                                إجمالي المستخدم
+                                {{ $t('system.credits.total_used') }}
                             </th>
                             <th class="px-4 py-3 text-right text-xs font-medium text-gray-500">
-                                الإجراءات
+                                {{ $t('common.actions') }}
                             </th>
                         </tr>
                     </thead>
@@ -165,13 +169,13 @@
                                     @click="openAddCreditsModal(item)"
                                     class="text-indigo-600 hover:text-indigo-800 text-sm"
                                 >
-                                    + إضافة رصيد
+                                    {{ $t('system.credits.add_credit') }}
                                 </button>
                             </td>
                         </tr>
                         <tr v-if="!balances.data?.length">
                             <td colspan="5" class="px-4 py-8 text-center text-gray-500">
-                                لا توجد بيانات
+                                {{ $t('common.no_data') }}
                             </td>
                         </tr>
                     </tbody>
@@ -188,7 +192,7 @@
                         class="relative bg-white dark:bg-gray-800 rounded-2xl p-6 w-full max-w-md shadow-xl"
                     >
                         <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                            إضافة رصيد SMS
+                            {{ $t('system.credits.add_sms_credit') }}
                         </h3>
                         <form @submit.prevent="addCredits" class="space-y-4">
                             <div v-if="!selectedTenant">
@@ -197,13 +201,15 @@
                                     :options="balances.data"
                                     :option-label="(t) => t.tenant?.trade_name"
                                     option-value="tenant_id"
-                                    label="المستأجر"
-                                    placeholder="اختر المستأجر"
+                                    :label="$t('system.credits.tenant')"
+                                    :placeholder="$t('system.credits.select_the_tenant')"
                                     required
                                 />
                             </div>
                             <div v-else class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3">
-                                <p class="text-sm text-gray-600 dark:text-gray-400">المستأجر</p>
+                                <p class="text-sm text-gray-600 dark:text-gray-400">
+                                    {{ $t('system.credits.tenant') }}
+                                </p>
                                 <p class="font-semibold text-gray-900 dark:text-white">
                                     {{ selectedTenant.tenant?.trade_name }}
                                 </p>
@@ -212,7 +218,7 @@
                                 <label
                                     class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
                                 >
-                                    عدد الرسائل
+                                    {{ $t('system.credits.message_count') }}
                                 </label>
                                 <input
                                     type="number"
@@ -226,12 +232,12 @@
                                 <label
                                     class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
                                 >
-                                    السبب (اختياري)
+                                    {{ $t('system.credits.reason_optional') }}
                                 </label>
                                 <input
                                     type="text"
                                     v-model="form.reason"
-                                    placeholder="مثال: هدية ترحيبية"
+                                    :placeholder="$t('system.credits.e.g._welcome_bonus')"
                                     class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                                 />
                             </div>
@@ -241,14 +247,14 @@
                                     :disabled="form.processing"
                                     class="flex-1 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-medium disabled:opacity-50"
                                 >
-                                    إضافة
+                                    {{ $t('common.add') }}
                                 </button>
                                 <button
                                     type="button"
                                     @click="showAddModal = false"
                                     class="px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg"
                                 >
-                                    إلغاء
+                                    {{ $t('common.cancel') }}
                                 </button>
                             </div>
                         </form>

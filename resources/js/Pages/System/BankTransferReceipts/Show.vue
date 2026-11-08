@@ -2,6 +2,7 @@
 import { ref, computed, watch } from 'vue';
 import { Head, router, Link } from '@inertiajs/vue3';
 import SystemLayout from '@/Layouts/SystemLayout.vue';
+import PageHeader from '@/Components/PageHeader.vue';
 
 const props = defineProps({
     receipt: { type: Object, required: true },
@@ -64,9 +65,9 @@ const statusColors = {
 };
 
 const statusLabels = {
-    pending: { ar: 'قيد المراجعة', en: 'Pending' },
-    approved: { ar: 'موافق عليه', en: 'Approved' },
-    rejected: { ar: 'مرفوض', en: 'Rejected' },
+    pending: { ar: $t('system.bank_transfer_receipts.pending_2'), en: 'Pending' },
+    approved: { ar: $t('system.bank_transfer_receipts.approved_3'), en: 'Approved' },
+    rejected: { ar: $t('system.bank_transfer_receipts.rejected_3'), en: 'Rejected' },
 };
 
 const formatDate = (dateStr) => {
@@ -174,7 +175,9 @@ const amountState = computed(() => {
             expected: Number(props.receipt.expected_amount),
             message:
                 locale.value === 'ar'
-                    ? `المبلغ المُحوّل أقل من المطلوب بـ ${formatCurrency(-diff)} SAR`
+                    ? $t('system.bank_transfer_receipts.transferred_less_than_required', {
+                          amount: formatCurrency(-diff),
+                      })
                     : `Transferred amount is ${formatCurrency(-diff)} SAR short`,
         };
     }
@@ -184,26 +187,42 @@ const amountState = computed(() => {
         expected: Number(props.receipt.expected_amount),
         message:
             locale.value === 'ar'
-                ? `المبلغ المُحوّل أكثر من المطلوب بـ ${formatCurrency(diff)} SAR (سيُسجَّل كرصيد دائن)`
+                ? $t('system.bank_transfer_receipts.transferred_more_than_required', {
+                      amount: formatCurrency(diff),
+                  })
                 : `Transferred amount is ${formatCurrency(diff)} SAR over (credit will be recorded)`,
     };
 });
 </script>
 
 <template>
-    <Head :title="locale === 'ar' ? 'مراجعة الإيصال' : 'Review Receipt'" />
+    <Head :title="locale === 'ar' ? $t('system.bank_transfer_receipts.title') : 'Review Receipt'" />
 
     <SystemLayout>
         <div class="space-y-6">
             <!-- Header -->
-            <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                <div>
+            <PageHeader
+                :title="
+                    (locale === 'ar'
+                        ? $t('system.bank_transfer_receipts.title')
+                        : 'Review Receipt') +
+                    ' #' +
+                    receipt.id
+                "
+                :subtitle="receipt.tenant?.trade_name || receipt.tenant?.name || ''"
+            >
+                <template #back>
                     <Link
                         href="/system/bank-transfer-receipts"
-                        class="inline-flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                        class="inline-flex items-center justify-center w-10 h-10 rounded-xl bg-gray-100 hover:bg-gray-200 dark:bg-gray-700/60 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300 transition-colors"
+                        :title="
+                            locale === 'ar'
+                                ? $t('system.bank_transfer_receipts.back_to_list_2')
+                                : 'Back to list'
+                        "
                     >
                         <svg
-                            class="h-4 w-4 rtl:rotate-180"
+                            class="w-5 h-5 rtl:rotate-180"
                             fill="none"
                             stroke="currentColor"
                             viewBox="0 0 24 24"
@@ -215,28 +234,36 @@ const amountState = computed(() => {
                                 d="M10 19l-7-7m0 0l7-7m-7 7h18"
                             />
                         </svg>
-                        {{ locale === 'ar' ? 'العودة للقائمة' : 'Back to list' }}
                     </Link>
-                    <h1 class="mt-2 text-2xl font-bold text-gray-900 dark:text-white">
-                        {{ locale === 'ar' ? 'مراجعة الإيصال' : 'Review Receipt' }} #{{
-                            receipt.id
+                </template>
+
+                <template #icon>
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"
+                        />
+                    </svg>
+                </template>
+
+                <template #actions>
+                    <span
+                        :class="[
+                            'inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-bold',
+                            statusColors[receipt.status],
+                        ]"
+                    >
+                        <span class="h-1.5 w-1.5 rounded-full bg-current"></span>
+                        {{
+                            locale === 'ar'
+                                ? statusLabels[receipt.status]?.ar
+                                : statusLabels[receipt.status]?.en
                         }}
-                    </h1>
-                </div>
-                <span
-                    :class="[
-                        'inline-flex items-center gap-1 self-start rounded-full px-3 py-1 text-xs font-bold',
-                        statusColors[receipt.status],
-                    ]"
-                >
-                    <span class="h-1.5 w-1.5 rounded-full bg-current"></span>
-                    {{
-                        locale === 'ar'
-                            ? statusLabels[receipt.status]?.ar
-                            : statusLabels[receipt.status]?.en
-                    }}
-                </span>
-            </div>
+                    </span>
+                </template>
+            </PageHeader>
 
             <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
                 <!-- Receipt details -->
@@ -245,12 +272,20 @@ const amountState = computed(() => {
                         class="rounded-xl border border-gray-200 bg-white p-5 dark:border-gray-700 dark:bg-gray-800"
                     >
                         <h2 class="mb-3 text-sm font-bold uppercase tracking-wider text-gray-500">
-                            {{ locale === 'ar' ? 'تفاصيل المستأجر' : 'Tenant details' }}
+                            {{
+                                locale === 'ar'
+                                    ? $t('system.bank_transfer_receipts.tenant_details_2')
+                                    : 'Tenant details'
+                            }}
                         </h2>
                         <div class="space-y-2 text-sm">
                             <div>
                                 <span class="text-gray-500 dark:text-gray-400">
-                                    {{ locale === 'ar' ? 'الاسم:' : 'Name:' }}
+                                    {{
+                                        locale === 'ar'
+                                            ? $t('system.bank_transfer_receipts.name_2')
+                                            : 'Name:'
+                                    }}
                                 </span>
                                 <p class="font-semibold text-gray-900 dark:text-white">
                                     {{ receipt.tenant?.trade_name || receipt.tenant?.name }}
@@ -258,7 +293,11 @@ const amountState = computed(() => {
                             </div>
                             <div v-if="receipt.tenant?.email">
                                 <span class="text-gray-500 dark:text-gray-400">
-                                    {{ locale === 'ar' ? 'البريد:' : 'Email:' }}
+                                    {{
+                                        locale === 'ar'
+                                            ? $t('system.bank_transfer_receipts.email_2')
+                                            : 'Email:'
+                                    }}
                                 </span>
                                 <p class="text-gray-700 dark:text-gray-200" dir="ltr">
                                     {{ receipt.tenant.email }}
@@ -266,7 +305,7 @@ const amountState = computed(() => {
                             </div>
                             <div v-if="receipt.tenant?.phone">
                                 <span class="text-gray-500 dark:text-gray-400">
-                                    {{ locale === 'ar' ? 'الهاتف:' : 'Phone:' }}
+                                    {{ locale === 'ar' ? $t('common.phone_label') : 'Phone:' }}
                                 </span>
                                 <p class="text-gray-700 dark:text-gray-200" dir="ltr">
                                     {{ receipt.tenant.phone }}
@@ -279,12 +318,20 @@ const amountState = computed(() => {
                         class="rounded-xl border border-gray-200 bg-white p-5 dark:border-gray-700 dark:bg-gray-800"
                     >
                         <h2 class="mb-3 text-sm font-bold uppercase tracking-wider text-gray-500">
-                            {{ locale === 'ar' ? 'تفاصيل الاشتراك' : 'Subscription details' }}
+                            {{
+                                locale === 'ar'
+                                    ? $t('system.bank_transfer_receipts.subscription_details')
+                                    : 'Subscription details'
+                            }}
                         </h2>
                         <div class="space-y-2 text-sm">
                             <div>
                                 <span class="text-gray-500 dark:text-gray-400">
-                                    {{ locale === 'ar' ? 'الباقة:' : 'Plan:' }}
+                                    {{
+                                        locale === 'ar'
+                                            ? $t('system.bank_transfer_receipts.plan_2')
+                                            : 'Plan:'
+                                    }}
                                 </span>
                                 <p class="font-semibold text-gray-900 dark:text-white">
                                     {{
@@ -296,16 +343,20 @@ const amountState = computed(() => {
                             </div>
                             <div>
                                 <span class="text-gray-500 dark:text-gray-400">
-                                    {{ locale === 'ar' ? 'دورة الفوترة:' : 'Cycle:' }}
+                                    {{
+                                        locale === 'ar'
+                                            ? $t('system.bank_transfer_receipts.cycle_2')
+                                            : 'Cycle:'
+                                    }}
                                 </span>
                                 <p class="text-gray-700 dark:text-gray-200">
                                     {{
                                         receipt.subscription?.billing_cycle === 'yearly'
                                             ? locale === 'ar'
-                                                ? 'سنوي'
+                                                ? $t('system.bank_transfer_receipts.yearly')
                                                 : 'Yearly'
                                             : locale === 'ar'
-                                              ? 'شهري'
+                                              ? $t('system.bank_transfer_receipts.monthly')
                                               : 'Monthly'
                                     }}
                                 </p>
@@ -338,12 +389,20 @@ const amountState = computed(() => {
                                 'text-orange-700 dark:text-orange-300': amountState.type === 'over',
                             }"
                         >
-                            {{ locale === 'ar' ? 'مطابقة المبالغ' : 'Amount verification' }}
+                            {{
+                                locale === 'ar'
+                                    ? $t('system.bank_transfer_receipts.amount_verification')
+                                    : 'Amount verification'
+                            }}
                         </h2>
                         <div class="grid grid-cols-3 gap-3 text-center">
                             <div>
                                 <p class="text-xs text-gray-500 dark:text-gray-400">
-                                    {{ locale === 'ar' ? 'المطلوب' : 'Due' }}
+                                    {{
+                                        locale === 'ar'
+                                            ? $t('system.bank_transfer_receipts.due')
+                                            : 'Due'
+                                    }}
                                 </p>
                                 <p
                                     class="mt-1 font-mono text-lg font-bold text-gray-900 dark:text-white"
@@ -353,7 +412,11 @@ const amountState = computed(() => {
                             </div>
                             <div>
                                 <p class="text-xs text-gray-500 dark:text-gray-400">
-                                    {{ locale === 'ar' ? 'المُحوّل' : 'Transferred' }}
+                                    {{
+                                        locale === 'ar'
+                                            ? $t('system.bank_transfer_receipts.transferred')
+                                            : 'Transferred'
+                                    }}
                                 </p>
                                 <p
                                     class="mt-1 font-mono text-lg font-bold text-gray-900 dark:text-white"
@@ -363,13 +426,22 @@ const amountState = computed(() => {
                             </div>
                             <div>
                                 <p class="text-xs text-gray-500 dark:text-gray-400">
-                                    {{ locale === 'ar' ? 'الفرق' : 'Difference' }}
+                                    {{
+                                        locale === 'ar'
+                                            ? $t('system.bank_transfer_receipts.difference')
+                                            : 'Difference'
+                                    }}
                                 </p>
                                 <p
                                     v-if="amountState.type === 'match'"
                                     class="mt-1 font-mono text-lg font-bold text-emerald-600 dark:text-emerald-400"
                                 >
-                                    ✓ {{ locale === 'ar' ? 'مطابق' : 'Match' }}
+                                    ✓
+                                    {{
+                                        locale === 'ar'
+                                            ? $t('system.bank_transfer_receipts.match')
+                                            : 'Match'
+                                    }}
                                 </p>
                                 <p
                                     v-else
@@ -404,12 +476,20 @@ const amountState = computed(() => {
                         <h2
                             class="mb-3 text-sm font-bold uppercase tracking-wider text-indigo-700 dark:text-indigo-300"
                         >
-                            {{ locale === 'ar' ? 'تفاصيل التحويل' : 'Transfer details' }}
+                            {{
+                                locale === 'ar'
+                                    ? $t('system.bank_transfer_receipts.transfer_details')
+                                    : 'Transfer details'
+                            }}
                         </h2>
                         <div class="space-y-2 text-sm">
                             <div class="flex justify-between">
                                 <span class="text-gray-600 dark:text-gray-300">
-                                    {{ locale === 'ar' ? 'المبلغ' : 'Amount' }}
+                                    {{
+                                        locale === 'ar'
+                                            ? $t('system.bank_transfer_receipts.amount')
+                                            : 'Amount'
+                                    }}
                                 </span>
                                 <span
                                     class="font-mono font-bold text-indigo-700 dark:text-indigo-300"
@@ -419,7 +499,11 @@ const amountState = computed(() => {
                             </div>
                             <div class="flex justify-between">
                                 <span class="text-gray-600 dark:text-gray-300">
-                                    {{ locale === 'ar' ? 'تاريخ التحويل' : 'Transfer date' }}
+                                    {{
+                                        locale === 'ar'
+                                            ? $t('system.bank_transfer_receipts.transfer_date')
+                                            : 'Transfer date'
+                                    }}
                                 </span>
                                 <span class="font-mono text-gray-900 dark:text-white">
                                     {{ formatDate(receipt.transfer_date) }}
@@ -427,7 +511,11 @@ const amountState = computed(() => {
                             </div>
                             <div v-if="receipt.bank_name" class="flex justify-between">
                                 <span class="text-gray-600 dark:text-gray-300">
-                                    {{ locale === 'ar' ? 'البنك' : 'Bank' }}
+                                    {{
+                                        locale === 'ar'
+                                            ? $t('system.bank_transfer_receipts.bank')
+                                            : 'Bank'
+                                    }}
                                 </span>
                                 <span class="text-gray-900 dark:text-white">
                                     {{ receipt.bank_name }}
@@ -435,7 +523,11 @@ const amountState = computed(() => {
                             </div>
                             <div v-if="receipt.transfer_reference" class="flex justify-between">
                                 <span class="text-gray-600 dark:text-gray-300">
-                                    {{ locale === 'ar' ? 'مرجع التحويل' : 'Reference' }}
+                                    {{
+                                        locale === 'ar'
+                                            ? $t('system.bank_transfer_receipts.reference')
+                                            : 'Reference'
+                                    }}
                                 </span>
                                 <span class="font-mono text-gray-900 dark:text-white">
                                     {{ receipt.transfer_reference }}
@@ -443,7 +535,11 @@ const amountState = computed(() => {
                             </div>
                             <div v-if="receipt.account_name" class="flex justify-between">
                                 <span class="text-gray-600 dark:text-gray-300">
-                                    {{ locale === 'ar' ? 'اسم صاحب الحساب' : 'Account holder' }}
+                                    {{
+                                        locale === 'ar'
+                                            ? $t('system.bank_transfer_receipts.account_holder')
+                                            : 'Account holder'
+                                    }}
                                 </span>
                                 <span class="text-gray-900 dark:text-white">
                                     {{ receipt.account_name }}
@@ -460,7 +556,9 @@ const amountState = computed(() => {
                             class="w-full rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-bold text-white hover:bg-emerald-700 disabled:opacity-50"
                         >
                             {{
-                                locale === 'ar' ? 'موافقة وتفعيل الاشتراك' : 'Approve and activate'
+                                locale === 'ar'
+                                    ? $t('system.bank_transfer_receipts.approve_and_activate_2')
+                                    : 'Approve and activate'
                             }}
                         </button>
                         <button
@@ -468,7 +566,11 @@ const amountState = computed(() => {
                             :disabled="processing"
                             class="w-full rounded-lg border border-rose-300 bg-white px-4 py-2.5 text-sm font-bold text-rose-700 hover:bg-rose-50 disabled:opacity-50 dark:border-rose-700 dark:bg-gray-800 dark:text-rose-300 dark:hover:bg-rose-900/20"
                         >
-                            {{ locale === 'ar' ? 'رفض الإيصال' : 'Reject receipt' }}
+                            {{
+                                locale === 'ar'
+                                    ? $t('system.bank_transfer_receipts.reject_receipt_2')
+                                    : 'Reject receipt'
+                            }}
                         </button>
                     </div>
 
@@ -478,7 +580,11 @@ const amountState = computed(() => {
                         class="rounded-xl border border-gray-200 bg-gray-50 p-5 dark:border-gray-700 dark:bg-gray-900/30"
                     >
                         <h2 class="mb-3 text-sm font-bold uppercase tracking-wider text-gray-500">
-                            {{ locale === 'ar' ? 'سجل المراجعة' : 'Review history' }}
+                            {{
+                                locale === 'ar'
+                                    ? $t('system.bank_transfer_receipts.review_history')
+                                    : 'Review history'
+                            }}
                         </h2>
                         <p class="text-sm text-gray-700 dark:text-gray-300">
                             <strong>{{ receipt.reviewer_name || '—' }}</strong>
@@ -502,7 +608,11 @@ const amountState = computed(() => {
                 >
                     <div class="mb-3 flex items-center justify-between">
                         <h2 class="text-sm font-bold uppercase tracking-wider text-gray-500">
-                            {{ locale === 'ar' ? 'الإيصال المرفوع' : 'Uploaded receipt' }}
+                            {{
+                                locale === 'ar'
+                                    ? $t('system.bank_transfer_receipts.uploaded_receipt')
+                                    : 'Uploaded receipt'
+                            }}
                         </h2>
                         <a
                             :href="`/system/bank-transfer-receipts/${receipt.id}/download`"
@@ -521,7 +631,11 @@ const amountState = computed(() => {
                                     d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
                                 />
                             </svg>
-                            {{ locale === 'ar' ? 'تحميل' : 'Download' }}
+                            {{
+                                locale === 'ar'
+                                    ? $t('system.bank_transfer_receipts.download_2')
+                                    : 'Download'
+                            }}
                         </a>
                     </div>
 
@@ -564,7 +678,11 @@ const amountState = computed(() => {
                             target="_blank"
                             class="mt-4 inline-flex rounded-lg bg-indigo-600 px-4 py-2 text-xs font-semibold text-white hover:bg-indigo-700"
                         >
-                            {{ locale === 'ar' ? 'فتح في تبويب جديد' : 'Open in new tab' }}
+                            {{
+                                locale === 'ar'
+                                    ? $t('system.bank_transfer_receipts.open_new_tab')
+                                    : 'Open in new tab'
+                            }}
                         </a>
                     </div>
                 </div>
@@ -580,12 +698,18 @@ const amountState = computed(() => {
             >
                 <div class="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl dark:bg-gray-800">
                     <h3 class="text-lg font-bold text-gray-900 dark:text-white">
-                        {{ locale === 'ar' ? 'رفض الإيصال' : 'Reject receipt' }}
+                        {{
+                            locale === 'ar'
+                                ? $t('system.bank_transfer_receipts.reject_receipt_2')
+                                : 'Reject receipt'
+                        }}
                     </h3>
                     <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
                         {{
                             locale === 'ar'
-                                ? 'يرجى توضيح سبب الرفض. سيتم إبلاغ المستأجر بالسبب.'
+                                ? $t(
+                                      'system.bank_transfer_receipts.please_provide_a_rejection_reason._the_tenant_wi'
+                                  )
                                 : 'Please provide a rejection reason. The tenant will be notified.'
                         }}
                     </p>
@@ -594,7 +718,9 @@ const amountState = computed(() => {
                         rows="4"
                         :placeholder="
                             locale === 'ar'
-                                ? 'مثال: المبلغ لا يطابق المطلوب، الإيصال غير واضح...'
+                                ? $t(
+                                      'system.bank_transfer_receipts.e.g._amount_mismatch_receipt_unclear...'
+                                  )
                                 : 'e.g. Amount mismatch, receipt unclear...'
                         "
                         class="mt-4 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-rose-500 focus:ring-1 focus:ring-rose-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
@@ -605,7 +731,11 @@ const amountState = computed(() => {
                             @click="showRejectModal = false"
                             class="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300"
                         >
-                            {{ locale === 'ar' ? 'إلغاء' : 'Cancel' }}
+                            {{
+                                locale === 'ar'
+                                    ? $t('system.bank_transfer_receipts.cancel')
+                                    : 'Cancel'
+                            }}
                         </button>
                         <button
                             type="button"
@@ -613,7 +743,11 @@ const amountState = computed(() => {
                             :disabled="!rejectNotes.trim() || processing"
                             class="rounded-lg bg-rose-600 px-4 py-2 text-sm font-semibold text-white hover:bg-rose-700 disabled:opacity-50"
                         >
-                            {{ locale === 'ar' ? 'تأكيد الرفض' : 'Confirm reject' }}
+                            {{
+                                locale === 'ar'
+                                    ? $t('system.bank_transfer_receipts.confirm_reject_2')
+                                    : 'Confirm reject'
+                            }}
                         </button>
                     </div>
                 </div>
@@ -634,7 +768,7 @@ const amountState = computed(() => {
                     <h2 class="text-lg font-bold text-gray-900 dark:text-white">
                         {{
                             locale === 'ar'
-                                ? 'تأكيد الموافقة على الإيصال'
+                                ? $t('system.bank_transfer_receipts.confirm_receipt_approval')
                                 : 'Confirm receipt approval'
                         }}
                     </h2>
@@ -655,7 +789,11 @@ const amountState = computed(() => {
                     >
                         <div class="flex justify-between">
                             <span class="text-gray-600 dark:text-gray-300">
-                                {{ locale === 'ar' ? 'المطلوب' : 'Due' }}
+                                {{
+                                    locale === 'ar'
+                                        ? $t('system.bank_transfer_receipts.due')
+                                        : 'Due'
+                                }}
                             </span>
                             <span class="font-mono font-bold">
                                 {{ formatCurrency(amountState.expected) }} SAR
@@ -663,7 +801,11 @@ const amountState = computed(() => {
                         </div>
                         <div class="mt-1 flex justify-between">
                             <span class="text-gray-600 dark:text-gray-300">
-                                {{ locale === 'ar' ? 'المُحوّل' : 'Transferred' }}
+                                {{
+                                    locale === 'ar'
+                                        ? $t('system.bank_transfer_receipts.transferred')
+                                        : 'Transferred'
+                                }}
                             </span>
                             <span class="font-mono font-bold">
                                 {{ formatCurrency(receipt.transfer_amount) }} SAR
@@ -671,13 +813,22 @@ const amountState = computed(() => {
                         </div>
                         <div class="mt-2 flex justify-between border-t border-current/10 pt-2">
                             <span class="font-semibold">
-                                {{ locale === 'ar' ? 'الفرق' : 'Difference' }}
+                                {{
+                                    locale === 'ar'
+                                        ? $t('system.bank_transfer_receipts.difference')
+                                        : 'Difference'
+                                }}
                             </span>
                             <span
                                 v-if="amountState.type === 'match'"
                                 class="font-mono font-bold text-emerald-600 dark:text-emerald-400"
                             >
-                                ✓ {{ locale === 'ar' ? 'مطابق' : 'Match' }}
+                                ✓
+                                {{
+                                    locale === 'ar'
+                                        ? $t('system.bank_transfer_receipts.match')
+                                        : 'Match'
+                                }}
                             </span>
                             <span
                                 v-else
@@ -710,7 +861,9 @@ const amountState = computed(() => {
                         <span class="text-amber-800 dark:text-amber-200">
                             {{
                                 locale === 'ar'
-                                    ? 'أوافق على الرغم من اختلاف المبلغ (سيُسجَّل في سجل المراجعة)'
+                                    ? $t(
+                                          'system.bank_transfer_receipts.approve_despite_the_amount_mismatch_will_be_reco'
+                                      )
                                     : 'Approve despite the amount mismatch (will be recorded in the audit log)'
                             }}
                         </span>
@@ -735,7 +888,9 @@ const amountState = computed(() => {
                             <span class="font-medium text-slate-700 dark:text-slate-200">
                                 {{
                                     locale === 'ar'
-                                        ? 'موافقة جزئية (اعتماد مبلغ مختلف عن المُحوّل)'
+                                        ? $t(
+                                              'system.bank_transfer_receipts.partial_approval_credit_a_different_amount_than_'
+                                          )
                                         : 'Partial approval (credit a different amount than received)'
                                 }}
                             </span>
@@ -746,7 +901,7 @@ const amountState = computed(() => {
                             >
                                 {{
                                     locale === 'ar'
-                                        ? 'المبلغ المعتمد (SAR)'
+                                        ? $t('system.bank_transfer_receipts.approved_amount')
                                         : 'Approved amount (SAR)'
                                 }}
                             </label>
@@ -765,7 +920,10 @@ const amountState = computed(() => {
                             >
                                 {{
                                     locale === 'ar'
-                                        ? `سيُسجَّل نقص ${formatCurrency(partialShortfall)} SAR كرصيد (الفاتورة تبقى مفتوحة)`
+                                        ? $t(
+                                              'system.bank_transfer_receipts.shortfall_recorded_as_credit',
+                                              { amount: formatCurrency(partialShortfall) }
+                                          )
                                         : `Shortfall of ${formatCurrency(partialShortfall)} SAR will be recorded as credit (invoice stays open)`
                                 }}
                             </p>
@@ -775,14 +933,20 @@ const amountState = computed(() => {
                     <label
                         class="mt-4 block text-sm font-semibold text-gray-700 dark:text-gray-200"
                     >
-                        {{ locale === 'ar' ? 'ملاحظات (اختياري)' : 'Notes (optional)' }}
+                        {{
+                            locale === 'ar'
+                                ? $t('system.bank_transfer_receipts.notes_optional')
+                                : 'Notes (optional)'
+                        }}
                     </label>
                     <textarea
                         v-model="approveNotes"
                         rows="3"
                         :placeholder="
                             locale === 'ar'
-                                ? 'مثال: تأكيد استلام المبلغ الكامل من العميل...'
+                                ? $t(
+                                      'system.bank_transfer_receipts.e.g._confirmed_full_amount_received_from_tenant.'
+                                  )
                                 : 'e.g. Confirmed full amount received from tenant...'
                         "
                         class="mt-1 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
@@ -794,7 +958,11 @@ const amountState = computed(() => {
                             @click="showApproveModal = false"
                             class="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300"
                         >
-                            {{ locale === 'ar' ? 'إلغاء' : 'Cancel' }}
+                            {{
+                                locale === 'ar'
+                                    ? $t('system.bank_transfer_receipts.cancel')
+                                    : 'Cancel'
+                            }}
                         </button>
                         <button
                             type="button"
@@ -802,7 +970,11 @@ const amountState = computed(() => {
                             :disabled="!canApprove"
                             class="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700 disabled:opacity-50"
                         >
-                            {{ locale === 'ar' ? 'تأكيد الموافقة' : 'Confirm approve' }}
+                            {{
+                                locale === 'ar'
+                                    ? $t('system.bank_transfer_receipts.confirm_approve_2')
+                                    : 'Confirm approve'
+                            }}
                         </button>
                     </div>
                 </div>

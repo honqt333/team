@@ -129,7 +129,7 @@ defineProps({ form: Object, addItem: Function, removeItem: Function, tab: String
                         <input
                             v-model="form.settings.landing_hero_typed_prefix_ar"
                             class="input-enterprise"
-                            placeholder="أدر"
+                            :placeholder="$t('system.website.manage')"
                         />
                     </div>
                     <div>
@@ -157,7 +157,7 @@ defineProps({ form: Object, addItem: Function, removeItem: Function, tab: String
                         <input
                             v-model="form.settings.landing_hero_typed_suffix_ar"
                             class="input-enterprise"
-                            placeholder="بذكاء حقيقي"
+                            :placeholder="$t('system.website.with_real_intelligence')"
                         />
                     </div>
                     <div>
@@ -186,7 +186,11 @@ defineProps({ form: Object, addItem: Function, removeItem: Function, tab: String
                             v-model="form.settings.landing_hero_typed_phrases_ar"
                             rows="3"
                             class="input-enterprise"
-                            placeholder="مركزك الآن|أرباحك اليوم|فريقك معك|مستقبلك هنا"
+                            :placeholder="
+                                $t(
+                                    'system.website.your_center_nowyour_revenue_todayyour_team_with_'
+                                )
+                            "
                         />
                         <p class="text-xs text-gray-500 mt-1">
                             {{ $t('tenant_site.landing.typed_words_hint') }}

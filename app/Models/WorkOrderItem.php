@@ -42,6 +42,9 @@ class WorkOrderItem extends Model
         'tax_category_code', 'tax_rate_snapshot', 'tax_amount', 'line_total_excl_tax', 'line_total_incl_tax',
         'warranty_expires_at', 'warranty_value_snapshot', 'warranty_unit_snapshot', 'is_warranty',
         'hold_reason', 'held_at', 'held_by_user_id',
+        // Technician fields
+        'technician_notes', 'estimated_duration', 'actual_duration', 'priority',
+        'paused_at', 'paused_duration', 'checklist',
     ];
 
     protected $appends = ['parts_total', 'grand_total'];
@@ -54,6 +57,12 @@ class WorkOrderItem extends Model
         'due_date' => 'date', 'tax_rate_snapshot' => 'decimal:2', 'tax_amount' => 'decimal:2',
         'line_total_excl_tax' => 'decimal:2', 'line_total_incl_tax' => 'decimal:2', 'is_taxable' => 'boolean',
         'is_warranty' => 'boolean', 'warranty_expires_at' => 'datetime', 'held_at' => 'datetime',
+        // Technician fields
+        'estimated_duration' => 'integer',
+        'actual_duration' => 'integer',
+        'paused_duration' => 'integer',
+        'paused_at' => 'datetime',
+        'checklist' => 'array',
     ];
 
     protected static function booted(): void
@@ -152,6 +161,11 @@ class WorkOrderItem extends Model
     public function itemNotes(): HasMany
     {
         return $this->hasMany(WorkOrderItemNote::class);
+    }
+
+    public function photos(): HasMany
+    {
+        return $this->hasMany(WorkOrderPhoto::class);
     }
 
     /**

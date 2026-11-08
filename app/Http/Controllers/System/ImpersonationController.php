@@ -21,9 +21,9 @@ class ImpersonationController extends Controller
      */
     public function start(Request $request, Tenant $tenant): RedirectResponse
     {
-        // Find the first admin user of this tenant
+        // Find the owner / admin user of this tenant
         $tenantUser = User::where('tenant_id', $tenant->id)
-            ->whereHas('roles', fn ($q) => $q->where('name', 'admin'))
+            ->whereHas('roles', fn ($q) => $q->whereIn('name', ['super_admin', 'admin', 'branch_manager']))
             ->first();
 
         if (! $tenantUser) {
@@ -35,43 +35,50 @@ class ImpersonationController extends Controller
             return back()->with('error', __('messages.system.impersonation.no_users'));
         }
 
-        // The system admin lives on the 'admin' guard (AdminUser), NOT
-        // the default 'web' guard. Reading Auth::id() here used to
-        // return the web guard's id, which is null for a system admin —
-        // so the original identity was never stored and the admin
-        // could not be restored on stop().
-        $originalAdmin = Auth::guard('admin')->user();
+        $actingUser = $request->user();
 
-        if (! $originalAdmin) {
-            // Defensive: without an admin identity there is nothing to
-            // return to, so refuse to start rather than trapping the
-            // operator inside the tenant account.
+        if (! $actingUser) {
             abort(403, __('messages.system.impersonation.no_admin'));
         }
 
-        // Store the original ADMIN identity so we can restore it later.
-        Session::put('impersonating_from', $originalAdmin->id);
+        $isAdminUser = $actingUser instanceof AdminUser;
+        $isSystemAdmin = $actingUser instanceof User && $actingUser->is_system_admin;
+
+        if (! $isAdminUser && ! $isSystemAdmin) {
+            abort(403, __('messages.system.impersonation.no_admin'));
+        }
+
+        $matchingAdmin = $isAdminUser
+            ? $actingUser
+            : AdminUser::where('email', $actingUser->email)->orWhere('user_id', $actingUser->id)->first();
+
+        // If on web guard and matching AdminUser exists, log in to admin guard so session is preserved
+        if ($matchingAdmin && ! Auth::guard('admin')->check()) {
+            Auth::guard('admin')->login($matchingAdmin);
+        }
+
+        // Store the original identity and guard so we can restore it later.
+        Session::put('impersonating_from', $actingUser->id);
+        Session::put('impersonating_from_guard', $isAdminUser ? 'admin' : 'web');
         Session::put('impersonating_tenant', $tenant->id);
 
-        // Audit log: record who started impersonating, when, from which IP.
-        // Stored against the original admin so the trail is preserved even
-        // after we switch the auth context.
-        AdminActivityLog::create([
-            'admin_user_id' => $originalAdmin->id,
-            'action' => 'impersonate_start',
-            'model_type' => Tenant::class,
-            'model_id' => $tenant->id,
-            'changes' => [
-                'target_user_id' => $tenantUser->id,
-                'target_user_email' => $tenantUser->email,
-            ],
-            'ip_address' => $request->ip(),
-            'user_agent' => $request->userAgent(),
-        ]);
+        // Audit log
+        if ($matchingAdmin) {
+            AdminActivityLog::create([
+                'admin_user_id' => $matchingAdmin->id,
+                'action' => 'impersonate_start',
+                'model_type' => Tenant::class,
+                'model_id' => $tenant->id,
+                'changes' => [
+                    'target_user_id' => $tenantUser->id,
+                    'target_user_email' => $tenantUser->email,
+                ],
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+            ]);
+        }
 
-        // Log in as the tenant user on the 'web' guard. The tenant's
-        // staff session lives there; the admin session stays intact so
-        // stop() can put it back.
+        // Log in as the tenant user on the 'web' guard.
         Auth::guard('web')->login($tenantUser);
 
         return redirect('/dashboard')->with('success', __('messages.system.impersonation.inside_account', ['tenant' => $tenant->trade_name]));
@@ -82,20 +89,25 @@ class ImpersonationController extends Controller
      */
     public function stop(Request $request): RedirectResponse
     {
-        $originalAdminId = Session::get('impersonating_from');
+        $originalId = Session::get('impersonating_from');
+        $originalGuard = Session::get('impersonating_from_guard', 'admin');
         $impersonatedTenantId = Session::get('impersonating_tenant');
 
         // Audit log BEFORE we lose the impersonation context.
-        $currentAdmin = Auth::guard('admin')->user();
+        $adminUserId = Auth::guard('admin')->id();
 
-        if ($currentAdmin && $impersonatedTenantId) {
+        if (! $adminUserId && $originalGuard === 'web') {
+            $adminUserId = AdminUser::where('user_id', $originalId)->orWhere('id', $originalId)->value('id');
+        }
+
+        if ($adminUserId && $impersonatedTenantId) {
             AdminActivityLog::create([
-                'admin_user_id' => $currentAdmin->id,
+                'admin_user_id' => $adminUserId,
                 'action' => 'impersonate_stop',
                 'model_type' => Tenant::class,
                 'model_id' => $impersonatedTenantId,
                 'changes' => [
-                    'original_admin_user_id' => $originalAdminId,
+                    'original_admin_user_id' => $originalId,
                 ],
                 'ip_address' => $request->ip(),
                 'user_agent' => $request->userAgent(),
@@ -107,21 +119,27 @@ class ImpersonationController extends Controller
 
         // Clear impersonation session.
         Session::forget('impersonating_from');
+        Session::forget('impersonating_from_guard');
         Session::forget('impersonating_tenant');
 
-        if (! $originalAdminId) {
-            // Nothing to restore (e.g. the session was lost). The admin
-            // guard may still be signed in — if so, go back to /system.
+        if (! $originalId) {
             return Auth::guard('admin')->check()
                 ? redirect('/system')->with('success', __('messages.system.impersonation.stopped'))
                 : redirect('/login');
         }
 
-        // Restore the original system admin on the 'admin' guard.
-        $originalAdmin = AdminUser::find($originalAdminId);
+        if ($originalGuard === 'web') {
+            $originalUser = User::find($originalId);
 
-        if ($originalAdmin) {
-            Auth::guard('admin')->login($originalAdmin);
+            if ($originalUser) {
+                Auth::guard('web')->login($originalUser);
+            }
+        } else {
+            $originalAdmin = AdminUser::find($originalId);
+
+            if ($originalAdmin) {
+                Auth::guard('admin')->login($originalAdmin);
+            }
         }
 
         return redirect('/system')->with('success', __('messages.system.impersonation.stopped'));

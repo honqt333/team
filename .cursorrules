@@ -1,0 +1,35 @@
+# Cursor Rules — Carag V2 / Khidmah Pro
+# Unified AI Agent Protocol & Supreme Constitution
+
+You are working on **Carag V2 / Khidmah Pro**, an enterprise multi-tenant ERP platform for automotive service centers built with Laravel 12, Vue 3, Inertia.js, and MySQL.
+
+## MANDATORY PROTOCOL (READ AGENTS.md FIRST)
+
+All work in this codebase is strictly governed by the Master Constitution in `AGENTS.md`.
+
+1. **Discovery First:** Always inspect existing models, migrations, services, components, and translations before writing code. Never guess columns or duplicate existing logic.
+2. **Tenant & Center Isolation:** Always respect `TenantScoped` and `CenterScoped`. Never infer tenant or center IDs from constants or bypass boundaries.
+3. **Server-Side Authorization:** Every action must be protected by a Policy or Gate (`$this->authorize(...)`). UI element hiding is NOT authorization.
+4. **Reuse Existing Domain Services & Approved UI Components:**
+   - Work order labor & timers: `WorkOrderLaborService` & `WorkOrderLaborEntry`.
+   - Invoicing and payments: `InvoiceService`, `PaymentManager`, `TaxCalculator`.
+   - Inventory movements: `InventoryService`, `InventoryMove`.
+   - Printing: Use the unified print engine (`usePrint`, `PrintEngine.vue`). Never create parallel print mechanisms.
+   - UI Components (see `docs/COMPONENTS.md` & `docs/MODALS.md`):
+     - Searchable Dropdown: ALWAYS use `SearchableSelect.vue` (forbidden to use raw `<select>` for dynamic datasets).
+     - Print Button: ALWAYS use `AppPrintButton.vue`.
+     - View Mode (Grid/List): ALWAYS use `AppViewModeToggle.vue`.
+     - Tabs: ALWAYS use `AppTabs.vue`.
+     - Vehicle Plates: ALWAYS use `SaudiPlateDisplay.vue` and `SaudiPlateInput.vue`.
+     - Signatures: ALWAYS use `SignaturePad.vue`.
+     - Dates: ALWAYS use `CustomDatePicker.vue`.
+     - Action Confirmation: ALWAYS use `ConfirmModal.vue`.
+5. **Typography & UI Consistency:**
+   - Typography is strictly unified on **`IBM Plex Sans Arabic`**.
+   - Header action layout order in RTL: `[Title/Badge]` (Right) ... `[Toolbar Glass Container]` then `[Primary CTA Button]` (Far Left).
+6. **No Hardcoded Strings:** Use `resources/js/i18n/lang/ar.json` / `en.json` on the frontend (`t('...')`) and `lang/ar/` / `lang/en/` on the backend (`__('...')`).
+7. **Migrations:** Never modify previously executed migrations. Always create new incremental migrations with proper `down()` methods.
+8. **Verification:** Never mark a task complete without running:
+   - `php artisan test` (or relevant feature test)
+   - `npm run build`
+   - `php artisan optimize:clear`

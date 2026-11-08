@@ -3,39 +3,57 @@
         <div class="max-w-2xl mx-auto py-8">
             <!-- Header -->
             <div class="text-center mb-8">
-                <h1 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">إتمام الدفع</h1>
-                <p class="text-gray-500 dark:text-gray-400">اختر طريقة الدفع لإتمام الاشتراك</p>
+                <h1 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+                    {{ $t('system.payment.complete_payment') }}
+                </h1>
+                <p class="text-gray-500 dark:text-gray-400">
+                    {{ $t('system.payment.choose_a_payment_method_to_complete_the_subscrip') }}
+                </p>
             </div>
 
             <!-- Order Summary -->
             <div
                 class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-200 dark:border-gray-700 mb-6"
             >
-                <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">ملخص الطلب</h2>
+                <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                    {{ $t('system.payment.order_summary') }}
+                </h2>
                 <div class="space-y-3">
                     <div class="flex justify-between">
-                        <span class="text-gray-600 dark:text-gray-400">المستأجر</span>
+                        <span class="text-gray-600 dark:text-gray-400">
+                            {{ $t('system.payment.tenant') }}
+                        </span>
                         <span class="font-medium text-gray-900 dark:text-white">
                             {{ subscription.tenant?.trade_name }}
                         </span>
                     </div>
                     <div class="flex justify-between">
-                        <span class="text-gray-600 dark:text-gray-400">الباقة</span>
+                        <span class="text-gray-600 dark:text-gray-400">
+                            {{ $t('system.payment.package') }}
+                        </span>
                         <span class="font-medium text-gray-900 dark:text-white">
                             {{ subscription.plan?.name_ar }}
                         </span>
                     </div>
                     <div class="flex justify-between">
-                        <span class="text-gray-600 dark:text-gray-400">الدورة</span>
+                        <span class="text-gray-600 dark:text-gray-400">
+                            {{ $t('system.payment.cycle') }}
+                        </span>
                         <span class="font-medium text-gray-900 dark:text-white">
-                            {{ subscription.billing_cycle === 'yearly' ? 'سنوي' : 'شهري' }}
+                            {{
+                                subscription.billing_cycle === 'yearly'
+                                    ? $t('system.payment.yearly')
+                                    : $t('common.monthly')
+                            }}
                         </span>
                     </div>
                     <hr class="border-gray-200 dark:border-gray-700" />
                     <div class="flex justify-between text-lg">
-                        <span class="font-semibold text-gray-900 dark:text-white">المجموع</span>
+                        <span class="font-semibold text-gray-900 dark:text-white">
+                            {{ $t('system.payment.total') }}
+                        </span>
                         <span class="font-bold text-indigo-600 dark:text-indigo-400">
-                            {{ subscription.price }} ر.س
+                            {{ subscription.price + $t('common.currency') }}
                         </span>
                     </div>
                 </div>
@@ -46,7 +64,7 @@
                 class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-200 dark:border-gray-700 mb-6"
             >
                 <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                    بيانات الدفع
+                    {{ $t('system.payment.payment_details') }}
                 </h2>
 
                 <!-- Gateway not configured message -->
@@ -65,10 +83,10 @@
                         />
                     </svg>
                     <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-2">
-                        بوابة الدفع غير مُعدّة
+                        {{ $t('system.payment.the_payment_gateway_is_not_configured') }}
                     </h3>
                     <p class="text-gray-500 dark:text-gray-400 mb-4">
-                        يجب إعداد مفاتيح API لبوابة الدفع في ملف .env
+                        {{ $t('system.payment.the_payment_gateway_api_keys_must_be_set_in_the_') }}
                     </p>
                     <div class="bg-gray-100 dark:bg-gray-700 rounded-lg p-4 text-start" dir="ltr">
                         <code class="text-sm text-gray-800 dark:text-gray-200">
@@ -97,7 +115,9 @@
                         d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
                     />
                 </svg>
-                <span>الدفع آمن ومشفر بمعيار PCI DSS</span>
+                <span>
+                    {{ $t('system.payment.payments_are_secure_and_encrypted_to_the_pci_dss') }}
+                </span>
             </div>
         </div>
     </SystemLayout>

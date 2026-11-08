@@ -263,12 +263,16 @@
                                     />
                                 </svg>
                             </span>
-                            تعيين / ترقية باقة للمستأجر
+                            {{ $t('system.tenants.assign_upgrade_a_package_for_the_tenant') }}
                         </h3>
                         <p class="text-xs text-gray-500 mt-1">
-                            ربط المستأجر
+                            {{ $t('system.tenants.link_the_tenant') }}
                             <strong>{{ tenant.trade_name || tenant.name }}</strong>
-                            بباقة جديدة وتفعيل الاشتراك فوراً.
+                            {{
+                                $t(
+                                    'system.tenants.to_a_new_package_and_activate_the_subscription_i'
+                                )
+                            }}
                         </p>
                     </div>
                     <button
@@ -293,7 +297,7 @@
                         <label
                             class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
                         >
-                            اختر الباقة
+                            {{ $t('system.tenants.select_the_package') }}
                             <span class="text-red-500">*</span>
                         </label>
                         <select
@@ -301,10 +305,15 @@
                             required
                             class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-indigo-500"
                         >
-                            <option value="" disabled>-- حدد الباقة --</option>
+                            <option value="" disabled>
+                                {{ $t('system.tenants.--_select_a_package_--') }}
+                            </option>
                             <option v-for="plan in plans" :key="plan.id" :value="plan.id">
-                                {{ plan.name_ar || plan.name_en }} (الاشتراك السنوي:
-                                {{ plan.price_yearly }} ر.س)
+                                {{
+                                    plan.name_ar ||
+                                    plan.name_en + $t('system.tenants.yearly_subscription')
+                                }}
+                                {{ plan.price_yearly + $t('system.tenants.static_template_text') }}
                             </option>
                         </select>
                     </div>
@@ -314,7 +323,7 @@
                         <label
                             class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
                         >
-                            دورة الفوترة
+                            {{ $t('system.tenants.billing_cycle') }}
                         </label>
                         <div
                             class="flex items-center justify-between p-3 rounded-xl border border-indigo-200 dark:border-indigo-800 bg-indigo-50/50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-300"
@@ -333,12 +342,12 @@
                                         d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
                                     />
                                 </svg>
-                                اشتراك سنوي (12 شهر)
+                                {{ $t('system.tenants.yearly_subscription_12_months') }}
                             </span>
                             <span
                                 class="text-xs bg-indigo-600 text-white px-2 py-0.5 rounded-full font-medium"
                             >
-                                سنوي
+                                {{ $t('system.tenants.show.yearly') }}
                             </span>
                         </div>
                     </div>
@@ -349,27 +358,35 @@
                         class="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl border border-gray-200 dark:border-gray-600 space-y-2 text-xs"
                     >
                         <div class="flex justify-between items-center">
-                            <span class="text-gray-500">نوع الباقة:</span>
+                            <span class="text-gray-500">
+                                {{ $t('system.tenants.package_type') }}
+                            </span>
                             <span class="font-bold text-gray-900 dark:text-white">
                                 {{ selectedPlanObj.name_ar || selectedPlanObj.name_en }}
                             </span>
                         </div>
                         <div class="flex justify-between items-center">
-                            <span class="text-gray-500">مدة الاشتراك:</span>
+                            <span class="text-gray-500">
+                                {{ $t('system.tenants.subscription_period') }}
+                            </span>
                             <span class="font-semibold text-gray-900 dark:text-white">
                                 {{
                                     selectedPlanObj.slug === 'trial'
-                                        ? `${selectedPlanObj.trial_days || 14} يوم (تجريبي)`
-                                        : 'سنة كاملة (12 شهر)'
+                                        ? $t('system.tenants.trial_days', {
+                                              days: selectedPlanObj.trial_days || 14,
+                                          })
+                                        : $t('system.tenants.full_year_12_months')
                                 }}
                             </span>
                         </div>
                         <div
                             class="flex justify-between items-center text-sm pt-2 border-t border-gray-200 dark:border-gray-600 font-bold"
                         >
-                            <span class="text-gray-700 dark:text-gray-300">المبلغ الإجمالي:</span>
+                            <span class="text-gray-700 dark:text-gray-300">
+                                {{ $t('system.tenants.total_amount') }}
+                            </span>
                             <span class="text-indigo-600 dark:text-indigo-400">
-                                {{ selectedPlanObj.price_yearly }} ر.س
+                                {{ selectedPlanObj.price_yearly + $t('common.currency') }}
                             </span>
                         </div>
                     </div>
@@ -378,8 +395,7 @@
                     <p
                         class="text-xs text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 p-2.5 rounded-lg border border-amber-200 dark:border-amber-800"
                     >
-                        * سيتم تفعيل الاشتراك مباشرة للمستأجر وتحديث حالته إلى (نشط)، مع أرشفة أي
-                        اشتراك سابق نشط.
+                        {{ $t('system.tenants.the_subscription_will_be_activated_for_the_tenan') }}
                     </p>
 
                     <!-- Modal Actions -->
@@ -396,8 +412,10 @@
                             :disabled="!local.assignPlanId || local.isSubmitting"
                             class="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-semibold disabled:opacity-50 transition-colors shadow-sm"
                         >
-                            <span v-if="local.isSubmitting">جاري الحفظ...</span>
-                            <span v-else>تأكيد وتفعيل الباقة</span>
+                            <span v-if="local.isSubmitting">{{ $t('common.saving') }}</span>
+                            <span v-else>
+                                {{ $t('system.tenants.confirm_and_activate_the_package') }}
+                            </span>
                         </button>
                     </div>
                 </form>

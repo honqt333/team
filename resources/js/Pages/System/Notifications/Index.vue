@@ -1,25 +1,37 @@
 <template>
     <SystemLayout>
-        <Head :title="locale === 'ar' ? 'كل الإشعارات' : 'All notifications'" />
+        <Head
+            :title="locale === 'ar' ? $t('system.notifications.all_title') : 'All notifications'"
+        />
 
         <div class="space-y-6">
-            <div class="flex items-center justify-between flex-wrap gap-2">
-                <div>
-                    <h1 class="text-2xl font-bold text-gray-900 dark:text-white">
-                        {{ $t('system.notifications.all_title') }}
-                    </h1>
-                    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                        {{ $t('system.notifications.all_subtitle') }}
-                    </p>
-                </div>
-                <button
-                    v-if="unreadCount > 0"
-                    @click="markAllRead"
-                    class="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200"
-                >
-                    {{ $t('notifications.mark_all_read') }}
-                </button>
-            </div>
+            <!-- Page Header -->
+            <PageHeader
+                :title="$t('system.notifications.all_title')"
+                :subtitle="$t('system.notifications.all_subtitle')"
+                :totalCount="notifications?.total != null ? toEnglish(notifications.total) : null"
+                :countLabel="$t('system.notifications.all_title')"
+            >
+                <template #icon>
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
+                        />
+                    </svg>
+                </template>
+
+                <template #actions v-if="unreadCount > 0">
+                    <button
+                        @click="markAllRead"
+                        class="inline-flex items-center gap-2 px-4 py-2.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-xl text-sm font-semibold transition-all shadow-sm active:scale-95"
+                    >
+                        {{ $t('notifications.mark_all_read') }}
+                    </button>
+                </template>
+            </PageHeader>
 
             <div
                 class="divide-y divide-gray-200 rounded-xl border border-gray-200 bg-white dark:divide-gray-700 dark:border-gray-700 dark:bg-gray-800"
@@ -109,6 +121,10 @@ const { t } = useI18n();
 import { computed, ref } from 'vue';
 import { Head, router } from '@inertiajs/vue3';
 import SystemLayout from '@/Layouts/SystemLayout.vue';
+import PageHeader from '@/Components/PageHeader.vue';
+import { useNumberFormat } from '@/Composables/useNumberFormat';
+
+const { toEnglish } = useNumberFormat();
 
 const props = defineProps({
     notifications: { type: Object, required: true },

@@ -1,0 +1,67 @@
+{
+  "captured_at": "2026-11-08T06:14:31.986Z",
+  "url": "https://carag-v2.test/landing-preview",
+  "lighthouse_version": "13.6.0",
+  "conditions": {
+    "preset": "desktop",
+    "throttlingMethod": "provided",
+    "note": "No artificial throttling - measures real main-thread cost. Mobile throttled numbers are in the legacy reports."
+  },
+  "scores": {
+    "performance": 49,
+    "accessibility": 75,
+    "best-practices": 81,
+    "seo": 92,
+    "agentic-browsing": 50
+  },
+  "metrics": {
+    "first-contentful-paint": {
+      "display": "1.8 s",
+      "score": 0.4
+    },
+    "largest-contentful-paint": {
+      "display": "1.8 s",
+      "score": 0.71
+    },
+    "total-blocking-time": {
+      "display": "1,130 ms",
+      "score": 0.03
+    },
+    "cumulative-layout-shift": {
+      "display": "0.01",
+      "score": 1
+    },
+    "speed-index": {
+      "display": "3.6 s",
+      "score": 0.15
+    },
+    "interactive": {
+      "display": "7.2 s",
+      "score": 0.16
+    },
+    "max-potential-fid": {
+      "display": "1,180 ms",
+      "score": 0
+    },
+    "total-byte-weight": {
+      "display": "Total size was 3,623 KiB",
+      "score": 0.5
+    },
+    "unused-javascript": {
+      "display": "Est savings of 95 KiB",
+      "score": 0.5
+    },
+    "unused-css-rules": {
+      "display": "Est savings of 41 KiB",
+      "score": 0.5
+    },
+    "bootup-time": {
+      "display": "0.3 s",
+      "score": 1
+    },
+    "mainthread-work-breakdown": {
+      "display": "3.1 s",
+      "score": 0
+    }
+  }
+}

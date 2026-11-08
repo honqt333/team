@@ -1,6 +1,12 @@
 <template>
     <SystemLayout>
-        <Head :title="isAr ? 'قوالب التواصل' : 'Communication Templates'" />
+        <Head
+            :title="
+                isAr
+                    ? $t('system.communication.communication_templates_2')
+                    : 'Communication Templates'
+            "
+        />
 
         <div class="space-y-6">
             <!-- Header Section -->

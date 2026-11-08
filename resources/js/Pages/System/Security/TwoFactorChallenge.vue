@@ -25,7 +25,9 @@ const toggleRecovery = () => {
 
 <template>
     <AuthLayout>
-        <Head :title="isRTL ? 'التحقق بخطوتين - لوحة النظام' : 'System 2FA Challenge'" />
+        <Head
+            :title="isRTL ? $t('system.security.system_2fa_challenge') : 'System 2FA Challenge'"
+        />
 
         <div class="text-center mb-6">
             <div
@@ -46,7 +48,11 @@ const toggleRecovery = () => {
                 </svg>
             </div>
             <h1 class="text-2xl font-bold text-gray-900 dark:text-white font-cairo">
-                {{ isRTL ? 'التحقق بخطوتين' : 'Two-Factor Authentication' }}
+                {{
+                    isRTL
+                        ? $t('system.security.two-factor_authentication')
+                        : 'Two-Factor Authentication'
+                }}
             </h1>
             <p class="text-gray-500 dark:text-gray-400 mt-1 text-sm">
                 {{

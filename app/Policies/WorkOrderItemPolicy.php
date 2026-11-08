@@ -48,6 +48,14 @@ class WorkOrderItemPolicy
 
     public function update(User $user, WorkOrderItem $item): bool
     {
+        // Assigned technician can update their own item in employee self-service portal
+        if ($item->technicians()->where('users.id', $user->id)->exists()) {
+            $wo = $item->workOrder;
+
+            return $wo && $wo->tenant_id === $user->tenant_id
+                && $wo->center_id === $user->current_center_id;
+        }
+
         if (! $user->can(Permissions::WORK_ORDER_ITEMS_UPDATE)) {
             return false;
         }

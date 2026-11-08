@@ -168,7 +168,7 @@ class VehicleController
             ->get();
 
         // Get all makes
-        $makes = VehicleMake::ordered()->get(['id', 'name_ar', 'name_en']);
+        $makes = VehicleMake::ordered()->get(['id', 'name_ar', 'name_en', 'logo_path']);
 
         // Get active colors
         $colors = VehicleColor::active()->ordered()->get(['id', 'name_ar', 'name_en', 'hex_code']);
@@ -285,7 +285,7 @@ class VehicleController
         $canDelete = $counts['quotes'] === 0 && $counts['workOrders'] === 0;
 
         // Get form data for modals
-        $makes = VehicleMake::ordered()->get(['id', 'name_ar', 'name_en']);
+        $makes = VehicleMake::ordered()->get(['id', 'name_ar', 'name_en', 'logo_path']);
         $colors = VehicleColor::active()->ordered()->get(['id', 'name_ar', 'name_en', 'hex_code']);
         $departments = Department::where('is_active', true)->orderBy('sort_order')->get();
         $services = Service::where('is_active', true)->with('department')->orderBy('sort_order')->get();

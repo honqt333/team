@@ -1,16 +1,16 @@
 <template>
     <SystemLayout>
-        <Head :title="isAr ? 'سجل التذكير التلقائي' : 'Dunning Log'" />
+        <Head :title="isAr ? $t('system.settings.dunning_log') : 'Dunning Log'" />
 
         <div class="space-y-6">
             <div>
                 <h1 class="text-2xl font-bold text-gray-900 dark:text-white">
-                    {{ isAr ? 'سجل التذكير التلقائي' : 'Dunning Log' }}
+                    {{ isAr ? $t('system.settings.dunning_log') : 'Dunning Log' }}
                 </h1>
                 <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
                     {{
                         isAr
-                            ? 'كل محاولات إرسال التذكيرات التلقائية — نجح، فشل، أو تم تخطيها.'
+                            ? $t('system.settings.every_dunning_send_attempt_sent_failed_or_skippe')
                             : 'Every dunning send attempt — sent, failed, or skipped.'
                     }}
                 </p>
@@ -22,7 +22,7 @@
             >
                 <div class="flex-1 min-w-[150px]">
                     <label class="mb-1 block text-xs font-medium text-gray-700 dark:text-gray-300">
-                        {{ isAr ? 'الحالة' : 'Status' }}
+                        {{ isAr ? $t('common.status') : 'Status' }}
                     </label>
                     <SearchableSelect
                         v-model="filters.status"
@@ -34,7 +34,7 @@
                 </div>
                 <div class="flex-1 min-w-[150px]">
                     <label class="mb-1 block text-xs font-medium text-gray-700 dark:text-gray-300">
-                        {{ isAr ? 'المستوى' : 'Tier' }}
+                        {{ isAr ? $t('system.settings.tier') : 'Tier' }}
                     </label>
                     <SearchableSelect
                         v-model="filters.tier"
@@ -48,13 +48,13 @@
                     @click="applyFilters"
                     class="rounded-md bg-amber-600 px-4 py-2 text-sm font-semibold text-white hover:bg-amber-700"
                 >
-                    {{ isAr ? 'تطبيق' : 'Apply' }}
+                    {{ isAr ? $t('common.apply') : 'Apply' }}
                 </button>
                 <Link
                     :href="'/system/settings/dunning'"
                     class="rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600"
                 >
-                    {{ isAr ? 'الإعدادات' : 'Settings' }}
+                    {{ isAr ? $t('system.settings.settings') : 'Settings' }}
                 </Link>
             </div>
 
@@ -66,25 +66,25 @@
                     <thead class="bg-gray-50 text-xs uppercase text-gray-500 dark:bg-gray-900/40">
                         <tr>
                             <th class="px-4 py-3 text-start">
-                                {{ isAr ? 'التاريخ' : 'Date' }}
+                                {{ isAr ? $t('common.date') : 'Date' }}
                             </th>
                             <th class="px-4 py-3 text-start">
-                                {{ isAr ? 'المستأجر' : 'Tenant' }}
+                                {{ isAr ? $t('system.settings.tenant') : 'Tenant' }}
                             </th>
                             <th class="px-4 py-3 text-start">
-                                {{ isAr ? 'الفاتورة' : 'Invoice' }}
+                                {{ isAr ? $t('system.settings.invoice') : 'Invoice' }}
                             </th>
                             <th class="px-4 py-3 text-start">
-                                {{ isAr ? 'المستوى' : 'Tier' }}
+                                {{ isAr ? $t('system.settings.tier') : 'Tier' }}
                             </th>
                             <th class="px-4 py-3 text-start">
-                                {{ isAr ? 'القناة' : 'Channel' }}
+                                {{ isAr ? $t('system.settings.channel') : 'Channel' }}
                             </th>
                             <th class="px-4 py-3 text-start">
-                                {{ isAr ? 'الحالة' : 'Status' }}
+                                {{ isAr ? $t('common.status') : 'Status' }}
                             </th>
                             <th class="px-4 py-3 text-start">
-                                {{ isAr ? 'خطأ' : 'Error' }}
+                                {{ isAr ? $t('common.error') : 'Error' }}
                             </th>
                         </tr>
                     </thead>
@@ -126,7 +126,11 @@
                                 colspan="7"
                                 class="px-4 py-8 text-center text-sm text-gray-500 dark:text-gray-400"
                             >
-                                {{ isAr ? 'لا توجد سجلات بعد' : 'No log entries yet' }}
+                                {{
+                                    isAr
+                                        ? $t('system.settings.no_log_entries_yet')
+                                        : 'No log entries yet'
+                                }}
                             </td>
                         </tr>
                     </tbody>
@@ -138,7 +142,8 @@
                     class="flex items-center justify-between border-t border-gray-200 px-4 py-3 dark:border-gray-700"
                 >
                     <div class="text-sm text-gray-700 dark:text-gray-300">
-                        {{ isAr ? 'صفحة' : 'Page' }} {{ logs.current_page }} / {{ logs.last_page }}
+                        {{ isAr ? $t('system.settings.page') : 'Page' }} {{ logs.current_page }} /
+                        {{ logs.last_page }}
                     </div>
                     <div class="flex gap-2">
                         <Link
@@ -162,6 +167,9 @@
 </template>
 
 <script setup>
+import { useI18n } from 'vue-i18n';
+const { t } = useI18n();
+
 import { computed, ref } from 'vue';
 import { Head, Link, router } from '@inertiajs/vue3';
 import SystemLayout from '@/Layouts/SystemLayout.vue';
@@ -181,19 +189,19 @@ const filters = ref({
 });
 
 const statusOptions = computed(() => [
-    { value: '', label: isAr.value ? 'الكل' : 'All' },
-    { value: 'sent', label: isAr.value ? 'مُرسلة' : 'Sent' },
-    { value: 'failed', label: isAr.value ? 'فشلت' : 'Failed' },
-    { value: 'skipped', label: isAr.value ? 'متخطاة' : 'Skipped' },
+    { value: '', label: isAr.value ? t('common.all') : 'All' },
+    { value: 'sent', label: isAr.value ? t('system.settings.sent') : 'Sent' },
+    { value: 'failed', label: isAr.value ? t('system.settings.failed') : 'Failed' },
+    { value: 'skipped', label: isAr.value ? t('system.settings.skipped') : 'Skipped' },
 ]);
 
 const tierOptions = computed(() => {
-    const opts = [{ value: '', label: isAr.value ? 'الكل' : 'All' }];
+    const opts = [{ value: '', label: isAr.value ? t('common.all') : 'All' }];
     const defs = props.tier_definitions || {};
     for (const key of Object.keys(defs)) {
         opts.push({
             value: key,
-            label: (isAr.value ? 'المستوى ' : 'Tier ') + key.replace('tier_', ''),
+            label: (isAr.value ? t('system.settings.tier_2') : 'Tier ') + key.replace('tier_', ''),
         });
     }
     return opts;
@@ -230,9 +238,9 @@ function statusClass(s) {
 function statusLabel(s) {
     return (
         {
-            sent: isAr.value ? 'مُرسل' : 'Sent',
-            failed: isAr.value ? 'فشل' : 'Failed',
-            skipped: isAr.value ? 'متخطى' : 'Skipped',
+            sent: isAr.value ? t('system.settings.sent_2') : 'Sent',
+            failed: isAr.value ? t('system.settings.failed_2') : 'Failed',
+            skipped: isAr.value ? t('system.settings.skipped_2') : 'Skipped',
         }[s] || s
     );
 }

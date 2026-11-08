@@ -73,84 +73,14 @@
                                     </svg>
                                 </button>
                             </Tooltip>
-                            <Tooltip :text="$t('common.print')">
-                                <button
-                                    @click="printSuppliers"
-                                    class="p-2.5 text-gray-500 hover:text-orange-600 hover:bg-white dark:hover:bg-gray-800 rounded-xl transition-all shadow-sm hover:shadow-md"
-                                >
-                                    <svg
-                                        class="w-5 h-5"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        viewBox="0 0 24 24"
-                                    >
-                                        <path
-                                            stroke-linecap="round"
-                                            stroke-linejoin="round"
-                                            stroke-width="2.5"
-                                            d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"
-                                        />
-                                    </svg>
-                                </button>
-                            </Tooltip>
+                            <AppPrintButton variant="icon" @click="printSuppliers" />
                         </div>
 
                         <!-- Divider -->
-                        <div class="w-px h-8 bg-gray-200 dark:bg-gray-700 mx-1"></div>
+                        <div class="w-px h-6 bg-gray-200 dark:bg-gray-700 mx-1"></div>
 
                         <!-- View Toggle Group -->
-                        <div class="flex items-center gap-1">
-                            <Tooltip :text="$t('common.grid_view')">
-                                <button
-                                    @click="viewMode = 'grid'"
-                                    :class="[
-                                        'p-2.5 rounded-xl transition-all shadow-sm',
-                                        viewMode === 'grid'
-                                            ? 'bg-orange-600 text-white shadow-orange-500/20'
-                                            : 'text-gray-400 hover:text-gray-600 hover:bg-white dark:hover:bg-gray-800',
-                                    ]"
-                                >
-                                    <svg
-                                        class="w-5 h-5"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        viewBox="0 0 24 24"
-                                    >
-                                        <path
-                                            stroke-linecap="round"
-                                            stroke-linejoin="round"
-                                            stroke-width="2.5"
-                                            d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2z"
-                                        />
-                                    </svg>
-                                </button>
-                            </Tooltip>
-                            <Tooltip :text="$t('common.list_view')">
-                                <button
-                                    @click="viewMode = 'list'"
-                                    :class="[
-                                        'p-2.5 rounded-xl transition-all shadow-sm',
-                                        viewMode === 'list'
-                                            ? 'bg-orange-600 text-white shadow-orange-500/20'
-                                            : 'text-gray-400 hover:text-gray-600 hover:bg-white dark:hover:bg-gray-800',
-                                    ]"
-                                >
-                                    <svg
-                                        class="w-5 h-5"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        viewBox="0 0 24 24"
-                                    >
-                                        <path
-                                            stroke-linecap="round"
-                                            stroke-linejoin="round"
-                                            stroke-width="2.5"
-                                            d="M4 6h16M4 12h16M4 18h16"
-                                        />
-                                    </svg>
-                                </button>
-                            </Tooltip>
-                        </div>
+                        <AppViewModeToggle v-model="viewMode" storage-key="suppliers" />
                     </div>
 
                     <!-- Add Supplier Button -->
@@ -638,7 +568,7 @@
             <!-- Print Section -->
             <Teleport to="body">
                 <div class="print-section hidden">
-                    <PrintHeader :title="$t('purchasing.suppliers.title')" />
+                    <StandardReportHeader :title="$t('purchasing.suppliers.title')" />
 
                     <!-- Table -->
                     <table class="print-table">
@@ -701,9 +631,7 @@
                         </tbody>
                     </table>
 
-                    <div class="mt-8 text-center text-xs text-gray-400">
-                        {{ $page.props.auth?.user?.name }}
-                    </div>
+                    <StandardReportFooter class="mt-8 border-t pt-4" />
                 </div>
             </Teleport>
         </div>
@@ -721,8 +649,11 @@ import { useI18n } from 'vue-i18n';
 import { usePermission } from '@/Composables/usePermission';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 import PageHeader from '@/Components/PageHeader.vue';
+import AppPrintButton from '@/Components/Common/AppPrintButton.vue';
+import AppViewModeToggle from '@/Components/Common/AppViewModeToggle.vue';
 import Tooltip from '@/Components/Tooltip.vue';
-import PrintHeader from '@/Components/Print/PrintHeader.vue';
+import StandardReportHeader from '@/Components/Print/StandardReportHeader.vue';
+import StandardReportFooter from '@/Components/Print/StandardReportFooter.vue';
 import { useNumberFormat } from '@/Composables/useNumberFormat';
 
 const { toEnglish } = useNumberFormat();

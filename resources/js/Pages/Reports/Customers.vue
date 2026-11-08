@@ -937,35 +937,8 @@
 
             <!-- PRINT SECTION ONLY -->
             <div class="hidden print:block print-section">
-                <!-- Formal Company / Center Header -->
-                <div class="border-b-2 border-gray-900 pb-4 mb-4 flex items-start justify-between">
-                    <div>
-                        <h2 class="text-xl font-black text-gray-900">{{ companyInfo.name }}</h2>
-                        <p
-                            v-if="companyInfo.center_name"
-                            class="text-xs text-gray-600 font-bold mt-0.5"
-                        >
-                            {{ companyInfo.center_name }}
-                        </p>
-                        <p v-if="companyInfo.tax_number" class="text-xs text-gray-600 mt-0.5">
-                            الرقم الضريبي: {{ companyInfo.tax_number }}
-                        </p>
-                        <p
-                            v-if="companyInfo.commercial_register"
-                            class="text-xs text-gray-600 mt-0.5"
-                        >
-                            السجل التجاري: {{ companyInfo.commercial_register }}
-                        </p>
-                    </div>
-                    <div class="text-end">
-                        <h1 class="text-lg font-black text-gray-900">
-                            {{ $t('reports.customers_report.official_report') }}
-                        </h1>
-                        <p class="text-xs text-gray-500 font-mono mt-1">
-                            تاريخ الطباعة: {{ printDate }}
-                        </p>
-                    </div>
-                </div>
+                <!-- Standard Report Header -->
+                <StandardReportHeader :title="$t('reports.customers_report.official_report')" />
 
                 <!-- Financial Totals Summary Box -->
                 <div
@@ -1090,6 +1063,9 @@
                         </tr>
                     </tbody>
                 </table>
+
+                <!-- Standard Report Footer -->
+                <StandardReportFooter />
             </div>
         </div>
     </AppLayout>
@@ -1103,6 +1079,8 @@ import AppLayout from '@/Layouts/AppLayout.vue';
 import PageHeader from '@/Components/PageHeader.vue';
 import BackButton from '@/Components/BackButton.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
+import StandardReportHeader from '@/Components/Print/StandardReportHeader.vue';
+import StandardReportFooter from '@/Components/Print/StandardReportFooter.vue';
 
 const { t } = useI18n();
 

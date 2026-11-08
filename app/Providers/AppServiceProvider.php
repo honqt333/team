@@ -18,6 +18,7 @@ use App\Models\HR\EmployeeDocument;
 use App\Models\HR\Leave;
 use App\Models\HR\Payroll;
 use App\Models\Integration\Integration;
+use App\Models\Invoice;
 use App\Models\Payment;
 use App\Models\PurchaseInvoice;
 use App\Models\PurchaseReturnInvoice;
@@ -71,6 +72,7 @@ use App\Services\Email\SmtpConfigService;
 use App\Services\Messaging\NullSmsService;
 use App\Services\Messaging\SmsService;
 use Closure;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Vite;
@@ -153,6 +155,11 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Vite::prefetch(concurrency: 3);
+
+        // Map polymorphic aliases for relations stored in database tables
+        Relation::morphMap([
+            'credit_note' => Invoice::class,
+        ]);
 
         // Register the Amiri Arabic font with DomPDF so PDF
         // generation can render Arabic text correctly. Without

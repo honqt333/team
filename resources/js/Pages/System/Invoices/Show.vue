@@ -1,86 +1,104 @@
 <template>
     <SystemLayout>
         <Head
-            :title="isAr ? `فاتورة ${invoice.invoice_number}` : `Invoice ${invoice.invoice_number}`"
+            :title="
+                isAr
+                    ? $t('system.invoices.invoice', { number: invoice.invoice_number })
+                    : `Invoice ${invoice.invoice_number}`
+            "
         />
 
         <div class="space-y-6">
-            <!-- Header card: back link + invoice number + status badge -->
-            <div
-                class="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800"
+            <!-- Header -->
+            <PageHeader
+                :title="
+                    (isAr ? $t('system.invoices.invoice_2') : 'Invoice') +
+                    ' ' +
+                    invoice.invoice_number
+                "
+                :subtitle="invoice.tenant?.trade_name || invoice.tenant?.name || ''"
             >
-                <div class="flex flex-wrap items-center justify-between gap-3 px-6 py-4">
-                    <div class="flex items-center gap-3 min-w-0">
-                        <Link
-                            href="/system/invoices"
-                            class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-gray-200 text-gray-500 transition hover:bg-gray-50 hover:text-gray-900 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700/40 dark:hover:text-white"
+                <template #back>
+                    <Link
+                        href="/system/invoices"
+                        class="inline-flex items-center justify-center w-10 h-10 rounded-xl bg-gray-100 hover:bg-gray-200 dark:bg-gray-700/60 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300 transition-colors"
+                        :title="$t('system.invoices.title')"
+                    >
+                        <ChevronIcon class="w-5 h-5 rtl:rotate-180" />
+                    </Link>
+                </template>
+
+                <template #icon>
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2z"
+                        />
+                    </svg>
+                </template>
+
+                <template #actions>
+                    <StatusBadge :status="effectiveStatus" />
+
+                    <!-- Actions Group -->
+                    <div
+                        class="flex items-center gap-1.5 p-1.5 bg-gray-50/50 dark:bg-gray-900/50 backdrop-blur-md rounded-2xl border border-gray-200/50 dark:border-gray-700/50 shadow-inner"
+                    >
+                        <a
+                            :href="`/system/invoices/${invoice.id}/download`"
+                            class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-white dark:hover:bg-gray-800 rounded-xl transition-all shadow-sm"
                         >
-                            <ChevronIcon class="h-4 w-4" />
-                        </Link>
-                        <div class="min-w-0">
-                            <p
-                                class="text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400"
-                            >
-                                {{ isAr ? 'فاتورة' : 'Invoice' }}
-                            </p>
-                            <h1 class="truncate text-xl font-bold text-gray-900 dark:text-white">
-                                {{ invoice.invoice_number }}
-                            </h1>
-                        </div>
+                            <DownloadIcon class="h-4 w-4" />
+                            <span>
+                                {{ isAr ? $t('system.invoices.download_pdf') : 'Download PDF' }}
+                            </span>
+                        </a>
+
+                        <button
+                            @click="sendInvoice"
+                            :disabled="sending"
+                            class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-white dark:hover:bg-gray-800 rounded-xl transition-all shadow-sm disabled:opacity-50"
+                        >
+                            <MailIcon class="h-4 w-4" />
+                            <span>
+                                {{
+                                    sending
+                                        ? isAr
+                                            ? $t('common.sending')
+                                            : 'Sending...'
+                                        : isAr
+                                          ? $t('system.invoices.send_by_email')
+                                          : 'Send by email'
+                                }}
+                            </span>
+                        </button>
+
+                        <button
+                            v-if="invoice.status === 'pending'"
+                            @click="cancelInvoice"
+                            :disabled="cancelling"
+                            class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-rose-600 dark:text-rose-400 hover:bg-white dark:hover:bg-gray-800 rounded-xl transition-all shadow-sm disabled:opacity-50"
+                        >
+                            <XIcon class="h-4 w-4" />
+                            <span>{{ isAr ? $t('common.cancel') : 'Cancel' }}</span>
+                        </button>
                     </div>
-                    <div class="flex items-center gap-2">
-                        <StatusBadge :status="effectiveStatus" />
-                    </div>
-                </div>
 
-                <!-- Action bar -->
-                <div
-                    class="flex flex-wrap items-center gap-2 border-t border-gray-200 bg-gray-50/50 px-6 py-3 dark:border-gray-700 dark:bg-gray-900/20"
-                >
-                    <a
-                        :href="`/system/invoices/${invoice.id}/download`"
-                        class="inline-flex items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 transition hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700/40"
-                    >
-                        <DownloadIcon class="h-4 w-4" />
-                        {{ isAr ? 'تحميل PDF' : 'Download PDF' }}
-                    </a>
-
-                    <button
-                        @click="sendInvoice"
-                        :disabled="sending"
-                        class="inline-flex items-center gap-1.5 rounded-lg border border-transparent bg-indigo-600 px-3 py-1.5 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-700 disabled:opacity-50"
-                    >
-                        <MailIcon class="h-4 w-4" />
-                        {{
-                            sending
-                                ? isAr
-                                    ? 'جاري الإرسال...'
-                                    : 'Sending...'
-                                : isAr
-                                  ? 'إرسال بالإيميل'
-                                  : 'Send by email'
-                        }}
-                    </button>
-
+                    <!-- Primary Mark As Paid CTA -->
                     <button
                         v-if="invoice.status === 'pending'"
                         @click="showMarkPaidModal = true"
-                        class="inline-flex items-center gap-1.5 rounded-lg border border-transparent bg-emerald-600 px-3 py-1.5 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-700"
+                        class="inline-flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white rounded-xl text-sm font-semibold transition-all shadow-md hover:shadow-emerald-500/25 active:scale-95"
                     >
                         <CheckIcon class="h-4 w-4" />
-                        {{ isAr ? 'تأكيد الدفع' : 'Mark as paid' }}
+                        <span>
+                            {{ isAr ? $t('system.invoices.mark_as_paid') : 'Mark as paid' }}
+                        </span>
                     </button>
-
-                    <button
-                        v-if="invoice.status === 'pending'"
-                        @click="cancelInvoice"
-                        class="inline-flex items-center gap-1.5 rounded-lg border border-rose-200 bg-white px-3 py-1.5 text-sm font-medium text-rose-600 transition hover:bg-rose-50 dark:border-rose-800 dark:bg-gray-800 dark:text-rose-400 dark:hover:bg-rose-900/20"
-                    >
-                        <XIcon class="h-4 w-4" />
-                        {{ isAr ? 'إلغاء الفاتورة' : 'Cancel invoice' }}
-                    </button>
-                </div>
-            </div>
+                </template>
+            </PageHeader>
 
             <!-- Main grid: 2/3 main + 1/3 sidebar -->
             <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
@@ -120,19 +138,19 @@
                     <h3
                         class="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400"
                     >
-                        {{ isAr ? 'معاينة الـ PDF' : 'PDF Preview' }}
+                        {{ isAr ? $t('system.invoices.pdf_preview') : 'PDF Preview' }}
                     </h3>
                     <a
                         :href="`/system/invoices/${invoice.id}/download`"
                         target="_blank"
                         class="text-xs font-semibold text-indigo-600 hover:text-indigo-800 dark:text-indigo-400"
                     >
-                        {{ isAr ? 'فتح في تبويب جديد' : 'Open in new tab' }} ↗
+                        {{ isAr ? $t('system.invoices.open_in_new_tab') : 'Open in new tab' }} ↗
                     </a>
                 </div>
                 <iframe v-if="pdfUrl" :src="pdfUrl" class="h-[700px] w-full border-0" />
                 <div v-else class="flex h-64 items-center justify-center text-sm text-gray-400">
-                    {{ isAr ? 'الـ PDF غير متاح' : 'PDF not available' }}
+                    {{ isAr ? $t('system.invoices.pdf_not_available') : 'PDF not available' }}
                 </div>
             </div>
         </div>
@@ -146,21 +164,29 @@
                         class="relative w-full max-w-md rounded-2xl bg-white p-6 shadow-xl dark:bg-gray-800"
                     >
                         <h3 class="mb-4 text-lg font-semibold text-gray-900 dark:text-white">
-                            {{ isAr ? 'تأكيد الدفع يدوياً' : 'Confirm payment manually' }}
+                            {{
+                                isAr
+                                    ? $t('system.invoices.confirm_payment_manually')
+                                    : 'Confirm payment manually'
+                            }}
                         </h3>
                         <div class="space-y-4">
                             <div>
                                 <label
                                     class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300"
                                 >
-                                    {{ isAr ? 'رقم المرجع' : 'Reference number' }}
+                                    {{
+                                        isAr
+                                            ? $t('system.invoices.reference_number')
+                                            : 'Reference number'
+                                    }}
                                 </label>
                                 <input
                                     type="text"
                                     v-model="markPaidForm.reference"
                                     :placeholder="
                                         isAr
-                                            ? 'رقم الحوالة أو الإيصال'
+                                            ? $t('system.invoices.transfer_or_receipt_number')
                                             : 'Transfer or receipt number'
                                     "
                                     class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
@@ -170,7 +196,7 @@
                                 <label
                                     class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300"
                                 >
-                                    {{ isAr ? 'ملاحظات' : 'Notes' }}
+                                    {{ isAr ? $t('common.notes') : 'Notes' }}
                                 </label>
                                 <textarea
                                     v-model="markPaidForm.notes"
@@ -188,10 +214,10 @@
                                 {{
                                     markingPaid
                                         ? isAr
-                                            ? 'جاري التأكيد...'
+                                            ? $t('system.invoices.confirming...')
                                             : 'Confirming...'
                                         : isAr
-                                          ? 'تأكيد الدفع'
+                                          ? $t('system.invoices.mark_as_paid')
                                           : 'Confirm payment'
                                 }}
                             </button>
@@ -199,7 +225,7 @@
                                 @click="showMarkPaidModal = false"
                                 class="rounded-lg bg-gray-100 px-4 py-2 font-medium text-gray-700 dark:bg-gray-700 dark:text-gray-300"
                             >
-                                {{ isAr ? 'إلغاء' : 'Cancel' }}
+                                {{ isAr ? $t('common.cancel') : 'Cancel' }}
                             </button>
                         </div>
                     </div>
@@ -210,9 +236,13 @@
 </template>
 
 <script setup>
+import { useI18n } from 'vue-i18n';
+const { t } = useI18n();
+
 import { computed, h, ref } from 'vue';
 import { Head, Link, router } from '@inertiajs/vue3';
 import SystemLayout from '@/Layouts/SystemLayout.vue';
+import PageHeader from '@/Components/PageHeader.vue';
 import StatusBadge from '@/Components/Billing/StatusBadge.vue';
 import InvoiceTimeline from '@/Components/Billing/InvoiceTimeline.vue';
 import InvoiceItemsTable from '@/Components/Billing/InvoiceItemsTable.vue';
@@ -303,7 +333,7 @@ function cancelInvoice() {
     if (
         confirm(
             isAr.value
-                ? 'هل أنت متأكد من إلغاء هذه الفاتورة؟'
+                ? t('system.invoices.are_you_sure_you_want_to_cancel_this_invoice')
                 : 'Are you sure you want to cancel this invoice?'
         )
     ) {

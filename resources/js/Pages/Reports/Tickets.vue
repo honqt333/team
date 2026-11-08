@@ -173,52 +173,23 @@
 
             <!-- Standard Official Print Section (Screen Hidden) -->
             <div class="print-section hidden">
-                <div class="grid grid-cols-3 items-center pb-4 mb-4 border-b-2 border-gray-800">
-                    <div class="text-start space-y-1 text-xs">
-                        <h2 class="text-base font-black text-black">{{ companyInfo.name }}</h2>
-                        <p
-                            v-if="companyInfo.center_name && centers?.length > 1"
-                            class="font-bold text-gray-700"
-                        >
-                            {{ $t('reports.tickets_report.center') }}: {{ companyInfo.center_name }}
-                        </p>
-                        <p v-if="companyInfo.tax_number" class="text-gray-600">
-                            {{ $t('common.vat') }}:
-                            <span class="font-mono font-bold">{{ companyInfo.tax_number }}</span>
-                        </p>
-                        <p v-if="companyInfo.commercial_register" class="text-gray-600">
-                            CR:
-                            <span class="font-mono">{{ companyInfo.commercial_register }}</span>
-                        </p>
-                    </div>
-
-                    <div class="text-center flex flex-col items-center justify-center">
-                        <span class="text-lg font-black tracking-wider text-black">CARAG</span>
-                        <span class="text-xs font-bold text-gray-700 uppercase tracking-wider">
-                            {{ $t('reports.tickets_report.official_report') }}
-                        </span>
-                    </div>
-
-                    <div class="text-end space-y-1 text-xs">
-                        <p class="text-gray-600">
-                            {{ $t('reports.payments_report.printed_at') }}:
-                            <span class="font-mono">{{ printDate }}</span>
-                        </p>
-                        <p class="text-gray-600">
-                            {{ $t('reports.payments_report.report_period') }}:
-                            <span class="font-mono">
-                                {{ filterForm.start_date || '—' }} /
-                                {{ filterForm.end_date || '—' }}
-                            </span>
-                        </p>
-                        <p class="text-gray-600">
+                <StandardReportHeader
+                    :title="$t('reports.tickets_report.official_report')"
+                    :subtitle="
+                        filterForm.start_date || filterForm.end_date
+                            ? `${filterForm.start_date || '—'} / ${filterForm.end_date || '—'}`
+                            : ''
+                    "
+                >
+                    <template #extra>
+                        <div v-if="filterForm.date_type" class="text-xs text-gray-600">
                             {{ $t('reports.tickets_report.date_type') }}:
                             <span class="font-bold">
                                 {{ getDateTypeLabel(filterForm.date_type) }}
                             </span>
-                        </p>
-                    </div>
-                </div>
+                        </div>
+                    </template>
+                </StandardReportHeader>
 
                 <!-- Print Financial Summary Box -->
                 <div
@@ -1124,27 +1095,8 @@
                 </div>
             </div>
 
-            <!-- Print Signatures Section -->
-            <div class="print-section hidden pt-8 mt-8 border-t-2 border-gray-300">
-                <div class="grid grid-cols-2 gap-8 text-center text-xs">
-                    <div>
-                        <p class="font-bold text-gray-700 mb-8">
-                            {{ $t('reports.payments_report.prepared_by') }}
-                        </p>
-                        <p class="border-t border-dashed border-gray-400 pt-1 text-gray-500">
-                            التوقيع والاعتماد
-                        </p>
-                    </div>
-                    <div>
-                        <p class="font-bold text-gray-700 mb-8">
-                            {{ $t('reports.payments_report.official_seal') }}
-                        </p>
-                        <p class="border-t border-dashed border-gray-400 pt-1 text-gray-500">
-                            الختم الرسمي للمركز
-                        </p>
-                    </div>
-                </div>
-            </div>
+            <!-- Unified Print Footer (no signatures/stamps) -->
+            <StandardReportFooter class="hidden print:block pt-8 mt-8 border-t-2 border-gray-300" />
         </div>
     </AppLayout>
 </template>
@@ -1158,6 +1110,8 @@ import PageHeader from '@/Components/PageHeader.vue';
 import BackButton from '@/Components/BackButton.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 import CustomDatePicker from '@/Components/CustomDatePicker.vue';
+import StandardReportHeader from '@/Components/Print/StandardReportHeader.vue';
+import StandardReportFooter from '@/Components/Print/StandardReportFooter.vue';
 
 const { t, te } = useI18n();
 

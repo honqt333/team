@@ -3,10 +3,23 @@
         <Head :title="$t('system.credits.sms_usage_title')" />
         <div class="space-y-6">
             <!-- Header -->
-            <div>
-                <h1 class="text-2xl font-bold text-gray-900 dark:text-white">سجل استخدام SMS</h1>
-                <p class="text-gray-500 dark:text-gray-400">تتبع جميع الرسائل المرسلة</p>
-            </div>
+            <PageHeader
+                :title="$t('system.credits.sms_usage_title')"
+                :subtitle="$t('system.credits.track_every_message_sent')"
+                :totalCount="logs?.total != null ? toEnglish(logs.total) : null"
+                :countLabel="$t('system.credits.sms_usage_title')"
+            >
+                <template #icon>
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"
+                        />
+                    </svg>
+                </template>
+            </PageHeader>
 
             <!-- Navigation Tabs -->
             <div class="flex gap-2 border-b border-gray-200 dark:border-gray-700">
@@ -64,7 +77,7 @@
                     <p class="text-2xl font-bold text-indigo-600">
                         {{ stats.total_sent?.toLocaleString() }}
                     </p>
-                    <p class="text-sm text-gray-500">إجمالي الرسائل</p>
+                    <p class="text-sm text-gray-500">{{ $t('system.credits.total_messages') }}</p>
                 </div>
                 <div
                     class="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700"
@@ -72,7 +85,7 @@
                     <p class="text-2xl font-bold text-emerald-600">
                         {{ stats.delivered?.toLocaleString() }}
                     </p>
-                    <p class="text-sm text-gray-500">تم التسليم</p>
+                    <p class="text-sm text-gray-500">{{ $t('system.credits.delivered') }}</p>
                 </div>
                 <div
                     class="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700"
@@ -80,7 +93,7 @@
                     <p class="text-2xl font-bold text-red-600">
                         {{ stats.failed?.toLocaleString() }}
                     </p>
-                    <p class="text-sm text-gray-500">فشل</p>
+                    <p class="text-sm text-gray-500">{{ $t('system.credits.failed_2') }}</p>
                 </div>
                 <div
                     class="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700"
@@ -88,7 +101,7 @@
                     <p class="text-2xl font-bold text-gray-900 dark:text-white">
                         {{ stats.total_credits_used?.toLocaleString() }}
                     </p>
-                    <p class="text-sm text-gray-500">الرصيد المستخدم</p>
+                    <p class="text-sm text-gray-500">{{ $t('system.credits.credit_used') }}</p>
                 </div>
             </div>
 
@@ -99,7 +112,7 @@
                     :options="statusOptions"
                     option-label="label"
                     option-value="value"
-                    placeholder="كل الحالات"
+                    :placeholder="$t('system.credits.all_statuses_2')"
                     compact
                 />
             </div>
@@ -112,22 +125,22 @@
                     <thead class="bg-gray-50 dark:bg-gray-700/50">
                         <tr>
                             <th class="px-4 py-3 text-right text-xs font-medium text-gray-500">
-                                المستأجر
+                                {{ $t('system.credits.tenant_3') }}
                             </th>
                             <th class="px-4 py-3 text-right text-xs font-medium text-gray-500">
-                                رقم الجوال
+                                {{ $t('system.credits.mobile_number') }}
                             </th>
                             <th class="px-4 py-3 text-right text-xs font-medium text-gray-500">
-                                النوع
+                                {{ $t('common.type') }}
                             </th>
                             <th class="px-4 py-3 text-right text-xs font-medium text-gray-500">
-                                الرصيد
+                                {{ $t('system.credits.credit_2') }}
                             </th>
                             <th class="px-4 py-3 text-right text-xs font-medium text-gray-500">
-                                الحالة
+                                {{ $t('common.status') }}
                             </th>
                             <th class="px-4 py-3 text-right text-xs font-medium text-gray-500">
-                                التاريخ
+                                {{ $t('system.credits.date') }}
                             </th>
                         </tr>
                     </thead>
@@ -167,7 +180,7 @@
                         </tr>
                         <tr v-if="!logs.data?.length">
                             <td colspan="6" class="px-4 py-8 text-center text-gray-500">
-                                لا توجد بيانات
+                                {{ $t('common.no_data') }}
                             </td>
                         </tr>
                     </tbody>
@@ -178,16 +191,23 @@
 </template>
 
 <script setup>
+import { useI18n } from 'vue-i18n';
+const { t } = useI18n();
+
 import { ref, computed } from 'vue';
 import { Head, Link, router } from '@inertiajs/vue3';
 import SystemLayout from '@/Layouts/SystemLayout.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
+import PageHeader from '@/Components/PageHeader.vue';
+import { useNumberFormat } from '@/Composables/useNumberFormat';
+
+const { toEnglish } = useNumberFormat();
 
 const statusOptions = computed(() => [
-    { value: 'sent', label: 'مرسل' },
-    { value: 'delivered', label: 'تم التسليم' },
-    { value: 'failed', label: 'فشل' },
-    { value: 'pending', label: 'قيد الإرسال' },
+    { value: 'sent', label: t('system.credits.sent') },
+    { value: 'delivered', label: t('system.credits.delivered') },
+    { value: 'failed', label: t('system.credits.failed_2') },
+    { value: 'pending', label: t('system.credits.pending') },
 ]);
 
 const props = defineProps({
@@ -206,17 +226,21 @@ const formatDate = (date) => (date ? new Date(date).toLocaleString('ar-SA-u-nu-l
 
 const getTypeLabel = (type) =>
     ({
-        reminder: 'تذكير',
-        notification: 'إشعار',
-        otp: 'رمز تحقق',
-        marketing: 'تسويقي',
-        invoice: 'فاتورة',
-        appointment: 'موعد',
+        reminder: t('system.credits.reminder'),
+        notification: t('system.credits.notification'),
+        otp: t('system.credits.verification_code'),
+        marketing: t('system.credits.marketing'),
+        invoice: t('system.credits.invoice'),
+        appointment: t('system.credits.appointment'),
     })[type] || type;
 
 const getStatusLabel = (status) =>
-    ({ sent: 'مرسل', delivered: 'تم التسليم', failed: 'فشل', pending: 'قيد الإرسال' })[status] ||
-    status;
+    ({
+        sent: t('system.credits.sent'),
+        delivered: t('system.credits.delivered'),
+        failed: t('system.credits.failed_2'),
+        pending: t('system.credits.pending'),
+    })[status] || status;
 
 const getStatusClass = (status) =>
     ({

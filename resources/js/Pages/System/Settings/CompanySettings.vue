@@ -1,21 +1,31 @@
 <template>
     <SystemLayout>
-        <div class="max-w-6xl mx-auto py-6">
+        <div class="max-w-6xl mx-auto py-6 space-y-6">
             <!-- Header -->
-            <div class="mb-8 flex items-start justify-between gap-4 flex-wrap">
-                <div>
-                    <h1 class="text-2xl font-bold text-gray-900 dark:text-white">
-                        {{ t('system.company_settings.title') }}
-                    </h1>
-                    <p class="text-gray-500 dark:text-gray-400 mt-1">
-                        {{ t('system.company_settings.subtitle') }}
-                    </p>
-                </div>
-                <div class="text-xs text-gray-400 dark:text-gray-500 flex items-center gap-2">
-                    <span class="inline-block w-2 h-2 rounded-full bg-emerald-500"></span>
-                    {{ t('system.company_settings.actions.saved') }}
-                </div>
-            </div>
+            <PageHeader
+                :title="t('system.company_settings.title')"
+                :subtitle="t('system.company_settings.subtitle')"
+            >
+                <template #icon>
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
+                        />
+                    </svg>
+                </template>
+
+                <template #actions>
+                    <div
+                        class="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200/50 dark:border-emerald-800/40 text-xs font-medium text-emerald-700 dark:text-emerald-300"
+                    >
+                        <span class="inline-block w-2 h-2 rounded-full bg-emerald-500"></span>
+                        {{ t('system.company_settings.actions.saved') }}
+                    </div>
+                </template>
+            </PageHeader>
 
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <!-- Left column: form -->
@@ -744,6 +754,7 @@ import { useForm } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import SystemLayout from '@/Layouts/SystemLayout.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
+import PageHeader from '@/Components/PageHeader.vue';
 
 const { t } = useI18n();
 

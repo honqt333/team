@@ -45,11 +45,11 @@
 
                 <!-- Print Content -->
                 <div ref="printContent" class="p-6 print:p-4">
-                    <!-- Logo & Company Info (for print) -->
-                    <div class="hidden print:block text-center mb-6 border-b pb-4">
-                        <h1 class="text-xl font-bold">{{ companyName }}</h1>
-                        <p class="text-gray-600">{{ $t('hr.payslip_title') }}</p>
-                    </div>
+                    <!-- Standard Report Header (for print) -->
+                    <StandardReportHeader
+                        class="hidden print:block mb-6"
+                        :title="$t('hr.payslip_title')"
+                    />
 
                     <!-- Employee Info -->
                     <div
@@ -190,27 +190,10 @@
                         </div>
                     </div>
 
-                    <!-- Footer Info -->
-                    <div
-                        class="mt-8 pt-4 border-t border-gray-200 dark:border-gray-700 text-sm text-gray-500"
-                    >
-                        <div class="flex justify-between">
-                            <span>
-                                {{ $t('hr.financial.payroll.created_by') }}:
-                                {{ payrollItem?.created_by?.name || '-' }}
-                            </span>
-                            <span>
-                                {{ $t('common.date') }}:
-                                {{
-                                    payrollItem?.created_at
-                                        ? new Date(payrollItem.created_at).toLocaleDateString(
-                                              'ar-SA-u-nu-latn'
-                                          )
-                                        : '-'
-                                }}
-                            </span>
-                        </div>
-                    </div>
+                    <!-- Unified Footer Info -->
+                    <StandardReportFooter
+                        class="mt-8 pt-4 border-t border-gray-200 dark:border-gray-700"
+                    />
                 </div>
             </div>
         </div>
@@ -223,6 +206,8 @@ const { t } = useI18n();
 
 import { computed, ref } from 'vue';
 import { usePage } from '@inertiajs/vue3';
+import StandardReportHeader from '@/Components/Print/StandardReportHeader.vue';
+import StandardReportFooter from '@/Components/Print/StandardReportFooter.vue';
 
 const props = defineProps({
     show: Boolean,

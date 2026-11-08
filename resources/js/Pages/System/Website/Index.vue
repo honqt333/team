@@ -3,6 +3,7 @@ import { ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useForm } from '@inertiajs/vue3';
 import SystemLayout from '@/Layouts/SystemLayout.vue';
+import PageHeader from '@/Components/PageHeader.vue';
 import { useToast } from '@/Composables/useToast';
 import PreviewPane from '@/Components/System/Website/PreviewPane.vue';
 import GeneralTab from './Tabs/GeneralTab.vue';
@@ -174,25 +175,28 @@ watch(
 <template>
     <SystemLayout :title="t('system.website.title')">
         <div class="max-w-screen-2xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
-            <!-- Header -->
-            <div
-                class="md:flex md:items-center md:justify-between mb-8 pb-5 border-b border-gray-200 dark:border-gray-700"
+            <!-- Page Header -->
+            <PageHeader
+                :title="t('system.website.header_title')"
+                :subtitle="t('system.website.header_subtitle')"
+                class="mb-8"
             >
-                <div class="flex-1 min-w-0">
-                    <h2
-                        class="text-2xl font-bold leading-7 text-gray-900 dark:text-white sm:text-3xl sm:truncate font-premium"
-                    >
-                        {{ t('system.website.header_title') }}
-                    </h2>
-                    <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
-                        {{ t('system.website.header_subtitle') }}
-                    </p>
-                </div>
-                <div class="mt-4 flex md:mt-0 gap-3 items-center">
+                <template #icon>
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"
+                        />
+                    </svg>
+                </template>
+
+                <template #actions>
                     <!-- Save Status Indicator -->
                     <div
                         v-if="saveStatus !== 'idle'"
-                        class="flex items-center gap-2 px-3 py-1.5 rounded-md text-sm"
+                        class="flex items-center gap-2 px-3 py-1.5 rounded-xl text-sm"
                     >
                         <svg
                             v-if="saveStatus === 'saving'"
@@ -216,7 +220,7 @@ watch(
                         </svg>
                         <svg
                             v-else-if="saveStatus === 'saved'"
-                            class="h-4 w-4 text-green-600"
+                            class="h-4 w-4 text-emerald-600"
                             fill="none"
                             stroke="currentColor"
                             viewBox="0 0 24 24"
@@ -230,7 +234,7 @@ watch(
                         </svg>
                         <svg
                             v-else
-                            class="h-4 w-4 text-red-600"
+                            class="h-4 w-4 text-rose-600"
                             fill="none"
                             stroke="currentColor"
                             viewBox="0 0 24 24"
@@ -245,8 +249,8 @@ watch(
                         <span
                             :class="{
                                 'text-indigo-600 dark:text-indigo-400': saveStatus === 'saving',
-                                'text-green-600 dark:text-green-400': saveStatus === 'saved',
-                                'text-red-600 dark:text-red-400': saveStatus === 'error',
+                                'text-emerald-600 dark:text-emerald-400': saveStatus === 'saved',
+                                'text-rose-600 dark:text-rose-400': saveStatus === 'error',
                             }"
                         >
                             {{
@@ -262,7 +266,7 @@ watch(
                     <!-- Unsaved Changes Indicator -->
                     <div
                         v-if="hasChanges && saveStatus === 'idle'"
-                        class="flex items-center gap-2 px-3 py-1.5 bg-yellow-50 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300 rounded-md text-sm"
+                        class="flex items-center gap-2 px-3 py-1.5 bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 rounded-xl text-sm"
                     >
                         <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path
@@ -275,57 +279,72 @@ watch(
                         {{ t('system.website.unsaved_changes') }}
                     </div>
 
-                    <button
-                        @click="togglePreview"
-                        class="btn-outline inline-flex items-center"
-                        :class="showPreview ? 'bg-indigo-50 dark:bg-indigo-900/30' : ''"
+                    <!-- Glass Toolbar -->
+                    <div
+                        class="flex items-center gap-1.5 p-1.5 bg-gray-50/50 dark:bg-gray-900/50 backdrop-blur-md rounded-2xl border border-gray-200/50 dark:border-gray-700/50 shadow-inner"
                     >
-                        <svg
-                            class="w-4 h-4 ml-2 -mr-1"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
+                        <button
+                            @click="togglePreview"
+                            class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-xl transition-all shadow-sm"
+                            :class="
+                                showPreview
+                                    ? 'bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400'
+                                    : 'text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-white dark:hover:bg-gray-800'
+                            "
                         >
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                            />
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
-                            />
-                        </svg>
-                        {{ t('system.website.preview_toggle') }}
-                    </button>
+                            <svg
+                                class="w-4 h-4"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                                />
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                                />
+                            </svg>
+                            <span>{{ t('system.website.preview_toggle') }}</span>
+                        </button>
 
-                    <a
-                        :href="route('public.landing.preview', { preview: 1 })"
-                        target="_blank"
-                        class="btn-outline inline-flex items-center"
-                    >
-                        <svg
-                            class="w-4 h-4 ml-2 -mr-1"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
+                        <a
+                            :href="route('public.landing.preview', { preview: 1 })"
+                            target="_blank"
+                            class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-white dark:hover:bg-gray-800 rounded-xl transition-all shadow-sm"
                         >
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
-                            />
-                        </svg>
-                        {{ t('system.website.preview') }}
-                    </a>
-                    <button @click="submit" :disabled="form.processing" class="btn-enterprise">
+                            <svg
+                                class="w-4 h-4"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                                />
+                            </svg>
+                            <span>{{ t('system.website.preview') }}</span>
+                        </a>
+                    </div>
+
+                    <!-- CTA Button -->
+                    <button
+                        @click="submit"
+                        :disabled="form.processing"
+                        class="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white rounded-xl text-sm font-semibold transition-all shadow-md hover:shadow-indigo-500/25 active:scale-95 disabled:opacity-50"
+                    >
                         <svg
                             v-if="!form.processing"
-                            class="w-4 h-4 ml-2 -mr-1"
+                            class="w-4 h-4"
                             fill="none"
                             stroke="currentColor"
                             viewBox="0 0 24 24"
@@ -339,7 +358,7 @@ watch(
                         </svg>
                         <svg
                             v-else
-                            class="w-4 h-4 ml-2 -mr-1 animate-spin"
+                            class="w-4 h-4 animate-spin"
                             fill="none"
                             stroke="currentColor"
                             viewBox="0 0 24 24"
@@ -358,10 +377,16 @@ watch(
                                 d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                             ></path>
                         </svg>
-                        {{ t('system.website.save') }}
+                        <span>
+                            {{
+                                form.processing
+                                    ? t('system.website.saving')
+                                    : t('system.website.save')
+                            }}
+                        </span>
                     </button>
-                </div>
-            </div>
+                </template>
+            </PageHeader>
 
             <!-- Layout -->
             <div

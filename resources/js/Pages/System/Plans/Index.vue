@@ -2,27 +2,40 @@
     <SystemLayout>
         <div class="space-y-6">
             <!-- Page Header -->
-            <div class="flex items-center justify-between">
-                <div>
-                    <h1 class="text-2xl font-bold text-gray-900 dark:text-white">
-                        {{ $t('system.plans.title') }}
-                    </h1>
-                    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                        {{ $t('system.plans.subtitle') }}
-                    </p>
-                </div>
-                <button @click="openModal()" class="btn-primary">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <PageHeader
+                :title="$t('system.plans.title')"
+                :subtitle="$t('system.plans.subtitle')"
+                :totalCount="plans ? toEnglish(plans.length) : null"
+                :countLabel="$t('system.plans.title')"
+            >
+                <template #icon>
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path
                             stroke-linecap="round"
                             stroke-linejoin="round"
                             stroke-width="2"
-                            d="M12 4v16m8-8H4"
+                            d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
                         />
                     </svg>
-                    {{ $t('system.plans.create') }}
-                </button>
-            </div>
+                </template>
+
+                <template #actions>
+                    <button
+                        @click="openModal()"
+                        class="inline-flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white rounded-xl text-sm font-semibold transition-all shadow-md hover:shadow-indigo-500/25 active:scale-95"
+                    >
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M12 4v16m8-8H4"
+                            />
+                        </svg>
+                        {{ $t('system.plans.create') }}
+                    </button>
+                </template>
+            </PageHeader>
 
             <!-- Plans Grid -->
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -643,8 +656,11 @@ import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { router, useForm } from '@inertiajs/vue3';
 import SystemLayout from '@/Layouts/SystemLayout.vue';
+import PageHeader from '@/Components/PageHeader.vue';
+import { useNumberFormat } from '@/Composables/useNumberFormat';
 
 const { t } = useI18n();
+const { toEnglish } = useNumberFormat();
 
 defineProps({
     plans: Array,

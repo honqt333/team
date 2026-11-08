@@ -241,7 +241,7 @@ async function start() {
                 item: props.item.id,
             })
         );
-        router.reload({ only: ['workOrder'] });
+        router.reload({ only: ['workOrder', 'laborEntries'] });
     } finally {
         busy.value = false;
     }
@@ -257,7 +257,7 @@ async function pause() {
                 entry: myActive.value.id,
             })
         );
-        router.reload({ only: ['workOrder'] });
+        router.reload({ only: ['workOrder', 'laborEntries'] });
     } finally {
         busy.value = false;
     }
@@ -273,7 +273,7 @@ async function resume() {
                 entry: myActive.value.id,
             })
         );
-        router.reload({ only: ['workOrder'] });
+        router.reload({ only: ['workOrder', 'laborEntries'] });
     } finally {
         busy.value = false;
     }
@@ -289,7 +289,7 @@ async function end() {
                 entry: myActive.value.id,
             })
         );
-        router.reload({ only: ['workOrder'] });
+        router.reload({ only: ['workOrder', 'laborEntries'] });
     } finally {
         busy.value = false;
     }

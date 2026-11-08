@@ -3,10 +3,23 @@
         <Head :title="$t('system.credits.sms_purchases_title')" />
         <div class="space-y-6">
             <!-- Header -->
-            <div>
-                <h1 class="text-2xl font-bold text-gray-900 dark:text-white">مشتريات SMS</h1>
-                <p class="text-gray-500 dark:text-gray-400">سجل شراء رصيد الرسائل النصية</p>
-            </div>
+            <PageHeader
+                :title="$t('system.credits.sms_purchases_title')"
+                :subtitle="$t('system.credits.sms_purchases_subtitle')"
+                :totalCount="purchases?.total != null ? toEnglish(purchases.total) : null"
+                :countLabel="$t('system.credits.sms_purchases_title')"
+            >
+                <template #icon>
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"
+                        />
+                    </svg>
+                </template>
+            </PageHeader>
 
             <!-- Navigation Tabs -->
             <div class="flex gap-2 border-b border-gray-200 dark:border-gray-700">
@@ -63,7 +76,7 @@
                     :options="statusOptions"
                     option-label="label"
                     option-value="value"
-                    placeholder="كل الحالات"
+                    :placeholder="$t('system.credits.all_statuses')"
                     compact
                 />
             </div>
@@ -76,25 +89,25 @@
                     <thead class="bg-gray-50 dark:bg-gray-700/50">
                         <tr>
                             <th class="px-4 py-3 text-right text-xs font-medium text-gray-500">
-                                المستأجر
+                                {{ $t('system.credits.tenant_2') }}
                             </th>
                             <th class="px-4 py-3 text-right text-xs font-medium text-gray-500">
-                                الباقة
+                                {{ $t('system.credits.package') }}
                             </th>
                             <th class="px-4 py-3 text-right text-xs font-medium text-gray-500">
-                                الرصيد
+                                {{ $t('system.credits.credit') }}
                             </th>
                             <th class="px-4 py-3 text-right text-xs font-medium text-gray-500">
-                                المبلغ
+                                {{ $t('system.credits.amount') }}
                             </th>
                             <th class="px-4 py-3 text-right text-xs font-medium text-gray-500">
-                                الحالة
+                                {{ $t('common.status') }}
                             </th>
                             <th class="px-4 py-3 text-right text-xs font-medium text-gray-500">
-                                طريقة الدفع
+                                {{ $t('system.credits.payment_method') }}
                             </th>
                             <th class="px-4 py-3 text-right text-xs font-medium text-gray-500">
-                                التاريخ
+                                {{ $t('system.credits.date') }}
                             </th>
                         </tr>
                     </thead>
@@ -108,7 +121,7 @@
                                 {{ purchase.tenant?.trade_name || '-' }}
                             </td>
                             <td class="px-4 py-3 text-gray-600 dark:text-gray-400">
-                                {{ purchase.package?.name_ar || 'مخصص' }}
+                                {{ purchase.package?.name_ar || $t('system.credits.custom') }}
                             </td>
                             <td class="px-4 py-3 text-indigo-600 font-semibold">
                                 {{ purchase.credits?.toLocaleString() }}
@@ -133,7 +146,7 @@
                         </tr>
                         <tr v-if="!purchases.data?.length">
                             <td colspan="7" class="px-4 py-8 text-center text-gray-500">
-                                لا توجد مشتريات
+                                {{ $t('system.credits.no_purchases') }}
                             </td>
                         </tr>
                     </tbody>
@@ -144,16 +157,23 @@
 </template>
 
 <script setup>
+import { useI18n } from 'vue-i18n';
+const { t } = useI18n();
+
 import { ref, computed } from 'vue';
 import { Head, Link, router } from '@inertiajs/vue3';
 import SystemLayout from '@/Layouts/SystemLayout.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
+import PageHeader from '@/Components/PageHeader.vue';
+import { useNumberFormat } from '@/Composables/useNumberFormat';
+
+const { toEnglish } = useNumberFormat();
 
 const statusOptions = computed(() => [
-    { value: 'pending', label: 'معلق' },
-    { value: 'paid', label: 'مدفوع' },
-    { value: 'failed', label: 'فشل' },
-    { value: 'refunded', label: 'مسترد' },
+    { value: 'pending', label: t('common.pending') },
+    { value: 'paid', label: t('common.status_paid') },
+    { value: 'failed', label: t('system.credits.failed') },
+    { value: 'refunded', label: t('system.credits.refunded') },
 ]);
 
 const props = defineProps({
@@ -178,7 +198,12 @@ const formatCurrency = (amount) =>
 const formatDate = (date) => (date ? new Date(date).toLocaleString('ar-SA-u-nu-latn') : '-');
 
 const getStatusLabel = (status) =>
-    ({ pending: 'معلق', paid: 'مدفوع', failed: 'فشل', refunded: 'مسترد' })[status] || status;
+    ({
+        pending: t('common.pending'),
+        paid: t('common.status_paid'),
+        failed: t('system.credits.failed'),
+        refunded: t('system.credits.refunded'),
+    })[status] || status;
 
 const getStatusClass = (status) =>
     ({

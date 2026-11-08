@@ -1,27 +1,38 @@
 <template>
     <SystemLayout>
-        <Head :title="locale === 'ar' ? 'تحليلات المستأجرين' : 'Customer analytics'" />
+        <Head
+            :title="
+                locale === 'ar' ? $t('system.analytics.tenant_analytics') : 'Customer analytics'
+            "
+        />
 
         <div class="space-y-6">
             <!-- Header -->
-            <div>
-                <h1 class="text-2xl font-bold text-gray-900 dark:text-white">
-                    {{ $t('system.analytics.tenant_analytics') }}
-                </h1>
-                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                    {{ $t('system.analytics.kpis_subtitle') }}
-                </p>
-            </div>
+            <PageHeader
+                :title="$t('system.analytics.tenant_analytics')"
+                :subtitle="$t('system.analytics.kpis_subtitle')"
+            >
+                <template #icon>
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
+                        />
+                    </svg>
+                </template>
+            </PageHeader>
 
             <!-- KPI grid — 6 cards, 3 columns on desktop -->
             <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 <!-- MRR -->
                 <KpiCard
-                    :label="locale === 'ar' ? 'الإيراد الشهري المتكرر' : 'MRR'"
+                    :label="locale === 'ar' ? $t('system.analytics.expression_literal') : 'MRR'"
                     :value="formatCurrency(kpis.mrr) + ' SAR'"
                     :sub="
                         locale === 'ar'
-                            ? 'مجموع الاشتراكات النشطة (شهري / 12 سنوياً)'
+                            ? $t('system.analytics.sum_of_active_subscriptions_yearly_12')
                             : 'Sum of active subscriptions (yearly ÷ 12)'
                     "
                     :trend="mrrTrend"
@@ -30,7 +41,7 @@
 
                 <!-- Churn -->
                 <KpiCard
-                    :label="locale === 'ar' ? 'معدل الإلغاء' : 'Churn rate'"
+                    :label="locale === 'ar' ? $t('system.analytics.churn_rate') : 'Churn rate'"
                     :value="kpis.churn_rate + '%'"
                     :sub="churnSub"
                     :trend="churnTrend"
@@ -40,37 +51,53 @@
 
                 <!-- New Tenants -->
                 <KpiCard
-                    :label="locale === 'ar' ? 'مستأجرين جدد' : 'New tenants'"
+                    :label="locale === 'ar' ? $t('system.analytics.new_tenants') : 'New tenants'"
                     :value="kpis.new_tenants_30d"
-                    :sub="locale === 'ar' ? 'آخر 30 يوم' : 'Last 30 days'"
+                    :sub="locale === 'ar' ? $t('system.analytics.last_30_days') : 'Last 30 days'"
                     color="indigo"
                 />
 
                 <!-- Outstanding Receivables -->
                 <KpiCard
-                    :label="locale === 'ar' ? 'المستحقات المعلقة' : 'Outstanding receivables'"
+                    :label="
+                        locale === 'ar'
+                            ? $t('system.analytics.outstanding_receivables')
+                            : 'Outstanding receivables'
+                    "
                     :value="formatCurrency(kpis.outstanding_receivables) + ' SAR'"
                     :sub="
-                        locale === 'ar' ? 'مجموع الفواتير غير المدفوعة' : 'Sum of unpaid invoices'
+                        locale === 'ar'
+                            ? $t('system.analytics.sum_of_unpaid_invoices')
+                            : 'Sum of unpaid invoices'
                     "
                     color="amber"
                 />
 
                 <!-- Trial Tenants -->
                 <KpiCard
-                    :label="locale === 'ar' ? 'في فترة التجربة' : 'Trial tenants'"
+                    :label="
+                        locale === 'ar' ? $t('system.analytics.trial_tenants') : 'Trial tenants'
+                    "
                     :value="kpis.trial_tenants"
-                    :sub="locale === 'ar' ? 'إشارة لإيراد قريب' : 'Near-term MRR signal'"
+                    :sub="
+                        locale === 'ar'
+                            ? $t('system.analytics.near-term_mrr_signal')
+                            : 'Near-term MRR signal'
+                    "
                     color="blue"
                 />
 
                 <!-- Last Month Churn (for trend) -->
                 <KpiCard
-                    :label="locale === 'ar' ? 'إلغاء الشهر الماضي' : 'Last month churn'"
+                    :label="
+                        locale === 'ar'
+                            ? $t('system.analytics.last_month_churn')
+                            : 'Last month churn'
+                    "
                     :value="kpis.churn_last_month + '%'"
                     :sub="
                         locale === 'ar'
-                            ? 'للمقارنة بالشهر الحالي'
+                            ? $t('system.analytics.for_comparison_with_current_month')
                             : 'For comparison with current month'
                     "
                     color="slate"
@@ -163,6 +190,7 @@ const { t } = useI18n();
 import { computed, onMounted, ref } from 'vue';
 import { Head } from '@inertiajs/vue3';
 import SystemLayout from '@/Layouts/SystemLayout.vue';
+import PageHeader from '@/Components/PageHeader.vue';
 import KpiCard from '@/Components/System/KpiCard.vue';
 
 const props = defineProps({

@@ -61,7 +61,7 @@
                                 :options="typeOptions"
                                 option-label="label"
                                 option-value="value"
-                                label="النوع"
+                                :label="$t('system.announcements.col.type')"
                             />
                         </div>
                         <div>
@@ -70,7 +70,7 @@
                                 :options="targetOptions"
                                 option-label="label"
                                 option-value="value"
-                                label="الفئة المستهدفة"
+                                :label="$t('system.announcements.col.audience')"
                             />
                         </div>
                     </div>

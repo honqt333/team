@@ -37,21 +37,25 @@
                         "
                         class="px-3 py-1 rounded-full text-sm"
                     >
-                        {{ announcement.is_published ? 'منشور' : 'مسودة' }}
+                        {{
+                            announcement.is_published
+                                ? $t('system.announcements.published')
+                                : $t('common.status_draft')
+                        }}
                     </span>
                     <button
                         v-if="!announcement.is_published"
                         @click="publish"
                         class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-sm"
                     >
-                        🚀 نشر الآن
+                        {{ $t('system.announcements.publish_now') }}
                     </button>
                     <button
                         v-else
                         @click="unpublish"
                         class="px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg text-sm"
                     >
-                        إيقاف
+                        {{ $t('system.announcements.stop') }}
                     </button>
                 </div>
             </div>
@@ -62,25 +66,25 @@
                     class="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700"
                 >
                     <p class="text-2xl font-bold text-indigo-600">{{ stats.target_count }}</p>
-                    <p class="text-sm text-gray-500">المستهدفين</p>
+                    <p class="text-sm text-gray-500">{{ $t('system.announcements.recipients') }}</p>
                 </div>
                 <div
                     class="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700"
                 >
                     <p class="text-2xl font-bold text-blue-600">{{ stats.reads_count }}</p>
-                    <p class="text-sm text-gray-500">شاهدوا</p>
+                    <p class="text-sm text-gray-500">{{ $t('system.announcements.viewed') }}</p>
                 </div>
                 <div
                     class="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700"
                 >
                     <p class="text-2xl font-bold text-emerald-600">{{ stats.sent_count }}</p>
-                    <p class="text-sm text-gray-500">تم الإرسال</p>
+                    <p class="text-sm text-gray-500">{{ $t('system.announcements.delivered') }}</p>
                 </div>
                 <div
                     class="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700"
                 >
                     <p class="text-2xl font-bold text-red-600">{{ stats.failed_count }}</p>
-                    <p class="text-sm text-gray-500">فشل</p>
+                    <p class="text-sm text-gray-500">{{ $t('system.announcements.failed') }}</p>
                 </div>
             </div>
 
@@ -88,7 +92,9 @@
             <div
                 class="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700"
             >
-                <h3 class="font-semibold text-gray-900 dark:text-white mb-3">المحتوى</h3>
+                <h3 class="font-semibold text-gray-900 dark:text-white mb-3">
+                    {{ $t('common.content') }}
+                </h3>
                 <div
                     class="prose dark:prose-invert max-w-none"
                     v-safe-html="sanitizedContent"
@@ -96,9 +102,14 @@
                 <div
                     class="mt-4 pt-4 border-t border-gray-100 dark:border-gray-700 flex gap-4 text-sm text-gray-500"
                 >
-                    <span>القنوات: {{ (announcement.channels || ['in_app']).join(', ') }}</span>
+                    <span>
+                        {{
+                            $t('system.announcements.channels_2') +
+                            (announcement.channels || ['in_app']).join(', ')
+                        }}
+                    </span>
                     <span v-if="announcement.expires_at">
-                        ينتهي: {{ formatDate(announcement.expires_at) }}
+                        {{ $t('system.announcements.ends') + formatDate(announcement.expires_at) }}
                     </span>
                 </div>
             </div>
@@ -107,7 +118,9 @@
             <div
                 class="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700"
             >
-                <h3 class="font-semibold text-gray-900 dark:text-white mb-4">سجل الإرسال</h3>
+                <h3 class="font-semibold text-gray-900 dark:text-white mb-4">
+                    {{ $t('system.announcements.delivery_log') }}
+                </h3>
                 <div v-if="recentLogs.length" class="space-y-2">
                     <div
                         v-for="log in recentLogs"
@@ -132,13 +145,18 @@
                         </span>
                     </div>
                 </div>
-                <p v-else class="text-gray-500 text-sm">لم يتم الإرسال بعد</p>
+                <p v-else class="text-gray-500 text-sm">
+                    {{ $t('system.announcements.not_sent_yet') }}
+                </p>
             </div>
         </div>
     </SystemLayout>
 </template>
 
 <script setup>
+import { useI18n } from 'vue-i18n';
+const { t } = useI18n();
+
 import { computed } from 'vue';
 import { Head, Link, router } from '@inertiajs/vue3';
 import SystemLayout from '@/Layouts/SystemLayout.vue';
@@ -153,11 +171,20 @@ const props = defineProps({
 const sanitizedContent = computed(() => DOMPurify.sanitize(props.announcement?.content || ''));
 
 const getTypeLabel = (type) =>
-    ({ info: 'معلومات', warning: 'تحذير', important: 'هام', maintenance: 'صيانة' })[type] || type;
+    ({
+        info: t('system.announcements.type.info'),
+        warning: t('system.announcements.type.warning'),
+        important: t('system.announcements.type.important'),
+        maintenance: t('system.announcements.type.maintenance'),
+    })[type] || type;
 const getTargetLabel = (target) =>
-    ({ all: 'الكل', active: 'النشطين', trial: 'التجريبي', expired: 'المنتهية', specific: 'محدد' })[
-        target
-    ] || target;
+    ({
+        all: t('system.announcements.all_statuses'),
+        active: t('system.announcements.target.active'),
+        trial: t('system.announcements.target.trial'),
+        expired: t('system.announcements.target.expired'),
+        specific: t('system.announcements.target.specific'),
+    })[target] || target;
 const formatDate = (date) => (date ? new Date(date).toLocaleDateString('ar-SA-u-nu-latn') : '-');
 const formatDateTime = (date) => (date ? new Date(date).toLocaleString('ar-SA-u-nu-latn') : '-');
 

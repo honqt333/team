@@ -219,7 +219,7 @@ defineProps({ form: Object, tab: String });
                         <input
                             v-model="form.settings.website_announcement_text_ar"
                             class="input-enterprise"
-                            placeholder="مثال: خصم 20% لفترة محدودة!"
+                            :placeholder="$t('system.website.e.g._20_off_for_a_limited_time')"
                         />
                     </div>
                     <div>

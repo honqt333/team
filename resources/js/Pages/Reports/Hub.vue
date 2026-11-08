@@ -489,6 +489,46 @@
                         متاح الآن
                     </span>
                 </Link>
+
+                <!-- Tax Periods & VAT Declaration -->
+                <Link
+                    :href="route('app.reports.tax-periods.index')"
+                    class="group relative bg-gradient-to-br from-teal-50 to-emerald-50 dark:from-teal-900/20 dark:to-emerald-900/20 rounded-2xl p-7 border border-teal-200 dark:border-teal-800 hover:border-teal-400 dark:hover:border-teal-600 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 text-center"
+                >
+                    <div
+                        class="w-16 h-16 mx-auto rounded-2xl bg-gradient-to-br from-teal-600 to-emerald-700 flex items-center justify-center shadow-lg shadow-teal-500/30 group-hover:scale-110 transition-all duration-300"
+                    >
+                        <svg
+                            class="w-8 h-8 text-white"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"
+                            />
+                        </svg>
+                    </div>
+                    <h3
+                        class="mt-4 text-base font-bold text-gray-900 dark:text-white group-hover:text-teal-600 dark:group-hover:text-teal-400 transition-colors"
+                    >
+                        {{ $t('reports.tax_periods') }}
+                    </h3>
+                    <div
+                        class="absolute top-3 end-3 px-2 py-0.5 bg-emerald-600 text-white text-[10px] font-bold rounded-full shadow"
+                    >
+                        ZATCA
+                    </div>
+                    <span
+                        class="mt-3 inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800 dark:bg-emerald-900/50 dark:text-emerald-300"
+                    >
+                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                        متاح الآن
+                    </span>
+                </Link>
             </div>
         </div>
     </AppLayout>

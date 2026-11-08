@@ -3317,6 +3317,7 @@
         "payments": "المدفوعات",
         "purchase_invoices": "فواتير الشراء",
         "services": "الخدمات",
+        "tax_periods": "الفترات الضريبية والإقرار",
         "subtitle": "مركز التقارير والتحليلات - نظرة شاملة على أداء مركزك",
         "suppliers": "الموردين",
         "title": "التقارير",
@@ -4288,6 +4289,107 @@
             "system_admin": "مدير النظام",
             "financial_officer": "المشرف المالي",
             "main_center": "المركز الرئيسي"
+        },
+        "tax_periods_report": {
+            "title": "الفترات الضريبية والإقرار الضريبي",
+            "subtitle": "إدارة الفترات الضريبية الربع سنوية واحتساب إقرار ضريبة القيمة المضافة لـ ZATCA",
+            "back_to_reports": "الرجوع لكافة التقارير",
+            "back_to_tax_periods": "الرجوع لقائمة الفترات الضريبية",
+            "select_period_to_create": "إنشاء فترة ضريبية",
+            "select_period_modal_desc": "اختر الربع السنوي المطلوب إنشاؤه",
+            "quarterly_periods": "الفترات الربع سنوية",
+            "created_periods": "الفترات الضريبية المنشأة",
+            "created_periods_desc": "قائمة الفترات الضريبية والإقرارات التي تم إنشاؤها وترحيلها في النظام",
+            "period_name": "اسم الفترة",
+            "period_key": "معرّف الفترة",
+            "period_dates": "تواريخ الفترة",
+            "status": "الحالة",
+            "status_draft": "مسودة (قابلة للتعديل)",
+            "status_posted": "مرحلة ومقفلة",
+            "status_uncreated": "غير منشأة",
+            "transactions_count": "عدد العمليات",
+            "transactions_unit": "حركة",
+            "operations_unit": "عملية",
+            "sales_vat": "ضريبة المبيعات",
+            "purchases_vat": "ضريبة المشتريات",
+            "net_vat": "صافي الضريبة",
+            "net_vat_due": "ضريبة مستحقة للسداد",
+            "net_vat_refund": "ضريبة مستردة",
+            "posted_at": "تاريخ الترحيل",
+            "posted_by": "تم الترحيل بواسطة",
+            "created_by": "أنشئت بواسطة",
+            "actions": "الإجراءات",
+            "view_declaration": "عرض الإقرار والحركات",
+            "create_period_btn": "إنشاء فترة جديدة",
+            "save_period_btn": "حفظ الفترة الضريبية",
+            "post_period_btn": "ترحيل وقفل الإقرار",
+            "recreate_period_btn": "إعادة فحص وتحديث الحركات",
+            "export_excel": "تصدير الحركات (Excel)",
+            "export_zatca": "تصدير إقرار ZATCA الرسمي",
+            "print_declaration": "طباعة الإقرار الضريبي",
+            "filter_year": "تصفية بالسنة",
+            "filter_status": "تصفية بالحالة",
+            "all_years": "كافة السنوات",
+            "all_statuses": "كافة الحالات",
+            "all_types": "كافة أنواع الحركات",
+            "no_periods": "لا توجد فترات ضريبية منشأة حتى الآن",
+            "no_transactions": "لا توجد حركات ضريبية في هذه الفترة",
+            "preview_transactions": "معاينة حركات الفترة واختيارها",
+            "preview_subtitle": "راجع الحركات المجمعة من الفواتير والمشتريات والمصروفات قبل حفظ الفترة",
+            "zatca_box_sales": "1. المبيعات الخاضعة للنسبة الأساسية (15%)",
+            "zatca_box_purchases": "7. المشتريات الخاضعة للنسبة الأساسية (15%)",
+            "zatca_box_net": "13. إجمالي ضريبة القيمة المضافة المستحقة للفترة الحالية",
+            "zatca_box_13_badge": "البند 13",
+            "zatca_official_header": "نموذج إقرار ضريبة القيمة المضافة الرسمي (ZATCA)",
+            "zatca_summary_title": "ملخص الإقرار الضريبي الرسمي",
+            "zatca_summary_subtitle": "هيئة الزكاة والضريبة والجمارك (ZATCA) • VAT Return Declaration",
+            "box_number": "البند",
+            "box_description": "الوصف",
+            "taxable_amount_sar": "المبلغ الخاضع للضريبة (ر.س)",
+            "adjustment_amount_sar": "مبلغ التعديل (ر.س)",
+            "vat_amount_sar": "مبلغ الضريبة (ر.س)",
+            "total_sales_label": "إجمالي المبيعات",
+            "total_purchases_label": "إجمالي المشتريات",
+            "detailed_transactions_title": "سجل الحركات الضريبية المفصلة",
+            "detailed_transactions_subtitle": "كشف بجميع الفواتير والمردودات والمصروفات المرتبطة بهذا الإقرار",
+            "search_placeholder": "بحث برقم المرجع أو الطرف الآخر أو الرقم الضريبي...",
+            "showing_records": "عرض {from} إلى {to} من إجمالي {total}",
+            "facility_name": "اسم المنشأة",
+            "tax_number_label": "الرقم الضريبي",
+            "tax_period_label": "الفترة الضريبية",
+            "selected_summary": "تم اختيار {selected} من إجمالي {total} حركة",
+            "sales_and_income": "المبيعات والإيرادات",
+            "purchases_and_expenses": "المشتريات والمصروفات",
+            "total_declaration": "الإجمالي العام للإقرار",
+            "taxable_subtotal": "المبلغ الخاضع للضريبة",
+            "vat_amount": "مبلغ الضريبة (15%)",
+            "total_with_vat": "الإجمالي شامل الضريبة",
+            "ref_no": "رقم المرجع",
+            "date": "التاريخ",
+            "type": "النوع",
+            "party": "العميل / المورد / البيان",
+            "tax_number": "الرقم الضريبي",
+            "is_selected": "مدرجة بالإقرار",
+            "vat_rate": "النسبة",
+            "posted_notice": "هذه الفترة الضريبية مرحلة ومقفلة رسمياً. لا يمكن تعديل أو حذف أي حركة فيها.",
+            "confirm_post_title": "تأكيد ترحيل وقفل الفترة الضريبية",
+            "confirm_post_message": "هل أنت متأكد من ترحيل وقفل هذه الفترة الضريبية؟ بعد الترحيل سيتم تجميد جميع حركات هذه الفترة ولن يمكن تعديلها أو حذفها، ولن تظهر في فترات ضريبية أخرى.",
+            "confirm_post_action": "نعم، ترحيل وقفل الإقرار",
+            "confirm_recreate_title": "إعادة فحص وتحديث الحركات",
+            "confirm_recreate_message": "سيتم إعادة فحص جميع الفواتير والمشتريات والمصروفات في هذا الربع وتحديث الحركات والملخص الإجمالي. هل تريد المتابعة؟",
+            "confirm_recreate_action": "تأكيد التحديث",
+            "invalid_period_key": "معرّف الفترة الضريبية غير صالح.",
+            "period_already_posted": "هذه الفترة الضريبية مقفلة ومرحلة مسبقاً.",
+            "period_saved_success": "تم حفظ الفترة الضريبية بنجاح.",
+            "period_posted_success": "تم ترحيل وقفل الفترة الضريبية بنجاح.",
+            "period_recreated_success": "تمت إعادة إنشاء وتحديث حركات الفترة الضريبية بنجاح.",
+            "types": {
+                "sales_invoice": "فاتورة مبيعات",
+                "credit_note": "إشعار دائن (مرتجع)",
+                "purchase_invoice": "فاتورة مشتريات",
+                "purchase_return": "إشعار مدين (مرتجع مشتريات)",
+                "company_transaction": "حركة مالية خاضعة للضريبة"
+            }
         }
     },
     "roles": {
@@ -5650,7 +5752,10 @@
                 "tenants": "المستأجرين",
                 "billing": "الفوترة",
                 "settings": "الإعدادات",
-                "credits": "الأرصدة"
+                "credits": "الأرصدة",
+                "support": "الدعم",
+                "panel": "اللوحة",
+                "self": "حسابي"
             },
             "form": {
                 "name": "الاسم",
@@ -5662,8 +5767,12 @@
                 "permissions": "الصلاحيات",
                 "is_active": "حساب نشط",
                 "create_action": "إنشاء المستخدم",
-                "saving": "جاري الحفظ..."
-            }
+                "saving": "جاري الحفظ...",
+                "permissions_hint": "الصلاحيات المحددة هنا تحل محل صلاحيات الدور الافتراضي. اتركها فارغة لاستخدام صلاحيات الدور.",
+                "permissions_role_default": "الصلاحيات الافتراضية للدور"
+            },
+            "all_administrators": "كل المسؤولين",
+            "all_actions": "كل الإجراءات"
         },
         "status": {
             "active": "نشط",
@@ -5821,7 +5930,25 @@
             "no_plan": "بدون باقة",
             "assign_plan": "تعيين / تغيير الباقة",
             "subscriptions_log": "سجل اشتراكات وباقات المستأجر",
-            "assign_new_plan": "تعيين باقة جديدة"
+            "assign_new_plan": "تعيين باقة جديدة",
+            "trial_days": "{days} يوم (تجريبي)",
+            "all_packages": "جميع الباقات",
+            "assign_upgrade_a_package_for_the_tenant": "تعيين / ترقية باقة للمستأجر",
+            "link_the_tenant": "ربط المستأجر",
+            "to_a_new_package_and_activate_the_subscription_i": "بباقة جديدة وتفعيل الاشتراك فوراً.",
+            "select_the_package": "اختر الباقة",
+            "--_select_a_package_--": "-- حدد الباقة --",
+            "yearly_subscription": "(الاشتراك السنوي:",
+            "static_template_text": "ر.س)",
+            "billing_cycle": "دورة الفوترة",
+            "yearly_subscription_12_months": "اشتراك سنوي (12 شهر)",
+            "package_type": "نوع الباقة:",
+            "subscription_period": "مدة الاشتراك:",
+            "days_trial": " يوم (تجريبي)",
+            "full_year_12_months": "سنة كاملة (12 شهر)",
+            "total_amount": "المبلغ الإجمالي:",
+            "the_subscription_will_be_activated_for_the_tenan": "* سيتم تفعيل الاشتراك مباشرة للمستأجر وتحديث حالته إلى (نشط)، مع أرشفة أي\n                        اشتراك سابق نشط.",
+            "confirm_and_activate_the_package": "تأكيد وتفعيل الباقة"
         },
         "subscriptions": {
             "title": "الاشتراكات",
@@ -5859,7 +5986,37 @@
                 "submit": "إنشاء الاشتراك",
                 "submitting": "جاري الإنشاء..."
             },
-            "ends_at": "تاريخ الانتهاء"
+            "ends_at": "تاريخ الانتهاء",
+            "tenant": "المستأجر *",
+            "package": "الباقة *",
+            "sar_monthly": "ر.س / شهرياً",
+            "sar_yearly": "ر.س / سنوياً",
+            "free_trial": "تجربة مجانية:",
+            "billing_cycle_2": "دورة الفوترة *",
+            "yearly_12_months": "سنوي (12 شهر)",
+            "subscription_details": "تفاصيل الاشتراك",
+            "subscription_information": "معلومات الاشتراك",
+            "price": "السعر",
+            "expression_literal": " ر.س",
+            "auto-renewal": "التجديد التلقائي",
+            "disabled": "معطّل",
+            "dates": "التواريخ",
+            "period_start": "بداية الفترة",
+            "period_end": "نهاية الفترة",
+            "trial_end": "نهاية التجربة",
+            "cancellation_date": "تاريخ الإلغاء",
+            "invoices": "الفواتير",
+            "pending": "قيد الانتظار",
+            "no_invoices": "لا توجد فواتير",
+            "cancel_subscription": "إلغاء الاشتراك",
+            "activate_subscription": "تفعيل الاشتراك",
+            "extend_subscription": "تمديد الاشتراك",
+            "view_tenant_details": "عرض تفاصيل المستأجر →",
+            "discount_code": "رمز الخصم",
+            "discount": "خصم",
+            "number_of_days": "عدد الأيام",
+            "extend": "تمديد",
+            "do_you_want_to_cancel_this_subscription": "هل تريد إلغاء هذا الاشتراك؟"
         },
         "plans": {
             "title": "الباقات",
@@ -5970,7 +6127,64 @@
             "saved": "تم تحديث الإعدادات بنجاح",
             "enable_sms_2fa": "تفعيل رسائل SMS (2FA)",
             "enable_sms_2fa_hint": "تفعيل خيار إرسال رموز التحقق عبر الرسائل النصية لكافة النظام.",
-            "enable_sms_2fa_warning": "تحذير: هذا الخيار قد يترتب عليه تكاليف إضافية (رصيد SMS)."
+            "enable_sms_2fa_warning": "تحذير: هذا الخيار قد يترتب عليه تكاليف إضافية (رصيد SMS).",
+            "dunning_settings": "إعدادات التذكير — {name}",
+            "dunning_settings_colon": "إعدادات التذكير: {name}",
+            "dunning_log": "سجل التذكير التلقائي",
+            "every_dunning_send_attempt_sent_failed_or_skippe": "كل محاولات إرسال التذكيرات التلقائية — نجح، فشل، أو تم تخطيها.",
+            "tier": "المستوى",
+            "settings": "الإعدادات",
+            "tenant": "المستأجر",
+            "invoice": "الفاتورة",
+            "channel": "القناة",
+            "no_log_entries_yet": "لا توجد سجلات بعد",
+            "page": "صفحة",
+            "sent": "مُرسلة",
+            "failed": "فشلت",
+            "skipped": "متخطاة",
+            "tier_2": "المستوى ",
+            "sent_2": "مُرسل",
+            "failed_2": "فشل",
+            "skipped_2": "متخطى",
+            "dunning_automation_settings": "إعدادات التذكير التلقائي",
+            "automatically_remind_tenants_with_overdue_invoic": "تذكير المستأجرين المتأخرين في السداد تلقائياً عبر إيميل/إشعار/WhatsApp. كل تذكير يُسجَّل في سجل كامل.",
+            "enable_automated_dunning": "تفعيل التذكير التلقائي",
+            "when_enabled_the_daily_cron_sends_reminders_to_t": "عند التفعيل، الـ cron اليومي يرسل تذكيرات للمستأجرين اللي عليهم فواتير متأخرة حسب الـ tiers المحددة.",
+            "quiet_hours": "ساعات الصمت",
+            "no_reminders_will_be_sent_in_this_window": {
+                "_leave_": "لا تُرسل تذكيرات داخل هذا النطاق. اتركها فارغة لتعطيل الميزة."
+            },
+            "auto-suspend_after": "تعليق تلقائي بعد",
+            "days_after_the_last_tier-4_final_reminder_before": "أيام بعد آخر تذكير في المستوى 4 (نهائي) قبل تعليق الحساب تلقائياً. اتركها فارغة لتعطيل الميزة.",
+            "reminder_tiers": "مستويات التذكير",
+            "tier_3": "المستوى",
+            "after": "بعد",
+            "tone": "اللهجة",
+            "channels": "القنوات",
+            "view_log": "عرض السجل",
+            "saving": {
+                "": {
+                    "": {
+                        "": "يحفظ..."
+                    }
+                }
+            },
+            "in-app": "داخل التطبيق",
+            "dunning_settings_2": "إعدادات التذكير: ",
+            "global_baseline_reference": "الإعدادات العامة (مرجعية)",
+            "active_tiers": "المستويات",
+            "quiet_hours_2": "ساعات الصمت",
+            "expression_literal": "معطّلة",
+            "per-tenant_override": "تجاوز على مستوى المستأجر",
+            "empty_fields_fall_back_to_the_general_settings": {
+                "_": "الحقول الفارغة ترجع للإعدادات العامة. اضغط \"حفظ\" لتفعيل التجاوز."
+            },
+            "enable_override": "تفعيل التجاوز",
+            "when_on_this_tenant_uses_the_values_below_instea": "عند التفعيل، يستخدم هذا المستأجر الإعدادات أدناه بدل العامة.",
+            "active_tiers_2": "المستويات المفعّلة",
+            "quiet_hours_optional": "ساعات الصمت (اختياري)",
+            "remove_override": "حذف التجاوز",
+            "remove_the_override": "حذف التجاوز؟"
         },
         "integrations": {
             "title": "التكاملات",
@@ -6044,7 +6258,16 @@
                 "announcement": "شريط الإعلانات",
                 "integrations": "التكاملات والربط",
                 "seo_social": "SEO وبيانات التواصل"
-            }
+            },
+            "e": {
+                "g": {
+                    "_20_off_for_a_limited_time": "مثال: خصم 20% لفترة محدودة!"
+                }
+            },
+            "manage": "أدر",
+            "with_real_intelligence": "بذكاء حقيقي",
+            "your_center_nowyour_revenue_todayyour_team_with_": "مركزك الآن|أرباحك اليوم|فريقك معك|مستقبلك هنا",
+            "keyword_another_keyword_keywords": "كلمة, كلمة اخرى, keywords"
         },
         "developer": {
             "title": "مركز التطوير",
@@ -6135,7 +6358,106 @@
             "package": "الباقة",
             "reference": "المرجع",
             "revenue": "الإيرادات",
-            "search_purchases": "البحث في المشتريات"
+            "search_purchases": "البحث في المشتريات",
+            "delete_package": "هل تريد حذف باقة \"{name}\"؟",
+            "sms_credit_balance_per_tenant": "رصيد الرسائل النصية لكل مستأجر",
+            "add_manual_credit": "+ إضافة رصيد يدوي",
+            "total_purchases": "إجمالي المشتريات",
+            "total_used": "إجمالي المستخدم",
+            "current_balance": "الرصيد الحالي",
+            "search_by_tenant_name": {
+                "": {
+                    "": {
+                        "": "بحث باسم المستأجر..."
+                    }
+                }
+            },
+            "tenant": "المستأجر",
+            "add_credit": "+ إضافة رصيد",
+            "add_sms_credit": "إضافة رصيد SMS",
+            "select_the_tenant": "اختر المستأجر",
+            "message_count": "عدد الرسائل",
+            "reason_optional": "السبب (اختياري)",
+            "e": {
+                "g": {
+                    "_welcome_bonus": "مثال: هدية ترحيبية"
+                }
+            },
+            "sms_credit_packages": "باقات رصيد SMS",
+            "manage_the_sms_packages_available_for_purchase": "إدارة باقات الرسائل النصية المتاحة للشراء",
+            "add_package": "+ إضافة باقة",
+            "best_seller": "الأكثر مبيعاً",
+            "disabled": "معطّل",
+            "message": "رسالة",
+            "sar_message": "ر.س / رسالة",
+            "no_packages_yet": {
+                "_click_add_package_to_create_the": "لا توجد باقات. اضغط على \"إضافة باقة\" لإنشاء أول باقة.",
+                "_click_add_package_to_create_the_2": "لا توجد باقات. اضغط على \"إضافة باقة\" لإنشاء أول باقة."
+            },
+            "edit_package": "تعديل الباقة",
+            "add_new_package": "إضافة باقة جديدة",
+            "name_arabic": "الاسم (عربي)",
+            "name_english": "الاسم (إنجليزي)",
+            "message_count_2": "عدد الرسائل",
+            "price_sar": "السعر (ر.س)",
+            "template_literal_chunk": "\"؟",
+            "all_statuses": "كل الحالات",
+            "tenant_2": "المستأجر",
+            "credit": "الرصيد",
+            "payment_method": "طريقة الدفع",
+            "failed": "فشل",
+            "refunded": "مسترد",
+            "track_every_message_sent": "تتبع جميع الرسائل المرسلة",
+            "total_messages": "إجمالي الرسائل",
+            "delivered": "تم التسليم",
+            "failed_2": "فشل",
+            "credit_used": "الرصيد المستخدم",
+            "all_statuses_2": "كل الحالات",
+            "tenant_3": "المستأجر",
+            "mobile_number": "رقم الجوال",
+            "credit_2": "الرصيد",
+            "sent": "مرسل",
+            "pending": "قيد الإرسال",
+            "reminder": "تذكير",
+            "notification": "إشعار",
+            "verification_code": "رمز تحقق",
+            "marketing": "تسويقي",
+            "invoice": "فاتورة",
+            "appointment": "موعد",
+            "whatsapp_credit_balance_per_tenant": "رصيد رسائل واتساب لكل مستأجر",
+            "add_credit_2": "+ إضافة رصيد",
+            "total_purchases_2": "إجمالي المشتريات",
+            "current_balance_2": "الرصيد الحالي",
+            "tenant_4": "المستأجر",
+            "static_template_text": "+ إضافة",
+            "add_whatsapp_credit": "إضافة رصيد WhatsApp",
+            "message_count_3": "عدد الرسائل",
+            "reason": "السبب",
+            "whatsapp_credit_packages": "باقات رصيد WhatsApp",
+            "manage_the_whatsapp_packages_available_for_purch": "إدارة باقات رسائل واتساب المتاحة للشراء",
+            "add_package_2": "+ إضافة باقة",
+            "best_seller_2": "الأكثر مبيعاً",
+            "disabled_2": "معطّل",
+            "message_2": "رسالة",
+            "sar_message_2": "ر.س / رسالة",
+            "edit_package_2": "تعديل الباقة",
+            "add_new_package_2": "إضافة باقة جديدة",
+            "name_arabic_2": "الاسم (عربي)",
+            "name_english_2": "الاسم (إنجليزي)",
+            "message_count_4": "عدد الرسائل",
+            "price_sar_2": "السعر (ر.س)",
+            "delete_package_2": "هل تريد حذف باقة \"",
+            "template_literal_chunk_2": "\"؟",
+            "total_messages_2": "إجمالي الرسائل",
+            "delivered_2": "تم التسليم",
+            "read": "مقروء",
+            "failed_3": "فشل",
+            "tenant_5": "المستأجر",
+            "mobile_number_2": "رقم الجوال",
+            "template": "القالب",
+            "credit_3": "الرصيد",
+            "sent_2": "مرسل",
+            "pending_2": "قيد الإرسال"
         },
         "announcements": {
             "title": "الإعلانات والإشعارات",
@@ -6177,7 +6499,18 @@
             "expiry_date": "تاريخ الانتهاء (اختياري)",
             "in_app": "داخل التطبيق",
             "channels": "قنوات الإرسال",
-            "specific_tenants": "مستأجرين محددين"
+            "specific_tenants": "مستأجرين محددين",
+            "published": "منشور",
+            "publish_now": "🚀 نشر الآن",
+            "stop": "إيقاف",
+            "recipients": "المستهدفين",
+            "viewed": "شاهدوا",
+            "delivered": "تم الإرسال",
+            "failed": "فشل",
+            "channels_2": "القنوات:",
+            "ends": "ينتهي:",
+            "delivery_log": "سجل الإرسال",
+            "not_sent_yet": "لم يتم الإرسال بعد"
         },
         "contact_messages": {
             "title": "رسائل الزوار",
@@ -6225,7 +6558,27 @@
                 "tenant": "المستأجر",
                 "amount": "المبلغ",
                 "due_at": "الاستحقاق"
-            }
+            },
+            "invoice": "فاتورة {number}",
+            "invoice_2": "فاتورة",
+            "download_pdf": "تحميل PDF",
+            "send_by_email": "إرسال بالإيميل",
+            "mark_as_paid": "تأكيد الدفع",
+            "cancel_invoice": "إلغاء الفاتورة",
+            "pdf_preview": "معاينة الـ PDF",
+            "open_in_new_tab": "فتح في تبويب جديد",
+            "pdf_not_available": "الـ PDF غير متاح",
+            "confirm_payment_manually": "تأكيد الدفع يدوياً",
+            "reference_number": "رقم المرجع",
+            "transfer_or_receipt_number": "رقم الحوالة أو الإيصال",
+            "confirming": {
+                "": {
+                    "": {
+                        "": "جاري التأكيد..."
+                    }
+                }
+            },
+            "are_you_sure_you_want_to_cancel_this_invoice": "هل أنت متأكد من إلغاء هذه الفاتورة؟"
         },
         "common": {
             "loading": "جاري التحميل...",
@@ -6534,7 +6887,10 @@
             "confirm_delete": "هل أنت متأكد من حذف هذا البلاغ؟"
         },
         "activity_log": {
-            "subtitle": "تتبع جميع إجراءات المسؤولين"
+            "title": "سجل النشاط",
+            "subtitle": "تتبع جميع إجراءات المسؤولين",
+            "all_admins": "كل المسؤولين",
+            "all_actions": "كل الإجراءات"
         },
         "analytics": {
             "tenant_analytics": "تحليلات المستأجرين",
@@ -6549,13 +6905,45 @@
             "tenants_report": "تقرير المستأجرين",
             "tenants_report_desc": "قائمة المستأجرين والباقات والاشتراكات وحالة كل اشتراك.",
             "aging_report": "تقرير أعمار الديون",
-            "aging_report_desc": "المستحقات المتأخرة موزعة على فترات الاستحقاق."
+            "aging_report_desc": "المستحقات المتأخرة موزعة على فترات الاستحقاق.",
+            "expression_literal": "الإيراد الشهري المتكرر",
+            "sum_of_active_subscriptions_yearly_12": "مجموع الاشتراكات النشطة (شهري / 12 سنوياً)",
+            "churn_rate": "معدل الإلغاء",
+            "new_tenants": "مستأجرين جدد",
+            "last_30_days": "آخر 30 يوم",
+            "outstanding_receivables": "المستحقات المعلقة",
+            "sum_of_unpaid_invoices": "مجموع الفواتير غير المدفوعة",
+            "trial_tenants": "في فترة التجربة",
+            "near-term_mrr_signal": "إشارة لإيراد قريب",
+            "last_month_churn": "إلغاء الشهر الماضي",
+            "for_comparison_with_current_month": "للمقارنة بالشهر الحالي"
         },
         "communication": {
             "templates_subtitle": "إدارة وتخصيص قوالب الرسائل البريدية والإشعارات الآلية للنظام.",
             "template_name": "اسم القالب والعنوان",
             "template_code": "الكود التعريفي",
-            "templates_empty": "لا توجد قوالب تواصل مضافة حالياً."
+            "templates_empty": "لا توجد قوالب تواصل مضافة حالياً.",
+            "copied": "تم نسخ {variable}",
+            "edit_template": "تعديل قالب",
+            "communication_templates": "قوالب التواصل",
+            "cancel": "إلغاء وعودة",
+            "save_changes": "حفظ التعديلات",
+            "template_details": "بيانات القالب",
+            "code": "الكود التعريفي:",
+            "type": "النوع:",
+            "email": "بريد إلكتروني",
+            "expression_literal": "رسالة نصية",
+            "enable_template": "تفعيل القالب في النظام",
+            "available_variables_click_to_copy": "المتغيرات المتاحة (انقر للنسخ)",
+            "no_variables_defined_for_this_template": {
+                "": "لا توجد متغيرات محددة لهذا القالب."
+            },
+            "template_editor": "محرر القالب",
+            "live_preview": "معاينة العرض الحي",
+            "subject": "عنوان الرسالة (Subject)",
+            "content": "محتوى الرسالة",
+            "subject_2": "العنوان:",
+            "communication_templates_2": "قوالب التواصل"
         },
         "payment": {
             "failed_message": "عذراً، لم نتمكن من إتمام عملية الدفع",
@@ -6565,9 +6953,23 @@
             "back_to_subscriptions": "العودة للاشتراكات",
             "support_hint": "إذا استمرت المشكلة، تواصل مع الدعم الفني",
             "success_title": "تم الدفع بنجاح! 🎉",
-            "success_message": "تم تفعيل الاشتراك وسيتم إرسال الفاتورة على البريد الإلكتروني"
+            "success_message": "تم تفعيل الاشتراك وسيتم إرسال الفاتورة على البريد الإلكتروني",
+            "complete_payment": "إتمام الدفع",
+            "choose_a_payment_method_to_complete_the_subscrip": "اختر طريقة الدفع لإتمام الاشتراك",
+            "order_summary": "ملخص الطلب",
+            "tenant": "المستأجر",
+            "package": "الباقة",
+            "cycle": "الدورة",
+            "yearly": "سنوي",
+            "total": "المجموع",
+            "payment_details": "بيانات الدفع",
+            "the_payment_gateway_is_not_configured": "بوابة الدفع غير مُعدّة",
+            "the_payment_gateway_api_keys_must_be_set_in_the_": "يجب إعداد مفاتيح API لبوابة الدفع في ملف .env",
+            "payments_are_secure_and_encrypted_to_the_pci_dss": "الدفع آمن ومشفر بمعيار PCI DSS"
         },
         "bank_transfer_receipts": {
+            "index_title": "مراجعة إيصالات التحويل البنكي",
+            "subtitle": "مراجعة وتأكيد إيصالات التحويل البنكي للمستأجرين",
             "title": "مراجعة الإيصال",
             "back_to_list": "العوده للقائمة",
             "tenant_details": "تفاصيل المستooter",
@@ -6605,7 +7007,150 @@
             "approve_mismatch_override": "Envoy على رغم من اختلاف المبلغ (سيُسجَّل في سجل المراجعة)",
             "partial_approval": "Envoy جزئية (اعتماد مبلغ مختلف عن المُحوّل)",
             "approved_amount": "المبلغ المعتمد (SAR)",
-            "partial_shortfall": "Envoy نقص ${amount} SAR كubits (الفاتورة تبقى مفتوحة)"
+            "partial_shortfall": "Envoy نقص ${amount} SAR كubits (الفاتورة تبقى مفتوحة)",
+            "short_by": "⚠️ ناقص {amount}",
+            "transferred_less_than_required": "المبلغ المُحوّل أقل من المطلوب بـ {amount} SAR",
+            "transferred_more_than_required": "المبلغ المُحوّل أكثر من المطلوب بـ {amount} SAR (سيُسجَّل كرصيد دائن)",
+            "shortfall_recorded_as_credit": "سيُسجَّل نقص {amount} SAR كرصيد (الفاتورة تبقى مفتوحة)",
+            "pending": "قيد المراجعة",
+            "approved": "موافق عليها",
+            "rejected": "مرفوضة",
+            "pending_amount": "مبالغ قيد المراجعة",
+            "search_by_tenant_name": {
+                "": {
+                    "": {
+                        "": "ابحث باسم المستأجر..."
+                    }
+                }
+            },
+            "tenant": "المستأجر",
+            "submitted": "مرفوع",
+            "actions": "إجراءات",
+            "no_receipts": "لا توجد إيصالات",
+            "review": "مراجعة",
+            "approved_2": "موافق عليه",
+            "rejected_2": "مرفوض",
+            "all_statuses": "جميع الحالات",
+            "no_comparison": "لا مقارنة",
+            "match_2": "✓ مطابق",
+            "back_to_list_2": "العودة للقائمة",
+            "tenant_details_2": "تفاصيل المستأجر",
+            "name_2": "الاسم:",
+            "email_2": "البريد:",
+            "plan_2": "الباقة:",
+            "cycle_2": "دورة الفوترة:",
+            "approve_and_activate_2": "موافقة وتفعيل الاشتراك",
+            "reject_receipt_2": "رفض الإيصال",
+            "download_2": "تحميل",
+            "please_provide_a_rejection_reason": {
+                "_the_tenant_wi": "يرجى توضيح سبب الرفض. سيتم إبلاغ المستأجر بالسبب."
+            },
+            "e": {
+                "g": {
+                    "_amount_mismatch_receipt_unclear": {
+                        "": {
+                            "": {
+                                "": "مثال: المبلغ لا يطابق المطلوب، الإيصال غير واضح..."
+                            }
+                        }
+                    },
+                    "_confirmed_full_amount_received_from_tenant": {
+                        "": "مثال: تأكيد استلام المبلغ الكامل من العميل..."
+                    }
+                }
+            },
+            "confirm_reject_2": "تأكيد الرفض",
+            "confirm_receipt_approval": "تأكيد الموافقة على الإيصال",
+            "approve_despite_the_amount_mismatch_will_be_reco": "أوافق على الرغم من اختلاف المبلغ (سيُسجَّل في سجل المراجعة)",
+            "partial_approval_credit_a_different_amount_than_": "موافقة جزئية (اعتماد مبلغ مختلف عن المُحوّل)",
+            "a_shortfall_of": "سيُسجَّل نقص ",
+            "sar_will_be_recorded_as_credit_the_invoice_stays": " SAR كرصيد (الفاتورة تبقى مفتوحة)",
+            "confirm_approve_2": "تأكيد الموافقة",
+            "pending_2": "قيد المراجعة",
+            "approved_3": "موافق عليه",
+            "rejected_3": "مرفوض",
+            "the_transferred_amount_is_less_than_required_by": "المبلغ المُحوّل أقل من المطلوب بـ ",
+            "the_transferred_amount_is_more_than_required_by": "المبلغ المُحوّل أكثر من المطلوب بـ ",
+            "sar_it_will_be_recorded_as_credit": " SAR (سيُسجَّل كرصيد دائن)"
+        },
+        "help": {
+            "saturday_-_thursday_800_am_-_1000_pm": "السبت - الخميس: 8:00 ص - 10:00 م",
+            "edit_topic": "تعديل الموضوع",
+            "delete_topic": "حذف الموضوع",
+            "select_the_section": {
+                "": {
+                    "": {
+                        "": "اختر القسم..."
+                    }
+                }
+            },
+            "e": {
+                "g": {
+                    "_the_work_order_lifecycle_from_entry_to_exit": "مثال: دورة حياة كرت العمل من الدخول حتى الخروج",
+                    "_work_orders": "مثال: كروت العمل",
+                    "_how_do_you_create_a_new_work_order_for_a_ve": "مثال: كيف تنشئ كرت عمل جديد للمركبة؟",
+                    "_you_can_attach_photos_of_the_vehicle_damage": "مثال: يمكنك إرفاق صور أضرار المركبة قبل البدء..."
+                }
+            },
+            "recalculate_the_duration_automatically_from_the_": "إعادة احتساب المدة تلقائياً من الرابط",
+            "httpswww": {
+                "youtube": {
+                    "comwatchv": {
+                        "": {
+                            "": {
+                                "_or_httpsyoutu": {
+                                    "be": {
+                                        "": {
+                                            "": "https://www.youtube.com/watch?v=... أو https://youtu.be/..."
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "a_simple_explanation_of_what_the_training_video_": "شرح مبسط لما يتضمنه الفيديو التدريبي...",
+            "a_short_description_of_this_guide": {
+                "": {
+                    "": {
+                        "": "وصف سريع لمحتوى هذا الدليل..."
+                    }
+                }
+            },
+            "write_the_step_here": {
+                "": {
+                    "": {
+                        "": "اكتب الخطوة هنا..."
+                    }
+                }
+            },
+            "delete_this_step": "حذف هذه الخطوة",
+            "go_to_work_orders": "الانتقال إلى كروت العمل",
+            "work_orders_and_services": "كروت العمل والخدمات",
+            "write_the_question_here": {
+                "": {
+                    "": {
+                        "": "اكتب السؤال هنا..."
+                    }
+                }
+            },
+            "write_the_detailed_answer_here": {
+                "": {
+                    "": {
+                        "": "اكتب الإجابة المفصلة..."
+                    }
+                }
+            }
+        },
+        "profile": {
+            "system_admin": "مدير النظام",
+            "admin": "مسؤول",
+            "support": "دعم فني"
+        },
+        "security": {
+            "system_2fa_challenge": "التحقق بخطوتين - لوحة النظام",
+            "two-factor_authentication": "التحقق بخطوتين"
         }
     },
     "subscription": {

@@ -1,9 +1,12 @@
 <template>
-    <div class="flex items-center justify-between">
-        <div class="flex items-center gap-4">
+    <PageHeader
+        :title="tenant.trade_name || tenant.name || $t('common.na')"
+        :subtitle="tenant.legal_name || ''"
+    >
+        <template #back>
             <Link
                 href="/system/tenants"
-                class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
+                class="inline-flex items-center justify-center w-10 h-10 rounded-xl bg-gray-100 hover:bg-gray-200 dark:bg-gray-700/60 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300 transition-colors"
                 :title="$t('system.tenants.title')"
             >
                 <svg
@@ -20,16 +23,20 @@
                     />
                 </svg>
             </Link>
-            <div>
-                <h1 class="text-2xl font-bold text-gray-900 dark:text-white">
-                    {{ tenant.trade_name || tenant.name || $t('common.na') }}
-                </h1>
-                <p v-if="tenant.legal_name" class="text-gray-500 dark:text-gray-400">
-                    {{ tenant.legal_name }}
-                </p>
-            </div>
-        </div>
-        <div class="flex items-center gap-2 flex-wrap">
+        </template>
+
+        <template #icon>
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
+                />
+            </svg>
+        </template>
+
+        <template #actions>
             <span
                 v-if="currentSubscription?.plan"
                 class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium bg-indigo-50 text-indigo-700 border border-indigo-200 dark:bg-indigo-900/30 dark:text-indigo-300 dark:border-indigo-800"
@@ -39,7 +46,7 @@
                         stroke-linecap="round"
                         stroke-linejoin="round"
                         stroke-width="2"
-                        d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012 2v2M7 7h10"
+                        d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
                     />
                 </svg>
                 {{ currentSubscription.plan.name_ar || currentSubscription.plan.name_en }}
@@ -51,14 +58,15 @@
             >
                 {{ getStatusLabel(tenant.status) }}
             </span>
-        </div>
-    </div>
+        </template>
+    </PageHeader>
 </template>
 
 <script setup>
 import { computed } from 'vue';
 import { Link } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
+import PageHeader from '@/Components/PageHeader.vue';
 
 const props = defineProps({
     tenant: { type: Object, required: true },

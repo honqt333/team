@@ -1,60 +1,19 @@
 <template>
-    <div
-        class="print-container bg-white min-h-screen p-8 print:p-0 print:m-0 flex flex-col items-center"
-        :dir="isRtl ? 'rtl' : 'ltr'"
-    >
-        <!-- Print / Back Controls (hidden during print) -->
-        <div class="fixed bottom-6 left-6 flex items-center gap-3 print:hidden z-50">
-            <!-- Back Button -->
-            <button
-                @click="goBack"
-                class="px-4 py-2.5 bg-white hover:bg-gray-50 text-gray-700 rounded-xl text-sm font-semibold transition-all border border-gray-200 shadow-lg flex items-center gap-2"
-            >
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M10 19l-7-7m0 0l7-7m-7 7h18"
-                    />
-                </svg>
-                {{ $t('common.back') }}
-            </button>
-
-            <!-- Print Button -->
-            <button
-                @click="printPage"
-                class="px-5 py-2.5 text-white rounded-xl text-sm font-semibold transition-all shadow-lg flex items-center gap-2"
-                :style="{ backgroundColor: visualSettings.primary_color || '#3b82f6' }"
-            >
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 022 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"
-                    />
-                </svg>
-                {{ $t('common.print') }}
-            </button>
-        </div>
-
-        <PrintEngine
-            :documentType="'purchase_return'"
-            :data="mappedPrintData"
-            :centerData="mappedCenterData"
-            :documentSettings="documentSettings"
-            :visualSettings="visualSettings"
-            :previewMode="false"
-        />
-    </div>
+    <PrintLayout
+        documentType="purchase_return"
+        :data="mappedPrintData"
+        :centerData="mappedCenterData"
+        :documentSettings="documentSettings"
+        :visualSettings="visualSettings"
+        :backUrl="returnInvoice?.id ? route('purchases.returns.show', returnInvoice.id) : null"
+    />
 </template>
 
 <script setup>
 import { computed, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { usePage, router } from '@inertiajs/vue3';
-import PrintEngine from '@/Components/Print/PrintEngine.vue';
+import PrintLayout from '@/Components/Print/PrintLayout.vue';
 
 const props = defineProps({
     returnInvoice: Object,

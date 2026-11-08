@@ -1,17 +1,24 @@
 <template>
     <SystemLayout>
         <div class="space-y-6">
-            <!-- Header -->
-            <div class="flex items-center justify-between">
-                <div>
-                    <h1 class="text-2xl font-bold text-gray-900 dark:text-white">
-                        {{ $t('system.backups.title') }}
-                    </h1>
-                    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                        {{ $t('system.backups.subtitle') }}
-                    </p>
-                </div>
-            </div>
+            <!-- Page Header -->
+            <PageHeader
+                :title="$t('system.backups.title')"
+                :subtitle="$t('system.backups.subtitle')"
+                :totalCount="backups?.total != null ? toEnglish(backups.total) : null"
+                :countLabel="$t('system.backups.title')"
+            >
+                <template #icon>
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21 3.582 4 8 4s8-1.79 8-4"
+                        />
+                    </svg>
+                </template>
+            </PageHeader>
 
             <!-- Stats -->
             <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
@@ -299,8 +306,11 @@ import { useI18n } from 'vue-i18n';
 import { router } from '@inertiajs/vue3';
 import SystemLayout from '@/Layouts/SystemLayout.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
+import PageHeader from '@/Components/PageHeader.vue';
+import { useNumberFormat } from '@/Composables/useNumberFormat';
 
 const { t } = useI18n();
+const { toEnglish } = useNumberFormat();
 
 const props = defineProps({
     backups: Object,

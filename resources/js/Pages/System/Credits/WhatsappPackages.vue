@@ -6,17 +6,17 @@
             <div class="flex items-center justify-between">
                 <div>
                     <h1 class="text-2xl font-bold text-gray-900 dark:text-white">
-                        باقات رصيد WhatsApp
+                        {{ $t('system.credits.whatsapp_credit_packages') }}
                     </h1>
                     <p class="text-gray-500 dark:text-gray-400">
-                        إدارة باقات رسائل واتساب المتاحة للشراء
+                        {{ $t('system.credits.manage_the_whatsapp_packages_available_for_purch') }}
                     </p>
                 </div>
                 <button
                     @click="showAddModal = true"
                     class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-sm font-medium"
                 >
-                    + إضافة باقة
+                    {{ $t('system.credits.add_package_2') }}
                 </button>
             </div>
 
@@ -84,7 +84,7 @@
                         v-if="pkg.is_popular"
                         class="absolute -top-3 right-4 bg-emerald-500 text-white text-xs px-2 py-1 rounded-full"
                     >
-                        الأكثر مبيعاً
+                        {{ $t('system.credits.best_seller_2') }}
                     </div>
 
                     <div class="flex items-center gap-2 mb-4">
@@ -111,7 +111,11 @@
                             "
                             class="px-2 py-1 rounded-full text-xs mr-auto"
                         >
-                            {{ pkg.is_active ? 'مفعّل' : 'معطّل' }}
+                            {{
+                                pkg.is_active
+                                    ? $t('common.enabled')
+                                    : $t('system.credits.disabled_2')
+                            }}
                         </span>
                     </div>
 
@@ -119,15 +123,18 @@
                         <span class="text-4xl font-bold text-emerald-600">
                             {{ pkg.credits.toLocaleString() }}
                         </span>
-                        <span class="text-gray-500 mr-1">رسالة</span>
+                        <span class="text-gray-500 mr-1">{{ $t('system.credits.message_2') }}</span>
                     </div>
 
                     <div class="text-center mb-4">
                         <span class="text-2xl font-bold text-gray-900 dark:text-white">
-                            {{ pkg.price }} ر.س
+                            {{ pkg.price + $t('common.currency') }}
                         </span>
                         <p class="text-xs text-gray-500">
-                            {{ (pkg.price / pkg.credits).toFixed(3) }} ر.س / رسالة
+                            {{
+                                (pkg.price / pkg.credits).toFixed(3) +
+                                $t('system.credits.sar_message_2')
+                            }}
                         </p>
                     </div>
 
@@ -136,19 +143,19 @@
                             @click="editPackage(pkg)"
                             class="flex-1 px-3 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg text-sm hover:bg-gray-200"
                         >
-                            تعديل
+                            {{ $t('common.edit') }}
                         </button>
                         <button
                             @click="deletePackage(pkg)"
                             class="px-3 py-2 text-red-600 hover:bg-red-50 rounded-lg text-sm"
                         >
-                            حذف
+                            {{ $t('common.delete') }}
                         </button>
                     </div>
                 </div>
 
                 <div v-if="!packages.length" class="col-span-full text-center py-12 text-gray-500">
-                    لا توجد باقات. اضغط على "إضافة باقة" لإنشاء أول باقة.
+                    {{ $t('system.credits.no_packages_yet._click_add_package_to_create_the_2') }}
                 </div>
             </div>
         </div>
@@ -162,7 +169,11 @@
                         class="relative bg-white dark:bg-gray-800 rounded-2xl p-6 w-full max-w-md shadow-xl"
                     >
                         <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                            {{ editingPackage ? 'تعديل الباقة' : 'إضافة باقة جديدة' }}
+                            {{
+                                editingPackage
+                                    ? $t('system.credits.edit_package_2')
+                                    : $t('system.credits.add_new_package_2')
+                            }}
                         </h3>
                         <form @submit.prevent="submitPackage" class="space-y-4">
                             <div class="grid grid-cols-2 gap-4">
@@ -170,7 +181,7 @@
                                     <label
                                         class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
                                     >
-                                        الاسم (عربي)
+                                        {{ $t('system.credits.name_arabic_2') }}
                                     </label>
                                     <input
                                         type="text"
@@ -183,7 +194,7 @@
                                     <label
                                         class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
                                     >
-                                        الاسم (إنجليزي)
+                                        {{ $t('system.credits.name_english_2') }}
                                     </label>
                                     <input
                                         type="text"
@@ -199,7 +210,7 @@
                                     <label
                                         class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
                                     >
-                                        عدد الرسائل
+                                        {{ $t('system.credits.message_count_4') }}
                                     </label>
                                     <input
                                         type="number"
@@ -213,7 +224,7 @@
                                     <label
                                         class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
                                     >
-                                        السعر (ر.س)
+                                        {{ $t('system.credits.price_sar_2') }}
                                     </label>
                                     <input
                                         type="number"
@@ -233,7 +244,7 @@
                                         class="rounded border-gray-300 text-emerald-600"
                                     />
                                     <span class="text-sm text-gray-700 dark:text-gray-300">
-                                        مفعّل
+                                        {{ $t('common.enabled') }}
                                     </span>
                                 </label>
                                 <label class="flex items-center gap-2 cursor-pointer">
@@ -243,7 +254,7 @@
                                         class="rounded border-gray-300 text-emerald-600"
                                     />
                                     <span class="text-sm text-gray-700 dark:text-gray-300">
-                                        الأكثر مبيعاً
+                                        {{ $t('system.credits.best_seller_2') }}
                                     </span>
                                 </label>
                             </div>
@@ -253,14 +264,14 @@
                                     :disabled="form.processing"
                                     class="flex-1 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-medium disabled:opacity-50"
                                 >
-                                    حفظ
+                                    {{ $t('common.save') }}
                                 </button>
                                 <button
                                     type="button"
                                     @click="showAddModal = false"
                                     class="px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg"
                                 >
-                                    إلغاء
+                                    {{ $t('common.cancel') }}
                                 </button>
                             </div>
                         </form>
@@ -272,6 +283,9 @@
 </template>
 
 <script setup>
+import { useI18n } from 'vue-i18n';
+const { t } = useI18n();
+
 import { ref } from 'vue';
 import { Head, Link, router, useForm } from '@inertiajs/vue3';
 import SystemLayout from '@/Layouts/SystemLayout.vue';
@@ -318,7 +332,7 @@ const submitPackage = () => {
 };
 
 const deletePackage = (pkg) => {
-    if (confirm(`هل تريد حذف باقة "${pkg.name_ar}"؟`))
+    if (confirm(t('system.credits.delete_package', { name: pkg.name_ar })))
         router.delete(`/system/whatsapp/packages/${pkg.id}`);
 };
 </script>

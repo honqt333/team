@@ -1,17 +1,24 @@
 <template>
     <SystemLayout>
         <div class="space-y-6">
-            <!-- Header -->
-            <div class="flex items-center justify-between">
-                <div>
-                    <h1 class="text-2xl font-bold text-gray-900 dark:text-white">
-                        {{ $t('system.invoices.title') }}
-                    </h1>
-                    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                        {{ $t('system.invoices.subtitle') }}
-                    </p>
-                </div>
-            </div>
+            <!-- Page Header -->
+            <PageHeader
+                :title="$t('system.invoices.title')"
+                :subtitle="$t('system.invoices.subtitle')"
+                :totalCount="invoices?.total != null ? toEnglish(invoices.total) : null"
+                :countLabel="$t('system.invoices.title')"
+            >
+                <template #icon>
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2z"
+                        />
+                    </svg>
+                </template>
+            </PageHeader>
 
             <!-- Stats -->
             <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
@@ -216,8 +223,11 @@ import { useI18n } from 'vue-i18n';
 import { Link, router } from '@inertiajs/vue3';
 import SystemLayout from '@/Layouts/SystemLayout.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
+import PageHeader from '@/Components/PageHeader.vue';
+import { useNumberFormat } from '@/Composables/useNumberFormat';
 
 const { t } = useI18n();
+const { toEnglish } = useNumberFormat();
 
 const statusOptions = computed(() => [
     { value: 'pending', label: t('system.invoices.status.pending') },

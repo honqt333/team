@@ -11,10 +11,15 @@ use App\Models\HR\Leave;
 use App\Models\HR\PayrollItem;
 use App\Models\WorkOrder;
 use App\Models\WorkOrderItem;
+use App\Models\WorkOrderLaborEntry;
+use App\Models\WorkOrderPhoto;
+use App\Services\WorkOrderLaborService;
 use App\Support\TenancyContext;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
+use RuntimeException;
 
 class EmployeePortalController extends Controller
 {
@@ -275,35 +280,116 @@ class EmployeePortalController extends Controller
         $this->authorize('viewOwn', Employee::class);
 
         $employee = $this->getEmployee();
+        $status = $request->get('status', 'active');
+        $search = $request->get('search');
+        $userId = $employee->user_id;
 
-        $status = $request->get('status', 'open');
-
-        // Get work orders with items assigned to this employee
-        $workOrders = WorkOrder::query()
+        $workOrdersQuery = WorkOrder::query()
             ->where('center_id', $employee->center_id)
-            ->whereHas('items', function ($query) use ($employee) {
-                $query->whereHas('technicians', function ($q) use ($employee) {
-                    $q->where('users.id', $employee->id);
+            ->whereHas('items', function ($query) use ($userId) {
+                $query->whereHas('technicians', function ($q) use ($userId) {
+                    $q->where('users.id', $userId);
                 });
             })
             ->with([
+                'customer',
                 'vehicle.customer',
+                'vehicle.make',
+                'vehicle.model',
                 'items' => fn ($q) => $q
-                    ->whereHas('technicians', function ($query) use ($employee) {
-                        $query->where('users.id', $employee->id);
+                    ->whereHas('technicians', function ($query) use ($userId) {
+                        $query->where('users.id', $userId);
                     })
-                    ->with(['parts', 'media', 'technicians:id,name']),
-            ])
-            ->when($status !== 'all', function ($query) use ($status) {
-                $query->where('status', $status);
-            })
-            ->orderByDesc('created_at')
-            ->paginate(15);
+                    ->with([
+                        'parts',
+                        'technicians' => fn ($tq) => $tq->withPivot(['assigned_at', 'completed_at', 'notes', 'share']),
+                        'photos',
+                        'itemNotes' => fn ($nq) => $nq->with('user:id,name')->latest(),
+                        'laborEntries' => fn ($lq) => $lq->where('user_id', $userId)->latest(),
+                    ]),
+            ]);
+
+        if (! empty($search)) {
+            $workOrdersQuery->where(function ($q) use ($search) {
+                $q->where('code', 'like', "%{$search}%")
+                    ->orWhereHas('vehicle', function ($vq) use ($search) {
+                        $vq->where('plate_number', 'like', "%{$search}%")
+                            ->orWhere('vin', 'like', "%{$search}%")
+                            ->orWhereHas('customer', function ($cq) use ($search) {
+                                $cq->where('name_ar', 'like', "%{$search}%")
+                                    ->orWhere('name_en', 'like', "%{$search}%")
+                                    ->orWhere('phone', 'like', "%{$search}%");
+                            });
+                    });
+            });
+        }
+
+        if ($status === 'active') {
+            $workOrdersQuery->whereHas('items', function ($query) use ($userId) {
+                $query->whereHas('technicians', fn ($q) => $q->where('users.id', $userId))
+                    ->whereIn('status', [
+                        WorkOrderItem::STATUS_PENDING,
+                        WorkOrderItem::STATUS_IN_PROGRESS,
+                        WorkOrderItem::STATUS_ON_HOLD,
+                        WorkOrderItem::STATUS_READY_FOR_QC,
+                    ]);
+            });
+        } elseif ($status === 'completed') {
+            $workOrdersQuery->whereHas('items', function ($query) use ($userId) {
+                $query->whereHas('technicians', fn ($q) => $q->where('users.id', $userId))
+                    ->where('status', WorkOrderItem::STATUS_COMPLETED);
+            });
+        } elseif ($status !== 'all') {
+            $workOrdersQuery->whereHas('items', function ($query) use ($userId, $status) {
+                $query->whereHas('technicians', fn ($q) => $q->where('users.id', $userId))
+                    ->where('status', $status);
+            });
+        }
+
+        $workOrders = $workOrdersQuery->orderByDesc('created_at')->paginate(15)->withQueryString();
+
+        $counts = [
+            'active' => WorkOrderItem::query()
+                ->where('center_id', $employee->center_id)
+                ->whereHas('technicians', fn ($q) => $q->where('users.id', $userId))
+                ->whereIn('status', [
+                    WorkOrderItem::STATUS_PENDING,
+                    WorkOrderItem::STATUS_IN_PROGRESS,
+                    WorkOrderItem::STATUS_ON_HOLD,
+                    WorkOrderItem::STATUS_READY_FOR_QC,
+                ])->count(),
+            'in_progress' => WorkOrderItem::query()
+                ->where('center_id', $employee->center_id)
+                ->whereHas('technicians', fn ($q) => $q->where('users.id', $userId))
+                ->where('status', WorkOrderItem::STATUS_IN_PROGRESS)->count(),
+            'pending' => WorkOrderItem::query()
+                ->where('center_id', $employee->center_id)
+                ->whereHas('technicians', fn ($q) => $q->where('users.id', $userId))
+                ->where('status', WorkOrderItem::STATUS_PENDING)->count(),
+            'ready_for_qc' => WorkOrderItem::query()
+                ->where('center_id', $employee->center_id)
+                ->whereHas('technicians', fn ($q) => $q->where('users.id', $userId))
+                ->where('status', WorkOrderItem::STATUS_READY_FOR_QC)->count(),
+            'completed' => WorkOrderItem::query()
+                ->where('center_id', $employee->center_id)
+                ->whereHas('technicians', fn ($q) => $q->where('users.id', $userId))
+                ->where('status', WorkOrderItem::STATUS_COMPLETED)->count(),
+            'all' => WorkOrderItem::query()
+                ->where('center_id', $employee->center_id)
+                ->whereHas('technicians', fn ($q) => $q->where('users.id', $userId))
+                ->count(),
+        ];
 
         return Inertia::render('EmployeePortal/MyTasks', [
             'workOrders' => $workOrders,
             'statusFilter' => $status,
-            'employee' => $employee->only(['id', 'name_ar']),
+            'counts' => $counts,
+            'filters' => [
+                'status' => $status,
+                'search' => $search,
+            ],
+            'employee' => $employee->only(['id', 'name_ar', 'name_en']),
+            'authUserId' => $userId,
         ]);
     }
 
@@ -342,14 +428,14 @@ class EmployeePortalController extends Controller
         $message = __('messages.item_status_updated');
 
         return $request->expectsJson()
-            ? response()->json(['success' => $message, 'item' => $item->fresh()])
+            ? response()->json(['success' => $message, 'item' => $item->fresh(['parts', 'technicians:id,name', 'photos'])])
             : redirect()->back()->with('success', $message);
     }
 
     /**
      * Mark work order item as completed (Technician)
      */
-    public function completeItem(Request $request, WorkOrder $workOrder, WorkOrderItem $item)
+    public function completeItem(Request $request, WorkOrder $workOrder, WorkOrderItem $item, WorkOrderLaborService $laborService)
     {
         $this->authorize('update', $item);
 
@@ -363,29 +449,374 @@ class EmployeePortalController extends Controller
                 : redirect()->back()->with('error', __('messages.action_not_confirmed'));
         }
 
-        $item->update([
-            'status' => WorkOrderItem::STATUS_COMPLETED,
-            'completed_at' => now(),
-        ]);
+        $userId = $request->user()->id;
 
-        // If all items are completed, auto-advance the work order
-        if ($workOrder->allItemsCompleted()) {
-            if (in_array($workOrder->status, [WorkOrder::STATUS_OPEN, WorkOrder::STATUS_IN_PROGRESS])) {
-                $workOrder->update(['status' => WorkOrder::STATUS_READY_FOR_QC]);
+        // 1. End any active or paused labor session for this technician
+        $openEntry = WorkOrderLaborEntry::query()
+            ->where('work_order_item_id', $item->id)
+            ->where('user_id', $userId)
+            ->whereIn('status', [WorkOrderLaborEntry::STATUS_RUNNING, WorkOrderLaborEntry::STATUS_PAUSED])
+            ->first();
+
+        if ($openEntry) {
+            try {
+                $laborService->end($openEntry);
+            } catch (RuntimeException $e) {
+                // Ignore if already ended
             }
         }
 
-        $workOrder->logActivity(
-            'item_completed',
-            __('work_orders.activities.actions.item_completed', [
-                'title' => $item->title,
-            ])
-        );
+        // 2. Mark this technician's completion in pivot table
+        $item->technicians()->updateExistingPivot($userId, [
+            'completed_at' => now(),
+        ]);
 
-        $message = __('messages.item_completed');
+        // 3. Check if all assigned technicians on this service have completed
+        $remainingTechs = $item->technicians()
+            ->wherePivotNull('completed_at')
+            ->get();
+
+        $allCompleted = $remainingTechs->isEmpty();
+
+        if ($allCompleted) {
+            // All technicians are done -> mark the item completed
+            $item->update([
+                'status' => WorkOrderItem::STATUS_COMPLETED,
+                'completed_at' => now(),
+                'paused_at' => null,
+            ]);
+
+            // Calculate actual duration in minutes from all completed labor entries
+            $totalSeconds = $item->laborEntries()->get()->sum(fn ($e) => $e->effectiveDurationSeconds());
+            $item->update([
+                'actual_duration' => (int) round($totalSeconds / 60),
+            ]);
+
+            // If all items on the work order are completed, auto-advance the work order
+            if ($workOrder->allItemsCompleted()) {
+                if (in_array($workOrder->status, [WorkOrder::STATUS_OPEN, WorkOrder::STATUS_IN_PROGRESS])) {
+                    $workOrder->update(['status' => WorkOrder::STATUS_READY_FOR_QC]);
+                }
+            }
+
+            $workOrder->logActivity(
+                'item_completed',
+                "تم إكمال الخدمة ({$item->title}) بالكامل من جميع الفنيين"
+            );
+
+            $message = 'تم إكمال الخدمة بنجاح من جميع الفنيين المكلفين';
+        } else {
+            // Other technicians are still working
+            if ($item->status === WorkOrderItem::STATUS_PENDING) {
+                $item->update(['status' => WorkOrderItem::STATUS_IN_PROGRESS]);
+            }
+
+            $techNames = $remainingTechs->pluck('name')->join('، ');
+            $workOrder->logActivity(
+                'tech_completed',
+                "أنهى الفني ({$request->user()->name}) دوره في الخدمة ({$item->title})"
+            );
+
+            $message = "تم إنهاء دورك في الخدمة بنجاح، بانتظار استكمال باقي الفنيين ({$techNames})";
+        }
+
+        $freshItem = $item->fresh([
+            'parts',
+            'technicians' => fn ($tq) => $tq->withPivot(['assigned_at', 'completed_at', 'notes', 'share']),
+            'photos',
+            'itemNotes' => fn ($nq) => $nq->with('user:id,name')->latest(),
+            'laborEntries' => fn ($lq) => $lq->where('user_id', $userId)->latest(),
+        ]);
 
         return $request->expectsJson()
-            ? response()->json(['success' => $message, 'item' => $item->fresh()])
+            ? response()->json([
+                'success' => $message,
+                'item' => $freshItem,
+                'all_completed' => $allCompleted,
+            ])
             : redirect()->back()->with('success', $message);
+    }
+
+    /**
+     * Update technician notes for an item
+     */
+    public function updateNotes(Request $request, WorkOrder $workOrder, WorkOrderItem $item)
+    {
+        $this->authorize('update', $item);
+
+        $validated = $request->validate([
+            'technician_notes' => 'nullable|string|max:2000',
+        ]);
+
+        $content = trim($validated['technician_notes'] ?? '');
+
+        // 1. Update technician_notes column on the item
+        $item->update(['technician_notes' => $content]);
+
+        // 2. Also reflect in itemNotes (WorkOrderItemNote) so it appears on the main work order Notes tab!
+        if (! empty($content)) {
+            $item->itemNotes()->create([
+                'tenant_id' => $workOrder->tenant_id,
+                'center_id' => $workOrder->center_id,
+                'work_order_id' => $workOrder->id,
+                'user_id' => $request->user()->id,
+                'content' => $content,
+            ]);
+
+            $workOrder->logActivity(
+                'note_added',
+                "ملاحظة فنية من ({$request->user()->name}) على الخدمة ({$item->title}): {$content}"
+            );
+        }
+
+        $freshItem = $item->fresh([
+            'parts',
+            'technicians' => fn ($tq) => $tq->withPivot(['assigned_at', 'completed_at', 'notes', 'share']),
+            'photos',
+            'itemNotes' => fn ($nq) => $nq->with('user:id,name')->latest(),
+            'laborEntries' => fn ($lq) => $lq->where('user_id', $request->user()->id)->latest(),
+        ]);
+
+        return response()->json([
+            'success' => __('messages.notes_saved'),
+            'item' => $freshItem,
+        ]);
+    }
+
+    /**
+     * Upload photos for an item
+     */
+    public function uploadMedia(Request $request, WorkOrder $workOrder, WorkOrderItem $item)
+    {
+        $this->authorize('update', $item);
+
+        $request->validate([
+            'files.*' => 'required|image|max:5120', // 5MB max per image
+            'files' => 'required|array|min:1|max:10',
+            'type' => 'nullable|string|in:general,before,after,damage',
+        ]);
+
+        $type = $request->input('type', WorkOrderPhoto::TYPE_GENERAL);
+        $createdPhotos = [];
+
+        foreach ($request->file('files') as $file) {
+            $path = $file->store("work_orders/{$workOrder->id}/items/{$item->id}", 'public');
+
+            $photo = $workOrder->photos()->create([
+                'work_order_item_id' => $item->id,
+                'path' => $path,
+                'type' => $type,
+                'caption' => $item->title,
+            ]);
+
+            $createdPhotos[] = $photo;
+        }
+
+        $workOrder->logActivity(
+            'photos_uploaded',
+            __('work_orders.activities.actions.photos_uploaded')
+        );
+
+        return response()->json([
+            'success' => __('messages.photos_uploaded_successfully'),
+            'photos' => $item->photos()->get(),
+            'item' => $item->fresh(['parts', 'technicians:id,name', 'photos']),
+        ]);
+    }
+
+    /**
+     * Delete a photo from an item
+     */
+    public function deletePhoto(Request $request, WorkOrder $workOrder, WorkOrderItem $item, WorkOrderPhoto $photo)
+    {
+        $this->authorize('update', $item);
+
+        if ($photo->work_order_id !== $workOrder->id || ($photo->work_order_item_id && $photo->work_order_item_id !== $item->id)) {
+            abort(403);
+        }
+
+        Storage::disk('public')->delete($photo->path);
+        $photo->delete();
+
+        return response()->json([
+            'success' => __('messages.photo_deleted'),
+            'photos' => $item->photos()->get(),
+            'item' => $item->fresh(['parts', 'technicians:id,name', 'photos']),
+        ]);
+    }
+
+    /**
+     * Update checklist for an item
+     */
+    public function updateChecklist(Request $request, WorkOrder $workOrder, WorkOrderItem $item)
+    {
+        $this->authorize('update', $item);
+
+        $validated = $request->validate([
+            'checklist' => 'required|array',
+            'checklist.*.text' => 'required|string|max:500',
+            'checklist.*.completed' => 'boolean',
+        ]);
+
+        $item->update([
+            'checklist' => $validated['checklist'],
+        ]);
+
+        return response()->json([
+            'success' => __('messages.checklist_saved'),
+            'item' => $item->fresh(['parts', 'technicians:id,name', 'photos']),
+        ]);
+    }
+
+    /**
+     * Start timer for an item
+     */
+    public function startTimer(Request $request, WorkOrder $workOrder, WorkOrderItem $item, WorkOrderLaborService $laborService)
+    {
+        $this->authorize('update', $item);
+        $user = $request->user();
+
+        // 1. Start session in WorkOrderLaborService
+        try {
+            $entry = $laborService->start($workOrder, $item, $user);
+        } catch (RuntimeException $e) {
+            $errorMsg = __("messages.{$e->getMessage()}");
+
+            if ($errorMsg === "messages.{$e->getMessage()}") {
+                $errorMsg = $e->getMessage();
+            }
+
+            return response()->json(['error' => $errorMsg], 422);
+        }
+
+        // 2. Keep item level tracking in sync
+        if (! $item->started_at) {
+            $item->update(['started_at' => now()]);
+        }
+        $item->update([
+            'paused_at' => null,
+            'status' => WorkOrderItem::STATUS_IN_PROGRESS,
+        ]);
+
+        if (in_array($workOrder->status, [WorkOrder::STATUS_OPEN, WorkOrder::STATUS_DRAFT])) {
+            $workOrder->update(['status' => WorkOrder::STATUS_IN_PROGRESS]);
+        }
+
+        $freshItem = $item->fresh([
+            'parts',
+            'technicians' => fn ($tq) => $tq->withPivot(['assigned_at', 'completed_at', 'notes', 'share']),
+            'photos',
+            'itemNotes' => fn ($nq) => $nq->with('user:id,name')->latest(),
+            'laborEntries' => fn ($lq) => $lq->where('user_id', $user->id)->latest(),
+        ]);
+
+        return response()->json([
+            'success' => __('messages.timer_started'),
+            'item' => $freshItem,
+            'entry' => $entry,
+        ]);
+    }
+
+    /**
+     * Pause timer for an item
+     */
+    public function pauseTimer(Request $request, WorkOrder $workOrder, WorkOrderItem $item, WorkOrderLaborService $laborService)
+    {
+        $this->authorize('update', $item);
+        $user = $request->user();
+
+        $entry = WorkOrderLaborEntry::query()
+            ->where('work_order_item_id', $item->id)
+            ->where('user_id', $user->id)
+            ->where('status', WorkOrderLaborEntry::STATUS_RUNNING)
+            ->latest()
+            ->first();
+
+        if (! $entry) {
+            return response()->json(['error' => __('messages.entry_not_running')], 422);
+        }
+
+        try {
+            $entry = $laborService->pause($entry);
+        } catch (RuntimeException $e) {
+            return response()->json(['error' => __("messages.{$e->getMessage()}")], 422);
+        }
+
+        $item->update(['paused_at' => now()]);
+
+        $freshItem = $item->fresh([
+            'parts',
+            'technicians' => fn ($tq) => $tq->withPivot(['assigned_at', 'completed_at', 'notes', 'share']),
+            'photos',
+            'itemNotes' => fn ($nq) => $nq->with('user:id,name')->latest(),
+            'laborEntries' => fn ($lq) => $lq->where('user_id', $user->id)->latest(),
+        ]);
+
+        return response()->json([
+            'success' => __('messages.timer_paused'),
+            'item' => $freshItem,
+            'entry' => $entry,
+        ]);
+    }
+
+    /**
+     * Resume timer for an item
+     */
+    public function resumeTimer(Request $request, WorkOrder $workOrder, WorkOrderItem $item, WorkOrderLaborService $laborService)
+    {
+        $this->authorize('update', $item);
+        $user = $request->user();
+
+        $entry = WorkOrderLaborEntry::query()
+            ->where('work_order_item_id', $item->id)
+            ->where('user_id', $user->id)
+            ->where('status', WorkOrderLaborEntry::STATUS_PAUSED)
+            ->latest()
+            ->first();
+
+        if (! $entry) {
+            return response()->json(['error' => __('messages.entry_not_paused')], 422);
+        }
+
+        try {
+            $entry = $laborService->resume($entry);
+        } catch (RuntimeException $e) {
+            return response()->json(['error' => __("messages.{$e->getMessage()}")], 422);
+        }
+
+        $item->update(['paused_at' => null]);
+
+        $freshItem = $item->fresh([
+            'parts',
+            'technicians' => fn ($tq) => $tq->withPivot(['assigned_at', 'completed_at', 'notes', 'share']),
+            'photos',
+            'itemNotes' => fn ($nq) => $nq->with('user:id,name')->latest(),
+            'laborEntries' => fn ($lq) => $lq->where('user_id', $user->id)->latest(),
+        ]);
+
+        return response()->json([
+            'success' => __('messages.timer_resumed'),
+            'item' => $freshItem,
+            'entry' => $entry,
+        ]);
+    }
+
+    /**
+     * Update priority for an item
+     */
+    public function updatePriority(Request $request, WorkOrder $workOrder, WorkOrderItem $item)
+    {
+        $this->authorize('update', $item);
+
+        $validated = $request->validate([
+            'priority' => 'required|in:low,normal,high,urgent',
+        ]);
+
+        $item->update(['priority' => $validated['priority']]);
+
+        return response()->json([
+            'success' => __('messages.priority_updated'),
+            'item' => $item->fresh(['parts', 'technicians:id,name', 'photos']),
+        ]);
     }
 }

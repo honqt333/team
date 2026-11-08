@@ -349,7 +349,9 @@
                             <input
                                 v-model="form.contact_hours"
                                 type="text"
-                                placeholder="السبت - الخميس: 8:00 ص - 10:00 م"
+                                :placeholder="
+                                    $t('system.help.saturday_-_thursday_800_am_-_1000_pm')
+                                "
                                 class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                             />
                         </div>
@@ -547,7 +549,7 @@
                                     type="button"
                                     @click="openTopicModal(topic, getTopicOriginalIndex(topic))"
                                     class="p-2 rounded-lg text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 transition-colors"
-                                    title="تعديل الموضوع"
+                                    :title="$t('system.help.edit_topic')"
                                 >
                                     <svg
                                         class="w-4 h-4"
@@ -567,7 +569,7 @@
                                     type="button"
                                     @click="deleteTopic(getTopicOriginalIndex(topic))"
                                     class="p-2 rounded-lg text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors"
-                                    title="حذف الموضوع"
+                                    :title="$t('system.help.delete_topic')"
                                 >
                                     <svg
                                         class="w-4 h-4"
@@ -843,7 +845,7 @@
                                     :options="categoryFormOptions"
                                     option-label="label"
                                     option-value="value"
-                                    placeholder="اختر القسم..."
+                                    :placeholder="$t('system.help.select_the_section...')"
                                     :compact="true"
                                 />
                             </div>
@@ -895,7 +897,11 @@
                             <input
                                 v-model="videoModal.form.title"
                                 type="text"
-                                placeholder="مثال: دورة حياة كرت العمل من الدخول حتى الخروج"
+                                :placeholder="
+                                    $t(
+                                        'system.help.e.g._the_work_order_lifecycle_from_entry_to_exit'
+                                    )
+                                "
                                 class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
                             />
                         </div>
@@ -910,7 +916,7 @@
                                 <input
                                     v-model="videoModal.form.category"
                                     type="text"
-                                    placeholder="مثال: كروت العمل"
+                                    :placeholder="$t('system.help.e.g._work_orders')"
                                     class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
                                 />
                             </div>
@@ -962,7 +968,11 @@
                                         @click="autoFetchVideoDuration"
                                         :disabled="fetchingDuration"
                                         class="absolute inset-y-1 end-1 px-2.5 bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-900/40 dark:hover:bg-indigo-900/60 text-indigo-600 dark:text-indigo-300 rounded-lg text-[11px] font-bold transition-colors flex items-center gap-1"
-                                        title="إعادة احتساب المدة تلقائياً من الرابط"
+                                        :title="
+                                            $t(
+                                                'system.help.recalculate_the_duration_automatically_from_the_'
+                                            )
+                                        "
                                     >
                                         <span>{{ $t('help.admin.videos.calculate') }}</span>
                                     </button>
@@ -982,7 +992,11 @@
                                 @paste="onVideoUrlPaste"
                                 type="url"
                                 dir="ltr"
-                                placeholder="https://www.youtube.com/watch?v=... أو https://youtu.be/..."
+                                :placeholder="
+                                    $t(
+                                        'system.help.httpswww.youtube.comwatchv..._or_httpsyoutu.be..'
+                                    )
+                                "
                                 class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm font-mono"
                             />
                             <p
@@ -1034,7 +1048,11 @@
                             <textarea
                                 v-model="videoModal.form.description"
                                 rows="3"
-                                placeholder="شرح مبسط لما يتضمنه الفيديو التدريبي..."
+                                :placeholder="
+                                    $t(
+                                        'system.help.a_simple_explanation_of_what_the_training_video_'
+                                    )
+                                "
                                 class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
                             ></textarea>
                         </div>
@@ -1103,7 +1121,7 @@
                                     :options="categoryFormOptions"
                                     option-label="label"
                                     option-value="value"
-                                    placeholder="اختر القسم..."
+                                    :placeholder="$t('system.help.select_the_section...')"
                                 />
                             </div>
 
@@ -1131,7 +1149,11 @@
                             <input
                                 v-model="topicModal.form.title"
                                 type="text"
-                                placeholder="مثال: كيف تنشئ كرت عمل جديد للمركبة؟"
+                                :placeholder="
+                                    $t(
+                                        'system.help.e.g._how_do_you_create_a_new_work_order_for_a_ve'
+                                    )
+                                "
                                 class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
                             />
                         </div>
@@ -1145,7 +1167,9 @@
                             <input
                                 v-model="topicModal.form.summary"
                                 type="text"
-                                placeholder="وصف سريع لمحتوى هذا الدليل..."
+                                :placeholder="
+                                    $t('system.help.a_short_description_of_this_guide...')
+                                "
                                 class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
                             />
                         </div>
@@ -1180,14 +1204,14 @@
                                     <input
                                         v-model="topicModal.form.steps[sIdx]"
                                         type="text"
-                                        placeholder="اكتب الخطوة هنا..."
+                                        :placeholder="$t('system.help.write_the_step_here...')"
                                         class="flex-1 px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-xs"
                                     />
                                     <button
                                         type="button"
                                         @click="removeTopicStep(sIdx)"
                                         class="p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 rounded-lg"
-                                        title="حذف هذه الخطوة"
+                                        :title="$t('system.help.delete_this_step')"
                                     >
                                         ✕
                                     </button>
@@ -1204,7 +1228,11 @@
                             <input
                                 v-model="topicModal.form.tip"
                                 type="text"
-                                placeholder="مثال: يمكنك إرفاق صور أضرار المركبة قبل البدء..."
+                                :placeholder="
+                                    $t(
+                                        'system.help.e.g._you_can_attach_photos_of_the_vehicle_damage'
+                                    )
+                                "
                                 class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
                             />
                         </div>
@@ -1219,7 +1247,7 @@
                                 <input
                                     v-model="topicModal.form.linkLabel"
                                     type="text"
-                                    placeholder="الانتقال إلى كروت العمل"
+                                    :placeholder="$t('system.help.go_to_work_orders')"
                                     class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
                                 />
                             </div>
@@ -1315,7 +1343,7 @@
                             <input
                                 v-model="categoryModal.form.name"
                                 type="text"
-                                placeholder="كروت العمل والخدمات"
+                                :placeholder="$t('system.help.work_orders_and_services')"
                                 class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
                             />
                         </div>
@@ -1381,7 +1409,7 @@
                             <input
                                 v-model="faqModal.form.q"
                                 type="text"
-                                placeholder="اكتب السؤال هنا..."
+                                :placeholder="$t('system.help.write_the_question_here...')"
                                 class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
                             />
                         </div>
@@ -1395,7 +1423,7 @@
                             <textarea
                                 v-model="faqModal.form.a"
                                 rows="4"
-                                placeholder="اكتب الإجابة المفصلة..."
+                                :placeholder="$t('system.help.write_the_detailed_answer_here...')"
                                 class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
                             ></textarea>
                         </div>

@@ -1,17 +1,27 @@
 <template>
     <SystemLayout>
-        <Head :title="isAr ? 'إعدادات التذكير التلقائي' : 'Dunning Automation Settings'" />
+        <Head
+            :title="
+                isAr
+                    ? $t('system.settings.dunning_automation_settings')
+                    : 'Dunning Automation Settings'
+            "
+        />
 
         <div class="space-y-6">
             <!-- Header -->
             <div>
                 <h1 class="text-2xl font-bold text-gray-900 dark:text-white">
-                    {{ isAr ? 'إعدادات التذكير التلقائي' : 'Dunning Automation Settings' }}
+                    {{
+                        isAr
+                            ? $t('system.settings.dunning_automation_settings')
+                            : 'Dunning Automation Settings'
+                    }}
                 </h1>
                 <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
                     {{
                         isAr
-                            ? 'تذكير المستأجرين المتأخرين في السداد تلقائياً عبر إيميل/إشعار/WhatsApp. كل تذكير يُسجَّل في سجل كامل.'
+                            ? $t('system.settings.automatically_remind_tenants_with_overdue_invoic')
                             : 'Automatically remind tenants with overdue invoices via email/in-app/WhatsApp. Every reminder is logged for audit.'
                     }}
                 </p>
@@ -29,12 +39,18 @@
                     />
                     <div class="flex-1">
                         <div class="text-base font-semibold text-gray-900 dark:text-white">
-                            {{ isAr ? 'تفعيل التذكير التلقائي' : 'Enable automated dunning' }}
+                            {{
+                                isAr
+                                    ? $t('system.settings.enable_automated_dunning')
+                                    : 'Enable automated dunning'
+                            }}
                         </div>
                         <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
                             {{
                                 isAr
-                                    ? 'عند التفعيل، الـ cron اليومي يرسل تذكيرات للمستأجرين اللي عليهم فواتير متأخرة حسب الـ tiers المحددة.'
+                                    ? $t(
+                                          'system.settings.when_enabled_the_daily_cron_sends_reminders_to_t'
+                                      )
                                     : 'When enabled, the daily cron sends reminders to tenants with overdue invoices based on the tiers below.'
                             }}
                         </p>
@@ -48,12 +64,14 @@
             >
                 <div>
                     <label class="block text-sm font-semibold text-gray-900 dark:text-white">
-                        {{ isAr ? 'ساعات الصمت' : 'Quiet hours' }}
+                        {{ isAr ? $t('system.settings.quiet_hours') : 'Quiet hours' }}
                     </label>
                     <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
                         {{
                             isAr
-                                ? 'لا تُرسل تذكيرات داخل هذا النطاق. اتركها فارغة لتعطيل الميزة.'
+                                ? $t(
+                                      'system.settings.no_reminders_will_be_sent_in_this_window._leave_'
+                                  )
                                 : 'No reminders will be sent in this window. Leave blank to disable.'
                         }}
                     </p>
@@ -74,12 +92,14 @@
 
                 <div>
                     <label class="block text-sm font-semibold text-gray-900 dark:text-white">
-                        {{ isAr ? 'تعليق تلقائي بعد' : 'Auto-suspend after' }}
+                        {{ isAr ? $t('system.settings.auto-suspend_after') : 'Auto-suspend after' }}
                     </label>
                     <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
                         {{
                             isAr
-                                ? 'أيام بعد آخر تذكير في المستوى 4 (نهائي) قبل تعليق الحساب تلقائياً. اتركها فارغة لتعطيل الميزة.'
+                                ? $t(
+                                      'system.settings.days_after_the_last_tier-4_final_reminder_before'
+                                  )
                                 : 'Days after the last tier-4 (final) reminder before auto-suspending the tenant. Leave blank to disable.'
                         }}
                     </p>
@@ -91,7 +111,9 @@
                             max="90"
                             class="w-24 rounded-md border-gray-300 text-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                         />
-                        <span class="text-sm text-gray-500">{{ isAr ? 'يوم' : 'days' }}</span>
+                        <span class="text-sm text-gray-500">
+                            {{ isAr ? $t('common.day') : 'days' }}
+                        </span>
                     </div>
                 </div>
             </div>
@@ -102,36 +124,37 @@
             >
                 <div class="border-b border-gray-200 px-5 py-4 dark:border-gray-700">
                     <h2 class="text-sm font-bold uppercase tracking-wider text-gray-500">
-                        {{ isAr ? 'مستويات التذكير' : 'Reminder Tiers' }}
+                        {{ isAr ? $t('system.settings.reminder_tiers') : 'Reminder Tiers' }}
                     </h2>
                 </div>
                 <table class="w-full text-sm">
                     <thead class="bg-gray-50 text-xs uppercase text-gray-500 dark:bg-gray-900/40">
                         <tr>
                             <th class="px-5 py-3 text-start">
-                                {{ isAr ? 'المستوى' : 'Tier' }}
+                                {{ isAr ? $t('system.settings.tier_3') : 'Tier' }}
                             </th>
                             <th class="px-5 py-3 text-start">
-                                {{ isAr ? 'بعد' : 'After' }}
+                                {{ isAr ? $t('system.settings.after') : 'After' }}
                             </th>
                             <th class="px-5 py-3 text-start">
-                                {{ isAr ? 'اللهجة' : 'Tone' }}
+                                {{ isAr ? $t('system.settings.tone') : 'Tone' }}
                             </th>
                             <th class="px-5 py-3 text-start">
-                                {{ isAr ? 'القنوات' : 'Channels' }}
+                                {{ isAr ? $t('system.settings.channels') : 'Channels' }}
                             </th>
                             <th class="px-5 py-3 text-start">
-                                {{ isAr ? 'مفعّل' : 'Active' }}
+                                {{ isAr ? $t('common.enabled') : 'Active' }}
                             </th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
                         <tr v-for="(tier, key) in tierDefinitions" :key="key">
                             <td class="px-5 py-3 font-medium text-gray-900 dark:text-white">
-                                {{ isAr ? 'المستوى' : 'Tier' }} {{ key.replace('tier_', '') }}
+                                {{ isAr ? $t('system.settings.tier_3') : 'Tier' }}
+                                {{ key.replace('tier_', '') }}
                             </td>
                             <td class="px-5 py-3 text-gray-700 dark:text-gray-300">
-                                {{ tier.days }} {{ isAr ? 'يوم' : 'days' }}
+                                {{ tier.days }} {{ isAr ? $t('common.day') : 'days' }}
                             </td>
                             <td class="px-5 py-3 text-gray-700 dark:text-gray-300">
                                 {{ tier.tone[isAr ? 'ar' : 'en'] }}
@@ -176,7 +199,7 @@
                     :href="'/system/billing/dunning-log'"
                     class="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700"
                 >
-                    {{ isAr ? 'عرض السجل' : 'View log' }}
+                    {{ isAr ? $t('system.settings.view_log') : 'View log' }}
                 </Link>
                 <button
                     @click="save"
@@ -186,10 +209,10 @@
                     {{
                         processing
                             ? isAr
-                                ? 'يحفظ...'
+                                ? $t('system.settings.saving...')
                                 : 'Saving...'
                             : isAr
-                              ? 'حفظ الإعدادات'
+                              ? $t('system.settings.save')
                               : 'Save settings'
                     }}
                 </button>
@@ -203,7 +226,8 @@
                     class="rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm dark:border-gray-700 dark:bg-gray-900/40"
                 >
                     <div class="font-semibold text-gray-900 dark:text-white">
-                        {{ isAr ? 'المستوى' : 'Tier' }} {{ key.replace('tier_', '') }} —
+                        {{ isAr ? $t('system.settings.tier_3') : 'Tier' }}
+                        {{ key.replace('tier_', '') }} —
                         {{ tier.tone[isAr ? 'ar' : 'en'] }}
                         ({{ tier.days }}d)
                     </div>
@@ -217,6 +241,9 @@
 </template>
 
 <script setup>
+import { useI18n } from 'vue-i18n';
+const { t } = useI18n();
+
 import { computed, onMounted, ref } from 'vue';
 import { Head, router, Link } from '@inertiajs/vue3';
 import SystemLayout from '@/Layouts/SystemLayout.vue';
@@ -233,7 +260,7 @@ const isAr = computed(() => (document?.documentElement?.lang || 'ar') === 'ar');
 
 const availableChannels = [
     { key: 'email', label: 'Email' },
-    { key: 'in_app', label: isAr.value ? 'داخل التطبيق' : 'In-app' },
+    { key: 'in_app', label: isAr.value ? t('system.settings.in-app') : 'In-app' },
     { key: 'sms', label: 'SMS' },
     { key: 'whatsapp', label: 'WhatsApp' },
 ];

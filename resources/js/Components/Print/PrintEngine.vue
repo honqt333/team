@@ -1,10 +1,6 @@
 <template>
     <div class="print-engine-wrapper">
-        <component 
-            :is="activeTemplate" 
-            v-bind="props" 
-            :documentType="normalizedDocType"
-        />
+        <component :is="activeTemplate" v-bind="props" :documentType="normalizedDocType" />
     </div>
 </template>
 
@@ -16,19 +12,19 @@ import TemplateThermal80 from './PrintTemplates/TemplateThermal80.vue';
 const props = defineProps({
     documentType: {
         type: String,
-        default: 'invoice'
+        default: 'invoice',
     },
     data: {
         type: Object,
-        default: () => ({})
+        default: () => ({}),
     },
     centerData: {
         type: Object,
-        default: () => ({})
+        default: () => ({}),
     },
     documentSettings: {
         type: Object,
-        default: () => ({})
+        default: () => ({}),
     },
     visualSettings: {
         type: Object,
@@ -38,13 +34,13 @@ const props = defineProps({
             show_stamp: true,
             show_qr_code: true,
             primary_color: '#fbbf24',
-            footer_text: ''
-        })
+            footer_text: '',
+        }),
     },
     previewMode: {
         type: Boolean,
-        default: false
-    }
+        default: false,
+    },
 });
 
 const normalizedDocType = computed(() => {
@@ -56,12 +52,15 @@ const templates = {
     TemplateDefaultA4,
     TemplateThermal80,
     TemplateModernA4: TemplateDefaultA4,
-    TemplateSleekThermal: TemplateThermal80
+    TemplateSleekThermal: TemplateThermal80,
 };
 
-// Resolve the active template component
+// Resolve the active template component (document-specific template takes precedence over global visual default)
 const activeTemplate = computed(() => {
-    const activeName = props.visualSettings?.active_template || 'TemplateDefaultA4';
+    const activeName =
+        props.documentSettings?.template ||
+        props.visualSettings?.active_template ||
+        'TemplateDefaultA4';
     return templates[activeName] || TemplateDefaultA4;
 });
 </script>

@@ -3317,6 +3317,7 @@
         "payments": "Payments",
         "purchase_invoices": "Purchase Invoices",
         "services": "Services",
+        "tax_periods": "Tax Periods & Declaration",
         "subtitle": "Reports & Analytics Center — A comprehensive overview of your center's performance",
         "suppliers": "Suppliers",
         "title": "Reports",
@@ -4288,6 +4289,107 @@
             "system_admin": "System Admin",
             "financial_officer": "Financial Officer",
             "main_center": "Main Center"
+        },
+        "tax_periods_report": {
+            "title": "Tax Periods & VAT Declaration",
+            "subtitle": "Manage quarterly tax periods and generate ZATCA-compliant VAT declarations",
+            "back_to_reports": "Back to Reports",
+            "back_to_tax_periods": "Back to Tax Periods List",
+            "select_period_to_create": "Create Tax Period",
+            "select_period_modal_desc": "Select the quarter to create",
+            "quarterly_periods": "Quarterly Periods",
+            "created_periods": "Created Tax Periods",
+            "created_periods_desc": "List of tax periods and declarations created and posted in the system",
+            "period_name": "Period Name",
+            "period_key": "Period Key",
+            "period_dates": "Period Dates",
+            "status": "Status",
+            "status_draft": "Draft (Editable)",
+            "status_posted": "Posted & Locked",
+            "status_uncreated": "Not Created",
+            "transactions_count": "Transactions Count",
+            "transactions_unit": "transactions",
+            "operations_unit": "operations",
+            "sales_vat": "Sales VAT",
+            "purchases_vat": "Purchases VAT",
+            "net_vat": "Net VAT",
+            "net_vat_due": "Net VAT Due",
+            "net_vat_refund": "Net VAT Refund",
+            "posted_at": "Posted At",
+            "posted_by": "Posted By",
+            "created_by": "Created By",
+            "actions": "Actions",
+            "view_declaration": "View Declaration & Transactions",
+            "create_period_btn": "Create New Period",
+            "save_period_btn": "Save Tax Period",
+            "post_period_btn": "Post & Lock Declaration",
+            "recreate_period_btn": "Recreate & Refresh Transactions",
+            "export_excel": "Export Transactions (Excel)",
+            "export_zatca": "Export Official ZATCA Form",
+            "print_declaration": "Print VAT Declaration",
+            "filter_year": "Filter by Year",
+            "filter_status": "Filter by Status",
+            "all_years": "All Years",
+            "all_statuses": "All Statuses",
+            "all_types": "All Transaction Types",
+            "no_periods": "No tax periods created yet",
+            "no_transactions": "No tax transactions found for this period",
+            "preview_transactions": "Preview & Select Transactions",
+            "preview_subtitle": "Review aggregated transactions from sales, purchases, and expenses before saving",
+            "zatca_box_sales": "1. Standard rated 15% sales",
+            "zatca_box_purchases": "7. Standard rated 15% purchases",
+            "zatca_box_net": "13. Total VAT due for current period",
+            "zatca_box_13_badge": "Box 13",
+            "zatca_official_header": "Official VAT Return Declaration (ZATCA)",
+            "zatca_summary_title": "VAT Declaration Summary",
+            "zatca_summary_subtitle": "Zakat, Tax and Customs Authority (ZATCA) • VAT Return Declaration",
+            "box_number": "Box",
+            "box_description": "Description",
+            "taxable_amount_sar": "Taxable Amount (SAR)",
+            "adjustment_amount_sar": "Adjustment Amount (SAR)",
+            "vat_amount_sar": "VAT Amount (SAR)",
+            "total_sales_label": "Total Sales",
+            "total_purchases_label": "Total Purchases",
+            "detailed_transactions_title": "Detailed Tax Transactions Log",
+            "detailed_transactions_subtitle": "Comprehensive list of invoices, debit/credit notes and expenses in this return",
+            "search_placeholder": "Search by ref no, party name or tax number...",
+            "showing_records": "Showing {from} to {to} of {total}",
+            "facility_name": "Facility Name",
+            "tax_number_label": "Tax Number",
+            "tax_period_label": "Tax Period",
+            "selected_summary": "Selected {selected} of {total} transactions",
+            "sales_and_income": "Sales & Income",
+            "purchases_and_expenses": "Purchases & Expenses",
+            "total_declaration": "Declaration Grand Total",
+            "taxable_subtotal": "Taxable Subtotal",
+            "vat_amount": "VAT Amount (15%)",
+            "total_with_vat": "Total Incl. VAT",
+            "ref_no": "Ref No.",
+            "date": "Date",
+            "type": "Type",
+            "party": "Customer / Supplier / Title",
+            "tax_number": "Tax Number",
+            "is_selected": "Included in VAT Return",
+            "vat_rate": "Rate",
+            "posted_notice": "This tax period is officially posted and locked. Its transactions cannot be modified or deleted.",
+            "confirm_post_title": "Confirm Posting & Locking Tax Period",
+            "confirm_post_message": "Are you sure you want to post and lock this tax period? Once posted, all transactions will be frozen and cannot be included in other tax periods.",
+            "confirm_post_action": "Yes, Post & Lock",
+            "confirm_recreate_title": "Refresh & Re-scan Transactions",
+            "confirm_recreate_message": "This will re-scan all sales, purchases, and expenses for this quarter and recalculate totals. Do you want to proceed?",
+            "confirm_recreate_action": "Confirm Refresh",
+            "invalid_period_key": "Invalid tax period key.",
+            "period_already_posted": "This tax period is already posted and locked.",
+            "period_saved_success": "Tax period saved successfully.",
+            "period_posted_success": "Tax period posted and locked successfully.",
+            "period_recreated_success": "Tax period transactions refreshed successfully.",
+            "types": {
+                "sales_invoice": "Sales Invoice",
+                "credit_note": "Credit Note (Return)",
+                "purchase_invoice": "Purchase Invoice",
+                "purchase_return": "Debit Note (Purchase Return)",
+                "company_transaction": "Taxable Transaction"
+            }
         }
     },
     "roles": {
@@ -5650,7 +5752,10 @@
                 "tenants": "Tenants",
                 "billing": "Billing",
                 "settings": "Settings",
-                "credits": "Credits"
+                "credits": "Credits",
+                "support": "Support",
+                "panel": "Panel",
+                "self": "My account"
             },
             "form": {
                 "name": "Name",
@@ -5662,8 +5767,12 @@
                 "permissions": "Permissions",
                 "is_active": "Active Account",
                 "create_action": "Create User",
-                "saving": "Saving..."
-            }
+                "saving": "Saving...",
+                "permissions_hint": "The abilities selected here replace the role default. Leave them empty to use the role default.",
+                "permissions_role_default": "Role default abilities"
+            },
+            "all_administrators": "All administrators",
+            "all_actions": "All actions"
         },
         "status": {
             "active": "Active",
@@ -5821,7 +5930,25 @@
             "no_plan": "No plan",
             "assign_plan": "Assign / change the plan",
             "subscriptions_log": "The tenant's subscription and plan history",
-            "assign_new_plan": "Assign a new plan"
+            "assign_new_plan": "Assign a new plan",
+            "trial_days": "{days} days (trial)",
+            "all_packages": "All packages",
+            "assign_upgrade_a_package_for_the_tenant": "Assign / upgrade a package for the tenant",
+            "link_the_tenant": "Link the tenant",
+            "to_a_new_package_and_activate_the_subscription_i": "to a new package and activate the subscription immediately.",
+            "select_the_package": "Select the package",
+            "--_select_a_package_--": "-- Select a package --",
+            "yearly_subscription": " (yearly subscription:",
+            "static_template_text": " SAR)",
+            "billing_cycle": "Billing cycle",
+            "yearly_subscription_12_months": "Yearly subscription (12 months)",
+            "package_type": "Package type:",
+            "subscription_period": "Subscription period:",
+            "days_trial": " days (trial)",
+            "full_year_12_months": "Full year (12 months)",
+            "total_amount": "Total amount:",
+            "the_subscription_will_be_activated_for_the_tenan": "* The subscription will be activated for the tenant right away and its status set to (active), archiving any previously active subscription.",
+            "confirm_and_activate_the_package": "Confirm and activate the package"
         },
         "subscriptions": {
             "title": "Subscriptions",
@@ -5859,7 +5986,37 @@
                 "submit": "Create Subscription",
                 "submitting": "Creating..."
             },
-            "ends_at": "End Date"
+            "ends_at": "End Date",
+            "tenant": "Tenant *",
+            "package": "Package *",
+            "sar_monthly": "SAR / monthly",
+            "sar_yearly": "SAR / yearly",
+            "free_trial": "Free trial:",
+            "billing_cycle_2": "Billing cycle *",
+            "yearly_12_months": "Yearly (12 months)",
+            "subscription_details": "Subscription details",
+            "subscription_information": "Subscription information",
+            "price": "Price",
+            "expression_literal": " SAR",
+            "auto-renewal": "Auto-renewal",
+            "disabled": "Disabled",
+            "dates": "Dates",
+            "period_start": "Period start",
+            "period_end": "Period end",
+            "trial_end": "Trial end",
+            "cancellation_date": "Cancellation date",
+            "invoices": "Invoices",
+            "pending": "Pending",
+            "no_invoices": "No invoices",
+            "cancel_subscription": "Cancel subscription",
+            "activate_subscription": "Activate subscription",
+            "extend_subscription": "Extend subscription",
+            "view_tenant_details": "View tenant details →",
+            "discount_code": "Discount code",
+            "discount": "Discount",
+            "number_of_days": "Number of days",
+            "extend": "Extend",
+            "do_you_want_to_cancel_this_subscription": "Do you want to cancel this subscription?"
         },
         "plans": {
             "title": "Plans",
@@ -5989,7 +6146,64 @@
             "saved": "Settings updated successfully",
             "enable_sms_2fa": "Enable SMS messages (2FA)",
             "enable_sms_2fa_hint": "Turn on sending verification codes by text message across the whole system.",
-            "enable_sms_2fa_warning": "Warning: this option may incur extra costs (SMS balance)."
+            "enable_sms_2fa_warning": "Warning: this option may incur extra costs (SMS balance).",
+            "dunning_settings": "Dunning settings — {name}",
+            "dunning_settings_colon": "Dunning settings: {name}",
+            "dunning_log": "Dunning Log",
+            "every_dunning_send_attempt_sent_failed_or_skippe": "Every dunning send attempt — sent, failed, or skipped.",
+            "tier": "Tier",
+            "settings": "Settings",
+            "tenant": "Tenant",
+            "invoice": "Invoice",
+            "channel": "Channel",
+            "no_log_entries_yet": "No log entries yet",
+            "page": "Page",
+            "sent": "Sent",
+            "failed": "Failed",
+            "skipped": "Skipped",
+            "tier_2": "Tier ",
+            "sent_2": "Sent",
+            "failed_2": "Failed",
+            "skipped_2": "Skipped",
+            "dunning_automation_settings": "Dunning Automation Settings",
+            "automatically_remind_tenants_with_overdue_invoic": "Automatically remind tenants with overdue invoices via email/in-app/WhatsApp. Every reminder is logged for audit.",
+            "enable_automated_dunning": "Enable automated dunning",
+            "when_enabled_the_daily_cron_sends_reminders_to_t": "When enabled, the daily cron sends reminders to tenants with overdue invoices based on the tiers below.",
+            "quiet_hours": "Quiet hours",
+            "no_reminders_will_be_sent_in_this_window": {
+                "_leave_": "No reminders will be sent in this window. Leave blank to disable."
+            },
+            "auto-suspend_after": "Auto-suspend after",
+            "days_after_the_last_tier-4_final_reminder_before": "Days after the last tier-4 (final) reminder before auto-suspending the tenant. Leave blank to disable.",
+            "reminder_tiers": "Reminder Tiers",
+            "tier_3": "Tier",
+            "after": "After",
+            "tone": "Tone",
+            "channels": "Channels",
+            "view_log": "View log",
+            "saving": {
+                "": {
+                    "": {
+                        "": "Saving..."
+                    }
+                }
+            },
+            "in-app": "In-app",
+            "dunning_settings_2": "Dunning settings: ",
+            "global_baseline_reference": "Global baseline (reference)",
+            "active_tiers": "Active tiers",
+            "quiet_hours_2": "Quiet hours",
+            "expression_literal": "Off",
+            "per-tenant_override": "Per-tenant override",
+            "empty_fields_fall_back_to_the_general_settings": {
+                "_": "Empty fields fall back to the general settings. Press \"Save\" to apply the override."
+            },
+            "enable_override": "Enable override",
+            "when_on_this_tenant_uses_the_values_below_instea": "When on, this tenant uses the values below instead of the global default.",
+            "active_tiers_2": "Active tiers",
+            "quiet_hours_optional": "Quiet hours (optional)",
+            "remove_override": "Remove override",
+            "remove_the_override": "Remove the override?"
         },
         "website": {
             "title": "Website CMS",
@@ -6044,7 +6258,16 @@
             "privacy_en": "Privacy policy (EN)",
             "site_title_en": "Site title (EN)",
             "terms_en": "Terms & conditions (EN)",
-            "title_en": "Title (EN)"
+            "title_en": "Title (EN)",
+            "e": {
+                "g": {
+                    "_20_off_for_a_limited_time": "e.g. 20% off for a limited time!"
+                }
+            },
+            "manage": "Manage",
+            "with_real_intelligence": "With real intelligence",
+            "your_center_nowyour_revenue_todayyour_team_with_": "Your center now|Your revenue today|Your team with you|Your future here",
+            "keyword_another_keyword_keywords": "keyword, another keyword, keywords"
         },
         "developer": {
             "title": "Developer Center",
@@ -6135,7 +6358,106 @@
             "package": "Package",
             "reference": "Reference",
             "revenue": "Revenue",
-            "search_purchases": "Search purchases"
+            "search_purchases": "Search purchases",
+            "delete_package": "Delete package \"{name}\"?",
+            "sms_credit_balance_per_tenant": "SMS credit balance per tenant",
+            "add_manual_credit": "+ Add manual credit",
+            "total_purchases": "Total purchases",
+            "total_used": "Total used",
+            "current_balance": "Current balance",
+            "search_by_tenant_name": {
+                "": {
+                    "": {
+                        "": "Search by tenant name..."
+                    }
+                }
+            },
+            "tenant": "Tenant",
+            "add_credit": "+ Add credit",
+            "add_sms_credit": "Add SMS credit",
+            "select_the_tenant": "Select the tenant",
+            "message_count": "Message count",
+            "reason_optional": "Reason (optional)",
+            "e": {
+                "g": {
+                    "_welcome_bonus": "e.g. Welcome bonus"
+                }
+            },
+            "sms_credit_packages": "SMS credit packages",
+            "manage_the_sms_packages_available_for_purchase": "Manage the SMS packages available for purchase",
+            "add_package": "+ Add package",
+            "best_seller": "Best seller",
+            "disabled": "Disabled",
+            "message": "message",
+            "sar_message": "SAR / message",
+            "no_packages_yet": {
+                "_click_add_package_to_create_the": "No packages yet. Click \"Add package\" to create the first one.",
+                "_click_add_package_to_create_the_2": "No packages yet. Click \"Add package\" to create the first one."
+            },
+            "edit_package": "Edit package",
+            "add_new_package": "Add new package",
+            "name_arabic": "Name (Arabic)",
+            "name_english": "Name (English)",
+            "message_count_2": "Message count",
+            "price_sar": "Price (SAR)",
+            "template_literal_chunk": "\"?",
+            "all_statuses": "All statuses",
+            "tenant_2": "Tenant",
+            "credit": "Credit",
+            "payment_method": "Payment method",
+            "failed": "Failed",
+            "refunded": "Refunded",
+            "track_every_message_sent": "Track every message sent",
+            "total_messages": "Total messages",
+            "delivered": "Delivered",
+            "failed_2": "Failed",
+            "credit_used": "Credit used",
+            "all_statuses_2": "All statuses",
+            "tenant_3": "Tenant",
+            "mobile_number": "Mobile number",
+            "credit_2": "Credit",
+            "sent": "Sent",
+            "pending": "Pending",
+            "reminder": "Reminder",
+            "notification": "Notification",
+            "verification_code": "Verification code",
+            "marketing": "Marketing",
+            "invoice": "Invoice",
+            "appointment": "Appointment",
+            "whatsapp_credit_balance_per_tenant": "WhatsApp credit balance per tenant",
+            "add_credit_2": "+ Add credit",
+            "total_purchases_2": "Total purchases",
+            "current_balance_2": "Current balance",
+            "tenant_4": "Tenant",
+            "static_template_text": "+ Add",
+            "add_whatsapp_credit": "Add WhatsApp credit",
+            "message_count_3": "Message count",
+            "reason": "Reason",
+            "whatsapp_credit_packages": "WhatsApp credit packages",
+            "manage_the_whatsapp_packages_available_for_purch": "Manage the WhatsApp packages available for purchase",
+            "add_package_2": "+ Add package",
+            "best_seller_2": "Best seller",
+            "disabled_2": "Disabled",
+            "message_2": "message",
+            "sar_message_2": "SAR / message",
+            "edit_package_2": "Edit package",
+            "add_new_package_2": "Add new package",
+            "name_arabic_2": "Name (Arabic)",
+            "name_english_2": "Name (English)",
+            "message_count_4": "Message count",
+            "price_sar_2": "Price (SAR)",
+            "delete_package_2": "Delete package \"",
+            "template_literal_chunk_2": "\"?",
+            "total_messages_2": "Total messages",
+            "delivered_2": "Delivered",
+            "read": "Read",
+            "failed_3": "Failed",
+            "tenant_5": "Tenant",
+            "mobile_number_2": "Mobile number",
+            "template": "Template",
+            "credit_3": "Credit",
+            "sent_2": "Sent",
+            "pending_2": "Pending"
         },
         "announcements": {
             "title": "Announcements & Notifications",
@@ -6177,7 +6499,18 @@
             "expiry_date": "Expiry date (optional)",
             "in_app": "Inside the app",
             "channels": "Sending channels",
-            "specific_tenants": "Specific tenants"
+            "specific_tenants": "Specific tenants",
+            "published": "Published",
+            "publish_now": "🚀 Publish now",
+            "stop": "Stop",
+            "recipients": "Recipients",
+            "viewed": "Viewed",
+            "delivered": "Delivered",
+            "failed": "Failed",
+            "channels_2": "Channels:",
+            "ends": "Ends:",
+            "delivery_log": "Delivery log",
+            "not_sent_yet": "Not sent yet"
         },
         "contact_messages": {
             "title": "Visitor Messages",
@@ -6225,7 +6558,27 @@
                 "tenant": "Tenant",
                 "amount": "Amount",
                 "due_at": "Due Date"
-            }
+            },
+            "invoice": "Invoice {number}",
+            "invoice_2": "Invoice",
+            "download_pdf": "Download PDF",
+            "send_by_email": "Send by email",
+            "mark_as_paid": "Mark as paid",
+            "cancel_invoice": "Cancel invoice",
+            "pdf_preview": "PDF Preview",
+            "open_in_new_tab": "Open in new tab",
+            "pdf_not_available": "PDF not available",
+            "confirm_payment_manually": "Confirm payment manually",
+            "reference_number": "Reference number",
+            "transfer_or_receipt_number": "Transfer or receipt number",
+            "confirming": {
+                "": {
+                    "": {
+                        "": "Confirming..."
+                    }
+                }
+            },
+            "are_you_sure_you_want_to_cancel_this_invoice": "Are you sure you want to cancel this invoice?"
         },
         "common": {
             "loading": "Loading...",
@@ -6534,7 +6887,10 @@
             "confirm_delete": "Are you sure you want to delete this feedback?"
         },
         "activity_log": {
-            "subtitle": "Track every action performed by the administrators"
+            "title": "Activity Log",
+            "subtitle": "Track every action performed by the administrators",
+            "all_admins": "All Admins",
+            "all_actions": "All Actions"
         },
         "analytics": {
             "tenant_analytics": "Tenant analytics",
@@ -6549,13 +6905,45 @@
             "tenants_report": "Tenant report",
             "tenants_report_desc": "A list of tenants, plans, subscriptions and the status of each subscription.",
             "aging_report": "Debt aging report",
-            "aging_report_desc": "Overdue receivables broken down by the periods they are due in."
+            "aging_report_desc": "Overdue receivables broken down by the periods they are due in.",
+            "expression_literal": "MRR",
+            "sum_of_active_subscriptions_yearly_12": "Sum of active subscriptions (yearly ÷ 12)",
+            "churn_rate": "Churn rate",
+            "new_tenants": "New tenants",
+            "last_30_days": "Last 30 days",
+            "outstanding_receivables": "Outstanding receivables",
+            "sum_of_unpaid_invoices": "Sum of unpaid invoices",
+            "trial_tenants": "Trial tenants",
+            "near-term_mrr_signal": "Near-term MRR signal",
+            "last_month_churn": "Last month churn",
+            "for_comparison_with_current_month": "For comparison with current month"
         },
         "communication": {
             "templates_subtitle": "Manage and customise the email templates and the automated system notifications.",
             "template_name": "Template name and title",
             "template_code": "Identifier",
-            "templates_empty": "No communication templates have been added yet."
+            "templates_empty": "No communication templates have been added yet.",
+            "copied": "Copied {variable}",
+            "edit_template": "Edit Template",
+            "communication_templates": "Communication Templates",
+            "cancel": "Cancel",
+            "save_changes": "Save Changes",
+            "template_details": "Template Details",
+            "code": "Code:",
+            "type": "Type:",
+            "email": "Email",
+            "expression_literal": "SMS",
+            "enable_template": "Enable template",
+            "available_variables_click_to_copy": "Available Variables (Click to copy)",
+            "no_variables_defined_for_this_template": {
+                "": "No variables defined for this template."
+            },
+            "template_editor": "Template Editor",
+            "live_preview": "Live Preview",
+            "subject": "Subject",
+            "content": "Content",
+            "subject_2": "Subject:",
+            "communication_templates_2": "Communication Templates"
         },
         "payment": {
             "failed_message": "Sorry, we could not complete the payment",
@@ -6565,9 +6953,23 @@
             "back_to_subscriptions": "Back to subscriptions",
             "support_hint": "If the problem persists, contact technical support",
             "success_title": "Payment successful! 🎉",
-            "success_message": "Your subscription is now active and the invoice will be sent to your email address"
+            "success_message": "Your subscription is now active and the invoice will be sent to your email address",
+            "complete_payment": "Complete payment",
+            "choose_a_payment_method_to_complete_the_subscrip": "Choose a payment method to complete the subscription",
+            "order_summary": "Order summary",
+            "tenant": "Tenant",
+            "package": "Package",
+            "cycle": "Cycle",
+            "yearly": "Yearly",
+            "total": "Total",
+            "payment_details": "Payment details",
+            "the_payment_gateway_is_not_configured": "The payment gateway is not configured",
+            "the_payment_gateway_api_keys_must_be_set_in_the_": "The payment gateway API keys must be set in the .env file",
+            "payments_are_secure_and_encrypted_to_the_pci_dss": "Payments are secure and encrypted to the PCI DSS standard"
         },
         "bank_transfer_receipts": {
+            "index_title": "Bank Transfer Receipts Review",
+            "subtitle": "Review and verify bank transfer receipts from tenants",
             "title": "Review Receipt",
             "back_to_list": "Back to list",
             "tenant_details": "Tenant details",
@@ -6605,7 +7007,150 @@
             "approve_mismatch_override": "Approve despite the amount mismatch (will be recorded in the audit log)",
             "partial_approval": "Partial approval (credit a different amount than received)",
             "approved_amount": "Approved amount (SAR)",
-            "partial_shortfall": "Shortfall of ${amount} SAR will be recorded as credit (invoice stays open)"
+            "partial_shortfall": "Shortfall of ${amount} SAR will be recorded as credit (invoice stays open)",
+            "short_by": "⚠️ Short by {amount}",
+            "transferred_less_than_required": "The transferred amount is less than required by {amount} SAR",
+            "transferred_more_than_required": "The transferred amount is more than required by {amount} SAR (it will be recorded as credit)",
+            "shortfall_recorded_as_credit": "A shortfall of {amount} SAR will be recorded as credit (the invoice stays open)",
+            "pending": "Pending",
+            "approved": "Approved",
+            "rejected": "Rejected",
+            "pending_amount": "Pending amount",
+            "search_by_tenant_name": {
+                "": {
+                    "": {
+                        "": "Search by tenant name..."
+                    }
+                }
+            },
+            "tenant": "Tenant",
+            "submitted": "Submitted",
+            "actions": "Actions",
+            "no_receipts": "No receipts",
+            "review": "Review",
+            "approved_2": "Approved",
+            "rejected_2": "Rejected",
+            "all_statuses": "All statuses",
+            "no_comparison": "No comparison",
+            "match_2": "✓ Match",
+            "back_to_list_2": "Back to list",
+            "tenant_details_2": "Tenant details",
+            "name_2": "Name:",
+            "email_2": "Email:",
+            "plan_2": "Plan:",
+            "cycle_2": "Cycle:",
+            "approve_and_activate_2": "Approve and activate",
+            "reject_receipt_2": "Reject receipt",
+            "download_2": "Download",
+            "please_provide_a_rejection_reason": {
+                "_the_tenant_wi": "Please provide a rejection reason. The tenant will be notified."
+            },
+            "e": {
+                "g": {
+                    "_amount_mismatch_receipt_unclear": {
+                        "": {
+                            "": {
+                                "": "e.g. Amount mismatch, receipt unclear..."
+                            }
+                        }
+                    },
+                    "_confirmed_full_amount_received_from_tenant": {
+                        "": "e.g. Confirmed full amount received from tenant..."
+                    }
+                }
+            },
+            "confirm_reject_2": "Confirm reject",
+            "confirm_receipt_approval": "Confirm receipt approval",
+            "approve_despite_the_amount_mismatch_will_be_reco": "Approve despite the amount mismatch (will be recorded in the audit log)",
+            "partial_approval_credit_a_different_amount_than_": "Partial approval (credit a different amount than received)",
+            "a_shortfall_of": "A shortfall of ",
+            "sar_will_be_recorded_as_credit_the_invoice_stays": " SAR will be recorded as credit (the invoice stays open)",
+            "confirm_approve_2": "Confirm approve",
+            "pending_2": "Pending",
+            "approved_3": "Approved",
+            "rejected_3": "Rejected",
+            "the_transferred_amount_is_less_than_required_by": "The transferred amount is less than required by ",
+            "the_transferred_amount_is_more_than_required_by": "The transferred amount is more than required by ",
+            "sar_it_will_be_recorded_as_credit": " SAR (it will be recorded as credit)"
+        },
+        "help": {
+            "saturday_-_thursday_800_am_-_1000_pm": "Saturday - Thursday: 8:00 AM - 10:00 PM",
+            "edit_topic": "Edit topic",
+            "delete_topic": "Delete topic",
+            "select_the_section": {
+                "": {
+                    "": {
+                        "": "Select the section..."
+                    }
+                }
+            },
+            "e": {
+                "g": {
+                    "_the_work_order_lifecycle_from_entry_to_exit": "e.g. The work order lifecycle from entry to exit",
+                    "_work_orders": "e.g. Work orders",
+                    "_how_do_you_create_a_new_work_order_for_a_ve": "e.g. How do you create a new work order for a vehicle?",
+                    "_you_can_attach_photos_of_the_vehicle_damage": "e.g. You can attach photos of the vehicle damage before starting..."
+                }
+            },
+            "recalculate_the_duration_automatically_from_the_": "Recalculate the duration automatically from the link",
+            "httpswww": {
+                "youtube": {
+                    "comwatchv": {
+                        "": {
+                            "": {
+                                "_or_httpsyoutu": {
+                                    "be": {
+                                        "": {
+                                            "": "https://www.youtube.com/watch?v=... or https://youtu.be/..."
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "a_simple_explanation_of_what_the_training_video_": "A simple explanation of what the training video covers...",
+            "a_short_description_of_this_guide": {
+                "": {
+                    "": {
+                        "": "A short description of this guide..."
+                    }
+                }
+            },
+            "write_the_step_here": {
+                "": {
+                    "": {
+                        "": "Write the step here..."
+                    }
+                }
+            },
+            "delete_this_step": "Delete this step",
+            "go_to_work_orders": "Go to work orders",
+            "work_orders_and_services": "Work orders and services",
+            "write_the_question_here": {
+                "": {
+                    "": {
+                        "": "Write the question here..."
+                    }
+                }
+            },
+            "write_the_detailed_answer_here": {
+                "": {
+                    "": {
+                        "": "Write the detailed answer here..."
+                    }
+                }
+            }
+        },
+        "profile": {
+            "system_admin": "System admin",
+            "admin": "Admin",
+            "support": "Support"
+        },
+        "security": {
+            "system_2fa_challenge": "System 2FA Challenge",
+            "two-factor_authentication": "Two-Factor Authentication"
         }
     },
     "subscription": {

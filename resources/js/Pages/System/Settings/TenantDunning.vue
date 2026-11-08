@@ -1,7 +1,11 @@
 <template>
     <SystemLayout>
         <Head
-            :title="isAr ? `إعدادات التذكير — ${tenant.name}` : `Dunning config — ${tenant.name}`"
+            :title="
+                isAr
+                    ? $t('system.settings.dunning_settings', { name: tenant.name })
+                    : `Dunning config — ${tenant.name}`
+            "
         />
 
         <div class="mx-auto max-w-4xl space-y-6 py-6">
@@ -24,7 +28,9 @@
                     <h1 class="text-2xl font-bold text-gray-900 dark:text-white">
                         {{
                             isAr
-                                ? `إعدادات التذكير: ${tenant.name}`
+                                ? $t('system.settings.dunning_settings_colon', {
+                                      name: tenant.name,
+                                  })
                                 : `Dunning settings: ${tenant.name}`
                         }}
                     </h1>
@@ -39,12 +45,16 @@
                 class="rounded-xl border border-blue-200 bg-blue-50 p-5 dark:border-blue-800/40 dark:bg-blue-900/20"
             >
                 <h3 class="text-sm font-bold text-blue-900 dark:text-blue-200">
-                    {{ isAr ? 'الإعدادات العامة (مرجعية)' : 'Global baseline (reference)' }}
+                    {{
+                        isAr
+                            ? $t('system.settings.global_baseline_reference')
+                            : 'Global baseline (reference)'
+                    }}
                 </h3>
                 <dl class="mt-3 grid grid-cols-2 gap-3 text-xs sm:grid-cols-4">
                     <div>
                         <dt class="text-blue-700/70 dark:text-blue-300/70">
-                            {{ isAr ? 'مفعّل' : 'Enabled' }}
+                            {{ isAr ? $t('common.enabled') : 'Enabled' }}
                         </dt>
                         <dd
                             class="font-mono text-sm font-semibold text-blue-900 dark:text-blue-100"
@@ -54,7 +64,7 @@
                     </div>
                     <div>
                         <dt class="text-blue-700/70 dark:text-blue-300/70">
-                            {{ isAr ? 'المستويات' : 'Active tiers' }}
+                            {{ isAr ? $t('system.settings.active_tiers') : 'Active tiers' }}
                         </dt>
                         <dd
                             class="font-mono text-sm font-semibold text-blue-900 dark:text-blue-100"
@@ -64,7 +74,7 @@
                     </div>
                     <div>
                         <dt class="text-blue-700/70 dark:text-blue-300/70">
-                            {{ isAr ? 'ساعات الصمت' : 'Quiet hours' }}
+                            {{ isAr ? $t('system.settings.quiet_hours_2') : 'Quiet hours' }}
                         </dt>
                         <dd
                             class="font-mono text-sm font-semibold text-blue-900 dark:text-blue-100"
@@ -73,7 +83,7 @@
                                 global_config.quiet_hours_start && global_config.quiet_hours_end
                                     ? `${global_config.quiet_hours_start} – ${global_config.quiet_hours_end}`
                                     : isAr
-                                      ? 'معطّلة'
+                                      ? $t('system.settings.expression_literal')
                                       : 'Off'
                             }}
                         </dd>
@@ -87,12 +97,12 @@
                 class="rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800"
             >
                 <h2 class="text-lg font-semibold text-gray-900 dark:text-white">
-                    {{ isAr ? 'تجاوز على مستوى المستأجر' : 'Per-tenant override' }}
+                    {{ isAr ? $t('system.settings.per-tenant_override') : 'Per-tenant override' }}
                 </h2>
                 <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
                     {{
                         isAr
-                            ? 'الحقول الفارغة ترجع للإعدادات العامة. اضغط "حفظ" لتفعيل التجاوز.'
+                            ? $t('system.settings.empty_fields_fall_back_to_the_general_settings._')
                             : 'Empty fields fall back to the global default. Click "Save" to enable the override.'
                     }}
                 </p>
@@ -106,12 +116,16 @@
                         />
                         <div>
                             <div class="text-sm font-medium text-gray-900 dark:text-white">
-                                {{ isAr ? 'تفعيل التجاوز' : 'Enable override' }}
+                                {{
+                                    isAr ? $t('system.settings.enable_override') : 'Enable override'
+                                }}
                             </div>
                             <p class="text-xs text-gray-500 dark:text-gray-400">
                                 {{
                                     isAr
-                                        ? 'عند التفعيل، يستخدم هذا المستأجر الإعدادات أدناه بدل العامة.'
+                                        ? $t(
+                                              'system.settings.when_on_this_tenant_uses_the_values_below_instea'
+                                          )
                                         : 'When on, this tenant uses the values below instead of the global default.'
                                 }}
                             </p>
@@ -122,7 +136,7 @@
                         <label
                             class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300"
                         >
-                            {{ isAr ? 'المستويات المفعّلة' : 'Active tiers' }}
+                            {{ isAr ? $t('system.settings.active_tiers_2') : 'Active tiers' }}
                         </label>
                         <input
                             v-model="form.active_tiers"
@@ -136,12 +150,16 @@
                         <label
                             class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300"
                         >
-                            {{ isAr ? 'ساعات الصمت (اختياري)' : 'Quiet hours (optional)' }}
+                            {{
+                                isAr
+                                    ? $t('system.settings.quiet_hours_optional')
+                                    : 'Quiet hours (optional)'
+                            }}
                         </label>
                         <div class="grid grid-cols-2 gap-3">
                             <div>
                                 <label class="mb-1 block text-xs text-gray-500 dark:text-gray-400">
-                                    {{ isAr ? 'من' : 'From' }}
+                                    {{ isAr ? $t('common.from') : 'From' }}
                                 </label>
                                 <input
                                     v-model="form.quiet_hours_start"
@@ -151,7 +169,7 @@
                             </div>
                             <div>
                                 <label class="mb-1 block text-xs text-gray-500 dark:text-gray-400">
-                                    {{ isAr ? 'إلى' : 'To' }}
+                                    {{ isAr ? $t('common.to') : 'To' }}
                                 </label>
                                 <input
                                     v-model="form.quiet_hours_end"
@@ -170,21 +188,21 @@
                         @click="clearOverride"
                         class="rounded-lg border border-rose-300 bg-white px-4 py-2 text-sm font-medium text-rose-600 hover:bg-rose-50 dark:border-rose-800 dark:bg-gray-800 dark:text-rose-400 dark:hover:bg-rose-900/20"
                     >
-                        {{ isAr ? 'حذف التجاوز' : 'Remove override' }}
+                        {{ isAr ? $t('system.settings.remove_override') : 'Remove override' }}
                     </button>
                     <div class="ml-auto flex gap-2">
                         <Link
                             :href="`/system/tenants/${tenant.id}`"
                             class="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600"
                         >
-                            {{ isAr ? 'إلغاء' : 'Cancel' }}
+                            {{ isAr ? $t('common.cancel') : 'Cancel' }}
                         </Link>
                         <button
                             type="submit"
                             :disabled="processing"
                             class="rounded-lg bg-amber-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-amber-700 disabled:opacity-50"
                         >
-                            {{ processing ? '…' : isAr ? 'حفظ' : 'Save' }}
+                            {{ processing ? '…' : isAr ? $t('common.save') : 'Save' }}
                         </button>
                     </div>
                 </div>
@@ -194,6 +212,9 @@
 </template>
 
 <script setup>
+import { useI18n } from 'vue-i18n';
+const { t } = useI18n();
+
 import { computed, ref } from 'vue';
 import { Head, Link, router } from '@inertiajs/vue3';
 import SystemLayout from '@/Layouts/SystemLayout.vue';
@@ -231,7 +252,7 @@ async function submit() {
 }
 
 async function clearOverride() {
-    if (!confirm(isAr.value ? 'حذف التجاوز؟' : 'Remove the override?')) {
+    if (!confirm(isAr.value ? t('system.settings.remove_the_override') : 'Remove the override?')) {
         return;
     }
     await router.delete(`/system/tenants/${props.tenant.id}/dunning`);

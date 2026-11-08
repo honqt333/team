@@ -157,7 +157,7 @@ class QuoteController extends Controller
             ->orderBy('sort_order')
             ->get();
 
-        $makes = VehicleMake::ordered()->get(['id', 'name_ar', 'name_en']);
+        $makes = VehicleMake::ordered()->get(['id', 'name_ar', 'name_en', 'logo_path']);
         $colors = VehicleColor::active()->ordered()->get(['id', 'name_ar', 'name_en', 'hex_code']);
 
         $modelsByMake = [];

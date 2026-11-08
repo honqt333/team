@@ -123,9 +123,11 @@ const regenerateCodes = () =>
                             class="mt-1 inline-block px-2 py-1 rounded-full text-xs"
                         >
                             {{
-                                { super_admin: 'مدير النظام', admin: 'مسؤول', support: 'دعم فني' }[
-                                    admin.role
-                                ]
+                                {
+                                    super_admin: $t('system.profile.system_admin'),
+                                    admin: $t('system.profile.admin'),
+                                    support: $t('system.profile.support'),
+                                }[admin.role]
                             }}
                         </span>
                     </div>

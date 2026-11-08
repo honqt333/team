@@ -1,6 +1,8 @@
 <template>
     <SystemLayout>
-        <Head :title="`${isAr ? 'تعديل قالب' : 'Edit Template'}: ${template.name}`" />
+        <Head
+            :title="`${isAr ? $t('system.communication.edit_template') : 'Edit Template'}: ${template.name}`"
+        />
 
         <div class="space-y-6">
             <!-- Header Section -->
@@ -24,11 +26,18 @@
                                     d="M15 19l-7-7 7-7"
                                 />
                             </svg>
-                            <span>{{ isAr ? 'قوالب التواصل' : 'Communication Templates' }}</span>
+                            <span>
+                                {{
+                                    isAr
+                                        ? $t('system.communication.communication_templates')
+                                        : 'Communication Templates'
+                                }}
+                            </span>
                         </Link>
                     </div>
                     <h1 class="text-2xl font-bold text-gray-900 dark:text-white mt-1">
-                        {{ isAr ? 'تعديل قالب' : 'Edit Template' }}: {{ template.name }}
+                        {{ isAr ? $t('system.communication.edit_template') : 'Edit Template' }}:
+                        {{ template.name }}
                     </h1>
                 </div>
 
@@ -37,7 +46,7 @@
                         :href="route('system.communication.templates.index')"
                         class="px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-xl text-xs font-bold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
                     >
-                        {{ isAr ? 'إلغاء وعودة' : 'Cancel' }}
+                        {{ isAr ? $t('system.communication.cancel') : 'Cancel' }}
                     </Link>
                     <AppButton
                         variant="action-xs"
@@ -45,7 +54,7 @@
                         :disabled="form.processing"
                         :loading="form.processing"
                     >
-                        {{ isAr ? 'حفظ التعديلات' : 'Save Changes' }}
+                        {{ isAr ? $t('system.communication.save_changes') : 'Save Changes' }}
                     </AppButton>
                 </div>
             </div>
@@ -57,12 +66,14 @@
                     class="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-200 dark:border-gray-700 space-y-3"
                 >
                     <h3 class="text-xs font-bold uppercase tracking-wider text-gray-400">
-                        {{ isAr ? 'بيانات القالب' : 'Template Details' }}
+                        {{
+                            isAr ? $t('system.communication.template_details') : 'Template Details'
+                        }}
                     </h3>
                     <div class="space-y-2 text-sm">
                         <div class="flex items-center justify-between">
                             <span class="text-gray-500 dark:text-gray-400">
-                                {{ isAr ? 'الكود التعريفي:' : 'Code:' }}
+                                {{ isAr ? $t('system.communication.code') : 'Code:' }}
                             </span>
                             <span
                                 class="font-mono text-xs px-2 py-0.5 rounded bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200"
@@ -72,7 +83,7 @@
                         </div>
                         <div class="flex items-center justify-between">
                             <span class="text-gray-500 dark:text-gray-400">
-                                {{ isAr ? 'النوع:' : 'Type:' }}
+                                {{ isAr ? $t('system.communication.type') : 'Type:' }}
                             </span>
                             <span
                                 class="text-xs font-semibold px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300"
@@ -80,10 +91,10 @@
                                 {{
                                     template.type === 'email'
                                         ? isAr
-                                            ? 'بريد إلكتروني'
+                                            ? $t('system.communication.email')
                                             : 'Email'
                                         : isAr
-                                          ? 'رسالة نصية'
+                                          ? $t('system.communication.expression_literal')
                                           : 'SMS'
                                 }}
                             </span>
@@ -98,7 +109,11 @@
                                 class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
                             />
                             <span class="text-xs font-bold text-gray-700 dark:text-gray-300">
-                                {{ isAr ? 'تفعيل القالب في النظام' : 'Enable template' }}
+                                {{
+                                    isAr
+                                        ? $t('system.communication.enable_template')
+                                        : 'Enable template'
+                                }}
                             </span>
                         </label>
                     </div>
@@ -111,7 +126,7 @@
                     <h3 class="text-xs font-bold uppercase tracking-wider text-gray-400 mb-2">
                         {{
                             isAr
-                                ? 'المتغيرات المتاحة (انقر للنسخ)'
+                                ? $t('system.communication.available_variables_click_to_copy')
                                 : 'Available Variables (Click to copy)'
                         }}
                     </h3>
@@ -145,7 +160,7 @@
                     <p v-else class="text-xs text-gray-500">
                         {{
                             isAr
-                                ? 'لا توجد متغيرات محددة لهذا القالب.'
+                                ? $t('system.communication.no_variables_defined_for_this_template.')
                                 : 'No variables defined for this template.'
                         }}
                     </p>
@@ -170,7 +185,7 @@
                                 : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400',
                         ]"
                     >
-                        {{ isAr ? 'محرر القالب' : 'Template Editor' }}
+                        {{ isAr ? $t('system.communication.template_editor') : 'Template Editor' }}
                     </button>
                     <button
                         v-if="template.type === 'email'"
@@ -183,7 +198,7 @@
                                 : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400',
                         ]"
                     >
-                        {{ isAr ? 'معاينة العرض الحي' : 'Live Preview' }}
+                        {{ isAr ? $t('system.communication.live_preview') : 'Live Preview' }}
                     </button>
                 </div>
 
@@ -194,7 +209,7 @@
                             <label
                                 class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1.5"
                             >
-                                {{ isAr ? 'عنوان الرسالة (Subject)' : 'Subject' }}
+                                {{ isAr ? $t('system.communication.subject') : 'Subject' }}
                             </label>
                             <input
                                 type="text"
@@ -212,7 +227,7 @@
                                 <label
                                     class="block text-xs font-bold text-gray-700 dark:text-gray-300"
                                 >
-                                    {{ isAr ? 'محتوى الرسالة' : 'Content' }}
+                                    {{ isAr ? $t('system.communication.content') : 'Content' }}
                                 </label>
                                 <span class="text-[11px] text-gray-400 font-mono">
                                     {{
@@ -237,7 +252,9 @@
                         <div
                             class="p-3 bg-gray-100 dark:bg-gray-900 rounded-xl text-xs text-gray-600 dark:text-gray-300 font-mono"
                         >
-                            <strong>{{ isAr ? 'العنوان:' : 'Subject:' }}</strong>
+                            <strong>
+                                {{ isAr ? $t('system.communication.subject_2') : 'Subject:' }}
+                            </strong>
                             {{ form.subject }}
                         </div>
                         <div
@@ -257,7 +274,7 @@
                         :disabled="form.processing"
                         :loading="form.processing"
                     >
-                        {{ isAr ? 'حفظ التغييرات' : 'Save Changes' }}
+                        {{ isAr ? $t('common.save_changes') : 'Save Changes' }}
                     </AppButton>
                 </div>
             </div>
@@ -266,6 +283,9 @@
 </template>
 
 <script setup>
+import { useI18n } from 'vue-i18n';
+const { t } = useI18n();
+
 import { computed, ref } from 'vue';
 import { Head, Link, useForm } from '@inertiajs/vue3';
 import SystemLayout from '@/Layouts/SystemLayout.vue';
@@ -292,6 +312,8 @@ const submit = () => {
 
 const copyVariable = (variable) => {
     navigator.clipboard.writeText(variable);
-    toastSuccess(isAr.value ? `تم نسخ ${variable}` : `Copied ${variable}`);
+    toastSuccess(
+        isAr.value ? t('system.communication.copied', { variable: variable }) : `Copied ${variable}`
+    );
 };
 </script>

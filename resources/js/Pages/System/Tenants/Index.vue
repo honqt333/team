@@ -61,7 +61,7 @@
                         :options="planOptions"
                         option-label="label"
                         option-value="value"
-                        :placeholder="'جميع الباقات'"
+                        :placeholder="$t('system.tenants.all_packages')"
                         compact
                         @update:model-value="applyFilters"
                     />

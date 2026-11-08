@@ -102,7 +102,7 @@
 
     --font-family-sans: 'IBM Plex Sans Arabic', 'Tajawal', 'Noto Kufi Arabic', 'Inter', system-ui,
         -apple-system, sans-serif;
-    --font-family-display: 'Tajawal', 'IBM Plex Sans Arabic', 'Noto Kufi Arabic', system-ui,
+    --font-family-display: 'IBM Plex Sans Arabic', 'Tajawal', 'Noto Kufi Arabic', system-ui,
         sans-serif;
     --font-family-mono: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace;
 

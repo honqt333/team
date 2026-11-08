@@ -8,6 +8,7 @@ use App\Models\Concerns\CenterScoped;
 use App\Traits\HasInventoryMoveRelations;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Throwable;
 
 class InventoryMove extends Model
 {
@@ -76,7 +77,11 @@ class InventoryMove extends Model
      */
     public function getWorkOrderAttribute(): ?WorkOrder
     {
-        $ref = $this->reference;
+        try {
+            $ref = $this->reference;
+        } catch (Throwable) {
+            return null;
+        }
 
         if ($ref instanceof WorkOrderItemPart) {
             return $ref->workOrder;
@@ -84,6 +89,10 @@ class InventoryMove extends Model
 
         if ($ref instanceof WorkOrder) {
             return $ref;
+        }
+
+        if ($ref instanceof Invoice) {
+            return $ref->workOrder;
         }
 
         return null;

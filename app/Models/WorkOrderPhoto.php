@@ -14,12 +14,15 @@ class WorkOrderPhoto extends Model
 
     protected $fillable = [
         'work_order_id',
+        'work_order_item_id',
         'tenant_id',
         'center_id',
         'path',
         'type',
         'caption',
     ];
+
+    protected $appends = ['url'];
 
     public const TYPE_BEFORE = 'before';
 
@@ -39,6 +42,11 @@ class WorkOrderPhoto extends Model
     public function workOrder(): BelongsTo
     {
         return $this->belongsTo(WorkOrder::class);
+    }
+
+    public function workOrderItem(): BelongsTo
+    {
+        return $this->belongsTo(WorkOrderItem::class);
     }
 
     /**

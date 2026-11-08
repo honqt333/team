@@ -21,16 +21,31 @@ const statusColors = {
 };
 
 const statusLabels = {
-    pending: { ar: 'قيد المراجعة', en: 'Pending' },
-    approved: { ar: 'موافق عليه', en: 'Approved' },
-    rejected: { ar: 'مرفوض', en: 'Rejected' },
+    pending: { ar: $t('system.bank_transfer_receipts.pending'), en: 'Pending' },
+    approved: { ar: $t('system.bank_transfer_receipts.approved_2'), en: 'Approved' },
+    rejected: { ar: $t('system.bank_transfer_receipts.rejected_2'), en: 'Rejected' },
 };
 
 const statusOptions = computed(() => [
-    { value: 'all', label: locale.value === 'ar' ? 'جميع الحالات' : 'All statuses' },
-    { value: 'pending', label: locale.value === 'ar' ? 'قيد المراجعة' : 'Pending' },
-    { value: 'approved', label: locale.value === 'ar' ? 'موافق عليه' : 'Approved' },
-    { value: 'rejected', label: locale.value === 'ar' ? 'مرفوض' : 'Rejected' },
+    {
+        value: 'all',
+        label:
+            locale.value === 'ar'
+                ? $t('system.bank_transfer_receipts.all_statuses')
+                : 'All statuses',
+    },
+    {
+        value: 'pending',
+        label: locale.value === 'ar' ? $t('system.bank_transfer_receipts.pending') : 'Pending',
+    },
+    {
+        value: 'approved',
+        label: locale.value === 'ar' ? $t('system.bank_transfer_receipts.approved_2') : 'Approved',
+    },
+    {
+        value: 'rejected',
+        label: locale.value === 'ar' ? $t('system.bank_transfer_receipts.rejected_2') : 'Rejected',
+    },
 ]);
 
 function applyFilters() {
@@ -76,13 +91,19 @@ function isImage(receipt) {
 // them but rendered neutrally).
 function getAmountBadge(receipt) {
     if (receipt.amount_diff === null || receipt.amount_diff === undefined) {
-        return { color: 'slate', label: locale.value === 'ar' ? 'لا مقارنة' : 'No comparison' };
+        return {
+            color: 'slate',
+            label:
+                locale.value === 'ar'
+                    ? $t('system.bank_transfer_receipts.no_comparison')
+                    : 'No comparison',
+        };
     }
     const diff = Number(receipt.amount_diff);
     if (Math.abs(diff) < 0.01) {
         return {
             color: 'emerald',
-            label: locale.value === 'ar' ? '✓ مطابق' : '✓ Match',
+            label: locale.value === 'ar' ? $t('system.bank_transfer_receipts.match_2') : '✓ Match',
         };
     }
     if (diff < 0) {
@@ -90,7 +111,9 @@ function getAmountBadge(receipt) {
             color: 'amber',
             label:
                 locale.value === 'ar'
-                    ? `⚠️ ناقص ${formatCurrency(-diff)}`
+                    ? $t('system.bank_transfer_receipts.short_by', {
+                          amount: formatCurrency(-diff),
+                      })
                     : `⚠️ Short ${formatCurrency(-diff)}`,
         };
     }
@@ -103,7 +126,11 @@ function getAmountBadge(receipt) {
 
 <template>
     <Head
-        :title="locale === 'ar' ? 'مراجعة إيصالات التحويل البنكي' : 'Bank Transfer Receipts Review'"
+        :title="
+            locale === 'ar'
+                ? $t('system.bank_transfer_receipts.index_title')
+                : 'Bank Transfer Receipts Review'
+        "
     />
 
     <SystemLayout>
@@ -114,14 +141,14 @@ function getAmountBadge(receipt) {
                     <h1 class="text-2xl font-bold text-gray-900 dark:text-white">
                         {{
                             locale === 'ar'
-                                ? 'مراجعة إيصالات التحويل البنكي'
+                                ? $t('system.bank_transfer_receipts.index_title')
                                 : 'Bank Transfer Receipts Review'
                         }}
                     </h1>
                     <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
                         {{
                             locale === 'ar'
-                                ? 'مراجعة وتأكيد إيصالات التحويل البنكي للمستأجرين'
+                                ? $t('system.bank_transfer_receipts.subtitle')
                                 : 'Review and verify bank transfer receipts from tenants'
                         }}
                     </p>
@@ -136,7 +163,11 @@ function getAmountBadge(receipt) {
                     <p
                         class="text-xs font-semibold uppercase tracking-wide text-amber-700 dark:text-amber-300"
                     >
-                        {{ locale === 'ar' ? 'قيد المراجعة' : 'Pending' }}
+                        {{
+                            locale === 'ar'
+                                ? $t('system.bank_transfer_receipts.pending')
+                                : 'Pending'
+                        }}
                     </p>
                     <p class="mt-1 text-2xl font-bold text-amber-700 dark:text-amber-300">
                         {{ stats.pending }}
@@ -148,7 +179,11 @@ function getAmountBadge(receipt) {
                     <p
                         class="text-xs font-semibold uppercase tracking-wide text-emerald-700 dark:text-emerald-300"
                     >
-                        {{ locale === 'ar' ? 'موافق عليها' : 'Approved' }}
+                        {{
+                            locale === 'ar'
+                                ? $t('system.bank_transfer_receipts.approved')
+                                : 'Approved'
+                        }}
                     </p>
                     <p class="mt-1 text-2xl font-bold text-emerald-700 dark:text-emerald-300">
                         {{ stats.approved }}
@@ -160,7 +195,11 @@ function getAmountBadge(receipt) {
                     <p
                         class="text-xs font-semibold uppercase tracking-wide text-rose-700 dark:text-rose-300"
                     >
-                        {{ locale === 'ar' ? 'مرفوضة' : 'Rejected' }}
+                        {{
+                            locale === 'ar'
+                                ? $t('system.bank_transfer_receipts.rejected')
+                                : 'Rejected'
+                        }}
                     </p>
                     <p class="mt-1 text-2xl font-bold text-rose-700 dark:text-rose-300">
                         {{ stats.rejected }}
@@ -172,7 +211,11 @@ function getAmountBadge(receipt) {
                     <p
                         class="text-xs font-semibold uppercase tracking-wide text-indigo-700 dark:text-indigo-300"
                     >
-                        {{ locale === 'ar' ? 'مبالغ قيد المراجعة' : 'Pending amount' }}
+                        {{
+                            locale === 'ar'
+                                ? $t('system.bank_transfer_receipts.pending_amount')
+                                : 'Pending amount'
+                        }}
                     </p>
                     <p class="mt-1 text-xl font-bold text-indigo-700 dark:text-indigo-300">
                         {{ formatCurrency(stats.total_amount_pending) }}
@@ -190,7 +233,9 @@ function getAmountBadge(receipt) {
                         v-model="search"
                         type="search"
                         :placeholder="
-                            locale === 'ar' ? 'ابحث باسم المستأجر...' : 'Search by tenant name...'
+                            locale === 'ar'
+                                ? $t('system.bank_transfer_receipts.search_by_tenant_name...')
+                                : 'Search by tenant name...'
                         "
                         @keyup.enter="applyFilters"
                         class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
@@ -216,37 +261,61 @@ function getAmountBadge(receipt) {
                             <th
                                 class="px-4 py-3 text-start text-xs font-bold uppercase tracking-wider text-gray-500"
                             >
-                                {{ locale === 'ar' ? 'المستأجر' : 'Tenant' }}
+                                {{
+                                    locale === 'ar'
+                                        ? $t('system.bank_transfer_receipts.tenant')
+                                        : 'Tenant'
+                                }}
                             </th>
                             <th
                                 class="px-4 py-3 text-start text-xs font-bold uppercase tracking-wider text-gray-500"
                             >
-                                {{ locale === 'ar' ? 'الباقة' : 'Plan' }}
+                                {{
+                                    locale === 'ar'
+                                        ? $t('system.bank_transfer_receipts.plan')
+                                        : 'Plan'
+                                }}
                             </th>
                             <th
                                 class="px-4 py-3 text-start text-xs font-bold uppercase tracking-wider text-gray-500"
                             >
-                                {{ locale === 'ar' ? 'المبلغ' : 'Amount' }}
+                                {{
+                                    locale === 'ar'
+                                        ? $t('system.bank_transfer_receipts.amount')
+                                        : 'Amount'
+                                }}
                             </th>
                             <th
                                 class="px-4 py-3 text-start text-xs font-bold uppercase tracking-wider text-gray-500"
                             >
-                                {{ locale === 'ar' ? 'تاريخ التحويل' : 'Transfer date' }}
+                                {{
+                                    locale === 'ar'
+                                        ? $t('system.bank_transfer_receipts.transfer_date')
+                                        : 'Transfer date'
+                                }}
                             </th>
                             <th
                                 class="px-4 py-3 text-start text-xs font-bold uppercase tracking-wider text-gray-500"
                             >
-                                {{ locale === 'ar' ? 'مرفوع' : 'Submitted' }}
+                                {{
+                                    locale === 'ar'
+                                        ? $t('system.bank_transfer_receipts.submitted')
+                                        : 'Submitted'
+                                }}
                             </th>
                             <th
                                 class="px-4 py-3 text-start text-xs font-bold uppercase tracking-wider text-gray-500"
                             >
-                                {{ locale === 'ar' ? 'الحالة' : 'Status' }}
+                                {{ locale === 'ar' ? $t('common.status') : 'Status' }}
                             </th>
                             <th
                                 class="px-4 py-3 text-end text-xs font-bold uppercase tracking-wider text-gray-500"
                             >
-                                {{ locale === 'ar' ? 'إجراءات' : 'Actions' }}
+                                {{
+                                    locale === 'ar'
+                                        ? $t('system.bank_transfer_receipts.actions')
+                                        : 'Actions'
+                                }}
                             </th>
                         </tr>
                     </thead>
@@ -256,7 +325,11 @@ function getAmountBadge(receipt) {
                                 colspan="7"
                                 class="px-4 py-12 text-center text-gray-500 dark:text-gray-400"
                             >
-                                {{ locale === 'ar' ? 'لا توجد إيصالات' : 'No receipts' }}
+                                {{
+                                    locale === 'ar'
+                                        ? $t('system.bank_transfer_receipts.no_receipts')
+                                        : 'No receipts'
+                                }}
                             </td>
                         </tr>
                         <tr
@@ -363,7 +436,11 @@ function getAmountBadge(receipt) {
                                     :href="`/system/bank-transfer-receipts/${r.id}`"
                                     class="rounded-lg bg-indigo-600 px-3 py-1 text-xs font-semibold text-white hover:bg-indigo-700"
                                 >
-                                    {{ locale === 'ar' ? 'مراجعة' : 'Review' }}
+                                    {{
+                                        locale === 'ar'
+                                            ? $t('system.bank_transfer_receipts.review')
+                                            : 'Review'
+                                    }}
                                 </Link>
                             </td>
                         </tr>

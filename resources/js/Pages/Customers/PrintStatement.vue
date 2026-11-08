@@ -1,160 +1,70 @@
 <template>
-    <div
-        class="print-container print-statement-page bg-white min-h-screen text-gray-900 p-8 print:p-0 print:m-0"
-        dir="rtl"
+    <StandardReportLayout
+        :title="$t('customers.statement.title')"
+        :subtitle="customerSummary"
+        back-route="app.customers.show"
+        :back-route-params="customer?.id ? [customer.id] : []"
     >
-        <Head
-            :title="
-                ($t('customers.statement.title') || 'كشف حساب عميل') +
-                ' - ' +
-                (customer?.name || '')
-            "
-        />
-
-        <!-- Floating Screen Controls (Hidden during print) -->
-        <div
-            class="print:hidden mb-6 flex justify-between items-center bg-gray-50 p-4 rounded-2xl border border-gray-200 shadow-sm"
-        >
-            <div class="flex items-center gap-3">
-                <button
-                    type="button"
-                    @click="handlePrint"
-                    class="px-5 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white rounded-xl font-bold flex items-center gap-2 shadow-md transition-all cursor-pointer"
-                >
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            stroke-width="2"
-                            d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"
-                        />
-                    </svg>
-                    <span>{{ $t('common.print') || $t('common.print') }}</span>
-                </button>
+        <template #header-extra>
+            <div v-if="customer?.tax_number" class="text-xs text-gray-600">
+                {{ $t('common.tax_number_label') }}
+                <span class="font-mono">{{ customer.tax_number }}</span>
             </div>
-            <button
-                type="button"
-                @click="handleClose"
-                class="px-4 py-2 bg-white text-gray-700 border border-gray-200 rounded-xl hover:bg-gray-100 font-bold transition-all cursor-pointer"
-            >
-                {{ $t('common.close') || $t('common.close') }}
-            </button>
+        </template>
+
+        <!-- Financial Summary Banner -->
+        <div
+            class="grid grid-cols-3 gap-3 mb-6 p-3 bg-gray-50 rounded-xl border border-gray-200 text-center text-xs"
+        >
+            <div class="p-2 bg-white rounded-lg border border-gray-100">
+                <span class="text-gray-500 block mb-1">
+                    {{ $t('customers.statement.total_invoices') }}
+                </span>
+                <strong class="font-mono text-sm text-gray-900">
+                    {{ formatMoney(financialSummary?.total_invoiced) }}
+                </strong>
+            </div>
+            <div class="p-2 bg-white rounded-lg border border-gray-100">
+                <span class="text-gray-500 block mb-1">
+                    {{ $t('customers.statement.total_paid') }}
+                </span>
+                <strong class="font-mono text-sm text-emerald-700">
+                    {{ formatMoney(financialSummary?.total_paid) }}
+                </strong>
+            </div>
+            <div class="p-2 bg-white rounded-lg border border-gray-100">
+                <span class="text-gray-500 block mb-1">
+                    {{ $t('customers.statement.remaining_balance') }}
+                </span>
+                <strong class="font-mono text-sm text-rose-700">
+                    {{ formatMoney(financialSummary?.total_due) }}
+                </strong>
+            </div>
         </div>
 
-        <!-- Official 3-Column Header (AUDIT_STANDARDS.md Section 5) -->
-        <div class="statement-sheet max-w-5xl mx-auto">
-            <div class="border-b-2 border-gray-900 pb-4 mb-4">
-                <div class="grid grid-cols-3 items-center text-xs">
-                    <!-- Column 1: Workshop / Center Info -->
-                    <div class="text-start space-y-1">
-                        <h1 class="text-base font-black text-black">
-                            {{ companyInfo.name }}
-                        </h1>
-                        <p v-if="companyInfo.branch" class="font-bold text-gray-700">
-                            {{ $t('common.branch_label') }} {{ companyInfo.branch }}
-                        </p>
-                        <p v-if="companyInfo.phone" class="text-gray-600">
-                            {{ $t('common.phone_label') }}
-                            <span class="font-mono" dir="ltr">{{ companyInfo.phone }}</span>
-                        </p>
-                        <p v-if="companyInfo.vat_number" class="text-gray-600">
-                            {{ $t('common.tax_number_label') }}
-                            <span class="font-mono font-bold">{{ companyInfo.vat_number }}</span>
-                        </p>
-                        <p v-if="companyInfo.cr_number" class="text-gray-600">
-                            {{ $t('common.commercial_registration_label') }}
-                            <span class="font-mono">{{ companyInfo.cr_number }}</span>
-                        </p>
-                    </div>
-
-                    <!-- Column 2 (Center): Logo & Statement Title -->
-                    <div class="text-center flex flex-col items-center justify-center">
-                        <div
-                            v-if="companyInfo.logo_url"
-                            class="h-16 w-32 mb-1 flex items-center justify-center"
-                        >
-                            <img
-                                :src="companyInfo.logo_url"
-                                alt="Logo"
-                                class="max-h-16 max-w-full object-contain"
-                            />
-                        </div>
-                        <div v-else class="text-center py-1">
-                            <span class="text-base font-black tracking-wide text-black">
-                                {{ companyInfo.name }}
-                            </span>
-                        </div>
-                        <h2 class="text-sm font-black text-black uppercase tracking-wider">
-                            {{ $t('customers.statement.title') }}
-                        </h2>
-                    </div>
-
-                    <!-- Column 3: Customer Info & Print Date -->
-                    <div class="text-end space-y-1">
-                        <p class="font-black text-black text-sm">{{ customer?.name }}</p>
-                        <p class="font-mono" dir="ltr">{{ customer?.phone }}</p>
-                        <p v-if="customer?.tax_number" class="text-gray-600">
-                            {{ $t('common.tax_number_label') }}
-                            <span class="font-mono">{{ customer?.tax_number }}</span>
-                        </p>
-                        <p class="text-gray-500">
-                            {{ $t('common.print_date_label') }}
-                            <span class="font-mono">{{ printDateFormatted }}</span>
-                        </p>
-                    </div>
-                </div>
-
-                <!-- Financial Summary Banner -->
-                <div
-                    class="grid grid-cols-3 gap-2 mt-4 p-2.5 bg-gray-100 rounded border border-gray-300 text-center text-xs"
-                >
-                    <div>
-                        <span class="text-gray-600 block">
-                            {{ $t('customers.statement.total_invoices') }}
-                        </span>
-                        <strong class="font-mono text-sm text-gray-900">
-                            {{ formatMoney(financialSummary?.total_invoiced) }}
-                        </strong>
-                    </div>
-                    <div>
-                        <span class="text-gray-600 block">
-                            {{ $t('customers.statement.total_paid') }}
-                        </span>
-                        <strong class="font-mono text-sm text-emerald-700">
-                            {{ formatMoney(financialSummary?.total_paid) }}
-                        </strong>
-                    </div>
-                    <div>
-                        <span class="text-gray-600 block">
-                            {{ $t('customers.statement.remaining_balance') }}
-                        </span>
-                        <strong class="font-mono text-sm text-rose-700">
-                            {{ formatMoney(financialSummary?.total_due) }}
-                        </strong>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Detailed Ledger Table -->
-            <table class="w-full text-xs text-center border-collapse">
+        <!-- Detailed Ledger Table -->
+        <div class="overflow-x-auto">
+            <table class="w-full text-xs text-center border border-gray-300 border-collapse">
                 <thead>
-                    <tr class="bg-gray-100 border-b-2 border-gray-800 text-gray-800 font-bold">
-                        <th class="py-2 px-2 text-center w-8">#</th>
-                        <th class="py-2 px-3 text-center">{{ $t('common.date') }}</th>
-                        <th class="py-2 px-3 text-center">{{ $t('customers.statement.type') }}</th>
-                        <th class="py-2 px-3 text-center">
+                    <tr class="bg-gray-100 border-b border-gray-300 text-gray-800 font-bold">
+                        <th class="py-2.5 px-2 text-center w-8">#</th>
+                        <th class="py-2.5 px-3 text-center">{{ $t('common.date') }}</th>
+                        <th class="py-2.5 px-3 text-center">
+                            {{ $t('customers.statement.type') }}
+                        </th>
+                        <th class="py-2.5 px-3 text-center">
                             {{ $t('common.reference_document_number') }}
                         </th>
-                        <th class="py-2 px-3 text-center">
+                        <th class="py-2.5 px-3 text-center">
                             {{ $t('customers.statement.work_order_vehicle') }}
                         </th>
-                        <th class="py-2 px-3 text-center">
+                        <th class="py-2.5 px-3 text-center">
                             {{ $t('customers.statement.debtor_invoices') }}
                         </th>
-                        <th class="py-2 px-3 text-center">
+                        <th class="py-2.5 px-3 text-center">
                             {{ $t('customers.statement.credit') }}
                         </th>
-                        <th class="py-2 px-3 text-center">
+                        <th class="py-2.5 px-3 text-center">
                             {{ $t('customers.statement.balance') }}
                         </th>
                     </tr>
@@ -220,36 +130,14 @@
                     </tr>
                 </tbody>
             </table>
-
-            <!-- Print Footer -->
-            <div class="pt-6 mt-8 border-t border-gray-300 text-xs text-gray-600">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p>
-                            {{ $t('common.prepared_by_label') }}
-                            <span class="font-bold text-black">
-                                {{ $page.props.auth?.user?.name || 'Administrator' }}
-                            </span>
-                        </p>
-                        <p>
-                            {{ $t('common.print_date_time_label') }}
-                            <span class="font-mono">{{ printDateFormatted }}</span>
-                        </p>
-                    </div>
-                    <div class="text-center w-52 border-t border-dashed border-gray-400 pt-1">
-                        <span class="text-[11px] font-bold text-black block">
-                            {{ $t('reports.payments_report.official_seal') }}
-                        </span>
-                    </div>
-                </div>
-            </div>
         </div>
-    </div>
+    </StandardReportLayout>
 </template>
 
 <script setup>
-import { computed, onMounted } from 'vue';
-import { Head } from '@inertiajs/vue3';
+import { computed } from 'vue';
+import { useI18n } from 'vue-i18n';
+import StandardReportLayout from '@/Components/Print/StandardReportLayout.vue';
 
 const props = defineProps({
     customer: {
@@ -281,6 +169,16 @@ const props = defineProps({
     },
 });
 
+const { t } = useI18n();
+
+const customerSummary = computed(() => {
+    if (!props.customer?.name) return '';
+    if (props.customer?.phone) {
+        return `${props.customer.name} (${props.customer.phone})`;
+    }
+    return props.customer.name;
+});
+
 const formatMoney = (val) => {
     const num = Number(val) || 0;
     return (
@@ -290,35 +188,6 @@ const formatMoney = (val) => {
         }).format(num) + ' SAR'
     );
 };
-
-const printDateFormatted = computed(() => {
-    return new Date().toLocaleString('en-GB', {
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit',
-        hour: '2-digit',
-        minute: '2-digit',
-    });
-});
-
-const handlePrint = () => {
-    window.print();
-};
-
-const handleClose = () => {
-    if (window.opener) {
-        window.close();
-    } else {
-        window.history.back();
-    }
-};
-
-onMounted(() => {
-    // Automatically open print dialog after short render delay
-    setTimeout(() => {
-        window.print();
-    }, 400);
-});
 </script>
 
 <style>
@@ -328,36 +197,6 @@ onMounted(() => {
 }
 
 @media print {
-    html,
-    body {
-        background-color: white !important;
-        margin: 0 !important;
-        padding: 0 !important;
-        color: black !important;
-        font-family: 'Noto Kufi Arabic', 'Tajawal', sans-serif !important;
-        height: auto !important;
-        overflow: visible !important;
-        visibility: visible !important;
-    }
-
-    #app,
-    .print-container,
-    .print-container * {
-        visibility: visible !important;
-    }
-
-    .print-statement-page {
-        padding: 0 !important;
-        margin: 0 !important;
-        min-height: auto !important;
-        background: white !important;
-    }
-
-    .print\:hidden {
-        display: none !important;
-        visibility: hidden !important;
-    }
-
     table {
         width: 100% !important;
         border-collapse: collapse !important;

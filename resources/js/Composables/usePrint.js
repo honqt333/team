@@ -1,5 +1,10 @@
+import { computed } from 'vue';
+import { useI18n } from 'vue-i18n';
+import { useNumberFormat } from '@/Composables/useNumberFormat';
+import { useFormatters } from '@/Composables/useFormatters';
+
 /**
- * Shared print composable - استدع
+ * Shared print composable - استدعاء الوظائف المشتركة للطباعة
  * used across all print templates.
  *
  * Usage:
@@ -9,7 +14,6 @@
 
 export function usePrint() {
     const { locale } = useI18n();
-    const page = usePage();
     const isRtl = computed(() => locale.value === 'ar');
 
     const helpers = useNumberFormat();
@@ -17,7 +21,6 @@ export function usePrint() {
 
     // Re-export formatting helpers
     const {
-        formatCurrency: formatCurrencyBase,
         formatNumber: formatNumberBase,
         formatInteger: formatIntegerBase,
         formatQuantity: formatQuantityBase,
@@ -291,64 +294,6 @@ export function usePrint() {
     }
 
     /**
-     * Build signature rows for print (replaces buildPrintSignatures)
-     */
-    function buildSignatures(docSettings, customerSignatureUrl) {
-        import('@/Utils/printSignatures').then(({ buildPrintSignatures }) => {
-            return buildPrintSignatures(docSettings, customerSignatureUrl);
-        });
-        // TODO: Actually import and use buildPrintSignatures here
-        return [];
-    }
-
-    /**
-     * Get line subtotal display (handles inclusive/exclusive pricing mode)
-     */
-    function getLineSubtotalDisplay(item, showExclusive = false, pricingModeSnapshot = null) {
-        if (
-            item.line_total_excl_tax !== undefined &&
-            item.line_total_excl_tax !== null &&
-            item.line_total_excl_tax !== 0
-        ) {
-            return showExclusive
-                ? Number(item.line_total_excl_tax)
-                : Number(item.line_total_incl_tax);
-        }
-
-        const qty = item.qty || 1;
-        const price = item.unit_price || 0;
-        const discount = item.discount || 0;
-        const lineTotalIncl = Math.max(price * qty - discount, 0);
-
-        if (pricingModeSnapshot === 'inclusive') {
-            if (showExclusive) {
-                const rate = isTaxEnabled(item) ? (item.tax_rate_snapshot || 0) / 100 : 0;
-                const tax = lineTotalIncl - lineTotalIncl / (1 + rate);
-                return lineTotalIncl - tax;
-            }
-            return lineTotalIncl;
-        }
-        return lineTotalIncl;
-    }
-
-    /**
-     * Get line VAT amount
-     */
-    function getLineVat(item, showExclusive = false, pricingModeSnapshot = null) {
-        if (!isTaxEnabled(item) || item.is_taxable === false) return 0;
-        if (item.tax_amount !== undefined && item.tax_amount !== null) {
-            return Number(item.tax_amount);
-        }
-        const rate = (item.tax_rate_snapshot || 0) / 100;
-
-        if (pricingModeSnapshot === 'inclusive') {
-            const total = getLineTotal(item, true, 0, false, 'price' in item ? item.price : null);
-            return total - total / (1 + rate);
-        }
-        return getLineExclTax(item, display) * rate;
-    }
-
-    /**
      * Build signature list from docSettings
      */
     const buildPrintSignatures = (docSettings, customerSignatureUrl) => {
@@ -433,6 +378,7 @@ export function usePrint() {
         formatInteger: formatIntegerBase,
         formatQuantity: formatQuantityBase,
         buildPrintSignatures,
+        buildSignatures: buildPrintSignatures,
         parseSignatures,
     };
 }

@@ -423,22 +423,112 @@
         <!-- Print Version -->
         <Teleport to="body">
             <div class="print-section hidden p-8 bg-white text-black" id="print-area">
-                <div class="flex justify-between border-b-2 pb-6 mb-8">
+                <StandardReportHeader :title="$t('purchasing.grn.title')">
+                    <template #extra>
+                        <div class="text-xs font-mono font-bold">{{ grn.code }}</div>
+                    </template>
+                </StandardReportHeader>
+
+                <!-- Logistics Grid -->
+                <div
+                    class="grid grid-cols-3 gap-4 mb-6 text-xs bg-gray-50 p-4 rounded-xl border border-gray-200"
+                >
                     <div>
-                        <h1 class="text-4xl font-black mb-2 uppercase">
-                            {{ $t('purchasing.grn.title') }}
-                        </h1>
-                        <p class="text-xl font-mono">{{ grn.code }}</p>
+                        <span class="text-gray-500 block mb-1">
+                            {{ $t('inventory.warehouses.title') }}
+                        </span>
+                        <strong class="text-sm font-bold text-gray-900">
+                            {{ grn.warehouse?.name }}
+                        </strong>
                     </div>
-                    <div class="text-end">
-                        <div class="text-sm font-bold uppercase text-gray-500 mb-1">
+                    <div>
+                        <span class="text-gray-500 block mb-1">
+                            {{ $t('purchasing.grn.for_po') }}
+                        </span>
+                        <strong class="text-sm font-bold font-mono text-gray-900">
+                            {{ grn.purchase_order?.code }}
+                            <span
+                                v-if="grn.purchase_order?.supplier?.name"
+                                class="font-sans text-xs text-gray-600 block"
+                            >
+                                ({{ grn.purchase_order?.supplier?.name }})
+                            </span>
+                        </strong>
+                    </div>
+                    <div>
+                        <span class="text-gray-500 block mb-1">
                             {{ $t('purchasing.grn.received_date') }}
-                        </div>
-                        <div class="text-lg font-black font-mono">
+                        </span>
+                        <strong class="text-sm font-bold font-mono text-gray-900">
                             {{ formatDate(grn.received_date) }}
+                        </strong>
+                    </div>
+                </div>
+
+                <!-- Items Table -->
+                <table
+                    class="w-full text-xs text-center border border-gray-300 border-collapse mb-6"
+                >
+                    <thead>
+                        <tr class="bg-gray-100 border-b border-gray-300 font-bold text-gray-800">
+                            <th class="py-2.5 px-3 text-start">
+                                {{ $t('inventory.parts.title') }}
+                            </th>
+                            <th class="py-2.5 px-3 text-center w-28">
+                                {{ $t('common.quantity') }}
+                            </th>
+                            <th class="py-2.5 px-3 text-end w-32">
+                                {{ $t('inventory.parts.unit_price') }}
+                            </th>
+                            <th class="py-2.5 px-3 text-end w-32">{{ $t('common.total') }}</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-200">
+                        <tr v-for="item in grn.items" :key="item.id">
+                            <td class="py-2.5 px-3 text-start">
+                                <div class="font-bold text-gray-900">
+                                    {{ item.part?.name_ar || item.part?.name_en }}
+                                </div>
+                                <div class="text-[11px] text-gray-500 font-mono">
+                                    {{ item.part?.sku }}
+                                </div>
+                            </td>
+                            <td class="py-2.5 px-3 text-center font-mono font-bold">
+                                {{ toEnglish(item.qty_received) }}
+                            </td>
+                            <td class="py-2.5 px-3 text-end font-mono">
+                                {{ formatCurrency(item.unit_cost) }}
+                            </td>
+                            <td class="py-2.5 px-3 text-end font-mono font-bold">
+                                {{ formatCurrency(item.qty_received * item.unit_cost) }}
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <!-- Total -->
+                <div class="flex justify-end mb-6">
+                    <div class="w-64 bg-gray-50 p-3 rounded-lg border border-gray-200 text-xs">
+                        <div class="flex justify-between items-center font-bold">
+                            <span>{{ $t('common.total') }}</span>
+                            <span class="text-base font-mono text-indigo-700">
+                                {{ formatCurrency(totalAmount) }}
+                            </span>
                         </div>
                     </div>
                 </div>
+
+                <!-- Notes if any -->
+                <div
+                    v-if="grn?.notes"
+                    class="mb-6 p-3 bg-gray-50 rounded-lg border border-gray-200 text-xs"
+                >
+                    <strong class="block mb-1 text-gray-700">{{ $t('common.notes') }}</strong>
+                    <p class="text-gray-600">{{ grn.notes }}</p>
+                </div>
+
+                <!-- Unified Footer -->
+                <StandardReportFooter class="mt-8 pt-4 border-t border-gray-300" />
             </div>
         </Teleport>
     </AppLayout>
@@ -455,6 +545,8 @@ import { useConfirm } from '@/Composables/useConfirm';
 import { useToast } from '@/Composables/useToast';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import BackButton from '@/Components/BackButton.vue';
+import StandardReportHeader from '@/Components/Print/StandardReportHeader.vue';
+import StandardReportFooter from '@/Components/Print/StandardReportFooter.vue';
 
 const props = defineProps({
     grn: Object,

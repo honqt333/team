@@ -31,27 +31,6 @@
                     <div
                         class="flex items-center gap-1.5 p-1.5 bg-gray-50/50 dark:bg-gray-900/50 backdrop-blur-md rounded-2xl border border-gray-200/50 dark:border-gray-700/50 shadow-inner"
                     >
-                        <Tooltip :text="$t('common.print')">
-                            <button
-                                @click="printQuotes"
-                                class="p-2.5 text-gray-500 hover:text-amber-600 hover:bg-white dark:hover:bg-gray-800 rounded-xl transition-all shadow-sm hover:shadow-md"
-                            >
-                                <svg
-                                    class="w-5 h-5"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        stroke-width="2.5"
-                                        d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"
-                                    />
-                                </svg>
-                            </button>
-                        </Tooltip>
-
                         <Tooltip :text="$t('common.export_excel')">
                             <button
                                 @click="exportQuotes"
@@ -73,60 +52,11 @@
                             </button>
                         </Tooltip>
 
-                        <div class="w-px h-8 bg-gray-200 dark:bg-gray-700 mx-1"></div>
+                        <AppPrintButton variant="icon" @click="printQuotes" />
 
-                        <div class="flex gap-1.5">
-                            <Tooltip :text="$t('common.grid_view')">
-                                <button
-                                    @click="viewMode = 'grid'"
-                                    :class="[
-                                        'p-2.5 rounded-xl transition-all shadow-sm',
-                                        viewMode === 'grid'
-                                            ? 'bg-amber-600 text-white shadow-amber-200 dark:shadow-none'
-                                            : 'text-gray-400 hover:text-gray-600 hover:bg-white dark:hover:bg-gray-800',
-                                    ]"
-                                >
-                                    <svg
-                                        class="w-5 h-5"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        viewBox="0 0 24 24"
-                                    >
-                                        <path
-                                            stroke-linecap="round"
-                                            stroke-linejoin="round"
-                                            stroke-width="2.5"
-                                            d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2z"
-                                        />
-                                    </svg>
-                                </button>
-                            </Tooltip>
-                            <Tooltip :text="$t('common.list_view')">
-                                <button
-                                    @click="viewMode = 'list'"
-                                    :class="[
-                                        'p-2.5 rounded-xl transition-all shadow-sm',
-                                        viewMode === 'list'
-                                            ? 'bg-amber-600 text-white shadow-amber-200 dark:shadow-none'
-                                            : 'text-gray-400 hover:text-gray-600 hover:bg-white dark:hover:bg-gray-800',
-                                    ]"
-                                >
-                                    <svg
-                                        class="w-5 h-5"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        viewBox="0 0 24 24"
-                                    >
-                                        <path
-                                            stroke-linecap="round"
-                                            stroke-linejoin="round"
-                                            stroke-width="2.5"
-                                            d="M4 6h16M4 12h16M4 18h16"
-                                        />
-                                    </svg>
-                                </button>
-                            </Tooltip>
-                        </div>
+                        <div class="w-px h-6 bg-gray-200 dark:bg-gray-700 mx-1"></div>
+
+                        <AppViewModeToggle v-model="viewMode" storage-key="quotes" />
                     </div>
 
                     <Tooltip :text="$t('quotes.add')">
@@ -948,7 +878,7 @@
         <!-- Print Section (Teleported to body for printing) -->
         <Teleport to="body">
             <div class="print-section hidden">
-                <PrintHeader :title="$t('quotes.title')" />
+                <StandardReportHeader :title="$t('quotes.title')" />
 
                 <!-- Table -->
                 <table class="print-table">
@@ -988,9 +918,7 @@
                     </tbody>
                 </table>
 
-                <div class="mt-8 text-center text-xs text-gray-400">
-                    {{ $page.props.auth.user.name }}
-                </div>
+                <StandardReportFooter class="mt-8 border-t pt-4" />
             </div>
         </Teleport>
     </AppLayout>
@@ -1005,11 +933,14 @@ import { useToast } from '@/Composables/useToast';
 import { useConfirm } from '@/Composables/useConfirm';
 import { useNumberFormat } from '@/Composables/useNumberFormat';
 import AppLayout from '@/Layouts/AppLayout.vue';
-import QuoteFormModal from '@/Components/Quotes/QuoteFormModal.vue';
 import PageHeader from '@/Components/PageHeader.vue';
+import AppPrintButton from '@/Components/Common/AppPrintButton.vue';
+import AppViewModeToggle from '@/Components/Common/AppViewModeToggle.vue';
+import QuoteFormModal from '@/Components/Quotes/QuoteFormModal.vue';
 import Tooltip from '@/Components/Tooltip.vue';
 import SortIcon from '@/Components/Common/SortIcon.vue';
-import PrintHeader from '@/Components/Print/PrintHeader.vue';
+import StandardReportHeader from '@/Components/Print/StandardReportHeader.vue';
+import StandardReportFooter from '@/Components/Print/StandardReportFooter.vue';
 import CustomDatePicker from '@/Components/CustomDatePicker.vue';
 import SaudiPlateDisplay from '@/Components/Vehicles/SaudiPlateDisplay.vue';
 import { usePermission } from '@/Composables/usePermission';

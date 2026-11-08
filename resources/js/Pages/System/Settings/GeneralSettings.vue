@@ -39,7 +39,7 @@ const updateSetting = (key, value) => {
 </script>
 
 <template>
-    <SystemLayout title="الإعدادات العامة">
+    <SystemLayout :title="$t('system.settings.general_title')">
         <template #header>
             <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
                 {{ $t('permissions_modules.settings_general') }}

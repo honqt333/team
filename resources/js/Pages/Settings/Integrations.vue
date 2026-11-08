@@ -274,7 +274,67 @@
                     </div>
                 </Link>
 
-                <!-- 5. إشعارات الواتساب والرسائل (قريباً) -->
+                <!-- 5. إعدادات وقوالب الطباعة -->
+                <Link
+                    :href="route('settings.print')"
+                    class="group relative bg-white dark:bg-gray-800 rounded-2xl p-6 border border-gray-200 dark:border-gray-700 hover:border-amber-400 dark:hover:border-amber-500 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between"
+                >
+                    <div>
+                        <div class="flex items-center justify-between mb-4">
+                            <div
+                                class="w-14 h-14 rounded-2xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center shadow-lg shadow-amber-500/25 group-hover:scale-110 transition-transform duration-300"
+                            >
+                                <svg
+                                    class="w-7 h-7 text-white"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2"
+                                        d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"
+                                    />
+                                </svg>
+                            </div>
+                            <span
+                                class="px-3 py-1 rounded-full text-xs font-bold bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800"
+                            >
+                                {{ $t('settings.integrations.badges.active') }}
+                            </span>
+                        </div>
+                        <h3
+                            class="text-lg font-bold text-gray-900 dark:text-white group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors"
+                        >
+                            {{ $t('settings.integrations.print_title') }}
+                        </h3>
+                        <p class="text-sm text-gray-500 dark:text-gray-400 mt-2 line-clamp-3">
+                            {{ $t('settings.integrations.print_desc') }}
+                        </p>
+                    </div>
+
+                    <div
+                        class="mt-6 pt-4 border-t border-gray-100 dark:border-gray-700/50 flex items-center justify-between text-xs font-semibold text-amber-600 dark:text-amber-400"
+                    >
+                        <span>{{ $t('settings.integrations.manage_print') }}</span>
+                        <svg
+                            class="w-4 h-4 rtl:rotate-180 group-hover:translate-x-1 rtl:group-hover:-translate-x-1 transition-transform"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M9 5l7 7-7 7"
+                            />
+                        </svg>
+                    </div>
+                </Link>
+
+                <!-- 6. إشعارات الواتساب والرسائل (قريباً) -->
                 <div
                     class="relative bg-white/60 dark:bg-gray-800/60 rounded-2xl p-6 border border-gray-200/80 dark:border-gray-700/80 flex flex-col justify-between opacity-85"
                 >
@@ -319,7 +379,7 @@
                     </div>
                 </div>
 
-                <!-- 6. الدفع الإلكتروني والتقسيط (قريباً) -->
+                <!-- 7. الدفع الإلكتروني والتقسيط (قريباً) -->
                 <div
                     class="relative bg-white/60 dark:bg-gray-800/60 rounded-2xl p-6 border border-gray-200/80 dark:border-gray-700/80 flex flex-col justify-between opacity-85"
                 >
@@ -364,7 +424,7 @@
                     </div>
                 </div>
 
-                <!-- 7. خرائط جوجل والمواقع (قريباً) -->
+                <!-- 8. خرائط جوجل والمواقع (قريباً) -->
                 <div
                     class="relative bg-white/60 dark:bg-gray-800/60 rounded-2xl p-6 border border-gray-200/80 dark:border-gray-700/80 flex flex-col justify-between opacity-85"
                 >
@@ -415,7 +475,7 @@
                     </div>
                 </div>
 
-                <!-- 8. الربط المحاسبي (قريباً) -->
+                <!-- 9. الربط المحاسبي (قريباً) -->
                 <div
                     class="relative bg-white/60 dark:bg-gray-800/60 rounded-2xl p-6 border border-gray-200/80 dark:border-gray-700/80 flex flex-col justify-between opacity-85"
                 >

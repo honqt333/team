@@ -1679,65 +1679,26 @@
         <Teleport to="body">
             <div id="supplier-statement-print-area" class="hidden">
                 <div class="print-statement-container p-6 bg-white text-black font-sans text-xs">
-                    <!-- Standard Official Print Header (AUDIT_STANDARDS.md Section 5) -->
-                    <div class="border-b-2 border-gray-900 pb-4 mb-4">
-                        <div class="grid grid-cols-3 items-center">
-                            <!-- Center Info -->
-                            <div class="text-start space-y-1">
-                                <h1 class="text-lg font-black">
-                                    {{
-                                        $page.props.tenant?.trade_name ||
-                                        $page.props.tenant?.name ||
-                                        'Carag'
-                                    }}
-                                </h1>
-                                <p v-if="$page.props.center?.name" class="font-bold text-gray-700">
-                                    {{ $t('common.branch_label') }} {{ $page.props.center?.name }}
+                    <StandardReportHeader
+                        :title="$t('purchasing.supplier_statement')"
+                        :subtitle="`${$t('common.period_label')} ${statementStartDate || $t('common.start')} ${$t('common.to')} ${statementEndDate || $t('common.until_now')}`"
+                    >
+                        <template #extra>
+                            <div class="space-y-0.5 text-xs">
+                                <p class="font-bold text-gray-900">{{ supplier.name }}</p>
+                                <p v-if="supplier.code" class="font-mono text-gray-600">
+                                    {{ $t('common.code_label') }}: {{ supplier.code }}
                                 </p>
-                                <p
-                                    v-if="
-                                        $page.props.tenant?.vat_number ||
-                                        $page.props.tenant?.tax_number
-                                    "
-                                    class="font-mono"
-                                >
-                                    {{ $t('common.tax_number_label') }}
-                                    {{
-                                        $page.props.tenant?.vat_number ||
-                                        $page.props.tenant?.tax_number
-                                    }}
-                                </p>
-                            </div>
-                            <!-- Title -->
-                            <div class="text-center space-y-1">
-                                <h2
-                                    class="text-base font-black px-3 py-1 border-2 border-black rounded-xl inline-block uppercase"
-                                >
-                                    {{ $t('purchasing.supplier_statement') }}
-                                </h2>
-                                <p class="text-[11px] font-mono text-gray-700">
-                                    {{ $t('common.period_label') }}
-                                    {{ statementStartDate || $t('common.start') }}
-                                    {{ $t('common.to') }}
-                                    {{ statementEndDate || $t('common.until_now') }}
-                                </p>
-                            </div>
-                            <!-- Supplier Info -->
-                            <div class="text-end space-y-1">
-                                <p class="font-black text-sm">{{ supplier.name }}</p>
-                                <p v-if="supplier.code" class="font-mono font-bold text-gray-700">
-                                    {{ $t('common.code_label') }} {{ supplier.code }}
-                                </p>
-                                <p v-if="supplier.tax_number" class="font-mono">
-                                    {{ $t('purchasing.supplier_is_vat_payer') }}
+                                <p v-if="supplier.tax_number" class="font-mono text-gray-600">
+                                    {{ $t('purchasing.supplier_is_vat_payer') }}:
                                     {{ supplier.tax_number }}
                                 </p>
-                                <p v-if="supplier.phone" dir="ltr" class="font-mono">
+                                <p v-if="supplier.phone" dir="ltr" class="font-mono text-gray-600">
                                     {{ supplier.phone }}
                                 </p>
                             </div>
-                        </div>
-                    </div>
+                        </template>
+                    </StandardReportHeader>
 
                     <!-- Summary Table -->
                     <div class="grid grid-cols-5 gap-2 mb-4 text-center">
@@ -1879,23 +1840,8 @@
                         </tbody>
                     </table>
 
-                    <!-- Footer Signatures -->
-                    <div class="border-t border-gray-800 pt-4 grid grid-cols-3 text-xs text-center">
-                        <div>
-                            <p class="font-bold">{{ $t('purchasing.accountant_in_charge') }}</p>
-                            <p class="mt-8 text-gray-500">.............................</p>
-                        </div>
-                        <div>
-                            <p class="font-bold">{{ $t('common.center_manager') }}</p>
-                            <p class="mt-8 text-gray-500">.............................</p>
-                        </div>
-                        <div>
-                            <p class="font-bold">
-                                {{ $t('purchasing.supplier_stamp_and_signature') }}
-                            </p>
-                            <p class="mt-8 text-gray-500">.............................</p>
-                        </div>
-                    </div>
+                    <!-- Unified Footer (NO stamps/signatures per instructions) -->
+                    <StandardReportFooter />
                 </div>
             </div>
         </Teleport>
@@ -1912,6 +1858,8 @@ import ConfirmModal from '@/Components/ConfirmModal.vue';
 import PurchaseInvoiceFormModal from '@/Components/Purchasing/PurchaseInvoiceFormModal.vue';
 import SupplierQuickPaymentModal from '@/Components/Purchasing/SupplierQuickPaymentModal.vue';
 import Tooltip from '@/Components/Tooltip.vue';
+import StandardReportHeader from '@/Components/Print/StandardReportHeader.vue';
+import StandardReportFooter from '@/Components/Print/StandardReportFooter.vue';
 import BackButton from '@/Components/BackButton.vue';
 import { useConfirm } from '@/Composables/useConfirm';
 import { usePermission } from '@/Composables/usePermission';

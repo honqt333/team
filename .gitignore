@@ -29,3 +29,7 @@ scratch_test.php
 /storage/framework/cache/*
 !/storage/framework/cache/.gitignore
 
+
+cookies.txt
+.lighthouseci/
+

@@ -80,6 +80,7 @@ class SystemSettingsController extends Controller
                 'name' => $name,
                 'title_ar' => $existing['title_ar'] ?? ($existing['title'] ?? $name),
                 'title_en' => $existing['title_en'] ?? ($existing['title'] ?? $name),
+                'template' => $existing['template'] ?? null,
                 'terms' => is_array($existing['terms'] ?? null) ? array_values(array_filter($existing['terms'], fn ($t) => ! empty($t['text_ar']) || ! empty($t['text_en']))) : [],
                 'print_terms' => $existing['print_terms'] ?? true,
                 'terms_first_page' => $existing['terms_first_page'] ?? false,

@@ -104,7 +104,17 @@
         <!-- Client & Vehicle Details Box -->
         <div
             :class="
-                ['parts_invoice', 'purchase_invoice', 'purchase_return'].includes(documentType)
+                [
+                    'parts_invoice',
+                    'purchase_invoice',
+                    'purchase_return',
+                    'payslip',
+                    'payroll',
+                    'attendance',
+                    'employee',
+                    'customers',
+                    'vehicles',
+                ].includes(documentType)
                     ? 'block mb-6'
                     : 'grid grid-cols-2 gap-4 mb-6'
             "
@@ -134,7 +144,15 @@
                             ? isRtl
                                 ? 'المورد'
                                 : 'Supplier'
-                            : $t('work_orders.print_view.customer')
+                            : ['payslip', 'employee', 'attendance'].includes(documentType)
+                              ? isRtl
+                                  ? 'الموظف'
+                                  : 'Employee'
+                              : ['payroll', 'customers', 'vehicles'].includes(documentType)
+                                ? isRtl
+                                    ? 'معلومات التقرير'
+                                    : 'Report Info'
+                                : $t('work_orders.print_view.customer')
                     }}
                 </h3>
                 <div class="grid grid-cols-2 gap-2 text-sm text-gray-700 mt-2">
@@ -170,7 +188,17 @@
 
             <div
                 v-if="
-                    !['parts_invoice', 'purchase_invoice', 'purchase_return'].includes(documentType)
+                    ![
+                        'parts_invoice',
+                        'purchase_invoice',
+                        'purchase_return',
+                        'payslip',
+                        'payroll',
+                        'attendance',
+                        'employee',
+                        'customers',
+                        'vehicles',
+                    ].includes(documentType)
                 "
                 class="border p-3 relative pt-4 transition-all duration-300"
                 :class="
@@ -265,6 +293,10 @@
                         'parts_invoice',
                         'purchase_invoice',
                         'purchase_return',
+                        'credit_note',
+                        'subscription_invoice',
+                        'delivery_note',
+                        'receipt',
                     ].includes(documentType)
                 "
                 class="space-y-6"
@@ -848,7 +880,7 @@
                 <div>
                     <h3 class="font-bold text-gray-800 mb-2 flex items-center gap-2">
                         {{
-                            documentType === 'work_order'
+                            ['work_order', 'payslip', 'employee'].includes(documentType)
                                 ? $t('work_orders.print_view.required_services')
                                 : documentType === 'parts_invoice'
                                   ? isRtl
@@ -872,7 +904,11 @@
                                     {{ $t('work_orders.print_view.service') }}
                                 </th>
                                 <!-- Status / Dates columns — work_order only -->
-                                <template v-if="documentType === 'work_order'">
+                                <template
+                                    v-if="
+                                        ['work_order', 'payslip', 'employee'].includes(documentType)
+                                    "
+                                >
                                     <th class="p-2 border border-gray-700 w-24 text-center">
                                         {{ $t('work_orders.print_view.status') }}
                                     </th>
@@ -958,7 +994,11 @@
                                     </span>
                                 </td>
                                 <!-- Status badge per item -->
-                                <template v-if="documentType === 'work_order'">
+                                <template
+                                    v-if="
+                                        ['work_order', 'payslip', 'employee'].includes(documentType)
+                                    "
+                                >
                                     <td class="p-2 border border-gray-200 text-center">
                                         <span
                                             class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold whitespace-nowrap"
@@ -1039,7 +1079,7 @@
                 <!-- ── Customer Complaint + Initial Assessment (work_order only) ── -->
                 <div
                     v-if="
-                        documentType === 'work_order' &&
+                        ['work_order', 'payslip', 'employee'].includes(documentType) &&
                         (data.customer_complaint || data.initial_assessment)
                     "
                     class="grid gap-3"
@@ -1478,10 +1518,10 @@ const parts = computed(() => {
 
 // Show VAT column only when at least one item has VAT
 const hasServicesVat = computed(() =>
-    services.value.some((i) => printTotals.printTotals.srvLineVat(i, props.data) > 0)
+    services.value.some((i) => printTotals.srvLineVat(i, props.data) > 0)
 );
 const hasPartsVat = computed(() =>
-    parts.value.some((i) => printTotals.printTotals.partLineVat(i, props.data) > 0)
+    parts.value.some((i) => printTotals.partLineVat(i, props.data) > 0)
 );
 
 const getPartsFooterColspan = computed(() => {

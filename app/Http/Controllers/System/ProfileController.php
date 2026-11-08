@@ -5,9 +5,10 @@ declare(strict_types=1);
 namespace App\Http\Controllers\System;
 
 use App\Http\Controllers\Controller;
+use App\Models\AdminUser;
+use App\Models\User;
 use App\Services\TwoFactorService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
 use Inertia\Inertia;
@@ -23,15 +24,23 @@ class ProfileController extends Controller
     }
 
     /**
+     * Resolve the acting account for system profile actions.
+     */
+    private function actor(Request $request): AdminUser|User
+    {
+        $actor = $request->user();
+
+        abort_if(! $actor, 401, 'Unauthorized');
+
+        return $actor;
+    }
+
+    /**
      * Display admin profile.
      */
-    public function index(): Response
+    public function index(Request $request): Response
     {
-        $admin = Auth::guard('admin')->user();
-
-        if (! $admin) {
-            abort(401, 'Unauthorized');
-        }
+        $admin = $this->actor($request);
 
         // Generate secret if not already set
         $secret = $admin->two_factor_secret;
@@ -39,12 +48,16 @@ class ProfileController extends Controller
 
         if (! $secret && ! $isEnabled) {
             $secret = $this->twoFactor->generateSecret();
-            $admin->update(['two_factor_secret' => encrypt($secret)]);
+            $admin->forceFill(['two_factor_secret' => encrypt($secret)])->save();
         } elseif ($secret && ! $isEnabled) {
             $secret = decrypt($secret);
         }
 
         $qrCode = ! $isEnabled ? $this->twoFactor->generateQrCode($admin->email, $secret) : null;
+
+        if ($admin instanceof User && empty($admin->role)) {
+            $admin->setAttribute('role', 'super_admin');
+        }
 
         return Inertia::render('System/Profile/Index', [
             'admin' => $admin,
@@ -66,12 +79,13 @@ class ProfileController extends Controller
      */
     public function update(Request $request)
     {
-        $admin = Auth::guard('admin')->user();
+        $admin = $this->actor($request);
+        $table = $admin instanceof AdminUser ? 'admin_users' : 'users';
 
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:admin_users,email,'.$admin->id,
-            'phone' => 'nullable|string|max:20|unique:admin_users,phone,'.$admin->id,
+            'email' => 'required|email|unique:'.$table.',email,'.$admin->id,
+            'phone' => 'nullable|string|max:20|unique:'.$table.',phone,'.$admin->id,
         ]);
 
         $admin->update($validated);
@@ -84,10 +98,11 @@ class ProfileController extends Controller
      */
     public function updatePassword(Request $request)
     {
-        $admin = Auth::guard('admin')->user();
+        $admin = $this->actor($request);
+        $guard = $admin instanceof AdminUser ? 'admin' : 'web';
 
         $request->validate([
-            'current_password' => ['required', 'current_password:admin'],
+            'current_password' => ['required', "current_password:{$guard}"],
             'password' => ['required', Password::defaults(), 'confirmed'],
         ]);
 

@@ -51,7 +51,13 @@ class VehicleMake extends Model
      */
     public function getLogoUrlAttribute(): ?string
     {
-        return $this->logo_path ? Storage::url($this->logo_path) : null;
+        $path = $this->attributes['logo_path'] ?? null;
+
+        if ($path === null && $this->id && ! array_key_exists('logo_path', $this->attributes)) {
+            $path = DB::table('vehicle_makes')->where('id', $this->id)->value('logo_path');
+        }
+
+        return $path ? Storage::url($path) : null;
     }
 
     public function tenant(): BelongsTo

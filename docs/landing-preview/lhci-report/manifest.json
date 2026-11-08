@@ -1,0 +1,15 @@
+[
+  {
+    "url": "https://carag-v2.test/landing-preview",
+    "isRepresentativeRun": true,
+    "htmlPath": "/Users/ahmad/Herd/carag-v2/docs/landing-preview/lhci-report/carag_v2_test-landing_preview-2026_11_08_06_41_49.report.html",
+    "jsonPath": "/Users/ahmad/Herd/carag-v2/docs/landing-preview/lhci-report/carag_v2_test-landing_preview-2026_11_08_06_41_49.report.json",
+    "summary": {
+      "performance": 0.61,
+      "accessibility": 0.96,
+      "best-practices": 1,
+      "seo": 0.92,
+      "agentic-browsing": 1
+    }
+  }
+]

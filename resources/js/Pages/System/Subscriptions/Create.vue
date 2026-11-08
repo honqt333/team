@@ -24,10 +24,10 @@
                     </Link>
                     <div>
                         <h1 class="text-2xl font-bold text-gray-900 dark:text-white">
-                            إنشاء اشتراك جديد
+                            {{ $t('system.subscriptions.create_title') }}
                         </h1>
                         <p class="text-gray-500 dark:text-gray-400">
-                            إضافة اشتراك يدوي لمستأجر موجود
+                            {{ $t('system.subscriptions.create_subtitle') }}
                         </p>
                     </div>
                 </div>
@@ -40,14 +40,14 @@
                 <!-- Tenant Selection -->
                 <div>
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        المستأجر *
+                        {{ $t('system.subscriptions.tenant') }}
                     </label>
                     <SearchableSelect
                         v-model="form.tenant_id"
                         :options="tenantOptions"
                         option-label="label"
                         option-value="value"
-                        placeholder="ابحث عن المستأجر..."
+                        :placeholder="$t('system.subscriptions.tenant_search_placeholder')"
                         :error="form.errors.tenant_id"
                     />
                     <p v-if="form.errors.tenant_id" class="text-red-500 text-xs mt-1">
@@ -58,7 +58,7 @@
                 <!-- Plan Selection -->
                 <div>
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        الباقة *
+                        {{ $t('system.subscriptions.package') }}
                     </label>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                         <label
@@ -85,20 +85,22 @@
                                     v-if="plan.is_featured"
                                     class="px-2 py-0.5 bg-indigo-600 text-white text-xs rounded-full"
                                 >
-                                    مميزة
+                                    {{ $t('system.subscriptions.featured') }}
                                 </span>
                             </div>
                             <p class="text-xs text-gray-500 mt-1">{{ plan.slug }}</p>
                             <div class="mt-3 text-sm text-gray-700 dark:text-gray-300">
                                 <p>
                                     <span class="font-semibold">{{ plan.price_monthly }}</span>
-                                    ر.س / شهرياً
+                                    {{ $t('system.subscriptions.sar_monthly') }}
                                 </p>
                                 <p class="text-xs text-gray-500">
-                                    {{ plan.price_yearly }} ر.س / سنوياً
+                                    {{ plan.price_yearly + $t('system.subscriptions.sar_yearly') }}
                                 </p>
                                 <p v-if="plan.trial_days > 0" class="text-xs text-emerald-600 mt-1">
-                                    تجربة مجانية: {{ plan.trial_days }} يوم
+                                    {{
+                                        $t('system.subscriptions.free_trial') + plan.trial_days
+                                    }}$t('common.day') }}
                                 </p>
                             </div>
                         </label>
@@ -111,7 +113,7 @@
                 <!-- Billing Cycle -->
                 <div>
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        دورة الفوترة *
+                        {{ $t('system.subscriptions.billing_cycle_2') }}
                     </label>
                     <div class="grid grid-cols-2 gap-3">
                         <label
@@ -140,12 +142,12 @@
                 <!-- Promo Code -->
                 <div>
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        رمز ترويجي (اختياري)
+                        {{ $t('system.subscriptions.promo_code_label') }}
                     </label>
                     <input
                         v-model="form.promo_code"
                         type="text"
-                        placeholder="مثال: WELCOME2026"
+                        :placeholder="$t('system.subscriptions.promo_code_placeholder')"
                         class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
                         dir="ltr"
                     />
@@ -165,13 +167,17 @@
                         :disabled="form.processing"
                         class="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium disabled:opacity-50"
                     >
-                        {{ form.processing ? 'جاري الإنشاء...' : 'إنشاء الاشتراك' }}
+                        {{
+                            form.processing
+                                ? $t('system.subscriptions.create_modal.submitting')
+                                : $t('system.subscriptions.create_modal.submit')
+                        }}
                     </button>
                     <Link
                         href="/system/subscriptions"
                         class="px-6 py-2.5 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg"
                     >
-                        إلغاء
+                        {{ $t('common.cancel') }}
                     </Link>
                 </div>
             </form>
@@ -180,6 +186,9 @@
 </template>
 
 <script setup>
+import { useI18n } from 'vue-i18n';
+const { t } = useI18n();
+
 import { computed } from 'vue';
 import { Link, useForm } from '@inertiajs/vue3';
 import SystemLayout from '@/Layouts/SystemLayout.vue';
@@ -205,7 +214,9 @@ const tenantOptions = computed(() =>
     }))
 );
 
-const billingCycleOptions = [{ value: 'yearly', label: 'سنوي (12 شهر)' }];
+const billingCycleOptions = [
+    { value: 'yearly', label: t('system.subscriptions.yearly_12_months') },
+];
 
 const submit = () => {
     form.post('/system/subscriptions', {

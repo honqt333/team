@@ -78,66 +78,23 @@
 
             <!-- AUDIT_STANDARDS.md Section 5: Standard Official Print Section -->
             <div class="print-section hidden">
-                <div class="grid grid-cols-3 items-center pb-4 mb-4 border-b-2 border-gray-800">
-                    <!-- Column 1: Company Info -->
-                    <div class="text-start space-y-1 text-xs">
-                        <h2 class="text-base font-black text-black">{{ companyInfo.name }}</h2>
-                        <p
-                            v-if="companyInfo.center_name && centers?.length > 1"
-                            class="font-bold text-gray-700"
-                        >
-                            {{ $t('reports.payments_report.center') }}:
-                            {{ companyInfo.center_name }}
-                        </p>
-                        <p v-if="companyInfo.vat_number" class="text-gray-600">
-                            {{ $t('common.vat') }}:
-                            <span class="font-mono font-bold">{{ companyInfo.vat_number }}</span>
-                        </p>
-                        <p v-if="companyInfo.cr_number" class="text-gray-600">
-                            CR:
-                            <span class="font-mono">{{ companyInfo.cr_number }}</span>
-                        </p>
-                    </div>
-
-                    <!-- Column 2 (Center): Official Logo -->
-                    <div class="text-center flex flex-col items-center justify-center">
-                        <img
-                            v-if="companyInfo.logo_path"
-                            :src="'/storage/' + companyInfo.logo_path"
-                            alt="Logo"
-                            class="h-14 w-auto object-contain mx-auto mb-1"
-                        />
-                        <div v-else class="text-center">
-                            <span class="text-lg font-black tracking-wider text-black">CARAG</span>
-                        </div>
-                        <span class="text-xs font-bold text-gray-700 uppercase tracking-wider">
-                            {{ $t('reports.payments_report.title') }}
-                        </span>
-                    </div>
-
-                    <!-- Column 3: Report Metadata -->
-                    <div class="text-end space-y-1 text-xs text-gray-600">
-                        <p class="font-bold text-black">
-                            {{ $t('reports.payments_report.official_report') }}
-                        </p>
-                        <p>
-                            {{ $t('reports.payments_report.report_period') }}:
-                            <span class="font-mono">{{ filters.start_date || 'All' }}</span>
-                            {{ $t('reports.payments_report.to') }}
-                            <span class="font-mono">{{ filters.end_date || 'Now' }}</span>
-                        </p>
-                        <p>
-                            {{ $t('reports.payments_report.printed_at') }}:
-                            <span class="font-mono">{{ printDateFormatted }}</span>
-                        </p>
-                        <p>
+                <StandardReportHeader
+                    :title="$t('reports.payments_report.official_report')"
+                    :subtitle="
+                        filters.start_date || filters.end_date
+                            ? `${$t('reports.payments_report.report_period')}: ${filters.start_date || 'All'} ${$t('reports.payments_report.to')} ${filters.end_date || 'Now'}`
+                            : ''
+                    "
+                >
+                    <template #extra>
+                        <div class="text-xs text-gray-600">
                             {{ $t('reports.payments_report.transaction_count') }}:
                             <span class="font-mono font-bold text-black">
                                 {{ kpis.total_count }}
                             </span>
-                        </p>
-                    </div>
-                </div>
+                        </div>
+                    </template>
+                </StandardReportHeader>
 
                 <!-- Print Financial Summary Banner -->
                 <div
@@ -487,7 +444,7 @@
             <div
                 class="bg-white dark:bg-gray-800 rounded-3xl p-5 border border-gray-200 dark:border-gray-800 shadow-sm space-y-4 print:hidden"
             >
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
                     <!-- Direct Search Input -->
                     <div>
                         <label
@@ -514,6 +471,24 @@
                                 ×
                             </button>
                         </div>
+                    </div>
+
+                    <!-- SearchableSelect: Branch / Center -->
+                    <div v-if="centers && centers.length > 0">
+                        <label
+                            class="block text-xs font-bold text-gray-600 dark:text-gray-300 mb-1"
+                        >
+                            {{ $t('reports.payments_report.center') }}
+                        </label>
+                        <SearchableSelect
+                            v-model="filterForm.center_id"
+                            :options="centerOptions"
+                            optionLabel="name"
+                            optionValue="id"
+                            :placeholder="$t('reports.payments_report.all_centers')"
+                            :searchPlaceholder="$t('reports.payments_report.center')"
+                            @update:modelValue="applyFilters"
+                        />
                     </div>
 
                     <!-- SearchableSelect: Payment Method -->
@@ -611,6 +586,9 @@
                                     {{ $t('reports.payments_report.voucher_no') }}
                                 </th>
                                 <th class="px-4 py-3.5 text-center">
+                                    {{ $t('reports.payments_report.center') }}
+                                </th>
+                                <th class="px-4 py-3.5 text-center">
                                     {{ $t('reports.payments_report.datetime') }}
                                 </th>
                                 <th class="px-4 py-3.5 text-center">
@@ -652,6 +630,15 @@
                                     class="px-4 py-3 font-mono font-bold text-gray-900 dark:text-white"
                                 >
                                     {{ payment.reference || 'REC-' + payment.id }}
+                                </td>
+
+                                <!-- Center / Branch -->
+                                <td class="px-4 py-3 text-center">
+                                    <span
+                                        class="inline-flex items-center px-2 py-0.5 rounded-lg text-[11px] font-semibold bg-gray-100 dark:bg-gray-700/60 text-gray-800 dark:text-gray-200"
+                                    >
+                                        {{ payment.center?.name || 'المركز الرئيسي' }}
+                                    </span>
                                 </td>
 
                                 <!-- Date (AUDIT_STANDARDS.md Section 3: English numbers) -->
@@ -712,9 +699,11 @@
                                         >
                                             {{ payment.work_order.vehicle.plate_number }}
                                         </span>
-                                        <div class="text-[10px] text-gray-500">
-                                            {{ payment.work_order.vehicle.make }}
-                                            {{ payment.work_order.vehicle.model }}
+                                        <div
+                                            v-if="getVehicleMakeModel(payment.work_order.vehicle)"
+                                            class="text-[10px] text-gray-500 font-medium"
+                                        >
+                                            {{ getVehicleMakeModel(payment.work_order.vehicle) }}
                                         </div>
                                     </div>
                                     <span v-else class="text-gray-400">—</span>
@@ -775,7 +764,7 @@
 
                             <!-- Empty State -->
                             <tr v-if="!payments.data || payments.data.length === 0">
-                                <td colspan="10" class="px-6 py-12 text-center">
+                                <td colspan="11" class="px-6 py-12 text-center">
                                     <div
                                         class="w-14 h-14 mx-auto rounded-2xl bg-gray-100 dark:bg-gray-700 text-gray-400 flex items-center justify-center mb-3"
                                     >
@@ -839,18 +828,7 @@
             </div>
 
             <!-- AUDIT_STANDARDS.md Section 5: Standard Print Footer -->
-            <div
-                class="print-footer hidden print:block pt-4 mt-6 border-t border-gray-300 text-center text-xs text-gray-600"
-            >
-                <p>
-                    {{ $t('reports.payments_report.prepared_by') }}:
-                    <span class="font-bold">
-                        {{ $page.props.auth?.user?.name || 'Administrator' }}
-                    </span>
-                    | {{ $t('reports.payments_report.printed_at') }}:
-                    <span class="font-mono">{{ printDateFormatted }}</span>
-                </p>
-            </div>
+            <StandardReportFooter class="hidden print:block pt-4 mt-6 border-t border-gray-300" />
         </div>
     </AppLayout>
 </template>
@@ -864,6 +842,8 @@ import PageHeader from '@/Components/PageHeader.vue';
 import BackButton from '@/Components/BackButton.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 import CustomDatePicker from '@/Components/CustomDatePicker.vue';
+import StandardReportHeader from '@/Components/Print/StandardReportHeader.vue';
+import StandardReportFooter from '@/Components/Print/StandardReportFooter.vue';
 
 const { t } = useI18n();
 
@@ -924,6 +904,7 @@ const filterForm = reactive({
     method: props.filters.method || 'all',
     type: props.filters.type || 'all',
     customer_id: props.filters.customer_id || 'all',
+    center_id: String(props.filters.center_id || 'all'),
     search: props.filters.search || '',
 });
 
@@ -1008,6 +989,17 @@ const customerOptions = computed(() => [
     })),
 ]);
 
+const centerOptions = computed(() => {
+    const list = props.centers.map((c) => ({
+        id: String(c.id),
+        name: c.name,
+    }));
+    if (props.centers.length > 1) {
+        return [{ id: 'all', name: t('reports.payments_report.all_centers') }, ...list];
+    }
+    return list;
+});
+
 const exportUrl = computed(() => {
     const params = new URLSearchParams({
         range: filterForm.range || 'this_month',
@@ -1016,6 +1008,7 @@ const exportUrl = computed(() => {
         method: filterForm.method || 'all',
         type: filterForm.type || 'all',
         customer_id: filterForm.customer_id || 'all',
+        center_id: filterForm.center_id || 'all',
         search: filterForm.search || '',
     });
     return `/app/reports/payments/export?${params.toString()}`;
@@ -1031,6 +1024,7 @@ const applyFilters = () => {
             method: filterForm.method || 'all',
             type: filterForm.type || 'all',
             customer_id: filterForm.customer_id || 'all',
+            center_id: filterForm.center_id || 'all',
             search: filterForm.search || '',
         },
         {
@@ -1047,6 +1041,9 @@ const resetFilters = () => {
     filterForm.method = 'all';
     filterForm.type = 'all';
     filterForm.customer_id = 'all';
+    filterForm.center_id = String(
+        props.filters.center_id || (props.centers.length === 1 ? props.centers[0].id : 'all')
+    );
     filterForm.search = '';
     applyFilters();
 };
@@ -1106,6 +1103,13 @@ const getPartyName = (p) => {
 
 const getPartyPhone = (p) => {
     return p.work_order?.customer?.phone || p.invoice?.customer?.phone || '';
+};
+
+const getVehicleMakeModel = (v) => {
+    if (!v) return '';
+    const makeName = v.make?.name_ar || v.make?.name || v.make_other || '';
+    const modelName = v.model?.name_ar || v.model?.name || v.model_other || '';
+    return [makeName, modelName, v.year ? `(${v.year})` : ''].filter(Boolean).join(' ');
 };
 
 const getMethodLabel = (m) => {

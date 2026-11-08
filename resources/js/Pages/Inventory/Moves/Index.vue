@@ -847,7 +847,7 @@
     <Teleport to="body">
         <div class="print-section hidden">
             <!-- Header -->
-            <PrintHeader
+            <StandardReportHeader
                 :title="$t('inventory.moves.title')"
                 :subtitle="warehouse ? warehouse.name : ''"
             />
@@ -903,10 +903,7 @@
             </table>
 
             <!-- Footer -->
-            <div class="mt-8 text-center text-[10px] text-gray-400 border-t pt-4">
-                {{ $t('common.printed_by') }}: {{ $page.props.auth.user.name }} |
-                {{ new Date().toLocaleString() }}
-            </div>
+            <StandardReportFooter class="mt-8 border-t pt-4" />
         </div>
     </Teleport>
 </template>
@@ -923,7 +920,8 @@ import { useI18n } from 'vue-i18n';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 import ReceiptModal from '@/Components/Inventory/ReceiptModal.vue';
 import AdjustmentModal from '@/Components/Inventory/AdjustmentModal.vue';
-import PrintHeader from '@/Components/Print/PrintHeader.vue';
+import StandardReportHeader from '@/Components/Print/StandardReportHeader.vue';
+import StandardReportFooter from '@/Components/Print/StandardReportFooter.vue';
 import { usePermission } from '@/Composables/usePermission';
 import { useNumberFormat } from '@/Composables/useNumberFormat';
 

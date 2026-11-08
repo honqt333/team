@@ -2,18 +2,43 @@
     <SystemLayout>
         <Head :title="$t('system.credits.whatsapp_balances_title')" />
         <div class="space-y-6">
-            <div class="flex items-center justify-between">
-                <div>
-                    <h1 class="text-2xl font-bold text-gray-900 dark:text-white">أرصدة WhatsApp</h1>
-                    <p class="text-gray-500 dark:text-gray-400">رصيد رسائل واتساب لكل مستأجر</p>
-                </div>
-                <button
-                    @click="showAddModal = true"
-                    class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-sm font-medium"
-                >
-                    + إضافة رصيد
-                </button>
-            </div>
+            <!-- Header -->
+            <PageHeader
+                :title="$t('system.credits.whatsapp_balances_title')"
+                :subtitle="$t('system.credits.whatsapp_credit_balance_per_tenant')"
+                gradientFrom="from-emerald-600"
+                gradientTo="to-teal-600"
+                glowFrom="from-emerald-500"
+                glowTo="to-teal-600"
+            >
+                <template #icon>
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
+                        />
+                    </svg>
+                </template>
+
+                <template #actions>
+                    <button
+                        @click="showAddModal = true"
+                        class="inline-flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white rounded-xl text-sm font-semibold transition-all shadow-md hover:shadow-emerald-500/25 active:scale-95"
+                    >
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M12 4v16m8-8H4"
+                            />
+                        </svg>
+                        {{ $t('system.credits.add_credit_2') }}
+                    </button>
+                </template>
+            </PageHeader>
 
             <!-- Navigation Tabs -->
             <div class="flex gap-2 border-b border-gray-200 dark:border-gray-700">
@@ -70,7 +95,9 @@
                     <p class="text-2xl font-bold text-emerald-600">
                         {{ stats.total_purchased?.toLocaleString() }}
                     </p>
-                    <p class="text-sm text-gray-500">إجمالي المشتريات</p>
+                    <p class="text-sm text-gray-500">
+                        {{ $t('system.credits.total_purchases_2') }}
+                    </p>
                 </div>
                 <div
                     class="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700"
@@ -78,7 +105,7 @@
                     <p class="text-2xl font-bold text-amber-600">
                         {{ stats.total_used?.toLocaleString() }}
                     </p>
-                    <p class="text-sm text-gray-500">المستخدم</p>
+                    <p class="text-sm text-gray-500">{{ $t('common.user') }}</p>
                 </div>
                 <div
                     class="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700"
@@ -86,7 +113,9 @@
                     <p class="text-2xl font-bold text-blue-600">
                         {{ stats.total_balance?.toLocaleString() }}
                     </p>
-                    <p class="text-sm text-gray-500">الرصيد الحالي</p>
+                    <p class="text-sm text-gray-500">
+                        {{ $t('system.credits.current_balance_2') }}
+                    </p>
                 </div>
                 <div
                     class="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700"
@@ -94,7 +123,7 @@
                     <p class="text-2xl font-bold text-gray-900 dark:text-white">
                         {{ formatCurrency(stats.total_revenue) }}
                     </p>
-                    <p class="text-sm text-gray-500">الإيرادات</p>
+                    <p class="text-sm text-gray-500">{{ $t('system.credits.revenue') }}</p>
                 </div>
             </div>
 
@@ -105,19 +134,19 @@
                     <thead class="bg-gray-50 dark:bg-gray-700/50">
                         <tr>
                             <th class="px-4 py-3 text-right text-xs font-medium text-gray-500">
-                                المستأجر
+                                {{ $t('system.credits.tenant_4') }}
                             </th>
                             <th class="px-4 py-3 text-right text-xs font-medium text-gray-500">
-                                الرصيد الحالي
+                                {{ $t('system.credits.current_balance_2') }}
                             </th>
                             <th class="px-4 py-3 text-right text-xs font-medium text-gray-500">
-                                إجمالي المشتريات
+                                {{ $t('system.credits.total_purchases_2') }}
                             </th>
                             <th class="px-4 py-3 text-right text-xs font-medium text-gray-500">
-                                المستخدم
+                                {{ $t('common.user') }}
                             </th>
                             <th class="px-4 py-3 text-right text-xs font-medium text-gray-500">
-                                الإجراءات
+                                {{ $t('common.actions') }}
                             </th>
                         </tr>
                     </thead>
@@ -149,13 +178,13 @@
                                     @click="openAddModal(item)"
                                     class="text-emerald-600 hover:text-emerald-800 text-sm"
                                 >
-                                    + إضافة
+                                    {{ $t('system.credits.static_template_text') }}
                                 </button>
                             </td>
                         </tr>
                         <tr v-if="!balances.data?.length">
                             <td colspan="5" class="px-4 py-8 text-center text-gray-500">
-                                لا توجد بيانات
+                                {{ $t('common.no_data') }}
                             </td>
                         </tr>
                     </tbody>
@@ -171,14 +200,16 @@
                         class="relative bg-white dark:bg-gray-800 rounded-2xl p-6 w-full max-w-md shadow-xl"
                     >
                         <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                            إضافة رصيد WhatsApp
+                            {{ $t('system.credits.add_whatsapp_credit') }}
                         </h3>
                         <form @submit.prevent="addCredits" class="space-y-4">
                             <div
                                 v-if="selectedTenant"
                                 class="bg-emerald-50 dark:bg-emerald-900/20 rounded-lg p-3"
                             >
-                                <p class="text-sm text-gray-600 dark:text-gray-400">المستأجر</p>
+                                <p class="text-sm text-gray-600 dark:text-gray-400">
+                                    {{ $t('system.credits.tenant_4') }}
+                                </p>
                                 <p class="font-semibold text-gray-900 dark:text-white">
                                     {{ selectedTenant.tenant?.trade_name }}
                                 </p>
@@ -187,7 +218,7 @@
                                 <label
                                     class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
                                 >
-                                    عدد الرسائل
+                                    {{ $t('system.credits.message_count_3') }}
                                 </label>
                                 <input
                                     type="number"
@@ -201,12 +232,12 @@
                                 <label
                                     class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
                                 >
-                                    السبب
+                                    {{ $t('system.credits.reason') }}
                                 </label>
                                 <input
                                     type="text"
                                     v-model="form.reason"
-                                    placeholder="اختياري"
+                                    :placeholder="$t('common.optional')"
                                     class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                                 />
                             </div>
@@ -216,14 +247,14 @@
                                     :disabled="form.processing"
                                     class="flex-1 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-medium disabled:opacity-50"
                                 >
-                                    إضافة
+                                    {{ $t('common.add') }}
                                 </button>
                                 <button
                                     type="button"
                                     @click="showAddModal = false"
                                     class="px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg"
                                 >
-                                    إلغاء
+                                    {{ $t('common.cancel') }}
                                 </button>
                             </div>
                         </form>

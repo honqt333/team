@@ -3,19 +3,24 @@
         <Head :title="$t('system.feedbacks.title')" />
 
         <div class="space-y-6">
-            <!-- Header -->
-            <div
-                class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
+            <!-- Page Header -->
+            <PageHeader
+                :title="$t('system.feedbacks.title')"
+                :subtitle="$t('system.feedbacks.subtitle')"
+                :totalCount="feedbacks?.total != null ? toEnglish(feedbacks.total) : null"
+                :countLabel="$t('system.feedbacks.title')"
             >
-                <div>
-                    <h1 class="text-2xl font-bold text-gray-900 dark:text-white">
-                        {{ $t('system.feedbacks.title') }}
-                    </h1>
-                    <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                        {{ $t('system.feedbacks.subtitle') }}
-                    </p>
-                </div>
-            </div>
+                <template #icon>
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"
+                        />
+                    </svg>
+                </template>
+            </PageHeader>
 
             <!-- Stats Bar -->
             <div class="grid grid-cols-2 lg:grid-cols-5 gap-4">
@@ -370,6 +375,8 @@ import { ref, watch, computed } from 'vue';
 import { Head, Link, router, useForm } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import SystemLayout from '@/Layouts/SystemLayout.vue';
+import PageHeader from '@/Components/PageHeader.vue';
+import { useNumberFormat } from '@/Composables/useNumberFormat';
 import Modal from '@/Components/Modal.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 import VideoPlayerModal from '@/Pages/Feedback/Partials/VideoPlayerModal.vue';
@@ -377,6 +384,7 @@ import { debounce } from 'lodash-es';
 import AppButton from '@/Components/App/AppButton.vue';
 
 const { t, locale } = useI18n();
+const { toEnglish } = useNumberFormat();
 
 const props = defineProps({
     feedbacks: Object,

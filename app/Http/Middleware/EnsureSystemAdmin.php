@@ -29,21 +29,31 @@ class EnsureSystemAdmin
     public function handle(Request $request, Closure $next): Response
     {
         // Automatically stop impersonation if returning to system routes.
-        //
-        // 'impersonating_from' holds the id of the system admin who
-        // started the impersonation. A system admin lives on the
-        // 'admin' guard (AdminUser), so we restore it there — looking
-        // the id up in the tenants `users` table would never find it.
         if ($request->hasSession() && $request->session()->has('impersonating_from')) {
-            $originalAdminId = $request->session()->get('impersonating_from');
-            $originalAdmin = AdminUser::find($originalAdminId);
+            $originalId = $request->session()->get('impersonating_from');
+            $originalGuard = $request->session()->get('impersonating_from_guard', 'admin');
 
-            if ($originalAdmin) {
-                Auth::guard('admin')->login($originalAdmin);
-                Auth::guard('web')->logout();
-                $request->session()->forget('impersonating_from');
-                $request->session()->forget('impersonating_tenant');
-                $request->setUserResolver(fn () => $originalAdmin);
+            if ($originalGuard === 'web') {
+                $originalUser = User::find($originalId);
+
+                if ($originalUser && $originalUser->is_system_admin) {
+                    Auth::guard('web')->login($originalUser);
+                    $request->session()->forget('impersonating_from');
+                    $request->session()->forget('impersonating_from_guard');
+                    $request->session()->forget('impersonating_tenant');
+                    $request->setUserResolver(fn () => $originalUser);
+                }
+            } else {
+                $originalAdmin = AdminUser::find($originalId);
+
+                if ($originalAdmin) {
+                    Auth::guard('admin')->login($originalAdmin);
+                    Auth::guard('web')->logout();
+                    $request->session()->forget('impersonating_from');
+                    $request->session()->forget('impersonating_from_guard');
+                    $request->session()->forget('impersonating_tenant');
+                    $request->setUserResolver(fn () => $originalAdmin);
+                }
             }
         }
 
@@ -64,6 +74,18 @@ class EnsureSystemAdmin
         //    (see RegisteredUserController::store) and only authorises
         //    actions within the tenant scope.
         if ($user instanceof User && $user->is_system_admin) {
+            // If the admin guard is not logged in, but there is an AdminUser matching this user,
+            // authenticate the admin guard as well so all system operations work seamlessly.
+            if (! Auth::guard('admin')->check()) {
+                $matchingAdmin = AdminUser::where('email', $user->email)
+                    ->orWhere('user_id', $user->id)
+                    ->first();
+
+                if ($matchingAdmin && $matchingAdmin->is_active) {
+                    Auth::guard('admin')->login($matchingAdmin);
+                }
+            }
+
             return $next($request);
         }
 

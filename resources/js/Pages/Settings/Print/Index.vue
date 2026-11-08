@@ -1,7 +1,7 @@
 <template>
     <AppLayout>
         <div class="space-y-6">
-            <!-- Header Section -->
+            <!-- Header -->
             <PageHeader
                 :title="$t('settings.cards.print.title')"
                 :subtitle="$t('settings.cards.print.description')"
@@ -14,7 +14,7 @@
                 badgeDot="bg-amber-500"
             >
                 <template #back>
-                    <BackButton href="/app/settings" />
+                    <BackButton href="/app/settings/integrations" />
                 </template>
 
                 <template #icon>
@@ -32,14 +32,14 @@
                     <button
                         @click="save()"
                         :disabled="form.processing"
-                        class="group relative inline-flex items-center gap-2 px-8 py-2.5 bg-gradient-to-r from-amber-600 to-orange-600 text-white font-bold rounded-xl transition-all hover:scale-[1.02] hover:shadow-lg hover:shadow-amber-500/25 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed overflow-hidden"
+                        class="group relative inline-flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-amber-600 to-orange-600 text-white font-bold rounded-xl transition-all hover:scale-[1.02] hover:shadow-lg hover:shadow-amber-500/25 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed overflow-hidden"
                     >
                         <div
                             class="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"
                         ></div>
                         <svg
                             v-if="form.processing"
-                            class="animate-spin h-5 w-5"
+                            class="animate-spin h-4 w-4 relative"
                             viewBox="0 0 24 24"
                         >
                             <circle
@@ -57,6 +57,20 @@
                                 d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                             ></path>
                         </svg>
+                        <svg
+                            v-else
+                            class="w-4 h-4 relative"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M5 13l4 4L19 7"
+                            />
+                        </svg>
                         <span class="relative">
                             {{ form.processing ? $t('common.loading') : $t('common.save') }}
                         </span>
@@ -64,19 +78,26 @@
                 </template>
             </PageHeader>
 
-            <!-- Main Split-Screen Container -->
-            <div class="flex flex-col lg:flex-row gap-6 items-start">
-                <!-- Right Side: Settings Control Panel (5/12 width on large screen) -->
-                <div class="w-full lg:w-5/12 space-y-6">
-                    <!-- Section 1: Template Selection & Visual Styles -->
-                    <div
-                        class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-200 dark:border-gray-700"
-                    >
-                        <h3
-                            class="text-base font-bold text-gray-900 dark:text-white flex items-center gap-2 mb-5"
+            <!-- Main Layout: Settings (left) + Live Preview (right, always visible) -->
+            <div class="flex flex-col xl:flex-row gap-6 items-start">
+                <!-- ═══════════ Settings Panel (left) ═══════════ -->
+                <div
+                    class="flex-1 min-w-0 bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden"
+                >
+                    <!-- Tab Bar -->
+                    <div class="flex border-b border-gray-100 dark:border-gray-700">
+                        <button
+                            type="button"
+                            @click="activeTab = 'appearance'"
+                            class="relative flex items-center gap-2 px-5 py-3.5 text-sm font-semibold transition-colors whitespace-nowrap"
+                            :class="
+                                activeTab === 'appearance'
+                                    ? 'text-amber-600 dark:text-amber-400'
+                                    : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'
+                            "
                         >
                             <svg
-                                class="w-5 h-5 text-amber-500"
+                                class="w-4 h-4"
                                 fill="none"
                                 stroke="currentColor"
                                 viewBox="0 0 24 24"
@@ -85,78 +106,135 @@
                                     stroke-linecap="round"
                                     stroke-linejoin="round"
                                     stroke-width="2"
-                                    d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                                    d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"
                                 />
                             </svg>
                             {{ $t('print_settings.general_print_identity') }}
-                        </h3>
+                            <span
+                                v-if="activeTab === 'appearance'"
+                                class="absolute bottom-0 start-0 end-0 h-0.5 bg-gradient-to-r from-amber-500 to-orange-500 rounded-t-full"
+                            ></span>
+                        </button>
 
-                        <!-- Active Template Selector -->
-                        <div class="space-y-3 mb-6">
+                        <button
+                            type="button"
+                            @click="activeTab = 'documents'"
+                            class="relative flex items-center gap-2 px-5 py-3.5 text-sm font-semibold transition-colors whitespace-nowrap"
+                            :class="
+                                activeTab === 'documents'
+                                    ? 'text-amber-600 dark:text-amber-400'
+                                    : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'
+                            "
+                        >
+                            <svg
+                                class="w-4 h-4"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                                />
+                            </svg>
+                            {{ $t('print_settings.documents_title') }}
+                            <span
+                                v-if="activeTab === 'documents'"
+                                class="absolute bottom-0 start-0 end-0 h-0.5 bg-gradient-to-r from-amber-500 to-orange-500 rounded-t-full"
+                            ></span>
+                        </button>
+                    </div>
+
+                    <!-- ─── Tab: Appearance ─────────────────────────────── -->
+                    <div v-show="activeTab === 'appearance'" class="p-6 space-y-6">
+                        <!-- Template Selection -->
+                        <div>
                             <label
-                                class="block text-xs font-black text-gray-400 uppercase tracking-widest"
+                                class="block text-xs font-black text-gray-400 uppercase tracking-widest mb-3"
                             >
                                 {{ $t('print_settings.default_template') }}
                             </label>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                 <div
                                     v-for="tmpl in availableTemplates"
                                     :key="tmpl.id"
                                     @click="previewTemplate(tmpl)"
-                                    class="p-4 rounded-2xl border text-start transition-all duration-300 flex flex-col justify-between min-h-[110px] relative overflow-hidden group cursor-pointer"
+                                    class="relative p-4 rounded-2xl border-2 cursor-pointer transition-all duration-200 overflow-hidden"
                                     :class="[
                                         form.visual.active_template === tmpl.id
-                                            ? 'border-amber-500 bg-amber-500/[0.04] ring-2 ring-amber-500/20'
+                                            ? 'border-amber-500 bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/10 shadow-sm shadow-amber-100 dark:shadow-amber-900/20'
                                             : previewingTemplate === tmpl.id
-                                              ? 'border-indigo-400 bg-indigo-50/30 dark:bg-indigo-950/10 ring-2 ring-indigo-400/20'
-                                              : 'border-gray-100 dark:border-gray-800 bg-gray-50/30 dark:bg-gray-900/30 hover:border-gray-200 dark:hover:border-gray-700',
+                                              ? 'border-indigo-400 bg-indigo-50/40 dark:bg-indigo-950/10'
+                                              : 'border-gray-100 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 bg-gray-50/30 dark:bg-gray-900/20',
                                     ]"
                                 >
-                                    <!-- Previewing indicator -->
+                                    <!-- Active badge -->
+                                    <span
+                                        v-if="form.visual.active_template === tmpl.id"
+                                        class="absolute top-2.5 end-2.5 inline-flex items-center gap-1 text-[9px] font-black px-2 py-0.5 rounded-full bg-amber-500 text-white"
+                                    >
+                                        <span class="w-1 h-1 rounded-full bg-white"></span>
+                                        {{ $t('print_settings.active_template') }}
+                                    </span>
+                                    <!-- Previewing badge -->
+                                    <span
+                                        v-else-if="previewingTemplate === tmpl.id"
+                                        class="absolute top-2.5 end-2.5 text-[9px] font-black px-2 py-0.5 rounded-full bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400"
+                                    >
+                                        {{ $t('print_settings.previewing') }}
+                                    </span>
+
+                                    <!-- Page icon -->
                                     <div
-                                        v-if="
-                                            previewingTemplate === tmpl.id &&
-                                            form.visual.active_template !== tmpl.id
+                                        class="w-8 h-10 mb-2.5 rounded border flex items-center justify-center flex-shrink-0"
+                                        :class="
+                                            form.visual.active_template === tmpl.id
+                                                ? 'border-amber-200 bg-amber-100/60 dark:bg-amber-900/30'
+                                                : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800'
                                         "
-                                        class="absolute top-2 right-2"
                                     >
-                                        <span
-                                            class="text-[8px] font-black px-1.5 py-0.5 rounded-full bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400"
+                                        <svg
+                                            class="w-4 h-5"
+                                            :class="
+                                                form.visual.active_template === tmpl.id
+                                                    ? 'text-amber-500'
+                                                    : 'text-gray-300 dark:text-gray-600'
+                                            "
+                                            fill="none"
+                                            stroke="currentColor"
+                                            viewBox="0 0 24 24"
                                         >
-                                            {{ $t('print_settings.previewing') }}
-                                        </span>
+                                            <path
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                stroke-width="1.5"
+                                                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                                            />
+                                        </svg>
                                     </div>
 
-                                    <div class="flex flex-col gap-1 pr-1 pt-1">
-                                        <div class="flex items-center gap-2">
-                                            <span
-                                                class="text-xs font-black text-gray-800 dark:text-gray-200"
-                                            >
-                                                {{ tmpl.name }}
-                                            </span>
-                                            <span
-                                                v-if="form.visual.active_template === tmpl.id"
-                                                class="w-1.5 h-1.5 rounded-full bg-amber-500"
-                                            ></span>
-                                        </div>
-                                        <span
-                                            class="text-[10px] text-gray-400 leading-normal line-clamp-2"
-                                        >
-                                            {{ tmpl.description }}
-                                        </span>
-                                    </div>
-
-                                    <div
-                                        class="flex justify-between items-center mt-3 pt-2 border-t border-gray-100/50 dark:border-gray-800/50 w-full"
+                                    <p
+                                        class="text-xs font-bold text-gray-800 dark:text-gray-100 mb-1"
                                     >
+                                        {{ tmpl.name }}
+                                    </p>
+                                    <p
+                                        class="text-[10px] text-gray-400 leading-relaxed line-clamp-2 mb-3"
+                                    >
+                                        {{ tmpl.description }}
+                                    </p>
+
+                                    <div class="flex items-center justify-between">
                                         <button
                                             type="button"
                                             @click.stop="selectTemplate(tmpl)"
-                                            class="text-[9px] font-bold px-2.5 py-1 rounded-lg transition-all"
+                                            class="text-[10px] font-bold px-2.5 py-1 rounded-lg transition-all"
                                             :class="
                                                 form.visual.active_template === tmpl.id
-                                                    ? 'bg-amber-500 text-white shadow-sm cursor-default'
-                                                    : 'bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 dark:bg-gray-800 dark:border-gray-750 dark:text-gray-300'
+                                                    ? 'bg-amber-500 text-white cursor-default shadow-sm'
+                                                    : 'border border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
                                             "
                                         >
                                             {{
@@ -173,127 +251,101 @@
                             </div>
                         </div>
 
-                        <!-- General Toggles & Color -->
-                        <div class="space-y-3.5">
-                            <!-- Show Logo -->
-                            <div
-                                class="relative p-3 rounded-xl border border-gray-100 dark:border-gray-700/60 bg-gray-50/30 dark:bg-gray-900/30 transition-all"
+                        <!-- Visual Options -->
+                        <div class="space-y-3">
+                            <label
+                                class="block text-xs font-black text-gray-400 uppercase tracking-widest"
                             >
-                                <div class="flex items-center justify-between">
-                                    <div class="flex items-center gap-2">
-                                        <span
-                                            class="text-xs font-semibold text-gray-700 dark:text-gray-300"
-                                        >
-                                            {{ $t('print_settings.show_center_logo') }}
-                                        </span>
-                                    </div>
-                                    <label class="relative inline-flex items-center cursor-pointer">
-                                        <input
-                                            type="checkbox"
-                                            v-model="form.visual.show_logo"
-                                            class="sr-only peer"
-                                        />
-                                        <div
-                                            class="w-9 h-5 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-amber-300 dark:peer-focus:ring-amber-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-600 peer-checked:bg-amber-600"
-                                        ></div>
-                                    </label>
-                                </div>
+                                {{ $t('print_settings.brand_primary_color') }}
+                            </label>
+
+                            <!-- Show Logo toggle -->
+                            <div
+                                class="flex items-center justify-between p-3.5 rounded-xl border border-gray-100 dark:border-gray-700 bg-gray-50/30 dark:bg-gray-900/20"
+                            >
+                                <span
+                                    class="text-sm font-semibold text-gray-700 dark:text-gray-300"
+                                >
+                                    {{ $t('print_settings.show_center_logo') }}
+                                </span>
+                                <label class="relative inline-flex items-center cursor-pointer">
+                                    <input
+                                        type="checkbox"
+                                        v-model="form.visual.show_logo"
+                                        class="sr-only peer"
+                                    />
+                                    <div
+                                        class="w-9 h-5 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-amber-300 dark:peer-focus:ring-amber-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-600 peer-checked:bg-amber-600"
+                                    ></div>
+                                </label>
                             </div>
 
-                            <!-- Primary color -->
+                            <!-- Color picker -->
                             <div
-                                class="relative p-3 rounded-xl border border-gray-100 dark:border-gray-700/60 bg-gray-50/30 dark:bg-gray-900/30 transition-all"
+                                class="flex items-center gap-3 p-3.5 rounded-xl border border-gray-100 dark:border-gray-700 bg-gray-50/30 dark:bg-gray-900/20"
                             >
-                                <div class="flex items-center gap-2 mb-2">
-                                    <label
-                                        class="block text-xs font-semibold text-gray-700 dark:text-gray-300"
+                                <input
+                                    v-model="form.visual.primary_color"
+                                    type="color"
+                                    class="w-9 h-9 rounded-lg border-0 p-0 overflow-hidden bg-transparent cursor-pointer flex-shrink-0"
+                                />
+                                <div class="flex-1 min-w-0">
+                                    <p
+                                        class="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1"
                                     >
                                         {{ $t('print_settings.brand_primary_color') }}
-                                    </label>
-                                </div>
-                                <div class="flex items-center gap-3">
-                                    <input
-                                        v-model="form.visual.primary_color"
-                                        type="color"
-                                        class="w-10 h-10 rounded-lg border-0 p-0 overflow-hidden bg-transparent cursor-pointer"
-                                    />
+                                    </p>
                                     <input
                                         v-model="form.visual.primary_color"
                                         type="text"
-                                        class="flex-1 px-3 py-1.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white font-mono text-xs"
                                         dir="ltr"
+                                        class="w-full px-2.5 py-1.5 rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white font-mono text-xs focus:ring-1 focus:ring-amber-400 focus:border-amber-400 outline-none"
                                     />
                                 </div>
                             </div>
 
                             <!-- Footer text -->
                             <div
-                                class="relative p-3 rounded-xl border border-gray-100 dark:border-gray-700/60 bg-gray-50/30 dark:bg-gray-900/30 transition-all"
+                                class="p-3.5 rounded-xl border border-gray-100 dark:border-gray-700 bg-gray-50/30 dark:bg-gray-900/20"
                             >
-                                <div class="flex items-center gap-2 mb-2">
-                                    <label
-                                        class="block text-xs font-semibold text-gray-700 dark:text-gray-300"
-                                    >
-                                        {{ $t('print_settings.default_footer_text') }}
-                                    </label>
-                                </div>
+                                <label
+                                    class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-2"
+                                >
+                                    {{ $t('print_settings.default_footer_text') }}
+                                </label>
                                 <textarea
                                     v-model="form.visual.footer_text"
                                     rows="2"
-                                    class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-xs leading-normal"
+                                    class="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-xs leading-relaxed resize-none focus:ring-1 focus:ring-amber-400 focus:border-amber-400 outline-none transition"
                                     :placeholder="$t('print_settings.footer_placeholder')"
                                 ></textarea>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Section 2: Document Customizations -->
+                    <!-- ─── Tab: Documents ──────────────────────────────── -->
                     <div
-                        class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-200 dark:border-gray-700"
+                        v-show="activeTab === 'documents'"
+                        class="flex flex-col sm:flex-row min-h-[460px]"
                     >
-                        <h3
-                            class="text-base font-bold text-gray-900 dark:text-white flex items-center gap-2 mb-4"
+                        <!-- Document list sidebar -->
+                        <div
+                            class="sm:w-60 border-b sm:border-b-0 sm:border-e border-gray-100 dark:border-gray-700 p-3 space-y-1 flex-shrink-0 max-h-[650px] overflow-y-auto"
                         >
-                            <svg
-                                class="w-5 h-5 text-emerald-500"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                            >
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    stroke-width="2"
-                                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                                />
-                            </svg>
-                            {{ $t('print_settings.documents_title') }}
-                        </h3>
-
-                        <!-- Document Selector Drawer list -->
-                        <div class="space-y-2 max-h-60 overflow-y-auto pr-1">
                             <button
                                 v-for="(doc, key) in form.documents"
                                 :key="key"
                                 type="button"
                                 @click="selectDocument(key)"
-                                class="w-full p-3 rounded-xl border text-start transition-all flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-900/50"
+                                class="w-full flex items-start gap-2.5 px-3 py-2.5 rounded-xl text-start text-xs font-semibold transition-all group"
                                 :class="
                                     selectedDocKey === key
-                                        ? 'border-emerald-500 bg-emerald-50/10 dark:bg-emerald-950/10 font-bold'
-                                        : 'border-gray-100 dark:border-gray-700/60 bg-transparent'
+                                        ? 'bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800 shadow-sm'
+                                        : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-900/30 border border-transparent'
                                 "
                             >
-                                <div class="flex flex-col">
-                                    <span class="text-xs text-gray-800 dark:text-gray-200">
-                                        {{ $t('print_settings.' + key) }}
-                                    </span>
-                                    <span class="text-[9px] text-gray-400 font-mono font-normal">
-                                        {{ doc.title_ar || $t('print_settings.no_custom_title') }}
-                                    </span>
-                                </div>
                                 <svg
-                                    class="w-4 h-4 text-gray-400"
+                                    class="w-4 h-4 flex-shrink-0 mt-0.5"
                                     fill="none"
                                     stroke="currentColor"
                                     viewBox="0 0 24 24"
@@ -302,215 +354,303 @@
                                         stroke-linecap="round"
                                         stroke-linejoin="round"
                                         stroke-width="2"
-                                        d="M9 5l7 7-7 7"
+                                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
                                     />
                                 </svg>
+                                <div class="flex-1 min-w-0">
+                                    <div class="flex items-center justify-between gap-1">
+                                        <p class="truncate">{{ $t('print_settings.' + key) }}</p>
+                                        <span
+                                            v-if="doc.template"
+                                            class="text-[8px] font-bold px-1.5 py-0.5 rounded bg-amber-100 dark:bg-amber-900/40 text-amber-800 dark:text-amber-300 flex-shrink-0"
+                                        >
+                                            {{ getTemplateShortName(doc.template) }}
+                                        </span>
+                                    </div>
+                                    <p
+                                        class="text-[9px] font-normal text-gray-400 truncate mt-0.5 font-mono"
+                                    >
+                                        {{ doc.title_ar || $t('print_settings.no_custom_title') }}
+                                    </p>
+                                </div>
                             </button>
                         </div>
 
-                        <!-- Active Document Form Customization (Visible only when a document is clicked) -->
-                        <div
-                            v-if="selectedDocKey"
-                            class="mt-6 pt-6 border-t border-gray-100 dark:border-gray-700/80 space-y-4"
-                        >
-                            <div class="flex items-center justify-between">
-                                <span
-                                    class="text-xs font-bold text-emerald-600 dark:text-emerald-400"
+                        <!-- Document form -->
+                        <div class="flex-1 p-5 overflow-y-auto">
+                            <div v-if="selectedDocKey" class="space-y-5">
+                                <!-- Title Header -->
+                                <div
+                                    class="flex items-center justify-between pb-4 border-b border-gray-100 dark:border-gray-700"
                                 >
-                                    {{ $t('print_settings.customize') }}
-                                    {{ $t('print_settings.' + selectedDocKey) }}
-                                </span>
-                                <button
-                                    type="button"
-                                    @click="selectedDocKey = null"
-                                    class="text-[10px] text-gray-400 hover:text-red-500"
-                                >
-                                    {{ $t('print_settings.close_customization') }}
-                                </button>
-                            </div>
+                                    <div class="flex items-center gap-3">
+                                        <div
+                                            class="w-8 h-8 rounded-lg bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center flex-shrink-0"
+                                        >
+                                            <svg
+                                                class="w-4 h-4 text-amber-600 dark:text-amber-400"
+                                                fill="none"
+                                                stroke="currentColor"
+                                                viewBox="0 0 24 24"
+                                            >
+                                                <path
+                                                    stroke-linecap="round"
+                                                    stroke-linejoin="round"
+                                                    stroke-width="2"
+                                                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                                                />
+                                            </svg>
+                                        </div>
+                                        <div>
+                                            <h3
+                                                class="text-sm font-bold text-gray-800 dark:text-gray-100"
+                                            >
+                                                {{ $t('print_settings.' + selectedDocKey) }}
+                                            </h3>
+                                            <p class="text-xs text-gray-400">
+                                                {{ $t('print_settings.customize') }}
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <!-- Active Template Badge for Current Document -->
+                                    <span
+                                        class="text-[10px] font-bold px-2 py-1 rounded-lg border"
+                                        :class="
+                                            form.documents[selectedDocKey].template
+                                                ? 'border-amber-300 bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-300'
+                                                : 'border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-500 dark:text-gray-400'
+                                        "
+                                    >
+                                        {{
+                                            getTemplateName(
+                                                form.documents[selectedDocKey].template ||
+                                                    form.visual.active_template
+                                            )
+                                        }}
+                                    </span>
+                                </div>
 
-                            <!-- Title Inputs (Arabic & English) -->
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div class="space-y-1.5">
+                                <!-- Template Link Selector for this specific Document -->
+                                <div
+                                    class="p-3.5 rounded-xl border border-amber-200/80 dark:border-amber-900/50 bg-amber-50/30 dark:bg-amber-950/10 space-y-2"
+                                >
+                                    <div class="flex items-center justify-between">
+                                        <label
+                                            class="block text-xs font-bold text-gray-800 dark:text-gray-200 flex items-center gap-1.5"
+                                        >
+                                            <svg
+                                                class="w-3.5 h-3.5 text-amber-500"
+                                                fill="none"
+                                                stroke="currentColor"
+                                                viewBox="0 0 24 24"
+                                            >
+                                                <path
+                                                    stroke-linecap="round"
+                                                    stroke-linejoin="round"
+                                                    stroke-width="2"
+                                                    d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                                                />
+                                            </svg>
+                                            {{ $t('print_settings.document_template_select') }}
+                                        </label>
+                                        <span
+                                            v-if="form.documents[selectedDocKey].template"
+                                            class="text-[10px] text-amber-600 dark:text-amber-400 font-bold"
+                                        >
+                                            {{ $t('print_settings.custom_template_active') }}
+                                        </span>
+                                        <span v-else class="text-[10px] text-gray-400">
+                                            {{ $t('print_settings.using_global_template') }}
+                                        </span>
+                                    </div>
+                                    <select
+                                        v-model="form.documents[selectedDocKey].template"
+                                        class="w-full px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-xs focus:ring-1 focus:ring-amber-400 focus:border-amber-400 outline-none transition cursor-pointer font-medium"
+                                    >
+                                        <option :value="null">
+                                            ⚡
+                                            {{ $t('print_settings.default_global_template') }} ({{
+                                                getTemplateName(form.visual.active_template)
+                                            }})
+                                        </option>
+                                        <option
+                                            v-for="tmpl in availableTemplates"
+                                            :key="tmpl.id"
+                                            :value="tmpl.id"
+                                        >
+                                            {{ tmpl.name }} — {{ tmpl.description }}
+                                        </option>
+                                    </select>
+                                </div>
+
+                                <!-- Custom Titles -->
+                                <div class="space-y-2">
                                     <label
-                                        class="block text-[10px] font-bold text-gray-400 uppercase"
+                                        class="block text-[10px] font-black text-gray-400 uppercase tracking-widest"
                                     >
                                         {{ $t('print_settings.document_title_arabic') }}
                                     </label>
-                                    <input
-                                        v-model="form.documents[selectedDocKey].title_ar"
-                                        type="text"
-                                        class="w-full px-3 py-1.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-950 dark:text-white text-xs text-end"
-                                    />
+                                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                        <div>
+                                            <label class="block text-[10px] text-gray-400 mb-1">
+                                                العربية
+                                            </label>
+                                            <input
+                                                v-model="form.documents[selectedDocKey].title_ar"
+                                                type="text"
+                                                dir="rtl"
+                                                class="w-full px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-xs focus:ring-1 focus:ring-amber-400 focus:border-amber-400 outline-none transition"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label class="block text-[10px] text-gray-400 mb-1">
+                                                English
+                                            </label>
+                                            <input
+                                                v-model="form.documents[selectedDocKey].title_en"
+                                                type="text"
+                                                dir="ltr"
+                                                class="w-full px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-xs focus:ring-1 focus:ring-amber-400 focus:border-amber-400 outline-none transition"
+                                            />
+                                        </div>
+                                    </div>
                                 </div>
-                                <div class="space-y-1.5">
+
+                                <!-- Options -->
+                                <div class="space-y-2">
                                     <label
-                                        class="block text-[10px] font-bold text-gray-400 uppercase"
+                                        class="block text-[10px] font-black text-gray-400 uppercase tracking-widest"
                                     >
-                                        Document Print Title (English)
+                                        {{ $t('print_settings.columns.print_terms') }}
                                     </label>
-                                    <input
-                                        v-model="form.documents[selectedDocKey].title_en"
-                                        type="text"
-                                        class="w-full px-3 py-1.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-950 dark:text-white text-xs text-start"
-                                    />
+                                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                        <label
+                                            v-for="(labelKey, optKey) in docOptions"
+                                            :key="optKey"
+                                            class="flex items-center gap-2.5 p-3 rounded-xl bg-gray-50 dark:bg-gray-900/20 border border-gray-100 dark:border-gray-700 cursor-pointer hover:border-amber-200 dark:hover:border-amber-800 transition-all"
+                                        >
+                                            <input
+                                                type="checkbox"
+                                                v-model="form.documents[selectedDocKey][optKey]"
+                                                class="w-4 h-4 rounded border-gray-300 text-amber-600 focus:ring-amber-500 flex-shrink-0"
+                                            />
+                                            <span class="text-xs text-gray-600 dark:text-gray-300">
+                                                {{ $t('print_settings.' + labelKey) }}
+                                            </span>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <!-- Actions -->
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                                    <button
+                                        type="button"
+                                        @click="openSignatureModal(selectedDocKey)"
+                                        class="flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl border-2 border-indigo-200 dark:border-indigo-800 hover:border-indigo-400 dark:hover:border-indigo-600 text-indigo-600 dark:text-indigo-400 bg-indigo-50/30 dark:bg-indigo-950/10 font-bold text-xs transition-all"
+                                    >
+                                        <svg
+                                            class="w-4 h-4"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            viewBox="0 0 24 24"
+                                        >
+                                            <path
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                stroke-width="2"
+                                                d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
+                                            />
+                                        </svg>
+                                        {{ $t('print_settings.edit_official_signatures') }}
+                                    </button>
+                                    <button
+                                        type="button"
+                                        @click="openTermsList(selectedDocKey)"
+                                        class="flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl border-2 border-amber-200 dark:border-amber-800 hover:border-amber-400 dark:hover:border-amber-600 text-amber-600 dark:text-amber-400 bg-amber-50/30 dark:bg-amber-950/10 font-bold text-xs transition-all"
+                                    >
+                                        <svg
+                                            class="w-4 h-4"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            viewBox="0 0 24 24"
+                                        >
+                                            <path
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                stroke-width="2"
+                                                d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"
+                                            />
+                                        </svg>
+                                        {{ $t('print_settings.edit_terms') }}
+                                    </button>
                                 </div>
                             </div>
 
-                            <!-- Specific Document Toggles -->
+                            <!-- Empty state -->
                             <div
-                                class="grid grid-cols-2 gap-2 text-[10px] text-gray-600 dark:text-gray-300 font-semibold"
+                                v-else
+                                class="h-full flex flex-col items-center justify-center py-16 text-center text-gray-400"
                             >
-                                <label
-                                    class="flex items-center gap-2 p-2 rounded-lg bg-gray-50/50 dark:bg-gray-900/30 border border-gray-100 dark:border-gray-700/50 cursor-pointer"
+                                <svg
+                                    class="w-10 h-10 mb-3 opacity-30"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
                                 >
-                                    <input
-                                        type="checkbox"
-                                        v-model="form.documents[selectedDocKey].print_terms"
-                                        class="w-4 h-4 rounded border-gray-300 text-amber-600 focus:ring-amber-500"
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="1.5"
+                                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
                                     />
-                                    <span>{{ $t('print_settings.columns.print_terms') }}</span>
-                                </label>
-                                <label
-                                    class="flex items-center gap-2 p-2 rounded-lg bg-gray-50/50 dark:bg-gray-900/30 border border-gray-100 dark:border-gray-700/50 cursor-pointer"
-                                >
-                                    <input
-                                        type="checkbox"
-                                        v-model="form.documents[selectedDocKey].terms_first_page"
-                                        class="w-4 h-4 rounded border-gray-300 text-amber-600 focus:ring-amber-500"
-                                    />
-                                    <span>{{ $t('print_settings.terms_on_first_page') }}</span>
-                                </label>
-                                <label
-                                    class="flex items-center gap-2 p-2 rounded-lg bg-gray-50/50 dark:bg-gray-900/30 border border-gray-100 dark:border-gray-700/50 cursor-pointer"
-                                >
-                                    <input
-                                        type="checkbox"
-                                        v-model="form.documents[selectedDocKey].show_stamp"
-                                        class="w-4 h-4 rounded border-gray-300 text-amber-600 focus:ring-amber-500"
-                                    />
-                                    <span>{{ $t('print_settings.enable_stamp') }}</span>
-                                </label>
-                                <label
-                                    class="flex items-center gap-2 p-2 rounded-lg bg-gray-50/50 dark:bg-gray-900/30 border border-gray-100 dark:border-gray-700/50 cursor-pointer"
-                                >
-                                    <input
-                                        type="checkbox"
-                                        v-model="form.documents[selectedDocKey].show_qr_code"
-                                        class="w-4 h-4 rounded border-gray-300 text-amber-600 focus:ring-amber-500"
-                                    />
-                                    <span>{{ $t('print_settings.show_qr_code_label') }}</span>
-                                </label>
-                                <label
-                                    class="flex items-center gap-2 p-2 rounded-lg bg-gray-50/50 dark:bg-gray-900/30 border border-gray-100 dark:border-gray-700/50 cursor-pointer"
-                                >
-                                    <input
-                                        type="checkbox"
-                                        v-model="form.documents[selectedDocKey].show_iban"
-                                        class="w-4 h-4 rounded border-gray-300 text-amber-600 focus:ring-amber-500"
-                                    />
-                                    <span>{{ $t('print_settings.show_bank_iban') }}</span>
-                                </label>
-                                <label
-                                    class="flex items-center gap-2 p-2 rounded-lg bg-gray-50/50 dark:bg-gray-900/30 border border-gray-100 dark:border-gray-700/50 cursor-pointer"
-                                >
-                                    <input
-                                        type="checkbox"
-                                        v-model="
-                                            form.documents[selectedDocKey].show_customer_address
-                                        "
-                                        class="w-4 h-4 rounded border-gray-300 text-amber-600 focus:ring-amber-500"
-                                    />
-                                    <span>{{ $t('print_settings.show_customer_address') }}</span>
-                                </label>
-                            </div>
-
-                            <!-- Signatures & Terms Custom Modals Links -->
-                            <div class="grid grid-cols-2 gap-3 pt-2">
-                                <button
-                                    type="button"
-                                    @click="openSignatureModal(selectedDocKey)"
-                                    class="flex items-center justify-center gap-1.5 py-2 px-3 border border-indigo-200 hover:border-indigo-400 text-indigo-600 dark:text-indigo-400 bg-indigo-50/30 dark:bg-indigo-950/10 rounded-xl text-[10px] font-bold transition-all"
-                                >
-                                    <svg
-                                        class="w-3.5 h-3.5"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        viewBox="0 0 24 24"
-                                    >
-                                        <path
-                                            stroke-linecap="round"
-                                            stroke-linejoin="round"
-                                            stroke-width="2"
-                                            d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
-                                        />
-                                    </svg>
-                                    {{ $t('print_settings.edit_official_signatures') }}
-                                </button>
-                                <button
-                                    type="button"
-                                    @click="openTermsList(selectedDocKey)"
-                                    class="flex items-center justify-center gap-1.5 py-2 px-3 border border-amber-200 hover:border-amber-400 text-amber-600 dark:text-amber-400 bg-amber-50/30 dark:bg-amber-950/10 rounded-xl text-[10px] font-bold transition-all"
-                                >
-                                    <svg
-                                        class="w-3.5 h-3.5"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        viewBox="0 0 24 24"
-                                    >
-                                        <path
-                                            stroke-linecap="round"
-                                            stroke-linejoin="round"
-                                            stroke-width="2"
-                                            d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"
-                                        />
-                                    </svg>
-                                    {{ $t('print_settings.edit_terms') }}
-                                </button>
+                                </svg>
+                                <p class="text-sm">
+                                    {{ $t('print_settings.select_document_hint') }}
+                                </p>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Left Side: Interactive Live Preview Sandbox (7/12 width) -->
+                <!-- ═══════════ Live Preview Panel (right, always visible) ═══════════ -->
                 <div
-                    class="w-full lg:w-7/12 bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-200 dark:border-gray-700 sticky top-6"
+                    class="xl:w-[430px] flex-shrink-0 bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden sticky top-6"
                 >
-                    <!-- Sandbox Control Bar -->
+                    <!-- Preview toolbar -->
                     <div
-                        class="flex items-center justify-between pb-4 border-b border-gray-100 dark:border-gray-700 mb-6 flex-wrap gap-4"
+                        class="flex items-center justify-between px-4 py-3 border-b border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/30"
                     >
                         <div class="flex items-center gap-2">
-                            <span
-                                class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping"
-                            ></span>
-                            <h3 class="text-sm font-bold text-gray-900 dark:text-white">
+                            <span class="relative flex h-2 w-2">
+                                <span
+                                    class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"
+                                ></span>
+                                <span
+                                    class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"
+                                ></span>
+                            </span>
+                            <span class="text-xs font-bold text-gray-700 dark:text-gray-200">
                                 {{ $t('print_settings.live_preview_platform') }}
-                            </h3>
+                            </span>
                         </div>
-
-                        <!-- Toolbar Options -->
-                        <div class="flex items-center gap-2 flex-wrap text-xs">
-                            <!-- Document selector in preview -->
+                        <div class="flex items-center gap-2">
                             <select
                                 v-model="previewDocType"
-                                class="px-2 py-1 rounded bg-gray-50 border border-gray-200 dark:bg-gray-700 dark:border-gray-600 text-gray-800 dark:text-gray-200 text-xs cursor-pointer focus:ring-0 focus:outline-none"
+                                class="text-[10px] px-2 py-1 rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 focus:outline-none cursor-pointer max-w-[150px] truncate"
                             >
                                 <option
                                     v-for="(doc, key) in form.documents"
                                     :key="key"
                                     :value="key"
                                 >
-                                    {{ $t('print_settings.preview') }}
                                     {{ $t('print_settings.' + key) }}
                                 </option>
                             </select>
-
-                            <!-- Zoom / Scale controls -->
                             <select
                                 v-model="previewScale"
-                                class="px-2 py-1 rounded bg-gray-50 border border-gray-200 dark:bg-gray-700 dark:border-gray-600 text-gray-800 dark:text-gray-200 text-xs cursor-pointer focus:ring-0 focus:outline-none"
+                                class="text-[10px] px-2 py-1 rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 focus:outline-none cursor-pointer"
                             >
+                                <option value="scale-[0.45]">45%</option>
                                 <option value="scale-[0.55]">
                                     {{ $t('print_settings.zoom_55') }}
                                 </option>
@@ -520,23 +660,16 @@
                                 <option value="scale-[0.75]">
                                     {{ $t('print_settings.zoom_75') }}
                                 </option>
-                                <option value="scale-[0.85]">
-                                    {{ $t('print_settings.zoom_85') }}
-                                </option>
-                                <option value="scale-[1.0]">
-                                    {{ $t('print_settings.actual_size') }}
-                                </option>
                             </select>
                         </div>
                     </div>
 
-                    <!-- Outer Paper Container -->
+                    <!-- Paper area -->
                     <div
-                        class="bg-gray-900/5 dark:bg-gray-950/20 p-6 rounded-xl border border-dashed border-gray-200 dark:border-gray-800 flex justify-center overflow-auto max-h-[70vh]"
+                        class="bg-gray-900/5 dark:bg-gray-950/20 p-4 flex justify-center overflow-auto max-h-[72vh]"
                     >
-                        <!-- Scaled Paper Engine Box -->
                         <div
-                            class="transition-all duration-300 shrink-0 transform"
+                            class="transition-all duration-300 shrink-0 transform origin-top"
                             :class="previewScale"
                         >
                             <PrintEngine
@@ -544,23 +677,22 @@
                                 :data="dummyPrintData"
                                 :centerData="dummyCenterData"
                                 :documentSettings="form.documents[previewDocType]"
-                                :visualSettings="{
-                                    ...form.visual,
-                                    active_template: previewingTemplate,
-                                }"
+                                :visualSettings="previewVisualSettings"
                                 :previewMode="true"
                             />
                         </div>
                     </div>
 
-                    <div class="mt-4 text-[10px] text-gray-400 text-center select-none">
+                    <div
+                        class="px-4 py-2 text-center text-[9px] text-gray-400 border-t border-gray-100 dark:border-gray-700"
+                    >
                         {{ $t('print_settings.preview_disclaimer') }}
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Terms Modal -->
+        <!-- Modals -->
         <TermsModal
             v-if="editingDoc"
             :show="true"
@@ -569,8 +701,6 @@
             @close="editingDoc = null"
             @save="handleDocSave"
         />
-
-        <!-- Terms List Modal -->
         <TermsListModal
             v-if="editingTermsDoc"
             :show="true"
@@ -579,7 +709,6 @@
             @close="editingTermsDoc = null"
             @save="handleDocSave"
         />
-        <!-- Term Edit Modal (top-level binding) -->
         <TermEditModal
             v-if="isTermEditOpen"
             :show="true"
@@ -587,7 +716,6 @@
             @close="closeTermEdit"
             @save="handleTermSaved"
         />
-        <!-- Signature Modal (draw / upload / library) -->
         <SignatureModal
             v-if="editingSignaturesDoc"
             :show="true"
@@ -613,8 +741,6 @@ import TermsModal from './Modals/TermsModal.vue';
 import TermsListModal from './Modals/TermsListModal.vue';
 import TermEditModal from './Modals/TermEditModal.vue';
 import SignatureModal from './Modals/SignatureModal.vue';
-
-// Import newly created PrintEngine wrapper
 import PrintEngine from '@/Components/Print/PrintEngine.vue';
 
 const { t } = useI18n();
@@ -637,24 +763,32 @@ const form = useForm({
     },
 });
 
-// If visual.active_template is missing in backend, set default
 if (!form.visual.active_template) {
     form.visual.active_template = 'TemplateDefaultA4';
 }
 
+// ─── Tabs ────────────────────────────────────────────────────────────────────
+const activeTab = ref('appearance');
+
+// Document checkbox options: formKey → translation sub-key
+const docOptions = {
+    print_terms: 'columns.print_terms',
+    terms_first_page: 'terms_on_first_page',
+    show_stamp: 'enable_stamp',
+    show_qr_code: 'show_qr_code_label',
+    show_iban: 'show_bank_iban',
+    show_customer_address: 'show_customer_address',
+};
+
+// ─── Modal state ─────────────────────────────────────────────────────────────
 const editingDoc = ref(null);
 const editingTermsDoc = ref(null);
 const editingSignaturesDoc = ref(null);
-
-// Term-edit modal state (top-level binding for TermEditModal).
-// `editingTerm` holds the term being edited; null when modal is closed.
-// `isTermEditOpen` controls modal visibility (also gated by v-if in template).
-// `editingTermDocKey` tracks which document's terms list to mutate on save
-// because TermEditModal emits only the term payload (no document context).
 const editingTerm = ref(null);
 const isTermEditOpen = ref(false);
 const editingTermDocKey = ref(null);
 
+// ─── Templates ───────────────────────────────────────────────────────────────
 const availableTemplates = [
     {
         id: 'TemplateDefaultA4',
@@ -678,43 +812,62 @@ const availableTemplates = [
     },
 ];
 
-// Tracks which template is being *previewed* (may differ from saved active_template)
+function getTemplateName(id) {
+    const tmpl = availableTemplates.find((t) => t.id === id);
+    return tmpl ? tmpl.name : id || 'Classic A4';
+}
+
+function getTemplateShortName(id) {
+    if (id === 'TemplateThermal80') return '80mm';
+    if (id === 'TemplateSleekThermal') return 'Sleek 80mm';
+    if (id === 'TemplateModernA4') return 'Modern A4';
+    if (id === 'TemplateDefaultA4') return 'Classic A4';
+    return id;
+}
+
 const previewingTemplate = ref(form.visual.active_template || 'TemplateDefaultA4');
 
-// Click on card body → preview only (no save)
 function previewTemplate(template) {
     previewingTemplate.value = template.id;
 }
 
-// Click on "تعيين كافتراضي" button → save as default
 function selectTemplate(template) {
     form.visual.active_template = template.id;
     previewingTemplate.value = template.id;
 }
 
-// Sandbox reactive state
-const selectedDocKey = ref('invoice'); // Current active customization
-const previewDocType = ref('invoice'); // Current active preview document
-const previewScale = ref('scale-[0.65]'); // Default zoom layout
+// ─── Documents ───────────────────────────────────────────────────────────────
+const selectedDocKey = ref('invoice');
+const previewDocType = ref('invoice');
+const previewScale = ref('scale-[0.55]');
 
-// Select document to customize and preview
 function selectDocument(key) {
     selectedDocKey.value = key;
-    previewDocType.value = key;
+    previewDocType.value = key; // sync preview with selected doc
 }
+
+// The template that the preview should actually use:
+// If the previewed document has a custom template, use it; otherwise use the currently previewed template.
+const effectivePreviewTemplate = computed(() => {
+    const docCustom = form.documents[previewDocType.value]?.template;
+    if (docCustom) return docCustom;
+    return previewingTemplate.value;
+});
+
+const previewVisualSettings = computed(() => ({
+    ...form.visual,
+    active_template: effectivePreviewTemplate.value,
+}));
 
 function openEditModal(key) {
     editingDoc.value = key;
 }
-
 function openTermsList(key) {
     editingTermsDoc.value = key;
 }
-
 function openSignatureModal(key) {
     editingSignaturesDoc.value = key;
 }
-
 function closeSignatureModal() {
     editingSignaturesDoc.value = null;
 }
@@ -727,10 +880,6 @@ function handleDocSave(newDoc) {
     }
 }
 
-// Open TermEditModal for a specific term in a specific document.
-// `term` may be:
-//   - an existing term object (with optional `_index` to know position) → edit mode
-//   - a blank template object → add mode (no _index)
 function openTermEdit(term) {
     editingTerm.value = term ? { ...term } : null;
     isTermEditOpen.value = true;
@@ -742,60 +891,38 @@ function closeTermEdit() {
     editingTermDocKey.value = null;
 }
 
-// Receive a saved term from TermEditModal and update the document's terms
-// list in place (no reload, no server call). Decision logic:
-//   - If the saved term carries a valid `_index` → update at that position
-//   - Otherwise → append as a new term
-// `_index` is stripped before storing so it never leaks into the form payload.
 function handleTermSaved(updatedTerm) {
     const docKey = editingTermDocKey.value;
-    if (!docKey || !form.documents[docKey]) {
-        return;
-    }
+    if (!docKey || !form.documents[docKey]) return;
     const doc = form.documents[docKey];
-    if (!Array.isArray(doc.terms)) {
-        doc.terms = [];
-    }
+    if (!Array.isArray(doc.terms)) doc.terms = [];
 
     const cleanTerm = { ...updatedTerm };
     const idx = cleanTerm._index;
     delete cleanTerm._index;
 
     if (typeof idx === 'number' && idx >= 0 && idx < doc.terms.length) {
-        // Edit existing term in place
         doc.terms[idx] = cleanTerm;
     } else {
-        // Append new term
         doc.terms.push(cleanTerm);
     }
 }
 
-/**
- * Called by SignatureModal after the user saves / picks a signature.
- * We append it to the current document's `signatures` list and ensure
- * the doc has a `signature` placeholder for the TemplateDefaultA4 footer
- * (the first signature becomes the default).
- */
 function handleSignatureSaved(sig) {
     const key = editingSignaturesDoc.value;
     if (!key || !sig) return;
-
     const doc = form.documents[key];
     if (!doc) return;
 
-    // The backend now returns BOTH name_ar and name_en on every upload.
-    // We still accept a legacy single `name` field as a fallback so older
-    // clients keep working, and we treat missing data as empty string
-    // rather than `undefined` so the template render never throws.
     const nameAr = sig.name_ar ?? sig.name ?? '';
     const nameEn = sig.name_en ?? sig.name ?? '';
-
     const list = Array.isArray(doc.signatures) ? [...doc.signatures] : [];
-    // Dedupe by id — if it already exists, no-op
+
     if (sig.id && list.some((s) => s.id === sig.id)) {
         closeSignatureModal();
         return;
     }
+
     list.push({
         id: sig.id,
         name_ar: nameAr,
@@ -805,10 +932,7 @@ function handleSignatureSaved(sig) {
         show: true,
         order: list.length + 1,
     });
-    // Stamp the first signature as the default footer reference so the
-    // template can render a single "primary" signature even when many
-    // are configured. Subsequent signatures just live in the signatures
-    // array.
+
     const nextDoc = { ...doc, signatures: list };
     if (!nextDoc.signature) {
         nextDoc.signature = {
@@ -823,77 +947,26 @@ function handleSignatureSaved(sig) {
     closeSignatureModal();
 }
 
-/**
- * Called by SignatureModal after the user performs a destructive or
- * ordering action (delete, rename, toggle show/hide, drag-reorder)
- * on a signature that's already in the library.
- *
- * The modal already sent the PATCH/DELETE/POST request to the server
- * and the server already persisted the change. Our job here is to
- * keep the in-page state in sync with the server, so the modal
- * (which reads from `form.documents[editingSignaturesDoc].signatures`)
- * shows the fresh data without a manual page refresh.
- *
- * Why we re-sync from the server rather than mutate locally:
- *   - The server is the source of truth (also `updated_at` /
- *     `updated_by` are stamped there). A local mutation would
- *     drift from disk on the next reload.
- *   - The full Inertia `router.reload` (no `only:`) is a single
- *     cheap round-trip and re-derives `form` via the form-init
- *     watcher below. We do not use `only: ['tenant']` because
- *     `print_settings` is a nested key on `tenant` and partial
- *     reloads have surprised us before.
- */
 function handleSignatureChanged(payload) {
     const key = editingSignaturesDoc.value;
     if (!key) return;
-
     const doc = form.documents[key];
     if (!doc || !Array.isArray(doc.signatures)) return;
 
     if (payload?.action === 'delete') {
-        // Local optimistic delete so the modal collapses the row
-        // immediately. The reload below will overwrite with the
-        // server's canonical list.
         doc.signatures = doc.signatures.filter((s) => s.id !== payload.id);
-        if (doc.signature?.id === payload.id) {
-            doc.signature = null;
-        }
+        if (doc.signature?.id === payload.id) doc.signature = null;
     } else if (
         payload?.action === 'reorder' &&
         Array.isArray(payload.order) &&
         payload.order.length > 0
     ) {
-        // Local optimistic reorder
         const byId = new Map(doc.signatures.map((s) => [s.id, s]));
         doc.signatures = payload.order.map((id) => byId.get(id)).filter(Boolean);
     }
-
-    // Always reload the page data. The reload fires `onSuccess` after
-    // the new Inertia payload lands; the watcher below then re-derives
-    // `form.documents` from the fresh tenant.print_settings, so the
-    // modal (and the PrintEngine preview) reflect the server's
-    // canonical state.
     router.reload();
 }
 
-/**
- * Watch the tenant's `print_settings` so the local form state stays
- * in sync with the server. Without this, the modal would keep showing
- * stale data after a PATCH / DELETE / reorder round trip — the
- * PrintEngine preview would also lie.
- *
- * The watcher fires:
- *   1. On first mount when Inertia hydrates page.props.
- *   2. After `router.reload()` returns, with the fresh payload.
- *   3. After the user hits Save and the server returns an updated
- *      tenant with merged print_settings.
- *
- * We only sync the `signatures` field per document; everything else
- * (title, terms, show_stamp, etc) is user-edited and only saved on
- * the explicit Save button. Mirroring those would clobber the
- * user's in-progress edits.
- */
 watch(
     () => page.props.tenant?.print_settings,
     (newSettings) => {
@@ -912,13 +985,11 @@ watch(
 function save() {
     form.put('/app/settings/system', {
         preserveScroll: true,
-        onSuccess: () => {
-            success(t('common.saved_success'));
-        },
+        onSuccess: () => success(t('common.saved_success')),
     });
 }
 
-// Sandbox Dummy Data
+// ─── Center Preview Data ─────────────────────────────────────────────────────
 const dummyCenterData = computed(() => ({
     name: t('print_settings.sample_center_name'),
     logo_url: page.props.tenant?.logo_url || '/images/logo.png',
@@ -930,54 +1001,162 @@ const dummyCenterData = computed(() => ({
     stamp_url: props.print_settings?.visual?.stamp_url || '',
 }));
 
-const dummyPrintData = computed(() => ({
-    code: 'WO-100293',
-    created_at: new Date(),
-    odometer: '45,210',
-    expected_end_date: new Date(Date.now() + 86400000 * 2), // 2 days from now
-    customer: {
-        name: t('print_settings.sample_name'),
-        phone: '+966 50 123 4567',
-    },
-    vehicle: {
-        make: t('print_settings.sample_make'),
-        model: t('print_settings.sample_model'),
-        year: '2023',
-        plate: t('print_settings.sample_plate'),
-        color: t('print_settings.pearl_white'),
-    },
-    items: [
-        {
-            service_name: t('print_settings.sample_service_computer'),
-            description: t('print_settings.sample_description_3'),
-            qty: 1,
-            unit_price: 150,
-            is_part: false,
+// ─── Dynamic Dummy Print Data (Smartly tailored to each document type) ───────
+const dummyPrintData = computed(() => {
+    const docType = previewDocType.value;
+
+    const base = {
+        code:
+            docType === 'quotation'
+                ? 'QT-2026-0041'
+                : docType === 'purchase_invoice'
+                  ? 'PINV-8812'
+                  : docType === 'purchase_return'
+                    ? 'PRET-019'
+                    : docType === 'receipt'
+                      ? 'REC-5510'
+                      : docType === 'credit_note'
+                        ? 'CN-0021'
+                        : docType === 'parts_invoice'
+                          ? 'PINV-3001'
+                          : docType === 'subscription_invoice'
+                            ? 'SUB-7704'
+                            : 'WO-100293',
+        created_at: new Date(),
+        odometer: '45,210',
+        mileage: 45210,
+        fuel_level: 70,
+        entry_date: new Date(),
+        expected_end_date: new Date(Date.now() + 86400000 * 2),
+        customer: {
+            name: ['purchase_invoice', 'purchase_return'].includes(docType)
+                ? 'شركة التوريدات العالمية لقطع الغيار'
+                : ['payslip', 'employee', 'attendance'].includes(docType)
+                  ? 'سعد محمد الشهري (فني صيانة أول)'
+                  : ['payroll', 'customers', 'vehicles'].includes(docType)
+                    ? 'التقرير الدوري الشامل للمركز'
+                    : t('print_settings.sample_name'),
+            phone: '+966 50 123 4567',
+            address: 'الرياض، حي الملز، طريق صلاح الدين',
+            tax_number: '310992384900003',
         },
-        {
-            service_name: t('print_settings.sample_service_oil'),
-            description: t('print_settings.sample_description_2'),
-            qty: 1,
-            unit_price: 280,
-            is_part: false,
+        vehicle: {
+            make: t('print_settings.sample_make'),
+            model: t('print_settings.sample_model'),
+            year: '2023',
+            plate: t('print_settings.sample_plate'),
+            color: t('print_settings.pearl_white'),
         },
-        {
-            service_name: t('print_settings.sample_service_brakes'),
-            description: t('print_settings.sample_description_4'),
-            qty: 1,
-            unit_price: 320,
-            technician: t('print_settings.sample_technician'),
-            is_part: false,
-        },
-        {
-            service_name: t('print_settings.sample_line_brakes'),
-            description: t('print_settings.sample_part'),
-            qty: 1,
-            unit_price: 240,
-            is_part: true,
-        },
-    ],
-    amount: 250, // For receipt
-    notes: t('print_settings.sample_description_1'),
-}));
+        damage_marks: [
+            { x: 120, y: 140, color: 'red', description: 'صدمة بالصدام الأمامي الأيمن' },
+            { x: 280, y: 190, color: 'blue', description: 'خدش سطحي بالباب الخلفي الأيسر' },
+        ],
+        payments: [
+            {
+                id: 1,
+                payment_date: new Date(),
+                payment_method: 'card',
+                reference: 'AUTH-99120',
+                notes: 'دفعة مقدمة - مدى',
+                amount: 500,
+                type: 'regular',
+            },
+            {
+                id: 2,
+                payment_date: new Date(),
+                payment_method: 'cash',
+                reference: '-',
+                notes: 'دفعة ثانية نقداً',
+                amount: 490,
+                type: 'regular',
+            },
+        ],
+        amount: 250,
+        notes: t('print_settings.sample_description_1'),
+    };
+
+    if (['parts_invoice', 'purchase_invoice', 'purchase_return'].includes(docType)) {
+        base.items = [
+            {
+                service_name: 'فحمات فرامل أمامية (أصلي)',
+                description: 'من المستودع الرئيسي - تويوتا أصلي',
+                qty: 2,
+                unit_price: 240,
+                is_part: true,
+            },
+            {
+                service_name: 'فلتر زيت محرك تخليقي',
+                description: 'فلتر أصلي مع حلقات منع التسريب',
+                qty: 1,
+                unit_price: 65,
+                is_part: true,
+            },
+            {
+                service_name: 'شمعات احتراق ليزر بلاتينيوم',
+                description: 'طقم 4 شمعات إشعال أصلية',
+                qty: 4,
+                unit_price: 85,
+                is_part: true,
+            },
+        ];
+    } else if (docType === 'payslip') {
+        base.items = [
+            {
+                service_name: 'الراتب الأساسي',
+                description: 'راتب شهر محرم 1448هـ',
+                qty: 1,
+                unit_price: 4500,
+                is_part: false,
+            },
+            {
+                service_name: 'بدل السكن والنقل',
+                description: 'بدل شهري ثابت',
+                qty: 1,
+                unit_price: 1500,
+                is_part: false,
+            },
+            {
+                service_name: 'حافز إنجاز الورشة',
+                description: 'مكافأة تجاوز تارغت الفحص الدوري',
+                qty: 1,
+                unit_price: 600,
+                is_part: false,
+            },
+        ];
+    } else {
+        base.items = [
+            {
+                service_name: t('print_settings.sample_service_computer'),
+                description: t('print_settings.sample_description_3'),
+                qty: 1,
+                unit_price: 150,
+                is_part: false,
+            },
+            {
+                service_name: t('print_settings.sample_service_oil'),
+                description: t('print_settings.sample_description_2'),
+                qty: 1,
+                unit_price: 280,
+                is_part: false,
+            },
+            {
+                service_name: t('print_settings.sample_service_brakes'),
+                description: t('print_settings.sample_description_4'),
+                qty: 1,
+                unit_price: 320,
+                technician: t('print_settings.sample_technician'),
+                is_part: false,
+            },
+            {
+                service_name: t('print_settings.sample_line_brakes'),
+                description: t('print_settings.sample_part'),
+                qty: 1,
+                unit_price: 240,
+                is_part: true,
+            },
+        ];
+    }
+
+    return base;
+});
 </script>

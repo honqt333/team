@@ -64,7 +64,7 @@ const platformOptions = computed(() => [
                     <input
                         v-model="form.settings.website_keywords"
                         class="input-enterprise"
-                        placeholder="كلمة, كلمة اخرى, keywords"
+                        :placeholder="$t('system.website.keyword_another_keyword_keywords')"
                     />
                 </div>
             </div>
