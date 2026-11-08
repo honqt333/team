@@ -405,16 +405,11 @@
                 </div>
 
                 <!-- Active toggle -->
-                <div class="flex items-center gap-3">
-                    <label class="relative inline-flex items-center cursor-pointer">
-                        <input type="checkbox" v-model="form.is_active" class="sr-only peer" />
-                        <div
-                            class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-teal-300 dark:peer-focus:ring-teal-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-teal-600"
-                        ></div>
-                    </label>
-                    <span class="text-sm font-medium text-gray-700 dark:text-gray-300">
-                        {{ $t('services_management.form.is_active') }}
-                    </span>
+                <div>
+                    <AppToggle
+                        v-model="form.is_active"
+                        :label="$t('services_management.form.is_active')"
+                    />
                 </div>
             </template>
 
@@ -455,6 +450,7 @@
                     <div class="relative">
                         <input
                             type="number"
+                            name="base_price"
                             v-model.number="form.base_price"
                             inputmode="decimal"
                             lang="en"
@@ -528,6 +524,7 @@
                         <div class="relative">
                             <input
                                 type="number"
+                                name="default_discount_value"
                                 v-model.number="form.default_discount_value"
                                 inputmode="decimal"
                                 lang="en"
@@ -552,6 +549,7 @@
                     <div class="relative">
                         <input
                             type="number"
+                            name="min_price"
                             v-model.number="form.min_price"
                             inputmode="decimal"
                             lang="en"
@@ -592,24 +590,65 @@
         </form>
 
         <template #footer>
-            <button
-                type="button"
-                @click="$emit('close')"
-                class="px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white font-medium transition-colors"
-            >
-                {{ $t('common.cancel') }}
-            </button>
-            <button
-                @click="submitForm"
-                :disabled="
-                    form.processing ||
-                    (!selectedCatalogService && !service?.id) ||
-                    !!minPriceValidationError
-                "
-                class="px-5 py-2.5 bg-gradient-to-r from-teal-600 to-emerald-600 text-white rounded-xl font-semibold shadow-lg shadow-teal-500/30 hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-            >
-                {{ form.processing ? $t('common.loading') : $t('common.save') }}
-            </button>
+            <div class="flex items-center justify-between w-full">
+                <div>
+                    <span
+                        v-if="Object.keys(form.errors).length > 0"
+                        class="text-xs text-red-500 font-medium inline-flex items-center gap-1.5"
+                    >
+                        <svg class="w-4 h-4 shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                            <path
+                                fill-rule="evenodd"
+                                d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                                clip-rule="evenodd"
+                            />
+                        </svg>
+                        {{
+                            $t('common.form_has_errors', { count: Object.keys(form.errors).length })
+                        }}
+                    </span>
+                </div>
+                <div class="flex items-center gap-3">
+                    <button
+                        type="button"
+                        @click="$emit('close')"
+                        class="px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white font-medium transition-colors"
+                    >
+                        {{ $t('common.cancel') }}
+                    </button>
+                    <button
+                        @click="submitForm"
+                        :disabled="
+                            form.processing ||
+                            (!selectedCatalogService && !service?.id) ||
+                            !!minPriceValidationError
+                        "
+                        class="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-700 hover:to-emerald-700 text-white rounded-xl font-semibold shadow-lg shadow-teal-500/30 hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                    >
+                        <svg
+                            v-if="form.processing"
+                            class="w-4 h-4 animate-spin -ml-1 mr-2 text-white"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                        >
+                            <circle
+                                class="opacity-25"
+                                cx="12"
+                                cy="12"
+                                r="10"
+                                stroke="currentColor"
+                                stroke-width="4"
+                            ></circle>
+                            <path
+                                class="opacity-75"
+                                fill="currentColor"
+                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                            ></path>
+                        </svg>
+                        {{ form.processing ? $t('common.loading') : $t('common.save') }}
+                    </button>
+                </div>
+            </div>
         </template>
     </BaseModal>
 </template>
@@ -620,6 +659,8 @@ import { useForm } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import BaseModal from '@/Components/BaseModal.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
+import AppToggle from '@/Components/Common/AppToggle.vue';
+import { useFormScrollToError } from '@/Composables/useFormScrollToError';
 
 const props = defineProps({
     show: { type: Boolean, default: false },
@@ -633,6 +674,7 @@ const props = defineProps({
 
 const emit = defineEmits(['close', 'saved', 'open-new-definition']);
 const { t } = useI18n();
+const { scrollToError } = useFormScrollToError();
 
 // ─── Catalog filtering ────────────────────────────────────────────────────────
 const selectedCatalogServiceId = ref('');
@@ -820,6 +862,9 @@ function submitForm() {
             selectedCatalogServiceId.value = '';
             emit('saved');
             emit('close');
+        },
+        onError: (errors) => {
+            scrollToError(errors);
         },
     });
 }
