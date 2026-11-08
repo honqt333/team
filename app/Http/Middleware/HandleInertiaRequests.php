@@ -64,6 +64,9 @@ class HandleInertiaRequests extends Middleware
             // request so the token doesn't
             // get stale like the meta tag.
             'locale' => app()->getLocale(),
+            'app_name' => app()->getLocale() === 'ar'
+                ? config('app.name_ar', 'خدمة برو')
+                : config('app.name', 'Khidmh Pro'),
             'auth' => [
                 'user' => $user ? ($isTenantUser ? $user->load('roles:id,name,label_ar,label_en') : $user) : null,
                 'is_super_admin' => $isSuperAdmin,

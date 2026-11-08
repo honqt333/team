@@ -12,7 +12,7 @@ return [
     'all_categories' => 'كل الفئات',
     'all_centers' => 'كل المراكز',
     'amount' => 'المبلغ',
-    'app_name' => 'Carag',
+    'app_name' => env('APP_NAME_AR', 'خدمة برو'),
     'app_slogan' => 'إدارة مراكز خدمة ذكية',
     'app_tagline' => 'أدر مركزك بالطريقة الذكية',
     'attachment_limits_hint' => 'يمكنك رفع حتى 10 ملفات (الحد الأقصى 10 ميجا لكل ملف).',

@@ -68,7 +68,7 @@
                         {{ $t('subscription.try_again') }}
                     </Link>
                     <a
-                        href="mailto:support@carag.app"
+                        href="mailto:support@khidmh.pro"
                         class="px-6 py-2.5 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 border border-gray-300 dark:border-gray-600 rounded-lg font-medium transition-colors"
                     >
                         {{ $t('subscription.contact_support') }}

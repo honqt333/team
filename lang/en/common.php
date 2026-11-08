@@ -12,7 +12,7 @@ return [
     'all_categories' => 'All Categories',
     'all_centers' => 'All Centers',
     'amount' => 'Amount',
-    'app_name' => 'Carag',
+    'app_name' => env('APP_NAME', 'Khidmh Pro'),
     'app_slogan' => 'Smart service center management',
     'app_tagline' => 'Manage your service center the smart way',
     'attachment_limits_hint' => 'You can upload up to 10 files (max 10MB each).',

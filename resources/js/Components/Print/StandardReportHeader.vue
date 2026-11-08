@@ -111,7 +111,12 @@ const tenant = computed(() => props.customCompany || page.props.tenant || {});
 const center = computed(() => page.props.center || {});
 
 const companyName = computed(() => {
-    return tenant.value.trade_name || tenant.value.name || 'Carag V2';
+    return (
+        tenant.value.trade_name ||
+        tenant.value.name ||
+        page.props.app_name ||
+        (isRtl.value ? 'خدمة برو' : 'Khidmh Pro')
+    );
 });
 
 const centerName = computed(() => {

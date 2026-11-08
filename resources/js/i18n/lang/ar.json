@@ -424,7 +424,14 @@
         "phone_label": "الهاتف:",
         "print_date_label": "تاريخ الطباعة:",
         "print_date_time_label": "تاريخ ووقت الطباعة:",
-        "reference_document_number": "رقم المرجع / المستند"
+        "reference_document_number": "رقم المرجع / المستند",
+        "count": "العدد",
+        "deselect_all": "إلغاء تحديد الكل",
+        "paid": "مدفوع",
+        "prepared_by": "تمت الطباعة بواسطة",
+        "previous": "السابق",
+        "time": "الوقت",
+        "view_mode": "طريقة العرض"
     },
     "company_profile": {
         "address": {
@@ -938,7 +945,15 @@
             "total_customers": "إجمالي العملاء:",
             "contact_person": "المسؤول / الاتصال",
             "report_date": "تاريخ التقرير:",
-            "title": "تقرير دليل العملاء (Customers Directory)"
+            "title": "تقرير دليل العملاء (Customers Directory)",
+            "balance": "الرصيد",
+            "customer_code": "كود العميل",
+            "invoices_count": "عدد الفواتير",
+            "name": "الاسم",
+            "no_customers": "لا يوجد عملاء",
+            "phone": "الهاتف",
+            "type": "النوع",
+            "vehicles_count": "عدد المركبات"
         }
     },
     "dashboard": {
@@ -1084,7 +1099,8 @@
         "search": "بحث في الأقسام...",
         "services": "خدمة",
         "title": "إدارة الأقسام",
-        "total_count": "قسم"
+        "total_count": "قسم",
+        "subtitle": "إدارة الأقسام وفئات العمل"
     },
     "employee_portal": {
         "attendance": "الحضور",
@@ -1115,7 +1131,12 @@
             "start_work": "بدء العمل",
             "ready_for_qc": "جاهز للفحص",
             "complete": "إكمال"
-        }
+        },
+        "checklist": "قائمة المهام",
+        "no_tasks_filtered": "لا توجد مهام مطابقة للفلاتر",
+        "notes": "الملاحظات",
+        "photos": "الصور",
+        "search_tasks_placeholder": "ابحث في المهام..."
     },
     "errors": {
         "403": {
@@ -2187,7 +2208,7 @@
         "work_order_updated": "تم تحديث كرت العمل بنجاح"
     },
     "nav": {
-        "brand": "Carag",
+        "brand": "خدمة برو",
         "close": "إغلاق",
         "customers": "العملاء",
         "dashboard": "لوحة التحكم",
@@ -2660,7 +2681,12 @@
         "vehicles_title": "عنوان قائمة المركبات",
         "quotation": "عرض سعر",
         "quotation_terms": "شروط عرض السعر",
-        "quotation_title": "عنوان عرض السعر"
+        "quotation_title": "عنوان عرض السعر",
+        "custom_template_active": "القالب المخصص المستخدم حالياً",
+        "default_global_template": "القالب العام الافتراضي",
+        "document_template_select": "اختر قالب المستند",
+        "select_document_hint": "القالب المختار يُطبَّق على كل المستندات المطبوعة من هذا القسم",
+        "using_global_template": "يستخدم القالب العام"
     },
     "profile": {
         "title": "الملف الشخصي",
@@ -3203,7 +3229,8 @@
             "pricing": "التسعير",
             "qty": "الكمية",
             "service": "الخدمة",
-            "total_cost": "تكلفة الخدمة"
+            "total_cost": "تكلفة الخدمة",
+            "add_and_another": "إضافة والاستمرار"
         },
         "share": {
             "copy_link": "نسخ الرابط",
@@ -4584,7 +4611,10 @@
                 "active": "نشط",
                 "coming_soon": "قريباً"
             },
-            "in_development": "قيد التطوير والتجهيز"
+            "in_development": "قيد التطوير والتجهيز",
+            "manage_print": "إدارة إعدادات الطباعة",
+            "print_desc": "اختر القوالب المستخدمة في طباعة المستندات والفواتير والتقارير",
+            "print_title": "الطباعة"
         },
         "all_transaction_types": "كل أنواع المعاملات"
     },
@@ -5449,7 +5479,7 @@
     },
     "system": {
         "brand": {
-            "name": "Carag",
+            "name": "خدمة برو",
             "panel_name": "لوحة النظام"
         },
         "invoice_show": {
@@ -6194,7 +6224,17 @@
                 "company": "معلومات الشركة",
                 "payment": "إعدادات الدفع",
                 "dunning": "المطالبات والتحصيل"
-            }
+            },
+            "auto_suspension": "الإيقاف التلقائي",
+            "automatically_suspend_the_workshop_after_invo": "إيقاف الورشة تلقائياً بعد تجاوز الفاتورة مدة السماح",
+            "channel_matrix": "مصفوفة القنوات",
+            "days_overdue": "متأخرة {days} يوم",
+            "days_overdue_2": "يوم تأخير",
+            "quiet_hours_ksa": "ساعات الصمت (توقيت السعودية)",
+            "select_which_channels_are_used_for_each_tier": "اختر القنوات المستخدمة في كل مستوى تذكير",
+            "skip_outbound_messages_during_these_hours_": "تجاهل الرسائل الصادرة خلال هذه الساعات",
+            "to": "إلى",
+            "uncheck_a_tier_to_skip_it_globally_skipped_tier": "ألغِ تحديد مستوى التذكير لتخطيه عالمياً"
         },
         "integrations": {
             "title": "التكاملات",
@@ -6469,7 +6509,33 @@
             "credit_3": "الرصيد",
             "sent_2": "مرسل",
             "pending_2": "قيد الإرسال",
-            "add_label": "+ إضافة"
+            "add_label": "+ إضافة",
+            "active_workshops": "ورش نشطة",
+            "add": "إضافة",
+            "add_manual_sms_credit": "إضافة رصيد SMS يدوي",
+            "adding": "جارٍ الإضافة...",
+            "critically_low": "حرج منخفض",
+            "custom_package": "باقة مخصصة",
+            "good": "جيد",
+            "low": "منخفض",
+            "low_credit": "رصيد منخفض",
+            "message_type": "نوع الرسالة",
+            "messages_count": "عدد الرسائل",
+            "messages_sent": "الرسائل المرسلة",
+            "no_data_available": "لا توجد بيانات متاحة",
+            "no_messages_recorded": "لا توجد رسائل مسجلة",
+            "no_operations_found": "لا توجد عمليات",
+            "popular": "الأكثر مبيعاً",
+            "reason_placeholder": "مثال: هدية ترحيبية",
+            "recipient": "المستلم",
+            "search_workshop": "ابحث باسم الورشة...",
+            "status": "الحالة",
+            "tenant_id": "رقم المستأجر",
+            "tenant_label": "المستأجر #{id}",
+            "total_credits_balance": "إجمالي الأرصدة",
+            "total_purchased": "إجمالي المشتريات",
+            "transaction_number": "رقم العملية",
+            "workshop": "الورشة"
         },
         "announcements": {
             "title": "الإعلانات والإشعارات",
@@ -8563,5 +8629,8 @@
         "for_two_factor_only": "للتحقق الثنائي فقط",
         "for_notifications_only": "للرسائل الإشعارية فقط",
         "delete_confirm": "هل تريد حذف هذا التكامل؟"
+    },
+    "financial": {
+        "bank_transfer": "تحويل بنكي"
     }
 }

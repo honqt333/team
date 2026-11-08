@@ -657,7 +657,7 @@ const props = defineProps({
         default: () => ({
             whatsapp: '+966 555 785 658',
             whatsapp_enabled: true,
-            email: 'support@carag.sa',
+            email: 'support@khidmh.pro',
             phone: '920000000',
             // The working hours come from the settings; the translated
             // default is used when they are not set. It cannot be built

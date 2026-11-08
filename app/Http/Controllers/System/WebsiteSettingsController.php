@@ -186,8 +186,8 @@ class WebsiteSettingsController extends Controller
 
         return Inertia::render('System/Website/Index', [
             'settings' => [
-                'website_title_ar' => $get('website.title.ar', 'Carag - نظام إدارة مراكز صيانة السيارات'),
-                'website_title_en' => $get('website.title.en', 'Carag - Car Workshop Management System'),
+                'website_title_ar' => $get('website.title.ar', config('app.name_ar', 'خدمة برو').' - نظام إدارة مراكز صيانة السيارات'),
+                'website_title_en' => $get('website.title.en', config('app.name', 'Khidmh Pro').' - Workshop Management System'),
                 'website_description_ar' => $get('website.description.ar', ''),
                 'website_description_en' => $get('website.description.en', ''),
                 'website_keywords' => $get('website.keywords', ''),
@@ -229,8 +229,8 @@ class WebsiteSettingsController extends Controller
                 'website_footer_menu' => $getJson('website.footer.menu', []),
                 'website_footer_about_ar' => $get('website.footer.about.ar', ''),
                 'website_footer_about_en' => $get('website.footer.about.en', ''),
-                'website_copyright_text_ar' => $get('website.copyright.text.ar', '© '.date('Y').' Carag. جميع الحقوق محفوظة.'),
-                'website_copyright_text_en' => $get('website.copyright.text.en', '© '.date('Y').' Carag. All rights reserved.'),
+                'website_copyright_text_ar' => $get('website.copyright.text.ar', '© '.date('Y').' '.config('app.name_ar', 'خدمة برو').'. جميع الحقوق محفوظة.'),
+                'website_copyright_text_en' => $get('website.copyright.text.en', '© '.date('Y').' '.config('app.name', 'Khidmh Pro').'. All rights reserved.'),
 
                 // Landing Page Content
                 'landing_hero_title_ar' => $get('landing.hero.title.ar', 'مرحباً بك في عصر الإدارة الذكية للورش'),
@@ -249,8 +249,8 @@ class WebsiteSettingsController extends Controller
                 'landing_hero_typed_phrases_ar' => $get('landing.hero.typed.phrases.ar', 'مركزك الآن|أرباحك اليوم|فريقك معك|مستقبلك هنا'),
                 'landing_hero_typed_phrases_en' => $get('landing.hero.typed.phrases.en', 'Your Workshop|Your Revenue|Your Team|Your Future'),
 
-                'landing_features_title_ar' => $get('landing.features.title.ar', 'لماذا نظام Carag هو خيارك الأفضل؟'),
-                'landing_features_title_en' => $get('landing.features.title.en', 'Why Carag is Your Best Choice?'),
+                'landing_features_title_ar' => $get('landing.features.title.ar', 'لماذا نظام '.config('app.name_ar', 'خدمة برو').' هو خيارك الأفضل؟'),
+                'landing_features_title_en' => $get('landing.features.title.en', 'Why '.config('app.name', 'Khidmh Pro').' is Your Best Choice?'),
                 'landing_features_subtitle_ar' => $get('landing.features.subtitle.ar', 'بنينا النظام خصيصاً ليناسب احتياجات مراكز الصيانة، لنوفر لك أدوات تقنية متطورة تزيد من كفاءة العمل.'),
                 'landing_features_subtitle_en' => $get('landing.features.subtitle.en', 'We built the system specifically for workshop needs, providing advanced tech tools to boost efficiency.'),
 
@@ -279,17 +279,25 @@ class WebsiteSettingsController extends Controller
                     ['q_ar' => 'هل يمكنني إدارة أكثر من فرع؟', 'q_en' => 'Can I manage multiple branches?', 'a_ar' => 'نعم، يدعم النظام إدارة فروع متعددة بصلاحيات منفصلة لكل فرع ومخزون مستقل.', 'a_en' => 'Yes, the system supports managing multiple branches with separate roles and inventory.'],
                     ['q_ar' => 'ماذا يحدث إذا انقطع الإنترنت؟', 'q_en' => 'What if the internet disconnects?', 'a_ar' => 'النظام سحابي ويتطلب اتصال بالإنترنت، ولكننا نستخدم خوادم مستقرة تضمن استمرار العمل.', 'a_en' => 'The system is cloud-based and requires internet, but we use stable servers to ensure uptime.'],
                 ]),
-                'landing_testimonials_list' => $getJson('landing.testimonials.list', [
-                    ['name' => 'AutoCare', 'logo_url' => 'https://upload.wikimedia.org/wikipedia/commons/4/44/BMW.svg'],
-                    ['name' => 'SpeedFix', 'logo_url' => 'https://upload.wikimedia.org/wikipedia/commons/a/a1/Volkswagen_Logo_till_1995.svg'],
-                    ['name' => 'ProGarage', 'logo_url' => 'https://upload.wikimedia.org/wikipedia/commons/9/90/Mercedes-Logo.svg'],
-                    ['name' => 'StarMotors', 'logo_url' => 'https://upload.wikimedia.org/wikipedia/commons/1/12/Suzuki_logo_2.svg'],
-                ]),
+                'landing_testimonials_list' => $getJson('landing.testimonials.list', []),
+                /*
+                 * Stats.
+                 *
+                 * These used to ship as "+500 workshops / +1M invoices /
+                 * +100K clients / 99.9% uptime". None of them were true, and
+                 * the database holds 4 tenants and 9 work orders, so the
+                 * numbers were not even close.
+                 *
+                 * The defaults below are honest: they describe what the
+                 * product actually does, not how many customers it allegedly
+                 * has. Real customer counts belong here only once they can be
+                 * read from the database.
+                 */
                 'landing_stats_list' => $getJson('landing.stats.list', [
-                    ['value' => '+500', 'label_ar' => 'ورشة وصناعية', 'label_en' => 'Workshops'],
-                    ['value' => '+1M', 'label_ar' => 'فاتورة مصدرة', 'label_en' => 'Invoices Issued'],
-                    ['value' => '+100K', 'label_ar' => 'عميل مسجل', 'label_en' => 'Registered Clients'],
-                    ['value' => '%99.9', 'label_ar' => 'استقرار النظام', 'label_en' => 'Uptime'],
+                    ['value' => 'ZATCA', 'label_ar' => 'فوترة إلكترونية متكاملة مع هيئة الزكاة والدخل', 'label_en' => 'E-invoicing integrated with ZATCA'],
+                    ['value' => 'SAR', 'label_ar' => 'ضريبة القيمة المضافة محسوبة على كل فاتورة', 'label_en' => 'VAT calculated on every invoice'],
+                    ['value' => '24/7', 'label_ar' => 'وصول سحابي من أي جهاز أو فرع', 'label_en' => 'Cloud access from any device or branch'],
+                    ['value' => '1', 'label_ar' => 'منصة واحدة لإدارة الفروع والمخزون والعملاء', 'label_en' => 'One platform for branches, stock and customers'],
                 ]),
                 'website_custom_pages' => $getJson('website.custom.pages', []),
 

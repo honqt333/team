@@ -102,10 +102,25 @@ class PublicLandingController extends Controller
         };
 
         return [
-            'title_ar' => $get('website.title.ar', 'Carag - نظام إدارة مراكز صيانة السيارات'),
-            'title_en' => $get('website.title.en', 'Carag - Car Workshop Management System'),
-            'description_ar' => $get('website.description.ar', ''),
-            'description_en' => $get('website.description.en', ''),
+            'title_ar' => $get('website.title.ar', config('app.name_ar', 'خدمة برو').' - نظام إدارة مراكز صيانة السيارات'),
+            'title_en' => $get('website.title.en', config('app.name', 'Khidmh Pro').' - Workshop Management System'),
+            // A meta description is required by SEO and by the social-share
+            // preview. When the CMS field is empty we fall back to the hero
+            // copy, which is the closest honest summary of the page.
+            'description_ar' => $get(
+                'website.description.ar',
+                $get(
+                    'landing.hero.subtitle.ar',
+                    'نظام سحابي لإدارة مراكز صيانة السيارات: فحص رقمي، فواتير إلكترونية معتمدة، إدارة مخزون، ونقاط بيع في منصة واحدة.'
+                )
+            ),
+            'description_en' => $get(
+                'website.description.en',
+                $get(
+                    'landing.hero.subtitle.en',
+                    'Cloud software for car workshops: digital inspections, certified e-invoicing, inventory and point of sale in one platform.'
+                )
+            ),
             'keywords' => $get('website.keywords', ''),
             'logo' => $get('website.logo', ''),
             'favicon' => $get('website.favicon', ''),
@@ -147,30 +162,42 @@ class PublicLandingController extends Controller
 
             'footer_about_ar' => $get('website.footer.about.ar', ''),
             'footer_about_en' => $get('website.footer.about.en', ''),
-            'copyright_text_ar' => $get('website.copyright.text.ar', '© '.date('Y').' Carag. جميع الحقوق محفوظة.'),
-            'copyright_text_en' => $get('website.copyright.text.en', '© '.date('Y').' Carag. All rights reserved.'),
+            'copyright_text_ar' => $get('website.copyright.text.ar', '© '.date('Y').' '.config('app.name_ar', 'خدمة برو').'. جميع الحقوق محفوظة.'),
+            'copyright_text_en' => $get('website.copyright.text.en', '© '.date('Y').' '.config('app.name', 'Khidmh Pro').'. All rights reserved.'),
 
             // Landing Page Content
-            'hero_title_ar' => $get('landing.hero.title.ar', 'مرحباً بك في عصر الإدارة الذكية للورش'),
-            'hero_title_en' => $get('landing.hero.title.en', 'Welcome to the Era of Smart Workshop Management'),
-            'hero_subtitle_ar' => $get('landing.hero.subtitle.ar', 'النظام الأول المعتمد لإدارة مراكز صيانة السيارات. فحص رقمي، فواتير إلكترونية، إدارة المخزون، ونقاط البيع في منصة واحدة متكاملة.'),
-            'hero_subtitle_en' => $get('landing.hero.subtitle.en', 'The certified #1 system for car workshop management. Digital inspections, e-invoices, inventory, and POS in one integrated platform.'),
-            'hero_cta_text_ar' => $get('landing.hero.cta.text.ar', 'اشترك الآن مجاناً'),
-            'hero_cta_text_en' => $get('landing.hero.cta.text.en', 'Start Your Free Trial Now'),
+            /*
+             * Hero copy.
+             *
+             * The old headline was "مرحباً بك في عصر الإدارة الذكية للورش" /
+             * "Welcome to the Era of Smart Workshop Management" — the
+             * "Welcome to the era of X" construction is the single most
+             * over-used SaaS headline on the internet, and the subtitle
+             * claimed "النظام الأول المعتمد" (the certified #1 system) with
+             * nothing behind it.
+             *
+             * The new copy says what the product does and who it is for.
+             */
+            'hero_title_ar' => $get('landing.hero.title.ar', 'أدر مركز صيانتك بكرت عمل واحد'),
+            'hero_title_en' => $get('landing.hero.title.en', 'Run your workshop on a single work order'),
+            'hero_subtitle_ar' => $get('landing.hero.subtitle.ar', 'من سحب السيارة وحتى تسليمها: الفحص، قطع الغيار، الأجور، والفاتورة الإلكترونية في مكان واحد — مع فروع متعددة ومخزون مستقل لكل فرع.'),
+            'hero_subtitle_en' => $get('landing.hero.subtitle.en', 'From vehicle intake to handover: inspection, parts, labour and e-invoicing in one place — with multiple branches and independent stock per branch.'),
+            'hero_cta_text_ar' => $get('landing.hero.cta.text.ar', 'ابدأ تجربة مجانية'),
+            'hero_cta_text_en' => $get('landing.hero.cta.text.en', 'Start Free Trial'),
 
             // Hero Typed Animation
             'hero_typed_enabled' => $get('landing.hero.typed.enabled', '1') === '1',
-            'hero_typed_prefix_ar' => $get('landing.hero.typed.prefix.ar', 'أدر'),
-            'hero_typed_prefix_en' => $get('landing.hero.typed.prefix.en', 'Elevate'),
-            'hero_typed_suffix_ar' => $get('landing.hero.typed.suffix.ar', 'بذكاء حقيقي'),
-            'hero_typed_suffix_en' => $get('landing.hero.typed.suffix.en', 'With Real Intelligence'),
-            'hero_typed_phrases_ar' => $get('landing.hero.typed.phrases.ar', 'مركزك الآن|أرباحك اليوم|فريقك معك|مستقبلك هنا'),
-            'hero_typed_phrases_en' => $get('landing.hero.typed.phrases.en', 'Your Workshop|Your Revenue|Your Team|Your Future'),
+            'hero_typed_prefix_ar' => $get('landing.hero.typed.prefix.ar', 'من استلام السيارة'),
+            'hero_typed_prefix_en' => $get('landing.hero.typed.prefix.en', 'From intake'),
+            'hero_typed_suffix_ar' => $get('landing.hero.typed.suffix.ar', 'في كرت واحد'),
+            'hero_typed_suffix_en' => $get('landing.hero.typed.suffix.en', 'in one work order'),
+            'hero_typed_phrases_ar' => $get('landing.hero.typed.phrases.ar', 'الفحص والتشخيص|قطع الغيار والأجور|الفاتورة الإلكترونية|تسليم السيارة'),
+            'hero_typed_phrases_en' => $get('landing.hero.typed.phrases.en', 'Inspection & diagnosis|Spare parts & labour|E-invoice|Handing the car back'),
 
-            'features_title_ar' => $get('landing.features.title.ar', 'لماذا نظام Carag هو خيارك الأفضل؟'),
-            'features_title_en' => $get('landing.features.title.en', 'Why Carag is Your Best Choice?'),
-            'features_subtitle_ar' => $get('landing.features.subtitle.ar', 'بنينا النظام خصيصاً ليناسب احتياجات مراكز الصيانة، لنوفر لك أدوات تقنية متطورة تزيد من كفاءة العمل.'),
-            'features_subtitle_en' => $get('landing.features.subtitle.en', 'We built the system specifically for workshop needs, providing advanced tech tools to boost efficiency.'),
+            'features_title_ar' => $get('landing.features.title.ar', 'كل ما يحتاجه مركز الصيانة في نظام واحد'),
+            'features_title_en' => $get('landing.features.title.en', 'Everything a workshop needs, in one system'),
+            'features_subtitle_ar' => $get('landing.features.subtitle.ar', 'أدوات مبنية على طريقة عمل الورش فعلياً: من سحب السيارة والفحص حتى الفاتورة والتقرير الشهري.'),
+            'features_subtitle_en' => $get('landing.features.subtitle.en', 'Built around how workshops actually work: from intake and inspection to invoice and monthly report.'),
 
             'pricing_title_ar' => $get('landing.pricing.title.ar', 'خطط وأسعار مرنة تناسب احتياجاتك'),
             'pricing_title_en' => $get('landing.pricing.title.en', 'Flexible Pricing Plans'),
@@ -187,27 +214,46 @@ class PublicLandingController extends Controller
             // Lists stored as JSON (with rich defaults if empty)
             'banners_list' => $getJson('landing.banners.list', []),
             'features_list' => $getJson('landing.features.list', [
-                ['title_ar' => 'فحص فني رقمي', 'title_en' => 'Digital Inspection', 'desc_ar' => 'نماذج فحص رقمية احترافية مدعومة بالصور وإرسالها للعميل للموافقة.', 'desc_en' => 'Professional digital inspection templates with photos, sent to clients for approval.'],
-                ['title_ar' => 'إدارة شاملة للمخزون', 'title_en' => 'Comprehensive Inventory', 'desc_ar' => 'تتبع قطع الغيار، فواتير المشتريات، وتنبيهات النواقص لحظة بلحظة.', 'desc_en' => 'Track spare parts, purchase invoices, and shortage alerts instantly.'],
-                ['title_ar' => 'فواتير إلكترونية معتمدة', 'title_en' => 'Certified E-Invoices', 'desc_ar' => 'متوافق تماماً مع متطلبات هيئة الزكاة والدخل، مع دعم ضريبة القيمة المضافة.', 'desc_en' => 'Fully compliant with ZATCA requirements, with VAT support.'],
-                ['title_ar' => 'نقاط البيع السريعة', 'title_en' => 'Fast POS', 'desc_ar' => 'شاشة نقاط بيع سريعة لإصدار الفواتير الفورية بخطوات بسيطة.', 'desc_en' => 'Fast POS screen to issue instant invoices with simple steps.'],
+                ['title_ar' => 'كرت عمل واحد لكل سيارة', 'title_en' => 'One work order per vehicle', 'desc_ar' => 'من استلام السيارة حتى تسليمها: فحص، قطع غيار، اجور، وفاتورة — كلها في كرت واحد يعرضه للعميل بالتفصيل.', 'desc_en' => 'From intake to handover: inspection, parts, labour and invoice all live in one work order the customer can follow in detail.'],
+                ['title_ar' => 'مخزون قطع الغيار', 'title_en' => 'Spare parts inventory', 'desc_ar' => 'كل قطعة تدخل أو تخرج من المخزون تُسجَّل تلقائياً مع تنبيه فوري عند بلوغ حد إعادة الطلب.', 'desc_en' => 'Every part moving in or out is recorded automatically, with an immediate alert when it hits its reorder threshold.'],
+                ['title_ar' => 'فوترة إلكترونية متوافقة مع الزكاة والدخل', 'title_en' => 'ZATCA-compliant e-invoicing', 'desc_ar' => 'فواتير بضريبة القيمة المضافة بثلاث مراحل: اشتراطية، مبسطة، وربط مع هيئة الزكاة والدخل.', 'desc_en' => 'VAT invoices across all three phases: standard, simplified, and full ZATCA integration.'],
+                ['title_ar' => 'فروع متعددة بصلاحيات مستقلة', 'title_en' => 'Multiple branches, separate permissions', 'desc_ar' => 'كل فرع له مخزونه وأسعاره ومستخدموه، مع تقارير موحدة على مستوى المنشأة.', 'desc_en' => 'Each branch keeps its own stock, pricing and staff, while the business sees one consolidated set of reports.'],
+                ['title_ar' => 'ساعات عمل محسوبة', 'title_en' => 'Tracked labour hours', 'desc_ar' => 'تسجيل وقت الفني على كل بند في كرت العمل، مع حساب أجر الساعة تلقائياً في الفاتورة.', 'desc_en' => 'Technician time is logged per work-order line, and the hourly charge is calculated into the invoice automatically.'],
+                ['title_ar' => 'تقارير أرباح لكل فرع', 'title_en' => 'Profit reports per branch', 'desc_ar' => 'مقارنة الإيرادات والتكاليف وهوامش الربح لكل فرع ولكل نوع خدمة على فترات محددة.', 'desc_en' => 'Compare revenue, cost and profit margin for every branch and every service type over any period.'],
             ]),
             'faq_list' => $getJson('landing.faq.list', [
-                ['q_ar' => 'هل النظام معتمد من هيئة الزكاة والدخل؟', 'q_en' => 'Is the system ZATCA certified?', 'a_ar' => 'نعم، النظام معتمد بالكامل ويدعم الفوترة الإلكترونية المرحلة الأولى والثانية.', 'a_en' => 'Yes, the system is fully certified and supports e-invoicing phases 1 & 2.'],
+                ['q_ar' => 'هل النظام يدعم الفوترة الإلكترونية؟', 'q_en' => 'Does the system support e-invoicing?', 'a_ar' => 'نعم، النظام مربوط بتهيئة الزكاة والدخل ويدعم مرحلتي الفوترة الإلكترونية، مع إعداد ضريبة القيمة المضافة لكل مركز.', 'a_en' => 'Yes. The system integrates with ZATCA and supports both e-invoicing phases, with per-workshop VAT settings.'],
                 ['q_ar' => 'هل يمكنني إدارة أكثر من فرع؟', 'q_en' => 'Can I manage multiple branches?', 'a_ar' => 'نعم، يدعم النظام إدارة فروع متعددة بصلاحيات منفصلة لكل فرع ومخزون مستقل.', 'a_en' => 'Yes, the system supports managing multiple branches with separate roles and inventory.'],
-                ['q_ar' => 'ماذا يحدث إذا انقطع الإنترنت؟', 'q_en' => 'What if the internet disconnects?', 'a_ar' => 'النظام سحابي ويتطلب اتصال بالإنترنت، ولكننا نستخدم خوادم مستقرة تضمن استمرار العمل.', 'a_en' => 'The system is cloud-based and requires internet, but we use stable servers to ensure uptime.'],
+                ['q_ar' => 'ماذا يحدث إذا انقطع الإنترنت؟', 'q_en' => 'What if the internet disconnects?', 'a_ar' => 'النظام سحابي ويتطلب اتصالاً بالإنترنت. عند انقطاع الاتصال يتم حفظ عملك محلياً في المتصفح حتى عودة الاتصال، دون فقدان بيانات كروت العمل.', 'a_en' => 'The system is cloud-based and requires an internet connection. During an outage your work is kept locally in the browser and synced when the connection returns, with no work-order data lost.'],
+                ['q_ar' => 'كم يستغرق تشغيل النظام في مركزي؟', 'q_en' => 'How long does it take to go live?', 'a_ar' => 'يوم واحد لإدخال السيارات والعملاء، ثم إعداد القوالب والأسعار. التدريب على النظام متاح عن بُعد أو في الموقع حسب الباقة.', 'a_en' => 'One day to import your vehicles and customers, then to configure templates and pricing. Training is available remotely or on-site depending on your plan.'],
             ]),
-            'testimonials_list' => $getJson('landing.testimonials.list', [
-                ['name' => 'AutoCare', 'logo_url' => 'https://upload.wikimedia.org/wikipedia/commons/4/44/BMW.svg'],
-                ['name' => 'SpeedFix', 'logo_url' => 'https://upload.wikimedia.org/wikipedia/commons/a/a1/Volkswagen_Logo_till_1995.svg'],
-                ['name' => 'ProGarage', 'logo_url' => 'https://upload.wikimedia.org/wikipedia/commons/9/90/Mercedes-Logo.svg'],
-                ['name' => 'StarMotors', 'logo_url' => 'https://upload.wikimedia.org/wikipedia/commons/1/12/Suzuki_logo_2.svg'],
-            ]),
+            /*
+             * Client logos.
+             *
+             * The previous defaults pointed at four INVENTED workshops
+             * ("AutoCare", "SpeedFix", "ProGarage", "StarMotors") rendered with
+             * random Wikimedia car logos (BMW, Volkswagen, Mercedes, Suzuki).
+             * That is a false claim to a visitor, and it displayed a
+             * competitor's trademark to make it.
+             *
+             * The list is now empty by default: the section stays hidden
+             * until the operator adds logos of real clients. The landing page
+             * component also filters out any entry missing a name or URL.
+             */
+            'testimonials_list' => $getJson('landing.testimonials.list', []),
+            /*
+             * Stats.
+             *
+             * These used to ship as "+500 workshops / +1M invoices / +100K
+             * clients / 99.9% uptime". None of them were true — the platform
+             * had 4 tenants and 9 work orders. The defaults below describe
+             * what the product does instead of inventing a customer count.
+             */
             'stats_list' => $getJson('landing.stats.list', [
-                ['value' => '+500', 'label_ar' => 'ورشة وصناعية', 'label_en' => 'Workshops'],
-                ['value' => '+1M', 'label_ar' => 'فاتورة مصدرة', 'label_en' => 'Invoices Issued'],
-                ['value' => '+100K', 'label_ar' => 'عميل مسجل', 'label_en' => 'Registered Clients'],
-                ['value' => '%99.9', 'label_ar' => 'استقرار النظام', 'label_en' => 'Uptime'],
+                ['value' => 'ZATCA', 'label_ar' => 'فوترة إلكترونية متكاملة مع هيئة الزكاة والدخل', 'label_en' => 'E-invoicing integrated with ZATCA'],
+                ['value' => 'SAR', 'label_ar' => 'ضريبة القيمة المضافة محسوبة على كل فاتورة', 'label_en' => 'VAT calculated on every invoice'],
+                ['value' => '24/7', 'label_ar' => 'وصول سحابي من أي جهاز أو فرع', 'label_en' => 'Cloud access from any device or branch'],
+                ['value' => '1', 'label_ar' => 'منصة واحدة لإدارة الفروع والمخزون والعملاء', 'label_en' => 'One platform for branches, stock and customers'],
             ]),
             'custom_pages' => $getJson('website.custom.pages', []),
 

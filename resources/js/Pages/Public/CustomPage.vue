@@ -30,7 +30,9 @@ const pageContent = computed(() => {
 });
 
 const siteTitle = computed(() => {
-    return isRtl.value ? props.settings.title_ar || 'Carag' : props.settings.title_en || 'Carag';
+    return isRtl.value
+        ? props.settings.title_ar || 'خدمة برو'
+        : props.settings.title_en || 'Khidmh Pro';
 });
 </script>
 

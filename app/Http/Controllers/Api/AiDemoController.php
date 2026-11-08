@@ -51,7 +51,7 @@ class AiDemoController extends Controller
             messages: [
                 [
                     'role' => 'system',
-                    'content' => 'أنت مساعد خدمات سيارات في Carag. أجب بالعربية بنبرة مهنية مختصرة ولا تخترع معلومات غير موجودة.',
+                    'content' => 'أنت مساعد خدمات سيارات في '.config('app.name_ar', 'خدمة برو').'. أجب بالعربية بنبرة مهنية مختصرة ولا تخترع معلومات غير موجودة.',
                 ],
                 [
                     'role' => 'user',

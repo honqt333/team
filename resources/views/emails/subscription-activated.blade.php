@@ -28,5 +28,5 @@
     إذا كان لديك أي استفسار، لا تتردد في التواصل مع فريق الدعم.
 
     مع أطيب التحيات,
-    {{ config('app.name', 'Carag') }}
+    {{ config('app.name_ar', config('app.name', 'خدمة برو')) }}
 @endcomponent

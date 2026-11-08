@@ -20,7 +20,7 @@ class HelpController extends Controller
         return Inertia::render('Help/Index', [
             'contactSupport' => [
                 'whatsapp' => Setting::get('help.contact.whatsapp', '+966 555 785 658'),
-                'email' => Setting::get('help.contact.email', 'support@carag.sa'),
+                'email' => Setting::get('help.contact.email', env('MAIL_FROM_ADDRESS', 'support@khidmh.pro')),
                 'phone' => Setting::get('help.contact.phone', '920000000'),
                 'hours' => Setting::get('help.contact.hours', 'السبت - الخميس: 8:00 ص - 10:00 م'),
                 'whatsapp_enabled' => Setting::get('help.contact.whatsapp_enabled', '1') === '1',

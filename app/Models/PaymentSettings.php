@@ -188,7 +188,7 @@ class PaymentSettings extends Model
             return $this->company_legal_name_en;
         }
 
-        return $this->company_legal_name ?? config('app.name', 'Carag');
+        return $this->company_legal_name ?? config('app.name_ar', config('app.name', 'خدمة برو'));
     }
 
     /**

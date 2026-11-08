@@ -336,7 +336,7 @@
                                 v-model="form.contact_email"
                                 type="email"
                                 dir="ltr"
-                                placeholder="support@carag.sa"
+                                placeholder="support@khidmh.pro"
                                 class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                             />
                         </div>
@@ -1482,7 +1482,7 @@ const selectedCategoryFilter = ref('all');
 const form = useForm({
     contact_whatsapp: props.settings?.contact_whatsapp || '+966 555 785 658',
     contact_phone: props.settings?.contact_phone || '920000000',
-    contact_email: props.settings?.contact_email || 'support@carag.sa',
+    contact_email: props.settings?.contact_email || 'support@khidmh.pro',
     contact_hours: props.settings?.contact_hours || t('help.support.hours'),
     contact_whatsapp_enabled: props.settings?.contact_whatsapp_enabled !== false,
     contact_ticket_url: props.settings?.contact_ticket_url || '',

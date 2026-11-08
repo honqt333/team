@@ -70,7 +70,7 @@ class SupportHubController extends Controller
         $helpSettings = [
             'contact_whatsapp' => Setting::get('help.contact.whatsapp', '+966 555 785 658'),
             'contact_phone' => Setting::get('help.contact.phone', '920000000'),
-            'contact_email' => Setting::get('help.contact.email', 'support@carag.sa'),
+            'contact_email' => Setting::get('help.contact.email', env('MAIL_FROM_ADDRESS', 'support@khidmh.pro')),
             'contact_hours' => Setting::get('help.contact.hours', 'السبت - الخميس: 8:00 ص - 10:00 م'),
             'contact_whatsapp_enabled' => Setting::get('help.contact.whatsapp_enabled', '1') === '1',
             'contact_ticket_url' => Setting::get('help.contact.ticket_url', ''),

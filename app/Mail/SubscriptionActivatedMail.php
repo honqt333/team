@@ -29,7 +29,7 @@ class SubscriptionActivatedMail extends Mailable
 
     public function envelope(): Envelope
     {
-        $appName = config('app.name', 'Carag');
+        $appName = config('app.name_ar', config('app.name', 'خدمة برو'));
 
         return new Envelope(
             subject: "{$appName} - تم تفعيل اشتراكك بنجاح",
