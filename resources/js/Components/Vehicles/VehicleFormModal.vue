@@ -32,6 +32,7 @@
         <form @submit.prevent="submitForm" class="space-y-5">
             <!-- License Plate Section -->
             <div
+                data-field="plate_number"
                 class="bg-gray-50 dark:bg-gray-900/50 rounded-xl p-4 border border-gray-200 dark:border-gray-700"
             >
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
@@ -65,7 +66,7 @@
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <!-- Make -->
-                    <div>
+                    <div data-field="make_id">
                         <label class="block text-xs text-gray-500 dark:text-gray-400 mb-1">
                             {{ $t('vehicles.form.make') }}
                             <span class="text-red-500">*</span>
@@ -90,7 +91,7 @@
                     </div>
 
                     <!-- Model -->
-                    <div>
+                    <div data-field="model_id">
                         <label class="block text-xs text-gray-500 dark:text-gray-400 mb-1">
                             {{ $t('vehicles.form.model') }}
                         </label>
@@ -134,6 +135,7 @@
                             </label>
                             <input
                                 type="text"
+                                name="make_other"
                                 v-model="form.make_other"
                                 class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-sm focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all"
                                 :class="{ 'border-red-500': form.errors.make_other }"
@@ -145,6 +147,7 @@
                             </label>
                             <input
                                 type="text"
+                                name="model_other"
                                 v-model="form.model_other"
                                 class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-sm focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all"
                             />
@@ -155,6 +158,7 @@
 
             <!-- Customer Section -->
             <div
+                data-field="customer_id"
                 class="bg-gray-50 dark:bg-gray-900/50 rounded-xl p-4 border border-gray-200 dark:border-gray-700"
             >
                 <div class="flex items-center justify-between mb-3">
@@ -229,7 +233,7 @@
 
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
                     <!-- Year -->
-                    <div>
+                    <div data-field="year">
                         <label class="block text-xs text-gray-500 dark:text-gray-400 mb-1">
                             {{ $t('vehicles.form.year') }}
                         </label>
@@ -242,7 +246,7 @@
                     </div>
 
                     <!-- Color -->
-                    <div>
+                    <div data-field="color">
                         <label class="block text-xs text-gray-500 dark:text-gray-400 mb-1">
                             {{ $t('vehicles.form.color') }}
                         </label>
@@ -271,6 +275,7 @@
                         </label>
                         <input
                             type="text"
+                            name="odometer"
                             inputmode="numeric"
                             v-model="form.odometer"
                             @input="
@@ -291,6 +296,7 @@
                     </label>
                     <input
                         type="text"
+                        name="vin"
                         v-model="form.vin"
                         dir="ltr"
                         @input="
@@ -314,6 +320,7 @@
                     {{ $t('vehicles.form.notes') }}
                 </label>
                 <textarea
+                    name="notes"
                     v-model="form.notes"
                     rows="2"
                     class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-teal-500 focus:border-transparent resize-none transition-all"
@@ -322,20 +329,61 @@
         </form>
 
         <template #footer>
-            <button
-                type="button"
-                @click="$emit('close')"
-                class="px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white font-medium transition-colors"
-            >
-                {{ $t('common.cancel') }}
-            </button>
-            <button
-                @click="submitForm"
-                :disabled="form.processing"
-                class="px-5 py-2.5 bg-gradient-to-r from-teal-600 to-cyan-600 text-white rounded-xl font-medium shadow-lg shadow-teal-500/30 hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-            >
-                {{ form.processing ? $t('common.loading') : $t('common.save') }}
-            </button>
+            <div class="flex items-center justify-between w-full">
+                <div>
+                    <span
+                        v-if="Object.keys(form.errors).length > 0"
+                        class="text-xs text-red-500 font-medium inline-flex items-center gap-1.5"
+                    >
+                        <svg class="w-4 h-4 shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                            <path
+                                fill-rule="evenodd"
+                                d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                                clip-rule="evenodd"
+                            />
+                        </svg>
+                        {{
+                            $t('common.form_has_errors', { count: Object.keys(form.errors).length })
+                        }}
+                    </span>
+                </div>
+                <div class="flex items-center gap-3">
+                    <button
+                        type="button"
+                        @click="$emit('close')"
+                        class="px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white font-medium transition-colors"
+                    >
+                        {{ $t('common.cancel') }}
+                    </button>
+                    <button
+                        @click="submitForm"
+                        :disabled="form.processing"
+                        class="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 text-white rounded-xl font-medium shadow-lg shadow-teal-500/30 hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                    >
+                        <svg
+                            v-if="form.processing"
+                            class="w-4 h-4 animate-spin -ml-1 mr-2 text-white"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                        >
+                            <circle
+                                class="opacity-25"
+                                cx="12"
+                                cy="12"
+                                r="10"
+                                stroke="currentColor"
+                                stroke-width="4"
+                            ></circle>
+                            <path
+                                class="opacity-75"
+                                fill="currentColor"
+                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                            ></path>
+                        </svg>
+                        {{ form.processing ? $t('common.loading') : $t('common.save') }}
+                    </button>
+                </div>
+            </div>
         </template>
 
         <!-- Customer Quick-Add Modal -->
@@ -507,6 +555,7 @@ import { ref, computed, watch, onMounted, onUnmounted } from 'vue';
 import { useForm, router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import { useConfirm } from '@/Composables/useConfirm';
+import { useFormScrollToError } from '@/Composables/useFormScrollToError';
 import BaseModal from '@/Components/BaseModal.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 import Tooltip from '@/Components/Tooltip.vue';
@@ -537,6 +586,7 @@ function normalizeArabicNumerals(value) {
 
 const { t } = useI18n();
 const { confirm } = useConfirm();
+const { scrollToError } = useFormScrollToError();
 
 const props = defineProps({
     show: {
@@ -875,6 +925,7 @@ function validate() {
 
 function submitForm() {
     if (!validate()) {
+        scrollToError(form.errors);
         return;
     }
 
@@ -904,6 +955,9 @@ function submitForm() {
             resetForm();
             emit('saved', savedVehicle);
             emit('close');
+        },
+        onError: (errors) => {
+            scrollToError(errors);
         },
     });
 }

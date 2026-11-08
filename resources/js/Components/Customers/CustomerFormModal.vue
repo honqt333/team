@@ -25,7 +25,7 @@
 
         <form @submit.prevent="submitForm" class="space-y-5">
             <!-- Type Selection -->
-            <div>
+            <div data-field="type">
                 <SearchableSelect
                     v-model="form.type"
                     :options="typeOptions"
@@ -50,6 +50,7 @@
                     </label>
                     <input
                         type="text"
+                        name="name"
                         v-model="form.name"
                         class="w-full px-4 py-2.5 border rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:border-transparent transition-all"
                         :class="
@@ -77,6 +78,7 @@
                     </label>
                     <input
                         type="text"
+                        name="contact_name"
                         v-model="form.contact_name"
                         class="w-full px-4 py-2.5 border rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:border-transparent transition-all"
                         :class="
@@ -107,6 +109,7 @@
                         </label>
                         <input
                             type="text"
+                            name="tax_number"
                             v-model="form.tax_number"
                             :placeholder="$t('customers.form.tax_placeholder')"
                             class="w-full px-4 py-2.5 border rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:border-transparent transition-all"
@@ -132,6 +135,7 @@
                         </label>
                         <input
                             type="number"
+                            name="credit_limit"
                             step="0.01"
                             min="0"
                             v-model="form.credit_limit"
@@ -160,6 +164,7 @@
                         <div class="relative">
                             <input
                                 type="number"
+                                name="payment_terms_days"
                                 min="0"
                                 v-model="form.payment_terms_days"
                                 :placeholder="'0'"
@@ -192,22 +197,24 @@
                         {{ $t('customers.form.phone') }}
                         <span class="text-red-500">*</span>
                     </label>
-                    <vue-tel-input
-                        v-model="form.phone"
-                        @on-input="(value) => onPhoneInput('phone', value)"
-                        @blur="checkPhoneExistence"
-                        :inputOptions="{ placeholder: '05xxxxxxxx' }"
-                        mode="international"
-                        :validCharactersOnly="false"
-                        class="w-full text-sm rounded-xl bg-white dark:bg-gray-900 focus-within:ring-2 focus-within:border-transparent transition-all ltr"
-                        :class="
-                            form.errors.phone
-                                ? 'error-border'
-                                : !form.phone
-                                  ? 'required-border'
-                                  : 'border-gray-300 dark:border-gray-600'
-                        "
-                    ></vue-tel-input>
+                    <div data-field="phone">
+                        <vue-tel-input
+                            v-model="form.phone"
+                            @on-input="(value) => onPhoneInput('phone', value)"
+                            @blur="checkPhoneExistence"
+                            :inputOptions="{ placeholder: '05xxxxxxxx' }"
+                            mode="international"
+                            :validCharactersOnly="false"
+                            class="w-full text-sm rounded-xl bg-white dark:bg-gray-900 focus-within:ring-2 focus-within:border-transparent transition-all ltr"
+                            :class="
+                                form.errors.phone
+                                    ? 'error-border'
+                                    : !form.phone
+                                      ? 'required-border'
+                                      : 'border-gray-300 dark:border-gray-600'
+                            "
+                        ></vue-tel-input>
+                    </div>
                     <p
                         v-if="form.errors.phone"
                         class="mt-1.5 text-sm text-red-600 dark:text-red-400"
@@ -234,19 +241,21 @@
                             {{ $t('customers.form.copy_from_phone') }}
                         </button>
                     </div>
-                    <vue-tel-input
-                        v-model="form.whatsapp"
-                        @on-input="(value) => onPhoneInput('whatsapp', value)"
-                        :inputOptions="{ placeholder: '05xxxxxxxx' }"
-                        mode="international"
-                        :validCharactersOnly="false"
-                        class="w-full text-sm rounded-xl bg-white dark:bg-gray-900 focus-within:ring-2 focus-within:border-transparent transition-all ltr"
-                        :class="
-                            form.errors.whatsapp
-                                ? 'error-border'
-                                : 'border-gray-300 dark:border-gray-600'
-                        "
-                    ></vue-tel-input>
+                    <div data-field="whatsapp">
+                        <vue-tel-input
+                            v-model="form.whatsapp"
+                            @on-input="(value) => onPhoneInput('whatsapp', value)"
+                            :inputOptions="{ placeholder: '05xxxxxxxx' }"
+                            mode="international"
+                            :validCharactersOnly="false"
+                            class="w-full text-sm rounded-xl bg-white dark:bg-gray-900 focus-within:ring-2 focus-within:border-transparent transition-all ltr"
+                            :class="
+                                form.errors.whatsapp
+                                    ? 'error-border'
+                                    : 'border-gray-300 dark:border-gray-600'
+                            "
+                        ></vue-tel-input>
+                    </div>
                     <p
                         v-if="form.errors.whatsapp"
                         class="mt-1.5 text-sm text-red-600 dark:text-red-400"
@@ -263,6 +272,7 @@
                     </label>
                     <input
                         type="email"
+                        name="email"
                         v-model="form.email"
                         class="w-full px-4 py-2.5 border rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:border-transparent transition-all"
                         :class="
@@ -322,6 +332,7 @@
                         {{ $t('customers.form.notes') }}
                     </label>
                     <textarea
+                        name="notes"
                         v-model="form.notes"
                         rows="2"
                         class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500 focus:border-transparent resize-none transition-all"
@@ -454,6 +465,7 @@
                                 {{ $t('customers.form.address_line') }}
                             </label>
                             <textarea
+                                name="address_line"
                                 v-model="form.address_line"
                                 rows="2"
                                 :placeholder="$t('customers.form.address_placeholder')"
@@ -469,6 +481,7 @@
                                 </label>
                                 <input
                                     type="text"
+                                    name="building_number"
                                     v-model="form.building_number"
                                     class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
                                 />
@@ -479,6 +492,7 @@
                                 </label>
                                 <input
                                     type="text"
+                                    name="postal_code"
                                     v-model="form.postal_code"
                                     class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
                                 />
@@ -489,6 +503,7 @@
                                 </label>
                                 <input
                                     type="text"
+                                    name="district"
                                     v-model="form.district"
                                     class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
                                 />
@@ -503,6 +518,7 @@
                                 </label>
                                 <input
                                     type="text"
+                                    name="city"
                                     v-model="form.city"
                                     class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
                                 />
@@ -513,6 +529,7 @@
                                 </label>
                                 <input
                                     type="text"
+                                    name="region"
                                     v-model="form.region"
                                     class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
                                 />
@@ -526,6 +543,7 @@
                             </label>
                             <input
                                 type="text"
+                                name="country"
                                 v-model="form.country"
                                 :placeholder="$t('customers.form.country_placeholder')"
                                 class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
@@ -537,20 +555,61 @@
         </form>
 
         <template #footer>
-            <button
-                type="button"
-                @click="$emit('close')"
-                class="px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white font-medium transition-colors"
-            >
-                {{ $t('common.cancel') }}
-            </button>
-            <button
-                @click="submitForm"
-                :disabled="form.processing"
-                class="px-5 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl font-medium shadow-lg shadow-indigo-500/30 hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-            >
-                {{ form.processing ? $t('common.loading') : $t('customers.form.submit') }}
-            </button>
+            <div class="flex items-center justify-between w-full">
+                <div>
+                    <span
+                        v-if="Object.keys(form.errors).length > 0"
+                        class="text-xs text-red-500 font-medium inline-flex items-center gap-1.5"
+                    >
+                        <svg class="w-4 h-4 shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                            <path
+                                fill-rule="evenodd"
+                                d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                                clip-rule="evenodd"
+                            />
+                        </svg>
+                        {{
+                            $t('common.form_has_errors', { count: Object.keys(form.errors).length })
+                        }}
+                    </span>
+                </div>
+                <div class="flex items-center gap-3">
+                    <button
+                        type="button"
+                        @click="$emit('close')"
+                        class="px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white font-medium transition-colors"
+                    >
+                        {{ $t('common.cancel') }}
+                    </button>
+                    <button
+                        @click="submitForm"
+                        :disabled="form.processing"
+                        class="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white rounded-xl font-medium shadow-lg shadow-indigo-500/30 hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                    >
+                        <svg
+                            v-if="form.processing"
+                            class="w-4 h-4 animate-spin -ml-1 mr-2 text-white"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                        >
+                            <circle
+                                class="opacity-25"
+                                cx="12"
+                                cy="12"
+                                r="10"
+                                stroke="currentColor"
+                                stroke-width="4"
+                            ></circle>
+                            <path
+                                class="opacity-75"
+                                fill="currentColor"
+                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                            ></path>
+                        </svg>
+                        {{ form.processing ? $t('common.loading') : $t('customers.form.submit') }}
+                    </button>
+                </div>
+            </div>
         </template>
     </BaseModal>
 
@@ -651,6 +710,7 @@ import { useForm, router, usePage } from '@inertiajs/vue3';
 import axios from 'axios';
 import { useI18n } from 'vue-i18n';
 import { useConfirm } from '@/Composables/useConfirm';
+import { useFormScrollToError } from '@/Composables/useFormScrollToError';
 import BaseModal from '@/Components/BaseModal.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 import L from 'leaflet';
@@ -677,6 +737,7 @@ const props = defineProps({
 
 const emit = defineEmits(['close', 'saved']);
 const { t, locale } = useI18n(); // Access t function and current locale
+const { scrollToError } = useFormScrollToError();
 const page = usePage();
 
 const duplicateCustomer = ref(null);
@@ -1228,6 +1289,7 @@ function submitForm() {
         !/^\d{15}$/.test(form.tax_number.trim())
     ) {
         form.setError('tax_number', t('validation.tax_number_invalid'));
+        scrollToError({ tax_number: t('validation.tax_number_invalid') });
         return;
     }
 
@@ -1246,6 +1308,9 @@ function submitForm() {
             form.reset();
             emit('saved', savedCustomer);
             emit('close');
+        },
+        onError: (errors) => {
+            scrollToError(errors);
         },
     });
 }
