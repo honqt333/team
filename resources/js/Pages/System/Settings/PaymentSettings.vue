@@ -605,15 +605,65 @@
                     </div>
                 </div>
 
-                <!-- Submit -->
-                <div class="flex justify-end">
-                    <button type="submit" :disabled="form.processing" class="btn-primary">
-                        {{
-                            form.processing
-                                ? t('system.payment_settings.actions.saving')
-                                : t('system.payment_settings.actions.save')
-                        }}
-                    </button>
+                <!-- Sticky Action Bar for Payment Settings -->
+                <div
+                    class="sticky bottom-0 z-20 mt-8 -mx-4 sm:-mx-6 lg:-mx-8 -mb-6 p-4 bg-white/95 dark:bg-gray-800/95 backdrop-blur-md border-t border-gray-200 dark:border-gray-700 flex items-center justify-between gap-4 flex-wrap rounded-b-2xl shadow-lg"
+                >
+                    <div>
+                        <span
+                            v-if="Object.keys(form.errors).length > 0"
+                            class="text-xs text-red-500 font-medium inline-flex items-center gap-1.5"
+                        >
+                            <svg class="w-4 h-4 shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                <path
+                                    fill-rule="evenodd"
+                                    d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                                    clip-rule="evenodd"
+                                />
+                            </svg>
+                            {{
+                                $t('common.form_has_errors', {
+                                    count: Object.keys(form.errors).length,
+                                })
+                            }}
+                        </span>
+                        <span v-else class="text-xs text-gray-400 dark:text-gray-500">
+                            {{ t('system.payment_settings.subtitle') }}
+                        </span>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <button
+                            type="submit"
+                            :disabled="form.processing"
+                            class="inline-flex items-center gap-2 px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm rounded-xl transition-all shadow-md shadow-indigo-500/20 active:scale-95 disabled:opacity-50"
+                        >
+                            <svg
+                                v-if="form.processing"
+                                class="w-4 h-4 animate-spin -ml-1 mr-2 text-white"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                            >
+                                <circle
+                                    class="opacity-25"
+                                    cx="12"
+                                    cy="12"
+                                    r="10"
+                                    stroke="currentColor"
+                                    stroke-width="4"
+                                ></circle>
+                                <path
+                                    class="opacity-75"
+                                    fill="currentColor"
+                                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                                ></path>
+                            </svg>
+                            {{
+                                form.processing
+                                    ? t('system.payment_settings.actions.saving')
+                                    : t('system.payment_settings.actions.save')
+                            }}
+                        </button>
+                    </div>
                 </div>
             </form>
         </div>
@@ -627,8 +677,10 @@ import { useI18n } from 'vue-i18n';
 import SystemLayout from '@/Layouts/SystemLayout.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 import PageHeader from '@/Components/PageHeader.vue';
+import { useFormScrollToError } from '@/Composables/useFormScrollToError';
 
 const { t } = useI18n();
+const { scrollToError } = useFormScrollToError();
 
 const props = defineProps({
     settings: Object,
@@ -704,6 +756,11 @@ const removeBankAccount = (index) => {
 };
 
 const submit = () => {
-    form.put('/system/settings/payment');
+    form.put('/system/settings/payment', {
+        preserveScroll: true,
+        onError: (errors) => {
+            scrollToError(errors);
+        },
+    });
 };
 </script>
