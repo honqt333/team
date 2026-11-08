@@ -6265,6 +6265,7 @@
             "saving": "Saving...",
             "save_error": "An error occurred while saving settings",
             "unsaved_changes": "You have unsaved changes",
+            "save_all_hint": "All settings are up to date",
             "upload_error": "Upload failed. Please check file size and type",
             "uploading": "Uploading...",
             "live": "Live",

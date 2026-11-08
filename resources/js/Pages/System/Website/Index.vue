@@ -536,11 +536,10 @@ watch(
                             <span class="truncate font-medium">
                                 {{
                                     hasChanges
-                                        ? t('system.website.unsaved_changes') ||
-                                          'يوجد تعديلات غير محفوظة'
+                                        ? t('system.website.unsaved_changes')
                                         : saveStatus === 'saved'
-                                          ? t('system.website.saved') || 'تم حفظ التعديلات بنجاح'
-                                          : t('system.website.save_all_hint') || 'جاهز للحفظ'
+                                          ? t('system.website.saved')
+                                          : t('system.website.save_all_hint')
                                 }}
                             </span>
                         </div>

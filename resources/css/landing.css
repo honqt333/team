@@ -1,96 +1,10 @@
 /*
- * Self-hosted fonts.
- *
- * The page used to pull Cairo (7 weights) + Outfit (7 weights) from Google
- * Fonts — 14 font files, render-blocking, from a third-party origin. It now
- * loads IBM Plex Sans Arabic (the font the rest of the app already uses,
- * per tailwind.config.js) with 4 weights, self-hosted, split into an Arabic
- * and a Latin subset so each page only downloads the script it needs.
+ * Fonts are loaded globally from /css/fonts.css (see app.blade.php), which
+ * serves the self-hosted IBM Plex Sans Arabic with an Arabic and a Latin
+ * subset. They are NOT re-declared here: the landing stylesheet is bundled
+ * with the page chunk, and duplicating the @font-face rules would make the
+ * browser fetch the same files twice.
  */
-
-@font-face {
-    font-family: 'IBM Plex Sans Arabic';
-    font-style: normal;
-    font-weight: 400;
-    font-display: swap;
-    src: url('/fonts/ibm-plex-sans-arabic-arabic-400.woff2') format('woff2');
-    unicode-range: U+0600-06FF, U+0750-077F, U+0870-088E, U+0890-0891, U+0898-08E1,
-        U+08E3-08FF, U+200C-200E, U+2010-2011, U+204F, U+2E41, U+FB50-FDFF, U+FE70-FEFF;
-}
-
-@font-face {
-    font-family: 'IBM Plex Sans Arabic';
-    font-style: normal;
-    font-weight: 400;
-    font-display: swap;
-    src: url('/fonts/ibm-plex-sans-arabic-latin-400.woff2') format('woff2');
-    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
-        U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193,
-        U+2212, U+2215, U+FEFF, U+FFFD;
-}
-
-@font-face {
-    font-family: 'IBM Plex Sans Arabic';
-    font-style: normal;
-    font-weight: 500;
-    font-display: swap;
-    src: url('/fonts/ibm-plex-sans-arabic-arabic-500.woff2') format('woff2');
-    unicode-range: U+0600-06FF, U+0750-077F, U+0870-088E, U+0890-0891, U+0898-08E1,
-        U+08E3-08FF, U+200C-200E, U+2010-2011, U+204F, U+2E41, U+FB50-FDFF, U+FE70-FEFF;
-}
-
-@font-face {
-    font-family: 'IBM Plex Sans Arabic';
-    font-style: normal;
-    font-weight: 500;
-    font-display: swap;
-    src: url('/fonts/ibm-plex-sans-arabic-latin-500.woff2') format('woff2');
-    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
-        U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193,
-        U+2212, U+2215, U+FEFF, U+FFFD;
-}
-
-@font-face {
-    font-family: 'IBM Plex Sans Arabic';
-    font-style: normal;
-    font-weight: 600;
-    font-display: swap;
-    src: url('/fonts/ibm-plex-sans-arabic-arabic-600.woff2') format('woff2');
-    unicode-range: U+0600-06FF, U+0750-077F, U+0870-088E, U+0890-0891, U+0898-08E1,
-        U+08E3-08FF, U+200C-200E, U+2010-2011, U+204F, U+2E41, U+FB50-FDFF, U+FE70-FEFF;
-}
-
-@font-face {
-    font-family: 'IBM Plex Sans Arabic';
-    font-style: normal;
-    font-weight: 600;
-    font-display: swap;
-    src: url('/fonts/ibm-plex-sans-arabic-latin-600.woff2') format('woff2');
-    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
-        U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193,
-        U+2212, U+2215, U+FEFF, U+FFFD;
-}
-
-@font-face {
-    font-family: 'IBM Plex Sans Arabic';
-    font-style: normal;
-    font-weight: 700;
-    font-display: swap;
-    src: url('/fonts/ibm-plex-sans-arabic-arabic-700.woff2') format('woff2');
-    unicode-range: U+0600-06FF, U+0750-077F, U+0870-088E, U+0890-0891, U+0898-08E1,
-        U+08E3-08FF, U+200C-200E, U+2010-2011, U+204F, U+2E41, U+FB50-FDFF, U+FE70-FEFF;
-}
-
-@font-face {
-    font-family: 'IBM Plex Sans Arabic';
-    font-style: normal;
-    font-weight: 700;
-    font-display: swap;
-    src: url('/fonts/ibm-plex-sans-arabic-latin-700.woff2') format('woff2');
-    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
-        U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193,
-        U+2212, U+2215, U+FEFF, U+FFFD;
-}
 
 *,
 *::before,
@@ -132,6 +46,13 @@ html {
     --border: rgba(255, 255, 255, 0.07);
     --card: rgba(255, 255, 255, 0.04);
     --glass: rgba(10, 10, 20, 0.8);
+    /*
+     * Lightened brand tint for small text on the near-black background.
+     * #a5b4fc on #050508 = 9.4:1, comfortably above the 4.5:1 requirement.
+     */
+    --primary-heading: #a5b4fc;
+    /* Green tick on the near-black background: 11.2:1. */
+    --accent-check: #34d399;
 }
 
 [data-theme='light'] {
@@ -139,24 +60,33 @@ html {
     --bg2: #f1f5f9;
     --text: #0f172a;
     --text2: #55617a;
-    --text3: #6b7688;
+    --text3: #687384;
     --border: rgba(0, 0, 0, 0.08);
     --card: #fff;
     --glass: rgba(255, 255, 255, 0.85);
+    /*
+     * Darkened brand tint for small text on the near-white background.
+     * #4338ca on #fafafa = 7.1:1.
+     */
+    --primary-heading: #4338ca;
+    /* Darkened green on the near-white background: 5.1:1. */
+    --accent-check: #047857;
 }
 
 .lp-root {
     /*
-     * `--primary` and `--primary-rgb` are injected inline by the page
-     * component from the CMS colour setting.
+     * `--primary` is injected inline by the page component from the CMS
+     * colour setting.
      *
-     * `--primary-heading` is the ACCESSIBLE variant of the brand colour, used
-     * for small text on the page background. The raw brand colour (#4f46e5)
-     * only reaches 3.23:1 on the dark background, which fails WCAG AA for
-     * text below 18.66px. This tint keeps the hue recognisable and clears
-     * 4.5:1.
+     * `--primary-heading` is the ACCESSIBLE variant of the brand colour,
+     * used for small text (footer headings, links). The raw brand colour
+     * (#4f46e5) only reaches 3.23:1 on the dark background and 5.9:1 on the
+     * light one, so neither value works for both themes.
+     *
+     * The dark theme needs a LIGHTER tint (the background is near-black) and
+     * the light theme needs a DARKER one (the background is near-white), so
+     * the two themes define their own value rather than sharing a formula.
      */
-    --primary-heading: color-mix(in srgb, var(--primary) 62%, #ffffff);
     background: var(--bg);
     color: var(--text);
     min-height: 100vh;
@@ -259,12 +189,22 @@ html {
     gap: 2rem;
 }
 
+@media (max-width: 640px) {
+    .lp-nav {
+        gap: 0.75rem;
+        padding: 0 1rem;
+    }
+}
+
 .lp-logo {
     display: flex;
     align-items: center;
     gap: 0.75rem;
     text-decoration: none;
     color: var(--text);
+    /* The logo must never push the nav actions off a narrow screen. */
+    min-width: 0;
+    flex-shrink: 1;
 }
 
 .logo-mark {
@@ -292,6 +232,10 @@ html {
     font-size: 1.25rem;
     font-weight: 800;
     letter-spacing: -0.02em;
+    /* The brand name must not wrap onto three lines on a 390px screen. */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .logo-name em {
@@ -505,7 +449,7 @@ html {
 .hero {
     position: relative;
     z-index: 10;
-    padding: 10rem 1.5rem 6rem;
+    padding: 7rem 1.5rem 5rem;
     max-width: 1280px;
     margin: 0 auto;
 }
@@ -520,9 +464,13 @@ html {
 @media (max-width: 1024px) {
     .hero-inner {
         grid-template-columns: 1fr;
-        gap: 4rem;
+        gap: 3rem;
     }
 
+    /*
+     * Put the product banner / image FIRST on tablet and mobile and live preview
+     * (`order: -1`), so the visitor sees the artwork at the top of the interface.
+     */
     .hero-visual {
         order: -1;
     }
@@ -542,7 +490,7 @@ html {
     border-radius: 9999px;
     background: rgba(var(--primary-rgb), 0.1);
     border: 1px solid rgba(var(--primary-rgb), 0.25);
-    color: #818cf8;
+    color: var(--primary-heading);
     font-size: 0.8rem;
     font-weight: 700;
     letter-spacing: 0.05em;
@@ -571,13 +519,21 @@ html {
 }
 
 .hero-h1 {
-    font-size: clamp(3rem, 6vw, 5rem);
-    font-weight: 900;
-    line-height: 1;
-    letter-spacing: -0.04em;
+    /*
+     * The old scale was clamp(3rem, 6vw, 5rem) at font-weight 900. At 1440px
+     * that is 86px, which pushed even a short headline onto four lines and
+     * made the hero read like a landing-page template rather than a product
+     * page. The headline is now sized to read as a headline, and the rotating
+     * line below it is deliberately smaller so the hierarchy is clear.
+     */
+    font-size: clamp(2.25rem, 3.6vw, 3.5rem);
+    font-weight: 800;
+    line-height: 1.12;
+    letter-spacing: -0.03em;
     display: flex;
     flex-direction: column;
     gap: 0.15em;
+    margin-bottom: 1rem;
 }
 
 .grad-text {
@@ -595,14 +551,16 @@ html {
 }
 
 .typed-line {
-    font-size: clamp(2rem, 4vw, 3.5rem);
-    font-weight: 900;
-    line-height: 1.2;
-    letter-spacing: -0.04em;
-    min-height: 1.2em;
+    /* Smaller than the headline — it is a supporting line, not a second H1. */
+    font-size: clamp(1.35rem, 2.2vw, 2rem);
+    font-weight: 700;
+    line-height: 1.3;
+    letter-spacing: -0.02em;
+    min-height: 1.3em;
     display: flex;
     flex-wrap: wrap;
     gap: 0.35em;
+    margin-bottom: 1.25rem;
 }
 
 .typed-prefix {
@@ -742,7 +700,12 @@ html {
 }
 
 .trust-check {
-    color: #34d399;
+    /*
+     * The green tick was a fixed #34d399, which is 2.13:1 on the light
+     * background (#fafafa) and fails WCAG AA. The theme tokens below carry a
+     * green that clears 4.5:1 on both backgrounds.
+     */
+    color: var(--accent-check);
     font-weight: 700;
 }
 
@@ -843,10 +806,12 @@ html {
 }
 
 .section-h2 {
-    font-size: clamp(2rem, 5vw, 3.5rem);
-    font-weight: 900;
-    letter-spacing: -0.04em;
-    line-height: 1.05;
+    /* Same reasoning as .hero-h1 — the old clamp pushed a two-word heading
+       onto three lines at desktop width. */
+    font-size: clamp(1.75rem, 3vw, 2.5rem);
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1.2;
     margin-bottom: 1rem;
 }
 
@@ -1010,7 +975,7 @@ html {
 .save-badge {
     font-size: 0.7rem;
     background: rgba(10, 185, 129, 0.15);
-    color: #10b981;
+    color: var(--accent-check);
     padding: 0.2rem 0.5rem;
     border-radius: 6px;
     font-style: normal;
@@ -1446,8 +1411,15 @@ html {
     padding-top: 2rem;
     text-align: center;
     font-size: 0.8rem;
-    color: var(--text2);
-    opacity: 0.5;
+    /*
+     * ACCESSIBILITY: this used to be `color: var(--text2); opacity: 0.5`.
+     * The opacity applies to the rendered pixel colour, so the text landed
+     * at 2.13:1 — well under the 4.5:1 requirement for 12.8px text.
+     *
+     * A muted colour token gives the same visual weight without touching
+     * the contrast ratio.
+     */
+    color: var(--text3);
 }
 
 .sr {
@@ -1458,6 +1430,22 @@ html {
         transform 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
     transition-delay: var(--d, 0ms);
     will-change: transform, opacity;
+}
+
+/*
+ * No-JavaScript fallback.
+ *
+ * The scroll-reveal sets `opacity: 0` and relies on an IntersectionObserver
+ * to add `.is-visible`. If JavaScript fails to load, or the observer never
+ * fires, EVERY section below the fold stays invisible — the page looks
+ * empty and the content is unreachable.
+ *
+ * A `<noscript>` block in the page head flips this class on, so the content
+ * is always readable.
+ */
+.no-js .sr {
+    opacity: 1;
+    transform: none;
 }
 
 .sr.is-visible {
@@ -1682,6 +1670,22 @@ html {
 }
 
 @media (max-width: 640px) {
+    /*
+     * The brand name is long ("Car Workshop Management System"). On a 390px
+     * screen it pushed the header to three lines, so it is shortened on
+     * small screens rather than allowed to wrap.
+     */
+    .logo-name {
+        font-size: 0.95rem;
+        max-width: 34vw;
+    }
+
+    .logo-mark {
+        width: 38px;
+        height: 38px;
+        border-radius: 12px;
+    }
+
     .nav-actions .btn-ghost-sm,
     .nav-actions .btn-primary-sm {
         display: none;
@@ -1831,4 +1835,64 @@ html {
     outline: 2px solid var(--primary-heading);
     outline-offset: 3px;
     border-radius: 4px;
+}
+
+/* ============================================
+   "How it works" timeline
+   ============================================ */
+.how-section {
+    background: rgba(255, 255, 255, 0.015);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+}
+
+.how-steps {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+    list-style: none;
+    padding: 0;
+    margin-top: 3rem;
+    counter-reset: how-step;
+}
+
+.how-step {
+    position: relative;
+    padding: 2rem 1.75rem;
+    border-radius: 18px;
+    background: var(--card);
+    border: 1px solid var(--border);
+}
+
+.how-num {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: 50%;
+    background: rgba(var(--primary-rgb), 0.14);
+    color: var(--primary-heading);
+    font-weight: 800;
+    font-size: 0.95rem;
+    margin-bottom: 1.25rem;
+}
+
+.how-title {
+    font-size: 1.15rem;
+    font-weight: 700;
+    margin-bottom: 0.625rem;
+}
+
+.how-body {
+    color: var(--text2);
+    font-size: 0.95rem;
+    line-height: 1.75;
+}
+
+@media (max-width: 900px) {
+    .how-steps {
+        grid-template-columns: 1fr;
+        gap: 1.25rem;
+    }
 }
