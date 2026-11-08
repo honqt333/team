@@ -157,6 +157,11 @@ export const MISSING_KEYS = {
     'nav.groups.finance': { ar: 'المالية والفواتير', en: 'Finance and invoices' },
     'nav.groups.reports': { ar: 'التقارير', en: 'Reports' },
     'nav.inventory': { ar: 'المستودع وقطع الغيار', en: 'Warehouse and parts' },
+
+    'tenant_site.admin.auto_apply_hint': {
+        ar: 'جميع التعديلات يتم حفظها وتطبيقها فوراً على الموقع العام',
+        en: 'Every change is saved and applied to the public site immediately',
+    },
 };
 
 export default MISSING_KEYS;

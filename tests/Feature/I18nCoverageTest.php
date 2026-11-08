@@ -47,13 +47,24 @@ class I18nCoverageTest extends TestCase
         // sources by default (see the --source option: php|vue|both).
         // The real number is 13, and it is identical in both locales.
         //
-        // The 13 remaining keys are genuine and are tracked in
-        // PROJECT_TRANSLATION_AUDIT.md §3. They are real gaps
-        // (5 payment error messages, the SMS OTP body, the secure
-        // payment note, and 6 secondary labels) — the count is a
-        // ceiling that must not grow.
-        'ar' => 13,
-        'en' => 13,
+        // The 13 remaining keys were genuine gaps, tracked in
+        // PROJECT_TRANSLATION_AUDIT.md §3 (5 payment error messages,
+        // the SMS OTP body, the secure payment note, and 6 secondary
+        // labels).
+        //
+        // They were closed on 2026-11-08 along with the 79 keys the
+        // credit hubs, the support hub, the command palette and the
+        // print settings referenced without ever adding them. The
+        // ceiling is now ZERO.
+        //
+        // Why zero and not thirteen: a key that is missing from BOTH
+        // ar.json and en.json is not a fallback. vue-i18n renders the
+        // key itself, so the user read `nav.groups.crm` in the middle
+        // of a table. A ceiling of 13 would have let the next screen
+        // ship the same way, so the number is pinned to zero and a
+        // new gap fails the build on the spot.
+        'ar' => 0,
+        'en' => 0,
     ];
 
     public function test_no_new_missing_translation_keys_in_arabic(): void
