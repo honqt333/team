@@ -1159,18 +1159,15 @@ Route::prefix('system')->middleware(['auth:web,admin', 'system.admin'])->group(f
     // fetches all the headline numbers in one round-trip; topPlans
     // and paymentMix are separate JSON endpoints so the front end
     // can lazy-load the chart data after the KPI cards render.
+    Route::get('/analytics', [AnalyticsController::class, 'index'])->name('system.analytics.index')->middleware('system.permission:system.invoices.view');
     Route::get('/analytics/kpis', [AnalyticsController::class, 'kpis'])->name('system.analytics.kpis')->middleware('system.permission:system.invoices.view');
     Route::get('/analytics/top-plans', [AnalyticsController::class, 'topPlans'])->name('system.analytics.top-plans')->middleware('system.permission:system.plans.manage');
     Route::get('/analytics/payment-mix', [AnalyticsController::class, 'paymentMix'])->name('system.analytics.payment-mix')->middleware('system.permission:system.invoices.view');
     Route::get('/analytics/cohort-retention', [AnalyticsController::class, 'cohortRetention'])->name('system.analytics.cohort-retention')->middleware('system.permission:system.subscriptions.view');
     Route::get('/analytics/tenants/{tenant}/health-trend', [AnalyticsController::class, 'tenantHealthTrend'])->name('system.analytics.tenant-health-trend')->middleware('system.permission:system.tenants.view');
 
-    // Phase 5 — Reports page (entry point for the 3 export buttons).
-    // The page itself is just a UI — the actual downloads live on
-    // /system/reports/* and stream the file directly.
-    Route::get('/analytics/reports', function () {
-        return Inertia::render('System/Analytics/Reports');
-    })->name('system.analytics.reports')->middleware('system.permission:system.invoices.view');
+    // Phase 5 — Reports page (redirects to unified Analytics Hub)
+    Route::get('/analytics/reports', fn () => redirect()->route('system.analytics.index', ['tab' => 'reports']))->name('system.analytics.reports')->middleware('system.permission:system.invoices.view');
 
     // Phase 5 — Reports & exports. Each route streams a download —
     // .xlsx for full exports, .csv for streaming-friendly aging report.

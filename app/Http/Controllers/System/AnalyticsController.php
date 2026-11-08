@@ -32,6 +32,44 @@ use Inertia\Response;
 class AnalyticsController extends Controller
 {
     /**
+     * Unified Analytics & Reports Hub.
+     */
+    public function index(Request $request): Response
+    {
+        $tab = $request->query('tab', 'kpis');
+
+        if (! in_array($tab, ['kpis', 'reports'], true)) {
+            $tab = 'kpis';
+        }
+
+        $now = now();
+        $thirtyDaysAgo = $now->copy()->subDays(30);
+        $startOfMonth = $now->copy()->startOfMonth();
+        $lastMonth = $now->copy()->subMonth();
+        $startOfLastMonth = $lastMonth->copy()->startOfMonth();
+
+        $kpis = [
+            'mrr' => $this->computeMrr(),
+            'churn_rate' => $this->computeChurnRate($startOfMonth, $now),
+            'new_tenants_30d' => Tenant::where('created_at', '>=', $thirtyDaysAgo)->count(),
+            'outstanding_receivables' => SubscriptionInvoice::whereIn(
+                'status',
+                ['pending', 'pending_payment', 'overdue']
+            )->sum('total'),
+            'trial_tenants' => Tenant::where('status', 'trial')->count(),
+            'churn_last_month' => $this->computeChurnRate(
+                $startOfLastMonth,
+                $startOfMonth
+            ),
+        ];
+
+        return Inertia::render('System/Analytics/AnalyticsHub', [
+            'tab' => $tab,
+            'kpis' => $kpis,
+        ]);
+    }
+
+    /**
      * 6 headline KPIs for the dashboard.
      * One endpoint, one SELECT bundle — keeps the dashboard mount
      * round-trip count to a minimum.

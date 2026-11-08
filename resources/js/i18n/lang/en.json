@@ -6927,7 +6927,13 @@
             "near-term_mrr_signal": "Near-term MRR signal",
             "last_month_churn": "Last month churn",
             "for_comparison_with_current_month": "For comparison with current month",
-            "mrr_label": "MRR"
+            "mrr_label": "MRR",
+            "hub_title": "Analytics & Reports",
+            "hub_subtitle": "Real-time KPIs, growth and collection metrics, and financial exports",
+            "tabs": {
+                "kpis": "Live KPIs",
+                "reports": "Reports & Exports"
+            }
         },
         "communication": {
             "templates_subtitle": "Manage and customise the email templates and the automated system notifications.",
