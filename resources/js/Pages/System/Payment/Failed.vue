@@ -1,6 +1,6 @@
 <template>
     <SystemLayout>
-        <div class="max-w-xl mx-auto py-12 text-center">
+        <div class="max-w-xl mx-auto py-6 text-center">
             <!-- Failed Icon -->
             <div
                 class="w-20 h-20 mx-auto bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center mb-6"

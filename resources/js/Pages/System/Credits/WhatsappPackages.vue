@@ -3,22 +3,47 @@
         <Head :title="$t('system.credits.whatsapp_packages_title')" />
         <div class="space-y-6">
             <!-- Header -->
-            <div class="flex items-center justify-between">
-                <div>
-                    <h1 class="text-2xl font-bold text-gray-900 dark:text-white">
-                        {{ $t('system.credits.whatsapp_credit_packages') }}
-                    </h1>
-                    <p class="text-gray-500 dark:text-gray-400">
-                        {{ $t('system.credits.manage_the_whatsapp_packages_available_for_purch') }}
-                    </p>
-                </div>
-                <button
-                    @click="showAddModal = true"
-                    class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-sm font-medium"
-                >
-                    {{ $t('system.credits.add_package_2') }}
-                </button>
-            </div>
+            <PageHeader
+                :title="$t('system.credits.whatsapp_credit_packages')"
+                :subtitle="$t('system.credits.manage_the_whatsapp_packages_available_for_purch')"
+                :totalCount="packages ? packages.length : null"
+                :countLabel="$t('system.credits.package')"
+                gradientFrom="from-emerald-600"
+                gradientTo="to-teal-600"
+                glowFrom="from-emerald-500"
+                glowTo="to-teal-600"
+                badgeBg="bg-emerald-50/70 dark:bg-emerald-950/40"
+                badgeText="text-emerald-600 dark:text-emerald-400"
+                badgeBorder="border-emerald-200/50 dark:border-emerald-800/40"
+                badgeDot="bg-emerald-500"
+            >
+                <template #icon>
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
+                        />
+                    </svg>
+                </template>
+                <template #actions>
+                    <button
+                        @click="showAddModal = true"
+                        class="inline-flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white rounded-xl text-sm font-semibold transition-all shadow-md hover:shadow-emerald-500/25 active:scale-95"
+                    >
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M12 4v16m8-8H4"
+                            />
+                        </svg>
+                        {{ $t('system.credits.add_package_2') }}
+                    </button>
+                </template>
+            </PageHeader>
 
             <!-- Navigation Tabs -->
             <div class="flex gap-2 border-b border-gray-200 dark:border-gray-700">
@@ -289,6 +314,7 @@ const { t } = useI18n();
 import { ref } from 'vue';
 import { Head, Link, router, useForm } from '@inertiajs/vue3';
 import SystemLayout from '@/Layouts/SystemLayout.vue';
+import PageHeader from '@/Components/PageHeader.vue';
 
 const props = defineProps({ packages: Array });
 

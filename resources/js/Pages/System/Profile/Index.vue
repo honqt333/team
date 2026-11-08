@@ -5,6 +5,7 @@ const { t } = useI18n();
 import { ref, computed } from 'vue';
 import { useForm, usePage, router } from '@inertiajs/vue3';
 import SystemLayout from '@/Layouts/SystemLayout.vue';
+import PageHeader from '@/Components/PageHeader.vue';
 import { useToast } from '@/Composables/useToast';
 
 const { success } = useToast();
@@ -100,39 +101,34 @@ const regenerateCodes = () =>
     <SystemLayout>
         <div class="max-w-4xl mx-auto space-y-6">
             <!-- Header -->
-            <div
-                class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-200 dark:border-gray-700"
-            >
-                <div class="flex items-center gap-4">
-                    <div
-                        class="w-16 h-16 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white text-2xl font-bold shadow-lg"
-                    >
+            <PageHeader :title="admin.name" :subtitle="admin.email">
+                <template #icon>
+                    <span class="text-xl font-bold">
                         {{ admin.name?.charAt(0).toUpperCase() }}
-                    </div>
-                    <div>
-                        <h1 class="text-2xl font-bold text-gray-900 dark:text-white">
-                            {{ admin.name }}
-                        </h1>
-                        <p class="text-sm text-gray-500 dark:text-gray-400">{{ admin.email }}</p>
-                        <span
-                            :class="{
-                                'bg-purple-100 text-purple-700': admin.role === 'super_admin',
-                                'bg-blue-100 text-blue-700': admin.role === 'admin',
-                                'bg-gray-100 text-gray-700': admin.role === 'support',
-                            }"
-                            class="mt-1 inline-block px-2 py-1 rounded-full text-xs"
-                        >
-                            {{
-                                {
-                                    super_admin: $t('system.profile.system_admin'),
-                                    admin: $t('system.profile.admin'),
-                                    support: $t('system.profile.support'),
-                                }[admin.role]
-                            }}
-                        </span>
-                    </div>
-                </div>
-            </div>
+                    </span>
+                </template>
+                <template #badge>
+                    <span
+                        :class="{
+                            'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300 border-purple-200 dark:border-purple-800':
+                                admin.role === 'super_admin',
+                            'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 border-blue-200 dark:border-blue-800':
+                                admin.role === 'admin',
+                            'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300 border-gray-200 dark:border-gray-700':
+                                admin.role === 'support',
+                        }"
+                        class="inline-block px-2.5 py-0.5 rounded-full text-xs font-semibold border"
+                    >
+                        {{
+                            {
+                                super_admin: $t('system.profile.system_admin'),
+                                admin: $t('system.profile.admin'),
+                                support: $t('system.profile.support'),
+                            }[admin.role]
+                        }}
+                    </span>
+                </template>
+            </PageHeader>
 
             <!-- Tabs -->
             <div

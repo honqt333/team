@@ -2,25 +2,40 @@
     <SystemLayout>
         <Head :title="$t('system.announcements.create')" />
 
-        <div class="max-w-2xl mx-auto space-y-6">
-            <div class="flex items-center gap-4">
-                <Link
-                    :href="route('system.announcements.index')"
-                    class="text-gray-500 hover:text-gray-700 rtl:rotate-180"
-                >
+        <div class="max-w-4xl mx-auto space-y-6">
+            <PageHeader :title="$t('system.announcements.create_title')">
+                <template #back>
+                    <Link
+                        :href="route('system.announcements.index')"
+                        class="p-2 rounded-xl text-gray-400 hover:text-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                        :title="$t('common.back')"
+                    >
+                        <svg
+                            class="w-5 h-5 rtl:rotate-180"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M10 19l-7-7m0 0l7-7m-7 7h18"
+                            />
+                        </svg>
+                    </Link>
+                </template>
+                <template #icon>
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path
                             stroke-linecap="round"
                             stroke-linejoin="round"
                             stroke-width="2"
-                            d="M15 19l-7-7 7-7"
+                            d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z"
                         />
                     </svg>
-                </Link>
-                <h1 class="text-2xl font-bold text-gray-900 dark:text-white">
-                    {{ $t('system.announcements.create_title') }}
-                </h1>
-            </div>
+                </template>
+            </PageHeader>
 
             <div
                 class="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700"
@@ -186,6 +201,7 @@ const { t } = useI18n();
 import { computed } from 'vue';
 import { Head, Link, useForm } from '@inertiajs/vue3';
 import SystemLayout from '@/Layouts/SystemLayout.vue';
+import PageHeader from '@/Components/PageHeader.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 
 const props = defineProps({

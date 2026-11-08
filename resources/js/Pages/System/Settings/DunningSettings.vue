@@ -10,22 +10,29 @@
 
         <div class="space-y-6">
             <!-- Header -->
-            <div>
-                <h1 class="text-2xl font-bold text-gray-900 dark:text-white">
-                    {{
-                        isAr
-                            ? $t('system.settings.dunning_automation_settings')
-                            : 'Dunning Automation Settings'
-                    }}
-                </h1>
-                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                    {{
-                        isAr
-                            ? $t('system.settings.automatically_remind_tenants_with_overdue_invoic')
-                            : 'Automatically remind tenants with overdue invoices via email/in-app/WhatsApp. Every reminder is logged for audit.'
-                    }}
-                </p>
-            </div>
+            <PageHeader
+                :title="
+                    isAr
+                        ? $t('system.settings.dunning_automation_settings')
+                        : 'Dunning Automation Settings'
+                "
+                :subtitle="
+                    isAr
+                        ? $t('system.settings.automatically_remind_tenants_with_overdue_invoic')
+                        : 'Automatically remind tenants with overdue invoices via email/in-app/WhatsApp. Every reminder is logged for audit.'
+                "
+            >
+                <template #icon>
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                        />
+                    </svg>
+                </template>
+            </PageHeader>
 
             <!-- Global toggle -->
             <div
@@ -247,6 +254,7 @@ const { t } = useI18n();
 import { computed, onMounted, ref } from 'vue';
 import { Head, router, Link } from '@inertiajs/vue3';
 import SystemLayout from '@/Layouts/SystemLayout.vue';
+import PageHeader from '@/Components/PageHeader.vue';
 
 const props = defineProps({
     config: { type: Object, required: true },

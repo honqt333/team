@@ -3,39 +3,49 @@
         <Head :title="announcement.title" />
 
         <div class="space-y-6">
-            <div class="flex items-center justify-between">
-                <div class="flex items-center gap-4">
+            <PageHeader
+                :title="announcement.title"
+                :subtitle="`${getTypeLabel(announcement.type)} • ${getTargetLabel(announcement.target)}`"
+            >
+                <template #back>
                     <Link
                         :href="route('system.announcements.index')"
-                        class="text-gray-500 hover:text-gray-700 rtl:rotate-180"
+                        class="p-2 rounded-xl text-gray-400 hover:text-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                        :title="$t('common.back')"
                     >
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg
+                            class="w-5 h-5 rtl:rotate-180"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                        >
                             <path
                                 stroke-linecap="round"
                                 stroke-linejoin="round"
                                 stroke-width="2"
-                                d="M15 19l-7-7 7-7"
+                                d="M10 19l-7-7m0 0l7-7m-7 7h18"
                             />
                         </svg>
                     </Link>
-                    <div>
-                        <h1 class="text-2xl font-bold text-gray-900 dark:text-white">
-                            {{ announcement.title }}
-                        </h1>
-                        <p class="text-gray-500">
-                            {{ getTypeLabel(announcement.type) }} •
-                            {{ getTargetLabel(announcement.target) }}
-                        </p>
-                    </div>
-                </div>
-                <div class="flex items-center gap-3">
+                </template>
+                <template #icon>
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z"
+                        />
+                    </svg>
+                </template>
+                <template #actions>
                     <span
                         :class="
                             announcement.is_published
-                                ? 'bg-emerald-100 text-emerald-700'
-                                : 'bg-gray-100 text-gray-500'
+                                ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300 border-emerald-200'
+                                : 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400 border-gray-200'
                         "
-                        class="px-3 py-1 rounded-full text-sm"
+                        class="px-3 py-1.5 rounded-xl text-xs font-semibold border"
                     >
                         {{
                             announcement.is_published
@@ -46,19 +56,19 @@
                     <button
                         v-if="!announcement.is_published"
                         @click="publish"
-                        class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-sm"
+                        class="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white rounded-xl text-sm font-semibold transition-all shadow-md active:scale-95"
                     >
                         {{ $t('system.announcements.publish_now') }}
                     </button>
                     <button
                         v-else
                         @click="unpublish"
-                        class="px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg text-sm"
+                        class="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 text-gray-700 dark:text-gray-300 rounded-xl text-sm font-semibold transition-all active:scale-95"
                     >
                         {{ $t('system.announcements.stop') }}
                     </button>
-                </div>
-            </div>
+                </template>
+            </PageHeader>
 
             <!-- Stats -->
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -160,6 +170,7 @@ const { t } = useI18n();
 import { computed } from 'vue';
 import { Head, Link, router } from '@inertiajs/vue3';
 import SystemLayout from '@/Layouts/SystemLayout.vue';
+import PageHeader from '@/Components/PageHeader.vue';
 import DOMPurify from 'dompurify';
 
 const props = defineProps({

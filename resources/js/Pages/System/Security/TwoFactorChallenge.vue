@@ -47,7 +47,7 @@ const toggleRecovery = () => {
                     />
                 </svg>
             </div>
-            <h1 class="text-2xl font-bold text-gray-900 dark:text-white font-cairo">
+            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">
                 {{
                     isRTL
                         ? $t('system.security.two-factor_authentication')

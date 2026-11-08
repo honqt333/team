@@ -1,6 +1,6 @@
 <template>
     <SystemLayout>
-        <div class="max-w-4xl mx-auto py-6 space-y-6">
+        <div class="max-w-4xl mx-auto space-y-6">
             <!-- Header -->
             <PageHeader
                 :title="t('system.payment_settings.title')"

@@ -2,16 +2,21 @@
     <SystemLayout>
         <div class="space-y-6">
             <!-- Header -->
-            <div class="flex items-center justify-between">
-                <div>
-                    <h1 class="text-2xl font-bold text-gray-900 dark:text-white">
-                        {{ $t('system.integrations.title') }}
-                    </h1>
-                    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                        {{ $t('system.integrations.subtitle') }}
-                    </p>
-                </div>
-            </div>
+            <PageHeader
+                :title="$t('system.integrations.title')"
+                :subtitle="$t('system.integrations.subtitle')"
+            >
+                <template #icon>
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M11 4a2 2 0 114 0v1a1 1 0 001 1h3a1 1 0 011 1v3a1 1 0 01-1 1h-1a2 2 0 100 4h1a1 1 0 011 1v3a1 1 0 01-1 1h-3a1 1 0 01-1-1v-1a2 2 0 10-4 0v1a1 1 0 01-1 1H7a1 1 0 01-1-1v-3a1 1 0 00-1-1H4a2 2 0 110-4h1a1 1 0 001-1V7a1 1 0 011-1h3a1 1 0 001-1V4z"
+                        />
+                    </svg>
+                </template>
+            </PageHeader>
 
             <!-- Sections: SMS, WhatsApp, Email -->
             <div
@@ -161,6 +166,7 @@ import { ref, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useForm } from '@inertiajs/vue3';
 import SystemLayout from '@/Layouts/SystemLayout.vue';
+import PageHeader from '@/Components/PageHeader.vue';
 
 const { t } = useI18n();
 

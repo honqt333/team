@@ -8,37 +8,44 @@
             "
         />
 
-        <div class="mx-auto max-w-4xl space-y-6 py-6">
+        <div class="max-w-4xl mx-auto space-y-6">
             <!-- Header -->
-            <div class="flex items-center gap-3">
-                <Link
-                    :href="`/system/tenants/${tenant.id}`"
-                    class="flex h-9 w-9 items-center justify-center rounded-lg border border-gray-200 text-gray-500 transition hover:bg-gray-50 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700/40"
-                >
-                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <PageHeader
+                :title="$t('system.settings.dunning_settings_colon', { name: tenant.name })"
+                :subtitle="tenant.email"
+            >
+                <template #back>
+                    <Link
+                        :href="`/system/tenants/${tenant.id}`"
+                        class="p-2 rounded-xl text-gray-400 hover:text-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                        :title="$t('common.back')"
+                    >
+                        <svg
+                            class="w-5 h-5 rtl:rotate-180"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M10 19l-7-7m0 0l7-7m-7 7h18"
+                            />
+                        </svg>
+                    </Link>
+                </template>
+                <template #icon>
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path
                             stroke-linecap="round"
                             stroke-linejoin="round"
                             stroke-width="2"
-                            d="M15 19l-7-7 7-7"
+                            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
                         />
                     </svg>
-                </Link>
-                <div>
-                    <h1 class="text-2xl font-bold text-gray-900 dark:text-white">
-                        {{
-                            isAr
-                                ? $t('system.settings.dunning_settings_colon', {
-                                      name: tenant.name,
-                                  })
-                                : `Dunning settings: ${tenant.name}`
-                        }}
-                    </h1>
-                    <p class="text-sm text-gray-500 dark:text-gray-400">
-                        {{ tenant.email }}
-                    </p>
-                </div>
-            </div>
+                </template>
+            </PageHeader>
 
             <!-- Global baseline (read-only) -->
             <div
@@ -83,7 +90,7 @@
                                 global_config.quiet_hours_start && global_config.quiet_hours_end
                                     ? `${global_config.quiet_hours_start} – ${global_config.quiet_hours_end}`
                                     : isAr
-                                      ? $t('system.settings.expression_literal')
+                                      ? $t('system.settings.disabled_label')
                                       : 'Off'
                             }}
                         </dd>
@@ -218,6 +225,7 @@ const { t } = useI18n();
 import { computed, ref } from 'vue';
 import { Head, Link, router } from '@inertiajs/vue3';
 import SystemLayout from '@/Layouts/SystemLayout.vue';
+import PageHeader from '@/Components/PageHeader.vue';
 
 const props = defineProps({
     tenant: { type: Object, required: true },

@@ -3,7 +3,8 @@
     "private": true,
     "type": "module",
     "scripts": {
-        "build": "vite build",
+        "build": "node scripts/generate-page-manifest.mjs && vite build",
+        "build:manifest": "node scripts/generate-page-manifest.mjs",
         "dev": "vite",
         "type-check": "vue-tsc --noEmit || true",
         "test": "vitest run",

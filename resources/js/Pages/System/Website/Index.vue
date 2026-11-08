@@ -174,12 +174,11 @@ watch(
 
 <template>
     <SystemLayout :title="t('system.website.title')">
-        <div class="max-w-screen-2xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+        <div class="space-y-6">
             <!-- Page Header -->
             <PageHeader
                 :title="t('system.website.header_title')"
                 :subtitle="t('system.website.header_subtitle')"
-                class="mb-8"
             >
                 <template #icon>
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">

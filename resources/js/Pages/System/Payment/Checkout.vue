@@ -1,6 +1,6 @@
 <template>
     <SystemLayout>
-        <div class="max-w-2xl mx-auto py-8">
+        <div class="max-w-2xl mx-auto py-4">
             <!-- Header -->
             <div class="text-center mb-8">
                 <h1 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">

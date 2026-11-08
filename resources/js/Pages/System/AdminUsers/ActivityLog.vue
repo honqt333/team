@@ -1,16 +1,54 @@
 <template>
     <SystemLayout>
         <div class="space-y-6">
-            <div class="flex items-center justify-between">
-                <div>
-                    <h1 class="text-2xl font-bold text-gray-900 dark:text-white">
-                        {{ $t('system.admin_users.activity_log') }}
-                    </h1>
-                    <p class="text-gray-500 dark:text-gray-400">
-                        {{ $t('system.activity_log.subtitle') }}
-                    </p>
-                </div>
-            </div>
+            <PageHeader
+                :title="$t('system.admin_users.activity_log')"
+                :subtitle="$t('system.activity_log.subtitle')"
+            >
+                <template #back>
+                    <Link
+                        href="/system/admin-users"
+                        class="p-2 rounded-xl text-gray-400 hover:text-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                        :title="$t('common.back')"
+                    >
+                        <svg
+                            class="w-5 h-5 rtl:rotate-180"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M10 19l-7-7m0 0l7-7m-7 7h18"
+                            />
+                        </svg>
+                    </Link>
+                </template>
+                <template #icon>
+                    <div
+                        class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-indigo-600 flex items-center justify-center text-white shadow-md shadow-indigo-500/20"
+                    >
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                            />
+                        </svg>
+                    </div>
+                </template>
+                <template #badge>
+                    <span
+                        v-if="logs?.total !== undefined"
+                        class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300 border border-indigo-100 dark:border-indigo-800"
+                    >
+                        {{ logs.total }}
+                    </span>
+                </template>
+            </PageHeader>
 
             <!-- Filters -->
             <div class="flex gap-4">
@@ -104,8 +142,9 @@ import { useI18n } from 'vue-i18n';
 const { t } = useI18n();
 
 import { ref, computed } from 'vue';
-import { router } from '@inertiajs/vue3';
+import { Link, router } from '@inertiajs/vue3';
 import SystemLayout from '@/Layouts/SystemLayout.vue';
+import PageHeader from '@/Components/PageHeader.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 
 const actionOptions = computed(() => [

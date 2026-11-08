@@ -2,11 +2,15 @@
     <SystemLayout>
         <div class="max-w-3xl mx-auto space-y-6">
             <!-- Back & Header -->
-            <div class="flex items-center justify-between">
-                <div class="flex items-center gap-4">
+            <PageHeader
+                :title="$t('system.subscriptions.create_title')"
+                :subtitle="$t('system.subscriptions.create_subtitle')"
+            >
+                <template #back>
                     <Link
                         href="/system/subscriptions"
-                        class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                        class="p-2 rounded-xl text-gray-400 hover:text-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                        :title="$t('common.back')"
                     >
                         <svg
                             class="w-5 h-5 rtl:rotate-180"
@@ -22,16 +26,18 @@
                             />
                         </svg>
                     </Link>
-                    <div>
-                        <h1 class="text-2xl font-bold text-gray-900 dark:text-white">
-                            {{ $t('system.subscriptions.create_title') }}
-                        </h1>
-                        <p class="text-gray-500 dark:text-gray-400">
-                            {{ $t('system.subscriptions.create_subtitle') }}
-                        </p>
-                    </div>
-                </div>
-            </div>
+                </template>
+                <template #icon>
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
+                        />
+                    </svg>
+                </template>
+            </PageHeader>
 
             <form
                 @submit.prevent="submit"
@@ -192,6 +198,7 @@ const { t } = useI18n();
 import { computed } from 'vue';
 import { Link, useForm } from '@inertiajs/vue3';
 import SystemLayout from '@/Layouts/SystemLayout.vue';
+import PageHeader from '@/Components/PageHeader.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 
 const props = defineProps({

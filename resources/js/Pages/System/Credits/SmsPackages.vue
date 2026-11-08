@@ -3,22 +3,39 @@
         <Head :title="$t('system.credits.sms_packages_title')" />
         <div class="space-y-6">
             <!-- Header -->
-            <div class="flex items-center justify-between">
-                <div>
-                    <h1 class="text-2xl font-bold text-gray-900 dark:text-white">
-                        {{ $t('system.credits.sms_credit_packages') }}
-                    </h1>
-                    <p class="text-gray-500 dark:text-gray-400">
-                        {{ $t('system.credits.manage_the_sms_packages_available_for_purchase') }}
-                    </p>
-                </div>
-                <button
-                    @click="showAddModal = true"
-                    class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-medium"
-                >
-                    {{ $t('system.credits.add_package') }}
-                </button>
-            </div>
+            <PageHeader
+                :title="$t('system.credits.sms_credit_packages')"
+                :subtitle="$t('system.credits.manage_the_sms_packages_available_for_purchase')"
+                :totalCount="packages ? packages.length : null"
+                :countLabel="$t('system.credits.package')"
+            >
+                <template #icon>
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"
+                        />
+                    </svg>
+                </template>
+                <template #actions>
+                    <button
+                        @click="showAddModal = true"
+                        class="inline-flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white rounded-xl text-sm font-semibold transition-all shadow-md hover:shadow-indigo-500/25 active:scale-95"
+                    >
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M12 4v16m8-8H4"
+                            />
+                        </svg>
+                        {{ $t('system.credits.add_package') }}
+                    </button>
+                </template>
+            </PageHeader>
 
             <!-- Navigation Tabs -->
             <div class="flex gap-2 border-b border-gray-200 dark:border-gray-700">
@@ -283,6 +300,7 @@ const { t } = useI18n();
 import { ref } from 'vue';
 import { Head, Link, router, useForm } from '@inertiajs/vue3';
 import SystemLayout from '@/Layouts/SystemLayout.vue';
+import PageHeader from '@/Components/PageHeader.vue';
 
 const props = defineProps({
     packages: Array,

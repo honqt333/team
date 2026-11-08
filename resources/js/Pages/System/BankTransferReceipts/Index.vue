@@ -1,8 +1,12 @@
 <script setup>
 import { ref, computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { Head, router, Link } from '@inertiajs/vue3';
 import SystemLayout from '@/Layouts/SystemLayout.vue';
+import PageHeader from '@/Components/PageHeader.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
+
+const { t } = useI18n();
 
 const props = defineProps({
     receipts: { type: Object, required: true }, // paginated
@@ -20,31 +24,22 @@ const statusColors = {
     rejected: 'bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-300',
 };
 
-const statusLabels = {
-    pending: { ar: $t('system.bank_transfer_receipts.pending'), en: 'Pending' },
-    approved: { ar: $t('system.bank_transfer_receipts.approved_2'), en: 'Approved' },
-    rejected: { ar: $t('system.bank_transfer_receipts.rejected_2'), en: 'Rejected' },
-};
-
 const statusOptions = computed(() => [
     {
         value: 'all',
-        label:
-            locale.value === 'ar'
-                ? $t('system.bank_transfer_receipts.all_statuses')
-                : 'All statuses',
+        label: t('system.bank_transfer_receipts.all_statuses'),
     },
     {
         value: 'pending',
-        label: locale.value === 'ar' ? $t('system.bank_transfer_receipts.pending') : 'Pending',
+        label: t('system.bank_transfer_receipts.pending'),
     },
     {
         value: 'approved',
-        label: locale.value === 'ar' ? $t('system.bank_transfer_receipts.approved_2') : 'Approved',
+        label: t('system.bank_transfer_receipts.approved_2'),
     },
     {
         value: 'rejected',
-        label: locale.value === 'ar' ? $t('system.bank_transfer_receipts.rejected_2') : 'Rejected',
+        label: t('system.bank_transfer_receipts.rejected_2'),
     },
 ]);
 
@@ -95,7 +90,7 @@ function getAmountBadge(receipt) {
             color: 'slate',
             label:
                 locale.value === 'ar'
-                    ? $t('system.bank_transfer_receipts.no_comparison')
+                    ? t('system.bank_transfer_receipts.no_comparison')
                     : 'No comparison',
         };
     }
@@ -103,7 +98,7 @@ function getAmountBadge(receipt) {
     if (Math.abs(diff) < 0.01) {
         return {
             color: 'emerald',
-            label: locale.value === 'ar' ? $t('system.bank_transfer_receipts.match_2') : '✓ Match',
+            label: locale.value === 'ar' ? t('system.bank_transfer_receipts.match_2') : '✓ Match',
         };
     }
     if (diff < 0) {
@@ -111,7 +106,7 @@ function getAmountBadge(receipt) {
             color: 'amber',
             label:
                 locale.value === 'ar'
-                    ? $t('system.bank_transfer_receipts.short_by', {
+                    ? t('system.bank_transfer_receipts.short_by', {
                           amount: formatCurrency(-diff),
                       })
                     : `⚠️ Short ${formatCurrency(-diff)}`,
@@ -136,24 +131,33 @@ function getAmountBadge(receipt) {
     <SystemLayout>
         <div class="space-y-6">
             <!-- Header -->
-            <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                <div>
-                    <h1 class="text-2xl font-bold text-gray-900 dark:text-white">
-                        {{
-                            locale === 'ar'
-                                ? $t('system.bank_transfer_receipts.index_title')
-                                : 'Bank Transfer Receipts Review'
-                        }}
-                    </h1>
-                    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                        {{
-                            locale === 'ar'
-                                ? $t('system.bank_transfer_receipts.subtitle')
-                                : 'Review and verify bank transfer receipts from tenants'
-                        }}
-                    </p>
-                </div>
-            </div>
+            <PageHeader
+                :title="$t('system.bank_transfer_receipts.index_title')"
+                :subtitle="$t('system.bank_transfer_receipts.subtitle')"
+            >
+                <template #icon>
+                    <div
+                        class="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 to-amber-600 flex items-center justify-center text-white shadow-md shadow-amber-500/20"
+                    >
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                            />
+                        </svg>
+                    </div>
+                </template>
+                <template #badge>
+                    <span
+                        v-if="receipts?.total !== undefined"
+                        class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300 border border-amber-100 dark:border-amber-800"
+                    >
+                        {{ receipts.total }}
+                    </span>
+                </template>
+            </PageHeader>
 
             <!-- Stats -->
             <div class="grid grid-cols-1 gap-4 sm:grid-cols-4">

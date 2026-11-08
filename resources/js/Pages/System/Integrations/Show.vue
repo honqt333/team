@@ -4,38 +4,49 @@
 
         <div class="space-y-6">
             <!-- Header -->
-            <div class="flex items-center justify-between">
-                <div class="flex items-center gap-4">
+            <PageHeader
+                :title="integration.name_ar || integration.name"
+                :subtitle="`${integration.name} • ${integration.type_label}`"
+            >
+                <template #back>
                     <Link
                         :href="route('system.integrations.index')"
-                        class="text-gray-500 hover:text-gray-700 rtl:rotate-180"
+                        class="p-2 rounded-xl text-gray-400 hover:text-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                        :title="$t('common.back')"
                     >
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg
+                            class="w-5 h-5 rtl:rotate-180"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                        >
                             <path
                                 stroke-linecap="round"
                                 stroke-linejoin="round"
                                 stroke-width="2"
-                                d="M15 19l-7-7 7-7"
+                                d="M10 19l-7-7m0 0l7-7m-7 7h18"
                             />
                         </svg>
                     </Link>
-                    <div>
-                        <h1 class="text-2xl font-bold text-gray-900 dark:text-white">
-                            {{ integration.name_ar }}
-                        </h1>
-                        <p class="text-gray-500 dark:text-gray-400">
-                            {{ integration.name }} • {{ integration.type_label }}
-                        </p>
-                    </div>
-                </div>
-                <div class="flex items-center gap-3">
+                </template>
+                <template #icon>
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M11 4a2 2 0 114 0v1a1 1 0 001 1h3a1 1 0 011 1v3a1 1 0 01-1 1h-1a2 2 0 100 4h1a1 1 0 011 1v3a1 1 0 01-1 1h-3a1 1 0 01-1-1v-1a2 2 0 10-4 0v1a1 1 0 01-1 1H7a1 1 0 01-1-1v-3a1 1 0 00-1-1H4a2 2 0 110-4h1a1 1 0 001-1V7a1 1 0 011-1h3a1 1 0 001-1V4z"
+                        />
+                    </svg>
+                </template>
+                <template #actions>
                     <span
                         :class="
                             integration.is_active
-                                ? 'bg-emerald-100 text-emerald-700'
-                                : 'bg-gray-100 text-gray-500'
+                                ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300 border-emerald-200'
+                                : 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400 border-gray-200'
                         "
-                        class="px-3 py-1 rounded-full text-sm"
+                        class="px-3 py-1.5 rounded-xl text-xs font-semibold border"
                     >
                         {{
                             integration.is_active
@@ -45,12 +56,12 @@
                     </span>
                     <button
                         @click="deleteIntegration"
-                        class="text-red-600 hover:text-red-700 text-sm"
+                        class="px-3.5 py-1.5 rounded-xl text-xs font-bold text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors"
                     >
                         {{ $t('common.delete') }}
                     </button>
-                </div>
-            </div>
+                </template>
+            </PageHeader>
 
             <!-- Config Form -->
             <div
@@ -345,6 +356,7 @@ const { t } = useI18n();
 import { ref, computed } from 'vue';
 import { Head, Link, useForm, router } from '@inertiajs/vue3';
 import SystemLayout from '@/Layouts/SystemLayout.vue';
+import PageHeader from '@/Components/PageHeader.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 
 const props = defineProps({

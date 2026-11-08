@@ -10,31 +10,23 @@
 
         <div class="space-y-6">
             <!-- Header Section -->
-            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                <div>
-                    <h1
-                        class="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2.5"
-                    >
-                        <svg
-                            class="w-7 h-7 text-indigo-600 dark:text-indigo-400"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                        >
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
-                            />
-                        </svg>
-                        <span>{{ $t('system.nav_items.templates') }}</span>
-                    </h1>
-                    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                        {{ $t('system.communication.templates_subtitle') }}
-                    </p>
-                </div>
-            </div>
+            <PageHeader
+                :title="$t('system.nav_items.templates')"
+                :subtitle="$t('system.communication.templates_subtitle')"
+                :totalCount="templates ? templates.length : null"
+                :countLabel="$t('system.nav_items.templates')"
+            >
+                <template #icon>
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                        />
+                    </svg>
+                </template>
+            </PageHeader>
 
             <!-- Table Card -->
             <div
@@ -178,6 +170,7 @@ const { t } = useI18n();
 import { computed } from 'vue';
 import { Head, Link } from '@inertiajs/vue3';
 import SystemLayout from '@/Layouts/SystemLayout.vue';
+import PageHeader from '@/Components/PageHeader.vue';
 
 defineProps({
     templates: Array,

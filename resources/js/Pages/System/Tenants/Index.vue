@@ -2,16 +2,33 @@
     <SystemLayout>
         <div class="space-y-6">
             <!-- Page Header -->
-            <div class="flex items-center justify-between">
-                <div>
-                    <h1 class="text-2xl font-bold text-gray-900 dark:text-white">
-                        {{ $t('system.tenants.title') }}
-                    </h1>
-                    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                        {{ $t('system.tenants.subtitle') }}
-                    </p>
-                </div>
-            </div>
+            <PageHeader
+                :title="$t('system.tenants.title')"
+                :subtitle="$t('system.tenants.subtitle')"
+            >
+                <template #icon>
+                    <div
+                        class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-indigo-600 flex items-center justify-center text-white shadow-md shadow-indigo-500/20"
+                    >
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
+                            />
+                        </svg>
+                    </div>
+                </template>
+                <template #badge>
+                    <span
+                        v-if="tenants?.total !== undefined"
+                        class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300 border border-indigo-100 dark:border-indigo-800"
+                    >
+                        {{ tenants.total }}
+                    </span>
+                </template>
+            </PageHeader>
 
             <!-- Filters -->
             <div
@@ -328,6 +345,7 @@ import { ref, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { Link, router } from '@inertiajs/vue3';
 import SystemLayout from '@/Layouts/SystemLayout.vue';
+import PageHeader from '@/Components/PageHeader.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 
 const { t } = useI18n();

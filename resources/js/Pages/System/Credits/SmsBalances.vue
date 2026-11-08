@@ -3,22 +3,39 @@
         <Head :title="$t('system.credits.sms_balances_title')" />
         <div class="space-y-6">
             <!-- Header -->
-            <div class="flex items-center justify-between">
-                <div>
-                    <h1 class="text-2xl font-bold text-gray-900 dark:text-white">
-                        {{ $t('system.credits.sms_balances_title') }}
-                    </h1>
-                    <p class="text-gray-500 dark:text-gray-400">
-                        {{ $t('system.credits.sms_credit_balance_per_tenant') }}
-                    </p>
-                </div>
-                <button
-                    @click="showAddModal = true"
-                    class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-sm font-medium"
-                >
-                    {{ $t('system.credits.add_manual_credit') }}
-                </button>
-            </div>
+            <PageHeader
+                :title="$t('system.credits.sms_balances_title')"
+                :subtitle="$t('system.credits.sms_credit_balance_per_tenant')"
+                :totalCount="balances?.total ?? null"
+                :countLabel="$t('system.credits.tabs.balances')"
+            >
+                <template #icon>
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"
+                        />
+                    </svg>
+                </template>
+                <template #actions>
+                    <button
+                        @click="showAddModal = true"
+                        class="inline-flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white rounded-xl text-sm font-semibold transition-all shadow-md hover:shadow-emerald-500/25 active:scale-95"
+                    >
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M12 4v16m8-8H4"
+                            />
+                        </svg>
+                        {{ $t('system.credits.add_manual_credit') }}
+                    </button>
+                </template>
+            </PageHeader>
 
             <!-- Navigation Tabs -->
             <div class="flex gap-2 border-b border-gray-200 dark:border-gray-700">
@@ -269,6 +286,7 @@
 import { ref } from 'vue';
 import { Head, Link, router, useForm } from '@inertiajs/vue3';
 import SystemLayout from '@/Layouts/SystemLayout.vue';
+import PageHeader from '@/Components/PageHeader.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 
 const props = defineProps({
