@@ -229,7 +229,12 @@ class TenantSetupService
                 'label_ar' => 'مدير عام',
                 'label_en' => 'Super Admin',
                 'description' => 'كامل الصلاحيات - الوصول لجميع أقسام النظام',
-                'permissions' => Permissions::all(), // All permissions
+                // The tenant-side permissions only. The system panel's
+                // abilities (see App\Support\SystemPermissions) are NOT
+                // tenant permissions — handing them to a tenant role would
+                // be a privilege escalation, since every new signup is
+                // assigned this role.
+                'permissions' => Permissions::tenantPermissions(),
             ],
             'branch_manager' => [
                 'label_ar' => 'مدير فرع',

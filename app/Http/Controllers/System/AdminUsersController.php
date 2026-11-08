@@ -8,6 +8,8 @@ use App\Http\Controllers\Controller;
 use App\Http\Middleware\EnsureSuperAdmin;
 use App\Models\AdminActivityLog;
 use App\Models\AdminUser;
+use App\Models\User;
+use App\Support\SystemPermissions;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -30,11 +32,14 @@ class AdminUsersController extends Controller
      *
      * @see EnsureSuperAdmin
      */
-    private function ensureSuperAdmin(): void
+    private function ensureSuperAdmin(?Request $request = null): void
     {
-        $admin = auth('admin')->user();
+        $user = $request?->user() ?? auth('admin')->user() ?? auth('web')->user();
 
-        if (! $admin instanceof AdminUser || ! $admin->isSuperAdmin()) {
+        $isAllowed = ($user instanceof AdminUser && $user->isSuperAdmin())
+            || ($user instanceof User && $user->is_system_admin);
+
+        if (! $isAllowed) {
             abort(403, __('messages.system.admin_users.only_super_admin'));
         }
     }
@@ -91,7 +96,7 @@ class AdminUsersController extends Controller
      */
     public function store(Request $request)
     {
-        $this->ensureSuperAdmin();
+        $this->ensureSuperAdmin($request);
 
         $validated = $request->validate([
             'name' => 'required|string|max:255',
@@ -105,10 +110,20 @@ class AdminUsersController extends Controller
 
         $validated['password'] = Hash::make($validated['password']);
 
+        // Keep only abilities the registry knows about. A client could
+        // otherwise store a hand-crafted ability name, which would then
+        // be handed back to the front end and shown as a granted
+        // permission it does not correspond to.
+        $validated['permissions'] = SystemPermissions::filterValid(
+            $validated['permissions'] ?? []
+        );
+
         $admin = AdminUser::create($validated);
 
         // Log activity
-        auth('admin')->user()?->logActivity('create', AdminUser::class, $admin->id);
+        $actor = auth('admin')->user()
+            ?? ($request->user() instanceof User ? AdminUser::where('email', $request->user()->email)->first() : null);
+        $actor?->logActivity('create', AdminUser::class, $admin->id);
 
         return redirect()->route('system.admin-users.index')
             ->with('success', __('messages.system.admin_users.created_success'));
@@ -135,7 +150,7 @@ class AdminUsersController extends Controller
      */
     public function update(Request $request, AdminUser $adminUser)
     {
-        $this->ensureSuperAdmin();
+        $this->ensureSuperAdmin($request);
 
         $validated = $request->validate([
             'name' => 'required|string|max:255',
@@ -153,9 +168,16 @@ class AdminUsersController extends Controller
             $validated['password'] = Hash::make($validated['password']);
         }
 
+        // Keep only abilities the registry knows about — see store().
+        $validated['permissions'] = SystemPermissions::filterValid(
+            $validated['permissions'] ?? []
+        );
+
         $adminUser->update($validated);
 
-        auth('admin')->user()?->logActivity('update', AdminUser::class, $adminUser->id);
+        $actor = auth('admin')->user()
+            ?? ($request->user() instanceof User ? AdminUser::where('email', $request->user()->email)->first() : null);
+        $actor?->logActivity('update', AdminUser::class, $adminUser->id);
 
         return back()->with('success', __('messages.system.admin_users.updated_success'));
     }
@@ -163,16 +185,24 @@ class AdminUsersController extends Controller
     /**
      * Delete admin user.
      */
-    public function destroy(AdminUser $adminUser)
+    public function destroy(Request $request, AdminUser $adminUser)
     {
-        $this->ensureSuperAdmin();
+        $this->ensureSuperAdmin($request);
+
+        $actingUser = $request->user();
 
         // Prevent self-deletion
-        if (auth('admin')->id() === $adminUser->id) {
+        if ($actingUser instanceof AdminUser && $actingUser->id === $adminUser->id) {
             return back()->withErrors(['error' => __('messages.system.admin_users.cannot_delete_self')]);
         }
 
-        auth('admin')->user()?->logActivity('delete', AdminUser::class, $adminUser->id);
+        if ($actingUser instanceof User && $adminUser->email === $actingUser->email) {
+            return back()->withErrors(['error' => __('messages.system.admin_users.cannot_delete_self')]);
+        }
+
+        $actor = auth('admin')->user()
+            ?? ($actingUser instanceof User ? AdminUser::where('email', $actingUser->email)->first() : null);
+        $actor?->logActivity('delete', AdminUser::class, $adminUser->id);
 
         $adminUser->delete();
 

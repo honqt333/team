@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Support\SystemPermissions;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -71,6 +72,14 @@ class AdminUser extends Authenticatable
     }
 
     /**
+     * Check if admin is active.
+     */
+    public function isActive(): bool
+    {
+        return (bool) $this->is_active;
+    }
+
+    /**
      * Check if admin is super admin.
      */
     public function isSuperAdmin(): bool
@@ -80,6 +89,14 @@ class AdminUser extends Authenticatable
 
     /**
      * Check if admin has permission.
+     *
+     * `super_admin` bypasses the permission list entirely — it holds
+     * every ability in the registry.
+     *
+     * For the other roles the account's own `permissions` column is an
+     * OVERRIDE: when it carries a list, that list is what the account
+     * holds; when it is empty, the role's defaults apply (see
+     * App\Support\SystemPermissions).
      */
     public function hasPermission(string $permission): bool
     {
@@ -87,7 +104,35 @@ class AdminUser extends Authenticatable
             return true;
         }
 
-        return in_array($permission, $this->permissions ?? []);
+        return in_array($permission, $this->effectivePermissions(), true);
+    }
+
+    /**
+     * The permissions this account effectively holds.
+     *
+     * @return array<int, string>
+     */
+    public function effectivePermissions(): array
+    {
+        $explicit = is_array($this->permissions) ? $this->permissions : null;
+
+        return SystemPermissions::resolveFor((string) $this->role, $explicit);
+    }
+
+    /**
+     * Whether the account holds at least one of the given permissions.
+     *
+     * @param array<int, string> $permissions
+     */
+    public function hasAnyPermission(array $permissions): bool
+    {
+        foreach ($permissions as $permission) {
+            if ($this->hasPermission($permission)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
@@ -105,34 +150,17 @@ class AdminUser extends Authenticatable
 
     /**
      * Available permissions.
+     *
+     * Delegates to the system permission registry, which is the single
+     * source of truth for the abilities the panel knows about. The
+     * admin-user form renders one checkbox per entry, so a new ability
+     * added to the registry shows up there automatically.
+     *
+     * @return array<string, array<string, string>>
      */
     public static function getAvailablePermissions(): array
     {
-        return [
-            'tenants' => [
-                'tenants.view' => 'عرض المستأجرين',
-                'tenants.create' => 'إنشاء مستأجر',
-                'tenants.edit' => 'تعديل المستأجرين',
-                'tenants.delete' => 'حذف المستأجرين',
-                'tenants.impersonate' => 'الدخول كمستأجر',
-            ],
-            'billing' => [
-                'subscriptions.view' => 'عرض الاشتراكات',
-                'subscriptions.manage' => 'إدارة الاشتراكات',
-                'invoices.view' => 'عرض الفواتير',
-                'invoices.manage' => 'إدارة الفواتير',
-            ],
-            'settings' => [
-                'plans.manage' => 'إدارة الباقات',
-                'promocodes.manage' => 'إدارة الرموز الترويجية',
-                'payment.settings' => 'إعدادات الدفع',
-                'integrations.manage' => 'إدارة التكاملات',
-            ],
-            'credits' => [
-                'sms.manage' => 'إدارة رصيد SMS',
-                'whatsapp.manage' => 'إدارة رصيد WhatsApp',
-            ],
-        ];
+        return SystemPermissions::groups();
     }
 
     /**

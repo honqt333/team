@@ -61,6 +61,7 @@ use App\Http\Controllers\App\Quotes\QuoteController;
 use App\Http\Controllers\App\Quotes\QuotePartsController;
 use App\Http\Controllers\App\Quotes\QuotePrintController;
 use App\Http\Controllers\App\Quotes\QuoteServiceController;
+use App\Http\Controllers\App\Reports\TaxPeriodsController;
 use App\Http\Controllers\App\ReportsController;
 use App\Http\Controllers\App\RoleController;
 use App\Http\Controllers\App\ServiceBayController;
@@ -1039,6 +1040,22 @@ Route::prefix('app')->middleware(['auth', 'verified', 'tenant.active', 'center.c
         Route::get('/cash-register', [ReportsController::class, 'cashRegister'])->name('cash-register');
         Route::get('/cash-register/export', [ReportsController::class, 'exportCashRegister'])->name('cash-register.export');
         Route::get('/cashRegister', fn () => redirect()->route('app.reports.cash-register'));
+
+        // Tax Periods (الفترات والإقرارات الضريبية)
+        Route::prefix('tax-periods')->name('tax-periods.')->group(function () {
+            Route::get('/', [TaxPeriodsController::class, 'index'])->name('index');
+            Route::get('/3-years', [TaxPeriodsController::class, 'threeYears'])->name('three-years');
+            Route::get('/new/{periodKey}', [TaxPeriodsController::class, 'create'])->name('create');
+            Route::post('/', [TaxPeriodsController::class, 'store'])->name('store');
+            Route::get('/{taxPeriod}', [TaxPeriodsController::class, 'show'])->name('show');
+            Route::post('/{taxPeriod}/post', [TaxPeriodsController::class, 'post'])->name('post');
+            Route::post('/{taxPeriod}/recreate', [TaxPeriodsController::class, 'recreate'])->name('recreate');
+            Route::get('/{taxPeriod}/export-excel', [TaxPeriodsController::class, 'exportExcel'])->name('export-excel');
+            Route::get('/{taxPeriod}/export-zatca', [TaxPeriodsController::class, 'exportZatca'])->name('export-zatca');
+        });
+        Route::get('/taxPeriods', fn () => redirect()->route('app.reports.tax-periods.index'));
+        Route::get('/taxPeriods/new/{periodKey}', fn ($periodKey) => redirect()->route('app.reports.tax-periods.create', $periodKey));
+        Route::get('/taxPeriods/{id}', fn ($id) => redirect()->route('app.reports.tax-periods.show', $id));
     });
 
     // ───────────────────────────────────────────────────────────────
@@ -1116,6 +1133,9 @@ Route::middleware(['auth', 'verified', 'tenant.active', 'center.context', Ensure
     Route::get('/reports/vehicles', fn () => redirect()->route('app.reports.vehicles'));
     Route::get('/reports/financialSummary', fn () => redirect()->route('app.reports.financial-summary'));
     Route::get('/reports/cashRegister', fn () => redirect()->route('app.reports.cash-register'));
+    Route::get('/reports/taxPeriods', fn () => redirect()->route('app.reports.tax-periods.index'));
+    Route::get('/reports/taxPeriods/new/{periodKey}', fn ($periodKey) => redirect()->route('app.reports.tax-periods.create', $periodKey));
+    Route::get('/reports/taxPeriods/{id}', fn ($id) => redirect()->route('app.reports.tax-periods.show', $id));
 });
 
 // Test routes for tenancy middleware (testing environment only)
@@ -1132,24 +1152,24 @@ if (app()->environment('testing')) {
 // System Admin Panel routes
 Route::prefix('system')->middleware(['auth:web,admin', 'system.admin'])->group(function () {
     // Dashboard
-    Route::get('/', [SystemDashboardController::class, 'index'])->name('system.dashboard');
+    Route::get('/', [SystemDashboardController::class, 'index'])->name('system.dashboard')->middleware('system.permission:system.tenants.view');
 
     // Phase 5 — Analytics dashboard data. The Inertia `kpis` page
     // fetches all the headline numbers in one round-trip; topPlans
     // and paymentMix are separate JSON endpoints so the front end
     // can lazy-load the chart data after the KPI cards render.
-    Route::get('/analytics/kpis', [AnalyticsController::class, 'kpis'])->name('system.analytics.kpis');
-    Route::get('/analytics/top-plans', [AnalyticsController::class, 'topPlans'])->name('system.analytics.top-plans');
-    Route::get('/analytics/payment-mix', [AnalyticsController::class, 'paymentMix'])->name('system.analytics.payment-mix');
-    Route::get('/analytics/cohort-retention', [AnalyticsController::class, 'cohortRetention'])->name('system.analytics.cohort-retention');
-    Route::get('/analytics/tenants/{tenant}/health-trend', [AnalyticsController::class, 'tenantHealthTrend'])->name('system.analytics.tenant-health-trend');
+    Route::get('/analytics/kpis', [AnalyticsController::class, 'kpis'])->name('system.analytics.kpis')->middleware('system.permission:system.invoices.view');
+    Route::get('/analytics/top-plans', [AnalyticsController::class, 'topPlans'])->name('system.analytics.top-plans')->middleware('system.permission:system.plans.manage');
+    Route::get('/analytics/payment-mix', [AnalyticsController::class, 'paymentMix'])->name('system.analytics.payment-mix')->middleware('system.permission:system.invoices.view');
+    Route::get('/analytics/cohort-retention', [AnalyticsController::class, 'cohortRetention'])->name('system.analytics.cohort-retention')->middleware('system.permission:system.subscriptions.view');
+    Route::get('/analytics/tenants/{tenant}/health-trend', [AnalyticsController::class, 'tenantHealthTrend'])->name('system.analytics.tenant-health-trend')->middleware('system.permission:system.tenants.view');
 
     // Phase 5 — Reports page (entry point for the 3 export buttons).
     // The page itself is just a UI — the actual downloads live on
     // /system/reports/* and stream the file directly.
     Route::get('/analytics/reports', function () {
         return Inertia::render('System/Analytics/Reports');
-    })->name('system.analytics.reports');
+    })->name('system.analytics.reports')->middleware('system.permission:system.invoices.view');
 
     // Phase 5 — Reports & exports. Each route streams a download —
     // .xlsx for full exports, .csv for streaming-friendly aging report.
@@ -1159,76 +1179,76 @@ Route::prefix('system')->middleware(['auth:web,admin', 'system.admin'])->group(f
             new BankTransferReceiptsExport,
             'receipts-'.now()->format('Y-m-d').'.xlsx'
         );
-    })->name('system.reports.receipts');
+    })->name('system.reports.receipts')->middleware('system.permission:system.invoices.view');
 
     Route::get('/reports/tenants', function () {
         return Excel::download(
             new TenantsReportExport,
             'tenants-'.now()->format('Y-m-d').'.xlsx'
         );
-    })->name('system.reports.tenants');
+    })->name('system.reports.tenants')->middleware('system.permission:system.tenants.view');
 
     Route::get('/reports/aging', function () {
         return Excel::download(
             new AgingReportExport,
             'aging-'.now()->format('Y-m-d').'.xlsx'
         );
-    })->name('system.reports.aging');
+    })->name('system.reports.aging')->middleware('system.permission:system.invoices.view');
 
     // Developer Center
-    Route::get('/developer', [DeveloperController::class, 'index'])->name('system.developer.index');
-    Route::post('/developer/audit', [DeveloperController::class, 'runAudit'])->name('system.developer.audit');
-    Route::get('/developer/graph', [DeveloperController::class, 'getGraph'])->name('system.developer.graph');
-    Route::post('/developer/ai-advice', [DeveloperController::class, 'aiAdvice'])->name('system.developer.ai-advice');
+    Route::get('/developer', [DeveloperController::class, 'index'])->name('system.developer.index')->middleware('system.permission:system.developer.access');
+    Route::post('/developer/audit', [DeveloperController::class, 'runAudit'])->name('system.developer.audit')->middleware('system.permission:system.developer.access');
+    Route::get('/developer/graph', [DeveloperController::class, 'getGraph'])->name('system.developer.graph')->middleware('system.permission:system.developer.access');
+    Route::post('/developer/ai-advice', [DeveloperController::class, 'aiAdvice'])->name('system.developer.ai-advice')->middleware('system.permission:system.developer.access');
 
     // Tenants Management — read access for any system admin
-    Route::get('/tenants', [TenantsController::class, 'index'])->name('system.tenants.index');
-    Route::get('/tenants/{tenant}', [TenantsController::class, 'show'])->name('system.tenants.show');
+    Route::get('/tenants', [TenantsController::class, 'index'])->name('system.tenants.index')->middleware('system.permission:system.tenants.view');
+    Route::get('/tenants/{tenant}', [TenantsController::class, 'show'])->name('system.tenants.show')->middleware('system.permission:system.tenants.view');
 
     // Destructive / privileged tenant actions — super_admin only.
     // Wrapping in a nested group keeps the outer /system prefix intact.
     Route::middleware('super_admin')->group(function () {
-        Route::post('/tenants/{tenant}/suspend', [TenantsController::class, 'suspend'])->name('system.tenants.suspend');
-        Route::post('/tenants/{tenant}/activate', [TenantsController::class, 'activate'])->name('system.tenants.activate');
+        Route::post('/tenants/{tenant}/suspend', [TenantsController::class, 'suspend'])->name('system.tenants.suspend')->middleware('system.permission:system.tenants.manage');
+        Route::post('/tenants/{tenant}/activate', [TenantsController::class, 'activate'])->name('system.tenants.activate')->middleware('system.permission:system.tenants.manage');
         // Phase 7.6: admin override for the dunning opt-out.
         // The opt-out is otherwise a tenant-only setting (the
         // tenant can flip it from the billing preferences page).
         // Admins need an escape hatch for: legal disputes where
         // the tenant has asked in writing to be opted back in,
         // an account recovery flow, or compliance audits.
-        Route::put('/tenants/{tenant}/dunning-opt-out', [TenantsController::class, 'updateDunningOptOut'])->name('system.tenants.dunning-opt-out');
+        Route::put('/tenants/{tenant}/dunning-opt-out', [TenantsController::class, 'updateDunningOptOut'])->name('system.tenants.dunning-opt-out')->middleware('system.permission:system.tenants.manage');
         // Phase 7.7: admin override to lift an auto-suspension
         // applied by dunning:auto-suspend. Different from a
         // manual un-suspend because the audit log distinguishes
         // the two.
-        Route::post('/tenants/{tenant}/lift-auto-suspend', [TenantsController::class, 'liftAutoSuspend'])->name('system.tenants.lift-auto-suspend');
-        Route::post('/tenants/{tenant}/extend-trial', [TenantsController::class, 'extendTrial'])->name('system.tenants.extend-trial');
+        Route::post('/tenants/{tenant}/lift-auto-suspend', [TenantsController::class, 'liftAutoSuspend'])->name('system.tenants.lift-auto-suspend')->middleware('system.permission:system.tenants.manage');
+        Route::post('/tenants/{tenant}/extend-trial', [TenantsController::class, 'extendTrial'])->name('system.tenants.extend-trial')->middleware('system.permission:system.tenants.manage');
         // Phase 7.5: per-tenant dunning config (overrides the
         // global config for this specific tenant). Useful for
         // high-touch customers who want different timing or
         // a different language for their reminders.
-        Route::get('/tenants/{tenant}/dunning', [DunningController::class, 'tenantConfig'])->name('system.tenants.dunning');
-        Route::put('/tenants/{tenant}/dunning', [DunningController::class, 'updateTenantConfig'])->name('system.tenants.dunning.update');
-        Route::delete('/tenants/{tenant}/dunning', [DunningController::class, 'clearTenantConfig'])->name('system.tenants.dunning.clear');
-        Route::delete('/tenants/{tenant}', [TenantsController::class, 'destroy'])->name('system.tenants.destroy');
-        Route::put('/tenants/{tenant}/security', [TenantSecurityController::class, 'update2FASettings'])->name('system.tenants.security.update');
+        Route::get('/tenants/{tenant}/dunning', [DunningController::class, 'tenantConfig'])->name('system.tenants.dunning')->middleware('system.permission:system.tenants.view');
+        Route::put('/tenants/{tenant}/dunning', [DunningController::class, 'updateTenantConfig'])->name('system.tenants.dunning.update')->middleware('system.permission:system.tenants.manage');
+        Route::delete('/tenants/{tenant}/dunning', [DunningController::class, 'clearTenantConfig'])->name('system.tenants.dunning.clear')->middleware('system.permission:system.tenants.manage');
+        Route::delete('/tenants/{tenant}', [TenantsController::class, 'destroy'])->name('system.tenants.destroy')->middleware('system.permission:system.tenants.delete');
+        Route::put('/tenants/{tenant}/security', [TenantSecurityController::class, 'update2FASettings'])->name('system.tenants.security.update')->middleware('system.permission:system.tenants.manage');
         // Impersonation is super_admin only — powerful debugging affordance.
-        Route::post('/tenants/{tenant}/impersonate', [ImpersonationController::class, 'start'])->name('system.impersonate.start');
+        Route::post('/tenants/{tenant}/impersonate', [ImpersonationController::class, 'start'])->name('system.impersonate.start')->middleware('system.permission:system.tenants.impersonate');
 
         // Bank Transfer Receipts Review
         Route::prefix('bank-transfer-receipts')->name('system.bank-receipts.')->group(function () {
-            Route::get('/', [BankTransferReceiptsController::class, 'index'])->name('index');
-            Route::get('/{receipt}', [BankTransferReceiptsController::class, 'show'])->name('show');
-            Route::get('/{receipt}/download', [BankTransferReceiptsController::class, 'download'])->name('download');
-            Route::post('/{receipt}/approve', [BankTransferReceiptsController::class, 'approve'])->name('approve');
-            Route::post('/{receipt}/reject', [BankTransferReceiptsController::class, 'reject'])->name('reject');
+            Route::get('/', [BankTransferReceiptsController::class, 'index'])->middleware('system.permission:system.invoices.view')->name('index');
+            Route::get('/{receipt}', [BankTransferReceiptsController::class, 'show'])->middleware('system.permission:system.invoices.view')->name('show');
+            Route::get('/{receipt}/download', [BankTransferReceiptsController::class, 'download'])->middleware('system.permission:system.invoices.view')->name('download');
+            Route::post('/{receipt}/approve', [BankTransferReceiptsController::class, 'approve'])->middleware('system.permission:system.invoices.manage')->name('approve');
+            Route::post('/{receipt}/reject', [BankTransferReceiptsController::class, 'reject'])->middleware('system.permission:system.invoices.manage')->name('reject');
         });
 
         // Tenant backups — super_admin only because they reveal
         // a tenant's full data set, and the file itself is held on
         // shared storage. Both pre-delete (automatic) and manual
         // backups go through this controller.
-        Route::post('/tenants/{tenant}/backups', [BackupController::class, 'store'])->name('system.tenants.backups.store');
+        Route::post('/tenants/{tenant}/backups', [BackupController::class, 'store'])->name('system.tenants.backups.store')->middleware('system.permission:system.tenants.view');
     });
 
     // Admin notification bell endpoints (Phase 4). Polling-based:
@@ -1236,153 +1256,159 @@ Route::prefix('system')->middleware(['auth:web,admin', 'system.admin'])->group(f
     // available to any authenticated admin, not just super_admin,
     // because the queue/review work is a regular admin task.
     Route::prefix('notifications')->name('system.notifications.')->group(function () {
-        Route::get('/recent', [AdminNotificationController::class, 'recent'])->name('recent');
-        Route::get('/unread-count', [AdminNotificationController::class, 'unreadCount'])->name('unread-count');
-        Route::post('/{notification}/read', [AdminNotificationController::class, 'markAsRead'])->name('read');
-        Route::post('/read-all', [AdminNotificationController::class, 'markAllAsRead'])->name('read-all');
+        Route::get('/recent', [AdminNotificationController::class, 'recent'])->middleware('system.permission:system.notifications.manage')->name('recent');
+        Route::get('/unread-count', [AdminNotificationController::class, 'unreadCount'])->middleware('system.permission:system.notifications.manage')->name('unread-count');
+        Route::post('/{notification}/read', [AdminNotificationController::class, 'markAsRead'])->name('read')
+            ->middleware('system.permission:system.notifications.manage');
+        Route::post('/read-all', [AdminNotificationController::class, 'markAllAsRead'])->middleware('system.permission:system.notifications.manage')->name('read-all');
         // Full-page listing (optional — the dropdown is enough for most
         // cases, but a dedicated page helps when the list grows).
-        Route::get('/', [AdminNotificationController::class, 'index'])->name('index');
+        Route::get('/', [AdminNotificationController::class, 'index'])->middleware('system.permission:system.notifications.manage')->name('index');
     });
 
     // Backups cross-tenant listing/download — super_admin only.
     Route::middleware('super_admin')->group(function () {
-        Route::get('/backups', [BackupController::class, 'index'])->name('system.backups.index');
-        Route::get('/backups/{backup}/download', [BackupController::class, 'download'])->name('system.backups.download');
-        Route::delete('/backups/{backup}', [BackupController::class, 'destroy'])->name('system.backups.destroy');
+        Route::get('/backups', [BackupController::class, 'index'])->name('system.backups.index')->middleware('system.permission:system.activity_log.view');
+        Route::get('/backups/{backup}/download', [BackupController::class, 'download'])->name('system.backups.download')->middleware('system.permission:system.activity_log.view');
+        Route::delete('/backups/{backup}', [BackupController::class, 'destroy'])->name('system.backups.destroy')->middleware('system.permission:system.activity_log.view');
     });
 
     // Communication Templates
     Route::resource('communication/templates', CommunicationTemplatesController::class)
         ->only(['index', 'edit', 'update'])
-        ->names('system.communication.templates');
+        ->names('system.communication.templates')
+        ->middleware('system.permission:system.templates.manage');
 
     // Plans Management
     // NOTE: create/edit routes removed because the Form.vue page is intentionally
     // not implemented. The Index page has a full modal-based CRUD flow that
     // posts directly to /plans and /plans/{id}. Re-introducing dedicated
     // create/edit pages would require building System/Plans/Form.vue.
-    Route::get('/plans', [PlansController::class, 'index'])->name('system.plans.index');
-    Route::post('/plans', [PlansController::class, 'store'])->name('system.plans.store');
-    Route::put('/plans/{plan}', [PlansController::class, 'update'])->name('system.plans.update');
-    Route::delete('/plans/{plan}', [PlansController::class, 'destroy'])->name('system.plans.destroy');
+    Route::get('/plans', [PlansController::class, 'index'])->name('system.plans.index')->middleware('system.permission:system.plans.manage');
+    Route::post('/plans', [PlansController::class, 'store'])->name('system.plans.store')->middleware('system.permission:system.plans.manage');
+    Route::put('/plans/{plan}', [PlansController::class, 'update'])->name('system.plans.update')->middleware('system.permission:system.plans.manage');
+    Route::delete('/plans/{plan}', [PlansController::class, 'destroy'])->name('system.plans.destroy')->middleware('system.permission:system.plans.manage');
 
     // Promo Codes Management
     // See note above re: Plans — create/edit routes removed; Index.vue modal
     // handles create/update via POST/PUT to /promo-codes and /promo-codes/{id}.
-    Route::get('/promo-codes', [PromoCodesController::class, 'index'])->name('system.promo-codes.index');
-    Route::post('/promo-codes', [PromoCodesController::class, 'store'])->name('system.promo-codes.store');
-    Route::put('/promo-codes/{promoCode}', [PromoCodesController::class, 'update'])->name('system.promo-codes.update');
-    Route::delete('/promo-codes/{promoCode}', [PromoCodesController::class, 'destroy'])->name('system.promo-codes.destroy');
+    Route::get('/promo-codes', [PromoCodesController::class, 'index'])->name('system.promo-codes.index')->middleware('system.permission:system.promocodes.manage');
+    Route::post('/promo-codes', [PromoCodesController::class, 'store'])->name('system.promo-codes.store')->middleware('system.permission:system.promocodes.manage');
+    Route::put('/promo-codes/{promoCode}', [PromoCodesController::class, 'update'])->name('system.promo-codes.update')->middleware('system.permission:system.promocodes.manage');
+    Route::delete('/promo-codes/{promoCode}', [PromoCodesController::class, 'destroy'])->name('system.promo-codes.destroy')->middleware('system.permission:system.promocodes.manage');
 
     // Subscriptions Management
-    Route::get('/subscriptions', [SubscriptionsController::class, 'index'])->name('system.subscriptions.index');
-    Route::get('/subscriptions/create', [SubscriptionsController::class, 'create'])->name('system.subscriptions.create');
-    Route::post('/subscriptions', [SubscriptionsController::class, 'store'])->name('system.subscriptions.store');
-    Route::get('/subscriptions/{subscription}', [SubscriptionsController::class, 'show'])->name('system.subscriptions.show');
-    Route::post('/subscriptions/{subscription}/cancel', [SubscriptionsController::class, 'cancel'])->name('system.subscriptions.cancel');
-    Route::post('/subscriptions/{subscription}/activate', [SubscriptionsController::class, 'activate'])->name('system.subscriptions.activate');
-    Route::post('/subscriptions/{subscription}/extend', [SubscriptionsController::class, 'extend'])->name('system.subscriptions.extend');
+    Route::get('/subscriptions', [SubscriptionsController::class, 'index'])->name('system.subscriptions.index')->middleware('system.permission:system.subscriptions.view');
+    Route::get('/subscriptions/create', [SubscriptionsController::class, 'create'])->name('system.subscriptions.create')->middleware('system.permission:system.subscriptions.manage');
+    Route::post('/subscriptions', [SubscriptionsController::class, 'store'])->name('system.subscriptions.store')->middleware('system.permission:system.subscriptions.manage');
+    Route::get('/subscriptions/{subscription}', [SubscriptionsController::class, 'show'])->name('system.subscriptions.show')->middleware('system.permission:system.subscriptions.view');
+    Route::post('/subscriptions/{subscription}/cancel', [SubscriptionsController::class, 'cancel'])->name('system.subscriptions.cancel')->middleware('system.permission:system.subscriptions.manage');
+    Route::post('/subscriptions/{subscription}/activate', [SubscriptionsController::class, 'activate'])->name('system.subscriptions.activate')->middleware('system.permission:system.subscriptions.manage');
+    Route::post('/subscriptions/{subscription}/extend', [SubscriptionsController::class, 'extend'])->name('system.subscriptions.extend')->middleware('system.permission:system.subscriptions.manage');
 
     // Payment
-    Route::get('/payment/checkout/{subscription}', [PaymentController::class, 'checkout'])->name('system.payment.checkout');
-    Route::get('/payment/callback/{payment}', [PaymentController::class, 'callback'])->name('system.payment.callback');
-    Route::get('/payment/success/{payment}', [PaymentController::class, 'success'])->name('system.payment.success');
-    Route::get('/payment/failed/{payment}', [PaymentController::class, 'failed'])->name('system.payment.failed');
-    Route::post('/payment/retry/{payment}', [PaymentController::class, 'retry'])->name('system.payment.retry');
+    Route::get('/payment/checkout/{subscription}', [PaymentController::class, 'checkout'])->name('system.payment.checkout')->middleware('system.permission:system.subscriptions.view');
+    Route::get('/payment/callback/{payment}', [PaymentController::class, 'callback'])->name('system.payment.callback')->middleware('system.permission:system.payment.retry');
+    Route::get('/payment/success/{payment}', [PaymentController::class, 'success'])->name('system.payment.success')->middleware('system.permission:system.subscriptions.view');
+    Route::get('/payment/failed/{payment}', [PaymentController::class, 'failed'])->name('system.payment.failed')->middleware('system.permission:system.subscriptions.view');
+    Route::post('/payment/retry/{payment}', [PaymentController::class, 'retry'])->name('system.payment.retry')->middleware('system.permission:system.payment.retry');
 
     // Payment Settings
-    Route::get('/settings/payment', [PaymentSettingsController::class, 'index'])->name('system.settings.payment');
-    Route::put('/settings/payment', [PaymentSettingsController::class, 'update'])->name('system.settings.payment.update');
+    Route::get('/settings/payment', [PaymentSettingsController::class, 'index'])->name('system.settings.payment')->middleware('system.permission:system.payment.settings');
+    Route::put('/settings/payment', [PaymentSettingsController::class, 'update'])->name('system.settings.payment.update')->middleware('system.permission:system.payment.settings');
 
     // Dunning Settings (Phase 6 — collection automation)
-    Route::get('/settings/dunning', [DunningController::class, 'settings'])->name('system.settings.dunning');
-    Route::put('/settings/dunning', [DunningController::class, 'updateSettings'])->name('system.settings.dunning.update');
-    Route::get('/billing/dunning-log', [DunningController::class, 'log'])->name('system.billing.dunning-log');
+    Route::get('/settings/dunning', [DunningController::class, 'settings'])->name('system.settings.dunning')->middleware('system.permission:system.settings.manage');
+    Route::put('/settings/dunning', [DunningController::class, 'updateSettings'])->name('system.settings.dunning.update')->middleware('system.permission:system.settings.manage');
+    Route::get('/billing/dunning-log', [DunningController::class, 'log'])->name('system.billing.dunning-log')->middleware('system.permission:system.settings.manage');
 
     // Company Settings
-    Route::get('/settings/company', [CompanySettingsController::class, 'index'])->name('system.settings.company');
-    Route::put('/settings/company', [CompanySettingsController::class, 'update'])->name('system.settings.company.update');
-    Route::post('/settings/company/upload-logo', [CompanySettingsController::class, 'uploadLogo'])->name('system.settings.company.upload-logo');
-    Route::delete('/settings/company/logo', [CompanySettingsController::class, 'removeLogo'])->name('system.settings.company.remove-logo');
-    Route::post('/settings/company/upload-stamp', [CompanySettingsController::class, 'uploadStamp'])->name('system.settings.company.upload-stamp');
-    Route::delete('/settings/company/stamp', [CompanySettingsController::class, 'removeStamp'])->name('system.settings.company.remove-stamp');
+    Route::get('/settings/company', [CompanySettingsController::class, 'index'])->name('system.settings.company')->middleware('system.permission:system.settings.manage');
+    Route::put('/settings/company', [CompanySettingsController::class, 'update'])->name('system.settings.company.update')->middleware('system.permission:system.settings.manage');
+    Route::post('/settings/company/upload-logo', [CompanySettingsController::class, 'uploadLogo'])->name('system.settings.company.upload-logo')->middleware('system.permission:system.settings.manage');
+    Route::delete('/settings/company/logo', [CompanySettingsController::class, 'removeLogo'])->name('system.settings.company.remove-logo')->middleware('system.permission:system.settings.manage');
+    Route::post('/settings/company/upload-stamp', [CompanySettingsController::class, 'uploadStamp'])->name('system.settings.company.upload-stamp')->middleware('system.permission:system.settings.manage');
+    Route::delete('/settings/company/stamp', [CompanySettingsController::class, 'removeStamp'])->name('system.settings.company.remove-stamp')->middleware('system.permission:system.settings.manage');
 
     // General Settings
-    Route::get('/settings/general', [GeneralSettingsController::class, 'index'])->name('system.settings.general');
-    Route::put('/settings/general', [GeneralSettingsController::class, 'update'])->name('system.settings.general.update');
+    Route::get('/settings/general', [GeneralSettingsController::class, 'index'])->name('system.settings.general')->middleware('system.permission:system.settings.manage');
+    Route::put('/settings/general', [GeneralSettingsController::class, 'update'])->name('system.settings.general.update')->middleware('system.permission:system.settings.manage');
 
     // Website Settings
-    Route::get('/settings/website', [WebsiteSettingsController::class, 'index'])->name('system.settings.website');
-    Route::put('/settings/website', [WebsiteSettingsController::class, 'update'])->name('system.settings.website.update')->middleware('throttle:60,1');
-    Route::post('/settings/website/upload-image', [WebsiteSettingsController::class, 'uploadImage'])->name('system.settings.website.upload-image')->middleware('throttle:30,1');
+    Route::get('/settings/website', [WebsiteSettingsController::class, 'index'])->name('system.settings.website')->middleware('system.permission:system.settings.manage');
+    Route::put('/settings/website', [WebsiteSettingsController::class, 'update'])->name('system.settings.website.update')->middleware(['throttle:60,1', 'system.permission:system.settings.manage']);
+    Route::post('/settings/website/upload-image', [WebsiteSettingsController::class, 'uploadImage'])->name('system.settings.website.upload-image')->middleware(['throttle:30,1', 'system.permission:system.settings.manage']);
 
     // Help & Knowledge Base Settings
-    Route::get('/settings/help', [HelpSettingsController::class, 'index'])->name('system.settings.help');
-    Route::put('/settings/help', [HelpSettingsController::class, 'update'])->name('system.settings.help.update');
-    Route::post('/settings/help/reset', [HelpSettingsController::class, 'resetDefaults'])->name('system.settings.help.reset');
-    Route::post('/settings/help/fetch-video-meta', [HelpSettingsController::class, 'fetchVideoMeta'])->name('system.settings.help.fetch_video_meta');
-    Route::get('/help', fn () => redirect()->route('system.settings.help'))->name('system.help');
+    Route::get('/settings/help', [HelpSettingsController::class, 'index'])->name('system.settings.help')->middleware('system.permission:system.settings.manage');
+    Route::put('/settings/help', [HelpSettingsController::class, 'update'])->name('system.settings.help.update')->middleware('system.permission:system.settings.manage');
+    Route::post('/settings/help/reset', [HelpSettingsController::class, 'resetDefaults'])->name('system.settings.help.reset')->middleware('system.permission:system.settings.manage');
+    Route::post('/settings/help/fetch-video-meta', [HelpSettingsController::class, 'fetchVideoMeta'])->name('system.settings.help.fetch_video_meta')->middleware('system.permission:system.settings.manage');
+    Route::get('/help', fn () => redirect()->route('system.settings.help'))->name('system.help')->middleware('system.permission:system.settings.manage');
 
     // Contact Messages
-    Route::get('/settings/contact-messages', [ContactMessageController::class, 'index'])->name('system.contact_messages.index');
-    Route::put('/settings/contact-messages/{contactMessage}/read', [ContactMessageController::class, 'markAsRead'])->name('system.contact_messages.read');
-    Route::delete('/settings/contact-messages/{contactMessage}', [ContactMessageController::class, 'destroy'])->name('system.contact_messages.destroy');
+    Route::get('/settings/contact-messages', [ContactMessageController::class, 'index'])->name('system.contact_messages.index')->middleware('system.permission:system.contact_messages.manage');
+    Route::put('/settings/contact-messages/{contactMessage}/read', [ContactMessageController::class, 'markAsRead'])->name('system.contact_messages.read')->middleware('system.permission:system.contact_messages.manage');
+    Route::delete('/settings/contact-messages/{contactMessage}', [ContactMessageController::class, 'destroy'])->name('system.contact_messages.destroy')->middleware('system.permission:system.contact_messages.manage');
 
     // Feedbacks & Support Desk
     Route::prefix('settings/feedbacks')->name('system.feedbacks.')->group(function () {
-        Route::get('/', [FeedbackManagementController::class, 'index'])->name('index');
-        Route::post('/{feedback}/reply', [FeedbackManagementController::class, 'reply'])->name('reply');
-        Route::put('/{feedback}/status', [FeedbackManagementController::class, 'updateStatus'])->name('update-status');
-        Route::delete('/{feedback}', [FeedbackManagementController::class, 'destroy'])->name('destroy');
+        Route::get('/', [FeedbackManagementController::class, 'index'])->name('index')
+            ->middleware('system.permission:system.feedbacks.manage');
+        Route::post('/{feedback}/reply', [FeedbackManagementController::class, 'reply'])->name('reply')
+            ->middleware('system.permission:system.feedbacks.manage');
+        Route::put('/{feedback}/status', [FeedbackManagementController::class, 'updateStatus'])->name('update-status')
+            ->middleware('system.permission:system.feedbacks.manage');
+        Route::delete('/{feedback}', [FeedbackManagementController::class, 'destroy'])->name('destroy')
+            ->middleware('system.permission:system.feedbacks.manage');
     });
-    Route::get('/feedbacks', fn () => redirect()->route('system.feedbacks.index'))->name('system.feedback.redirect');
-    Route::get('/feedback', fn () => redirect()->route('system.feedbacks.index'))->name('system.feedback.shortcut');
+    Route::get('/feedbacks', fn () => redirect()->route('system.feedbacks.index'))->name('system.feedback.redirect')->middleware('system.permission:system.feedbacks.manage');
+    Route::get('/feedback', fn () => redirect()->route('system.feedbacks.index'))->name('system.feedback.shortcut')->middleware('system.permission:system.feedbacks.manage');
 
     // Subscription Invoices
-    Route::get('/invoices', [SubscriptionInvoicesController::class, 'index'])->name('system.invoices.index');
-    Route::get('/invoices/{invoice}', [SubscriptionInvoicesController::class, 'show'])->name('system.invoices.show');
-    Route::get('/invoices/{invoice}/download', [SubscriptionInvoicesController::class, 'download'])->name('system.invoices.download');
-    Route::post('/invoices/{invoice}/send', [SubscriptionInvoicesController::class, 'send'])->name('system.invoices.send');
-    Route::post('/invoices/{invoice}/mark-paid', [SubscriptionInvoicesController::class, 'markPaid'])->name('system.invoices.mark-paid');
-    Route::post('/invoices/{invoice}/cancel', [SubscriptionInvoicesController::class, 'cancel'])->name('system.invoices.cancel');
-    Route::post('/invoices/{invoice}/regenerate-pdf', [SubscriptionInvoicesController::class, 'regeneratePdf'])->name('system.invoices.regenerate-pdf');
+    Route::get('/invoices', [SubscriptionInvoicesController::class, 'index'])->name('system.invoices.index')->middleware('system.permission:system.invoices.view');
+    Route::get('/invoices/{invoice}', [SubscriptionInvoicesController::class, 'show'])->name('system.invoices.show')->middleware('system.permission:system.invoices.view');
+    Route::get('/invoices/{invoice}/download', [SubscriptionInvoicesController::class, 'download'])->name('system.invoices.download')->middleware('system.permission:system.invoices.view');
+    Route::post('/invoices/{invoice}/send', [SubscriptionInvoicesController::class, 'send'])->name('system.invoices.send')->middleware('system.permission:system.invoices.manage');
+    Route::post('/invoices/{invoice}/mark-paid', [SubscriptionInvoicesController::class, 'markPaid'])->name('system.invoices.mark-paid')->middleware('system.permission:system.invoices.manage');
+    Route::post('/invoices/{invoice}/cancel', [SubscriptionInvoicesController::class, 'cancel'])->name('system.invoices.cancel')->middleware('system.permission:system.invoices.manage');
+    Route::post('/invoices/{invoice}/regenerate-pdf', [SubscriptionInvoicesController::class, 'regeneratePdf'])->name('system.invoices.regenerate-pdf')->middleware('system.permission:system.invoices.manage');
 
     // Installments — removed (replaced by Tabby/Tamara BNPL)
 
     // SMS Credits
-    Route::get('/sms/packages', [SmsCreditsController::class, 'packages'])->name('system.sms.packages');
-    Route::post('/sms/packages', [SmsCreditsController::class, 'storePackage'])->name('system.sms.packages.store');
-    Route::put('/sms/packages/{package}', [SmsCreditsController::class, 'updatePackage'])->name('system.sms.packages.update');
-    Route::delete('/sms/packages/{package}', [SmsCreditsController::class, 'destroyPackage'])->name('system.sms.packages.destroy');
-    Route::get('/sms/balances', [SmsCreditsController::class, 'balances'])->name('system.sms.balances');
-    Route::post('/sms/add-credits', [SmsCreditsController::class, 'addCredits'])->name('system.sms.add-credits');
-    Route::get('/sms/purchases', [SmsCreditsController::class, 'purchases'])->name('system.sms.purchases');
-    Route::get('/sms/usage', [SmsCreditsController::class, 'usage'])->name('system.sms.usage');
+    Route::get('/sms/packages', [SmsCreditsController::class, 'packages'])->name('system.sms.packages')->middleware('system.permission:system.credits.manage');
+    Route::post('/sms/packages', [SmsCreditsController::class, 'storePackage'])->name('system.sms.packages.store')->middleware('system.permission:system.credits.manage');
+    Route::put('/sms/packages/{package}', [SmsCreditsController::class, 'updatePackage'])->name('system.sms.packages.update')->middleware('system.permission:system.credits.manage');
+    Route::delete('/sms/packages/{package}', [SmsCreditsController::class, 'destroyPackage'])->name('system.sms.packages.destroy')->middleware('system.permission:system.credits.manage');
+    Route::get('/sms/balances', [SmsCreditsController::class, 'balances'])->name('system.sms.balances')->middleware('system.permission:system.credits.manage');
+    Route::post('/sms/add-credits', [SmsCreditsController::class, 'addCredits'])->name('system.sms.add-credits')->middleware('system.permission:system.credits.manage');
+    Route::get('/sms/purchases', [SmsCreditsController::class, 'purchases'])->name('system.sms.purchases')->middleware('system.permission:system.credits.manage');
+    Route::get('/sms/usage', [SmsCreditsController::class, 'usage'])->name('system.sms.usage')->middleware('system.permission:system.credits.manage');
 
     // WhatsApp Credits
-    Route::get('/whatsapp/packages', [WhatsappCreditsController::class, 'packages'])->name('system.whatsapp.packages');
-    Route::post('/whatsapp/packages', [WhatsappCreditsController::class, 'storePackage'])->name('system.whatsapp.packages.store');
-    Route::put('/whatsapp/packages/{package}', [WhatsappCreditsController::class, 'updatePackage'])->name('system.whatsapp.packages.update');
-    Route::delete('/whatsapp/packages/{package}', [WhatsappCreditsController::class, 'destroyPackage'])->name('system.whatsapp.packages.destroy');
-    Route::get('/whatsapp/balances', [WhatsappCreditsController::class, 'balances'])->name('system.whatsapp.balances');
-    Route::post('/whatsapp/add-credits', [WhatsappCreditsController::class, 'addCredits'])->name('system.whatsapp.add-credits');
-    Route::get('/whatsapp/usage', [WhatsappCreditsController::class, 'usage'])->name('system.whatsapp.usage');
-    Route::get('/whatsapp/purchases', [WhatsappCreditsController::class, 'purchases'])->name('system.whatsapp.purchases');
+    Route::get('/whatsapp/packages', [WhatsappCreditsController::class, 'packages'])->name('system.whatsapp.packages')->middleware('system.permission:system.credits.manage');
+    Route::post('/whatsapp/packages', [WhatsappCreditsController::class, 'storePackage'])->name('system.whatsapp.packages.store')->middleware('system.permission:system.credits.manage');
+    Route::put('/whatsapp/packages/{package}', [WhatsappCreditsController::class, 'updatePackage'])->name('system.whatsapp.packages.update')->middleware('system.permission:system.credits.manage');
+    Route::delete('/whatsapp/packages/{package}', [WhatsappCreditsController::class, 'destroyPackage'])->name('system.whatsapp.packages.destroy')->middleware('system.permission:system.credits.manage');
+    Route::get('/whatsapp/balances', [WhatsappCreditsController::class, 'balances'])->name('system.whatsapp.balances')->middleware('system.permission:system.credits.manage');
+    Route::post('/whatsapp/add-credits', [WhatsappCreditsController::class, 'addCredits'])->name('system.whatsapp.add-credits')->middleware('system.permission:system.credits.manage');
+    Route::get('/whatsapp/usage', [WhatsappCreditsController::class, 'usage'])->name('system.whatsapp.usage')->middleware('system.permission:system.credits.manage');
+    Route::get('/whatsapp/purchases', [WhatsappCreditsController::class, 'purchases'])->name('system.whatsapp.purchases')->middleware('system.permission:system.credits.manage');
 
     // Integrations
-    Route::get('/integrations', [IntegrationsController::class, 'index'])->name('system.integrations.index');
-    Route::post('/integrations', [IntegrationsController::class, 'store'])->name('system.integrations.store');
-    Route::get('/integrations/{integration}', [IntegrationsController::class, 'show'])->name('system.integrations.show');
-    Route::put('/integrations/{integration}', [IntegrationsController::class, 'update'])->name('system.integrations.update');
-    Route::post('/integrations/{integration}/test', [IntegrationsController::class, 'test'])->name('system.integrations.test');
-    Route::get('/integrations/{integration}/balance', [IntegrationsController::class, 'getBalance'])->name('system.integrations.balance');
-    Route::delete('/integrations/{integration}', [IntegrationsController::class, 'destroy'])->name('system.integrations.destroy');
+    Route::get('/integrations', [IntegrationsController::class, 'index'])->name('system.integrations.index')->middleware('system.permission:system.integrations.manage');
+    Route::post('/integrations', [IntegrationsController::class, 'store'])->name('system.integrations.store')->middleware('system.permission:system.integrations.manage');
+    Route::get('/integrations/{integration}', [IntegrationsController::class, 'show'])->name('system.integrations.show')->middleware('system.permission:system.integrations.manage');
+    Route::put('/integrations/{integration}', [IntegrationsController::class, 'update'])->name('system.integrations.update')->middleware('system.permission:system.integrations.manage');
+    Route::post('/integrations/{integration}/test', [IntegrationsController::class, 'test'])->name('system.integrations.test')->middleware('system.permission:system.integrations.manage');
+    Route::get('/integrations/{integration}/balance', [IntegrationsController::class, 'getBalance'])->name('system.integrations.balance')->middleware('system.permission:system.integrations.manage');
+    Route::delete('/integrations/{integration}', [IntegrationsController::class, 'destroy'])->name('system.integrations.destroy')->middleware('system.permission:system.integrations.manage');
 
     // Profile
-    Route::get('/profile', [App\Http\Controllers\System\ProfileController::class, 'index'])->name('system.profile.index');
-    Route::put('/profile', [App\Http\Controllers\System\ProfileController::class, 'update'])->name('system.profile.update');
-    Route::put('/profile/password', [App\Http\Controllers\System\ProfileController::class, 'updatePassword'])->name('system.profile.password');
+    Route::get('/profile', [App\Http\Controllers\System\ProfileController::class, 'index'])->name('system.profile.index')->middleware('system.permission:system.profile.manage');
+    Route::put('/profile', [App\Http\Controllers\System\ProfileController::class, 'update'])->name('system.profile.update')->middleware('system.permission:system.profile.manage');
+    Route::put('/profile/password', [App\Http\Controllers\System\ProfileController::class, 'updatePassword'])->name('system.profile.password')->middleware('system.permission:system.profile.manage');
 
     // Admin Users
     //
@@ -1398,32 +1424,32 @@ Route::prefix('system')->middleware(['auth:web,admin', 'system.admin'])->group(f
     //
     // The `super_admin` middleware closes that escalation path. The
     // index/edit routes stay readable by every system admin.
-    Route::get('/admin-users', [AdminUsersController::class, 'index'])->name('system.admin-users.index');
-    Route::get('/admin-users/create', [AdminUsersController::class, 'create'])->name('system.admin-users.create');
-    Route::get('/activity-log', [AdminUsersController::class, 'activityLog'])->name('system.activity-log');
+    Route::get('/admin-users', [AdminUsersController::class, 'index'])->name('system.admin-users.index')->middleware('system.permission:system.admin_users.view');
+    Route::get('/admin-users/create', [AdminUsersController::class, 'create'])->name('system.admin-users.create')->middleware('system.permission:system.admin_users.view');
+    Route::get('/activity-log', [AdminUsersController::class, 'activityLog'])->name('system.activity-log')->middleware('system.permission:system.activity_log.view');
 
     Route::middleware('super_admin')->group(function () {
-        Route::post('/admin-users', [AdminUsersController::class, 'store'])->name('system.admin-users.store');
-        Route::get('/admin-users/{adminUser}/edit', [AdminUsersController::class, 'edit'])->name('system.admin-users.edit');
-        Route::put('/admin-users/{adminUser}', [AdminUsersController::class, 'update'])->name('system.admin-users.update');
-        Route::delete('/admin-users/{adminUser}', [AdminUsersController::class, 'destroy'])->name('system.admin-users.destroy');
+        Route::post('/admin-users', [AdminUsersController::class, 'store'])->name('system.admin-users.store')->middleware('system.permission:system.admin_users.manage');
+        Route::get('/admin-users/{adminUser}/edit', [AdminUsersController::class, 'edit'])->name('system.admin-users.edit')->middleware('system.permission:system.admin_users.view');
+        Route::put('/admin-users/{adminUser}', [AdminUsersController::class, 'update'])->name('system.admin-users.update')->middleware('system.permission:system.admin_users.manage');
+        Route::delete('/admin-users/{adminUser}', [AdminUsersController::class, 'destroy'])->name('system.admin-users.destroy')->middleware('system.permission:system.admin_users.manage');
     });
 
     // Announcements
-    Route::get('/announcements', [AnnouncementsController::class, 'index'])->name('system.announcements.index');
-    Route::get('/announcements/create', [AnnouncementsController::class, 'create'])->name('system.announcements.create');
-    Route::post('/announcements', [AnnouncementsController::class, 'store'])->name('system.announcements.store');
-    Route::get('/announcements/{announcement}', [AnnouncementsController::class, 'show'])->name('system.announcements.show');
-    Route::post('/announcements/{announcement}/publish', [AnnouncementsController::class, 'publish'])->name('system.announcements.publish');
-    Route::post('/announcements/{announcement}/unpublish', [AnnouncementsController::class, 'unpublish'])->name('system.announcements.unpublish');
-    Route::delete('/announcements/{announcement}', [AnnouncementsController::class, 'destroy'])->name('system.announcements.destroy');
+    Route::get('/announcements', [AnnouncementsController::class, 'index'])->name('system.announcements.index')->middleware('system.permission:system.announcements.manage');
+    Route::get('/announcements/create', [AnnouncementsController::class, 'create'])->name('system.announcements.create')->middleware('system.permission:system.announcements.manage');
+    Route::post('/announcements', [AnnouncementsController::class, 'store'])->name('system.announcements.store')->middleware('system.permission:system.announcements.manage');
+    Route::get('/announcements/{announcement}', [AnnouncementsController::class, 'show'])->name('system.announcements.show')->middleware('system.permission:system.announcements.manage');
+    Route::post('/announcements/{announcement}/publish', [AnnouncementsController::class, 'publish'])->name('system.announcements.publish')->middleware('system.permission:system.announcements.manage');
+    Route::post('/announcements/{announcement}/unpublish', [AnnouncementsController::class, 'unpublish'])->name('system.announcements.unpublish')->middleware('system.permission:system.announcements.manage');
+    Route::delete('/announcements/{announcement}', [AnnouncementsController::class, 'destroy'])->name('system.announcements.destroy')->middleware('system.permission:system.announcements.manage');
 
     // Two-Factor Authentication
-    Route::get('/security/2fa', [App\Http\Controllers\System\TwoFactorController::class, 'setup'])->name('system.2fa.setup');
-    Route::post('/security/2fa/send-code', [App\Http\Controllers\System\TwoFactorController::class, 'sendCode'])->name('system.2fa.send-code');
-    Route::post('/security/2fa/enable', [App\Http\Controllers\System\TwoFactorController::class, 'enable'])->name('system.2fa.enable');
-    Route::post('/security/2fa/disable', [App\Http\Controllers\System\TwoFactorController::class, 'disable'])->name('system.2fa.disable');
-    Route::post('/security/2fa/regenerate', [App\Http\Controllers\System\TwoFactorController::class, 'regenerateRecoveryCodes'])->name('system.2fa.regenerate');
+    Route::get('/security/2fa', [App\Http\Controllers\System\TwoFactorController::class, 'setup'])->name('system.2fa.setup')->middleware('system.permission:system.security.2fa.manage');
+    Route::post('/security/2fa/send-code', [App\Http\Controllers\System\TwoFactorController::class, 'sendCode'])->name('system.2fa.send-code')->middleware('system.permission:system.security.2fa.manage');
+    Route::post('/security/2fa/enable', [App\Http\Controllers\System\TwoFactorController::class, 'enable'])->name('system.2fa.enable')->middleware('system.permission:system.security.2fa.manage');
+    Route::post('/security/2fa/disable', [App\Http\Controllers\System\TwoFactorController::class, 'disable'])->name('system.2fa.disable')->middleware('system.permission:system.security.2fa.manage');
+    Route::post('/security/2fa/regenerate', [App\Http\Controllers\System\TwoFactorController::class, 'regenerateRecoveryCodes'])->name('system.2fa.regenerate')->middleware('system.permission:system.security.2fa.manage');
 
     // NOTE: /system/tenants/{tenant}/impersonate is registered above inside
     // the super_admin-only group. The duplicate declaration here was

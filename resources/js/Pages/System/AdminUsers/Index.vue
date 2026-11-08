@@ -377,6 +377,14 @@
                                 >
                                     {{ $t('system.admin_users.form.permissions') }}
                                 </label>
+                                <!-- The list is an OVERRIDE: leaving it empty
+                                     keeps the role's own abilities, and
+                                     selecting any replaces them. The hint
+                                     says so, because the difference is
+                                     invisible otherwise. -->
+                                <p class="text-xs text-gray-500 dark:text-gray-400 mb-3">
+                                    {{ $t('system.admin_users.form.permissions_hint') }}
+                                </p>
                                 <div class="space-y-4">
                                     <div
                                         v-for="(perms, group) in permissions"
@@ -475,11 +483,17 @@ const roleLabels = computed(() => ({
     support: t('system.admin_users.roles.support'),
 }));
 
+// The groups come straight from the server-side permission registry
+// (App\Support\SystemPermissions), so a new group shows up here as
+// soon as it is registered — no front-end change needed.
 const groupLabels = computed(() => ({
     tenants: t('system.admin_users.permission_groups.tenants'),
     billing: t('system.admin_users.permission_groups.billing'),
     settings: t('system.admin_users.permission_groups.settings'),
+    support: t('system.admin_users.permission_groups.support'),
     credits: t('system.admin_users.permission_groups.credits'),
+    panel: t('system.admin_users.permission_groups.panel'),
+    self: t('system.admin_users.permission_groups.self'),
 }));
 
 const props = defineProps({

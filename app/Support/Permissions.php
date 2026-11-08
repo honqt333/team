@@ -347,12 +347,111 @@ class Permissions
     public const WEBSITE_MANAGE = 'settings.website.manage';
 
     // ========================================
+    // SYSTEM PANEL (/system)
+    //
+    // The platform-admin panel. These abilities are NOT Spatie
+    // permissions: they are resolved by the system permission
+    // registry (App\Support\SystemPermissions) against the role and
+    // the permission list stored on the admin account.
+    //
+    // The naming convention is `<group>.<action>` — the same shape the
+    // tenant-side permissions use, so the two live side by side
+    // without ambiguity.
+    //
+    // Grouping mirrors SystemPermissions::GROUPS, which is the single
+    // place the registry maps an ability to its display group.
+    // ========================================
+
+    /** Tenants — viewing the tenant list and a tenant's detail */
+    public const SYSTEM_TENANTS_VIEW = 'system.tenants.view';
+
+    /** Tenants — lifecycle changes: suspend, activate, extend trial, dunning */
+    public const SYSTEM_TENANTS_MANAGE = 'system.tenants.manage';
+
+    /** Tenants — hard delete (the most destructive action in the panel) */
+    public const SYSTEM_TENANTS_DELETE = 'system.tenants.delete';
+
+    /** Tenants — impersonate a tenant user */
+    public const SYSTEM_TENANTS_IMPERSONATE = 'system.tenants.impersonate';
+
+    /** Billing — viewing subscriptions and invoices */
+    public const SYSTEM_SUBSCRIPTIONS_VIEW = 'system.subscriptions.view';
+
+    /** Billing — creating, cancelling and extending subscriptions */
+    public const SYSTEM_SUBSCRIPTIONS_MANAGE = 'system.subscriptions.manage';
+
+    /** Billing — viewing invoices */
+    public const SYSTEM_INVOICES_VIEW = 'system.invoices.view';
+
+    /** Billing — cancelling invoices, marking them paid, sending them */
+    public const SYSTEM_INVOICES_MANAGE = 'system.invoices.manage';
+
+    /** Billing — the plan catalogue */
+    public const SYSTEM_PLANS_MANAGE = 'system.plans.manage';
+
+    /** Billing — promo codes */
+    public const SYSTEM_PROMOCODES_MANAGE = 'system.promocodes.manage';
+
+    /** Billing — payment gateway configuration (holds secret keys) */
+    public const SYSTEM_PAYMENT_SETTINGS = 'system.payment.settings';
+
+    /** Billing — retrying a failed payment */
+    public const SYSTEM_PAYMENT_RETRY = 'system.payment.retry';
+
+    /** Settings — the platform settings pages (general, company, help, website, dunning) */
+    public const SYSTEM_SETTINGS_MANAGE = 'system.settings.manage';
+
+    /** Settings — third-party integrations */
+    public const SYSTEM_INTEGRATIONS_MANAGE = 'system.integrations.manage';
+
+    /** Settings — platform announcements broadcast to tenants */
+    public const SYSTEM_ANNOUNCEMENTS_MANAGE = 'system.announcements.manage';
+
+    /** Settings — communication templates (email / SMS bodies) */
+    public const SYSTEM_TEMPLATES_MANAGE = 'system.templates.manage';
+
+    /** Support — tenant feedback tickets */
+    public const SYSTEM_FEEDBACKS_MANAGE = 'system.feedbacks.manage';
+
+    /** Support — contact messages from the public site */
+    public const SYSTEM_CONTACT_MESSAGES_MANAGE = 'system.contact_messages.manage';
+
+    /** Credits — SMS and WhatsApp credit balances and packages */
+    public const SYSTEM_CREDITS_MANAGE = 'system.credits.manage';
+
+    /** Panel — the admin notification list */
+    public const SYSTEM_NOTIFICATIONS_MANAGE = 'system.notifications.manage';
+
+    /** Panel — the developer centre (audit runner, dependency graph, AI advice) */
+    public const SYSTEM_DEVELOPER_ACCESS = 'system.developer.access';
+
+    /** Panel — reading the admin roster (a diagnostic surface) */
+    public const SYSTEM_ADMIN_USERS_VIEW = 'system.admin_users.view';
+
+    /** Panel — creating, editing and deleting system-admin accounts */
+    public const SYSTEM_ADMIN_USERS_MANAGE = 'system.admin_users.manage';
+
+    /** Panel — reading the admin activity log */
+    public const SYSTEM_ACTIVITY_LOG_VIEW = 'system.activity_log.view';
+
+    /** Self — the signed-in admin's own profile and password */
+    public const SYSTEM_PROFILE_MANAGE = 'system.profile.manage';
+
+    /** Self — the signed-in admin's own two-factor authentication */
+    public const SYSTEM_SECURITY_2FA_MANAGE = 'system.security.2fa.manage';
+
+    // ========================================
     // HELPER METHODS
     // ========================================
 
     /**
      * Get all permission constants as an array.
-     * Useful for seeding and documentation.
+     *
+     * This includes BOTH the tenant-side permissions and the system
+     * panel's abilities. Use `tenantPermissions()` when the list is
+     * going to a tenant role — handing a tenant owner a system-panel
+     * ability would be a privilege escalation, since every new signup
+     * is assigned the tenant-scoped `super_admin` role.
      *
      * @return array<string>
      */
@@ -361,6 +460,33 @@ class Permissions
         $reflection = new ReflectionClass(self::class);
 
         return array_values($reflection->getConstants());
+    }
+
+    /**
+     * The permissions that belong to a TENANT role.
+     *
+     * Everything except the system panel's abilities.
+     *
+     * @return array<string>
+     */
+    public static function tenantPermissions(): array
+    {
+        $system = SystemPermissions::names();
+
+        return array_values(array_filter(
+            self::all(),
+            fn (string $permission) => ! in_array($permission, $system, true)
+        ));
+    }
+
+    /**
+     * The permissions that belong to the SYSTEM panel.
+     *
+     * @return array<string>
+     */
+    public static function systemPermissions(): array
+    {
+        return SystemPermissions::names();
     }
 
     /**

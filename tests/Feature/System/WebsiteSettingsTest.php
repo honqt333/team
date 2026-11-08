@@ -280,10 +280,42 @@ class WebsiteSettingsTest extends TestCase
 
         $this->actingAs($admin, 'admin')->put('/system/settings/website', $payload);
 
-        // Regular setting updated
-        $this->assertSame('تعديل العنوان مقبول', Setting::get('website.title.ar'));
+        // A `support` admin holds no website-settings ability at all
+        // (see App\Support\SystemPermissions::ROLE_DEFAULTS), so the
+        // whole page is refused — not just the script fields.
+        //
+        // The route declares `system.permission:system.settings.manage`,
+        // which the support role does not carry. This used to let the
+        // title through while blocking only the scripts.
+        $this->assertNull(
+            Setting::get('website.title.ar'),
+            'A support admin must not reach the website settings at all.'
+        );
 
         // Script remained untouched because role is 'support' (not super_admin)
+        $this->assertSame('<script>original()</script>', Setting::get('website.scripts.header'));
+    }
+
+    public function test_an_admin_role_can_update_website_settings_but_not_the_custom_scripts(): void
+    {
+        // The `admin` role carries the website-settings ability, so the
+        // ordinary fields go through — while the script fields stay
+        // behind the controller's own super_admin guard.
+        $admin = $this->createAdminUser('admin');
+
+        Setting::set('website.scripts.header', '<script>original()</script>', 'website');
+        WebsiteSettingsController::flushSettingsCache();
+
+        $payload = [
+            'settings' => [
+                'website_title_ar' => 'تعديل العنوان مقبول',
+                'website_scripts_header' => '<script>tampered_by_admin()</script>',
+            ],
+        ];
+
+        $this->actingAs($admin, 'admin')->put('/system/settings/website', $payload);
+
+        $this->assertSame('تعديل العنوان مقبول', Setting::get('website.title.ar'));
         $this->assertSame('<script>original()</script>', Setting::get('website.scripts.header'));
     }
 

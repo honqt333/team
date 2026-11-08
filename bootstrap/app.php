@@ -7,6 +7,7 @@ use App\Http\Middleware\EnsureCenterContext;
 use App\Http\Middleware\EnsureCustomerPortalSession;
 use App\Http\Middleware\EnsureSuperAdmin;
 use App\Http\Middleware\EnsureSystemAdmin;
+use App\Http\Middleware\EnsureSystemPermission;
 use App\Http\Middleware\EnsureTenantActive;
 use App\Http\Middleware\HandleInertiaRequests;
 use App\Http\Middleware\PortalLocale;
@@ -157,6 +158,12 @@ return Application::configure(basePath: dirname(__DIR__))
             'role' => RoleMiddleware::class,
             'permission' => PermissionMiddleware::class,
             'role_or_permission' => RoleOrPermissionMiddleware::class,
+            // System panel ability check. Declare the ability a route
+            // needs: `system.permission:tenants.manage`. An account
+            // must hold it (or be the platform owner) to pass. The
+            // abilities come from App\Support\SystemPermissions, so a
+            // route can only ask for something the registry knows.
+            'system.permission' => EnsureSystemPermission::class,
         ]);
 
         // Ensure TrackAiUsage fails closed BEFORE SubstituteBindings so a

@@ -67,7 +67,13 @@ class HandleInertiaRequests extends Middleware
             'auth' => [
                 'user' => $user ? ($isTenantUser ? $user->load('roles:id,name,label_ar,label_en') : $user) : null,
                 'is_super_admin' => $isSuperAdmin,
-                'permissions' => $user ? ($isTenantUser ? $user->getAllPermissions()->pluck('name') : ($user->permissions ?? [])) : [],
+                // For a system admin the panel resolves abilities from the
+                // role and the account's own list, so the EFFECTIVE set is
+                // what the front end needs — not the raw column, which is
+                // empty for every account that relies on its role default.
+                'permissions' => $user ? ($isTenantUser
+                    ? $user->getAllPermissions()->pluck('name')
+                    : $user->effectivePermissions()) : [],
                 'available_centers' => ($user && $isTenantUser) ? $user->centers()->get(['centers.id', 'centers.name_ar', 'centers.name_en']) : [],
                 'unread_notifications_count' => ($user && $isTenantUser)
                     ? InternalNotification::where('user_id', $user->id)->where('tenant_id', $user->tenant_id)->whereNull('read_at')->count()

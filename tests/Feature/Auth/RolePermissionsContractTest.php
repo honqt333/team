@@ -80,7 +80,11 @@ class RolePermissionsContractTest extends TestCase
         $svc = new TenantSetupService;
         $roles = $svc->getDefaultRoles();
 
-        $expected = Permissions::all();
+        // The tenant super_admin holds every TENANT permission. The
+        // system panel's abilities are deliberately excluded: every new
+        // signup is assigned this role, so handing it the platform
+        // abilities would be a privilege escalation.
+        $expected = Permissions::tenantPermissions();
         sort($expected);
         $actual = $roles['super_admin']['permissions'];
         sort($actual);
@@ -88,7 +92,16 @@ class RolePermissionsContractTest extends TestCase
         $this->assertSame(
             $expected,
             $actual,
-            'super_admin role must have every permission registered in App\Support\Permissions::all()'
+            'super_admin role must have every tenant permission registered in App\Support\Permissions::tenantPermissions()'
+        );
+
+        // And it must NOT carry a single system-panel ability.
+        $systemAbilities = Permissions::systemPermissions();
+        $leaked = array_intersect($actual, $systemAbilities);
+
+        $this->assertEmpty(
+            $leaked,
+            'A tenant role must never hold a system-panel ability: '.implode(', ', $leaked)
         );
     }
 
@@ -128,7 +141,11 @@ class RolePermissionsContractTest extends TestCase
         $allGranted = array_values(array_unique($allGranted));
         sort($allGranted);
 
-        $registered = Permissions::all();
+        // The tenant side only. The system panel's abilities are granted
+        // through the system roles (super_admin / admin / support), which
+        // live in App\Support\SystemPermissions — not through a tenant
+        // role.
+        $registered = Permissions::tenantPermissions();
         sort($registered);
 
         $orphans = array_diff($registered, $allGranted);
@@ -143,7 +160,9 @@ class RolePermissionsContractTest extends TestCase
         // byModule() is a doc-style helper. Every permission
         // listed in it must exist; every permission not listed
         // would surprise readers.
-        $registered = Permissions::all();
+        // byModule() documents the TENANT permissions; the system
+        // panel's abilities are grouped by their own registry.
+        $registered = Permissions::tenantPermissions();
         $byModule = Permissions::byModule();
         $flat = array_merge(...array_values($byModule));
         $flat = array_unique($flat);
