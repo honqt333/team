@@ -52,8 +52,18 @@ class WorkOrderController extends Controller
                 $q->orWhere('phone', 'like', "%{$query}%");
             }
         })
+            ->with([
+                'vehicles' => fn ($q) => $q->select('id', 'customer_id', 'plate_number', 'make_id', 'model_id', 'year')
+                    // `vehicle_makes` and `vehicle_models` have no `name`
+                    // column: the name lives in `name_ar` / `name_en` and the
+                    // `name` attribute is an appended accessor. Asking for
+                    // `id,name` here was a fatal SQL error on every search.
+                    // `logo_path` is included because the `logo_url` accessor
+                    // falls back to a per-row query when it is missing.
+                    ->with(['make:id,name_ar,name_en,logo_path', 'model:id,name_ar,name_en']),
+            ])
             ->select('id', 'name', 'phone', 'type', 'credit_limit')
-            ->limit(10)
+            ->limit(15)
             ->get();
 
         $customers->each(function ($customer) {

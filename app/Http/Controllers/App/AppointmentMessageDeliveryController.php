@@ -175,7 +175,7 @@ class AppointmentMessageDeliveryController extends Controller
             ->where('appointments.center_id', $centerId)
             ->with([
                 'customer:id,name',
-                'appointment:id,scheduled_at,status,center_id,tenant_id,customer_id,vehicle_id,ref_number',
+                'appointment:id,scheduled_at,status,center_id,tenant_id,customer_id,vehicle_id',
             ]);
 
         if (! empty($data['status'])) {

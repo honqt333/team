@@ -99,7 +99,10 @@ class DunningController extends Controller
     public function log(Request $request): Response
     {
         $query = DunningReminderLog::query()
-            ->with(['tenant:id,name', 'invoice:id,invoice_number,total,due_at'])
+            // The invoices table has no `total` and no `due_at` column: the
+            // amount is `total_incl_tax` and the date is `due_date`. Asking
+            // for columns that do not exist is a fatal SQL error.
+            ->with(['tenant:id,name', 'invoice:id,invoice_number,total_incl_tax,due_date'])
             ->orderByDesc('sent_at');
 
         if ($status = $request->query('status')) {

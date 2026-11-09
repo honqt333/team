@@ -91,11 +91,28 @@ class AppointmentController extends Controller
             ->orderBy($nameCol)
             ->get(['id', 'name_ar', 'name_en', 'base_price', 'duration_value', 'duration_unit']);
 
+        $customers = Customer::query()
+            ->where('tenant_id', $tenantId)
+            ->with([
+                'vehicles' => fn ($q) => $q->select('id', 'customer_id', 'plate_number', 'make_id', 'model_id', 'year')
+                    // `vehicle_makes` and `vehicle_models` have no `name`
+                    // column: the name lives in `name_ar` / `name_en` and the
+                    // `name` attribute is an appended accessor. Asking for
+                    // `id,name` here was a fatal SQL error on every load.
+                    // `logo_path` is included because the `logo_url` accessor
+                    // falls back to a per-row query when it is missing.
+                    ->with(['make:id,name_ar,name_en,logo_path', 'model:id,name_ar,name_en']),
+            ])
+            ->orderBy('name')
+            ->limit(100)
+            ->get(['id', 'name', 'phone']);
+
         return Inertia::render('Appointments/Index', [
             'appointments' => $appointments,
             'bays' => $bays,
             'techs' => $techs,
             'services' => $services,
+            'customers' => $customers,
             'filters' => [
                 'date' => $request->query('date'),
                 'status' => $request->query('status'),
