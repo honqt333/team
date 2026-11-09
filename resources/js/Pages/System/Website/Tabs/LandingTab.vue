@@ -652,66 +652,140 @@ defineProps({ form: Object, addItem: Function, removeItem: Function, tab: String
                         {{ $t('tenant_site.landing.toggle_clients_desc') }}
                     </p>
                 </div>
-                <label class="relative inline-flex items-center cursor-pointer">
-                    <input
-                        type="checkbox"
-                        v-model="form.settings.landing_testimonials_enabled"
-                        true-value="1"
-                        false-value="0"
-                        class="sr-only peer"
-                    />
-                    <div
-                        class="w-11 h-6 bg-gray-200 dark:bg-gray-700 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 dark:peer-focus:ring-indigo-800 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"
-                    ></div>
-                </label>
+                <AppToggle
+                    v-model="form.settings.landing_testimonials_enabled"
+                    true-value="1"
+                    false-value="0"
+                />
             </div>
             <div class="flex items-center justify-between mt-6 mb-6">
                 <h3 class="text-lg leading-6 font-semibold text-gray-900 dark:text-white">
                     {{ $t('tenant_site.landing.manage_client_logos') }}
                 </h3>
                 <button
-                    @click="addItem('landing_testimonials_list', { name: '', logo_url: '' })"
+                    @click="
+                        addItem('landing_testimonials_list', {
+                            name: '',
+                            logo_url: '',
+                            photo_url: '',
+                            role_ar: '',
+                            role_en: '',
+                            quote_ar: '',
+                            quote_en: '',
+                        })
+                    "
                     class="inline-flex items-center px-3 py-2 border border-gray-300 dark:border-gray-600 shadow-sm text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
                 >
                     {{ $t('customers.add') }}
                 </button>
             </div>
+
+            <p class="text-xs text-gray-500 dark:text-gray-400 mb-4">
+                {{ $t('tenant_site.landing.testimonials_hint') }}
+            </p>
+
             <div class="space-y-3">
                 <div
                     v-for="(client, index) in form.settings.landing_testimonials_list"
                     :key="index"
-                    class="p-4 border border-gray-200 dark:border-gray-700 rounded-lg flex gap-4 items-center bg-gray-50 dark:bg-gray-800/30"
+                    class="p-4 border border-gray-200 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-800/30 space-y-3"
                 >
-                    <div class="flex-1">
-                        <label class="text-xs text-gray-500 dark:text-gray-400 block mb-1">
-                            {{ $t('tenant_site.landing.client_company_name') }}
-                        </label>
-                        <input v-model="client.name" class="input-enterprise" />
-                    </div>
-                    <div class="flex-1">
-                        <label class="text-xs text-gray-500 dark:text-gray-400 block mb-1">
-                            {{ $t('tenant_site.landing.logo_url') }}
-                        </label>
-                        <input
-                            v-model="client.logo_url"
-                            class="input-enterprise text-left font-mono"
-                            dir="ltr"
-                            placeholder="https://"
-                        />
-                    </div>
-                    <button
-                        @click="removeItem('landing_testimonials_list', index)"
-                        class="text-gray-400 hover:text-red-600 mt-5"
-                    >
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                    <div class="flex gap-4 items-end">
+                        <div class="flex-1">
+                            <label class="text-xs text-gray-500 dark:text-gray-400 block mb-1">
+                                {{ $t('tenant_site.landing.client_company_name') }}
+                            </label>
+                            <input v-model="client.name" class="input-enterprise" />
+                        </div>
+                        <div class="flex-1">
+                            <label class="text-xs text-gray-500 dark:text-gray-400 block mb-1">
+                                {{ $t('tenant_site.landing.logo_url') }}
+                            </label>
+                            <input
+                                v-model="client.logo_url"
+                                class="input-enterprise text-left font-mono"
+                                dir="ltr"
+                                placeholder="https://"
                             />
-                        </svg>
-                    </button>
+                        </div>
+                        <div class="flex-1">
+                            <label class="text-xs text-gray-500 dark:text-gray-400 block mb-1">
+                                {{ $t('tenant_site.landing.client_photo_url') }}
+                            </label>
+                            <input
+                                v-model="client.photo_url"
+                                class="input-enterprise text-left font-mono"
+                                dir="ltr"
+                                placeholder="https://"
+                            />
+                        </div>
+                        <button
+                            @click="removeItem('landing_testimonials_list', index)"
+                            class="text-gray-400 hover:text-red-600 mb-2"
+                        >
+                            <svg
+                                class="w-5 h-5"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                                />
+                            </svg>
+                        </button>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                            <label class="text-xs text-gray-500 dark:text-gray-400 block mb-1">
+                                {{ $t('tenant_site.landing.client_role_ar') }}
+                            </label>
+                            <input
+                                v-model="client.role_ar"
+                                class="input-enterprise"
+                                :placeholder="$t('tenant_site.landing.client_role_ar')"
+                            />
+                        </div>
+                        <div>
+                            <label class="text-xs text-gray-500 dark:text-gray-400 block mb-1">
+                                {{ $t('tenant_site.landing.client_role_en') }}
+                            </label>
+                            <input
+                                v-model="client.role_en"
+                                class="input-enterprise text-left"
+                                dir="ltr"
+                                :placeholder="$t('tenant_site.landing.client_role_en')"
+                            />
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                            <label class="text-xs text-gray-500 dark:text-gray-400 block mb-1">
+                                {{ $t('tenant_site.landing.client_quote_ar') }}
+                            </label>
+                            <textarea
+                                v-model="client.quote_ar"
+                                rows="3"
+                                class="input-enterprise"
+                            ></textarea>
+                        </div>
+                        <div>
+                            <label class="text-xs text-gray-500 dark:text-gray-400 block mb-1">
+                                {{ $t('tenant_site.landing.client_quote_en') }}
+                            </label>
+                            <textarea
+                                v-model="client.quote_en"
+                                rows="3"
+                                class="input-enterprise text-left"
+                                dir="ltr"
+                            ></textarea>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

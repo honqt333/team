@@ -187,6 +187,20 @@ Route::get('/{tenant}', [TenantSiteController::class, 'show'])
     ->middleware('public.tenant')
     ->name('public.site.show');
 
+// The social share card of a workshop: 1200×630 JPEG.
+//
+// It is a route and not a static file because the card is derived from the
+// workshop's own banner, cover or logo, cropped to the 1.91:1 ratio every
+// social platform expects, and encoded as JPEG because the Open Graph
+// crawlers do not render the WebP the uploads are stored as.
+//
+// The URL ends in .jpg so that a crawler which guesses the extension from
+// the og:image tag finds the right thing.
+Route::get('/{tenant}/og-image.jpg', [TenantSiteController::class, 'ogImage'])
+    ->where('tenant', '^(?!(?:app|system|dashboard|login|logout|register|password|forgot-password|reset-password|verify-email|confirm-password|two-factor|2fa|locale|phone|lang|landing-preview|view|impersonate|impersonate-stop|up|storage|livewire|invitations)$)[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$')
+    ->middleware('public.tenant')
+    ->name('public.site.og_image');
+
 // ─────────────────────────────────────────────────────────────────────────────
 // Customer Portal (Phase 7)
 // ─────────────────────────────────────────────────────────────────────────────

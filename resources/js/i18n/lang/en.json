@@ -7754,7 +7754,14 @@
             "hero_section": "Landing page content (Hero Section)",
             "login_button_text": "Login button text",
             "section_description": "Section description",
-            "contact_form_note": "The messages the visitors send through the contact form are emailed to the address set in the (SEO and contact details) tab."
+            "contact_form_note": "The messages the visitors send through the contact form are emailed to the address set in the (SEO and contact details) tab.",
+            "manage_testimonials": "Manage the testimonials",
+            "testimonials_hint": "Write a real quote with the owner's name. It appears on the page only when there is a name AND a quote — no invented testimonials.",
+            "client_photo_url": "Photo link (a portrait)",
+            "client_role_ar": "Role (Arabic)",
+            "client_role_en": "Role (English)",
+            "client_quote_ar": "Quote (Arabic)",
+            "client_quote_en": "Quote (English)"
         },
         "lists": {
             "sliders": "Manage the sliders",

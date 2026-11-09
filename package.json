@@ -14,7 +14,8 @@
         "format": "prettier --write .",
         "prepare": "husky",
         "lhci": "lhci autorun",
-        "lhci:baseline": "lhci autorun --collect.url=http://carag-v2.test/landing-preview --collect.settings.preset=desktop --collect.settings.formFactor=desktop --collect.settings.screenEmulation.disabled=true --collect.settings.throttlingMethod=provided --collect.numberOfRuns=1"
+        "lhci:baseline": "lhci autorun --collect.url=http://carag-v2.test/landing-preview --collect.settings.preset=desktop --collect.settings.formFactor=desktop --collect.settings.screenEmulation.disabled=true --collect.settings.throttlingMethod=provided --collect.numberOfRuns=1",
+        "og:image": "node scripts/build-og-image.mjs"
     },
     "lint-staged": {
         "*.{vue,js,ts}": [
