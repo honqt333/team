@@ -158,6 +158,87 @@ class PublicPageSeoTest extends TestCase
     }
 
     /**
+     * The share card must be a JPEG the Open Graph crawlers can render.
+     *
+     * The tenant banner is stored as WebP after the upload is optimised —
+     * which is right for the page and wrong for the share card: the
+     * crawlers do not render WebP, so the card came out EMPTY. The URL
+     * also has to be absolute, because a relative `og:image` is ignored.
+     */
+    public function test_tenant_share_image_is_an_absolute_jpeg_card(): void
+    {
+        $tenant = Tenant::factory()->create(['slug' => 'og-workshop']);
+        TenantWebsite::factory()->for($tenant)->published()->create([
+            'site_name' => 'ورشة بطاقة المشاركة',
+        ]);
+
+        $response = $this->get('/og-workshop');
+
+        $response->assertOk();
+        $response->assertInertia(fn ($page) => $page
+            ->where('site.share_image_url', url('/og-workshop/og-image.jpg'))
+        );
+
+        $image = (string) ($response->viewData('page')['props']['site']['share_image_url'] ?? '');
+
+        $this->assertStringStartsWith('http', $image, 'A relative og:image is ignored by every platform.');
+        $this->assertStringNotContainsStringIgnoringCase('.webp', $image, 'The crawlers do not render WebP.');
+        $this->assertStringEndsWith('.jpg', $image);
+    }
+
+    public function test_the_tenant_share_card_route_returns_a_1200_by_630_jpeg(): void
+    {
+        $tenant = Tenant::factory()->create(['slug' => 'card-workshop']);
+        TenantWebsite::factory()->for($tenant)->published()->create([
+            'site_name' => 'ورشة البطاقة',
+        ]);
+
+        $response = $this->get('/card-workshop/og-image.jpg');
+
+        $response->assertOk();
+        $response->assertHeader('Content-Type', 'image/jpeg');
+
+        $bytes = $response->getContent();
+
+        $this->assertNotSame('', $bytes);
+
+        $size = getimagesizefromstring($bytes);
+
+        $this->assertNotFalse($size, 'The share card must be a real image.');
+        $this->assertSame(1200, $size[0]);
+        $this->assertSame(630, $size[1]);
+        $this->assertSame('image/jpeg', $size['mime']);
+    }
+
+    public function test_the_landing_share_image_is_an_absolute_jpeg_card(): void
+    {
+        $response = $this->get('/');
+
+        $response->assertOk();
+        $response->assertInertia(fn ($page) => $page
+            ->where('ogImageUrl', url('/images/landing/og.jpg'))
+        );
+
+        $image = (string) ($response->viewData('page')['props']['ogImageUrl'] ?? '');
+
+        $this->assertStringStartsWith('http', $image);
+        $this->assertStringNotContainsStringIgnoringCase('.webp', $image);
+        $this->assertStringEndsWith('.jpg', $image);
+
+        // The card itself has to exist, at the right size.
+        $path = public_path('images/landing/og.jpg');
+
+        $this->assertFileExists($path);
+
+        $size = getimagesize($path);
+
+        $this->assertNotFalse($size);
+        $this->assertSame(1200, $size[0]);
+        $this->assertSame(630, $size[1]);
+        $this->assertSame('image/jpeg', $size['mime']);
+    }
+
+    /**
      * Pull the JSON-LD block out of the served HTML.
      */
     private function jsonLd(string $html): string

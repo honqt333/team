@@ -122,7 +122,12 @@ const emit = defineEmits(['toggle-theme', 'toggle-mobile', 'switch-lang']);
                 <Link :href="route('login')" class="btn-ghost-sm">
                     {{ t('login_button_text_ar', 'login_button_text_en') }}
                 </Link>
-                <Link :href="route('register')" class="btn-primary-sm">
+                <Link
+                    :href="route('register')"
+                    class="btn-primary-sm"
+                    data-track="trial_start"
+                    data-track-placement="header"
+                >
                     {{ t('hero_cta_text_ar', 'hero_cta_text_en') }}
                 </Link>
 
@@ -170,7 +175,12 @@ const emit = defineEmits(['toggle-theme', 'toggle-mobile', 'switch-lang']);
                     <Link :href="route('login')" class="btn-ghost-sm w-full text-center">
                         {{ t('login_button_text_ar', 'login_button_text_en') }}
                     </Link>
-                    <Link :href="route('register')" class="btn-primary-sm w-full text-center">
+                    <Link
+                        :href="route('register')"
+                        class="btn-primary-sm w-full text-center"
+                        data-track="trial_start"
+                        data-track-placement="header-mobile"
+                    >
                         {{ t('hero_cta_text_ar', 'hero_cta_text_en') }}
                     </Link>
                 </div>

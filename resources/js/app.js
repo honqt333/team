@@ -15,6 +15,7 @@ import i18n from './i18n';
 import { getInitialTheme, applyTheme } from './theme';
 import { ArabicNumeralsPlugin } from './Plugins/arabicNumerals';
 import { SafeHtmlPlugin } from './Plugins/safeHtml';
+import { installEventTracking } from './Support/analytics';
 
 import VueTelInput from 'vue-tel-input';
 import 'vue-tel-input/vue-tel-input.css';
@@ -39,6 +40,10 @@ if (typeof window !== 'undefined') {
             window.location.reload();
         }
     });
+
+    // One delegated listener for the whole application. Anything carrying a
+    // `data-track` attribute reports itself; see resources/js/Support/analytics.js.
+    installEventTracking(document);
 }
 
 // Page resolution.

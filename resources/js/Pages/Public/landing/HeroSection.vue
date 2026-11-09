@@ -136,10 +136,20 @@ const trustItems = computed(() =>
                 <p class="hero-sub">{{ t('hero_subtitle_ar', 'hero_subtitle_en') }}</p>
 
                 <div class="hero-btns">
-                    <Link :href="route('register')" class="btn-cta">
+                    <Link
+                        :href="route('register')"
+                        class="btn-cta"
+                        data-track="trial_start"
+                        data-track-placement="hero"
+                    >
                         {{ t('hero_cta_text_ar', 'hero_cta_text_en') }}
                     </Link>
-                    <a href="#features" class="btn-ghost">
+                    <a
+                        href="#features"
+                        class="btn-ghost"
+                        data-track="cta_click"
+                        data-track-placement="hero-secondary"
+                    >
                         {{ isRtl ? 'استكشف المزايا' : 'Explore features' }}
                     </a>
                 </div>
@@ -178,9 +188,22 @@ const trustItems = computed(() =>
                             type="image/webp"
                             srcset="/images/landing/FXHzyVlYFrkltsYphSMwQJs5tN5b5RjkAvAQw1wo.webp"
                         />
+                        <!--
+                            NO `src` on the img, on purpose.
+
+                            The `<picture>` always matches (AVIF, then WebP), so
+                            the img's own `src` is never the one that gets
+                            displayed. But Chrome still FETCHES it — the
+                            measured cost was the 67 KB CMS banner PNG
+                            downloaded on every landing-page visit, in
+                            parallel with the 41 KB AVIF that was actually
+                            shown.
+
+                            Without `src`, the browser uses the matching
+                            `<source>` and downloads nothing extra.
+                        -->
                         <img
                             v-if="heroImage"
-                            :src="heroImage"
                             :alt="
                                 isRtl
                                     ? 'لوحة تحكم Khidmah Pro لإدارة مركز صيانة السيارات'

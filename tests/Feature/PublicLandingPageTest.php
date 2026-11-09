@@ -75,6 +75,15 @@ class PublicLandingPageTest extends TestCase
             'logo', 'primary_color', 'features_enabled', 'features_list',
             'stats_enabled', 'stats_list', 'pricing_enabled', 'faq_enabled',
             'faq_list', 'testimonials_enabled', 'testimonials_list',
+            'audience_enabled', 'audience_list',
+            'audience_tag_ar', 'audience_tag_en',
+            'audience_title_ar', 'audience_title_en',
+            'audience_subtitle_ar', 'audience_subtitle_en',
+            'audience_note_title_ar', 'audience_note_title_en',
+            'audience_note_text_ar', 'audience_note_text_en',
+            'testimonials_tag_ar', 'testimonials_tag_en',
+            'testimonials_title_ar', 'testimonials_title_en',
+            'testimonials_subtitle_ar', 'testimonials_subtitle_en',
             'contact_enabled', 'hero_title_ar', 'hero_title_en',
             'hero_subtitle_ar', 'hero_subtitle_en', 'hero_cta_text_ar',
             'hero_cta_text_en', 'hero_typed_enabled', 'hero_typed_prefix_ar',
@@ -138,6 +147,73 @@ class PublicLandingPageTest extends TestCase
             ->assertInertia(fn ($page) => $page
                 ->where('settings.features_list.0.title_ar', 'ميزة مخصصة')
                 ->where('settings.faq_list.0.q_en', 'Custom question')
+            );
+    }
+
+    public function test_cms_can_override_the_audience_list(): void
+    {
+        $this->storeSetting('landing.audience.list', json_encode([
+            ['title_ar' => 'ورشة مخصصة', 'title_en' => 'Custom workshop', 'desc_ar' => 'وصف', 'desc_en' => 'Description'],
+        ], JSON_UNESCAPED_UNICODE));
+
+        $this->get('/')
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page
+                ->where('settings.audience_list.0.title_ar', 'ورشة مخصصة')
+                ->where('settings.audience_list.0.title_en', 'Custom workshop')
+            );
+    }
+
+    public function test_the_audience_section_says_who_should_not_buy(): void
+    {
+        /*
+         * The section is only useful if it excludes people. "This may not be
+         * for you if…" is what makes the four entries above it credible.
+         */
+        $response = $this->get('/');
+        $response->assertOk();
+
+        $settings = $response->viewData('page')['props']['settings'];
+
+        $this->assertNotSame('', trim((string) $settings['audience_note_text_ar']));
+        $this->assertNotSame('', trim((string) $settings['audience_note_text_en']));
+        $this->assertNotSame('', trim((string) $settings['audience_note_title_ar']));
+    }
+
+    public function test_testimonials_are_never_shipped_as_defaults(): void
+    {
+        /*
+         * A testimonial is a person's name and their words. Shipping one
+         * as a default means inventing a customer, which is the same lie
+         * the invented client logos were.
+         *
+         * The section stays hidden until the operator adds a real entry.
+         */
+        $response = $this->get('/');
+        $response->assertOk();
+
+        $list = $response->viewData('page')['props']['settings']['testimonials_list'] ?? [];
+
+        $this->assertSame([], $list, 'The shipped defaults must not contain testimonials.');
+    }
+
+    public function test_the_cms_can_add_a_real_testimonial(): void
+    {
+        $this->storeSetting('landing.testimonials.list', json_encode([
+            [
+                'name' => 'ورشة الصفاء',
+                'quote_ar' => 'انتقلنا من الورق إلى كرت عمل واحد، وعرفنا ربح كل فرع.',
+                'quote_en' => 'We moved from paper to a single work order and finally saw each branch\'s profit.',
+                'role_ar' => 'المالك',
+                'role_en' => 'Owner',
+            ],
+        ], JSON_UNESCAPED_UNICODE));
+
+        $this->get('/')
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page
+                ->where('settings.testimonials_list.0.name', 'ورشة الصفاء')
+                ->where('settings.testimonials_list.0.quote_en', "We moved from paper to a single work order and finally saw each branch's profit.")
             );
     }
 

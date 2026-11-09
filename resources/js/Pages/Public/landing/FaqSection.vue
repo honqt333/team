@@ -29,7 +29,11 @@ defineProps({
                     class="faq-item sr"
                     :style="`--d:${i * 80}ms`"
                 >
-                    <summary class="faq-q">
+                    <summary
+                        class="faq-q"
+                        data-track="faq_open"
+                        :data-track-placement="`faq-${i + 1}`"
+                    >
                         <span class="faq-num" aria-hidden="true">0{{ i + 1 }}</span>
                         <span>{{ isRtl ? q.q_ar : q.q_en }}</span>
                     </summary>

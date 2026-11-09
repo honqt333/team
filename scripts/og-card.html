@@ -1,0 +1,225 @@
+<!doctype html>
+<!--
+    The social share card of the public landing page (1200×630).
+
+    It is rendered by scripts/build-og-image.mjs, which fills the
+    placeholders from the CMS settings and the app config — the brand name
+    and the headline are NOT written here, so rebranding the system does not
+    leave a stale card behind.
+
+    The card is JPEG, not WebP: the Open Graph crawlers do not render WebP.
+-->
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="utf-8" />
+    <style>
+        /* The two subsets are declared as two families on purpose: the
+           Arabic file has no Latin glyphs and vice versa, and a single
+           family with unicode-range would need the ranges copied here. */
+        @font-face {
+            font-family: 'PlexAr';
+            font-weight: 700;
+            font-display: block;
+            src: url('../public/fonts/ibm-plex-sans-arabic-arabic-700.woff2') format('woff2');
+        }
+
+        @font-face {
+            font-family: 'PlexAr';
+            font-weight: 400;
+            font-display: block;
+            src: url('../public/fonts/ibm-plex-sans-arabic-arabic-400.woff2') format('woff2');
+        }
+
+        @font-face {
+            font-family: 'PlexEn';
+            font-weight: 600;
+            font-display: block;
+            src: url('../public/fonts/ibm-plex-sans-arabic-latin-600.woff2') format('woff2');
+        }
+
+        @font-face {
+            font-family: 'PlexEn';
+            font-weight: 400;
+            font-display: block;
+            src: url('../public/fonts/ibm-plex-sans-arabic-latin-400.woff2') format('woff2');
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            width: 1200px;
+            height: 630px;
+            overflow: hidden;
+        }
+
+        body {
+            font-family: 'PlexAr', system-ui, sans-serif;
+            color: #f4f8fc;
+            background:
+                radial-gradient(820px 460px at 88% 4%, rgba(229, 164, 72, 0.20), transparent 62%),
+                radial-gradient(700px 420px at 4% 96%, rgba(74, 163, 223, 0.22), transparent 64%),
+                linear-gradient(158deg, #0a2344 0%, #07203c 46%, #04121f 100%);
+            position: relative;
+        }
+
+        /* A faint star field, borrowed from the constellation in the brand
+           artwork. Two radial gradients are cheaper than an image and never
+           cost a request. */
+        body::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background-image:
+                radial-gradient(1.5px 1.5px at 18% 24%, rgba(255, 255, 255, 0.55), transparent),
+                radial-gradient(1.5px 1.5px at 62% 12%, rgba(255, 255, 255, 0.40), transparent),
+                radial-gradient(1.5px 1.5px at 84% 46%, rgba(255, 255, 255, 0.45), transparent),
+                radial-gradient(1.5px 1.5px at 32% 72%, rgba(255, 255, 255, 0.30), transparent),
+                radial-gradient(1.5px 1.5px at 72% 82%, rgba(255, 255, 255, 0.35), transparent),
+                radial-gradient(1.5px 1.5px at 46% 38%, rgba(255, 255, 255, 0.25), transparent);
+        }
+
+        .frame {
+            position: absolute;
+            inset: 26px;
+            border: 1px solid rgba(255, 255, 255, 0.10);
+            border-radius: 28px;
+        }
+
+        .content {
+            position: relative;
+            height: 100%;
+            padding: 62px 68px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .brand-mark {
+            width: 54px;
+            height: 54px;
+            border-radius: 16px;
+            background: linear-gradient(140deg, #4aa3df 0%, #1d5fa8 55%, #0b2f5c 100%);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            display: grid;
+            place-items: center;
+            font-family: 'PlexEn', sans-serif;
+            font-weight: 600;
+            font-size: 22px;
+            color: #ffffff;
+            letter-spacing: 0.02em;
+        }
+
+        .brand-names {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .brand-ar {
+            font-size: 25px;
+            font-weight: 700;
+            line-height: 1.1;
+        }
+
+        .brand-en {
+            font-family: 'PlexEn', sans-serif;
+            font-size: 13px;
+            font-weight: 600;
+            letter-spacing: 0.22em;
+            color: #e5a448;
+            text-transform: uppercase;
+        }
+
+        .headline {
+            font-size: 62px;
+            font-weight: 700;
+            line-height: 1.24;
+            letter-spacing: -0.01em;
+            max-width: 900px;
+            text-shadow: 0 2px 26px rgba(0, 0, 0, 0.30);
+        }
+
+        .rule {
+            width: 92px;
+            height: 4px;
+            border-radius: 99px;
+            background: linear-gradient(90deg, #e5a448, rgba(229, 164, 72, 0.1));
+            margin: 26px 0 22px;
+        }
+
+        .sub {
+            font-size: 25px;
+            font-weight: 400;
+            line-height: 1.62;
+            color: #a9c2dc;
+            max-width: 820px;
+        }
+
+        .foot {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 40px;
+        }
+
+        /* The proof line: the same values the stats section shows. */
+        .foot-note {
+            font-family: 'PlexEn', sans-serif;
+            font-size: 17px;
+            font-weight: 600;
+            letter-spacing: 0.16em;
+            color: #e5a448;
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+
+        .foot-en {
+            font-family: 'PlexEn', sans-serif;
+            font-size: 16px;
+            font-weight: 600;
+            letter-spacing: 0.14em;
+            color: rgba(255, 255, 255, 0.45);
+            text-transform: uppercase;
+            text-align: left;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="frame"></div>
+
+    <div class="content">
+        <div class="brand">
+            <div class="brand-mark">K</div>
+            <div class="brand-names">
+                <span class="brand-ar">{{BRAND_AR}}</span>
+                <span class="brand-en">{{BRAND_EN}}</span>
+            </div>
+        </div>
+
+        <div>
+            <h1 class="headline">{{HEADLINE_AR}}</h1>
+            <div class="rule"></div>
+            <p class="sub">{{SUBTITLE_AR}}</p>
+        </div>
+
+        <div class="foot">
+            <span class="foot-note">{{FOOT_AR}}</span>
+            <span class="foot-en">{{FOOT_EN}}</span>
+        </div>
+    </div>
+</body>
+
+</html>

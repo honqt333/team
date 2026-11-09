@@ -41,6 +41,8 @@ function toggleBilling() {
                     type="button"
                     role="switch"
                     :aria-checked="billingCycle === 'yearly'"
+                    data-track="pricing_toggle"
+                    data-track-placement="billing"
                     :aria-label="
                         isRtl
                             ? 'التبديل بين الدفع الشهري والسنوي'
@@ -93,6 +95,8 @@ function toggleBilling() {
                             'plan-btn',
                             plan.is_featured ? 'plan-btn-primary' : 'plan-btn-ghost',
                         ]"
+                        data-track="trial_start"
+                        data-track-placement="pricing"
                     >
                         {{ isRtl ? 'ابدأ الآن' : 'Start Now' }}
                     </Link>

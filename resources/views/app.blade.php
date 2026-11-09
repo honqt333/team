@@ -7,7 +7,14 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <title inertia>{{ app()->getLocale() === 'ar' ? config('app.name_ar', 'خدمة برو') : config('app.name', 'Khidmh Pro') }}</title>
-    <link rel="icon" type="image/png" href="/images/logo.png">
+    {{-- Keep the icon small: /images/logo.png is a 28 KB 640×640 file that is
+         rendered at 16 px, and the browser downloads it on every page. The
+         CMS favicon wins when the page provides one (the public pages do),
+         so the browser never fetches two icons. --}}
+    @php
+        $pageFavicon = $page['props']['settings']['favicon'] ?? ($page['props']['site']['logo_url'] ?? null);
+    @endphp
+    <link rel="icon" type="image/png" href="{{ $pageFavicon ?: '/images/favicon.png' }}">
 
     <!-- Inline Dark Mode Check -->
     <script>

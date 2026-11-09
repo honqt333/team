@@ -125,6 +125,8 @@ const labels = {
                             type="submit"
                             :disabled="form.processing"
                             class="maint-btn contact-submit"
+                            data-track="contact_submit"
+                            data-track-placement="contact-form"
                         >
                             <span v-if="form.processing">
                                 {{ isRtl ? 'جاري الإرسال...' : 'Sending...' }}

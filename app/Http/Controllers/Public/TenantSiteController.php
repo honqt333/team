@@ -9,8 +9,10 @@ use App\Models\Center;
 use App\Models\Service;
 use App\Models\Tenant;
 use App\Models\TenantWebsite;
+use App\Services\Media\OpenGraphImage;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response as HttpResponse;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -45,6 +47,10 @@ use Inertia\Response;
  */
 class TenantSiteController extends Controller
 {
+    public function __construct(
+        private readonly OpenGraphImage $openGraphImage,
+    ) {}
+
     /**
      * The public homepage. The {tenant} route param is bound
      * and validated by the ResolveTenantFromUrl middleware;
@@ -343,48 +349,59 @@ class TenantSiteController extends Controller
     }
 
     /**
-     * The image to use for the social share preview.
+     * The image used for the social share preview.
      *
-     * A banner (wide, landscape) makes a much better share card than a
-     * square logo, so it is preferred. Returns null when the tenant has
-     * not uploaded anything, and the page then simply omits the tag.
+     * It points at the generated share card, NOT at the banner file:
+     *
+     *  - the banner is stored as WebP after the upload is optimised, and
+     *    the Open Graph crawlers do not render WebP — the card would come
+     *    out empty;
+     *  - a banner is 1920×960 and a logo is square, while the card ratio
+     *    every platform expects is 1.91:1.
+     *
+     * The URL is absolute: a relative `og:image` is ignored by every
+     * platform and the share falls back to a bare text link.
      *
      * @param array<int, array<string, mixed>> $banners
      */
     private function shareImageUrl(array $banners, TenantWebsite $website): ?string
     {
-        $relative = null;
+        $tenant = $website->tenant;
 
-        foreach ($banners as $banner) {
-            if (! empty($banner['image_url'])) {
-                $relative = $banner['image_url'];
-
-                break;
-            }
-        }
-
-        if ($relative === null && ! empty($website->cover_url)) {
-            $relative = $website->cover_url;
-        }
-
-        if ($relative === null && ! empty($website->logo_url)) {
-            $relative = $website->logo_url;
-        }
-
-        if ($relative === null) {
+        if (! $tenant) {
             return null;
         }
 
-        /*
-         * The share image must be an ABSOLUTE url. `Storage::url()`
-         * returns a root-relative path in the local environment, and a
-         * relative `og:image` is ignored by every social platform — the
-         * card would silently render without an image.
-         */
-        if (str_starts_with($relative, 'http://') || str_starts_with($relative, 'https://')) {
-            return $relative;
+        return url("/{$tenant->slug}/og-image.jpg");
+    }
+
+    /**
+     * The 1200×630 share card of this workshop.
+     *
+     * Served as a JPEG on purpose: the Open Graph crawlers do not render
+     * WebP, and the optimised banner is exactly that.
+     */
+    public function ogImage(Request $request): HttpResponse
+    {
+        /** @var TenantWebsite $website */
+        $website = $request->attributes->get('public_tenant_website');
+
+        /** @var Tenant $tenant */
+        $tenant = $request->attributes->get('public_tenant');
+
+        $bytes = $this->openGraphImage->forTenant($website, $tenant->slug);
+
+        if ($bytes === '') {
+            abort(404);
         }
 
-        return url($relative);
+        return response($bytes, 200, [
+            'Content-Type' => 'image/jpeg',
+            'Content-Length' => (string) strlen($bytes),
+            // The file name carries a fingerprint of the source image, so a
+            // new banner produces a new URL and the old one can be cached
+            // forever.
+            'Cache-Control' => 'public, max-age=604800, immutable',
+        ]);
     }
 }

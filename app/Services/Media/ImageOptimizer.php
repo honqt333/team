@@ -59,6 +59,163 @@ final class ImageOptimizer
     public const MAX_WIDTH = 1920;
 
     /**
+     * The favicon canvas. 64×64 covers every browser tab, bookmark and
+     * home-screen icon at any density.
+     */
+    public const FAVICON_SIZE = 64;
+
+    /**
+     * The largest a brand logo is kept. It is rendered at 48 px in the
+     * header, so 512 px is already generous — and 12× the display size.
+     */
+    public const LOGO_MAX_WIDTH = 512;
+
+    /**
+     * Build a favicon: a 64×64 PNG with the artwork fitted inside it.
+     *
+     * WHY THIS EXISTS
+     * ---------------
+     * The favicon was uploaded as a full-size PNG — 68 KB — and the browser
+     * downloads it on EVERY page view, from every page of the application.
+     * It is the second heaviest thing the landing page fetched, after the
+     * hero artwork, and it is never looked at.
+     *
+     * It is FITTED rather than cropped: a brand logo is often wider than it
+     * is tall, and cropping it to a square would cut the wordmark in half.
+     * The canvas is transparent so the logo keeps its own background.
+     */
+    public static function favicon(string $binary, ?string $type = null): OptimizedImage
+    {
+        $type ??= ImageType::detect($binary);
+
+        if ($type === null || ! function_exists('imagecreatefromstring')) {
+            return new OptimizedImage($binary, $type === ImageType::JPEG ? 'jpg' : 'png');
+        }
+
+        $image = @imagecreatefromstring($binary);
+
+        if ($image === false) {
+            return new OptimizedImage($binary, $type === ImageType::JPEG ? 'jpg' : 'png');
+        }
+
+        try {
+            if (! imageistruecolor($image) && function_exists('imagepalettetotruecolor')) {
+                imagepalettetotruecolor($image);
+            }
+
+            $sourceWidth = imagesx($image);
+            $sourceHeight = imagesy($image);
+
+            if ($sourceWidth < 1 || $sourceHeight < 1) {
+                return new OptimizedImage($binary, $type === ImageType::JPEG ? 'jpg' : 'png');
+            }
+
+            $canvas = imagecreatetruecolor(self::FAVICON_SIZE, self::FAVICON_SIZE);
+
+            if ($canvas === false) {
+                return new OptimizedImage($binary, $type === ImageType::JPEG ? 'jpg' : 'png');
+            }
+
+            // Fully transparent canvas: the logo keeps its own colours.
+            imagealphablending($canvas, false);
+            imagesavealpha($canvas, true);
+            imagefilledrectangle($canvas, 0, 0, self::FAVICON_SIZE, self::FAVICON_SIZE, imagecolorallocatealpha($canvas, 0, 0, 0, 127));
+
+            $scale = min(self::FAVICON_SIZE / $sourceWidth, self::FAVICON_SIZE / $sourceHeight);
+            $targetWidth = max(1, (int) round($sourceWidth * $scale));
+            $targetHeight = max(1, (int) round($sourceHeight * $scale));
+
+            imagealphablending($canvas, true);
+
+            imagecopyresampled(
+                $canvas,
+                $image,
+                (int) round((self::FAVICON_SIZE - $targetWidth) / 2),
+                (int) round((self::FAVICON_SIZE - $targetHeight) / 2),
+                0,
+                0,
+                $targetWidth,
+                $targetHeight,
+                $sourceWidth,
+                $sourceHeight
+            );
+
+            ob_start();
+            imagepng($canvas, null, 9);
+            $png = (string) ob_get_clean();
+
+            imagedestroy($canvas);
+
+            return new OptimizedImage($png, 'png', strlen($binary) - strlen($png), self::FAVICON_SIZE, self::FAVICON_SIZE);
+        } finally {
+            if (is_object($image)) {
+                imagedestroy($image);
+            }
+        }
+    }
+
+    /**
+     * Scale a logo down to a sane size, keeping its transparency.
+     *
+     * The logo is shown in the header at 40-60 px, but it was uploaded at
+     * whatever size the operator had on their screen — the one in the
+     * database was 36 KB for an image that is rendered at 48 px.
+     */
+    public static function logo(string $binary, ?string $type = null): OptimizedImage
+    {
+        $type ??= ImageType::detect($binary);
+
+        if ($type === null || ! function_exists('imagecreatefromstring')) {
+            return new OptimizedImage($binary, $type === ImageType::JPEG ? 'jpg' : 'png');
+        }
+
+        $image = @imagecreatefromstring($binary);
+
+        if ($image === false) {
+            return new OptimizedImage($binary, $type === ImageType::JPEG ? 'jpg' : 'png');
+        }
+
+        try {
+            if (! imageistruecolor($image) && function_exists('imagepalettetotruecolor')) {
+                imagepalettetotruecolor($image);
+            }
+
+            $width = imagesx($image);
+            $height = imagesy($image);
+
+            if ($width < 1 || $height < 1 || ($width <= self::LOGO_MAX_WIDTH && $height <= self::LOGO_MAX_WIDTH)) {
+                return new OptimizedImage($binary, $type === ImageType::JPEG ? 'jpg' : 'png', 0, $width, $height);
+            }
+
+            $scale = self::LOGO_MAX_WIDTH / max($width, $height);
+            $targetWidth = max(1, (int) round($width * $scale));
+            $targetHeight = max(1, (int) round($height * $scale));
+
+            $resized = imagecreatetruecolor($targetWidth, $targetHeight);
+
+            if ($resized === false) {
+                return new OptimizedImage($binary, $type === ImageType::JPEG ? 'jpg' : 'png', 0, $width, $height);
+            }
+
+            imagealphablending($resized, false);
+            imagesavealpha($resized, true);
+            imagecopyresampled($resized, $image, 0, 0, 0, 0, $targetWidth, $targetHeight, $width, $height);
+            imagedestroy($image);
+            $image = $resized;
+
+            ob_start();
+            imagepng($image, null, 9);
+            $png = (string) ob_get_clean();
+
+            return new OptimizedImage($png, 'png', strlen($binary) - strlen($png), $targetWidth, $targetHeight);
+        } finally {
+            if (is_object($image)) {
+                imagedestroy($image);
+            }
+        }
+    }
+
+    /**
      * Optimise an uploaded image.
      *
      * @param string $binary The raw bytes of the upload.
@@ -137,9 +294,7 @@ final class ImageOptimizer
 
             return new OptimizedImage($webp, 'webp', strlen($binary) - strlen($webp), $width, $height);
         } finally {
-            if (is_object($image)) {
-                imagedestroy($image);
-            }
+            imagedestroy($image);
         }
     }
 }

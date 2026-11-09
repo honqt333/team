@@ -36,11 +36,13 @@ import HeroSection from './landing/HeroSection.vue';
 
 // ── Lazy: below the fold, parsed only when needed ──────────────────────────
 const FeaturesSection = defineAsyncComponent(() => import('./landing/FeaturesSection.vue'));
+const AudienceSection = defineAsyncComponent(() => import('./landing/AudienceSection.vue'));
 const HowItWorksSection = defineAsyncComponent(() => import('./landing/HowItWorksSection.vue'));
 const StatsSection = defineAsyncComponent(() => import('./landing/StatsSection.vue'));
 const PricingSection = defineAsyncComponent(() => import('./landing/PricingSection.vue'));
 const FaqSection = defineAsyncComponent(() => import('./landing/FaqSection.vue'));
 const ClientsSection = defineAsyncComponent(() => import('./landing/ClientsSection.vue'));
+const TestimonialsSection = defineAsyncComponent(() => import('./landing/TestimonialsSection.vue'));
 const ContactSection = defineAsyncComponent(() => import('./landing/ContactSection.vue'));
 const CtaSection = defineAsyncComponent(() => import('./landing/CtaSection.vue'));
 const LandingFooter = defineAsyncComponent(() => import('./landing/LandingFooter.vue'));
@@ -52,6 +54,8 @@ const props = defineProps({
     isAdminPreview: { type: Boolean, default: false },
     /** The canonical URL of this page (built server-side). */
     canonicalUrl: { type: String, default: '' },
+    /** The absolute URL of the 1200×630 social share card. */
+    ogImageUrl: { type: String, default: '' },
     /** The schema.org JSON-LD graph (built server-side). */
     jsonLd: { type: Object, default: null },
 });
@@ -76,6 +80,21 @@ const cssVars = computed(() => {
 // ── Live settings (synced from the CMS editor via postMessage) ─────────────
 const liveSettings = ref({ ...(props.settings || {}) });
 const settings = computed(() => liveSettings.value);
+
+/**
+ * Whether there is a real testimonial to show.
+ *
+ * The check lives HERE and not only inside the section component: the
+ * section is code-split, so a `v-if` inside it still fetches the chunk.
+ * Without a real entry there is nothing to render, and the request is
+ * pure waste on a page that has to stay fast.
+ */
+const hasTestimonials = computed(() =>
+    (settings.value.testimonials_list || []).some(
+        (entry) =>
+            entry && entry.name && ((entry.quote_ar || '').trim() || (entry.quote_en || '').trim())
+    )
+);
 
 watch(
     () => props.settings,
@@ -185,21 +204,26 @@ onUnmounted(() => {
         <meta property="og:title" :content="t('title_ar', 'title_en')" />
         <meta property="og:description" :content="t('description_ar', 'description_en')" />
         <!--
-            The share image points at the optimised WebP, not the original
-            1.6 MB PNG in the CMS. Social platforms fetch this URL, and the
-            PNG was the single heaviest asset on the page.
+            The share image is a dedicated 1200×630 JPEG, generated from the
+            same headline the page shows (`npm run og:image`).
+
+            It used to point at the optimised WebP banner, which produced
+            an EMPTY card on every platform: the Open Graph crawlers do
+            not render WebP. The URL is absolute because a relative
+            `og:image` is ignored as well.
         -->
-        <meta
-            v-if="settings.banners_list && settings.banners_list[0]"
-            property="og:image"
-            content="/images/landing/FXHzyVlYFrkltsYphSMwQJs5tN5b5RjkAvAQw1wo.webp"
-        />
-        <meta property="og:image:width" content="1408" />
-        <meta property="og:image:height" content="736" />
+        <meta property="og:image" :content="ogImageUrl" />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
+        <meta property="og:image:type" content="image/jpeg" />
         <meta property="og:type" content="website" />
         <meta property="og:locale" :content="isRtl ? 'ar_SA' : 'en_US'" />
         <meta property="og:locale:alternate" :content="isRtl ? 'en_US' : 'ar_SA'" />
-        <link v-if="settings.favicon" rel="icon" :href="settings.favicon" type="image/x-icon" />
+        <!--
+            The favicon is rendered by app.blade.php, which reads the CMS
+            setting. A second <link rel="icon"> here would make the browser
+            download two icons.
+        -->
 
         <!--
             Canonical URL and language alternates.
@@ -221,11 +245,7 @@ onUnmounted(() => {
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" :content="t('title_ar', 'title_en')" />
         <meta name="twitter:description" :content="t('description_ar', 'description_en')" />
-        <meta
-            v-if="settings.banners_list && settings.banners_list[0]"
-            name="twitter:image"
-            content="/images/landing/FXHzyVlYFrkltsYphSMwQJs5tN5b5RjkAvAQw1wo.webp"
-        />
+        <meta name="twitter:image" :content="ogImageUrl" />
 
         <!--
             The JSON-LD graph is rendered server-side by app.blade.php.
@@ -356,6 +376,13 @@ onUnmounted(() => {
                     :t="t"
                     :li="li"
                 />
+                <AudienceSection
+                    v-if="settings.audience_enabled"
+                    :settings="settings"
+                    :is-rtl="isRtl"
+                    :t="t"
+                    :li="li"
+                />
                 <HowItWorksSection :settings="settings" :is-rtl="isRtl" />
                 <StatsSection v-if="settings.stats_enabled" :settings="settings" :is-rtl="isRtl" />
                 <PricingSection
@@ -366,6 +393,13 @@ onUnmounted(() => {
                     :t="t"
                 />
                 <FaqSection v-if="settings.faq_enabled" :settings="settings" :is-rtl="isRtl" />
+                <TestimonialsSection
+                    v-if="settings.testimonials_enabled && hasTestimonials"
+                    :settings="settings"
+                    :is-rtl="isRtl"
+                    :t="t"
+                    :li="li"
+                />
                 <ClientsSection
                     v-if="settings.testimonials_enabled"
                     :settings="settings"

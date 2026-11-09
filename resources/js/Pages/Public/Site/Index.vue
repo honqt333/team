@@ -44,8 +44,9 @@
         <meta property="og:locale:alternate" :content="isRtl ? 'en_US' : 'ar_SA'" />
         <meta v-if="site.canonical_url" property="og:url" :content="site.canonical_url" />
         <meta v-if="site.share_image_url" property="og:image" :content="site.share_image_url" />
-        <meta v-if="site.share_image_url" property="og:image:width" content="1920" />
-        <meta v-if="site.share_image_url" property="og:image:height" content="960" />
+        <meta v-if="site.share_image_url" property="og:image:width" content="1200" />
+        <meta v-if="site.share_image_url" property="og:image:height" content="630" />
+        <meta v-if="site.share_image_url" property="og:image:type" content="image/jpeg" />
 
         <!--
             Twitter/X uses its own tags, and without them the share card
@@ -56,7 +57,11 @@
         <meta name="twitter:description" :content="seoDescription" />
         <meta v-if="site.share_image_url" name="twitter:image" :content="site.share_image_url" />
 
-        <link v-if="site.logo_url" rel="icon" :href="site.logo_url" type="image/x-icon" />
+        <!--
+            The favicon is rendered by app.blade.php, which reads the CMS
+            settings. A second <link rel="icon"> here would make the browser
+            download two icons.
+        -->
 
         <!--
             The JSON-LD graph is rendered server-side by app.blade.php.
@@ -240,6 +245,8 @@
                                         currentBanner.cta_link || site.whatsapp_link || '#services'
                                     "
                                     class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white text-slate-900 font-bold text-sm shadow-lg hover:bg-slate-100 transition"
+                                    data-track="booking_start"
+                                    data-track-placement="hero-banner"
                                 >
                                     <span>{{ currentBanner.cta_text }}</span>
                                     <svg
@@ -338,6 +345,8 @@
                             :href="site.phone_link"
                             class="inline-flex items-center gap-2 px-5 py-3 rounded-xl text-white font-semibold shadow-lg shadow-indigo-500/20 hover:opacity-95 transition"
                             :style="{ backgroundColor: 'var(--tenant-primary-strong)' }"
+                            data-track="phone_click"
+                            data-track-placement="hero"
                         >
                             <svg
                                 class="w-5 h-5"
@@ -361,6 +370,8 @@
                             target="_blank"
                             rel="noopener"
                             class="inline-flex items-center gap-2 px-5 py-3 rounded-xl font-semibold border border-emerald-500 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10 transition"
+                            data-track="whatsapp_click"
+                            data-track-placement="hero"
                         >
                             <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                                 <path
@@ -711,6 +722,8 @@
                                 v-if="site.phone_link"
                                 :href="site.phone_link"
                                 class="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-white font-semibold text-slate-900 hover:bg-slate-100"
+                                data-track="phone_click"
+                                data-track-placement="cta"
                             >
                                 {{ t('tenant_site.cta.call') }}
                             </a>
@@ -720,6 +733,8 @@
                                 target="_blank"
                                 rel="noopener"
                                 class="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-white/10 border border-white/30 font-semibold text-white hover:bg-white/20"
+                                data-track="whatsapp_click"
+                                data-track-placement="cta"
                             >
                                 {{ t('tenant_site.cta.whatsapp') }}
                             </a>

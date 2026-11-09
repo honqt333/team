@@ -9,9 +9,11 @@ use App\Http\Requests\WebsiteSettingsUpdateRequest;
 use App\Models\AdminUser;
 use App\Models\Setting;
 use App\Models\User;
+use App\Services\Media\ImageOptimizer;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -404,6 +406,32 @@ class WebsiteSettingsController extends Controller
         $folder = $request->key === 'banner_image' ? 'website/banners' : 'website';
         $path = $file->store($folder, 'public');
         $url = asset('storage/'.$path);
+
+        /*
+         * The favicon and the logo are special: they are downloaded on
+         * EVERY page of the application, and they were stored at whatever
+         * size they were uploaded at — the favicon in the database was a
+         * 68 KB PNG for an icon that renders at 16 px.
+         *
+         * They are rewritten in place, under the same path, so the URL
+         * stored in the settings does not change.
+         */
+        if ($request->key === 'website_favicon' || $request->key === 'website_logo') {
+            $disk = Storage::disk('public');
+            $absolute = $disk->path($path);
+
+            if (is_file($absolute)) {
+                $binary = (string) file_get_contents($absolute);
+
+                $optimised = $request->key === 'website_favicon'
+                    ? ImageOptimizer::favicon($binary)
+                    : ImageOptimizer::logo($binary);
+
+                if ($optimised->binary !== $binary && $optimised->binary !== '') {
+                    file_put_contents($absolute, $optimised->binary);
+                }
+            }
+        }
 
         // Immediate persistence for logo & favicon
         if ($request->key === 'website_logo') {

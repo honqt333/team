@@ -20,7 +20,18 @@ defineProps({
 });
 
 function realClients(list) {
-    return (list || []).filter((c) => c && c.logo_url && c.name);
+    return (list || []).filter((c) => {
+        if (!c || !c.logo_url || !c.name) {
+            return false;
+        }
+
+        // An entry that carries a quote is a testimonial, and the
+        // testimonial section renders it. Showing it here as well would
+        // put the same workshop on the page twice.
+        const hasQuote = Boolean((c.quote_ar || '').trim() || (c.quote_en || '').trim());
+
+        return !hasQuote;
+    });
 }
 </script>
 
