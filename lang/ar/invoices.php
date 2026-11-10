@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 return [
+    'only_draft_can_be_issued' => 'يمكن إصدار الفواتير المسودة فقط.',
     'all_statuses' => 'جميع الحالات',
     'already_exists' => 'الفاتورة موجودة بالفعل لهذا الأمر',
     'columns' => [

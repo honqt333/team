@@ -5,6 +5,9 @@
         />
 
         <div class="space-y-6">
+            <p class="text-sm text-gray-500 dark:text-gray-400" role="note">
+                {{ $t('reports.tax_periods_report.consolidated_notice') }}
+            </p>
             <!-- Header Section -->
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>

@@ -265,4 +265,11 @@ return [
         'choose_payment_method' => 'اختر وسيلة الدفع',
         'subscription_error' => 'خطأ في إنشاء الاشتراك',
     ],
+
+    'notification_templates' => [
+        'work_order_created' => 'مرحباً {customer_name}، تم استلام مركبتك {plate_number} برقم كرت صيانة #{code} في {center_name}.',
+        'work_order_completed' => 'عزيزنا {customer_name}، اكتملت صيانة مركبتك {plate_number} (#{code}) وأصبحت جاهزة للاستلام في {center_name}.',
+        'quote_shared' => 'مرحباً {customer_name}، تفضل عرض السعر الخاص بمركبتك {plate_number} رقم {code}، يمكنك الاطلاع عليه هنا: {url}',
+        'invoice_issued' => 'عزيزنا {customer_name}، تم إصدار الفاتورة الضريبية رقم {code} بمبلغ {total} ر.س لمركبتك {plate_number}.',
+    ],
 ];

@@ -17,6 +17,9 @@ import js from '@eslint/js';
 import vueParser from 'vue-eslint-parser';
 
 export default [
+    {
+        ignores: ['public/**', 'vendor/**', 'node_modules/**', 'storage/**', 'resources/fonts/**'],
+    },
     js.configs.recommended,
     {
         files: ['resources/js/**/*.{js,vue}'],

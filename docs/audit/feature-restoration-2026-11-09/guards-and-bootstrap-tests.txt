@@ -1,0 +1,31 @@
+
+   PASS  Tests\Feature\HardcodedArabicTest
+  ✓ no new hardcoded arabic in the vue sources                           8.77s  
+  ✓ company transactions controller has zero hardcoded arabic strings    0.05s  
+  ✓ the extractor finds the remaining arabic                             9.11s  
+  ✓ the locale files have the same keys                                  0.13s  
+  ✓ the locale files carry the same placeholders                         0.15s  
+
+   PASS  Tests\Feature\FontPolicyTest
+  ✓ no source file loads fonts from google                               0.20s  
+  ✓ the font token does not name a parallel family                       0.04s  
+  ✓ the self hosted font stylesheet is served and declares the family    0.05s  
+  ✓ the layout links the local font stylesheet                           0.05s  
+  ✓ no source or view file names a parallel font family                  0.16s  
+
+   PASS  Tests\Feature\System\ErrorLogControllerTest
+  ✓ tenant user is denied                                               14.38s  
+  ✓ system account without developer permission is denied                0.11s  
+  ✓ authorized account sees empty state                                  0.23s  
+  ✓ records are filtered bounded and sensitive context is omitted        0.15s  
+  ✓ large file read is capped                                            0.16s  
+  ✓ filter does not accept paths or unknown levels                       0.14s  
+
+   PASS  Tests\Feature\InitialSystemRecoveryTest
+  ✓ standalone setup creates dependencies and is repeatable              5.94s  
+  ✓ default database seeder keeps the full bootstrap chain               5.01s  
+  ✓ logo seed preserves existing artwork and skips tenant makes          1.21s  
+
+  Tests:    19 passed (92 assertions)
+  Duration: 46.18s
+

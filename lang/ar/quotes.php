@@ -3,6 +3,21 @@
 declare(strict_types=1);
 
 return [
+    'already_converted' => 'تم تحويل عرض السعر مسبقاً.',
+    'approval_required' => 'يجب اعتماد عرض السعر قبل تحويله.',
+
+    'public_cannot_approve' => 'لا يمكن الموافقة على هذا العرض.',
+    'public_cannot_reject' => 'لا يمكن رفض هذا العرض.',
+    'public_expired' => 'عرض السعر منتهي الصلاحية.',
+    'public_approved' => 'تمت الموافقة على عرض السعر بنجاح.',
+    'public_rejected' => 'تم تسجيل رفض عرض السعر.',
+    'empty_decision' => 'لا يمكن اعتماد أو رفض عرض سعر فارغ.',
+    'approved_title' => 'تمت الموافقة على عرض السعر #:code',
+    'approved_body' => 'وافق العميل على عرض السعر عبر رابط المشاركة.',
+    'rejected_title' => 'تم رفض عرض السعر #:code',
+    'rejected_body' => 'تم رفض عرض السعر.',
+    'approved_converted_body' => 'تمت الموافقة على عرض السعر وتحويله إلى كرت عمل.',
+
     'actions' => [
         'approve' => 'موافقة',
         'convert_to_work_order' => 'تحويل إلى كرت عمل',

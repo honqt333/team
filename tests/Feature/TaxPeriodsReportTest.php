@@ -95,7 +95,7 @@ class TaxPeriodsReportTest extends TestCase
         $periodKey = "{$currentYear}-Q1";
 
         // Create a sales invoice in Q1
-        Invoice::create([
+        $salesInvoice = Invoice::create([
             'tenant_id' => $tenant->id,
             'center_id' => $center->id,
             'customer_id' => $customer->id,
@@ -112,7 +112,7 @@ class TaxPeriodsReportTest extends TestCase
         ]);
 
         // Create a purchase invoice in Q1
-        PurchaseInvoice::create([
+        $purchaseInvoice = PurchaseInvoice::create([
             'tenant_id' => $tenant->id,
             'center_id' => $center->id,
             'supplier_id' => $supplier->id,
@@ -141,7 +141,7 @@ class TaxPeriodsReportTest extends TestCase
             'transactions' => [
                 [
                     'transaction_type' => 'sales_invoice',
-                    'transaction_id' => 9999,
+                    'transaction_id' => $salesInvoice->id,
                     'ref_no' => 'INV-TEST-001',
                     'transaction_date' => "{$currentYear}-01-15",
                     'party_name' => 'عميل تجريبي',
@@ -155,7 +155,7 @@ class TaxPeriodsReportTest extends TestCase
                 ],
                 [
                     'transaction_type' => 'purchase_invoice',
-                    'transaction_id' => 8888,
+                    'transaction_id' => $purchaseInvoice->id,
                     'ref_no' => 'PI-TEST-001',
                     'transaction_date' => "{$currentYear}-02-10",
                     'party_name' => 'مورد تجريبي',

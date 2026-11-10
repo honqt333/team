@@ -1,5 +1,11 @@
 <script setup>
 import { computed } from 'vue';
+import { useI18n } from 'vue-i18n';
+
+const { locale } = useI18n();
+const weekdayFormatter = computed(
+    () => new Intl.DateTimeFormat(locale.value, { weekday: 'short', timeZone: 'UTC' })
+);
 
 const props = defineProps({
     data: { type: Array, default: () => [] }, // [{ date, label, count }]
@@ -52,7 +58,9 @@ function barHeight(val) {
                     :key="d.date"
                     class="flex-1 text-center uppercase tracking-wide"
                 >
-                    {{ d.label }}
+                    {{
+                        d.date ? weekdayFormatter.format(new Date(`${d.date}T12:00:00Z`)) : d.label
+                    }}
                 </span>
             </div>
         </div>

@@ -619,22 +619,18 @@
                                             {{ $t('common.currency') }} / {{ $t('common.hour') }}
                                         </span>
                                     </div>
-                                    <label class="flex items-center gap-2 mt-3 cursor-pointer">
-                                        <input
-                                            type="checkbox"
+                                    <div class="mt-3">
+                                        <AppToggle
                                             v-model="attendanceSettingsForm.overtime_enabled"
-                                            class="rounded text-emerald-600"
-                                        />
-                                        <span
-                                            class="text-sm text-emerald-700 dark:text-emerald-300"
-                                        >
-                                            {{
+                                            :label="
                                                 $t(
                                                     'hr.settings.attendance_settings.overtime_enabled'
                                                 )
-                                            }}
-                                        </span>
-                                    </label>
+                                            "
+                                            color="emerald"
+                                            size="sm"
+                                        />
+                                    </div>
                                 </div>
                             </div>
 
@@ -648,24 +644,13 @@
                                     🗓️ {{ $t('hr.settings.attendance_settings.working_days') }}
                                 </label>
                                 <div class="flex flex-wrap gap-2">
-                                    <label
+                                    <AppToggle
                                         v-for="(dayName, dayIndex) in weekDays"
                                         :key="dayIndex"
-                                        class="flex items-center gap-2 px-3 py-2 bg-white dark:bg-gray-700 rounded-lg border cursor-pointer"
-                                        :class="
-                                            attendanceSettingsForm.working_days.includes(dayIndex)
-                                                ? 'border-blue-500 bg-blue-100 dark:bg-blue-900/40'
-                                                : 'border-gray-200 dark:border-gray-600'
-                                        "
-                                    >
-                                        <input
-                                            type="checkbox"
-                                            :value="dayIndex"
-                                            v-model="attendanceSettingsForm.working_days"
-                                            class="rounded text-blue-600"
-                                        />
-                                        <span class="text-sm">{{ dayName }}</span>
-                                    </label>
+                                        v-model="attendanceSettingsForm.working_days"
+                                        :value="dayIndex"
+                                        :label="dayName"
+                                    />
                                 </div>
                             </div>
 
@@ -897,15 +882,7 @@
                 </div>
 
                 <div v-if="editingDevice" class="flex items-center gap-2">
-                    <input
-                        type="checkbox"
-                        v-model="deviceForm.is_active"
-                        id="device_active"
-                        class="rounded text-violet-600"
-                    />
-                    <label for="device_active" class="text-sm text-gray-700 dark:text-gray-300">
-                        {{ $t('common.active') }}
-                    </label>
+                    <AppToggle v-model="deviceForm.is_active" :label="$t('common.active')" />
                 </div>
 
                 <div>
@@ -1037,26 +1014,15 @@
                 </div>
 
                 <div class="flex items-center gap-4">
-                    <label class="flex items-center gap-2 cursor-pointer">
-                        <input
-                            type="checkbox"
-                            v-model="shiftForm.is_overnight"
-                            class="rounded text-violet-600"
-                        />
-                        <span class="text-sm text-gray-700 dark:text-gray-300">
-                            🌙 {{ $t('hr.settings.shifts.overnight') }}
-                        </span>
-                    </label>
-                    <label v-if="editingShift" class="flex items-center gap-2 cursor-pointer">
-                        <input
-                            type="checkbox"
-                            v-model="shiftForm.is_active"
-                            class="rounded text-violet-600"
-                        />
-                        <span class="text-sm text-gray-700 dark:text-gray-300">
-                            {{ $t('common.active') }}
-                        </span>
-                    </label>
+                    <AppToggle
+                        v-model="shiftForm.is_overnight"
+                        :label="$t('hr.settings.shifts.overnight')"
+                    />
+                    <AppToggle
+                        v-if="editingShift"
+                        v-model="shiftForm.is_active"
+                        :label="$t('common.active')"
+                    />
                 </div>
 
                 <div
@@ -1091,6 +1057,7 @@ import SettingsTable from '@/Components/HR/SettingsTable.vue';
 import HRSettingModal from '@/Components/HR/HRSettingModal.vue';
 import RegulationModal from '@/Components/HR/RegulationModal.vue';
 import BaseModal from '@/Components/BaseModal.vue';
+import AppToggle from '@/Components/Common/AppToggle.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 import { useToast } from '@/Composables/useToast';
 import { useConfirm } from '@/Composables/useConfirm';

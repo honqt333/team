@@ -87,7 +87,7 @@
                                         d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
                                     />
                                 </svg>
-                                <span id="system-date"></span>
+                                <span class="capitalize">{{ currentDate }}</span>
                             </div>
                         </div>
                     </div>
@@ -437,16 +437,27 @@
 <script setup>
 import { ref, reactive, computed, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { Link } from '@inertiajs/vue3';
+import { Link, usePage } from '@inertiajs/vue3';
+import axios from 'axios';
 import SystemLayout from '@/Layouts/SystemLayout.vue';
 
 const { t } = useI18n();
+const page = usePage();
 
 const props = defineProps({
     stats: Object,
     recentRegistrations: Array,
     trialEndingSoon: Array,
     integrations: Array,
+});
+
+const currentDate = computed(() => {
+    return new Date().toLocaleDateString(page.props.locale === 'en' ? 'en-US' : 'ar-SA', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+    });
 });
 
 // Balance state
@@ -550,8 +561,8 @@ const fetchProviderBalance = async (integration) => {
     providerErrors[integration.id] = null;
 
     try {
-        const response = await fetch(`/system/integrations/${integration.id}/balance`);
-        const data = await response.json();
+        const response = await axios.get(`/system/integrations/${integration.id}/balance`);
+        const data = response.data;
 
         if (data.success) {
             providerBalances[integration.id] = data;
@@ -560,7 +571,8 @@ const fetchProviderBalance = async (integration) => {
                 data.message || t('system.dashboard.provider_balances.fetch_failed');
         }
     } catch (error) {
-        providerErrors[integration.id] = t('system.dashboard.provider_balances.fetch_error');
+        providerErrors[integration.id] =
+            error.response?.data?.message || t('system.dashboard.provider_balances.fetch_error');
     } finally {
         providerLoading[integration.id] = false;
     }
@@ -581,17 +593,5 @@ onMounted(() => {
     if (props.integrations?.length) {
         refreshAllBalances();
     }
-    // Update date in header
-    updateSystemDate();
-    setInterval(updateSystemDate, 60000); // Update every minute
 });
-
-function updateSystemDate() {
-    const dateElement = document.getElementById('system-date');
-    if (dateElement) {
-        const now = new Date();
-        const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-        dateElement.textContent = now.toLocaleDateString('ar-SA', options);
-    }
-}
 </script>

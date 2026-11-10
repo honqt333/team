@@ -33,7 +33,7 @@ class SetPermissionsTeam
                 $user->unsetRelation('permissions');
 
                 // Debug: log after setting
-                Log::channel('single')->debug('SetPermissionsTeam', [
+                Log::channel('single')?->debug('SetPermissionsTeam', [
                     'user_id' => $user->id,
                     'tenant_id' => $user->tenant_id,
                     'team_id_set' => $registrar->getPermissionsTeamId(),

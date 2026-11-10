@@ -1,0 +1,9 @@
+{
+  "initial_diagnostics": 255,
+  "final_diagnostics": 0,
+  "new_suppressions": 0,
+  "report_tests": 145,
+  "financial_regression_tests": 29,
+  "test_sets_overlap": true,
+  "database_data_changed": false
+}

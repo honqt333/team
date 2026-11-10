@@ -245,17 +245,28 @@ class TenantBackupService
             $payload['tables'][$table] = $rows;
         }
 
-        $json = json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_PARTIAL_OUTPUT_ON_ERROR);
+        $json = json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR);
 
         if ($json === false) {
             throw new RuntimeException('Failed to encode backup JSON: '.json_last_error_msg());
         }
 
         $compressed = gzencode($json, 6);
+
+        if ($compressed === false) {
+            throw new RuntimeException('Backup compression failed.');
+        }
         $checksum = hash('sha256', $compressed);
         $path = sprintf('tenants/%d/backups/%d-%s.json.gz', $tenant->id, $record->id, now()->format('Ymd-His'));
 
-        Storage::disk($record->disk)->put($path, $compressed);
+        $disk = Storage::disk($record->disk);
+
+        if (! $disk->put($path, $compressed)
+            || ! $disk->exists($path)
+            || $disk->size($path) !== strlen($compressed)
+            || ! hash_equals($checksum, hash('sha256', $disk->get($path)))) {
+            throw new RuntimeException('Backup storage verification failed.');
+        }
 
         return [$path, $manifest, strlen($compressed), $checksum];
     }

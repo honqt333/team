@@ -313,7 +313,7 @@ class QuotesTest extends TestCase
         $conversionService = app(QuoteConversionService::class);
 
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Quote has already been converted.');
+        $this->expectExceptionMessage(__('quotes.already_converted'));
 
         $conversionService->convert($quote, $this->user);
     }
@@ -403,5 +403,187 @@ class QuotesTest extends TestCase
         $this->assertTrue($eagerLoadedLine->relationLoaded('parts'));
         $this->assertSame(75.5, $eagerLoadedLine->parts_total);
         $this->assertIsFloat($eagerLoadedLine->parts_total);
+    }
+
+    public function test_quotes_index_sorts_by_column_and_direction(): void
+    {
+        $this->actingAs($this->user);
+
+        Quote::query()->where('tenant_id', $this->tenant->id)->delete();
+
+        $quote1 = Quote::create([
+            'tenant_id' => $this->tenant->id,
+            'center_id' => $this->center->id,
+            'customer_id' => $this->customer->id,
+            'vehicle_id' => $this->vehicle->id,
+            'code' => 'QT-001',
+            'status' => Quote::STATUS_DRAFT,
+            'subtotal' => 100,
+            'total_discount' => 10,
+            'total' => 90,
+            'created_by' => $this->user->id,
+        ]);
+
+        $quote2 = Quote::create([
+            'tenant_id' => $this->tenant->id,
+            'center_id' => $this->center->id,
+            'customer_id' => $this->customer->id,
+            'vehicle_id' => $this->vehicle->id,
+            'code' => 'QT-999',
+            'status' => Quote::STATUS_DRAFT,
+            'subtotal' => 500,
+            'total_discount' => 50,
+            'total' => 450,
+            'created_by' => $this->user->id,
+        ]);
+
+        // 1. Sort by total asc
+        $responseAsc = $this->get(route('app.quotes.index', [
+            'status' => 'all',
+            'sort' => 'total',
+            'direction' => 'asc',
+        ]));
+        $responseAsc->assertOk();
+        $quotesAsc = $responseAsc->inertiaPage()['props']['quotes']['data'];
+        $this->assertEquals('QT-001', $quotesAsc[0]['code']);
+        $this->assertEquals('QT-999', $quotesAsc[1]['code']);
+
+        // 2. Sort by total desc
+        $responseDesc = $this->get(route('app.quotes.index', [
+            'status' => 'all',
+            'sort' => 'total',
+            'direction' => 'desc',
+        ]));
+        $responseDesc->assertOk();
+        $quotesDesc = $responseDesc->inertiaPage()['props']['quotes']['data'];
+        $this->assertEquals('QT-999', $quotesDesc[0]['code']);
+        $this->assertEquals('QT-001', $quotesDesc[1]['code']);
+
+        // 3. Sort by code desc
+        $responseCodeDesc = $this->get(route('app.quotes.index', [
+            'status' => 'all',
+            'sort' => 'code',
+            'direction' => 'desc',
+        ]));
+        $responseCodeDesc->assertOk();
+        $quotesCodeDesc = $responseCodeDesc->inertiaPage()['props']['quotes']['data'];
+        $this->assertEquals('QT-999', $quotesCodeDesc[0]['code']);
+        $this->assertEquals('QT-001', $quotesCodeDesc[1]['code']);
+    }
+
+    public function test_quotes_index_filters_by_status_search_and_dates(): void
+    {
+        $this->actingAsWithTeam($this->user);
+
+        // Clean existing quotes
+        Quote::query()->delete();
+
+        $customerA = Customer::factory()->create([
+            'tenant_id' => $this->tenant->id,
+            'name' => 'Ahmed Al-Harbi',
+            'phone' => '0501112233',
+        ]);
+        $customerB = Customer::factory()->create([
+            'tenant_id' => $this->tenant->id,
+            'name' => 'Fahad Al-Otaibi',
+            'phone' => '0504445566',
+        ]);
+
+        $vehicleA = Vehicle::factory()->create([
+            'tenant_id' => $this->tenant->id,
+            'customer_id' => $customerA->id,
+            'plate_number' => 'ABC 1234',
+        ]);
+        $vehicleB = Vehicle::factory()->create([
+            'tenant_id' => $this->tenant->id,
+            'customer_id' => $customerB->id,
+            'plate_number' => 'XYZ 9876',
+        ]);
+
+        // Quote 1: Draft (pending), 3 days ago
+        $q1 = Quote::create([
+            'tenant_id' => $this->tenant->id,
+            'center_id' => $this->center->id,
+            'customer_id' => $customerA->id,
+            'vehicle_id' => $vehicleA->id,
+            'code' => 'QT-DRAFT-1',
+            'status' => Quote::STATUS_DRAFT,
+            'created_by' => $this->user->id,
+        ]);
+        $q1->created_at = now()->subDays(3);
+        $q1->saveQuietly();
+
+        // Quote 2: Converted, 2 days ago
+        $q2 = Quote::create([
+            'tenant_id' => $this->tenant->id,
+            'center_id' => $this->center->id,
+            'customer_id' => $customerB->id,
+            'vehicle_id' => $vehicleB->id,
+            'code' => 'QT-CONV-2',
+            'status' => Quote::STATUS_CONVERTED,
+            'created_by' => $this->user->id,
+        ]);
+        $q2->created_at = now()->subDays(2);
+        $q2->saveQuietly();
+
+        // Quote 3: Rejected, today
+        $q3 = Quote::create([
+            'tenant_id' => $this->tenant->id,
+            'center_id' => $this->center->id,
+            'customer_id' => $customerA->id,
+            'vehicle_id' => $vehicleA->id,
+            'code' => 'QT-REJ-3',
+            'status' => Quote::STATUS_REJECTED,
+            'created_by' => $this->user->id,
+        ]);
+
+        // 1. Default request without status returns pending (draft/sent) quotes
+        $respDefault = $this->get(route('app.quotes.index'));
+        $respDefault->assertOk();
+        $quotesDefault = $respDefault->inertiaPage()['props']['quotes']['data'];
+        $this->assertCount(1, $quotesDefault);
+        $this->assertEquals('QT-DRAFT-1', $quotesDefault[0]['code']);
+
+        // 2. Status 'all' returns all 3 quotes
+        $respAll = $this->get(route('app.quotes.index', ['status' => 'all']));
+        $respAll->assertOk();
+        $quotesAll = $respAll->inertiaPage()['props']['quotes']['data'];
+        $this->assertCount(3, $quotesAll);
+
+        // 3. Status 'converted' returns only converted
+        $respConverted = $this->get(route('app.quotes.index', ['status' => 'converted']));
+        $respConverted->assertOk();
+        $quotesConverted = $respConverted->inertiaPage()['props']['quotes']['data'];
+        $this->assertCount(1, $quotesConverted);
+        $this->assertEquals('QT-CONV-2', $quotesConverted[0]['code']);
+
+        // 4. Search by phone number (customerB)
+        $respSearchPhone = $this->get(route('app.quotes.index', [
+            'status' => 'all',
+            'search' => '0504445566',
+        ]));
+        $respSearchPhone->assertOk();
+        $quotesSearchPhone = $respSearchPhone->inertiaPage()['props']['quotes']['data'];
+        $this->assertCount(1, $quotesSearchPhone);
+        $this->assertEquals('QT-CONV-2', $quotesSearchPhone[0]['code']);
+
+        // 5. Search by plate number
+        $respSearchPlate = $this->get(route('app.quotes.index', [
+            'status' => 'all',
+            'search' => 'ABC 1234',
+        ]));
+        $respSearchPlate->assertOk();
+        $quotesSearchPlate = $respSearchPlate->inertiaPage()['props']['quotes']['data'];
+        $this->assertCount(2, $quotesSearchPlate);
+
+        // 6. Filter by date_from (today only)
+        $respDate = $this->get(route('app.quotes.index', [
+            'status' => 'all',
+            'date_from' => now()->toDateString(),
+        ]));
+        $respDate->assertOk();
+        $quotesDate = $respDate->inertiaPage()['props']['quotes']['data'];
+        $this->assertCount(1, $quotesDate);
+        $this->assertEquals('QT-REJ-3', $quotesDate[0]['code']);
     }
 }

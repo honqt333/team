@@ -54,7 +54,7 @@ class HardcodedArabicTest extends TestCase
      * @var array<string, int>
      */
     private const MAX_INLINE_ARABIC = [
-        'ar' => 814,
+        'ar' => 725,
     ];
 
     public function test_no_new_hardcoded_arabic_in_the_vue_sources(): void
@@ -69,6 +69,20 @@ class HardcodedArabicTest extends TestCase
             ."\nEither move the copy into resources/js/i18n/lang/{ar,en}.json "
             ."and call it with \$t('key'), or — if a page is deliberately "
             .'left alone — lower the ceiling in this test after checking why.'
+        );
+    }
+
+    public function test_company_transactions_controller_has_zero_hardcoded_arabic_strings(): void
+    {
+        $code = (string) file_get_contents(base_path('app/Http/Controllers/App/CompanyTransactionController.php'));
+        $code = preg_replace('#/\*.*?\*/#s', '', $code) ?? $code;
+        $code = preg_replace('#(?<!:)//[^\n]*#', '', $code) ?? $code;
+
+        preg_match_all('/[\x{0600}-\x{06FF}]/u', $code, $matches);
+
+        $this->assertEmpty(
+            $matches[0],
+            'CompanyTransactionController must not contain hardcoded Arabic strings.'
         );
     }
 

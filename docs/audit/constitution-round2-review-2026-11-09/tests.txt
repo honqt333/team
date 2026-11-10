@@ -1,0 +1,33 @@
+
+   PASS  Tests\Feature\CompanyTransactionsTest
+  ✓ user can create draft company transaction                            5.25s  
+  ✓ user can update draft company transaction                            0.40s  
+  ✓ user can delete draft company transaction                            0.41s  
+  ✓ taxable transaction requires contact                                 0.43s  
+  ✓ approving taxable revenue generates sales invoice                    0.42s  
+  ✓ approving taxable expense generates purchase invoice                 0.45s  
+  ✓ tenancy isolation on company transactions                            0.81s  
+
+   PASS  Tests\Feature\System\InvoicePdfCompanyInfoTest
+  ✓ pdf header uses company name from settings                           3.37s  
+  ✓ pdf falls back to default when no settings                           9.10s  
+  ✓ pdf uses settings updated after initial invoice                      2.85s  
+  ✓ pdf renders with company stamp                                       0.83s  
+
+   PASS  Tests\Feature\FontPolicyTest
+  ✓ no source file loads fonts from google                               0.27s  
+  ✓ the font token does not name a parallel family                       0.17s  
+  ✓ the self hosted font stylesheet is served and declares the family    0.11s  
+  ✓ the layout links the local font stylesheet                           0.06s  
+  ✓ no source or view file names a parallel font family                  0.17s  
+
+   PASS  Tests\Feature\HardcodedArabicTest
+  ✓ no new hardcoded arabic in the vue sources                           7.30s  
+  ✓ company transactions controller has zero hardcoded arabic strings    0.05s  
+  ✓ the extractor finds the remaining arabic                            10.61s  
+  ✓ the locale files have the same keys                                  0.07s  
+  ✓ the locale files carry the same placeholders                         0.09s  
+
+  Tests:    21 passed (72 assertions)
+  Duration: 43.32s
+

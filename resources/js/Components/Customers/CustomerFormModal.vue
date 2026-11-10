@@ -41,153 +41,105 @@
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <!-- Name -->
-                <div :class="['company', 'government'].includes(form.type) ? '' : 'md:col-span-2'">
-                    <label
-                        class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5"
-                    >
-                        {{ $t('customers.form.name') }}
-                        <span class="text-red-500">*</span>
-                    </label>
-                    <input
-                        type="text"
+                <FormField
+                    v-slot="field"
+                    :class="['company', 'government'].includes(form.type) ? '' : 'md:col-span-2'"
+                    :label="$t('customers.form.name')"
+                    :error="form.errors.name"
+                    required
+                >
+                    <AppInput
+                        :id="field.id"
+                        :aria-describedby="field.describedBy"
+                        :invalid="field.hasError"
                         name="name"
                         v-model="form.name"
-                        class="w-full px-4 py-2.5 border rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:border-transparent transition-all"
-                        :class="
-                            form.errors.name
-                                ? 'border-red-500 focus:ring-red-500'
-                                : !form.name
-                                  ? 'border-red-300 dark:border-red-800 focus:ring-indigo-500'
-                                  : 'border-gray-300 dark:border-gray-600 focus:ring-indigo-500'
-                        "
+                        class="w-full"
+                        required
                     />
-                    <p
-                        v-if="form.errors.name"
-                        class="mt-1.5 text-sm text-red-600 dark:text-red-400"
-                    >
-                        {{ form.errors.name }}
-                    </p>
-                </div>
+                </FormField>
 
-                <div v-if="['company', 'government'].includes(form.type)">
-                    <label
-                        class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5"
-                    >
-                        {{ $t('customers.form.contact_name') }}
-                        <span class="text-red-500">*</span>
-                    </label>
-                    <input
-                        type="text"
+                <FormField
+                    v-slot="field"
+                    v-if="['company', 'government'].includes(form.type)"
+                    :label="$t('customers.form.contact_name')"
+                    :error="form.errors.contact_name"
+                    required
+                >
+                    <AppInput
+                        :id="field.id"
+                        :aria-describedby="field.describedBy"
+                        :invalid="field.hasError"
                         name="contact_name"
                         v-model="form.contact_name"
-                        class="w-full px-4 py-2.5 border rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:border-transparent transition-all"
-                        :class="
-                            form.errors.contact_name
-                                ? 'border-red-500 focus:ring-red-500'
-                                : !form.contact_name
-                                  ? 'border-red-300 dark:border-red-800 focus:ring-indigo-500'
-                                  : 'border-gray-300 dark:border-gray-600 focus:ring-indigo-500'
-                        "
+                        class="w-full"
+                        required
                     />
-                    <p
-                        v-if="form.errors.contact_name"
-                        class="mt-1.5 text-sm text-red-600 dark:text-red-400"
-                    >
-                        {{ form.errors.contact_name }}
-                    </p>
-                </div>
+                </FormField>
 
                 <div
                     v-if="form.type === 'company'"
                     class="md:col-span-2 grid grid-cols-1 md:grid-cols-3 gap-4"
                 >
-                    <div>
-                        <label
-                            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5"
-                        >
-                            {{ $t('customers.form.tax_number') }}
-                        </label>
-                        <input
-                            type="text"
+                    <FormField
+                        v-slot="field"
+                        :label="$t('customers.form.tax_number')"
+                        :error="form.errors.tax_number"
+                    >
+                        <AppInput
+                            :id="field.id"
+                            :aria-describedby="field.describedBy"
+                            :invalid="field.hasError"
                             name="tax_number"
                             v-model="form.tax_number"
                             :placeholder="$t('customers.form.tax_placeholder')"
-                            class="w-full px-4 py-2.5 border rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:border-transparent transition-all"
-                            :class="
-                                form.errors.tax_number
-                                    ? 'border-red-500 focus:ring-red-500'
-                                    : 'border-gray-300 dark:border-gray-600 focus:ring-indigo-500'
-                            "
+                            class="w-full"
                         />
-                        <p
-                            v-if="form.errors.tax_number"
-                            class="mt-1.5 text-sm text-red-600 dark:text-red-400"
-                        >
-                            {{ form.errors.tax_number }}
-                        </p>
-                    </div>
+                    </FormField>
 
-                    <div>
-                        <label
-                            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5"
-                        >
-                            {{ $t('customers.form.credit_limit') }}
-                        </label>
-                        <input
+                    <FormField
+                        v-slot="field"
+                        :label="$t('customers.form.credit_limit')"
+                        :error="form.errors.credit_limit"
+                    >
+                        <AppInput
+                            :id="field.id"
+                            :aria-describedby="field.describedBy"
+                            :invalid="field.hasError"
                             type="number"
                             name="credit_limit"
                             step="0.01"
                             min="0"
                             v-model="form.credit_limit"
                             :placeholder="$t('customers.form.credit_limit_placeholder')"
-                            class="w-full px-4 py-2.5 border rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:border-transparent transition-all"
-                            :class="
-                                form.errors.credit_limit
-                                    ? 'border-red-500 focus:ring-red-500'
-                                    : 'border-gray-300 dark:border-gray-600 focus:ring-indigo-500'
-                            "
+                            class="w-full"
                         />
-                        <p
-                            v-if="form.errors.credit_limit"
-                            class="mt-1.5 text-sm text-red-600 dark:text-red-400"
-                        >
-                            {{ form.errors.credit_limit }}
-                        </p>
-                    </div>
+                    </FormField>
 
-                    <div>
-                        <label
-                            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5"
-                        >
-                            {{ $t('customers.form.payment_terms') }}
-                        </label>
+                    <FormField
+                        v-slot="field"
+                        :label="$t('customers.form.payment_terms')"
+                        :error="form.errors.payment_terms_days"
+                    >
                         <div class="relative">
-                            <input
+                            <AppInput
+                                :id="field.id"
+                                :aria-describedby="field.describedBy"
+                                :invalid="field.hasError"
                                 type="number"
                                 name="payment_terms_days"
                                 min="0"
                                 v-model="form.payment_terms_days"
-                                :placeholder="'0'"
-                                class="w-full px-4 py-2.5 border rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:border-transparent transition-all pe-12"
-                                :class="
-                                    form.errors.payment_terms_days
-                                        ? 'border-red-500 focus:ring-red-500'
-                                        : 'border-gray-300 dark:border-gray-600 focus:ring-indigo-500'
-                                "
+                                placeholder="0"
+                                class="w-full pe-12"
                             />
                             <span
-                                class="absolute inset-y-0 end-3 flex items-center text-xs text-gray-400 pointer-events-none"
+                                class="absolute inset-y-0 end-3 flex items-center text-xs text-text-muted pointer-events-none"
                             >
                                 {{ $t('common.days') }}
                             </span>
                         </div>
-                        <p
-                            v-if="form.errors.payment_terms_days"
-                            class="mt-1.5 text-sm text-red-600 dark:text-red-400"
-                        >
-                            {{ form.errors.payment_terms_days }}
-                        </p>
-                    </div>
+                    </FormField>
                 </div>
 
                 <div>
@@ -264,30 +216,22 @@
                     </p>
                 </div>
 
-                <div class="md:col-span-2">
-                    <label
-                        class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5"
-                    >
-                        {{ $t('customers.form.email') }}
-                    </label>
-                    <input
+                <FormField
+                    v-slot="field"
+                    class="md:col-span-2"
+                    :label="$t('customers.form.email')"
+                    :error="form.errors.email"
+                >
+                    <AppInput
+                        :id="field.id"
+                        :aria-describedby="field.describedBy"
+                        :invalid="field.hasError"
                         type="email"
                         name="email"
                         v-model="form.email"
-                        class="w-full px-4 py-2.5 border rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:border-transparent transition-all"
-                        :class="
-                            form.errors.email
-                                ? 'border-red-500 focus:ring-red-500'
-                                : 'border-gray-300 dark:border-gray-600 focus:ring-indigo-500'
-                        "
+                        class="w-full"
                     />
-                    <p
-                        v-if="form.errors.email"
-                        class="mt-1.5 text-sm text-red-600 dark:text-red-400"
-                    >
-                        {{ form.errors.email }}
-                    </p>
-                </div>
+                </FormField>
 
                 <!-- Quick Actions -->
                 <div class="md:col-span-2">
@@ -325,19 +269,18 @@
                 </div>
 
                 <!-- Notes -->
-                <div class="md:col-span-2">
-                    <label
-                        class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5"
-                    >
-                        {{ $t('customers.form.notes') }}
-                    </label>
+                <FormField
+                    class="md:col-span-2"
+                    :label="$t('customers.form.notes')"
+                    :error="form.errors.notes"
+                >
                     <textarea
                         name="notes"
                         v-model="form.notes"
                         rows="2"
-                        class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500 focus:border-transparent resize-none transition-all"
+                        class="w-full px-4 py-2.5 border border-border dark:border-gray-600 rounded-xl bg-surface dark:bg-gray-900 text-text-primary dark:text-gray-100 focus:ring-2 focus:ring-focus-ring focus:border-action-primary resize-none transition-all"
                     ></textarea>
-                </div>
+                </FormField>
             </div>
 
             <!-- Address Section -->
@@ -713,6 +656,8 @@ import { useConfirm } from '@/Composables/useConfirm';
 import { useFormScrollToError } from '@/Composables/useFormScrollToError';
 import BaseModal from '@/Components/BaseModal.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
+import FormField from '@/Components/Common/FormField.vue';
+import AppInput from '@/Components/App/AppInput.vue';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
@@ -939,8 +884,6 @@ watch(
         if (initialFormData.value && !isLocating.value) {
             const currentData = JSON.stringify(newData);
             const isChanged = currentData !== initialFormData.value;
-            if (isChanged !== isDirty.value) {
-            }
             isDirty.value = isChanged;
         }
     },

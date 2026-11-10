@@ -350,7 +350,7 @@ function getAmountBadge(receipt) {
                                     >
                                         <img
                                             v-if="isImage(r)"
-                                            :src="`/storage/${r.receipt_path}`"
+                                            :src="r.receipt_url"
                                             :alt="`receipt-${r.id}`"
                                             class="h-full w-full object-cover"
                                             loading="lazy"

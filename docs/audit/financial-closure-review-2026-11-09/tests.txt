@@ -1,0 +1,84 @@
+
+   PASS  Tests\Feature\FinancialSafetyAuditAcceptanceTest
+  ✓ r01 financial summary excludes draft and cancelled sales invoices    4.07s  
+  ✓ r01 financial summary excludes draft and cancelled credit notes      0.66s  
+  ✓ r01 financial summary excludes draft and cancelled purchases         0.62s  
+  ✓ r01 financial summary excludes draft company transactions            0.58s  
+  ✓ r02 linked company revenue is counted exactly once in financial tot… 0.60s  
+  ✓ r02 linked company expense is counted exactly once in financial tot… 1.74s  
+  ✓ r02 cancelled linked invoice does not count in sales or income       3.98s  
+  ✓ r02 unlinked company revenue is safely counted in income             5.20s  
+  ✓ r02 tax period deduplicates linked company transactions              1.36s  
+  ✓ r02 cash register deduplicates payments and company transactions     1.34s  
+  ✓ r03 revenue transaction is classified as income in tax collection    0.71s  
+  ✓ r03 expense transaction is classified as expense in tax collection   0.82s  
+  ✓ r03 legacy income type is supported in tax collection                0.96s  
+  ✓ r03 draft and deleted company transactions are excluded from tax co… 1.83s  
+  ✓ tax period excludes company transaction when linked to cancelled dr… 1.38s  
+  ✓ tax period excludes company transaction when linked to purchase inv… 1.15s  
+  ✓ cash register payment method filter excludes cash company transacti… 1.32s  
+  ✓ cash register payment method filter includes cash company transacti… 1.74s  
+  ✓ cash register excludes company transaction linked to invoice even w… 1.04s  
+
+   PASS  Tests\Feature\CashRegisterReportTest
+  ✓ guest is redirected to login                                         0.09s  
+  ✓ wrshah legacy redirects                                              0.68s  
+  ✓ authenticated user can view cash register report                     0.96s  
+  ✓ cash register calculates debit credit and balance accurately         0.94s  
+  ✓ cash register filters by payment method                              1.38s  
+  ✓ cash register exports csv successfully                               0.51s  
+
+   PASS  Tests\Feature\TaxPeriodsReportTest
+  ✓ guest is redirected to login                                         0.05s  
+  ✓ authenticated user can view tax periods index                        0.51s  
+  ✓ user can view three years periods json                               0.78s  
+  ✓ user can preview and create tax period                               0.87s  
+  ✓ user can view and post tax period                                    1.07s  
+  ✓ user cannot access another tenants tax period                        1.38s  
+  ✓ user can export tax period excel and zatca                           1.19s  
+
+   PASS  Tests\Feature\PurchasePaymentSafetyTest
+  ✓ purchase payment lifecycle full payment and deletion                 0.77s  
+  ✓ purchase payment partial payments and incremental deletion           1.59s  
+  ✓ purchase payment rejects overpayment beyond balance                  2.20s  
+  ✓ purchase payment rejects negative or zero amount                     0.73s  
+  ✓ purchase payment deletion via eloquent triggers recalculation        0.55s  
+
+   PASS  Tests\Feature\ArabicPdfShapingTest
+  ✓ shaper converts arabic characters to presentation glyphs             0.06s  
+  ✓ shaper preserves html tags and style blocks                          0.05s  
+  ✓ shaper handles non arabic text cleanly                               0.05s  
+  ✓ shaper handles non breaking spaces in labels                         0.06s  
+  ✓ escaped html entities remain escaped and never become html elements  0.09s  
+  ✓ escaped scripts and styles in user text remain escaped               0.10s  
+  ✓ html comments are preserved                                          0.07s  
+
+   FAIL  Tests\Feature\HardcodedArabicTest
+  ⨯ no new hardcoded arabic in the vue sources                           7.24s  
+  ✓ company transactions controller has zero hardcoded arabic strings    0.08s  
+  ✓ the extractor finds the remaining arabic                            13.04s  
+  ✓ the locale files have the same keys                                  0.06s  
+  ✓ the locale files carry the same placeholders                         0.07s  
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\HardcodedArabicTest > no new hardcoded arabic in th…   
+  The Vue sources hold 726 inline Arabic literals (allowed: 725).
+Either move the copy into resources/js/i18n/lang/{ar,en}.json and call it with $t('key'), or — if a page is deliberately left alone — lower the ceiling in this test after checking why.
+Failed asserting that 726 is equal to 725 or is less than 725.
+
+  at tests/Feature/HardcodedArabicTest.php:64
+     60▕     public function test_no_new_hardcoded_arabic_in_the_vue_sources(): void
+     61▕     {
+     62▕         $count = $this->countInlineArabic();
+     63▕ 
+  ➜  64▕         $this->assertLessThanOrEqual(
+     65▕             self::MAX_INLINE_ARABIC['ar'],
+     66▕             $count,
+     67▕             "The Vue sources hold {$count} inline Arabic literals "
+     68▕             .'(allowed: '.self::MAX_INLINE_ARABIC['ar'].').'
+
+  1   tests/Feature/HardcodedArabicTest.php:64
+
+
+  Tests:    1 failed, 48 passed (339 assertions)
+  Duration: 68.40s
+

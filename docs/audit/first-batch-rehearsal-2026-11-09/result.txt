@@ -1,0 +1,8 @@
+migrate: 0
+migrate:rollback: 0
+migrate: 0
+Migration up/down and legacy account preservation: PASS
+billing:privatize-documents: 0
+billing:privatize-documents: 0
+billing:privatize-documents: 0
+Preview, verified transfer, idempotent rerun and unrelated file preservation: PASS

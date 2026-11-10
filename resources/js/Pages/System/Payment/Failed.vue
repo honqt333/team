@@ -1,110 +1,152 @@
 <template>
     <SystemLayout>
         <div class="max-w-xl mx-auto py-6 text-center">
-            <!-- Failed Icon -->
-            <div
-                class="w-20 h-20 mx-auto bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center mb-6"
+            <PageHeader
+                :title="$t('system.payment.failed_title')"
+                :subtitle="$t('system.payment.failed_subtitle')"
             >
-                <svg
-                    class="w-10 h-10 text-red-600 dark:text-red-400"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                >
-                    <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M6 18L18 6M6 6l12 12"
-                    />
-                </svg>
-            </div>
+                <template #icon>
+                    <div
+                        class="w-12 h-12 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center text-red-600 dark:text-red-400"
+                    >
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M6 18L18 6M6 6l12 12"
+                            />
+                        </svg>
+                    </div>
+                </template>
+            </PageHeader>
 
             <!-- Error Message -->
-            <h1 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-                {{ $t('system.company_subscription.status.failed') }}
-            </h1>
-            <p class="text-gray-500 dark:text-gray-400 mb-4">
-                {{ $t('system.payment.failed_message') }}
-            </p>
-
-            <!-- Error Reason -->
-            <div
-                v-if="payment.failure_reason"
-                class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4 mb-8"
-            >
-                <p class="text-red-700 dark:text-red-300 text-sm">
-                    {{ payment.failure_reason }}
+            <div class="space-y-4 text-center">
+                <h1 class="text-2xl font-bold text-gray-900 dark:text-white">
+                    {{ $t('system.payment.failed_title') }}
+                </h1>
+                <p class="text-gray-500 dark:text-gray-400">
+                    {{ $t('system.payment.failed_message') }}
                 </p>
-            </div>
 
-            <!-- Payment Details -->
-            <div
-                class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-200 dark:border-gray-700 text-start mb-8"
-            >
-                <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                    {{ $t('system.payment.attempt_details') }}
-                </h2>
-                <div class="space-y-3">
-                    <div class="flex justify-between">
-                        <span class="text-gray-600 dark:text-gray-400">
-                            {{ $t('system.payment.transaction_number') }}
-                        </span>
-                        <span class="font-medium text-gray-900 dark:text-white font-mono">
-                            {{ payment.id }}
-                        </span>
-                    </div>
-                    <div class="flex justify-between">
-                        <span class="text-gray-600 dark:text-gray-400">
-                            {{ $t('common.amount') }}
-                        </span>
-                        <span class="font-medium text-gray-900 dark:text-white">
-                            {{ payment.amount }} {{ payment.currency }}
-                        </span>
-                    </div>
-                    <div class="flex justify-between">
-                        <span class="text-gray-600 dark:text-gray-400">
-                            {{ $t('common.status') }}
-                        </span>
-                        <span
-                            class="px-2 py-1 bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400 rounded-full text-xs font-medium"
-                        >
-                            {{ $t('system.status.failed') }}
-                        </span>
+                <!-- Error Reason -->
+                <div
+                    v-if="payment.failure_reason"
+                    class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4"
+                >
+                    <p class="text-red-700 dark:text-red-300 text-sm">
+                        {{ payment.failure_reason }}
+                    </p>
+                </div>
+
+                <!-- Payment Details -->
+                <div
+                    class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-200 dark:border-gray-700 text-start"
+                >
+                    <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                        {{ $t('system.payment.attempt_details') }}
+                    </h2>
+                    <div class="space-y-3">
+                        <div class="flex justify-between">
+                            <span class="text-gray-600 dark:text-gray-400">
+                                {{ $t('system.payment.transaction_number') }}
+                            </span>
+                            <span class="font-medium text-gray-900 dark:text-white font-mono">
+                                {{ payment.id }}
+                            </span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600 dark:text-gray-400">
+                                {{ $t('common.amount') }}
+                            </span>
+                            <span class="font-medium text-gray-900 dark:text-white font-mono">
+                                {{ payment.amount + ' ' + payment.currency }}
+                            </span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600 dark:text-gray-400">
+                                {{ $t('system.payment.payment_method') }}
+                            </span>
+                            <span class="font-medium text-gray-900 dark:text-white">
+                                {{ getPaymentMethodLabel(payment.payment_method) }}
+                            </span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600 dark:text-gray-400">
+                                {{ $t('system.payment.created_at') }}
+                            </span>
+                            <span class="text-gray-900 dark:text-white font-mono">
+                                {{ formatDate(payment.created_at) }}
+                            </span>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <!-- Actions -->
-            <div class="flex justify-center gap-4">
-                <button @click="retryPayment" class="btn-primary">
-                    {{ $t('system.payment.retry') }}
-                </button>
-                <Link
-                    href="/system/subscriptions"
-                    class="px-6 py-2.5 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-lg font-medium transition-colors"
-                >
-                    {{ $t('system.payment.back_to_subscriptions') }}
-                </Link>
+                <!-- Actions -->
+                <div class="mt-6 flex flex-col sm:flex-row gap-3 justify-center">
+                    <button
+                        @click="retryPayment"
+                        class="w-full sm:w-auto px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl transition-colors"
+                    >
+                        {{ $t('system.payment.retry_payment') }}
+                    </button>
+                    <a
+                        :href="route('system.subscriptions.show', subscription)"
+                        class="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 font-semibold rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                    >
+                        {{ $t('system.payment.view_subscription') }}
+                    </a>
+                </div>
             </div>
-
-            <!-- Help Text -->
-            <p class="mt-8 text-sm text-gray-500 dark:text-gray-400">
-                {{ $t('system.payment.support_hint') }}
-            </p>
         </div>
     </SystemLayout>
 </template>
 
 <script setup>
-import { Link, router } from '@inertiajs/vue3';
+import { computed } from 'vue';
+import { Head, router, useForm } from '@inertiajs/vue3';
+import { useI18n } from 'vue-i18n';
 import SystemLayout from '@/Layouts/SystemLayout.vue';
+import PageHeader from '@/Components/PageHeader.vue';
+import { useNumberFormat } from '@/Composables/useNumberFormat';
+
+const { t } = useI18n();
+const { toEnglish } = useNumberFormat();
 
 const props = defineProps({
-    payment: Object,
+    payment: { type: Object, required: true },
+    subscription: { type: Object, required: true },
 });
 
+const form = useForm({
+    payment_method: '',
+});
+
+const getPaymentMethodLabel = (method) => {
+    const map = {
+        moyasar: 'Moyasar',
+        tap: 'Tap',
+        paytabs: 'PayTabs',
+        tabby: 'Tabby',
+        tamara: 'Tamara',
+        bank_transfer: 'Bank Transfer',
+    };
+    return map[method] || method;
+};
+
+const formatDate = (dateStr) => {
+    if (!dateStr) return '—';
+    return new Date(dateStr).toLocaleDateString('ar-SA', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+    });
+};
+
 const retryPayment = () => {
-    router.post(`/system/payment/retry/${props.payment.id}`);
+    router.post('/system/payment/retry/' + payment.id);
 };
 </script>

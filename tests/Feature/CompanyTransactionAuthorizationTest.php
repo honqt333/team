@@ -407,4 +407,19 @@ class CompanyTransactionAuthorizationTest extends TestCase
         $this->assertNotNull($router->getRoutes()->getByName('settings.company.transactions.update'));
         $this->assertNotNull($router->getRoutes()->getByName('settings.company.transactions.destroy'));
     }
+
+    public function test_foreign_contact_category_and_center_are_rejected_and_legacy_contact_is_not_serialized(): void
+    {
+        $other = Tenant::factory()->create();
+        $center = Center::factory()->create(['tenant_id' => $other->id]);
+        $customer = Customer::factory()->create(['tenant_id' => $other->id, 'center_id' => $center->id]);
+        $category = IncomeCategory::create(['tenant_id' => $other->id, 'name_ar' => 'Test', 'name_en' => 'Test', 'transaction_type' => 'revenue']);
+        $actor = $this->userWith([Permissions::INVOICES_CREATE]);
+        $this->actingAs($actor)->post('/app/settings/company/transactions', $this->payload([
+            'contact_type' => 'customer', 'contact_id' => $customer->id,
+            'center_id' => $center->id, 'income_category_id' => $category->id,
+        ]))->assertSessionHasErrors(['contact_id', 'center_id', 'income_category_id']);
+        $legacy = $this->transaction(['contact_type' => 'customer', 'contact_id' => $customer->id]);
+        $this->assertNull($legacy->toArray()['contact']);
+    }
 }

@@ -25,15 +25,7 @@ class DatabaseSeeder extends Seeder
         // 2b. Create default admin user for /system/* panel (admin guard)
         $this->call(AdminUserSeeder::class);
 
-        // 3. Create Technical Data (Cars, Colors, Services, Units, HR Metadata)
-        $this->call(MetadataSeeder::class);
-        $this->call(ServiceSeeder::class);
-        $this->call(VehicleConditionSeeder::class);
-
-        // 4. Create Communication Templates (email/sms)
-        // Without these, /system/communication/templates is empty and
-        // notifications fall back to hard-coded HTML in their notifier.
-        $this->call(CommunicationTemplateSeeder::class);
+        // Technical data and communication templates are seeded by InitialSystemSeeder.
 
         // 5. Create Test Data (Optional, but useful for now)
         $this->call(TestDataSeeder::class);

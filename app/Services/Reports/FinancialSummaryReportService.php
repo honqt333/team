@@ -28,6 +28,14 @@ class FinancialSummaryReportService
             ->where('invoices.center_id', $centerId)
             ->where('invoices.type', 'invoice')
             ->whereNull('invoices.deleted_at')
+            ->whereNotIn('invoices.status', ['cancelled', 'draft'])
+            ->whereNotExists(function ($q) {
+                $q->select(DB::raw(1))
+                    ->from('company_transactions')
+                    ->whereColumn('company_transactions.invoice_id', 'invoices.id')
+                    ->whereNull('company_transactions.deleted_at')
+                    ->where('company_transactions.status', 'approved');
+            })
             ->where('invoice_lines.is_part', 0);
 
         $invPartsQuery = DB::table('invoice_lines')
@@ -36,6 +44,14 @@ class FinancialSummaryReportService
             ->where('invoices.center_id', $centerId)
             ->where('invoices.type', 'invoice')
             ->whereNull('invoices.deleted_at')
+            ->whereNotIn('invoices.status', ['cancelled', 'draft'])
+            ->whereNotExists(function ($q) {
+                $q->select(DB::raw(1))
+                    ->from('company_transactions')
+                    ->whereColumn('company_transactions.invoice_id', 'invoices.id')
+                    ->whereNull('company_transactions.deleted_at')
+                    ->where('company_transactions.status', 'approved');
+            })
             ->where('invoice_lines.is_part', 1);
 
         if ($storeSalesOnly) {
@@ -76,6 +92,7 @@ class FinancialSummaryReportService
             ->where('invoices.center_id', $centerId)
             ->where('invoices.type', 'credit_note')
             ->whereNull('invoices.deleted_at')
+            ->whereNotIn('invoices.status', ['cancelled', 'draft'])
             ->where('invoice_lines.is_part', 0);
 
         $retPartsQuery = DB::table('invoice_lines')
@@ -84,6 +101,7 @@ class FinancialSummaryReportService
             ->where('invoices.center_id', $centerId)
             ->where('invoices.type', 'credit_note')
             ->whereNull('invoices.deleted_at')
+            ->whereNotIn('invoices.status', ['cancelled', 'draft'])
             ->where('invoice_lines.is_part', 1);
 
         if ($storeSalesOnly) {
@@ -121,7 +139,15 @@ class FinancialSummaryReportService
         $purchQuery = DB::table('purchase_invoices')
             ->where('tenant_id', $tenantId)
             ->where('center_id', $centerId)
-            ->whereNull('deleted_at');
+            ->whereNull('deleted_at')
+            ->whereNotIn('status', ['cancelled', 'draft'])
+            ->whereNotExists(function ($q) {
+                $q->select(DB::raw(1))
+                    ->from('company_transactions')
+                    ->whereColumn('company_transactions.purchase_invoice_id', 'purchase_invoices.id')
+                    ->whereNull('company_transactions.deleted_at')
+                    ->where('company_transactions.status', 'approved');
+            });
 
         if ($from) {
             $purchQuery->where(function ($sub) use ($from) {
@@ -185,13 +211,35 @@ class FinancialSummaryReportService
             ->where('tenant_id', $tenantId)
             ->where('center_id', $centerId)
             ->where('transaction_type', 'revenue')
-            ->whereNull('deleted_at');
+            ->where('status', 'approved')
+            ->whereNull('deleted_at')
+            ->where(function ($q) {
+                $q->whereNull('invoice_id')
+                    ->orWhereExists(function ($sub) {
+                        $sub->select(DB::raw(1))
+                            ->from('invoices')
+                            ->whereColumn('invoices.id', 'company_transactions.invoice_id')
+                            ->whereNull('invoices.deleted_at')
+                            ->whereNotIn('invoices.status', ['cancelled', 'draft']);
+                    });
+            });
 
         $expQuery = DB::table('company_transactions')
             ->where('tenant_id', $tenantId)
             ->where('center_id', $centerId)
             ->where('transaction_type', 'expense')
-            ->whereNull('deleted_at');
+            ->where('status', 'approved')
+            ->whereNull('deleted_at')
+            ->where(function ($q) {
+                $q->whereNull('purchase_invoice_id')
+                    ->orWhereExists(function ($sub) {
+                        $sub->select(DB::raw(1))
+                            ->from('purchase_invoices')
+                            ->whereColumn('purchase_invoices.id', 'company_transactions.purchase_invoice_id')
+                            ->whereNull('purchase_invoices.deleted_at')
+                            ->whereNotIn('purchase_invoices.status', ['cancelled', 'draft']);
+                    });
+            });
 
         if ($from) {
             $incQuery->where(function ($sub) use ($from) {

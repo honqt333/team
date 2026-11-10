@@ -6,20 +6,20 @@
     <title>عرض سعر - {{ $quote->code }}</title>
     <style>
         @font-face {
-            font-family: 'Amiri';
+            font-family: 'IBM Plex Sans Arabic';
             font-weight: normal;
             font-style: normal;
-            src: url('file://{{ base_path("resources/fonts/Amiri-Regular.ttf") }}') format('truetype');
+            src: url('file://{{ base_path("resources/fonts/IBMPlexSansArabic-Regular.ttf") }}') format('truetype');
         }
         @font-face {
-            font-family: 'Amiri';
+            font-family: 'IBM Plex Sans Arabic';
             font-weight: bold;
             font-style: normal;
-            src: url('file://{{ base_path("resources/fonts/Amiri-Bold.ttf") }}') format('truetype');
+            src: url('file://{{ base_path("resources/fonts/IBMPlexSansArabic-Bold.ttf") }}') format('truetype');
         }
 
         * {
-            font-family: 'Amiri', 'DejaVu Sans', sans-serif;
+            font-family: 'IBM Plex Sans Arabic', sans-serif;
             box-sizing: border-box;
         }
 

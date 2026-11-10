@@ -12,7 +12,7 @@ use App\Services\QuoteConversionService;
 use App\Services\QuoteSignatureStorage;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Throwable;
+use Illuminate\Support\Facades\DB;
 
 class QuoteApprovalController extends Controller
 {
@@ -25,71 +25,70 @@ class QuoteApprovalController extends Controller
      */
     public function approve(Request $request, Quote $quote): RedirectResponse
     {
-        $this->authorize('approve', $quote);
+        return DB::transaction(function () use ($request, $quote) {
 
-        if (! $quote->canBeApproved()) {
-            abort(403, 'This quote cannot be approved.');
-        }
+            $quote = Quote::query()->lockForUpdate()->findOrFail($quote->id);
+            $this->authorize('approve', $quote);
 
-        // Cannot approve a quote without services or parts
-        if ($quote->lines()->count() === 0 && $quote->parts()->count() === 0) {
-            abort(400, 'Cannot approve an empty quote.');
-        }
-
-        // Handle optional customer signature on approval
-        $signaturePath = null;
-
-        if ($request->filled('signature')) {
-            // The signature is written to the public disk, so it has to
-            // be an inert image: the type is taken from the bytes and
-            // active formats (SVG) are refused.
-            try {
-                $signaturePath = app(QuoteSignatureStorage::class)
-                    ->store((string) $request->input('signature'), $quote);
-            } catch (InvalidQuoteSignatureException $e) {
-                return back()
-                    ->withInput()
-                    ->withErrors(['signature' => __('quotes.signature_invalid')]);
+            if (! $quote->canBeApproved()) {
+                abort(403, __('quotes.public_cannot_approve'));
             }
-        }
 
-        // First, mark as approved
-        $quote->update([
-            'status' => Quote::STATUS_APPROVED,
-            'approved_at' => now(),
-            'approved_by' => auth()->id(),
-            'signature_path' => $signaturePath ?? $quote->signature_path,
-        ]);
+            if ($quote->isExpired()) {
+                return back()->with('error', __('quotes.public_expired'));
+            }
 
-        // Then convert to work order
-        try {
-            $workOrder = $this->conversionService->convert($quote, auth()->user());
-        } catch (Throwable $e) {
-            // Revert approval if conversion fails
+            // Cannot approve a quote without services or parts
+            if ($quote->lines()->count() === 0 && $quote->parts()->count() === 0) {
+                abort(400, __('quotes.empty_decision'));
+            }
+
+            // Handle optional customer signature on approval
+            $signaturePath = null;
+
+            if ($request->filled('signature')) {
+                // The signature is written to the public disk, so it has to
+                // be an inert image: the type is taken from the bytes and
+                // active formats (SVG) are refused.
+                try {
+                    $signaturePath = app(QuoteSignatureStorage::class)
+                        ->store((string) $request->input('signature'), $quote);
+                } catch (InvalidQuoteSignatureException $e) {
+                    return back()
+                        ->withInput()
+                        ->withErrors(['signature' => __('quotes.signature_invalid')]);
+                }
+            }
+
+            // First, mark as approved
             $quote->update([
-                'status' => Quote::STATUS_DRAFT,
-                'approved_at' => null,
-                'approved_by' => null,
+                'status' => Quote::STATUS_APPROVED,
+                'approved_at' => now(),
+                'approved_by' => auth()->id(),
+                'signature_path' => $signaturePath ?? $quote->signature_path,
             ]);
 
-            abort(500, 'Failed to convert quote to work order: '.$e->getMessage());
-        }
+            // Then convert to work order
+            $workOrder = $this->conversionService->convert($quote, auth()->user());
 
-        // Notify quote creator about approval
-        if ($quote->created_by && $quote->created_by !== auth()->id()) {
-            NotificationService::notify(
-                tenantId: $quote->tenant_id,
-                userId: $quote->created_by,
-                type: 'quote.approved',
-                title: 'تمت الموافقة على عرض السعر #'.$quote->code,
-                body: 'تمت الموافقة على عرض السعر وتحويله إلى أمر عمل',
-                actionUrl: '/app/quotes/'.$quote->id,
-                actorId: auth()->id(),
-                icon: 'check',
-            );
-        }
+            $quote->logActivity('approve', ['channel' => 'staff']);
 
-        return redirect()->route('work-orders.show', $workOrder->id);
+            // Notify quote creator about approval
+            if ($quote->created_by && $quote->created_by !== auth()->id()) {
+                NotificationService::notify(
+                    tenantId: $quote->tenant_id,
+                    userId: $quote->created_by,
+                    type: 'quote.approved',
+                    title: __('quotes.approved_title', ['code' => $quote->code]),
+                    body: __('quotes.approved_converted_body'),
+                    actionUrl: '/app/quotes/'.$quote->id,
+                    actorId: auth()->id(),
+                    icon: 'check',
+                );
+            }
+
+            return redirect()->route('work-orders.show', $workOrder->id);
+        });
     }
 
     /**
@@ -97,36 +96,46 @@ class QuoteApprovalController extends Controller
      */
     public function reject(Request $request, Quote $quote): RedirectResponse
     {
-        $this->authorize('reject', $quote);
+        return DB::transaction(function () use ($quote) {
 
-        if (! $quote->canBeRejected()) {
-            abort(403, 'This quote cannot be rejected.');
-        }
+            $quote = Quote::query()->lockForUpdate()->findOrFail($quote->id);
+            $this->authorize('reject', $quote);
 
-        // Cannot reject a quote without services or parts
-        if ($quote->lines()->count() === 0 && $quote->parts()->count() === 0) {
-            abort(400, 'Cannot reject an empty quote.');
-        }
+            if (! $quote->canBeRejected()) {
+                abort(403, __('quotes.public_cannot_reject'));
+            }
 
-        $quote->update([
-            'status' => Quote::STATUS_REJECTED,
-            'rejected_at' => now(),
-        ]);
+            // Cannot reject a quote without services or parts
+            if ($quote->lines()->count() === 0 && $quote->parts()->count() === 0) {
+                abort(400, __('quotes.empty_decision'));
+            }
 
-        // Notify quote creator about rejection
-        if ($quote->created_by && $quote->created_by !== auth()->id()) {
-            NotificationService::notify(
-                tenantId: $quote->tenant_id,
-                userId: $quote->created_by,
-                type: 'quote.rejected',
-                title: 'تم رفض عرض السعر #'.$quote->code,
-                body: 'تم رفض عرض السعر',
-                actionUrl: '/app/quotes/'.$quote->id,
-                actorId: auth()->id(),
-                icon: 'x',
-            );
-        }
+            if ($quote->isExpired()) {
+                return back()->with('error', __('quotes.public_expired'));
+            }
 
-        return redirect()->back();
+            $quote->update([
+                'status' => Quote::STATUS_REJECTED,
+                'rejected_at' => now(),
+            ]);
+
+            $quote->logActivity('reject', ['channel' => 'staff']);
+
+            // Notify quote creator about rejection
+            if ($quote->created_by && $quote->created_by !== auth()->id()) {
+                NotificationService::notify(
+                    tenantId: $quote->tenant_id,
+                    userId: $quote->created_by,
+                    type: 'quote.rejected',
+                    title: __('quotes.rejected_title', ['code' => $quote->code]),
+                    body: __('quotes.rejected_body'),
+                    actionUrl: '/app/quotes/'.$quote->id,
+                    actorId: auth()->id(),
+                    icon: 'x',
+                );
+            }
+
+            return redirect()->back();
+        });
     }
 }

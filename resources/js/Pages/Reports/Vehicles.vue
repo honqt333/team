@@ -753,36 +753,22 @@
                     <!-- Overdue & Warehouse Parts Toggles -->
                     <div class="flex flex-wrap items-center gap-4 pt-5 sm:col-span-2 lg:col-span-2">
                         <!-- Overdue Toggle -->
-                        <label class="relative inline-flex items-center cursor-pointer">
-                            <input
-                                type="checkbox"
-                                v-model="isOverdueInput"
-                                @change="applyFilters"
-                                class="sr-only peer"
-                            />
-                            <div
-                                class="w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-600 peer-checked:bg-red-600"
-                            ></div>
-                            <span class="ms-2.5 text-xs font-bold text-gray-700 dark:text-gray-300">
-                                {{ $t('reports.vehicles_report.overdue') }}
-                            </span>
-                        </label>
+                        <AppToggle
+                            v-model="isOverdueInput"
+                            size="sm"
+                            color="danger"
+                            :label="$t('reports.vehicles_report.overdue')"
+                            @change="applyFilters"
+                        />
 
                         <!-- Warehouse Parts Only Toggle -->
-                        <label class="relative inline-flex items-center cursor-pointer">
-                            <input
-                                type="checkbox"
-                                v-model="warehousePartsOnlyInput"
-                                @change="applyFilters"
-                                class="sr-only peer"
-                            />
-                            <div
-                                class="w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-600 peer-checked:bg-emerald-600"
-                            ></div>
-                            <span class="ms-2.5 text-xs font-bold text-gray-700 dark:text-gray-300">
-                                {{ $t('reports.vehicles_report.warehouse_parts_only') }}
-                            </span>
-                        </label>
+                        <AppToggle
+                            v-model="warehousePartsOnlyInput"
+                            size="sm"
+                            color="success"
+                            :label="$t('reports.vehicles_report.warehouse_parts_only')"
+                            @change="applyFilters"
+                        />
                     </div>
                 </div>
 
@@ -1315,6 +1301,7 @@ import AppLayout from '@/Layouts/AppLayout.vue';
 import PageHeader from '@/Components/PageHeader.vue';
 import BackButton from '@/Components/BackButton.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
+import AppToggle from '@/Components/Common/AppToggle.vue';
 import SaudiPlateDisplay from '@/Components/Vehicles/SaudiPlateDisplay.vue';
 import CustomDatePicker from '@/Components/CustomDatePicker.vue';
 import StandardReportHeader from '@/Components/Print/StandardReportHeader.vue';

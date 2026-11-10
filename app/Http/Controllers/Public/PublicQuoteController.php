@@ -11,6 +11,7 @@ use App\Services\NotificationService;
 use App\Services\QuoteSignatureStorage;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -21,7 +22,7 @@ class PublicQuoteController extends Controller
      */
     public function show(string $uuid): Response
     {
-        $quote = Quote::withoutGlobalScopes()
+        $quote = Quote::withoutGlobalScopes()->whereNull('deleted_at')
             ->where('uuid', $uuid)
             ->with([
                 'center',
@@ -134,56 +135,61 @@ class PublicQuoteController extends Controller
      */
     public function approve(Request $request, string $uuid): RedirectResponse
     {
-        $quote = Quote::withoutGlobalScopes()
-            ->where('uuid', $uuid)
-            ->firstOrFail();
+        return DB::transaction(function () use ($request, $uuid) {
 
-        if (! in_array($quote->status, [Quote::STATUS_DRAFT, Quote::STATUS_SENT])) {
-            return back()->with('error', 'لا يمكن الموافقة على هذا العرض.');
-        }
+            $quote = Quote::withoutGlobalScopes()->whereNull('deleted_at')->lockForUpdate()
+                ->where('uuid', $uuid)
+                ->firstOrFail();
 
-        if ($quote->isExpired()) {
-            return back()->with('error', 'عذراً، هذا العرض منتهي الصلاحية ولا يمكن اعتماده.');
-        }
-
-        $signaturePath = null;
-
-        if ($request->filled('signature')) {
-            // The signature is written to the public disk, so it has to
-            // be an inert image: the type is taken from the bytes and
-            // active formats (SVG) are refused.
-            try {
-                $signaturePath = app(QuoteSignatureStorage::class)
-                    ->store((string) $request->input('signature'), $quote);
-            } catch (InvalidQuoteSignatureException $e) {
-                return back()
-                    ->withInput()
-                    ->withErrors(['signature' => __('quotes.signature_invalid')]);
+            if (! in_array($quote->status, [Quote::STATUS_DRAFT, Quote::STATUS_SENT])) {
+                return back()->with('error', __('quotes.public_cannot_approve'));
             }
-        }
 
-        $quote->update([
-            'status' => Quote::STATUS_APPROVED,
-            'approved_at' => now(),
-            'signature_path' => $signaturePath ?? $quote->signature_path,
-        ]);
+            if ($quote->isExpired()) {
+                return back()->with('error', __('quotes.public_expired'));
+            }
 
-        // Notify the quote creator
-        if ($quote->created_by) {
-            NotificationService::notify(
-                tenantId: $quote->tenant_id,
-                userId: $quote->created_by,
-                type: 'quote.approved',
-                title: 'وافق العميل على عرض السعر #'.$quote->code,
-                body: 'تمت الموافقة من قِبَل العميل عبر رابط المشاركة',
-                actionUrl: '/app/quotes/'.$quote->id,
-                actorId: null,
-                icon: 'check',
-            );
-        }
+            $signaturePath = null;
 
-        return redirect()->route('public.quotes.show', $quote->uuid)
-            ->with('success', 'تمت الموافقة على عرض السعر بنجاح.');
+            if ($request->filled('signature')) {
+                // The signature is written to the public disk, so it has to
+                // be an inert image: the type is taken from the bytes and
+                // active formats (SVG) are refused.
+                try {
+                    $signaturePath = app(QuoteSignatureStorage::class)
+                        ->store((string) $request->input('signature'), $quote);
+                } catch (InvalidQuoteSignatureException $e) {
+                    return back()
+                        ->withInput()
+                        ->withErrors(['signature' => __('quotes.signature_invalid')]);
+                }
+            }
+
+            $quote->update([
+                'status' => Quote::STATUS_APPROVED,
+                'approved_at' => now(),
+                'signature_path' => $signaturePath ?? $quote->signature_path,
+            ]);
+
+            $quote->logActivity('approve', ['channel' => 'public_link']);
+
+            // Notify the quote creator
+            if ($quote->created_by) {
+                NotificationService::notify(
+                    tenantId: $quote->tenant_id,
+                    userId: $quote->created_by,
+                    type: 'quote.approved',
+                    title: __('quotes.approved_title', ['code' => $quote->code]),
+                    body: __('quotes.approved_body'),
+                    actionUrl: '/app/quotes/'.$quote->id,
+                    actorId: null,
+                    icon: 'check',
+                );
+            }
+
+            return redirect()->route('public.quotes.show', $quote->uuid)
+                ->with('success', __('quotes.public_approved'));
+        });
     }
 
     /**
@@ -191,39 +197,48 @@ class PublicQuoteController extends Controller
      */
     public function reject(Request $request, string $uuid): RedirectResponse
     {
-        $request->validate([
-            'rejection_reason' => 'required|string|max:1000',
-        ]);
+        return DB::transaction(function () use ($request, $uuid) {
 
-        $quote = Quote::withoutGlobalScopes()
-            ->where('uuid', $uuid)
-            ->firstOrFail();
+            $request->validate([
+                'rejection_reason' => 'required|string|max:1000',
+            ]);
 
-        if (! in_array($quote->status, [Quote::STATUS_DRAFT, Quote::STATUS_SENT])) {
-            return back()->with('error', 'لا يمكن رفض هذا العرض.');
-        }
+            $quote = Quote::withoutGlobalScopes()->whereNull('deleted_at')->lockForUpdate()
+                ->where('uuid', $uuid)
+                ->firstOrFail();
 
-        $quote->update([
-            'status' => Quote::STATUS_REJECTED,
-            'rejected_at' => now(),
-            'rejection_reason' => $request->rejection_reason,
-        ]);
+            if (! in_array($quote->status, [Quote::STATUS_DRAFT, Quote::STATUS_SENT])) {
+                return back()->with('error', __('quotes.public_cannot_reject'));
+            }
 
-        // Notify the quote creator
-        if ($quote->created_by) {
-            NotificationService::notify(
-                tenantId: $quote->tenant_id,
-                userId: $quote->created_by,
-                type: 'quote.rejected',
-                title: 'رفض العميل عرض السعر #'.$quote->code,
-                body: 'سبب الرفض: '.$request->rejection_reason,
-                actionUrl: '/app/quotes/'.$quote->id,
-                actorId: null,
-                icon: 'x',
-            );
-        }
+            if ($quote->isExpired()) {
+                return back()->with('error', __('quotes.public_expired'));
+            }
 
-        return redirect()->route('public.quotes.show', $quote->uuid)
-            ->with('success', 'تم تسجيل رفضك لعرض السعر.');
+            $quote->update([
+                'status' => Quote::STATUS_REJECTED,
+                'rejected_at' => now(),
+                'rejection_reason' => $request->rejection_reason,
+            ]);
+
+            $quote->logActivity('reject', ['channel' => 'public_link']);
+
+            // Notify the quote creator
+            if ($quote->created_by) {
+                NotificationService::notify(
+                    tenantId: $quote->tenant_id,
+                    userId: $quote->created_by,
+                    type: 'quote.rejected',
+                    title: __('quotes.rejected_title', ['code' => $quote->code]),
+                    body: __('quotes.rejected_body'),
+                    actionUrl: '/app/quotes/'.$quote->id,
+                    actorId: null,
+                    icon: 'x',
+                );
+            }
+
+            return redirect()->route('public.quotes.show', $quote->uuid)
+                ->with('success', __('quotes.public_rejected'));
+        });
     }
 }

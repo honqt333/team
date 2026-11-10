@@ -138,6 +138,12 @@
         "attachment_deleted": "تم حذف المرفق بنجاح",
         "attachment_limits_hint": "يُسمح برفع ملفات PDF, JPG, PNG بحجم أقصى 1 ميجابايت.",
         "attachments_uploaded_successfully": "تم رفع المرفقات بنجاح",
+        "click_to_browse": "تصفح من جهازك",
+        "drag_and_drop_files": "اسحب الملفات هنا أو",
+        "file_too_large": "حجم الملف كبير جداً: {file} (الحد الأقصى {size})",
+        "max_file_size": "الحد الأقصى لكل ملف: {size} ميجابايت",
+        "supported_formats": "الصيغ المدعومة: {formats}",
+        "upload_files": "رفع ملفات",
         "back": "رجوع",
         "basic_info": "البيانات الأساسية",
         "btn_create_quote": "إنشاء تقييم",
@@ -209,7 +215,6 @@
         "export": "تصدير",
         "export_excel": "تصدير إكسل",
         "female": "أنثى",
-        "file_too_large": "حجم الملف كبير جداً: {file} (الحد الأقصى {size})",
         "finance": "المالية",
         "fixed_amount": "مبلغ ثابت",
         "from": "من",
@@ -245,6 +250,7 @@
         "manual_update": "تحديث يدوي",
         "max": "الحد الأقصى",
         "max_size": "الحد الأقصى للحجم {size}",
+        "menu": "القائمة",
         "minute": "دقيقة",
         "minutes": "دقيقة",
         "monthly": "شهري",
@@ -287,6 +293,7 @@
         "records": "سجل",
         "remove": "إزالة",
         "reset": "إعادة تعيين",
+        "reset_filter": "إعادة تعيين الفلاتر",
         "reset_filters": "إعادة تعيين الفلاتر",
         "results": "النتائج",
         "save": "حفظ",
@@ -433,6 +440,7 @@
         "previous": "السابق",
         "time": "الوقت",
         "view_mode": "طريقة العرض",
+        "toggle_theme": "تبديل المظهر",
         "form_has_errors": "يرجى مراجعة الحقول التي بها أخطاء ({count})",
         "remaining_required": "متبقي {count} حقل إلزامي",
         "try_adjusting_search": "جرّب تعديل البحث",
@@ -990,13 +998,13 @@
         "in_database": "في قاعدة البيانات",
         "in_progress_short": ":n قيد العمل",
         "insight_new_customers": "{n} عميل جديد هذا الشهر",
-        "insight_overdue_wo": "{n} أمر عمل متأخر",
+        "insight_overdue_wo": "{n} كرت عمل متأخر",
         "insight_revenue_down": "الإيرادات منخفضة {pct}%",
         "insight_revenue_up": "الإيرادات مرتفعة {pct}%",
         "insight_this_month": "هذا الشهر",
         "insight_vs_last_month": "مقارنة بالشهر الماضي",
-        "insight_wo_down": "أوامر العمل منخفضة {pct}%",
-        "insight_wo_up": "أوامر العمل مرتفعة {pct}%",
+        "insight_wo_down": "كروت العمل منخفضة {pct}%",
+        "insight_wo_up": "كروت العمل مرتفعة {pct}%",
         "insights_title": "نظرة عامة وإجراءات",
         "invoice_count": ":n فاتورة",
         "last_30_days": "آخر 30 يوم",
@@ -1006,26 +1014,29 @@
         "low_stock_parts_desc": "مخزون منخفض يحتاج إعادة طلب",
         "new_customer": "عميل جديد",
         "new_invoice": "فاتورة جديدة",
-        "new_quote": "تقييم جديد",
+        "new_quote": "عرض سعر جديد",
         "new_this_month": "{n} جديد هذا الشهر",
-        "new_work_order": "أمر عمل جديد",
+        "new_work_order": "كرت عمل جديد",
+        "workshop_board": "لوحة الورشة",
+        "appointments": "المواعيد والتسليمات",
+        "inventory": "المخزون والقطع",
         "no_alerts_attention": "لا توجد تنبيهات تحتاج انتباهك حالياً.",
         "no_data": "لا توجد بيانات",
         "no_recent_invoices": "لا توجد فواتير حديثة",
-        "no_recent_work_orders": "لا توجد أوامر عمل حديثة",
-        "no_schedule_today": "لا توجد مواعيد اليوم",
+        "no_recent_work_orders": "لا توجد كروت عمل حديثة",
+        "no_schedule_today": "لا توجد تسليمات مجدولة اليوم",
         "open_or_in_progress": "مفتوحة أو قيد التنفيذ",
-        "outstanding_balance": "المستحقات",
-        "overdue_invoices": "فواتير مستحقة",
+        "outstanding_balance": "المستحقات غير المحصلة",
+        "overdue_invoices": "فواتير متأخرة السداد",
         "overdue_invoices_desc": "فواتير غير مدفوعة منذ أكثر من 30 يوم",
-        "overdue_work_orders": "أوامر عمل متأخرة",
+        "overdue_work_orders": "كروت عمل متأخرة",
         "overdue_work_orders_desc": "تجاوزت تاريخ الانتهاء المتوقع",
         "payments_today": "تحصيل اليوم: {n}",
         "quick_actions": "الإجراءات السريعة",
         "quick_actions_subtitle": "وصول سريع للعمليات الأكثر استخداماً",
         "recent_activity": "النشاط الأخير",
         "recent_invoices": "أحدث الفواتير",
-        "recent_work_orders": "أحدث أوامر العمل",
+        "recent_work_orders": "أحدث كروت العمل",
         "refresh": "تحديث",
         "reports": "التقارير",
         "reset": "إعادة تعيين",
@@ -1034,12 +1045,12 @@
         "revenue_trend": "اتجاه الإيرادات",
         "save_layout": "حفظ التخطيط",
         "settings": "الإعدادات",
-        "subtitle": "مرحباً بك في نظام خدمة برو. إليك ملخص أداء مركزك اليوم.",
+        "subtitle": "ملخص الأداء والمؤشرات التشغيلية والمالية للمركز اليوم.",
         "tab_alerts": "التنبيهات",
         "tab_financial": "المالية",
-        "tab_operations": "العمليات",
+        "tab_operations": "التشغيل والورشة",
         "tab_overview": "نظرة عامة",
-        "technician_performance": "أداء فريق العمل",
+        "technician_performance": "إنتاجية الفنيين",
         "this_month": "هذا الشهر",
         "title": "لوحة التحكم",
         "welcome": "مرحباً أيها المُشرف",
@@ -1067,8 +1078,8 @@
         "trial_ends": "تنتهي: :date",
         "no_trial_ending_soon": "لا توجد فترات تجريبية منتهية قريباً",
         "view": "عرض",
-        "today_schedule": "مواعيد اليوم",
-        "top_customers": "أفضل العملاء",
+        "today_schedule": "تسليمات اليوم المتوقعة",
+        "top_customers": "أعلى العملاء",
         "top_services": "الخدمات الأكثر طلباً",
         "total": "الإجمالي",
         "total_customers": "إجمالي العملاء",
@@ -1076,10 +1087,10 @@
         "unpaid_invoices": "فواتير غير مدفوعة",
         "view_all": "عرض الكل",
         "vs_last_month": "مقارنةً بالشهر الماضي",
-        "vs_last_period": "مقابل :value",
-        "weekly_work_orders": "أوامر العمل الأسبوعية",
-        "work_orders_status": "توزيع أوامر العمل",
-        "work_orders_this_month": "أوامر عمل الشهر",
+        "vs_last_period": "مقابل {value}",
+        "weekly_work_orders": "نشاط كروت العمل الأسبوعي",
+        "work_orders_status": "حالات كروت العمل",
+        "work_orders_this_month": "كروت عمل الشهر",
         "today": "اليوم"
     },
     "departments": {
@@ -1144,7 +1155,21 @@
         "no_tasks_filtered": "لا توجد مهام مطابقة للفلاتر",
         "notes": "الملاحظات",
         "photos": "الصور",
-        "search_tasks_placeholder": "ابحث في المهام..."
+        "search_tasks_placeholder": "ابحث في المهام...",
+        "upload_new_photos": "رفع صور جديدة",
+        "classification": "التصنيف",
+        "priorities": {
+            "low": "منخفضة",
+            "normal": "عادية",
+            "high": "عالية",
+            "urgent": "عاجلة"
+        },
+        "photo_types": {
+            "general": "عام",
+            "before": "قبل العمل",
+            "after": "بعد العمل",
+            "damage": "أضرار / عيوب"
+        }
     },
     "errors": {
         "403": {
@@ -1164,6 +1189,7 @@
             "check_out": "تسجيل خروج",
             "daily_report": "تقرير الحضور اليومي",
             "date": "التاريخ",
+            "empty_hint": "لا يوجد موظفون نشطون مسجلون في هذا المركز لتحضيرهم",
             "early_leave": "انصراف مبكر",
             "holiday": "عطلة",
             "late": "متأخر",
@@ -1289,6 +1315,7 @@
             "no_allowances": "لا توجد بدلات",
             "no_deductions": "لا توجد خصومات",
             "no_employees": "لا يوجد موظفين",
+            "empty_hint": "ابدأ بإضافة موظف جديد لتعيين الصلاحيات والأقسام والرواتب",
             "no_job_title": "لا يوجد مسمى وظيفي",
             "no_user_account": "لا يوجد حساب مستخدم لهذا الموظف",
             "no_user_link": "بدون ربط",
@@ -1356,6 +1383,12 @@
             "manage_deductions": "إدارة الحسومات",
             "other_payments": {
                 "add": "إضافة دفعة",
+                "edit": "تعديل دفعة",
+                "delete_confirm_title": "حذف الدفعة",
+                "delete_confirm_message": "هل أنت متأكد من حذف هذه الدفعة؟ لا يمكن التراجع عن هذا الإجراء.",
+                "approve_confirm_title": "اعتماد الدفعة",
+                "approve_confirm_message": "هل أنت متأكد من اعتماد هذه الدفعة؟ سيتم إدراجها في المسيرات القادمة.",
+                "empty_hint": "لا توجد مدفوعات أخرى مسجلة حالياً",
                 "payment_title": "العنوان",
                 "title": "المدفوعات الأخرى",
                 "types": {
@@ -1452,6 +1485,7 @@
             "must_approve_first": "يجب اعتماد المسيّرة قبل تسجيلها كمدفوعة",
             "net_salary": "الصافي",
             "no_payrolls": "لا توجد مسيّرات",
+            "empty_hint": "ابدأ بتوليد مسير رواتب جديد للفترة الحالية لحساب المستحقات والبدلات والخصومات",
             "paid": "مدفوعة",
             "payment_date": "تاريخ الصرف",
             "pending": "قيد الانتظار",
@@ -1632,6 +1666,7 @@
             "cost": "التكلفة",
             "date": "التاريخ",
             "empty": "لا توجد حركات",
+            "empty_hint": "لم يتم تسجيل أي حركات مخزنية مطابقة للمعايير المحددة",
             "no_moves_desc": "لم يتم تسجيل أي حركات واردة أو منصرفة لهذه القطعة حتى الآن.",
             "receipt": "استلام",
             "receipt_created": "تم تسجيل الاستلام بنجاح",
@@ -1768,6 +1803,7 @@
             "current": "المخزون الحالي",
             "current_stock": "الكمية الحالية",
             "empty": "لا توجد أرصدة",
+            "empty_hint": "لا توجد أرصدة مخزنية مطابقة لمعايير البحث الحالية أو لم يتم تسجيل أي رصيد بعد.",
             "no_balances_desc": "لا توجد أرصدة مستودعات مسجلة لهذه القطعة حتى الآن.",
             "in_stock": "متوفر",
             "insufficient": "الكمية المطلوبة أكبر من المتوفر",
@@ -1803,6 +1839,7 @@
             "created": "تم إنشاء التحويل بنجاح",
             "edit": "تعديل التحويل",
             "empty": "لا توجد تحويلات",
+            "empty_hint": "ابدأ بإنشاء تحويل جديد لنقل قطع الغيار بين المستودعات والفروع",
             "from": "من مستودع",
             "item_added": "تم إضافة البند",
             "item_exists": "هذا البند موجود مسبقاً",
@@ -1985,6 +2022,7 @@
             "create": "إنشاء فاتورة شراء مباشرة",
             "discount": "الخصم",
             "due_date_label": "موعد الدفع",
+            "empty_hint": "ابدأ بإضافة فاتورة شراء جديدة لتسجيل مشتريات القطع والمواد من الموردين",
             "invoice": "فاتورة شراء",
             "invoice_number": "رقم فاتورة المورد",
             "invoice_number_placeholder": "أدخل رقم فاتورة المورد المباشر",
@@ -1992,6 +2030,7 @@
             "overdue_days": "{days} أيام متأخرة عن الاستحقاق",
             "remaining": "الباقي",
             "return_invoice": "فاتورة مرتجع شراء",
+            "returns_empty_hint": "لا توجد مرتجعات شراء مسجلة حالياً",
             "statuses": {
                 "cancelled": "ملغاة",
                 "draft": "مسودة",
@@ -2054,6 +2093,7 @@
             "partial": "مدفوعة جزئياً",
             "reported": "مُبلغة",
             "unpaid": "غير مدفوعة",
+            "overdue": "متأخرة السداد",
             "valid": "صالحة"
         },
         "subtotal": "المجموع قبل الضريبة",
@@ -2817,6 +2857,7 @@
         "updated_success": "تم تحديث الملف الشخصي بنجاح"
     },
     "purchasing": {
+        "order": "أمر الشراء",
         "grn": {
             "cancelled": "تم إلغاء سند الاستلام",
             "code": "رقم السند",
@@ -2883,6 +2924,7 @@
             "unit_factor": "معامل التحويل"
         },
         "orders": {
+            "order": "أمر الشراء",
             "actions": {
                 "receive": "استلام البضاعة",
                 "send": "إرسال للمورد"
@@ -2905,6 +2947,7 @@
             "due_date": "تاريخ الاستحقاق",
             "edit": "تعديل أمر شراء",
             "empty": "لا توجد أوامر شراء",
+            "empty_hint": "ابدأ بإنشاء أول أمر شراء من الموردين لتغذية المخزون وتتبع المشتريات",
             "errors": {
                 "full_payment_required": "يجب سداد كامل المبلغ للأوامر النقدية أو تفعيل خيار الدفع الآجل."
             },
@@ -2975,6 +3018,7 @@
             "edit": "تعديل مورد",
             "email": "البريد الإلكتروني",
             "empty": "لا يوجد موردين",
+            "empty_hint": "ابدأ بإضافة مورد جديد لإدارة المشتريات وفواتير الموردين",
             "form": {
                 "lat": "خط العرض",
                 "lng": "خط الطول"
@@ -3381,6 +3425,7 @@
         "customers": "العملاء",
         "employees": "الموظفون / العمال",
         "financial_summary": "الملخص المالي",
+        "date_from_to": "من {from} إلى {to}",
         "inventory_activities": "أنشطة المخزون",
         "invoices": "الفواتير",
         "orders": "الطلبات",
@@ -4362,6 +4407,7 @@
             "main_center": "المركز الرئيسي"
         },
         "tax_periods_report": {
+            "consolidated_notice": "هذه الفترة تجمع جميع فروع التسجيل الضريبي للمنشأة، بصرف النظر عن الفرع الحالي.",
             "title": "الفترات الضريبية والإقرار الضريبي",
             "subtitle": "إدارة الفترات الضريبية الربع سنوية واحتساب إقرار ضريبة القيمة المضافة لـ ZATCA",
             "back_to_reports": "الرجوع لكافة التقارير",
@@ -4544,6 +4590,8 @@
         "minutes": "دقيقة",
         "no_services": "لا توجد خدمات في هذا القسم",
         "no_services_in_dept": "لا توجد خدمات في هذا القسم في الفروع الأخرى. يمكنك إضافة تعريف جديد.",
+        "show_all_catalog_services": "عرض كل خدمات الفروع الأخرى",
+        "show_dept_services_only": "عرض خدمات القسم فقط",
         "not_set": "غير محدد",
         "previous_warranty_claims": "استبيانات الضمان السابقة",
         "remaining_duration": "المدة المتبقية",
@@ -4605,6 +4653,10 @@
                 "description": "إدارة الماركات، الموديلات، والألوان",
                 "title": "إعدادات النظام"
             },
+            "notifications": {
+                "description": "التحكم في قنوات الإشعارات، أحداث التنبيهات، وقوالب الرسائل",
+                "title": "إعدادات الإشعارات"
+            },
             "users": {
                 "description": "إدارة مستخدمين النظام وصلاحياتهم",
                 "title": "المستخدمين"
@@ -4616,6 +4668,74 @@
         },
         "subtitle": "إدارة إعدادات النظام والتهيئة",
         "title": "الإعدادات",
+        "notifications": {
+            "title": "إعدادات الإشعارات والتنبيهات",
+            "subtitle": "إدارة قنوات التواصل، أحداث الإشعارات التلقائية، وتخصيص قوالب الرسائل",
+            "saved_successfully": "تم حفظ إعدادات الإشعارات بنجاح",
+            "test_sent_successfully": "تم إرسال إشعار تجريبي بنجاح إلى شريط الإشعارات",
+            "test_title": "إشعار تجريبي من المنظومة",
+            "test_body": "تم استلام الإشعار التجريبي بنجاح في الوقت {time}. إعدادات التنبيهات تعمل بشكل سليم.",
+            "tabs": {
+                "channels": "قنوات الإرسال",
+                "events": "أحداث التنبيهات",
+                "templates": "قوالب الرسائل"
+            },
+            "channels": {
+                "title": "قنوات الإشعار المعتمدة",
+                "description": "تفعيل أو تعطيل القنوات المستخدمة للتواصل مع العملاء وفريق العمل",
+                "in_app": "إشعارات النظام الداخلية (الجرس)",
+                "in_app_desc": "إظهار شارات وتنبيهات مباشرة في شريط التنقل العلوي للمستخدمين داخل المنصة",
+                "email": "البريد الإلكتروني",
+                "email_desc": "إرسال التنبيهات والفواتير عبر البريد الإلكتروني للعملاء أو الإدارة",
+                "email_recipient": "البريد الإلكتروني المعتمد للإدارة",
+                "email_recipient_hint": "البريد الذي ستصل إليه تنبيهات الإدارة والعمليات الحساسة",
+                "sms": "الرسائل النصية القصيرة (SMS)",
+                "sms_desc": "إرسال رسائل نصية برقم معتمد للعملاء والموظفين عند الأحداث المحددة",
+                "whatsapp": "رسائل واتساب (WhatsApp)",
+                "whatsapp_desc": "إرسال إشعارات وعروض الأسعار والفواتير مباشرة عبر تطبيق واتساب",
+                "whatsapp_phone": "رقم واتساب الإدارة المعتمد",
+                "whatsapp_phone_hint": "رقم المركز بصيغة دولية (مثل 9665xxxxxxxx)"
+            },
+            "events": {
+                "title": "مصفوفة أحداث الإشعارات",
+                "description": "حدد القنوات المفعلة لكل حدث من أحداث المنظومة",
+                "table_event": "الحدث / المستند",
+                "table_in_app": "النظام الداخلي",
+                "table_email": "البريد",
+                "table_sms": "SMS",
+                "table_whatsapp": "واتساب",
+                "appointment_booked": "حجز موعد جديد",
+                "appointment_reminder": "تذكير بالموعد القادم",
+                "appointment_cancelled": "إلغاء حجز موعد",
+                "work_order_created": "إنشاء كرت عمل جديد",
+                "work_order_status_changed": "تحديث حالة كرت العمل",
+                "work_order_completed": "جاهزية المركبة واكتمال كرت العمل",
+                "quote_shared": "مشاركة عرض سعر مع العميل",
+                "quote_approved": "اعتماد وقبول عرض السعر",
+                "invoice_issued": "إصدار فاتورة ضريبية",
+                "payment_received": "تسجيل سند قبض / سداد دفعة",
+                "low_stock_alert": "تنبيه انخفاض رصيد المخزون"
+            },
+            "templates": {
+                "title": "قوالب نصوص الإشعارات",
+                "description": "تخصيص نص الرسائل التلقائية مع دعم المتغيرات الديناميكية",
+                "variables_hint": "المتغيرات المتاحة:",
+                "work_order_created": "نص إشعار إنشاء كرت العمل",
+                "work_order_completed": "نص إشعار اكتمال الصيانة وجاهزية الاستلام",
+                "quote_shared": "نص إشعار مشاركة عرض السعر",
+                "invoice_issued": "نص إشعار إصدار الفاتورة الضريبية",
+                "appointment_booked": "نص إشعار تأكيد حجز الموعد",
+                "appointment_reminder": "نص إشعار التذكير بالموعد",
+                "low_stock_alert": "نص تنبيه نقص المخزون"
+            },
+            "actions": {
+                "save": "حفظ التغييرات",
+                "saving": "جاري الحفظ...",
+                "send_test": "إرسال إشعار تجريبي",
+                "sending_test": "جاري الإرسال...",
+                "reset_defaults": "استعادة الافتراضيات"
+            }
+        },
         "print": {
             "signatures": {
                 "title": "مكتبة التواقيع",
@@ -4919,6 +5039,7 @@
         "fix_the_following": "يرجى تصحيح الأخطاء التالية:"
     },
     "vehicles": {
+        "model_required": "يرجى اختيار موديل المركبة.",
         "add": "إضافة مركبة",
         "all_loaded": "تم تحميل جميع المركبات",
         "columns": {
@@ -5022,6 +5143,28 @@
         "delete_reading_confirm": "هل أنت متأكد من حذف قراءة العداد ("
     },
     "work_orders": {
+        "suggestions": {
+            "errors": {
+                "center_required": "معرّف المركز مطلوب لتشغيل الاقتراحات الذكية.",
+                "invalid_response": "أعاد الذكاء الاصطناعي استجابة غير صالحة.",
+                "tenant_required": "تتبّع استخدام الذكاء الاصطناعي يتطلب وجود مستأجر نشط.",
+                "unavailable": "خدمة الاقتراحات غير متاحة حالياً. حاول لاحقاً.",
+                "request_failed": "تعذر تحميل الاقتراحات. حاول مجدداً."
+            },
+            "unavailable": "العنصر المقترح غير متاح حالياً. اختره من القائمة الحالية.",
+            "panel_title": "اقتراحات الصيانة",
+            "panel_subtitle": "خدمات وقطع مقترحة بناءً على شكوى العميل",
+            "powered_by_ai": "بمساعدة الذكاء الاصطناعي",
+            "refresh": "جلب الاقتراحات",
+            "empty": "لا توجد اقتراحات لعرضها.",
+            "add": "مراجعة وإضافة",
+            "provided_by": "مقدم الاقتراحات {provider}",
+            "confidence_high": "ثقة مرتفعة",
+            "confidence_medium": "ثقة متوسطة",
+            "confidence_low": "ثقة منخفضة",
+            "type_service": "خدمة",
+            "type_part": "قطعة غيار"
+        },
         "allow_credit_override": "السماح بالاستثناء وتجاوز الحد الائتماني",
         "credit_limit_exceeded": "العميل تجاوز الحد الائتماني المسموح به. المديونية الحالية: :balance ر.س، الحد الائتماني: :limit ر.س.",
         "credit_limit_warning_desc": "مديونية العميل الحالية تجاوزت السقف الائتماني المعتمد. يرجى تحصيل المبالغ المستحقة أو تفعيل خيار الاستثناء أدناه لمتابعة فتح الكرت.",
@@ -5475,14 +5618,6 @@
             "pending": "قيد الانتظار",
             "ready_for_qc": "فحص الجودة"
         },
-        "suggestions": {
-            "errors": {
-                "center_required": "معرّف المركز مطلوب لتشغيل الاقتراحات الذكية.",
-                "invalid_response": "أعاد الذكاء الاصطناعي استجابة غير صالحة.",
-                "tenant_required": "تتبّع استخدام الذكاء الاصطناعي يتطلب وجود مستأجر نشط.",
-                "unavailable": "خدمة الاقتراحات غير متاحة حالياً. حاول لاحقاً."
-            }
-        },
         "credit_note": {
             "no_cash_movement_hint": "💡 لن يُسجل أي خصم أو صرف من الخزينة؛ سيبقى الإشعار الدائن كالتزام مستحق للعميل في حسابه.",
             "load_error": "حدث خطأ أثناء تحميل بيانات الإرجاع"
@@ -5599,7 +5734,8 @@
             "feedbacks_support": "البلاغات ومكتب الدعم",
             "activity_log": "سجل النشاط",
             "system_settings": "إعدادات المنظومة",
-            "support_hub": "مكتب الدعم والرسائل"
+            "support_hub": "مكتب الدعم والرسائل",
+            "error_log": "سجل الأخطاء"
         },
         "notifications": {
             "title": "الإشعارات",
@@ -6895,6 +7031,14 @@
             }
         },
         "billing": {
+            "storage": {
+                "title": "مساحة التخزين المخصصة للسحابة",
+                "subtitle": "استهلاك المستندات والصور والمرفقات المحفوظة في حسابك",
+                "used": "مستهلك",
+                "unlimited": "غير محدود",
+                "used_space": "المساحة المستهلكة",
+                "allocated_limit": "الحد المخصص للباقة"
+            },
             "page": {
                 "title": "الفوترة",
                 "subtitle": "إدارة اشتراكك وطرق الدفع والإيصالات",
@@ -7294,7 +7438,30 @@
                 "contact_messages": "رسائل الزوار",
                 "help": "مركز المساعدة والشروحات"
             }
-        }
+        },
+        "error_log": {
+            "title": "سجل الأخطاء",
+            "description": "عرض محدود للسجلات مع إخفاء السياق والبيانات الحساسة.",
+            "all_levels": "جميع المستويات",
+            "timestamp": "الوقت",
+            "level": "المستوى",
+            "message": "الرسالة",
+            "limit": "عدد السجلات",
+            "truncated": "يقتصر العرض على نهاية ملف السجل.",
+            "empty": "لا توجد سجلات مطابقة",
+            "levels": {
+                "debug": "تصحيح",
+                "info": "معلومات",
+                "notice": "إشعار",
+                "warning": "تحذير",
+                "error": "خطأ",
+                "critical": "حرج",
+                "alert": "تنبيه",
+                "emergency": "طوارئ"
+            },
+            "refresh": "تحديث السجل"
+        },
+        "nav": {}
     },
     "subscription": {
         "bank_transfer_pending": "تم استلام طلب اشتراكك عبر التحويل البنكي. سيتم تفعيل اشتراكك فور التحقق من التحويل.",
@@ -7498,10 +7665,14 @@
         "all": "الكل",
         "clear_filters": "مسح الفلاتر",
         "empty": "لا توجد مواعيد بهذه الفلاتر",
-        "customer": "معرّف العميل",
-        "vehicle": "معرّف المركبة",
-        "customer_placeholder": "معرّف العميل",
-        "vehicle_placeholder": "معرّف المركبة",
+        "customer": "العميل",
+        "vehicle": "المركبة",
+        "customer_placeholder": "اختر العميل...",
+        "vehicle_placeholder": "اختر المركبة...",
+        "no_vehicles": "لا توجد مركبات مسجلة لهذا العميل",
+        "select_customer_first": "يرجى اختيار العميل أولاً",
+        "search_vehicle_or_customer": "بحث سريع باللوحة أو اسم العميل...",
+        "selected_vehicle": "المركبة المحددة",
         "bay": "الباي",
         "tech": "الفني",
         "no_bay": "بدون باي محدد",

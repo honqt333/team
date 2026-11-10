@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Models\Concerns\TenantScoped;
+use App\Services\PaymentService;
 use App\Traits\HasPurchaseInvoiceRelations;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -56,6 +57,11 @@ class PurchaseInvoice extends Model
     public function isCancelled()
     {
         return $this->status === self::STATUS_CANCELLED;
+    }
+
+    public function updatePaymentStatus(): void
+    {
+        app(PaymentService::class)->recalculatePurchaseInvoice($this);
     }
 
     // Code generator: PINV-0001

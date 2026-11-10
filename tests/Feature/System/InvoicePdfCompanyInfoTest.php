@@ -35,6 +35,7 @@ class InvoicePdfCompanyInfoTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+        Storage::fake('local');
         // Clear BEFORE RefreshDatabase's transaction opens so
         // we wipe any leftover rows from a previous test (the
         // transaction wrap doesn't help when the model also
@@ -75,7 +76,9 @@ class InvoicePdfCompanyInfoTest extends TestCase
         $service = app(SubscriptionInvoiceService::class);
         $path = $service->generatePdf($invoice);
 
-        $this->assertTrue(Storage::disk('public')->exists($path));
+        $this->assertTrue(Storage::disk('local')->exists($path));
+        $this->assertFalse(Storage::disk('public')->exists($path));
+        $this->assertStringContainsString('/system/invoices/', $service->getPdfUrl($invoice));
 
         // Extract text and verify the configured company name shows up
         $text = $this->extractPdfText($path);
@@ -109,7 +112,9 @@ class InvoicePdfCompanyInfoTest extends TestCase
         $service = app(SubscriptionInvoiceService::class);
         $path = $service->generatePdf($invoice);
 
-        $this->assertTrue(Storage::disk('public')->exists($path));
+        $this->assertTrue(Storage::disk('local')->exists($path));
+        $this->assertFalse(Storage::disk('public')->exists($path));
+        $this->assertStringContainsString('/system/invoices/', $service->getPdfUrl($invoice));
         $text = $this->extractPdfText($path);
         $this->assertNotEmpty($text, 'PDF must not be empty even without settings');
     }
@@ -218,10 +223,12 @@ class InvoicePdfCompanyInfoTest extends TestCase
         $service = app(SubscriptionInvoiceService::class);
         $path = $service->generatePdf($invoice);
 
-        $this->assertTrue(Storage::disk('public')->exists($path));
+        $this->assertTrue(Storage::disk('local')->exists($path));
+        $this->assertFalse(Storage::disk('public')->exists($path));
+        $this->assertStringContainsString('/system/invoices/', $service->getPdfUrl($invoice));
 
         // File must be non-empty (the embedded PNG adds bytes)
-        $size = filesize(Storage::disk('public')->path($path));
+        $size = filesize(Storage::disk('local')->path($path));
         $this->assertGreaterThan(1000, $size, 'PDF with embedded stamp should be >1KB');
     }
 
@@ -232,7 +239,7 @@ class InvoicePdfCompanyInfoTest extends TestCase
      */
     private function extractPdfText(string $path): string
     {
-        $fullPath = Storage::disk('public')->path($path);
+        $fullPath = Storage::disk('local')->path($path);
 
         // Use pypdf's layout extraction mode because simple mode
         // dumps characters in source-code order, which means

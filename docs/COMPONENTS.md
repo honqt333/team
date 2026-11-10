@@ -20,6 +20,12 @@
 | **ConfirmModal** | `@/Components/ConfirmModal.vue` | نافذة تأكيد الإجراءات الحرجة (حذف، إلغاء، استرجاع) |
 | **BaseModal** | `@/Components/BaseModal.vue` | النافذة المنبثقة الأساسية لكافة النماذج (`docs/MODALS.md`) |
 | **PrintEngine** | `@/Components/Print/PrintEngine.vue` | محرك الطباعة الموحد (A4 وحراري 80mm) عبر `usePrint` |
+| **DataTable** | `@/Components/Common/DataTable.vue` | محرك عرض الجداول والبيانات الموحد مع الفرز والحالات الفارغة |
+| **AppPagination** | `@/Components/Common/AppPagination.vue` | شريط التنقل بين الصفحات الموحد بالاعتماد على Design Tokens |
+| **AppToggle** | `@/Components/Common/AppToggle.vue` | مفتاح التبديل الموحد (On/Off) لجميع الحالات المنطقية |
+| **AppViewModeToggle** | `@/Components/Common/AppViewModeToggle.vue` | مبدل العرض الشبكي/السطري الموحد مع حفظ تلقائي |
+| **AppAttachmentManager** | `@/Components/Common/AppAttachmentManager.vue` | مدير المرفقات الموحد للسحب والإفلات والعرض والحذف |
+| **useServerTable** | `@/Composables/useServerTable.ts` | Composable موحد لإدارة فرز وبحث وجدول بيانات السيرفر |
 
 ---
 
@@ -269,4 +275,7 @@ import StandardReportLayout from '@/Components/Print/StandardReportLayout.vue';
 2. ❌ **ممنوع** تمثيل لوحات السيارات كنصوص عادية مبعثرة؛ **استخدم دائماً `SaudiPlateDisplay`**.
 3. ❌ **ممنوع** إنشاء مكتبات Canvas جديدة للتوقيع؛ **استخدم `SignaturePad`**.
 4. ❌ **ممنوع** استخدام مكتبات طباعة خارجية أو نوافذ منبثقة للطباعة؛ **اعتمد على `usePrint` و `PrintEngine.vue`**.
-5. ✅ **دائماً** احرص على تمرير الترجمات عبر `$t('...')` في نصوص الـ labels والـ placeholders.
+5. ❌ **ممنوع** استخدام وسوم HTML الخام `<table>` أو `<input type="checkbox">` ومفاتيح تبديل يدوية؛ **استخدم دائماً `DataTable.vue` و `AppToggle.vue`**.
+6. ❌ **ممنوع** الفرز اليدوي في الذاكرة (Client-side sorting) على الصفحات المقسمة مجزأة؛ **استخدم دائماً `useServerTable.ts` مع Whitelist backend sorting**.
+7. ✅ **دائماً** احرص على تمرير الترجمات عبر `$t('...')` في نصوص الـ labels والـ placeholders.
+8. ✅ **دائماً** استخدم Design Tokens للألوان والخلفيات وتجنب الألوان الثابتة (`blue-600`, `indigo-500`, إلخ).

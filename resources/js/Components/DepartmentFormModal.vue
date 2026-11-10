@@ -2,9 +2,21 @@
     <BaseModal :show="show" @close="$emit('close')" size="md">
         <template #title>
             <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-600 to-amber-600 flex items-center justify-center">
-                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+                <div
+                    class="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-600 to-amber-600 flex items-center justify-center"
+                >
+                    <svg
+                        class="w-5 h-5 text-white"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
+                        />
                     </svg>
                 </div>
                 {{ department ? $t('departments.edit') : $t('departments.add') }}
@@ -13,8 +25,13 @@
 
         <form @submit.prevent="submitForm" class="space-y-5">
             <!-- Default Departments -->
-            <div v-if="!department && filteredDefaultDepartments.length > 0" class="space-y-2 pb-4 border-b border-gray-100 dark:border-gray-800">
-                <label class="block text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">
+            <div
+                v-if="!department && filteredDefaultDepartments.length > 0"
+                class="space-y-2 pb-4 border-b border-gray-100 dark:border-gray-800"
+            >
+                <label
+                    class="block text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider"
+                >
                     {{ $t('departments.choose_default') }}
                 </label>
                 <div class="grid grid-cols-2 gap-2">
@@ -25,9 +42,13 @@
                         @click="selectDefaultDepartment(dept)"
                         class="flex items-center gap-3 p-3 rounded-xl border border-gray-100 dark:border-gray-800/80 bg-gray-50/50 dark:bg-gray-900/50 hover:bg-orange-50/50 dark:hover:bg-orange-950/10 hover:border-orange-200 dark:hover:border-orange-800/50 transition-all group text-start active:scale-[0.98]"
                     >
-                        <span class="text-xl group-hover:scale-110 transition-transform">{{ dept.icon }}</span>
+                        <span class="text-xl group-hover:scale-110 transition-transform">
+                            {{ dept.icon }}
+                        </span>
                         <div class="flex-1 min-w-0">
-                            <span class="block text-xs font-bold text-gray-800 dark:text-gray-200 group-hover:text-orange-600 dark:group-hover:text-orange-400 truncate">
+                            <span
+                                class="block text-xs font-bold text-gray-800 dark:text-gray-200 group-hover:text-orange-600 dark:group-hover:text-orange-400 truncate"
+                            >
                                 {{ locale === 'ar' ? dept.name_ar : dept.name_en }}
                             </span>
                         </div>
@@ -36,57 +57,59 @@
             </div>
 
             <!-- Name Arabic -->
-            <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-                    {{ $t('departments.form.name_ar') }} <span class="text-red-500">*</span>
-                </label>
-                <input 
-                    type="text" 
+            <FormField
+                v-slot="field"
+                :label="$t('departments.form.name_ar')"
+                :error="form.errors.name_ar"
+                required
+            >
+                <AppInput
+                    :id="field.id"
+                    :aria-describedby="field.describedBy"
+                    :invalid="field.hasError"
                     v-model="form.name_ar"
                     dir="rtl"
                     :placeholder="$t('departments.form.name_ar_placeholder')"
-                    class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all"
-                    :class="{ 'border-red-500': form.errors.name_ar }"
+                    class="w-full"
+                    required
                 />
-                <p v-if="form.errors.name_ar" class="mt-1.5 text-sm text-red-600 dark:text-red-400">{{ form.errors.name_ar }}</p>
-            </div>
+            </FormField>
 
             <!-- Name English -->
-            <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-                    {{ $t('departments.form.name_en') }} <span class="text-red-500">*</span>
-                </label>
-                <input 
-                    type="text" 
+            <FormField
+                v-slot="field"
+                :label="$t('departments.form.name_en')"
+                :error="form.errors.name_en"
+                required
+            >
+                <AppInput
+                    :id="field.id"
+                    :aria-describedby="field.describedBy"
+                    :invalid="field.hasError"
                     v-model="form.name_en"
                     dir="ltr"
-                    required
                     :placeholder="$t('departments.form.name_en_placeholder')"
-                    class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all"
-                    :class="{ 'border-red-500': form.errors.name_en }"
+                    class="w-full"
+                    required
                 />
-                <p v-if="form.errors.name_en" class="mt-1.5 text-sm text-red-600 dark:text-red-400">{{ form.errors.name_en }}</p>
-            </div>
+            </FormField>
 
             <!-- Description -->
-            <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-                    {{ $t('departments.form.description') }}
-                </label>
-                <textarea 
+            <FormField :label="$t('departments.form.description')" :error="form.errors.description">
+                <textarea
                     v-model="form.description"
                     rows="3"
-                    class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-orange-500 focus:border-transparent resize-none transition-all"
+                    class="w-full px-4 py-2.5 border border-border dark:border-gray-600 rounded-xl bg-surface dark:bg-gray-900 text-text-primary dark:text-gray-100 focus:ring-2 focus:ring-focus-ring focus:border-action-primary resize-none transition-all"
                 ></textarea>
-            </div>
+            </FormField>
 
             <!-- Sort Order -->
             <div>
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
                     {{ $t('departments.form.sort_order') }}
                 </label>
-                <input 
-                    type="number" 
+                <input
+                    type="number"
                     v-model.number="form.sort_order"
                     min="0"
                     class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all"
@@ -94,12 +117,12 @@
             </div>
 
             <!-- Active Toggle -->
-            <div class="flex items-center gap-3">
-                <label class="relative inline-flex items-center cursor-pointer">
-                    <input type="checkbox" v-model="form.is_active" class="sr-only peer">
-                    <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-orange-300 dark:peer-focus:ring-orange-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-orange-600"></div>
-                </label>
-                <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ $t('departments.form.is_active') }}</span>
+            <div>
+                <AppToggle
+                    v-model="form.is_active"
+                    color="warning"
+                    :label="$t('departments.form.is_active')"
+                />
             </div>
         </form>
 
@@ -127,6 +150,9 @@ import { watch, computed } from 'vue';
 import { useForm, router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import BaseModal from '@/Components/BaseModal.vue';
+import AppToggle from '@/Components/Common/AppToggle.vue';
+import FormField from '@/Components/Common/FormField.vue';
+import AppInput from '@/Components/App/AppInput.vue';
 
 const { locale } = useI18n();
 
@@ -136,57 +162,57 @@ const DEFAULT_DEPARTMENTS = [
         name_en: 'Mechanics',
         description_ar: 'قسم ميكانيكا السيارات وإصلاح الأعطال الميكانيكية للسيارة.',
         description_en: 'Car mechanics department and mechanical repair.',
-        icon: '🔧'
+        icon: '🔧',
     },
     {
         name_ar: 'الكهرباء',
         name_en: 'Electricity',
         description_ar: 'قسم كهرباء السيارات وإصلاح الأعطال الكهربائية.',
         description_en: 'Car electricity department and electrical repair.',
-        icon: '⚡'
+        icon: '⚡',
     },
     {
         name_ar: 'الصيانة الدورية',
         name_en: 'Periodic Maintenance',
         description_ar: 'قسم الصيانة الدورية وتغيير الزيوت والفلاتر.',
         description_en: 'Periodic maintenance department, oil and filter changes.',
-        icon: '📅'
+        icon: '📅',
     },
     {
         name_ar: 'السمكرة والدهان',
         name_en: 'Body & Paint',
         description_ar: 'قسم سمكرة السيارات ودهان الهيكل الخارجي.',
         description_en: 'Car body work and external paint department.',
-        icon: '🎨'
+        icon: '🎨',
     },
     {
         name_ar: 'تكييف الهواء',
         name_en: 'Air Conditioning',
         description_ar: 'قسم فحص وإصلاح مكيفات السيارات وتعبئة الفريون.',
         description_en: 'Car A/C inspection, repair, and Freon recharge.',
-        icon: '❄️'
+        icon: '❄️',
     },
     {
         name_ar: 'الفحص والبرمجة',
         name_en: 'Diagnostics & Programming',
         description_ar: 'قسم فحص الكمبيوتر وبرمجة الأنظمة الإلكترونية للسيارة.',
         description_en: 'Computer diagnostics and programming of car electronic systems.',
-        icon: '💻'
+        icon: '💻',
     },
     {
         name_ar: 'الغسيل والتلميع',
         name_en: 'Washing & Polishing',
         description_ar: 'قسم غسيل السيارات وتلميع وهيكل وتنظيف المقاعد.',
         description_en: 'Car washing, polishing, body detailing, and seat cleaning.',
-        icon: '🧼'
+        icon: '🧼',
     },
     {
         name_ar: 'الإطارات والوزن',
         name_en: 'Tires & Alignment',
         description_ar: 'قسم ميزان السيارات ووزن الأذرعة وتغيير وترصيص الإطارات.',
         description_en: 'Wheel alignment, tire changing, and wheel balancing.',
-        icon: '🚗'
-    }
+        icon: '🚗',
+    },
 ];
 
 function selectDefaultDepartment(dept) {
@@ -211,14 +237,14 @@ const props = defineProps({
 
 const filteredDefaultDepartments = computed(() => {
     const existingNames = new Set(
-        props.existingDepartments.flatMap(d => [
-            d.name_ar?.trim().toLowerCase(),
-            d.name_en?.trim().toLowerCase()
-        ]).filter(Boolean)
+        props.existingDepartments
+            .flatMap((d) => [d.name_ar?.trim().toLowerCase(), d.name_en?.trim().toLowerCase()])
+            .filter(Boolean)
     );
-    return DEFAULT_DEPARTMENTS.filter(d => 
-        !existingNames.has(d.name_ar.trim().toLowerCase()) && 
-        !existingNames.has(d.name_en.trim().toLowerCase())
+    return DEFAULT_DEPARTMENTS.filter(
+        (d) =>
+            !existingNames.has(d.name_ar.trim().toLowerCase()) &&
+            !existingNames.has(d.name_en.trim().toLowerCase())
     );
 });
 
@@ -233,29 +259,34 @@ const form = useForm({
 });
 
 // Initialize form when department prop changes (for edit mode)
-watch(() => props.department, (newDept) => {
-    if (newDept) {
-        form.name_ar = newDept.name_ar || '';
-        form.name_en = newDept.name_en || '';
-        form.description = newDept.description || '';
-        form.sort_order = newDept.sort_order || 0;
-        form.is_active = newDept.is_active ?? true;
-    }
-}, { immediate: true });
+watch(
+    () => props.department,
+    (newDept) => {
+        if (newDept) {
+            form.name_ar = newDept.name_ar || '';
+            form.name_en = newDept.name_en || '';
+            form.description = newDept.description || '';
+            form.sort_order = newDept.sort_order || 0;
+            form.is_active = newDept.is_active ?? true;
+        }
+    },
+    { immediate: true }
+);
 
 // Reset form when modal opens for create
-watch(() => props.show, (open) => {
-    if (open && !props.department) {
-        form.reset();
-        form.is_active = true;
+watch(
+    () => props.show,
+    (open) => {
+        if (open && !props.department) {
+            form.reset();
+            form.is_active = true;
+        }
     }
-});
+);
 
 function submitForm() {
-    const url = props.department 
-        ? `/app/departments/${props.department.id}` 
-        : '/app/departments';
-    
+    const url = props.department ? `/app/departments/${props.department.id}` : '/app/departments';
+
     const method = props.department ? 'put' : 'post';
     const isEdit = !!props.department;
 

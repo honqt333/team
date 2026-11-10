@@ -97,12 +97,12 @@ trait ReportScopingTrait
             'name' => $tenant->legal_name ?: $tenant->name,
             'commercial_register' => $tenant->cr_number ?? null,
             'cr_number' => $tenant->cr_number ?? '',
-            'tax_number' => $tenant->taxSettings?->tax_number ?? $tenant->tax_number ?? $tenant->vat_number ?? null,
-            'vat_number' => $tenant->taxSettings?->tax_number ?? $tenant->tax_number ?? $tenant->vat_number ?? '',
+            'tax_number' => $tenant->taxSettings->tax_number ?? $tenant->tax_number ?? $tenant->vat_number ?? null,
+            'vat_number' => $tenant->taxSettings->tax_number ?? $tenant->tax_number ?? $tenant->vat_number ?? '',
             'address' => $tenant->address ?? null,
             'phone' => $tenant->phone ?? null,
             'logo_path' => $tenant->logo_path ?? '',
-            'center_name' => $targetCenter?->name ?? '',
+            'center_name' => $targetCenter->name ?? '',
         ];
     }
 
@@ -118,7 +118,7 @@ trait ReportScopingTrait
             return [null, null];
         }
 
-        if ($range === 'custom' || (empty($range) && (! empty($start) || ! empty($end)))) {
+        if ($range === 'custom') {
             $parsedStart = null;
             $parsedEnd = null;
 

@@ -32,26 +32,11 @@
 
                 <template #actions>
                     <div class="flex items-center gap-2.5 shrink-0">
-                        <button
-                            type="button"
+                        <AppPrintButton
+                            variant="secondary"
+                            :label="$t('reports.customers_report.print_report')"
                             @click="handlePrint"
-                            class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 text-xs font-bold transition-all shadow-sm"
-                        >
-                            <svg
-                                class="w-4 h-4 text-gray-500"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                            >
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    stroke-width="2"
-                                    d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"
-                                />
-                            </svg>
-                            <span>{{ $t('reports.customers_report.print_report') }}</span>
-                        </button>
+                        />
 
                         <a
                             :href="exportUrl"
@@ -232,12 +217,7 @@
                         >
                             {{ $t('reports.customers_report.date_from') }}
                         </label>
-                        <input
-                            v-model="filterForm.start_date"
-                            type="date"
-                            class="w-full text-xs rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white px-3 py-2 focus:ring-sky-500"
-                            @change="applyFilters"
-                        />
+                        <CustomDatePicker v-model="filterForm.start_date" @change="applyFilters" />
                     </div>
                     <div>
                         <label
@@ -245,12 +225,7 @@
                         >
                             {{ $t('reports.customers_report.date_to') }}
                         </label>
-                        <input
-                            v-model="filterForm.end_date"
-                            type="date"
-                            class="w-full text-xs rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white px-3 py-2 focus:ring-sky-500"
-                            @change="applyFilters"
-                        />
+                        <CustomDatePicker v-model="filterForm.end_date" @change="applyFilters" />
                     </div>
                 </div>
 
@@ -935,152 +910,33 @@
                 </button>
             </div>
 
-            <!-- PRINT SECTION ONLY -->
-            <div class="hidden print:block print-section">
-                <!-- Standard Report Header -->
-                <StandardReportHeader :title="$t('reports.customers_report.official_report')" />
-
-                <!-- Financial Totals Summary Box -->
-                <div
-                    class="grid grid-cols-6 gap-2 p-3 bg-gray-100 rounded-lg text-center mb-4 border border-gray-300 text-xs"
-                >
-                    <div>
-                        <div class="text-gray-500">
-                            {{ $t('reports.customers_report.total_records') }}
-                        </div>
-                        <div class="font-bold font-mono">{{ kpis.total_records }}</div>
-                    </div>
-                    <div>
-                        <div class="text-gray-500">
-                            {{ $t('reports.customers_report.total_payment_due') }}
-                        </div>
-                        <div class="font-bold font-mono">
-                            {{ formatMoney(kpis.total_payment_due) }}
-                        </div>
-                    </div>
-                    <div>
-                        <div class="text-gray-500">
-                            {{ $t('reports.customers_report.total_amount_paid') }}
-                        </div>
-                        <div class="font-bold font-mono">
-                            {{ formatMoney(kpis.total_amount_paid) }}
-                        </div>
-                    </div>
-                    <div>
-                        <div class="text-gray-500">
-                            {{ $t('reports.customers_report.total_amount_adjusted') }}
-                        </div>
-                        <div class="font-bold font-mono">
-                            {{ formatMoney(kpis.total_amount_adjusted) }}
-                        </div>
-                    </div>
-                    <div>
-                        <div class="text-gray-500">
-                            {{ $t('reports.customers_report.total_payment_remaining') }}
-                        </div>
-                        <div class="font-bold font-mono">
-                            {{ formatMoney(kpis.total_payment_remaining) }}
-                        </div>
-                    </div>
-                    <div>
-                        <div class="text-gray-500">
-                            {{ $t('reports.customers_report.total_bad_debt') }}
-                        </div>
-                        <div class="font-bold font-mono text-rose-700">
-                            {{ formatMoney(kpis.total_bad_debt) }}
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Print Table -->
-                <table class="w-full text-[10px] text-start border-collapse border border-gray-300">
-                    <thead>
-                        <tr class="bg-gray-100 font-bold border-b border-gray-300">
-                            <th class="p-1.5 border-e border-gray-300 text-start">#</th>
-                            <th class="p-1.5 border-e border-gray-300 text-start">
-                                {{ $t('reports.customers_report.work_order_no') }}
-                            </th>
-                            <th class="p-1.5 border-e border-gray-300 text-start">
-                                {{ $t('reports.customers_report.customer_party') }}
-                            </th>
-                            <th class="p-1.5 border-e border-gray-300 text-start">
-                                {{ $t('reports.customers_report.vehicle_details') }}
-                            </th>
-                            <th class="p-1.5 border-e border-gray-300 text-start">
-                                {{ $t('reports.customers_report.check_in_date') }}
-                            </th>
-                            <th class="p-1.5 border-e border-gray-300 text-end">
-                                {{ $t('reports.customers_report.payment_due') }}
-                            </th>
-                            <th class="p-1.5 border-e border-gray-300 text-end">
-                                {{ $t('reports.customers_report.amount_paid') }}
-                            </th>
-                            <th class="p-1.5 border-e border-gray-300 text-end">
-                                {{ $t('reports.customers_report.amount_adjusted') }}
-                            </th>
-                            <th class="p-1.5 border-e border-gray-300 text-end">
-                                {{ $t('reports.customers_report.payment_remaining') }}
-                            </th>
-                            <th class="p-1.5 text-center">
-                                {{ $t('reports.customers_report.payment_status') }}
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr
-                            v-for="(row, idx) in printRows"
-                            :key="row.id"
-                            class="border-b border-gray-200"
-                        >
-                            <td class="p-1.5 border-e border-gray-300 font-mono">{{ idx + 1 }}</td>
-                            <td class="p-1.5 border-e border-gray-300 font-mono font-bold">
-                                {{ row.code }}
-                            </td>
-                            <td class="p-1.5 border-e border-gray-300">
-                                {{ row.customer.name }} ({{ row.customer.phone }})
-                            </td>
-                            <td class="p-1.5 border-e border-gray-300">
-                                {{ row.vehicle.name }} [{{ row.vehicle.plate_number }}]
-                            </td>
-                            <td class="p-1.5 border-e border-gray-300 font-mono">
-                                {{ row.entry_date }}
-                            </td>
-                            <td class="p-1.5 border-e border-gray-300 text-end font-mono">
-                                {{ formatMoney(row.payment_due) }}
-                            </td>
-                            <td class="p-1.5 border-e border-gray-300 text-end font-mono">
-                                {{ formatMoney(row.amount_paid) }}
-                            </td>
-                            <td class="p-1.5 border-e border-gray-300 text-end font-mono">
-                                {{ formatMoney(row.amount_adjusted) }}
-                            </td>
-                            <td class="p-1.5 border-e border-gray-300 text-end font-mono font-bold">
-                                {{ formatMoney(row.payment_remaining) }}
-                            </td>
-                            <td class="p-1.5 text-center">
-                                {{ $t(`reports.customers_report.${row.payment_status}`) }}
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-
-                <!-- Standard Report Footer -->
-                <StandardReportFooter />
-            </div>
+            <!-- PRINT ENGINE SECTION -->
+            <PrintEngine
+                class="hidden print:block print-section"
+                documentType="customers_report"
+                :data="{
+                    kpis,
+                    records: printRows,
+                    filters: filterForm,
+                }"
+                :centerData="$page.props.auth?.center || {}"
+            />
         </div>
     </AppLayout>
 </template>
 
 <script setup>
+import CustomDatePicker from '@/Components/CustomDatePicker.vue';
 import { ref, reactive, computed, onMounted } from 'vue';
 import { router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import PageHeader from '@/Components/PageHeader.vue';
 import BackButton from '@/Components/BackButton.vue';
+import AppPrintButton from '@/Components/Common/AppPrintButton.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
-import StandardReportHeader from '@/Components/Print/StandardReportHeader.vue';
-import StandardReportFooter from '@/Components/Print/StandardReportFooter.vue';
+import PrintEngine from '@/Components/Print/PrintEngine.vue';
+import { usePrint } from '@/Composables/usePrint';
 
 const { t } = useI18n();
 
@@ -1394,8 +1250,12 @@ const exportUrl = computed(() => {
     return `/app/reports/customers/export?${params.toString()}`;
 });
 
+const { printDocument } = usePrint();
+
 const handlePrint = () => {
-    window.print();
+    printDocument({
+        title: t('reports.customers.title'),
+    });
 };
 
 const printDate = computed(() => {

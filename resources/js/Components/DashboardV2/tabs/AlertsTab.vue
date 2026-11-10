@@ -5,6 +5,7 @@ import AlertCard from '@/Components/DashboardV2/widgets/AlertCard.vue';
 import RecentInvoices from '@/Components/DashboardV2/widgets/RecentInvoices.vue';
 
 defineProps({
+    userContext: { type: Object, default: () => ({}) },
     alerts: { type: Object, required: true },
     recentInvoices: { type: Array, default: () => [] },
     currency: { type: String, default: 'SAR' },
@@ -37,6 +38,7 @@ const ICONS = {
                 color="rose"
             />
             <AlertCard
+                v-if="userContext?.canViewFinancials"
                 :title="$t('dashboard.overdue_invoices')"
                 :count="alerts.overdueInvoices ?? 0"
                 :description="$t('dashboard.overdue_invoices_desc')"
@@ -45,6 +47,7 @@ const ICONS = {
                 color="amber"
             />
             <AlertCard
+                v-if="userContext?.canViewInventory"
                 :title="$t('dashboard.low_stock_parts')"
                 :count="alerts.lowStock ?? 0"
                 :description="$t('dashboard.low_stock_parts_desc')"
@@ -58,11 +61,11 @@ const ICONS = {
         <div
             v-if="
                 (alerts.overdueWorkOrders ?? 0) +
-                    (alerts.overdueInvoices ?? 0) +
-                    (alerts.lowStock ?? 0) ===
+                    (userContext?.canViewFinancials ? (alerts.overdueInvoices ?? 0) : 0) +
+                    (userContext?.canViewInventory ? (alerts.lowStock ?? 0) : 0) ===
                 0
             "
-            class="rounded-lg border border-emerald-200 bg-emerald-50 p-6 text-center dark:border-emerald-800/50 dark:bg-emerald-900/10"
+            class="rounded-2xl border border-emerald-200/80 bg-emerald-50/80 p-6 text-center shadow-xs dark:border-emerald-800/50 dark:bg-emerald-950/20"
         >
             <div
                 class="mx-auto inline-flex h-12 w-12 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-300"
@@ -86,6 +89,7 @@ const ICONS = {
 
         <!-- Recent unpaid/partial invoices (helps with collection) -->
         <ChartCard
+            v-if="userContext?.canViewFinancials"
             :title="$t('dashboard.recent_invoices')"
             :subtitle="$t('dashboard.latest_8')"
             :action="$t('dashboard.view_all')"

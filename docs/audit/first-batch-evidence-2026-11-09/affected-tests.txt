@@ -1,0 +1,68 @@
+
+   PASS  Tests\Feature\FirstBatchSecurityTest
+  ✓ invitation is consumed once and old signed links are rejected        8.00s  
+  ✓ invitation cannot reactivate disabled account                        0.59s  
+  ✓ invitation requires two factor before authenticating                 0.71s  
+  ✓ user manager cannot assign owner or foreign role or foreign center   1.43s  
+  ✓ user manager cannot reset owner password                             0.58s  
+  ✓ role manager cannot create reserved role or grant unheld permission  0.55s  
+  ✓ backup false write fails and blocks tenant deletion                  0.56s  
+  ✓ backup success is verified against saved bytes                       0.64s  
+  ✓ legacy document migration is dry run and verifies before removing    0.06s  
+  ✓ user manager cannot take over custom privileged account              0.66s  
+  ✓ receipt download requires permission and tenant ownership            1.44s  
+  ✓ expired or rotated invitation is rejected                            0.36s  
+  ✓ private invoice url uses authorized route and preserves download     0.51s  
+
+   PASS  Tests\Feature\Settings\UserManagementTest
+  ✓ user can view users index                                            0.88s  
+  ✓ user can create new user                                             0.53s  
+  ✓ user can update user without changing email                          0.61s  
+  ✓ user can update user role and centers                                0.87s  
+  ✓ user can toggle user active status                                   0.73s  
+  ✓ user cannot deactivate self                                          0.76s  
+
+   PASS  Tests\Feature\System\TenantBackupTest
+  ✓ super admin can create backup                                        0.44s  
+  ✓ backup artifact is valid gzipped json                                0.95s  
+  ✓ regular admin cannot create backup                                   0.80s  
+  ✓ backup records audit log on creation                                 0.70s  
+  ✓ regular admin cannot access backups index                            0.59s  
+  ✓ super admin can list backups                                         0.77s  
+  ✓ super admin can download backup                                      0.47s  
+  ✓ super admin can delete backup                                        0.47s  
+  ✓ tenant destroy creates pre delete backup                             0.51s  
+
+   PASS  Tests\Feature\System\InvoicePdfCompanyInfoTest
+  ✓ pdf header uses company name from settings                           2.71s  
+  ✓ pdf falls back to default when no settings                           4.72s  
+  ✓ pdf uses settings updated after initial invoice                      2.68s  
+  ✓ pdf renders with company stamp                                       0.77s  
+
+   PASS  Tests\Feature\System\DunningAutomationTest
+  ✓ finds candidate at three days overdue for tier one                   0.37s  
+  ✓ picks highest active tier based on age                               0.41s  
+  ✓ skips invoices under three days overdue                              0.39s  
+  ✓ skips paid invoices                                                  0.37s  
+  ✓ respects tenant opt out                                              0.39s  
+  ✓ skips when dunning disabled in config                                0.39s  
+  ✓ sends email through default channel matrix                           0.80s  
+  ✓ idempotency same tier cannot be sent twice                           0.63s  
+  ✓ message body is in arabic when language is arabic                    0.80s  
+  ✓ message body is in english when language is english                  0.50s  
+  ✓ per tenant config overrides global                                   1.27s  
+  ✓ message body includes invoice number and total                       1.82s  
+  ✓ email includes invoice pdf attachment                                1.11s  
+  ✓ quiet hours skip send                                                0.55s  
+  ✓ quiet hours disabled when null                                       0.92s  
+  ✓ failure records retry with next retry at                             0.85s  
+  ✓ retry count caps at max retries                                      0.05s  
+  ✓ auto suspend skips when feature disabled                             0.54s  
+  ✓ auto suspends after grace window with unpaid invoice                 1.03s  
+  ✓ auto suspend skips when invoice paid                                 0.60s  
+  ✓ auto suspend idempotent                                              0.46s  
+  ✓ auto suspend respects opt out                                        0.66s  
+
+  Tests:    54 passed (180 assertions)
+  Duration: 52.17s
+

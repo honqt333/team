@@ -99,16 +99,19 @@ class Service extends Model
         return $desc ? (string) $desc : null;
     }
 
+    /** @return BelongsTo<Tenant, $this> */
     public function tenant(): BelongsTo
     {
         return $this->belongsTo(Tenant::class);
     }
 
+    /** @return BelongsTo<Center, $this> */
     public function center(): BelongsTo
     {
         return $this->belongsTo(Center::class);
     }
 
+    /** @return BelongsTo<Department, $this> */
     public function department(): BelongsTo
     {
         return $this->belongsTo(Department::class);
@@ -117,6 +120,7 @@ class Service extends Model
     /**
      * Get the user who last updated this service
      */
+    /** @return BelongsTo<User, $this> */
     public function updater(): BelongsTo
     {
         return $this->belongsTo(User::class, 'updated_by');

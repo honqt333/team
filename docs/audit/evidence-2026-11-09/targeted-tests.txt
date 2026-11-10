@@ -1,0 +1,58 @@
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\InvoicingSecurityTest::test_immutability_of_issued_invoice(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\InvoicingSecurityTest::test_sequential_numbering_with_locking(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   PASS  Tests\Feature\TenancyIsolationTest
+  ✓ blocks requests if user has no current center id                     9.79s  
+  ✓ blocks requests if center is inactive                                2.13s  
+  ✓ blocks requests if user is not assigned to center in pivot           1.15s  
+  ✓ allows request if user is assigned and center active                 1.18s  
+  ✓ blocks cross tenant access                                           1.62s  
+  ✓ readonly mode allows get blocks post                                 0.80s  
+
+   PASS  Tests\Feature\InvoicingSecurityTest
+  ✓ immutability of issued invoice                                       0.32s  
+  ✓ sequential numbering with locking                                    0.46s  
+
+   PASS  Tests\Feature\PaymentConcurrencySafetyTest
+  ✓ a payment larger than the balance is refused                         0.80s  
+  ✓ the balance is re read inside the transaction                        0.74s  
+  ✓ paying in full records the remaining balance only                    0.65s  
+  ✓ a second pay full cannot settle the same invoice twice               0.65s  
+  ✓ a non positive payment is refused                                    0.80s  
+  ✓ a normal payment still works                                         1.12s  
+  ✓ the endpoint refuses an amount above the balance                     2.49s  
+  ✓ a collector arriving after the invoice was settled gets an error     0.90s  
+
+   PASS  Tests\Feature\InventoryTransferIntegrityTest
+  ✓ an item of another transfer cannot be deleted                        0.47s  
+  ✓ the item of the transfer in the url can be deleted                   0.53s  
+  ✓ receiving more than the quantity sent is refused                     0.82s  
+  ✓ receiving the full sent quantity works                               1.20s  
+  ✓ a partial receipt is allowed                                         0.99s  
+  ✓ a quantity for an unknown item is refused                            0.43s  
+  ✓ a negative received quantity is refused                              0.50s  
+  ✓ the receive endpoint refuses an over receipt                         0.54s  
+  ✓ a part of another tenant cannot be added                             0.82s  
+
+   PASS  Tests\Feature\HealthTest
+  ✓ healthz returns ok                                                   0.04s  
+  ✓ readyz returns check status                                          0.04s  
+  ✓ healthz does not require auth                                        0.04s  
+  ✓ readyz emits correlation header even when degraded                   0.04s  
+
+   PASS  Tests\Feature\AdminUserRoleEscalationTest
+  ✓ support admin cannot promote itself to super admin                   0.06s  
+  ✓ support admin cannot create a super admin account                    0.05s  
+  ✓ operational admin cannot create a super admin account                0.07s  
+  ✓ support admin cannot delete another admin                            0.05s  
+  ✓ support admin cannot edit another admin at all                       0.05s  
+  ✓ super admin can still create an admin account                        0.05s  
+  ✓ super admin can still update an admin account                        0.04s  
+  ✓ support admin can still read the admin list                          0.05s  
+  ✓ controller guard rejects non super admin even without route middlew… 0.18s  
+
+  Tests:    38 passed (104 assertions)
+  Duration: 32.76s
+

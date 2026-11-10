@@ -735,7 +735,7 @@
                                         <td
                                             class="px-4 py-3 font-medium text-gray-800 dark:text-gray-200"
                                         >
-                                            {{ inv.center?.name || 'المركز الرئيسي' }}
+                                            {{ inv.center?.name || $t('common.main_center') }}
                                         </td>
                                         <td class="px-4 py-3">
                                             <a
@@ -892,7 +892,7 @@
                                     {{ (invoices.from || 1) + idx }}
                                 </td>
                                 <td class="px-4 py-3 font-medium text-gray-800 dark:text-gray-200">
-                                    {{ inv.center?.name || 'المركز الرئيسي' }}
+                                    {{ inv.center?.name || $t('common.main_center') }}
                                 </td>
                                 <td class="px-4 py-3">
                                     <div class="flex items-center gap-1.5">

@@ -51,19 +51,26 @@ class AttendanceSettings extends Model
      */
     public static function getForCenter(int $centerId): self
     {
-        return self::firstOrCreate(
-            ['center_id' => $centerId],
-            [
-                'grace_period_minutes' => 10,
-                'late_deduction_per_minute' => 0,
-                'absence_deduction_value' => 100, // 100% of daily salary
-                'absence_deduction_type' => 'percentage',
-                'overtime_rate_per_hour' => 0,
-                'overtime_enabled' => true,
-                'auto_mark_absent' => false,
-                'working_days' => [0, 1, 2, 3, 4], // Sunday to Thursday
-            ]
-        );
+        $existing = self::withoutGlobalScopes()->where('center_id', $centerId)->first();
+
+        if ($existing) {
+            return $existing;
+        }
+
+        $center = Center::withoutGlobalScopes()->find($centerId);
+
+        return self::withoutGlobalScopes()->create([
+            'center_id' => $centerId,
+            'tenant_id' => $center?->tenant_id,
+            'grace_period_minutes' => 10,
+            'late_deduction_per_minute' => 0,
+            'absence_deduction_value' => 100, // 100% of daily salary
+            'absence_deduction_type' => 'percentage',
+            'overtime_rate_per_hour' => 0,
+            'overtime_enabled' => true,
+            'auto_mark_absent' => false,
+            'working_days' => [0, 1, 2, 3, 4], // Sunday to Thursday
+        ]);
     }
 
     /**

@@ -28,21 +28,25 @@ trait HasInvoiceRelations
         return $this->hasMany(Payment::class);
     }
 
+    /** @return BelongsTo<WorkOrder, $this> */
     public function workOrder(): BelongsTo
     {
         return $this->belongsTo(WorkOrder::class);
     }
 
+    /** @return BelongsTo<Center, $this> */
     public function center(): BelongsTo
     {
         return $this->belongsTo(Center::class);
     }
 
+    /** @return BelongsTo<Customer, $this> */
     public function customer(): BelongsTo
     {
         return $this->belongsTo(Customer::class);
     }
 
+    /** @return BelongsTo<Tenant, $this> */
     public function tenant(): BelongsTo
     {
         return $this->belongsTo(Tenant::class);
@@ -53,6 +57,7 @@ trait HasInvoiceRelations
         return $this->hasOne(CompanyTransaction::class, 'invoice_id');
     }
 
+    /** @return BelongsTo<Invoice, $this> */
     public function originalInvoice(): BelongsTo
     {
         return $this->belongsTo(Invoice::class, 'original_invoice_id');

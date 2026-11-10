@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\App;
 
+use App\Exceptions\PaymentExceedsBalanceException;
 use App\Exports\SuppliersTemplateExport;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\App\Purchasing\SupplierRequest;
@@ -13,11 +14,13 @@ use App\Models\Payment;
 use App\Models\PurchaseInvoice;
 use App\Models\Supplier;
 use App\Models\Warehouse;
+use App\Services\PaymentService;
 use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
+use InvalidArgumentException;
 use Maatwebsite\Excel\Facades\Excel;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
@@ -42,8 +45,20 @@ class SuppliersController extends Controller
             ->when($request->input('status') === 'active', fn ($q) => $q->active())
             ->when($request->input('status') === 'inactive', fn ($q) => $q->where('is_active', false))
             ->when($request->input('type'), fn ($q, $type) => $q->where('type', $type))
-            ->withCount('purchaseOrders')
-            ->orderBy('name');
+            ->withCount('purchaseOrders');
+
+        $sort = (string) $request->input('sort');
+        $direction = strtolower((string) $request->input('direction', 'asc')) === 'desc' ? 'desc' : 'asc';
+
+        if (in_array($sort, ['name', 'contact_person', 'phone', 'type', 'is_active', 'created_at', 'id'], true)) {
+            $query->orderBy("suppliers.{$sort}", $direction);
+        } elseif ($sort === 'status') {
+            $query->orderBy('suppliers.is_active', $direction);
+        } elseif ($sort === 'orders_count' || $sort === 'purchase_orders_count') {
+            $query->orderBy('purchase_orders_count', $direction);
+        } else {
+            $query->orderBy('suppliers.name', 'asc');
+        }
 
         $suppliers = $query->paginate(25)->withQueryString();
 
@@ -56,7 +71,13 @@ class SuppliersController extends Controller
 
         return Inertia::render('Purchasing/Suppliers/Index', [
             'suppliers' => $suppliers,
-            'filters' => $request->only(['search', 'status', 'type']),
+            'filters' => array_merge(
+                $request->only(['search', 'status', 'type']),
+                [
+                    'sort' => $sort ?: null,
+                    'direction' => $sort ? $direction : null,
+                ]
+            ),
         ]);
     }
 
@@ -342,36 +363,21 @@ class SuppliersController extends Controller
                 ->where('id', $validated['purchase_invoice_id'])
                 ->firstOrFail();
 
-            $invBalance = (float) $invoice->balance;
-
-            if ($invBalance <= 0.01) {
-                return back()->with('error', __('payments.errors.invoice_already_paid') ?? 'هذه الفاتورة مسددة بالكامل ولا يوجد متبقي لسداده.');
+            try {
+                app(PaymentService::class)->recordPurchasePayment($invoice, [
+                    'amount' => $amount,
+                    'payment_date' => $paymentDate,
+                    'payment_method' => $validated['payment_method'],
+                    'reference' => $validated['reference'] ?? null,
+                    'notes' => $validated['notes'] ?? null,
+                    'received_by' => $user->id,
+                    'type' => Payment::TYPE_PAYMENT,
+                ]);
+            } catch (PaymentExceedsBalanceException $e) {
+                return back()->with('error', $e->getMessage());
+            } catch (InvalidArgumentException $e) {
+                return back()->with('error', $e->getMessage());
             }
-
-            if ($amount > $invBalance + 0.009) {
-                return back()->with('error', __('payments.errors.amount_exceeds_invoice_balance', [
-                    'balance' => number_format($invBalance, 2),
-                ]) ?? ('المبلغ المدخل يتجاوز رصيد الفاتورة المتبقي ('.number_format($invBalance, 2).' ر.س)'));
-            }
-
-            Payment::create([
-                'tenant_id' => $user->tenant_id,
-                'center_id' => $invoice->center_id ?? $user->current_center_id,
-                'purchase_invoice_id' => $invoice->id,
-                'amount' => $amount,
-                'payment_date' => $paymentDate,
-                'payment_method' => $validated['payment_method'],
-                'reference' => $validated['reference'] ?? null,
-                'notes' => $validated['notes'] ?? null,
-                'received_by' => $user->id,
-                'type' => Payment::TYPE_PAYMENT,
-            ]);
-
-            $newBalance = max(0.0, (float) $invoice->balance - $amount);
-            $invoice->update([
-                'balance' => $newBalance,
-                'status' => $newBalance <= 0.01 ? PurchaseInvoice::STATUS_PAID : PurchaseInvoice::STATUS_OPEN,
-            ]);
 
             return back()->with('success', __('payments.recorded') ?? 'تم تسجيل الدفعة بنجاح');
         }
@@ -397,6 +403,7 @@ class SuppliersController extends Controller
             ->get();
 
         $remainingToAllocate = $amount;
+        $paymentService = app(PaymentService::class);
 
         foreach ($openInvoices as $invoice) {
             if ($remainingToAllocate <= 0) {
@@ -406,10 +413,7 @@ class SuppliersController extends Controller
             $invBalance = (float) $invoice->balance;
             $portion = min($remainingToAllocate, $invBalance);
 
-            Payment::create([
-                'tenant_id' => $user->tenant_id,
-                'center_id' => $invoice->center_id ?? $user->current_center_id,
-                'purchase_invoice_id' => $invoice->id,
+            $paymentService->recordPurchasePayment($invoice, [
                 'amount' => $portion,
                 'payment_date' => $paymentDate,
                 'payment_method' => $validated['payment_method'],
@@ -417,12 +421,6 @@ class SuppliersController extends Controller
                 'notes' => $validated['notes'] ?? null,
                 'received_by' => $user->id,
                 'type' => Payment::TYPE_PAYMENT,
-            ]);
-
-            $newInvBalance = max(0.0, $invBalance - $portion);
-            $invoice->update([
-                'balance' => $newInvBalance,
-                'status' => $newInvBalance <= 0.01 ? PurchaseInvoice::STATUS_PAID : PurchaseInvoice::STATUS_OPEN,
             ]);
 
             $remainingToAllocate -= $portion;

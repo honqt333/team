@@ -1,0 +1,6 @@
+Note: Using configuration file /Users/ahmad/Herd/carag-v2/phpstan.neon.
+/Users/ahmad/Herd/carag-v2/app/Services/Reports/CashRegisterReportService.php
+/Users/ahmad/Herd/carag-v2/app/Services/Reports/TaxPeriodService.php
+
+ [OK] No errors                                                                 
+

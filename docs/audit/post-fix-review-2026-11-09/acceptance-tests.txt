@@ -1,0 +1,66 @@
+
+   PASS  Tests\Feature\FinancialSafetyAuditAcceptanceTest
+  ✓ r01 financial summary excludes draft and cancelled sales invoices    5.36s  
+  ✓ r01 financial summary excludes draft and cancelled credit notes      0.72s  
+  ✓ r01 financial summary excludes draft and cancelled purchases         1.01s  
+  ✓ r01 financial summary excludes draft company transactions            0.82s  
+  ✓ r02 linked company revenue is counted exactly once in financial tot… 0.75s  
+  ✓ r02 linked company expense is counted exactly once in financial tot… 0.78s  
+  ✓ r02 cancelled linked invoice does not count in sales or income       0.70s  
+  ✓ r02 unlinked company revenue is safely counted in income             0.94s  
+  ✓ r02 tax period deduplicates linked company transactions              0.85s  
+  ✓ r02 cash register deduplicates payments and company transactions     0.82s  
+  ✓ r03 revenue transaction is classified as income in tax collection    1.00s  
+  ✓ r03 expense transaction is classified as expense in tax collection   0.87s  
+  ✓ r03 legacy income type is supported in tax collection                0.84s  
+  ✓ r03 draft and deleted company transactions are excluded from tax co… 0.84s  
+
+   PASS  Tests\Feature\FinancialSummaryReportTest
+  ✓ guest is redirected to login                                         0.08s  
+  ✓ wrshah legacy redirects                                              0.56s  
+  ✓ authenticated user can view financial summary report                 1.35s  
+  ✓ financial summary aggregates sales and returns                       0.70s  
+  ✓ financial summary filters by center                                  0.52s  
+  ✓ financial summary export csv                                         0.47s  
+
+   PASS  Tests\Feature\TaxPeriodsReportTest
+  ✓ guest is redirected to login                                         0.08s  
+  ✓ authenticated user can view tax periods index                        0.53s  
+  ✓ user can view three years periods json                               0.41s  
+  ✓ user can preview and create tax period                               0.52s  
+  ✓ user can view and post tax period                                    0.49s  
+  ✓ user cannot access another tenants tax period                        1.07s  
+  ✓ user can export tax period excel and zatca                           1.75s  
+
+   PASS  Tests\Feature\CashRegisterReportTest
+  ✓ guest is redirected to login                                         0.14s  
+  ✓ wrshah legacy redirects                                              1.30s  
+  ✓ authenticated user can view cash register report                     1.70s  
+  ✓ cash register calculates debit credit and balance accurately         1.86s  
+  ✓ cash register filters by payment method                              0.74s  
+  ✓ cash register exports csv successfully                               0.49s  
+
+   PASS  Tests\Feature\CompanyTransactionsTest
+  ✓ user can create draft company transaction                            0.53s  
+  ✓ user can update draft company transaction                            0.45s  
+  ✓ user can delete draft company transaction                            0.47s  
+  ✓ taxable transaction requires contact                                 0.49s  
+  ✓ approving taxable revenue generates sales invoice                    0.50s  
+  ✓ approving taxable expense generates purchase invoice                 0.43s  
+  ✓ tenancy isolation on company transactions                            0.82s  
+
+   PASS  Tests\Feature\SecondBatchFinancialSafetyTest
+  ✓ stale draft cannot change issued number or consume another sequence  0.94s  
+  ✓ period is consolidated and browser amounts are ignored               3.04s  
+  ✓ credit note is negative and drafts and deleted documents are exclud… 2.73s  
+  ✓ existing legacy period is preserved and cannot be posted or recreat… 0.38s  
+  ✓ unknown or duplicate transaction identifiers are rejected            0.78s  
+  ✓ branch invoice permission does not expose consolidated data          0.65s  
+  ✓ posted period cannot be recreated through stale instance             0.81s  
+  ✓ paid payroll item cannot be deleted through another draft or its pa… 0.55s  
+  ✓ posting rejects a transaction already selected in another posted pe… 0.81s  
+  ✓ unselected transactions do not block future eligibility              0.79s  
+
+  Tests:    50 passed (391 assertions)
+  Duration: 46.35s
+

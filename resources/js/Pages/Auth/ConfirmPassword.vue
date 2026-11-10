@@ -24,7 +24,7 @@ const submit = () => {
         <Head :title="isRTL ? 'تأكيد كلمة المرور' : 'Confirm Password'" />
 
         <!-- Title -->
-        <h2 class="text-2xl font-bold text-gray-900 dark:text-white text-center mb-2 font-cairo">
+        <h2 class="text-2xl font-bold text-gray-900 dark:text-white text-center mb-2">
             {{ $t('auth.confirm_password') }}
         </h2>
 

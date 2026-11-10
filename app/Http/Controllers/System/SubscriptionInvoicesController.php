@@ -88,9 +88,13 @@ class SubscriptionInvoicesController extends Controller
     /**
      * Download invoice PDF.
      */
-    public function download(SubscriptionInvoice $invoice)
+    public function download(Request $request, SubscriptionInvoice $invoice)
     {
         $pdfPath = $this->invoiceService->getPdfPath($invoice);
+
+        if ($request->boolean('inline')) {
+            return response()->file($pdfPath, ['Cache-Control' => 'private, no-store']);
+        }
 
         return response()->download($pdfPath, "{$invoice->invoice_number}.pdf");
     }

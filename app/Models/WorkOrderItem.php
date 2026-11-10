@@ -12,6 +12,11 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+/**
+ * @property numeric-string|null $tax_amount
+ * @property bool $is_taxable
+ * @property numeric-string|null $tax_rate_snapshot
+ */
 class WorkOrderItem extends Model
 {
     use CenterScoped, HasFactory;
@@ -126,21 +131,25 @@ class WorkOrderItem extends Model
 
     // ==================== Relationships ====================
 
+    /** @return BelongsTo<WorkOrder, $this> */
     public function workOrder(): BelongsTo
     {
         return $this->belongsTo(WorkOrder::class)->withoutGlobalScope('center_scoped');
     }
 
+    /** @return BelongsTo<Center, $this> */
     public function center(): BelongsTo
     {
         return $this->belongsTo(Center::class);
     }
 
+    /** @return BelongsTo<Service, $this> */
     public function service(): BelongsTo
     {
         return $this->belongsTo(Service::class);
     }
 
+    /** @return BelongsTo<Department, $this> */
     public function department(): BelongsTo
     {
         return $this->belongsTo(Department::class);
@@ -225,6 +234,7 @@ class WorkOrderItem extends Model
         return $this->hasOne(WorkOrderItemQualityCheck::class)->latestOfMany('created_at');
     }
 
+    /** @return BelongsTo<User, $this> */
     public function heldBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'held_by_user_id');

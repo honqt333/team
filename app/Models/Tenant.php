@@ -6,6 +6,7 @@ namespace App\Models;
 
 use App\Models\Billing\Subscription;
 use App\Services\TenantSetupService;
+use App\Services\TenantStorageService;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -42,6 +43,7 @@ class Tenant extends Model
         'quote_number_format',
         'workflow_settings',
         'notification_templates',
+        'notification_settings',
         'two_factor_enabled',
         'two_factor_enforcement',
         'sms_2fa_enabled',
@@ -75,6 +77,7 @@ class Tenant extends Model
             'print_settings' => 'array',
             'workflow_settings' => 'array',
             'notification_templates' => 'array',
+            'notification_settings' => 'array',
             'dunning_opted_out' => 'boolean',
         ];
     }
@@ -126,6 +129,11 @@ class Tenant extends Model
         ], function ($query) {
             $query->whereIn('status', ['active', 'trial', 'trialing']);
         });
+    }
+
+    public function activeSubscription(): HasOne
+    {
+        return $this->currentSubscription();
     }
 
     public function backups(): HasMany
@@ -188,6 +196,85 @@ class Tenant extends Model
     public function getNotificationTemplate(string $type, ?string $default = null): string
     {
         return $this->notification_templates[$type] ?? $default ?? '';
+    }
+
+    /**
+     * Default tenant notification configuration matrix.
+     *
+     * @return array<string, mixed>
+     */
+    public static function defaultNotificationSettings(): array
+    {
+        return [
+            'channels' => [
+                'in_app' => true,
+                'email' => false,
+                'sms' => false,
+                'whatsapp' => false,
+            ],
+            'channel_configs' => [
+                'email_recipient' => '',
+                'whatsapp_phone' => '',
+            ],
+            'events' => [
+                'appointment_booked' => ['in_app' => true, 'email' => false, 'sms' => false, 'whatsapp' => false],
+                'appointment_reminder' => ['in_app' => true, 'email' => false, 'sms' => false, 'whatsapp' => false],
+                'appointment_cancelled' => ['in_app' => true, 'email' => false, 'sms' => false, 'whatsapp' => false],
+                'work_order_created' => ['in_app' => true, 'email' => false, 'sms' => false, 'whatsapp' => false],
+                'work_order_status_changed' => ['in_app' => true, 'email' => false, 'sms' => false, 'whatsapp' => false],
+                'work_order_completed' => ['in_app' => true, 'email' => false, 'sms' => false, 'whatsapp' => false],
+                'quote_shared' => ['in_app' => true, 'email' => false, 'sms' => false, 'whatsapp' => false],
+                'quote_approved' => ['in_app' => true, 'email' => false, 'sms' => false, 'whatsapp' => false],
+                'invoice_issued' => ['in_app' => true, 'email' => false, 'sms' => false, 'whatsapp' => false],
+                'payment_received' => ['in_app' => true, 'email' => false, 'sms' => false, 'whatsapp' => false],
+                'low_stock_alert' => ['in_app' => true, 'email' => false, 'sms' => false, 'whatsapp' => false],
+            ],
+        ];
+    }
+
+    /**
+     * Get effective notification settings with defaults merged.
+     *
+     * @return array<string, mixed>
+     */
+    public function getEffectiveNotificationSettings(): array
+    {
+        $defaults = self::defaultNotificationSettings();
+        $saved = $this->notification_settings ?? [];
+
+        return [
+            'channels' => array_merge($defaults['channels'], $saved['channels'] ?? []),
+            'channel_configs' => array_merge($defaults['channel_configs'], $saved['channel_configs'] ?? []),
+            'events' => array_replace_recursive($defaults['events'], $saved['events'] ?? []),
+        ];
+    }
+
+    public function isNotificationChannelEnabled(string $channel): bool
+    {
+        $settings = $this->getEffectiveNotificationSettings();
+
+        return (bool) ($settings['channels'][$channel] ?? false);
+    }
+
+    public function isNotificationEventEnabled(string $event, string $channel = 'in_app'): bool
+    {
+        if (! $this->isNotificationChannelEnabled($channel)) {
+            return false;
+        }
+
+        $settings = $this->getEffectiveNotificationSettings();
+
+        return (bool) ($settings['events'][$event][$channel] ?? false);
+    }
+
+    /**
+     * Get storage quota and usage summary for the tenant.
+     *
+     * @return array<string, mixed>
+     */
+    public function getStorageUsageAttribute(): array
+    {
+        return TenantStorageService::getStorageUsageSummary($this);
     }
 
     /**

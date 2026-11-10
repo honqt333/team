@@ -15,6 +15,8 @@ class BankTransferReceipt extends Model
 {
     use HasFactory, TenantScoped;
 
+    protected $appends = ['receipt_url'];
+
     protected $fillable = [
         'tenant_id',
         'subscription_id',
@@ -109,6 +111,8 @@ class BankTransferReceipt extends Model
             return '';
         }
 
-        return asset('storage/'.$this->receipt_path);
+        return request()->is('system/*')
+            ? route('system.bank-receipts.download', $this)
+            : route('app.billing.receipts.download', $this);
     }
 }

@@ -55,7 +55,7 @@
                     </span>
                 </p>
                 <p v-if="showTime" class="text-gray-500">
-                    <span>{{ $t('common.time') || 'الوقت' }}:</span>
+                    <span>{{ $t('common.time') }}:</span>
                     <span class="font-mono text-gray-700 ms-1.5" dir="ltr">{{ currentTime }}</span>
                 </p>
                 <p
@@ -104,7 +104,7 @@ const props = defineProps({
 });
 
 const page = usePage();
-const { locale } = useI18n();
+const { t, locale } = useI18n();
 const isRtl = computed(() => locale.value === 'ar');
 
 const tenant = computed(() => props.customCompany || page.props.tenant || {});
@@ -112,10 +112,7 @@ const center = computed(() => page.props.center || {});
 
 const companyName = computed(() => {
     return (
-        tenant.value.trade_name ||
-        tenant.value.name ||
-        page.props.app_name ||
-        (isRtl.value ? 'خدمة برو' : 'Khidmh Pro')
+        tenant.value.trade_name || tenant.value.name || page.props.app_name || t('common.app_name')
     );
 });
 

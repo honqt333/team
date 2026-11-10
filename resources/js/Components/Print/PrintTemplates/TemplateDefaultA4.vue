@@ -10,7 +10,7 @@
         >
             <div class="w-1/3">
                 <h1 class="text-2xl font-bold text-gray-900 mb-1">
-                    {{ centerData.name || 'مركز اور كارز' }}
+                    {{ centerData.name || $t('common.app_name') }}
                 </h1>
                 <p
                     v-if="printHelpers.isTaxEnabled(props.data) && centerData.tax_number"

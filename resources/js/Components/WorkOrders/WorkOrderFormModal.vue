@@ -799,11 +799,9 @@
                             />
                         </svg>
                         {{
-                            $t(
-                                'common.fix_errors_count',
-                                { count: Object.keys(form.errors).length },
-                                `${Object.keys(form.errors).length} أخطاء تحتاج تصحيح`
-                            )
+                            $t('common.fix_errors_count', {
+                                count: Object.keys(form.errors).length,
+                            })
                         }}
                     </span>
                 </div>
@@ -889,6 +887,7 @@ import VehicleConditionReport from '@/Components/WorkOrders/VehicleConditionRepo
 import VehiclePhotoUploader from '@/Components/WorkOrders/VehiclePhotoUploader.vue';
 import CustomDatePicker from '@/Components/CustomDatePicker.vue';
 import { useFormScrollToError } from '@/Composables/useFormScrollToError';
+import { useDebounce } from '@/Composables/useDebounce';
 import axios from 'axios';
 
 const props = defineProps({
@@ -1235,14 +1234,10 @@ function formatDateForInput(dateStr) {
 }
 
 // Debounce search
-let debounceTimer = null;
-function debouncedSearch() {
-    clearTimeout(debounceTimer);
-    debounceTimer = setTimeout(() => {
-        searchQuery.value = toEnglish(searchQuery.value);
-        performSearch();
-    }, 300);
-}
+const debouncedSearch = useDebounce(() => {
+    searchQuery.value = toEnglish(searchQuery.value);
+    performSearch();
+}, 300);
 
 async function performSearch() {
     if (searchQuery.value.length < 2) {

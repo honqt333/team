@@ -911,22 +911,67 @@
 
                 <!-- Top bar -->
                 <header
-                    class="relative z-50 h-14 flex items-center justify-between px-4 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 flex-shrink-0"
+                    class="relative z-50 h-14 flex items-center justify-between px-3 sm:px-4 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 flex-shrink-0"
                 >
-                    <!-- Mobile hamburger -->
-                    <button
-                        @click="mobileMenuOpen = true"
-                        class="md:hidden p-2 rounded-lg text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700"
-                    >
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M4 6h16M4 12h16M4 18h16"
-                            />
-                        </svg>
-                    </button>
+                    <div class="flex items-center gap-2">
+                        <!-- Mobile hamburger -->
+                        <button
+                            @click="mobileMenuOpen = true"
+                            class="md:hidden p-1.5 -ms-1 rounded-lg text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700"
+                            aria-label="Toggle Navigation"
+                        >
+                            <svg
+                                class="w-6 h-6"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M4 6h16M4 12h16M4 18h16"
+                                />
+                            </svg>
+                        </button>
+
+                        <!-- Mobile Brand Logo & Name -->
+                        <div class="flex md:hidden items-center gap-1.5 min-w-0">
+                            <div
+                                class="w-7 h-7 rounded-lg bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 flex items-center justify-center overflow-hidden shrink-0"
+                            >
+                                <img
+                                    v-if="page.props.tenant?.logo_url"
+                                    :src="page.props.tenant.logo_url"
+                                    :alt="page.props.tenant?.name"
+                                    class="w-full h-full object-contain"
+                                />
+                                <svg
+                                    v-else
+                                    class="w-4 h-4 text-indigo-600 dark:text-indigo-400"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2"
+                                        d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
+                                    />
+                                </svg>
+                            </div>
+                            <span
+                                class="text-xs font-bold text-gray-900 dark:text-white truncate max-w-[90px] xs:max-w-[130px] sm:max-w-[180px]"
+                            >
+                                {{
+                                    page.props.tenant?.trade_name ||
+                                    page.props.tenant?.name ||
+                                    $t('nav.brand')
+                                }}
+                            </span>
+                        </div>
+                    </div>
 
                     <!-- Brand info on desktop when isTopNav is active, or empty spacer when in side nav -->
                     <div v-if="isTopNav" class="hidden md:flex items-center gap-3">
@@ -1000,15 +1045,34 @@
                         </kbd>
                     </button>
 
-                    <div class="flex items-center gap-1">
-                        <!-- Center Switcher -->
-                        <div
-                            v-if="page.props.auth.available_centers?.length > 1"
-                            class="relative mx-1"
+                    <div class="flex items-center gap-1 sm:gap-1.5">
+                        <!-- Mobile Quick Search trigger -->
+                        <button
+                            type="button"
+                            @click="openCommandPalette"
+                            class="md:hidden p-1.5 rounded-lg text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                            :title="$t('common.quick_search') || 'بحث سريع'"
                         >
+                            <svg
+                                class="w-5 h-5 text-gray-500 dark:text-gray-400"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                                />
+                            </svg>
+                        </button>
+
+                        <!-- Center Switcher -->
+                        <div v-if="page.props.auth.available_centers?.length > 1" class="relative">
                             <button
                                 @click="toggleCenterMenu"
-                                class="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors border border-transparent hover:border-gray-200 dark:hover:border-gray-600"
+                                class="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors border border-transparent hover:border-gray-200 dark:hover:border-gray-600"
                             >
                                 <span class="hidden sm:inline-block max-w-[150px] truncate">
                                     {{
@@ -1017,9 +1081,13 @@
                                             : page.props.center.name_en
                                     }}
                                 </span>
-                                <span class="sm:hidden font-mono">#{{ page.props.center.id }}</span>
+                                <span
+                                    class="sm:hidden font-mono font-bold text-xs bg-gray-100 dark:bg-gray-700 px-1.5 py-0.5 rounded"
+                                >
+                                    #{{ page.props.center.id }}
+                                </span>
                                 <svg
-                                    class="w-4 h-4 text-gray-400 mt-0.5"
+                                    class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-gray-400 mt-0.5"
                                     fill="none"
                                     stroke="currentColor"
                                     viewBox="0 0 24 24"
@@ -1133,15 +1201,18 @@
                         <!-- Language toggle -->
                         <button
                             @click="toggleLocale"
-                            class="px-3 py-1.5 rounded-lg text-sm font-medium text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                            class="px-2 py-1 sm:px-3 sm:py-1.5 rounded-lg text-xs sm:text-sm font-semibold text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
                         >
-                            {{ currentLocale === 'ar' ? 'English' : 'العربية' }}
+                            <span class="sm:hidden">{{ currentLocale === 'ar' ? 'EN' : 'ع' }}</span>
+                            <span class="hidden sm:inline">
+                                {{ currentLocale === 'ar' ? 'English' : 'العربية' }}
+                            </span>
                         </button>
 
                         <!-- Theme toggle -->
                         <button
                             @click="toggleThemeHandler"
-                            class="p-2 rounded-lg text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                            class="p-1.5 sm:p-2 rounded-lg text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
                             :title="$t('theme.toggle')"
                         >
                             <svg
@@ -1181,7 +1252,7 @@
                         <div class="relative">
                             <button
                                 @click="toggleUserMenu"
-                                class="flex items-center gap-2 p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                                class="flex items-center gap-2 p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
                             >
                                 <img
                                     v-if="
@@ -1189,12 +1260,12 @@
                                         !page.props.auth.user.photo_url.includes('ui-avatars.com')
                                     "
                                     :src="page.props.auth.user.photo_url"
-                                    class="w-8 h-8 rounded-full object-cover border border-gray-200 dark:border-gray-700"
+                                    class="w-7 h-7 sm:w-8 sm:h-8 rounded-full object-cover border border-gray-200 dark:border-gray-700"
                                     alt="User Avatar"
                                 />
                                 <div
                                     v-else
-                                    class="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-600 to-purple-600 flex items-center justify-center text-white text-sm font-bold"
+                                    class="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-gradient-to-br from-indigo-600 to-purple-600 flex items-center justify-center text-white text-xs sm:text-sm font-bold"
                                 >
                                     {{ userInitial }}
                                 </div>

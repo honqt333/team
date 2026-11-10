@@ -10,8 +10,12 @@ use App\Traits\HasQuoteRelations;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
+/**
+ * @property numeric-string|float $total_incl_tax
+ */
 class Quote extends Model
 {
     use CenterScoped, HasQuoteRelations, HasTaxSnapshot, SoftDeletes;
@@ -292,5 +296,15 @@ class Quote extends Model
         }
 
         $this->total = $this->total_incl_tax;
+    }
+
+    public function logActivity(string $decision, array $context = []): void
+    {
+        Log::notice('quote.'.$decision, array_merge($context, [
+            'tenant_id' => $this->tenant_id, 'center_id' => $this->center_id,
+            'quote_id' => $this->id, 'user_id' => auth()->id(),
+            'status' => $this->status, 'total_incl_tax' => $this->getAttribute('total_incl_tax'),
+            'document_updated_at' => $this->updated_at?->toIso8601String(),
+        ]));
     }
 }

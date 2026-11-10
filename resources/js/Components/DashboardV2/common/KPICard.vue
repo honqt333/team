@@ -67,7 +67,7 @@ const formattedPrevious = computed(() => {
     <component
         :is="href ? 'a' : 'div'"
         :href="href || undefined"
-        class="group block rounded-xl border border-slate-200 bg-white p-5 transition-all hover:border-slate-300 hover:shadow-sm dark:border-slate-700 dark:bg-slate-800 dark:hover:border-slate-600"
+        class="group relative block rounded-2xl border border-slate-200/80 bg-white p-5 shadow-2xs transition-all duration-200 hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md dark:border-slate-800 dark:bg-slate-800/90 dark:hover:border-slate-700"
         :class="href ? 'cursor-pointer' : ''"
     >
         <div class="flex items-start justify-between gap-3">
@@ -162,7 +162,7 @@ const formattedPrevious = computed(() => {
             <div
                 v-if="icon"
                 :class="[
-                    'flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg',
+                    'flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl shadow-2xs transition-transform duration-200 group-hover:scale-105',
                     iconColorClasses[iconColor] || iconColorClasses.slate,
                 ]"
                 v-html="icon"

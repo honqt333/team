@@ -16,16 +16,40 @@ class DepartmentController
 {
     use AuthorizesRequests;
 
-    public function index(): Response
+    public function index(Request $request): Response
     {
         $this->authorize('viewAny', Department::class);
 
-        $departments = Department::withCount('services')
-            ->ordered()
-            ->paginate(20);
+        $query = Department::withCount('services')
+            ->when($request->input('search'), function ($q, $search) {
+                $q->where(function ($sub) use ($search) {
+                    $sub->where('name_ar', 'like', "%{$search}%")
+                        ->orWhere('name_en', 'like', "%{$search}%")
+                        ->orWhere('description', 'like', "%{$search}%");
+                });
+            })
+            ->when($request->filled('status'), function ($q) use ($request) {
+                if ($request->input('status') === 'active') {
+                    $q->where('is_active', true);
+                } elseif ($request->input('status') === 'inactive') {
+                    $q->where('is_active', false);
+                }
+            });
+
+        $allowedSorts = ['name_ar', 'name_en', 'services_count', 'is_active', 'sort_order', 'created_at'];
+        $sort = in_array($request->input('sort'), $allowedSorts, true) ? $request->input('sort') : 'sort_order';
+        $direction = strtolower((string) ($request->input('direction') ?? $request->input('order', ''))) === 'desc' ? 'desc' : 'asc';
+
+        $query->orderBy($sort, $direction);
+
+        $departments = $query->paginate(25)->withQueryString();
 
         return Inertia::render('Departments/Index', [
             'departments' => $departments,
+            'filters' => array_merge($request->only(['search', 'status']), [
+                'sort' => $sort,
+                'direction' => $direction,
+            ]),
         ]);
     }
 

@@ -82,7 +82,7 @@ class CreditNoteService
 
             $previouslyReturnedExcl = (float) $creditLines
                 ->filter(function ($l) use ($item) {
-                    if (isset($l->work_order_item_id) && $l->work_order_item_id !== null) {
+                    if (isset($l->work_order_item_id)) {
                         return (int) $l->work_order_item_id === (int) $item->id;
                     }
 
@@ -117,7 +117,7 @@ class CreditNoteService
         $returnableParts = $activeParts->map(function ($part) use ($creditLines, $taxRate) {
             $previouslyReturnedQty = (float) $creditLines
                 ->filter(function ($l) use ($part) {
-                    if (isset($l->work_order_item_part_id) && $l->work_order_item_part_id !== null) {
+                    if (isset($l->work_order_item_part_id)) {
                         return (int) $l->work_order_item_part_id === (int) $part->id;
                     }
 
@@ -602,7 +602,7 @@ class CreditNoteService
         $returnableParts = $partLines->map(function ($line) use ($creditLines, $taxRate, $saleMoves, $defaultWarehouseId) {
             $previouslyReturnedQty = (float) $creditLines
                 ->filter(function ($l) use ($line) {
-                    if (isset($l->original_invoice_line_id) && $l->original_invoice_line_id !== null) {
+                    if (isset($l->original_invoice_line_id)) {
                         return (int) $l->original_invoice_line_id === (int) $line->id;
                     }
 
@@ -613,14 +613,14 @@ class CreditNoteService
             $originalQty = (float) $line->qty;
             $refundableQty = max(0.0, round($originalQty - $previouslyReturnedQty, 2));
 
-            $warehouseId = $saleMoves->get($line->part_id)?->warehouse_id ?? $defaultWarehouseId;
+            $warehouseId = $saleMoves->get($line->part_id)->warehouse_id ?? $defaultWarehouseId;
 
             return [
                 'id' => $line->id,
                 'work_order_item_part_id' => $line->id,
                 'part_id' => $line->part_id,
                 'name' => $line->description,
-                'part_number' => $line->part?->sku ?? $line->part?->part_number ?? null,
+                'part_number' => $line->part->sku ?? $line->part->part_number ?? null,
                 'unit_price' => (float) $line->unit_price,
                 'discount' => (float) ($line->discount_amount ?? $line->discount_value ?? 0),
                 'original_qty' => $originalQty,
@@ -801,7 +801,7 @@ class CreditNoteService
                     'warehouse_id' => $matchedSummary['warehouse_id'],
                     'part_id' => $line->part_id,
                     'qty' => $returnQty,
-                    'unit_cost' => (float) ($line->part?->cost_price ?? $line->unit_price),
+                    'unit_cost' => (float) ($line->part->cost_price ?? $line->unit_price),
                     'part_name' => $line->description,
                 ];
             }

@@ -94,6 +94,12 @@
                     <div data-field="model_id">
                         <label class="block text-xs text-gray-500 dark:text-gray-400 mb-1">
                             {{ $t('vehicles.form.model') }}
+                            <span
+                                v-if="form.make_id && form.make_id !== '__other__'"
+                                class="text-red-500"
+                            >
+                                *
+                            </span>
                         </label>
                         <SearchableSelect
                             v-if="form.make_id && form.make_id !== '__other__'"
@@ -903,7 +909,7 @@ function validate() {
         // Normal Make selected
         // 3. Model Validation
         if (!form.model_id) {
-            form.setError('model_id', ' ');
+            form.setError('model_id', t('vehicles.model_required'));
             isValid = false;
         } else if (form.model_id === '__other__') {
             // If Model is Other, Model Name is required

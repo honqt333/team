@@ -283,4 +283,50 @@ class PartsCrudTest extends TestCase
         $this->assertCount(1, $barcodeResponse->json());
         $this->assertEquals($inStockPart->id, $barcodeResponse->json()[0]['id']);
     }
+
+    public function test_parts_index_sorts_by_column_and_direction(): void
+    {
+        $this->actingAs($this->user);
+
+        // Clear any leftover parts from setUp
+        Part::query()->where('tenant_id', $this->user->tenant_id)->delete();
+
+        Part::create([
+            'tenant_id' => $this->user->tenant_id,
+            'sku' => 'SKU-AAA',
+            'name_ar' => 'ألف قطعة',
+            'name_en' => 'Alpha Part',
+            'unit_id' => $this->baseUnit->id,
+            'is_active' => true,
+        ]);
+
+        Part::create([
+            'tenant_id' => $this->user->tenant_id,
+            'sku' => 'SKU-ZZZ',
+            'name_ar' => 'ياء قطعة',
+            'name_en' => 'Zulu Part',
+            'unit_id' => $this->baseUnit->id,
+            'is_active' => true,
+        ]);
+
+        $responseAsc = $this->get(route('app.inventory.parts.index', [
+            'sort' => 'sku',
+            'direction' => 'asc',
+        ]));
+
+        $responseAsc->assertOk();
+        $partsAsc = $responseAsc->inertiaPage()['props']['parts']['data'];
+        $this->assertEquals('SKU-AAA', $partsAsc[0]['sku']);
+        $this->assertEquals('SKU-ZZZ', $partsAsc[1]['sku']);
+
+        $responseDesc = $this->get(route('app.inventory.parts.index', [
+            'sort' => 'sku',
+            'direction' => 'desc',
+        ]));
+
+        $responseDesc->assertOk();
+        $partsDesc = $responseDesc->inertiaPage()['props']['parts']['data'];
+        $this->assertEquals('SKU-ZZZ', $partsDesc[0]['sku']);
+        $this->assertEquals('SKU-AAA', $partsDesc[1]['sku']);
+    }
 }

@@ -32,11 +32,11 @@ class InventoryMoveController extends Controller
         }
 
         // Whitelist allowed sort columns and order directions to prevent SQL injection.
-        $allowedSorts = ['posted_at', 'part_id', 'qty', 'created_at', 'sku'];
+        $allowedSorts = ['id', 'posted_at', 'part_id', 'qty', 'created_at', 'sku', 'part', 'balance_after', 'unit_cost', 'total_cost'];
         $sort = in_array($request->input('sort'), $allowedSorts, true)
             ? $request->input('sort')
             : 'posted_at';
-        $order = strtolower($request->input('order') ?? '') === 'asc' ? 'asc' : 'desc';
+        $order = strtolower((string) ($request->input('direction') ?? $request->input('order') ?? '')) === 'asc' ? 'asc' : 'desc';
 
         $query = InventoryMove::forWarehouse($warehouse->id)
             ->with([
@@ -47,6 +47,7 @@ class InventoryMoveController extends Controller
             ->when($request->input('search'), function ($q, $search) {
                 $q->whereHas('part', fn ($pq) => $pq->where('sku', 'like', "%{$search}%")
                     ->orWhere('name_ar', 'like', "%{$search}%")
+                    ->orWhere('name_en', 'like', "%{$search}%")
                 );
             })
             ->when($request->input('type'), fn ($q, $type) => $q->ofType($type))
@@ -55,7 +56,7 @@ class InventoryMoveController extends Controller
             ->when($request->input('date_to'), fn ($q, $date) => $q->whereDate('posted_at', '<=', $date));
 
         // Apply Sorting (sort is whitelisted above; order is forced to asc/desc)
-        if ($sort === 'sku') {
+        if ($sort === 'sku' || $sort === 'part') {
             $query->join('parts', 'inventory_moves.part_id', '=', 'parts.id')
                 ->orderBy('parts.sku', $order)
                 ->select('inventory_moves.*');
@@ -63,7 +64,7 @@ class InventoryMoveController extends Controller
             $query->orderBy("inventory_moves.{$sort}", $order);
         }
 
-        $moves = $query->paginate(50)->withQueryString();
+        $moves = $query->paginate(25)->withQueryString();
 
         $moveTypes = [
             InventoryMove::TYPE_RECEIPT,
@@ -80,7 +81,13 @@ class InventoryMoveController extends Controller
             'moves' => $moves,
             'warehouse' => $warehouse,
             'moveTypes' => $moveTypes,
-            'filters' => $request->only(['search', 'type', 'part_id', 'date_from', 'date_to']),
+            'filters' => array_merge(
+                $request->only(['search', 'type', 'part_id', 'date_from', 'date_to']),
+                [
+                    'sort' => $sort,
+                    'direction' => $order,
+                ]
+            ),
         ]);
     }
 

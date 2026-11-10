@@ -60,7 +60,10 @@ const maxUsage = computed(() => {
                         </span>
                     </div>
                 </div>
-                <div class="flex-shrink-0 text-left">
+                <div
+                    v-if="service.total_revenue !== null && service.total_revenue !== undefined"
+                    class="flex-shrink-0 text-end"
+                >
                     <p class="text-sm font-semibold tabular-nums text-slate-900 dark:text-white">
                         {{
                             new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 }).format(

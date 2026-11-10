@@ -8,6 +8,7 @@ use App\Enums\InvoiceType;
 use App\Exceptions\PaymentExceedsBalanceException;
 use App\Models\Invoice;
 use App\Models\Payment;
+use App\Models\PurchaseInvoice;
 use Illuminate\Support\Facades\DB;
 use InvalidArgumentException;
 
@@ -69,28 +70,122 @@ class PaymentService
     }
 
     /**
+     * Record a payment against a purchase invoice (e.g. expenses, supplier invoices).
+     *
+     * @throws PaymentExceedsBalanceException
+     */
+    public function recordPurchasePayment(PurchaseInvoice $purchaseInvoice, array $data): Payment
+    {
+        return DB::transaction(function () use ($purchaseInvoice, $data) {
+            $locked = $this->lockPurchaseInvoice($purchaseInvoice);
+
+            $amount = round((float) ($data['amount'] ?? 0), 2);
+
+            if ($amount <= 0) {
+                throw new InvalidArgumentException('مبلغ الدفعة يجب أن يكون أكبر من صفر.');
+            }
+
+            $balance = round((float) $locked->balance, 2);
+
+            if ($amount - self::BALANCE_TOLERANCE > $balance) {
+                throw new PaymentExceedsBalanceException(
+                    'مبلغ الدفعة ('.number_format($amount, 2, '.', '').') أكبر من رصيد فاتورة المشتريات المستحق ('
+                    .number_format($balance, 2, '.', '').').'
+                );
+            }
+
+            $payment = Payment::create([
+                'tenant_id' => $locked->tenant_id,
+                'center_id' => $locked->center_id,
+                'purchase_invoice_id' => $locked->id,
+                'amount' => $amount,
+                'payment_date' => $data['payment_date'] ?? now(),
+                'payment_method' => $data['payment_method'] ?? 'cash',
+                'reference' => $data['reference'] ?? null,
+                'notes' => $data['notes'] ?? null,
+                'received_by' => $data['received_by'] ?? auth()->id(),
+                'type' => $data['type'] ?? Payment::TYPE_PAYMENT,
+            ]);
+
+            $this->recalculatePurchaseInvoice($locked);
+
+            return $payment;
+        });
+    }
+
+    /**
+     * Recalculate purchase invoice balance and status based on payments and returns.
+     */
+    public function recalculatePurchaseInvoice(PurchaseInvoice $purchaseInvoice): void
+    {
+        $total = round((float) ($purchaseInvoice->total ?? 0), 2);
+
+        $totalReturns = round((float) $purchaseInvoice->returnInvoices()
+            ->whereNull('deleted_at')
+            ->sum('total'), 2);
+
+        $totalPaid = round((float) $purchaseInvoice->payments()
+            ->whereNull('deleted_at')
+            ->where('type', Payment::TYPE_PAYMENT)
+            ->sum('amount'), 2);
+
+        $totalRefunds = round((float) $purchaseInvoice->payments()
+            ->whereNull('deleted_at')
+            ->where('type', Payment::TYPE_REFUND)
+            ->sum('amount'), 2);
+
+        $netPaid = $totalPaid - $totalRefunds;
+        $newBalance = max(0.0, round($total - $totalReturns - $netPaid, 2));
+
+        $status = $purchaseInvoice->status;
+
+        if (! in_array($status, [PurchaseInvoice::STATUS_CANCELLED, PurchaseInvoice::STATUS_DRAFT], true)) {
+            $status = $newBalance <= self::BALANCE_TOLERANCE
+                ? PurchaseInvoice::STATUS_PAID
+                : PurchaseInvoice::STATUS_OPEN;
+        }
+
+        $purchaseInvoice->update([
+            'balance' => $newBalance,
+            'status' => $status,
+        ]);
+    }
+
+    /**
      * Delete a payment and recalculate invoice status.
      */
     public function deletePayment(Payment $payment): bool
     {
         return DB::transaction(function () use ($payment) {
             $invoice = $payment->invoice;
+            $purchaseInvoice = $payment->purchaseInvoice;
 
-            if (! $invoice) {
+            if ($invoice) {
+                // Same reason as recordPayment(): the recalculation has to
+                // happen against a locked row, or it can interleave with a
+                // payment that is being recorded right now.
+                $locked = $this->lockInvoice($invoice);
+
                 $payment->delete();
+
+                // Recalculate invoice status
+                $locked->updatePaymentStatus();
 
                 return true;
             }
 
-            // Same reason as recordPayment(): the recalculation has to
-            // happen against a locked row, or it can interleave with a
-            // payment that is being recorded right now.
-            $locked = $this->lockInvoice($invoice);
+            if ($purchaseInvoice) {
+                $lockedPurchase = $this->lockPurchaseInvoice($purchaseInvoice);
+
+                $payment->delete();
+
+                // Recalculate purchase invoice status & balance
+                $this->recalculatePurchaseInvoice($lockedPurchase);
+
+                return true;
+            }
 
             $payment->delete();
-
-            // Recalculate invoice status
-            $locked->updatePaymentStatus();
 
             return true;
         });
@@ -155,6 +250,13 @@ class PaymentService
         return Invoice::query()
             ->lockForUpdate()
             ->findOrFail($invoice->id);
+    }
+
+    private function lockPurchaseInvoice(PurchaseInvoice $purchaseInvoice): PurchaseInvoice
+    {
+        return PurchaseInvoice::query()
+            ->lockForUpdate()
+            ->findOrFail($purchaseInvoice->id);
     }
 
     /**

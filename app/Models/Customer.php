@@ -13,6 +13,13 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\DB;
 
+/**
+ * Response-only credit summaries populated by customer/vehicle queries.
+ *
+ * @property float $balance
+ * @property bool $is_credit_exceeded
+ * @property float|null $available_credit
+ */
 class Customer extends Model
 {
     use HasFactory, SoftDeletes, TenantScoped;

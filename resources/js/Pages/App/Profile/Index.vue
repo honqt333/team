@@ -13,6 +13,7 @@ import PrimaryButton from '@/Components/PrimaryButton.vue';
 import SecondaryButton from '@/Components/SecondaryButton.vue';
 import DangerButton from '@/Components/DangerButton.vue';
 import BaseModal from '@/Components/BaseModal.vue';
+import AppToggle from '@/Components/Common/AppToggle.vue';
 
 const props = defineProps({
     mustVerifyEmail: Boolean,
@@ -1107,8 +1108,8 @@ const regenerateCodes = () =>
                                 </div>
 
                                 <div class="space-y-3">
-                                    <label
-                                        class="flex items-center justify-between p-3.5 rounded-2xl bg-gray-50/80 dark:bg-gray-750/50 border border-gray-100 dark:border-gray-700 cursor-pointer"
+                                    <div
+                                        class="flex items-center justify-between p-3.5 rounded-2xl bg-gray-50/80 dark:bg-gray-750/50 border border-gray-100 dark:border-gray-700"
                                     >
                                         <div class="flex items-center gap-3">
                                             <div
@@ -1134,20 +1135,11 @@ const regenerateCodes = () =>
                                                 {{ $t('profile.preferences.hide_floating_button') }}
                                             </span>
                                         </div>
-                                        <div class="relative inline-flex items-center">
-                                            <input
-                                                type="checkbox"
-                                                v-model="preferencesForm.hide_floating_button"
-                                                class="sr-only peer"
-                                            />
-                                            <div
-                                                class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-indigo-600"
-                                            ></div>
-                                        </div>
-                                    </label>
+                                        <AppToggle v-model="preferencesForm.hide_floating_button" />
+                                    </div>
 
-                                    <label
-                                        class="flex items-center justify-between p-3.5 rounded-2xl bg-gray-50/80 dark:bg-gray-750/50 border border-gray-100 dark:border-gray-700 cursor-pointer"
+                                    <div
+                                        class="flex items-center justify-between p-3.5 rounded-2xl bg-gray-50/80 dark:bg-gray-750/50 border border-gray-100 dark:border-gray-700"
                                     >
                                         <div class="flex items-center gap-3">
                                             <div
@@ -1171,17 +1163,10 @@ const regenerateCodes = () =>
                                                 }}
                                             </span>
                                         </div>
-                                        <div class="relative inline-flex items-center">
-                                            <input
-                                                type="checkbox"
-                                                v-model="preferencesForm.hide_floating_contact"
-                                                class="sr-only peer"
-                                            />
-                                            <div
-                                                class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-indigo-600"
-                                            ></div>
-                                        </div>
-                                    </label>
+                                        <AppToggle
+                                            v-model="preferencesForm.hide_floating_contact"
+                                        />
+                                    </div>
                                 </div>
                             </div>
 

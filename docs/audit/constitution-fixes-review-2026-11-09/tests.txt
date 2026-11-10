@@ -1,0 +1,92 @@
+
+   PASS  Tests\Feature\HR\PayrollCenterIsolationTest
+  ✓ user in center a cannot view payroll run of center b                 4.13s  
+  ✓ user in center a can view payroll run of center a                    0.94s  
+  ✓ user in center a cannot approve payroll run of center b              1.25s  
+  ✓ approving payroll run logs activity                                  0.90s  
+
+   PASS  Tests\Feature\BiometricTokenHashingTest
+  ✓ the generated token is not stored in plaintext                       3.15s  
+  ✓ the hash matches the documented algorithm                            0.89s  
+  ✓ a device can be found by the token it presented                      0.46s  
+  ✓ an unknown token finds no device                                     0.50s  
+  ✓ an inactive device is not found by its token                         1.54s  
+  ✓ rotating the token invalidates the old one                           1.29s  
+  ✓ the token is not exposed by the models array form                    0.91s  
+  ✓ the token is readable in memory right after it is issued             1.19s  
+  ✓ a device can still clock in with its token                           0.68s  
+  ✓ a device with an unknown token is rejected                           0.88s  
+  ✓ device cannot clock in employee from different center                0.82s  
+
+   PASS  Tests\Feature\FontPolicyTest
+  ✓ no source file loads fonts from google                               0.34s  
+  ✓ the font token does not name a parallel family                       0.16s  
+  ✓ the self hosted font stylesheet is served and declares the family    0.11s  
+  ✓ the layout links the local font stylesheet                           0.08s  
+
+   FAIL  Tests\Feature\HardcodedArabicTest
+  ⨯ no new hardcoded arabic in the vue sources                           6.13s  
+  ✓ the extractor finds the remaining arabic                             5.83s  
+  ✓ the locale files have the same keys                                  0.06s  
+  ✓ the locale files carry the same placeholders                         0.07s  
+
+   PASS  Tests\Feature\CompanyTransactionsTest
+  ✓ user can create draft company transaction                            0.56s  
+  ✓ user can update draft company transaction                            0.49s  
+  ✓ user can delete draft company transaction                            0.67s  
+  ✓ taxable transaction requires contact                                 0.86s  
+  ✓ approving taxable revenue generates sales invoice                    0.59s  
+  ✓ approving taxable expense generates purchase invoice                 0.64s  
+  ✓ tenancy isolation on company transactions                            1.12s  
+
+   PASS  Tests\Feature\WorkOrdersCrudTest
+  ✓ authorized user can create and list work orders                      0.68s  
+  ✓ user without permission cannot create                                0.47s  
+  ✓ user cannot access work order from another center                    0.95s  
+  ✓ can create work order without items                                  0.53s  
+  ✓ validation fails when item title missing                             0.45s  
+  ✓ work order code is sequential                                        0.57s  
+  ✓ item total is calculated correctly                                   0.52s  
+  ✓ authorized user can update item status and activity is logged        0.57s  
+  ✓ authorized user cannot delete item if it has parts or technicians    0.67s  
+  ✓ authorized user cannot delete item if work order has payments        0.66s  
+  ✓ authorized user can reactivate cancelled item                        0.57s  
+  ✓ authorized user can add item under packages department               0.57s  
+  ✓ suspending and resuming work order retains item statuses             1.40s  
+  ✓ cannot transition service back to pending after work started         1.32s  
+  ✓ completing work order with or without balance generates invoice      1.59s  
+  ✓ completing work order with balance without deferred invoice succeed… 1.92s  
+  ✓ completed sub filter returns only orders with completed items and n… 1.17s  
+  ✓ cannot start work on work order without services                     0.88s  
+  ✓ cancelling service reduces work order totals immediately             0.72s  
+  ✓ cannot complete work order if no completed services                  1.99s  
+  ✓ payments inherited in invoices                                       0.81s  
+  ✓ cancellation of work order ignores cancelled items and parts         0.53s  
+  ✓ delete item converts to cancelled if payments exist                  0.53s  
+  ✓ can retrieve active warranties for vehicle                           0.56s  
+  ✓ can retrieve active warranties for custom written service on vehicl… 0.52s  
+  ✓ cross branch data sharing and policies                               0.73s  
+  ✓ work order creation checks customer credit limit                     2.34s  
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\HardcodedArabicTest > no new hardcoded arabic in th…   
+  The Vue sources hold 742 inline Arabic literals (allowed: 733).
+Either move the copy into resources/js/i18n/lang/{ar,en}.json and call it with $t('key'), or — if a page is deliberately left alone — lower the ceiling in this test after checking why.
+Failed asserting that 742 is equal to 733 or is less than 733.
+
+  at tests/Feature/HardcodedArabicTest.php:64
+     60▕     public function test_no_new_hardcoded_arabic_in_the_vue_sources(): void
+     61▕     {
+     62▕         $count = $this->countInlineArabic();
+     63▕ 
+  ➜  64▕         $this->assertLessThanOrEqual(
+     65▕             self::MAX_INLINE_ARABIC['ar'],
+     66▕             $count,
+     67▕             "The Vue sources hold {$count} inline Arabic literals "
+     68▕             .'(allowed: '.self::MAX_INLINE_ARABIC['ar'].').'
+
+  1   tests/Feature/HardcodedArabicTest.php:64
+
+
+  Tests:    1 failed, 56 passed (208 assertions)
+  Duration: 61.56s
+

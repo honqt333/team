@@ -1,0 +1,11 @@
+
+   PASS  Tests\Feature\HR\PayrollCenterIsolationTest
+  ✓ user in center a cannot view payroll run of center b                 5.78s  
+  ✓ policy checks cross center access without route binding              0.44s  
+  ✓ user in center a can view payroll run of center a                    0.60s  
+  ✓ user in center a cannot approve payroll run of center b              0.42s  
+  ✓ approving payroll run logs activity                                  0.86s  
+
+  Tests:    5 passed (9 assertions)
+  Duration: 8.15s
+

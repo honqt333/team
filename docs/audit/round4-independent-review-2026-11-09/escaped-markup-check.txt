@@ -1,0 +1,2 @@
+ACTIVE_IMG=no
+ESCAPED_IMG=yes

@@ -456,7 +456,7 @@
                             <label
                                 class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1"
                             >
-                                {{ $t('common.search') || 'بحث' }}
+                                {{ $t('common.search') }}
                             </label>
                             <input
                                 type="text"
@@ -650,8 +650,8 @@
                         class="p-4 border-t border-gray-100 dark:border-gray-700 flex items-center justify-between flex-wrap gap-2"
                     >
                         <div class="text-xs text-gray-500 dark:text-gray-400">
-                            {{ $t('common.showing') || 'عرض' }} {{ items.from }} - {{ items.to }}
-                            {{ $t('common.of') || 'من' }} {{ items.total }}
+                            {{ $t('common.showing') }} {{ items.from }} - {{ items.to }}
+                            {{ $t('common.of') }} {{ items.total }}
                         </div>
                         <div class="flex items-center gap-1">
                             <button
@@ -836,7 +836,10 @@ const selectedCenterName = computed(() => {
 
 const dateRangeSubtitle = computed(() => {
     if (props.filters.start_date && props.filters.end_date) {
-        return `من ${props.filters.start_date} إلى ${props.filters.end_date}`;
+        return t('reports.date_from_to', {
+            from: props.filters.start_date,
+            to: props.filters.end_date,
+        });
     }
     const preset = datePresets.value.find((p) => p.id === currentRange.value);
     if (preset) return preset.label;

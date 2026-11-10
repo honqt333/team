@@ -1,48 +1,75 @@
 <script setup>
-import { ref, watch } from 'vue';
-import { Head, router, usePage, Link } from '@inertiajs/vue3';
+import { computed, watch } from 'vue';
+import { Head, usePage } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
+import { ref } from 'vue';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import PageHeader from '@/Components/PageHeader.vue';
 import BackButton from '@/Components/BackButton.vue';
-import Breadcrumb from '@/Components/Breadcrumb.vue';
-import UserManagementTabs from '@/Pages/Settings/Partials/UserManagementTabs.vue';
+import AppToggle from '@/Components/Common/AppToggle.vue';
+import AppEmptyState from '@/Components/Common/AppEmptyState.vue';
+import AppTableSkeleton from '@/Components/Common/AppTableSkeleton.vue';
+import DataTable from '@/Components/Common/DataTable.vue';
 import UserFormModal from './UserFormModal.vue';
+import UserManagementTabs from '@/Pages/Settings/Partials/UserManagementTabs.vue';
 import { usePermission } from '@/Composables/usePermission';
+import { useServerTable } from '@/Composables/useServerTable';
+import { useConfirm } from '@/Composables/useConfirm';
+import { router } from '@inertiajs/vue3';
 
 const props = defineProps({
     users: Object,
     filters: Object,
     centers: Array,
     roles: Array,
-    employees: Array, // Add employees prop
+    employees: Array,
 });
 
-const { t, locale } = useI18n(); // Destructure locale
+const { t, locale } = useI18n();
 const { can } = usePermission();
+const page = usePage();
+const { confirm } = useConfirm();
 
+// ─── Server Table ────────────────────────────────────────────────────────────
+const { tableFilters, isLoading } = useServerTable({
+    routeUrl: () => route('settings.users.index'),
+    initialFilters: {
+        search: props.filters?.search || '',
+    },
+    only: ['users', 'filters'],
+    debounceMs: 350,
+});
+
+watch(
+    () => props.filters?.search,
+    (val) => {
+        if (val !== undefined && val !== tableFilters.search) {
+            tableFilters.search = val;
+        }
+    }
+);
+
+// ─── Column Definitions ───────────────────────────────────────────────────────
+const columns = computed(() => [
+    { key: 'name', label: t('users.name', 'الاسم'), sortable: false },
+    { key: 'email', label: t('users.email', 'البريد الإلكتروني'), sortable: false },
+    { key: 'centers', label: t('users.branches', 'الفروع'), sortable: false },
+    { key: 'role', label: t('users.role', 'الدور'), sortable: false },
+    { key: 'employee', label: t('users.employee', 'الموظف المرتبط'), sortable: false },
+    { key: 'status', label: t('users.status', 'الحالة'), sortable: false },
+    { key: 'actions', label: t('common.actions', 'الإجراءات'), sortable: false },
+]);
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
 const getRoleLabel = (user) => {
     if (!user.roles || user.roles.length === 0) return '-';
-    // Assuming single role per user for display
     const role = user.roles[0];
-    return locale.value === 'ar' ? (role.label_ar || role.name) : (role.label_en || role.name);
+    return locale.value === 'ar' ? role.label_ar || role.name : role.label_en || role.name;
 };
 
-const search = ref(props.filters.search || '');
+// ─── Modal: Create / Edit ─────────────────────────────────────────────────────
 const showModal = ref(false);
 const selectedUser = ref(null);
-
-watch(search, (value) => {
-    router.get(
-        route('settings.users.index'),
-        { search: value },
-        { 
-            preserveState: true, 
-            preserveScroll: true, 
-            replace: true 
-        }
-    );
-});
 
 const openCreateModal = () => {
     selectedUser.value = null;
@@ -54,38 +81,39 @@ const openEditModal = (user) => {
     showModal.value = true;
 };
 
-const deleteUser = (user) => {
-    if (confirm(t('common.confirm_delete', 'Are you sure you want to delete this item?'))) {
-        router.delete(route('settings.users.destroy', user.id));
-    }
-};
-
-const toggleUserActive = (user) => {
-    router.patch(route('settings.users.toggle', user.id), {}, {
+// ─── Modal: Delete Confirmation ───────────────────────────────────────────────
+const confirmDelete = async (user) => {
+    const confirmed = await confirm({
+        type: 'danger',
+        title: t('common.confirm_delete_title', 'تأكيد الحذف'),
+        message: t('common.confirm_delete', 'هل أنت متأكد من حذف هذا العنصر؟'),
+        confirmText: t('common.delete', 'حذف'),
+        cancelText: t('common.cancel', 'إلغاء'),
+    });
+    if (!confirmed) return;
+    router.delete(route('settings.users.destroy', user.id), {
         preserveScroll: true,
-        onSuccess: () => {
-            // Optimistic update handled by Inertia reload
-        }
     });
 };
-// Actually, I should use the dedicated method "toggleActive" I added to controller. 
-// But I need to register it in routes.
-// Let's check routes/web.php again.
-// I haven't added the route. I should add a route for toggle active.
-// For now, I'll use the 'update' method since I modified it to accept is_active.
-// However, 'update' requires validation of other fields too (name, email...).
-// Sending just is_active might fail validation if I don't send everything.
-// The update request validates name/email/roles.
-// So simpler to just add a specific route.
 
+// ─── Toggle Active ────────────────────────────────────────────────────────────
+const toggleUserActive = (user) => {
+    router.patch(
+        route('settings.users.toggle', user.id),
+        {},
+        {
+            preserveScroll: true,
+        }
+    );
+};
 </script>
 
 <template>
-    <Head :title="t('users.title', 'Users Management')" />
+    <Head :title="t('users.title', 'إدارة المستخدمين')" />
 
     <AppLayout>
         <div class="space-y-6">
-            <!-- Header & Tabs -->
+            <!-- ─── Header ──────────────────────────────────────────────── -->
             <PageHeader
                 :title="t('users.title')"
                 :subtitle="t('users.description')"
@@ -103,19 +131,31 @@ const toggleUserActive = (user) => {
 
                 <template #icon>
                     <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"
+                        />
                     </svg>
                 </template>
 
                 <template #actions>
-                    <button 
+                    <button
                         v-if="can('users.create')"
                         @click="openCreateModal"
                         class="group relative inline-flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-violet-600 to-purple-600 text-white font-bold rounded-xl transition-all hover:scale-[1.02] hover:shadow-lg hover:shadow-violet-500/25 active:scale-95 overflow-hidden"
                     >
-                        <div class="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>
+                        <div
+                            class="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"
+                        ></div>
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M12 4v16m8-8H4"
+                            />
                         </svg>
                         <span class="relative hidden sm:inline">{{ t('users.create_new') }}</span>
                     </button>
@@ -126,181 +166,200 @@ const toggleUserActive = (user) => {
                 </template>
             </PageHeader>
 
-            <!-- Filters & Content -->
-            <div class="space-y-6">
-                <!-- Filters & Search -->
-                <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-1">
-                    <div class="p-3">
-                        <div class="relative max-w-md">
-                            <input 
-                                v-model="search"
-                                type="text" 
-                                :placeholder="t('common.search', 'Search...')" 
-                                class="w-full pl-10 pr-4 py-2 text-sm rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-violet-500 focus:border-violet-500 transition-colors"
-                            >
-                            <svg class="absolute start-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                            </svg>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Table -->
-                <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
-                            <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
-                                <tr>
-                                    <th scope="col" class="px-6 py-3 align-middle text-center">{{ t('users.name', 'Name') }}</th>
-                                    <th scope="col" class="px-6 py-3 align-middle text-center">{{ t('users.email', 'Email') }}</th>
-                                    <th scope="col" class="px-6 py-3 align-middle text-center">{{ t('users.branches', 'Branches') }}</th>
-                                    <th scope="col" class="px-6 py-3 align-middle text-center">{{ t('users.role', 'Role') }}</th>
-                                    <th scope="col" class="px-6 py-3 align-middle text-center">{{ t('users.employee', 'Employee') }}</th>
-                                    <th scope="col" class="px-6 py-3 text-center align-middle">{{ t('users.status', 'Status') }}</th>
-                                    <th scope="col" class="px-6 py-3 text-center align-middle">{{ t('common.actions', 'Actions') }}</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
-                                <tr 
-                                    v-for="user in users.data" 
-                                    :key="user.id" 
-                                    class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
-                                >
-                                    <td class="px-6 py-4 align-middle">
-                                        <div class="flex items-center gap-3">
-                                            <div class="w-8 h-8 rounded-full bg-violet-100 dark:bg-violet-900/50 flex items-center justify-center text-violet-600 dark:text-violet-400 font-bold text-xs uppercase">
-                                                {{ user.name.charAt(0) }}
-                                            </div>
-                                            <span class="font-medium text-gray-900 dark:text-white">{{ user.name }}</span>
-                                        </div>
-                                    </td>
-                                    <td class="px-6 py-4 text-gray-600 dark:text-gray-300 align-middle">{{ user.email }}</td>
-                                    <td class="px-6 py-4 align-middle">
-                                        <div class="flex flex-wrap gap-1">
-                                            <span 
-                                                v-for="center in user.centers" 
-                                                :key="center.id"
-                                                class="px-2 py-0.5 rounded text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300"
-                                            >
-                                                {{ center.name }}
-                                            </span>
-                                        </div>
-                                    </td>
-                                    <td class="px-6 py-4 align-middle">
-                                        <span v-if="user.roles && user.roles.length > 0" class="px-2 py-0.5 rounded text-xs font-medium bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 border border-blue-100 dark:border-blue-800">
-                                            {{ getRoleLabel(user) }}
-                                        </span>
-                                        <span v-else class="text-gray-400 text-xs italic">-</span>
-                                    </td>
-                                    <td class="px-6 py-4 align-middle">
-                                        <span v-if="user.employee" class="text-emerald-600 dark:text-emerald-400 text-xs font-medium px-2 py-0.5 rounded bg-emerald-50 dark:bg-emerald-900/30">
-                                            {{ user.employee.name_ar || user.employee.name_en }}
-                                        </span>
-                                        <span v-else class="text-gray-400 text-xs italic">{{ t('users.no_employee', '-') }}</span>
-                                    </td>
-                                    <td class="px-6 py-4 text-center align-middle">
-                                        <button 
-                                            v-if="can('users.update') && user.id !== $page.props.auth.user.id"
-                                            @click="toggleUserActive(user)"
-                                            class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-violet-600 focus:ring-offset-2"
-                                            :class="[user.is_active ? 'bg-violet-600' : 'bg-gray-200 dark:bg-gray-700']"
-                                            :title="user.is_active ? t('users.active', 'Active') : t('users.inactive', 'Inactive')"
-                                        >
-                                            <span class="sr-only">{{ t('users.toggle_status') }}</span>
-                                            <span
-                                                aria-hidden="true"
-                                                class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"
-                                                :class="[user.is_active ? 'translate-x-5 rtl:-translate-x-5' : 'translate-x-0']"
-                                            />
-                                        </button>
-                                        <span v-else class="text-xs" :class="user.is_active ? 'text-emerald-600' : 'text-red-600'">
-                                            {{ user.is_active ? t('users.active', 'Active') : t('users.inactive', 'Inactive') }}
-                                        </span>
-                                    </td>
-                                    <td class="px-6 py-4 align-middle">
-                                        <div class="flex items-center justify-center gap-2">
-                                            <button 
-                                                v-if="can('users.update')"
-                                                @click="openEditModal(user)"
-                                                class="p-2 text-gray-400 hover:text-violet-600 hover:bg-violet-50 dark:hover:bg-violet-900/30 rounded-lg transition-colors"
-                                                :title="t('common.edit')"
-                                            >
-                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                                </svg>
-                                            </button>
-                                            <button 
-                                                v-if="can('users.delete') && user.id !== $page.props.auth.user.id"
-                                                @click="deleteUser(user)"
-                                                class="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors"
-                                                :title="t('common.delete')"
-                                            >
-                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                                </svg>
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr v-if="users.data.length === 0">
-                                    <td colspan="5" class="px-6 py-12 text-center text-gray-500 dark:text-gray-400 align-middle">
-                                        <div class="flex flex-col items-center justify-center">
-                                            <svg class="w-12 h-12 text-gray-300 dark:text-gray-600 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                                            </svg>
-                                            <p>{{ t('common.no_results', 'No results found') }}</p>
-                                        </div>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                    
-                    <!-- Pagination -->
-                    <div v-if="users.links.length > 3" class="px-6 py-4 flex items-center justify-between border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
-                        <div class="flex-1 flex justify-between sm:hidden">
-                            <!-- Mobile pagination buttons could go here -->
-                        </div>
-                        <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
-                            <div>
-                                <p class="text-sm text-gray-700 dark:text-gray-300">
-                                    {{ t('common.showing', 'Showing') }}
-                                    <span class="font-medium">{{ users.from }}</span>
-                                    {{ t('common.to', 'to') }}
-                                    <span class="font-medium">{{ users.to }}</span>
-                                    {{ t('common.of', 'of') }}
-                                    <span class="font-medium">{{ users.total }}</span>
-                                    {{ t('common.results', 'results') }}
-                                </p>
-                            </div>
-                            <div>
-                                <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
-                                    <!-- Use a proper Pagination component in real app, simplified here -->
-                                    <template v-for="(link, i) in users.links" :key="i">
-                                        <component
-                                            :is="link.url ? 'Link' : 'span'"
-                                            v-if="link.url || link.label === '...'"
-                                            :href="link.url"
-                                            v-safe-html="link.label"
-                                            class="relative inline-flex items-center px-4 py-2 border text-sm font-medium"
-                                            :class="[
-                                                link.active 
-                                                    ? 'z-10 bg-violet-50 border-violet-500 text-violet-600' 
-                                                    : 'bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-700',
-                                                i === 0 ? 'rounded-l-md' : '',
-                                                i === users.links.length - 1 ? 'rounded-r-md' : '',
-                                                !link.url ? 'cursor-default' : ''
-                                            ]"
-                                        />
-                                    </template>
-                                </nav>
-                            </div>
-                        </div>
-                    </div>
+            <!-- ─── Search Bar ─────────────────────────────────────────── -->
+            <div class="bg-surface rounded-xl shadow-sm border border-border p-4">
+                <div class="relative max-w-md">
+                    <input
+                        v-model="tableFilters.search"
+                        type="text"
+                        :placeholder="t('common.search', 'بحث...')"
+                        class="w-full ps-10 pe-4 py-2 text-sm rounded-lg border border-border bg-surface-muted text-text-primary placeholder:text-text-muted focus:ring-2 focus:ring-focus-ring focus:border-action-primary transition-colors"
+                    />
+                    <svg
+                        class="absolute start-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                        />
+                    </svg>
                 </div>
             </div>
+
+            <!-- ─── Table ───────────────────────────────────────────────── -->
+            <DataTable :columns="columns" :data="users" :loading="isLoading">
+                <!-- Name cell -->
+                <template #cell-name="{ item }">
+                    <div class="flex items-center gap-3">
+                        <div
+                            class="w-8 h-8 rounded-full bg-selection-bg flex items-center justify-center text-action-primary font-bold text-xs uppercase shrink-0"
+                        >
+                            {{ (item.name || '?').charAt(0) }}
+                        </div>
+                        <span class="font-medium text-text-primary">{{ item.name }}</span>
+                    </div>
+                </template>
+
+                <!-- Email cell -->
+                <template #cell-email="{ item }">
+                    <span class="text-text-secondary text-sm">{{ item.email }}</span>
+                </template>
+
+                <!-- Centers cell -->
+                <template #cell-centers="{ item }">
+                    <div class="flex flex-wrap gap-1">
+                        <span
+                            v-for="center in item.centers"
+                            :key="center.id"
+                            class="px-2 py-0.5 rounded text-xs font-medium bg-surface-muted text-text-secondary border border-border"
+                        >
+                            {{ center.name }}
+                        </span>
+                        <span
+                            v-if="!item.centers || item.centers.length === 0"
+                            class="text-text-muted text-xs italic"
+                        >
+                            -
+                        </span>
+                    </div>
+                </template>
+
+                <!-- Role cell -->
+                <template #cell-role="{ item }">
+                    <span
+                        v-if="item.roles && item.roles.length > 0"
+                        class="px-2 py-0.5 rounded text-xs font-medium bg-selection-bg text-action-primary border border-selection-ring/30"
+                    >
+                        {{ getRoleLabel(item) }}
+                    </span>
+                    <span v-else class="text-text-muted text-xs italic">-</span>
+                </template>
+
+                <!-- Employee cell -->
+                <template #cell-employee="{ item }">
+                    <span
+                        v-if="item.employee"
+                        class="text-success text-xs font-medium px-2 py-0.5 rounded bg-success/10"
+                    >
+                        {{ item.employee.name_ar || item.employee.name_en }}
+                    </span>
+                    <span v-else class="text-text-muted text-xs italic">
+                        {{ t('users.no_employee', '-') }}
+                    </span>
+                </template>
+
+                <!-- Status cell -->
+                <template #cell-status="{ item }">
+                    <div class="flex justify-center">
+                        <AppToggle
+                            v-if="can('users.update') && item.id !== $page.props.auth.user.id"
+                            :model-value="item.is_active"
+                            color="success"
+                            :title="
+                                item.is_active
+                                    ? t('users.active', 'نشط')
+                                    : t('users.inactive', 'غير نشط')
+                            "
+                            @change="toggleUserActive(item)"
+                        />
+                        <span
+                            v-else
+                            class="text-xs font-medium"
+                            :class="item.is_active ? 'text-success' : 'text-danger'"
+                        >
+                            {{
+                                item.is_active
+                                    ? t('users.active', 'نشط')
+                                    : t('users.inactive', 'غير نشط')
+                            }}
+                        </span>
+                    </div>
+                </template>
+
+                <!-- Actions cell -->
+                <template #cell-actions="{ item }">
+                    <div class="flex items-center justify-center gap-1">
+                        <button
+                            v-if="can('users.update')"
+                            @click="openEditModal(item)"
+                            class="p-1.5 rounded-lg text-text-muted hover:text-action-primary hover:bg-selection-bg transition-colors"
+                            :title="t('common.edit', 'تعديل')"
+                        >
+                            <svg
+                                class="w-4 h-4"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                                />
+                            </svg>
+                        </button>
+                        <button
+                            v-if="can('users.delete') && item.id !== $page.props.auth.user.id"
+                            @click="confirmDelete(item)"
+                            class="p-1.5 rounded-lg text-text-muted hover:text-danger hover:bg-danger/10 transition-colors"
+                            :title="t('common.delete', 'حذف')"
+                        >
+                            <svg
+                                class="w-4 h-4"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                                />
+                            </svg>
+                        </button>
+                    </div>
+                </template>
+
+                <!-- Empty State -->
+                <template #empty>
+                    <AppEmptyState
+                        :title="t('common.no_results', 'لا توجد نتائج')"
+                        :description="
+                            tableFilters.search
+                                ? t('common.no_results_search', 'لا توجد مستخدمين تطابق بحثك')
+                                : t('users.empty_description', 'لم يتم إضافة أي مستخدمين بعد')
+                        "
+                        :action-text="can('users.create') ? t('users.create_new') : ''"
+                        @action="openCreateModal"
+                    >
+                        <template #icon>
+                            <svg
+                                class="w-7 h-7"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="1.75"
+                                    d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
+                                />
+                            </svg>
+                        </template>
+                    </AppEmptyState>
+                </template>
+            </DataTable>
         </div>
 
+        <!-- ─── Modals ─────────────────────────────────────────────────── -->
         <UserFormModal
             :show="showModal"
             :user="selectedUser"

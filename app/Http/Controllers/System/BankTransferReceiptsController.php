@@ -104,7 +104,7 @@ class BankTransferReceiptsController extends Controller
         //   - receipt_mime_type : looked up from the file on disk (cached
         //                         on the request so we don't stat twice)
         //   - receipt_size_bytes: file size on disk
-        $disk = Storage::disk('public');
+        $disk = Storage::disk(Storage::disk('local')->exists($receipt->receipt_path ?? '') ? 'local' : 'public');
         $receipt->receipt_filename = $receipt->receipt_path
             ? basename($receipt->receipt_path)
             : null;
@@ -414,7 +414,9 @@ class BankTransferReceiptsController extends Controller
      */
     public function download(BankTransferReceipt $receipt)
     {
-        if (! $receipt->receipt_path || ! Storage::disk('public')->exists($receipt->receipt_path)) {
+        $disk = Storage::disk(Storage::disk('local')->exists($receipt->receipt_path ?? '') ? 'local' : 'public');
+
+        if (! $receipt->receipt_path || ! $disk->exists($receipt->receipt_path)) {
             abort(404, 'Receipt file not found');
         }
 
@@ -424,6 +426,6 @@ class BankTransferReceiptsController extends Controller
         // when downloading.
         $filename = basename($receipt->receipt_path);
 
-        return Storage::disk('public')->download($receipt->receipt_path, $filename);
+        return $disk->response($receipt->receipt_path, $filename, ['Cache-Control' => 'private, no-store'], 'inline');
     }
 }

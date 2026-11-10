@@ -13,9 +13,6 @@ use App\Models\InventoryMove;
 use App\Models\InventoryUnit;
 use App\Models\Invoice;
 use App\Models\Payment;
-use App\Models\PurchaseInvoice;
-use App\Models\PurchaseReturnInvoice;
-use App\Models\Supplier;
 use App\Models\TenantTaxSetting;
 use App\Models\VehicleColor;
 use App\Models\VehicleMake;
@@ -58,9 +55,23 @@ class PurchasingInvoicesController extends Controller
             })
             ->when($request->input('payment_status'), fn ($q, $s) => $q->where('payment_status', $s))
             ->when($request->input('date_from'), fn ($q, $d) => $q->whereDate('issue_date', '>=', $d))
-            ->when($request->input('date_to'), fn ($q, $d) => $q->whereDate('issue_date', '<=', $d))
-            ->orderBy('issue_date', 'desc')
-            ->orderBy('id', 'desc');
+            ->when($request->input('date_to'), fn ($q, $d) => $q->whereDate('issue_date', '<=', $d));
+
+        $allowedSorts = ['invoice_number', 'customer', 'issue_date', 'subtotal', 'total_incl_tax', 'balance', 'payment_status', 'created_at'];
+        $sort = in_array($request->input('sort'), $allowedSorts, true) ? $request->input('sort') : 'issue_date';
+        $direction = strtolower((string) ($request->input('direction') ?? $request->input('order', ''))) === 'asc' ? 'asc' : 'desc';
+
+        if ($sort === 'customer') {
+            $baseQuery->orderBy(
+                Customer::select('name')
+                    ->whereColumn('customers.id', 'invoices.customer_id')
+                    ->limit(1),
+                $direction
+            );
+        } else {
+            $baseQuery->orderBy("invoices.{$sort}", $direction);
+        }
+        $baseQuery->orderBy('invoices.id', 'desc');
 
         // Sales Invoices tab: standard sales invoices (exclude credit notes)
         $invoices = (clone $baseQuery)
@@ -96,7 +107,10 @@ class PurchasingInvoicesController extends Controller
         return Inertia::render('Purchasing/Sales/Index', [
             'invoices' => $invoices,
             'returns' => $returns,
-            'filters' => $request->only(['search', 'payment_status', 'date_from', 'date_to', 'tab']),
+            'filters' => array_merge($request->only(['search', 'payment_status', 'date_from', 'date_to', 'tab']), [
+                'sort' => $sort,
+                'direction' => $direction,
+            ]),
             'customers' => $customers,
             'makes' => $makes,
             'colors' => $colors,
@@ -351,66 +365,6 @@ class PurchasingInvoicesController extends Controller
      */
     public function purchasesIndex(Request $request)
     {
-        $tenantId = auth()->user()->tenant_id;
-        $centerId = auth()->user()->current_center_id;
-
-        $query = PurchaseInvoice::where('tenant_id', $tenantId)
-            ->where('center_id', $centerId)
-            ->with(['supplier', 'purchaseOrder'])
-            ->when($request->input('search'), function ($q, $search) {
-                $q->where(function ($query) use ($search) {
-                    $query->where('code', 'like', "%{$search}%")
-                        ->orWhere('invoice_number', 'like', "%{$search}%")
-                        ->orWhereHas('supplier', fn ($s) => $s->where('name', 'like', "%{$search}%"));
-                });
-            })
-            ->when($request->input('status'), fn ($q, $s) => $q->where('status', $s))
-            ->when($request->input('date_from'), fn ($q, $d) => $q->whereDate('issue_date', '>=', $d))
-            ->when($request->input('date_to'), fn ($q, $d) => $q->whereDate('issue_date', '<=', $d))
-            ->orderBy('id', 'desc');
-
-        $invoices = $query->paginate(25)->withQueryString();
-
-        $returns = PurchaseReturnInvoice::where('tenant_id', $tenantId)
-            ->where('center_id', $centerId)
-            ->with(['purchaseInvoice.supplier'])
-            ->when($request->input('search'), function ($q, $search) {
-                $q->where(function ($query) use ($search) {
-                    $query->where('code', 'like', "%{$search}%")
-                        ->orWhereHas('purchaseInvoice.supplier', fn ($s) => $s->where('name', 'like', "%{$search}%"));
-                });
-            })
-            ->when($request->input('date_from'), fn ($q, $d) => $q->whereDate('return_date', '>=', $d))
-            ->when($request->input('date_to'), fn ($q, $d) => $q->whereDate('return_date', '<=', $d))
-            ->orderBy('id', 'desc')
-            ->paginate(25, ['*'], 'returns_page')
-            ->withQueryString();
-
-        $suppliers = Supplier::forTenant($tenantId)->forCenter($centerId)->active()->get(['id', 'name']);
-        $defaultWarehouse = Warehouse::forCenter($centerId)->default()->first();
-        $warehouses = Warehouse::forCenter($centerId)->active()->get(['id', 'name']);
-        $units = InventoryUnit::where('is_active', true)->get(['id', 'name_ar', 'name_en']);
-
-        return Inertia::render('Purchasing/Invoices/Index', [
-            'invoices' => $invoices,
-            'returns' => $returns,
-            'filters' => $request->only(['search', 'status', 'date_from', 'date_to']),
-            'statuses' => [
-                PurchaseInvoice::STATUS_DRAFT,
-                PurchaseInvoice::STATUS_OPEN,
-                PurchaseInvoice::STATUS_PAID,
-                PurchaseInvoice::STATUS_CANCELLED,
-            ],
-            'suppliers' => $suppliers,
-            'defaultWarehouse' => $defaultWarehouse,
-            'warehouses' => $warehouses,
-            'units' => $units,
-            'stats' => [
-                'total' => PurchaseInvoice::where('tenant_id', $tenantId)->where('center_id', $centerId)->count(),
-                'open' => PurchaseInvoice::where('tenant_id', $tenantId)->where('center_id', $centerId)->where('status', 'open')->count(),
-                'paid' => PurchaseInvoice::where('tenant_id', $tenantId)->where('center_id', $centerId)->where('status', 'paid')->count(),
-                'draft' => PurchaseInvoice::where('tenant_id', $tenantId)->where('center_id', $centerId)->where('status', 'draft')->count(),
-            ],
-        ]);
+        return redirect()->route('app.invoices.purchases.index', $request->query());
     }
 }

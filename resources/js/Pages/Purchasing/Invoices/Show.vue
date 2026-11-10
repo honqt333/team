@@ -429,8 +429,77 @@
                         {{ $t('work_orders.cost_and_payment') }}
                     </h3>
 
-                    <div class="overflow-x-auto md:overflow-x-visible flex-1">
-                        <table class="w-full min-w-[820px] md:min-w-0 text-sm">
+                    <!-- Mobile Card Breakdown (Visible on mobile < sm) -->
+                    <div class="block sm:hidden space-y-3 mb-2">
+                        <!-- Spare Parts breakdown -->
+                        <div
+                            class="p-3 bg-gray-50 dark:bg-gray-900/40 rounded-xl space-y-1.5 border border-gray-100 dark:border-gray-700/50"
+                        >
+                            <div
+                                class="flex justify-between items-center text-xs font-bold text-gray-900 dark:text-white"
+                            >
+                                <span>{{ $t('quotes.show.tabs.spare_parts') }}</span>
+                                <span class="font-mono">
+                                    {{ formatCurrency(calculatedInvoiceTotal) }}
+                                </span>
+                            </div>
+                            <div
+                                class="flex justify-between items-center text-[11px] text-gray-500"
+                            >
+                                <span>
+                                    {{ $t('common.unit_price') }}:
+                                    {{ formatCurrency(calculatedInvoiceSubtotal) }}
+                                </span>
+                                <span
+                                    v-if="invoice.discount_amount > 0"
+                                    class="text-red-500 italic"
+                                >
+                                    -{{ formatCurrency(invoice.discount_amount) }}
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Grand Total, Paid & Balance Summary Card -->
+                        <div
+                            class="p-3.5 bg-amber-50/70 dark:bg-amber-950/20 rounded-xl border border-amber-200/60 dark:border-amber-800/40 space-y-2"
+                        >
+                            <div
+                                class="flex justify-between items-center text-sm font-black text-amber-900 dark:text-amber-300"
+                            >
+                                <span>{{ $t('common.total') }}</span>
+                                <span
+                                    class="font-mono text-base text-amber-600 dark:text-amber-400"
+                                >
+                                    {{ formatCurrency(calculatedInvoiceTotal) }}
+                                </span>
+                            </div>
+                            <div
+                                class="flex justify-between items-center text-xs font-bold text-emerald-600 dark:text-emerald-400"
+                            >
+                                <span>{{ $t('invoices.paid') }}</span>
+                                <span class="font-mono">
+                                    {{ formatCurrency(invoice.total - invoice.balance) }}
+                                </span>
+                            </div>
+                            <div
+                                class="pt-2 border-t border-amber-200/60 dark:border-amber-800/40 flex justify-between items-center text-sm font-black"
+                                :class="
+                                    invoice.balance > 0.01
+                                        ? 'text-red-600 dark:text-red-400'
+                                        : 'text-emerald-600 dark:text-emerald-400'
+                                "
+                            >
+                                <span>{{ $t('invoices.balance') }}</span>
+                                <span class="font-mono text-base">
+                                    {{ formatCurrency(invoice.balance) }}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Desktop Table (Visible on sm and larger) -->
+                    <div class="hidden sm:block overflow-x-auto md:overflow-x-visible flex-1">
+                        <table class="w-full min-w-[550px] md:min-w-0 text-sm">
                             <thead>
                                 <tr
                                     class="text-gray-400 dark:text-gray-500 border-b border-gray-100 dark:border-gray-700/50 pb-2"
@@ -2164,16 +2233,11 @@
                                             </p>
                                         </div>
                                     </div>
-                                    <label class="relative inline-flex items-center cursor-pointer">
-                                        <input
-                                            type="checkbox"
-                                            v-model="returnForm.create_debit_note"
-                                            class="sr-only peer"
-                                        />
-                                        <div
-                                            class="w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-600 peer-checked:bg-red-600"
-                                        ></div>
-                                    </label>
+                                    <AppToggle
+                                        v-model="returnForm.create_debit_note"
+                                        size="sm"
+                                        color="danger"
+                                    />
                                 </div>
 
                                 <!-- Debit Note Date -->
@@ -2503,6 +2567,7 @@ import { useI18n } from 'vue-i18n';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import PageHeader from '@/Components/PageHeader.vue';
 import BackButton from '@/Components/BackButton.vue';
+import AppToggle from '@/Components/Common/AppToggle.vue';
 import PurchaseOrderPaymentModal from '@/Components/Purchasing/PurchaseOrderPaymentModal.vue';
 import CustomDatePicker from '@/Components/CustomDatePicker.vue';
 import Tooltip from '@/Components/Tooltip.vue';

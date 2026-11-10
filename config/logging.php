@@ -57,8 +57,16 @@ return [
 
         'stack' => [
             'driver' => 'stack',
-            'channels' => explode(',', (string) env('LOG_STACK', 'single')),
+            'channels' => array_values(array_unique([...explode(',', (string) env('LOG_STACK', 'single')), 'daily-detailed'])),
             'ignore_exceptions' => false,
+        ],
+
+        'daily-detailed' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/detailed.log'),
+            'level' => 'warning',
+            'days' => 30,
+            'formatter' => JsonFormatter::class,
         ],
 
         'single' => [

@@ -6,29 +6,25 @@
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <title>فاتورة اشتراك - {{ $invoice->invoice_number }}</title>
     <style>
-        /* Register Amiri via @font-face so DomPDF picks it up
+        /* Register IBM Plex Sans Arabic via @font-face so DomPDF picks it up
            when CSS references the family name. The file is
            committed at resources/fonts/ and registered as a
-           fontDir in AppServiceProvider. Without this, Arabic
-           text renders with letter-by-letter LTR order
-           ("ورب ةمدخ" instead of "خدمة برو") because the
-           default DejaVu Sans has no Arabic glyphs and no
-           shaping tables. */
+           fontDir in AppServiceProvider. */
         @font-face {
-            font-family: 'Amiri';
+            font-family: 'IBM Plex Sans Arabic';
             font-weight: normal;
             font-style: normal;
-            src: url('file://{{ base_path("resources/fonts/Amiri-Regular.ttf") }}') format('truetype');
+            src: url('file://{{ base_path("resources/fonts/IBMPlexSansArabic-Regular.ttf") }}') format('truetype');
         }
         @font-face {
-            font-family: 'Amiri';
+            font-family: 'IBM Plex Sans Arabic';
             font-weight: bold;
             font-style: normal;
-            src: url('file://{{ base_path("resources/fonts/Amiri-Bold.ttf") }}') format('truetype');
+            src: url('file://{{ base_path("resources/fonts/IBMPlexSansArabic-Bold.ttf") }}') format('truetype');
         }
 
         * {
-            font-family: 'Amiri', 'DejaVu Sans', sans-serif;
+            font-family: 'IBM Plex Sans Arabic', sans-serif;
             box-sizing: border-box;
         }
 
@@ -234,7 +230,7 @@
             @if (!empty($company['logo_url']))
                 <img src="{{ $company['logo_url'] }}" class="logo" alt="logo" />
             @endif
-            <div class="company-name">{{ $company['name'] ?? 'Khidma Pro' }}</div>
+            <div class="company-name">{{ $company['name'] ?? config('app.name_ar', 'خدمة برو') }}</div>
             <div style="color: #666; font-size: 11px;">
                 @if ($company['cr_number'])
                     السجل التجاري: {{ $company['cr_number'] }}<br>

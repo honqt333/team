@@ -44,11 +44,14 @@ const phoneVerified = computed(() => {
 });
 
 // Watch for phone changes to reset code sent state
-watch(() => form.phone, (newPhone) => {
-    if (verifiedPhone.value && formatPhone(newPhone) !== verifiedPhone.value) {
-        codeSent.value = false;
+watch(
+    () => form.phone,
+    (newPhone) => {
+        if (verifiedPhone.value && formatPhone(newPhone) !== verifiedPhone.value) {
+            codeSent.value = false;
+        }
     }
-});
+);
 
 const formatPhone = (phone) => {
     phone = phone.replace(/[\s\-]/g, '');
@@ -120,7 +123,7 @@ const submit = () => {
         <Head :title="isRTL ? 'إنشاء حساب' : 'Create Account'" />
 
         <!-- Title -->
-        <h2 class="text-2xl font-bold text-gray-900 dark:text-white text-center mb-6 font-cairo">
+        <h2 class="text-2xl font-bold text-gray-900 dark:text-white text-center mb-6">
             {{ isRTL ? 'إنشاء حساب' : 'Create Account' }}
         </h2>
 
@@ -128,7 +131,8 @@ const submit = () => {
             <!-- Company Name -->
             <div>
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-                    {{ isRTL ? 'الاسم التجاري' : 'Business Name' }} <span class="text-red-500">*</span>
+                    {{ isRTL ? 'الاسم التجاري' : 'Business Name' }}
+                    <span class="text-red-500">*</span>
                 </label>
                 <input
                     type="text"
@@ -137,7 +141,11 @@ const submit = () => {
                     autofocus
                     :placeholder="isRTL ? 'اسم الشركة أو المركز' : 'Company or Center Name'"
                     class="w-full px-4 py-2.5 border rounded-xl focus:ring-2 focus:ring-violet-500 focus:border-violet-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400"
-                    :class="form.errors.company_name ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'"
+                    :class="
+                        form.errors.company_name
+                            ? 'border-red-500'
+                            : 'border-gray-300 dark:border-gray-600'
+                    "
                 />
                 <InputError class="mt-1" :message="form.errors.company_name" />
             </div>
@@ -145,8 +153,11 @@ const submit = () => {
             <!-- First & Last Name -->
             <div class="grid grid-cols-2 gap-3">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-                        {{ isRTL ? 'الاسم الأول' : 'First Name' }} <span class="text-red-500">*</span>
+                    <label
+                        class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5"
+                    >
+                        {{ isRTL ? 'الاسم الأول' : 'First Name' }}
+                        <span class="text-red-500">*</span>
                     </label>
                     <input
                         type="text"
@@ -154,13 +165,20 @@ const submit = () => {
                         required
                         :placeholder="isRTL ? 'الاسم الأول' : 'First Name'"
                         class="w-full px-4 py-2.5 border rounded-xl focus:ring-2 focus:ring-violet-500 focus:border-violet-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400"
-                        :class="form.errors.first_name ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'"
+                        :class="
+                            form.errors.first_name
+                                ? 'border-red-500'
+                                : 'border-gray-300 dark:border-gray-600'
+                        "
                     />
                     <InputError class="mt-1" :message="form.errors.first_name" />
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-                        {{ isRTL ? 'اسم الأخير' : 'Last Name' }} <span class="text-red-500">*</span>
+                    <label
+                        class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5"
+                    >
+                        {{ isRTL ? 'اسم الأخير' : 'Last Name' }}
+                        <span class="text-red-500">*</span>
                     </label>
                     <input
                         type="text"
@@ -168,7 +186,11 @@ const submit = () => {
                         required
                         :placeholder="isRTL ? 'اسم الأخير' : 'Last Name'"
                         class="w-full px-4 py-2.5 border rounded-xl focus:ring-2 focus:ring-violet-500 focus:border-violet-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400"
-                        :class="form.errors.last_name ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'"
+                        :class="
+                            form.errors.last_name
+                                ? 'border-red-500'
+                                : 'border-gray-300 dark:border-gray-600'
+                        "
                     />
                     <InputError class="mt-1" :message="form.errors.last_name" />
                 </div>
@@ -177,7 +199,8 @@ const submit = () => {
             <!-- Email -->
             <div>
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-                    {{ isRTL ? 'بريد العمل' : 'Work Email' }} <span class="text-red-500">*</span>
+                    {{ isRTL ? 'بريد العمل' : 'Work Email' }}
+                    <span class="text-red-500">*</span>
                 </label>
                 <input
                     type="email"
@@ -186,7 +209,11 @@ const submit = () => {
                     autocomplete="email"
                     placeholder="example@company.com"
                     class="w-full px-4 py-2.5 border rounded-xl focus:ring-2 focus:ring-violet-500 focus:border-violet-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400"
-                    :class="form.errors.email ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'"
+                    :class="
+                        form.errors.email
+                            ? 'border-red-500'
+                            : 'border-gray-300 dark:border-gray-600'
+                    "
                 />
                 <InputError class="mt-1" :message="form.errors.email" />
             </div>
@@ -194,11 +221,16 @@ const submit = () => {
             <!-- Phone with OTP Verification -->
             <div>
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-                    {{ isRTL ? 'هاتف العمل' : 'Work Phone' }} <span class="text-red-500">*</span>
-                    <span v-if="phoneVerified" class="text-green-500 text-xs ms-2">✓ {{ isRTL ? 'تم التحقق' : 'Verified' }}</span>
+                    {{ isRTL ? 'هاتف العمل' : 'Work Phone' }}
+                    <span class="text-red-500">*</span>
+                    <span v-if="phoneVerified" class="text-green-500 text-xs ms-2">
+                        ✓ {{ isRTL ? 'تم التحقق' : 'Verified' }}
+                    </span>
                 </label>
                 <div class="flex gap-2">
-                    <div class="flex items-center gap-1 px-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-700 text-gray-700 dark:text-gray-300">
+                    <div
+                        class="flex items-center gap-1 px-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-700 text-gray-700 dark:text-gray-300"
+                    >
                         <span class="text-lg">🇸🇦</span>
                         <span class="text-sm">+966</span>
                     </div>
@@ -209,7 +241,11 @@ const submit = () => {
                         :disabled="phoneVerified"
                         placeholder="5xxxxxxxx"
                         class="flex-1 px-4 py-2.5 border rounded-xl focus:ring-2 focus:ring-violet-500 focus:border-violet-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 disabled:opacity-50"
-                        :class="form.errors.phone ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'"
+                        :class="
+                            form.errors.phone
+                                ? 'border-red-500'
+                                : 'border-gray-300 dark:border-gray-600'
+                        "
                     />
                     <!-- Send OTP Button - Only show if verification enabled and not verified -->
                     <button
@@ -223,18 +259,27 @@ const submit = () => {
                     </button>
                 </div>
                 <InputError class="mt-1" :message="form.errors.phone || otpForm.errors.phone" />
-                
+
                 <!-- OTP Input (show after code sent) -->
-                <div v-if="codeSent && !phoneVerified" class="mt-3 p-4 bg-violet-50 dark:bg-violet-900/20 rounded-xl border border-violet-200 dark:border-violet-800">
+                <div
+                    v-if="codeSent && !phoneVerified"
+                    class="mt-3 p-4 bg-violet-50 dark:bg-violet-900/20 rounded-xl border border-violet-200 dark:border-violet-800"
+                >
                     <p class="text-sm text-violet-700 dark:text-violet-300 mb-3">
-                        {{ isRTL ? 'تم إرسال رمز التحقق إلى هاتفك' : 'Verification code sent to your phone' }}
+                        {{
+                            isRTL
+                                ? 'تم إرسال رمز التحقق إلى هاتفك'
+                                : 'Verification code sent to your phone'
+                        }}
                     </p>
                     <div class="flex gap-2">
                         <input
                             type="text"
                             v-model="otpForm.otp"
                             maxlength="6"
-                            :placeholder="isRTL ? 'أدخل الرمز المكون من 6 أرقام' : 'Enter 6-digit code'"
+                            :placeholder="
+                                isRTL ? 'أدخل الرمز المكون من 6 أرقام' : 'Enter 6-digit code'
+                            "
                             class="flex-1 px-4 py-2.5 border border-violet-300 dark:border-violet-600 rounded-xl focus:ring-2 focus:ring-violet-500 focus:border-violet-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-center tracking-widest font-mono"
                         />
                         <button
@@ -251,10 +296,18 @@ const submit = () => {
                         @click="sendOtp"
                         :disabled="otpForm.processing || cooldownRemaining > 0"
                         class="mt-2 text-sm disabled:opacity-50"
-                        :class="cooldownRemaining > 0 ? 'text-gray-400 cursor-not-allowed' : 'text-violet-600 hover:underline'"
+                        :class="
+                            cooldownRemaining > 0
+                                ? 'text-gray-400 cursor-not-allowed'
+                                : 'text-violet-600 hover:underline'
+                        "
                     >
                         <span v-if="cooldownRemaining > 0">
-                            {{ isRTL ? `إعادة الإرسال بعد ${cooldownRemaining} ثانية` : `Resend in ${cooldownRemaining}s` }}
+                            {{
+                                isRTL
+                                    ? `إعادة الإرسال بعد ${cooldownRemaining} ثانية`
+                                    : `Resend in ${cooldownRemaining}s`
+                            }}
                         </span>
                         <span v-else>
                             {{ isRTL ? 'إعادة إرسال الرمز' : 'Resend code' }}
@@ -267,8 +320,11 @@ const submit = () => {
             <!-- Password -->
             <div class="grid grid-cols-2 gap-3">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-                        {{ isRTL ? 'كلمة المرور' : 'Password' }} <span class="text-red-500">*</span>
+                    <label
+                        class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5"
+                    >
+                        {{ isRTL ? 'كلمة المرور' : 'Password' }}
+                        <span class="text-red-500">*</span>
                     </label>
                     <div class="relative">
                         <input
@@ -278,18 +334,61 @@ const submit = () => {
                             autocomplete="new-password"
                             placeholder="••••••"
                             class="w-full px-4 py-2.5 pe-10 border rounded-xl focus:ring-2 focus:ring-violet-500 focus:border-violet-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400"
-                            :class="form.errors.password ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'"
+                            :class="
+                                form.errors.password
+                                    ? 'border-red-500'
+                                    : 'border-gray-300 dark:border-gray-600'
+                            "
                         />
-                        <button type="button" @click="showPassword = !showPassword" class="absolute inset-y-0 end-0 flex items-center pe-3 text-gray-400 hover:text-gray-600">
-                            <svg v-if="!showPassword" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
-                            <svg v-else class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"></path></svg>
+                        <button
+                            type="button"
+                            @click="showPassword = !showPassword"
+                            class="absolute inset-y-0 end-0 flex items-center pe-3 text-gray-400 hover:text-gray-600"
+                        >
+                            <svg
+                                v-if="!showPassword"
+                                class="w-5 h-5"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                                ></path>
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                                ></path>
+                            </svg>
+                            <svg
+                                v-else
+                                class="w-5 h-5"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"
+                                ></path>
+                            </svg>
                         </button>
                     </div>
                     <InputError class="mt-1" :message="form.errors.password" />
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-                        {{ isRTL ? 'تأكيد كلمة المرور' : 'Confirm Password' }} <span class="text-red-500">*</span>
+                    <label
+                        class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5"
+                    >
+                        {{ isRTL ? 'تأكيد كلمة المرور' : 'Confirm Password' }}
+                        <span class="text-red-500">*</span>
                     </label>
                     <div class="relative">
                         <input
@@ -300,9 +399,45 @@ const submit = () => {
                             placeholder="••••••"
                             class="w-full px-4 py-2.5 pe-10 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-violet-500 focus:border-violet-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400"
                         />
-                        <button type="button" @click="showConfirmPassword = !showConfirmPassword" class="absolute inset-y-0 end-0 flex items-center pe-3 text-gray-400 hover:text-gray-600">
-                            <svg v-if="!showConfirmPassword" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
-                            <svg v-else class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"></path></svg>
+                        <button
+                            type="button"
+                            @click="showConfirmPassword = !showConfirmPassword"
+                            class="absolute inset-y-0 end-0 flex items-center pe-3 text-gray-400 hover:text-gray-600"
+                        >
+                            <svg
+                                v-if="!showConfirmPassword"
+                                class="w-5 h-5"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                                ></path>
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                                ></path>
+                            </svg>
+                            <svg
+                                v-else
+                                class="w-5 h-5"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"
+                                ></path>
+                            </svg>
                         </button>
                     </div>
                     <InputError class="mt-1" :message="form.errors.password_confirmation" />
@@ -334,9 +469,21 @@ const submit = () => {
                 />
                 <label for="terms" class="text-sm text-gray-600 dark:text-gray-400">
                     {{ isRTL ? 'قرأت وأوافق على' : 'I have read and agree to the' }}
-                    <button type="button" @click="showTermsModal = true" class="text-violet-600 hover:underline">{{ isRTL ? 'سياسة الاستخدام' : 'Terms of Service' }}</button>
+                    <button
+                        type="button"
+                        @click="showTermsModal = true"
+                        class="text-violet-600 hover:underline"
+                    >
+                        {{ isRTL ? 'سياسة الاستخدام' : 'Terms of Service' }}
+                    </button>
                     {{ isRTL ? 'و' : 'and' }}
-                    <button type="button" @click="showPrivacyModal = true" class="text-violet-600 hover:underline">{{ isRTL ? 'سياسة الخصوصية' : 'Privacy Policy' }}</button>
+                    <button
+                        type="button"
+                        @click="showPrivacyModal = true"
+                        class="text-violet-600 hover:underline"
+                    >
+                        {{ isRTL ? 'سياسة الخصوصية' : 'Privacy Policy' }}
+                    </button>
                 </label>
             </div>
             <InputError class="mt-1" :message="form.errors.terms" />
@@ -349,12 +496,25 @@ const submit = () => {
             >
                 <span v-if="form.processing" class="flex items-center justify-center gap-2">
                     <svg class="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24">
-                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        <circle
+                            class="opacity-25"
+                            cx="12"
+                            cy="12"
+                            r="10"
+                            stroke="currentColor"
+                            stroke-width="4"
+                        ></circle>
+                        <path
+                            class="opacity-75"
+                            fill="currentColor"
+                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                        ></path>
                     </svg>
                     {{ isRTL ? 'جاري الإرسال...' : 'Submitting...' }}
                 </span>
-                <span v-else-if="phoneVerificationEnabled && !phoneVerified">{{ isRTL ? 'يرجى التحقق من رقم الهاتف أولاً' : 'Please verify phone first' }}</span>
+                <span v-else-if="phoneVerificationEnabled && !phoneVerified">
+                    {{ isRTL ? 'يرجى التحقق من رقم الهاتف أولاً' : 'Please verify phone first' }}
+                </span>
                 <span v-else>{{ isRTL ? 'إرسال' : 'Submit' }}</span>
             </button>
 
@@ -380,17 +540,58 @@ const submit = () => {
             <div v-if="showTermsModal" class="fixed inset-0 z-50 overflow-y-auto">
                 <div class="flex min-h-screen items-center justify-center p-4">
                     <div class="fixed inset-0 bg-black/50" @click="showTermsModal = false"></div>
-                    <div class="relative bg-white dark:bg-gray-800 rounded-2xl shadow-xl max-w-2xl w-full max-h-[80vh] overflow-hidden">
-                        <div class="bg-gradient-to-r from-violet-600 to-indigo-600 px-6 py-4 flex items-center justify-between">
-                            <h3 class="text-lg font-bold text-white">{{ isRTL ? 'سياسة الاستخدام' : 'Terms of Service' }}</h3>
-                            <button @click="showTermsModal = false" class="text-white/80 hover:text-white">
-                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    <div
+                        class="relative bg-white dark:bg-gray-800 rounded-2xl shadow-xl max-w-2xl w-full max-h-[80vh] overflow-hidden"
+                    >
+                        <div
+                            class="bg-gradient-to-r from-violet-600 to-indigo-600 px-6 py-4 flex items-center justify-between"
+                        >
+                            <h3 class="text-lg font-bold text-white">
+                                {{ isRTL ? 'سياسة الاستخدام' : 'Terms of Service' }}
+                            </h3>
+                            <button
+                                @click="showTermsModal = false"
+                                class="text-white/80 hover:text-white"
+                            >
+                                <svg
+                                    class="w-6 h-6"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2"
+                                        d="M6 18L18 6M6 6l12 12"
+                                    ></path>
+                                </svg>
                             </button>
                         </div>
-                        <div class="p-6 overflow-y-auto max-h-[60vh] text-gray-700 dark:text-gray-300 text-sm leading-relaxed">
-                            <p class="mb-4">{{ isRTL ? 'مرحباً بك في خدمة برو. باستخدامك لهذه الخدمة، فإنك توافق على الالتزام بهذه الشروط والأحكام.' : 'Welcome to Khidmh Pro. By using this service, you agree to be bound by these terms and conditions.' }}</p>
-                            <p class="mb-4">{{ isRTL ? 'يرجى قراءة هذه الشروط بعناية قبل استخدام النظام. إذا كنت لا توافق على جميع الشروط، فلا يجوز لك استخدام الخدمة.' : 'Please read these terms carefully before using the system. If you do not agree to all terms, you may not use the service.' }}</p>
-                            <p class="text-gray-500 dark:text-gray-400 italic">{{ isRTL ? '(سيتم تحديث هذا المحتوى من لوحة تحكم النظام)' : '(This content will be updated from the system admin panel)' }}</p>
+                        <div
+                            class="p-6 overflow-y-auto max-h-[60vh] text-gray-700 dark:text-gray-300 text-sm leading-relaxed"
+                        >
+                            <p class="mb-4">
+                                {{
+                                    isRTL
+                                        ? 'مرحباً بك في خدمة برو. باستخدامك لهذه الخدمة، فإنك توافق على الالتزام بهذه الشروط والأحكام.'
+                                        : 'Welcome to Khidmh Pro. By using this service, you agree to be bound by these terms and conditions.'
+                                }}
+                            </p>
+                            <p class="mb-4">
+                                {{
+                                    isRTL
+                                        ? 'يرجى قراءة هذه الشروط بعناية قبل استخدام النظام. إذا كنت لا توافق على جميع الشروط، فلا يجوز لك استخدام الخدمة.'
+                                        : 'Please read these terms carefully before using the system. If you do not agree to all terms, you may not use the service.'
+                                }}
+                            </p>
+                            <p class="text-gray-500 dark:text-gray-400 italic">
+                                {{
+                                    isRTL
+                                        ? '(سيتم تحديث هذا المحتوى من لوحة تحكم النظام)'
+                                        : '(This content will be updated from the system admin panel)'
+                                }}
+                            </p>
                         </div>
                     </div>
                 </div>
@@ -402,18 +603,61 @@ const submit = () => {
             <div v-if="showPrivacyModal" class="fixed inset-0 z-50 overflow-y-auto">
                 <div class="flex min-h-screen items-center justify-center p-4">
                     <div class="fixed inset-0 bg-black/50" @click="showPrivacyModal = false"></div>
-                    <div class="relative bg-white dark:bg-gray-800 rounded-2xl shadow-xl max-w-2xl w-full max-h-[80vh] overflow-hidden">
-                        <div class="bg-gradient-to-r from-violet-600 to-indigo-600 px-6 py-4 flex items-center justify-between">
-                            <h3 class="text-lg font-bold text-white">{{ isRTL ? 'سياسة الخصوصية' : 'Privacy Policy' }}</h3>
-                            <button @click="showPrivacyModal = false" class="text-white/80 hover:text-white">
-                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    <div
+                        class="relative bg-white dark:bg-gray-800 rounded-2xl shadow-xl max-w-2xl w-full max-h-[80vh] overflow-hidden"
+                    >
+                        <div
+                            class="bg-gradient-to-r from-violet-600 to-indigo-600 px-6 py-4 flex items-center justify-between"
+                        >
+                            <h3 class="text-lg font-bold text-white">
+                                {{ isRTL ? 'سياسة الخصوصية' : 'Privacy Policy' }}
+                            </h3>
+                            <button
+                                @click="showPrivacyModal = false"
+                                class="text-white/80 hover:text-white"
+                            >
+                                <svg
+                                    class="w-6 h-6"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2"
+                                        d="M6 18L18 6M6 6l12 12"
+                                    ></path>
+                                </svg>
                             </button>
                         </div>
-                        <div class="p-6 overflow-y-auto max-h-[60vh] text-gray-700 dark:text-gray-300 text-sm leading-relaxed">
-                            <h4 class="font-bold mb-2">{{ isRTL ? 'سياسة الخصوصية' : 'Privacy Policy' }}</h4>
-                            <p class="mb-4">{{ isRTL ? 'نحن نحترم خصوصيتك ونلتزم بحماية بياناتك الشخصية. توضح هذه السياسة كيفية جمع واستخدام وحماية معلوماتك.' : 'We respect your privacy and are committed to protecting your personal data. This policy explains how we collect, use, and protect your information.' }}</p>
-                            <p class="mb-4">{{ isRTL ? 'نستخدم بياناتك لتقديم الخدمة وتحسينها. لن نشارك معلوماتك مع أطراف ثالثة دون موافقتك.' : 'We use your data to provide and improve the service. We will not share your information with third parties without your consent.' }}</p>
-                            <p class="text-gray-500 dark:text-gray-400 italic">{{ isRTL ? '(سيتم تحديث هذا المحتوى من لوحة تحكم النظام)' : '(This content will be updated from the system admin panel)' }}</p>
+                        <div
+                            class="p-6 overflow-y-auto max-h-[60vh] text-gray-700 dark:text-gray-300 text-sm leading-relaxed"
+                        >
+                            <h4 class="font-bold mb-2">
+                                {{ isRTL ? 'سياسة الخصوصية' : 'Privacy Policy' }}
+                            </h4>
+                            <p class="mb-4">
+                                {{
+                                    isRTL
+                                        ? 'نحن نحترم خصوصيتك ونلتزم بحماية بياناتك الشخصية. توضح هذه السياسة كيفية جمع واستخدام وحماية معلوماتك.'
+                                        : 'We respect your privacy and are committed to protecting your personal data. This policy explains how we collect, use, and protect your information.'
+                                }}
+                            </p>
+                            <p class="mb-4">
+                                {{
+                                    isRTL
+                                        ? 'نستخدم بياناتك لتقديم الخدمة وتحسينها. لن نشارك معلوماتك مع أطراف ثالثة دون موافقتك.'
+                                        : 'We use your data to provide and improve the service. We will not share your information with third parties without your consent.'
+                                }}
+                            </p>
+                            <p class="text-gray-500 dark:text-gray-400 italic">
+                                {{
+                                    isRTL
+                                        ? '(سيتم تحديث هذا المحتوى من لوحة تحكم النظام)'
+                                        : '(This content will be updated from the system admin panel)'
+                                }}
+                            </p>
                         </div>
                     </div>
                 </div>
@@ -421,9 +665,3 @@ const submit = () => {
         </Teleport>
     </AuthLayout>
 </template>
-
-<style scoped>
-.font-cairo {
-    font-family: 'Cairo', system-ui, sans-serif;
-}
-</style>

@@ -10,24 +10,34 @@
                 <div class="space-y-4">
                     <!-- Name AR -->
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                            {{ $t('common.name') }} (AR) <span class="text-red-500">*</span>
+                        <label
+                            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                        >
+                            {{ $t('common.name') }} (AR)
+                            <span class="text-red-500">*</span>
                         </label>
                         <input
                             v-model="form.name_ar"
                             type="text"
                             :class="[
                                 'w-full px-4 py-2.5 text-sm border rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-violet-500',
-                                form.errors.name_ar || (form.hasErrors && !form.name_ar) ? 'border-red-500 focus:border-red-500' : 'border-gray-300 dark:border-gray-600 focus:border-violet-500'
+                                form.errors.name_ar || (form.hasErrors && !form.name_ar)
+                                    ? 'border-red-500 focus:border-red-500'
+                                    : 'border-gray-300 dark:border-gray-600 focus:border-violet-500',
                             ]"
                         />
-                        <p v-if="form.errors.name_ar" class="mt-1 text-xs text-red-500">{{ form.errors.name_ar }}</p>
+                        <p v-if="form.errors.name_ar" class="mt-1 text-xs text-red-500">
+                            {{ form.errors.name_ar }}
+                        </p>
                     </div>
 
                     <!-- Name EN -->
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                            {{ $t('common.name') }} (EN) <span class="text-red-500">*</span>
+                        <label
+                            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                        >
+                            {{ $t('common.name') }} (EN)
+                            <span class="text-red-500">*</span>
                         </label>
                         <input
                             v-model="form.name_en"
@@ -35,16 +45,23 @@
                             required
                             :class="[
                                 'w-full px-4 py-2.5 text-sm border rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-violet-500',
-                                form.errors.name_en || (form.hasErrors && !form.name_en) ? 'border-red-500 focus:border-red-500' : 'border-gray-300 dark:border-gray-600 focus:border-violet-500'
+                                form.errors.name_en || (form.hasErrors && !form.name_en)
+                                    ? 'border-red-500 focus:border-red-500'
+                                    : 'border-gray-300 dark:border-gray-600 focus:border-violet-500',
                             ]"
                         />
-                        <p v-if="form.errors.name_en" class="mt-1 text-xs text-red-500">{{ form.errors.name_en }}</p>
+                        <p v-if="form.errors.name_en" class="mt-1 text-xs text-red-500">
+                            {{ form.errors.name_en }}
+                        </p>
                     </div>
 
                     <!-- Phone -->
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                            {{ $t('common.phone') }} <span class="text-red-500">*</span>
+                        <label
+                            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                        >
+                            {{ $t('common.phone') }}
+                            <span class="text-red-500">*</span>
                         </label>
                         <input
                             v-model="form.phone"
@@ -52,10 +69,14 @@
                             dir="ltr"
                             :class="[
                                 'w-full px-4 py-2.5 text-sm border rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-violet-500',
-                                form.errors.phone || (form.hasErrors && !form.phone) ? 'border-red-500 focus:border-red-500' : 'border-gray-300 dark:border-gray-600 focus:border-violet-500'
+                                form.errors.phone || (form.hasErrors && !form.phone)
+                                    ? 'border-red-500 focus:border-red-500'
+                                    : 'border-gray-300 dark:border-gray-600 focus:border-violet-500',
                             ]"
                         />
-                        <p v-if="form.errors.phone" class="mt-1 text-xs text-red-500">{{ form.errors.phone }}</p>
+                        <p v-if="form.errors.phone" class="mt-1 text-xs text-red-500">
+                            {{ form.errors.phone }}
+                        </p>
                     </div>
 
                     <!-- Gender -->
@@ -63,7 +84,10 @@
                         <SearchableSelect
                             v-model="form.gender"
                             :label="$t('hr.employees.gender')"
-                            :options="[{id: 'male', name: $t('common.male')}, {id: 'female', name: $t('common.female')}]"
+                            :options="[
+                                { id: 'male', name: $t('common.male') },
+                                { id: 'female', name: $t('common.female') },
+                            ]"
                             option-label="name"
                             option-value="id"
                             :error="form.errors.gender"
@@ -73,14 +97,19 @@
                 </div>
 
                 <!-- Right Column: Career Details -->
-                <div class="space-y-4 lg:border-l lg:dark:border-gray-700 lg:pl-6 rtl:lg:border-l-0 rtl:lg:border-r rtl:lg:pr-6">
+                <div
+                    class="space-y-4 lg:border-l lg:dark:border-gray-700 lg:pl-6 rtl:lg:border-l-0 rtl:lg:border-r rtl:lg:pr-6"
+                >
                     <!-- Nationality -->
                     <div>
-                         <SearchableSelect
+                        <SearchableSelect
                             v-model="form.nationality_id"
                             :label="$t('hr.employees.nationality')"
                             :options="nationalities"
-                            :option-label="(opt) => locale === 'ar' ? opt.name_ar : opt.name_en || opt.name_ar"
+                            :option-label="
+                                (opt) =>
+                                    locale === 'ar' ? opt.name_ar : opt.name_en || opt.name_ar
+                            "
                             option-value="id"
                             :error="form.errors.nationality_id"
                             required
@@ -100,26 +129,49 @@
                         />
                     </div>
 
+                    <!-- Department -->
+                    <div v-if="departments?.length">
+                        <SearchableSelect
+                            v-model="form.department_id"
+                            :label="$t('common.department')"
+                            :options="departments"
+                            :option-label="
+                                (opt) =>
+                                    locale === 'ar' ? opt.name_ar : opt.name_en || opt.name_ar
+                            "
+                            option-value="id"
+                            :error="form.errors.department_id"
+                            :placeholder="$t('common.choose')"
+                        />
+                    </div>
+
                     <!-- Email (Mandatory) -->
                     <div>
-                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                            {{ $t('common.email') }} <span class="text-red-500">*</span>
+                        <label
+                            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                        >
+                            {{ $t('common.email') }}
+                            <span class="text-red-500">*</span>
                         </label>
                         <input
                             v-model="form.email"
                             type="email"
                             :class="[
                                 'w-full px-4 py-2.5 text-sm border rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-violet-500',
-                                form.errors.email ? 'border-red-500 focus:border-red-500' : 'border-gray-300 dark:border-gray-600 focus:border-violet-500'
+                                form.errors.email
+                                    ? 'border-red-500 focus:border-red-500'
+                                    : 'border-gray-300 dark:border-gray-600 focus:border-violet-500',
                             ]"
                             required
                         />
-                        <p v-if="form.errors.email" class="mt-1 text-xs text-red-500">{{ form.errors.email }}</p>
+                        <p v-if="form.errors.email" class="mt-1 text-xs text-red-500">
+                            {{ form.errors.email }}
+                        </p>
                     </div>
 
                     <!-- Branch -->
                     <div v-if="filteredCenterOptions.length > 1">
-                         <SearchableSelect
+                        <SearchableSelect
                             v-model="form.center_id"
                             :label="$t('hr.employees.branch')"
                             :options="filteredCenterOptions"
@@ -147,13 +199,29 @@
 
                 <!-- Auto System Access Info -->
                 <div class="lg:col-span-2 border-t border-gray-100 dark:border-gray-700 pt-4">
-                    <div class="flex items-start gap-3 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-xl border border-blue-200 dark:border-blue-800">
-                        <svg class="w-5 h-5 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    <div
+                        class="flex items-start gap-3 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-xl border border-blue-200 dark:border-blue-800"
+                    >
+                        <svg
+                            class="w-5 h-5 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                            />
                         </svg>
                         <div>
-                            <h3 class="font-medium text-blue-900 dark:text-blue-100">{{ $t('hr.employees.auto_account_title') }}</h3>
-                            <p class="text-xs text-blue-700 dark:text-blue-300 mt-1">{{ $t('hr.employees.auto_account_hint') }}</p>
+                            <h3 class="font-medium text-blue-900 dark:text-blue-100">
+                                {{ $t('hr.employees.auto_account_title') }}
+                            </h3>
+                            <p class="text-xs text-blue-700 dark:text-blue-300 mt-1">
+                                {{ $t('hr.employees.auto_account_hint') }}
+                            </p>
                         </div>
                     </div>
                 </div>
@@ -196,6 +264,7 @@ const page = usePage();
 const props = defineProps({
     show: Boolean,
     jobTitles: Array,
+    departments: Array,
     nationalities: Array,
     centers: Array,
     shifts: Array,
@@ -211,6 +280,7 @@ const form = useForm({
     gender: null,
     nationality_id: null,
     job_title_id: null,
+    department_id: null,
     center_id: null,
     default_shift_id: null,
     hasErrors: false,
@@ -218,28 +288,25 @@ const form = useForm({
 
 // Computed options
 const filteredCenterOptions = computed(() => {
-    const options = props.centers.map(c => ({...c, name: '📍 ' + c.name}));
-    
-    // Only add Management option if super admin
-    // Note: checking permission via shared props since we don't have direct checkRole here
-    // Assuming super_admin capability is shared or we can check via page props
-    const isSuperAdmin = page.props.auth.user.roles?.some(r => r.name === 'super_admin');
-    
-    if (isSuperAdmin) {
-        options.unshift({id: null, name: '🏠 ' + t('common.management')});
-    }
-    
+    const options = (props.centers || []).map((c) => ({ ...c, name: '📍 ' + c.name }));
+
+    // Management (HQ / Tenant-wide) option
+    options.unshift({ id: null, name: '🏠 ' + t('common.management') });
+
     return options;
 });
 
 // Auto-select if only one option
-watch(() => props.show, (newVal) => {
-    if (newVal) {
-        if (filteredCenterOptions.value.length === 1) {
-            form.center_id = filteredCenterOptions.value[0].id;
+watch(
+    () => props.show,
+    (newVal) => {
+        if (newVal) {
+            if (filteredCenterOptions.value.length === 1) {
+                form.center_id = filteredCenterOptions.value[0].id;
+            }
         }
     }
-});
+);
 
 function submit() {
     form.hasErrors = false;
@@ -251,8 +318,8 @@ function submit() {
             emit('saved');
         },
         onError: () => {
-             form.hasErrors = true;
-        }
+            form.hasErrors = true;
+        },
     });
 }
 </script>

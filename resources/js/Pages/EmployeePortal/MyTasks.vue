@@ -1,10 +1,15 @@
 <script setup>
+import AppPagination from '@/Components/Common/AppPagination.vue';
 import { ref, reactive, computed, onMounted, onUnmounted } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { router } from '@inertiajs/vue3';
 import axios from 'axios';
 import { useToast } from '@/Composables/useToast';
 import EmployeePortalLayout from '@/Layouts/EmployeePortalLayout.vue';
 import BaseModal from '@/Components/BaseModal.vue';
+import SearchableSelect from '@/Components/SearchableSelect.vue';
+
+const { t } = useI18n();
 
 const props = defineProps({
     workOrders: Object,
@@ -41,6 +46,13 @@ const currentFilter = ref(props.statusFilter || 'active');
 const loadingItems = reactive(new Set());
 
 // Tab options
+const priorityOptions = computed(() =>
+    ['low', 'normal', 'high', 'urgent'].map((value) => ({
+        value,
+        label: t(`employee_portal.priorities.${value}`),
+    }))
+);
+
 const tabs = computed(() => [
     { key: 'active', label: 'النشطة', count: props.counts?.active ?? 0, icon: '⚡' },
     { key: 'in_progress', label: 'جاري العمل', count: props.counts?.in_progress ?? 0, icon: '⚙️' },
@@ -474,12 +486,12 @@ const isUploadingPhotos = ref(false);
 const isDeletingPhotoId = ref(null);
 const fileInputRef = ref(null);
 
-const photoTypeOptions = [
-    { value: 'general', label: 'عام' },
-    { value: 'before', label: 'قبل العمل' },
-    { value: 'after', label: 'بعد العمل' },
-    { value: 'damage', label: 'أضرار / عيوب' },
-];
+const photoTypeOptions = computed(() => [
+    { value: 'general', label: t('employee_portal.photo_types.general') },
+    { value: 'before', label: t('employee_portal.photo_types.before') },
+    { value: 'after', label: t('employee_portal.photo_types.after') },
+    { value: 'damage', label: t('employee_portal.photo_types.damage') },
+]);
 
 const openPhotosModal = (workOrder, item) => {
     activeWorkOrder.value = workOrder;
@@ -1244,19 +1256,18 @@ const saveChecklist = async () => {
                                     </button>
 
                                     <!-- Priority Selector -->
-                                    <select
-                                        :value="item.priority || 'normal'"
-                                        @change="
-                                            updatePriority(workOrder, item, $event.target.value)
-                                        "
+                                    <SearchableSelect
+                                        :model-value="item.priority || 'normal'"
+                                        :options="priorityOptions"
+                                        option-label="label"
+                                        option-value="value"
                                         :disabled="isItemLoading(`${workOrder.id}-${item.id}`)"
-                                        class="px-2.5 py-1 text-xs font-medium border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 focus:ring-1 focus:ring-purple-500"
-                                    >
-                                        <option value="low">منخفضة</option>
-                                        <option value="normal">عادية</option>
-                                        <option value="high">عالية</option>
-                                        <option value="urgent">عاجلة</option>
-                                    </select>
+                                        required
+                                        compact
+                                        @update:model-value="
+                                            updatePriority(workOrder, item, $event)
+                                        "
+                                    />
                                 </div>
                             </div>
                         </div>
@@ -1264,33 +1275,16 @@ const saveChecklist = async () => {
                 </div>
 
                 <!-- Pagination -->
-                <div v-if="workOrders.links && workOrders.links.length > 3" class="mt-6">
-                    <nav
-                        class="flex flex-col sm:flex-row items-center justify-between gap-3 bg-white dark:bg-gray-800 px-5 py-3 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm"
-                    >
-                        <div class="text-xs text-gray-600 dark:text-gray-400">
-                            عرض {{ workOrders.from || 0 }} إلى {{ workOrders.to || 0 }} من أصل
-                            {{ workOrders.total }} أمر عمل
-                        </div>
-                        <div class="flex items-center gap-1">
-                            <button
-                                v-for="(link, i) in workOrders.links"
-                                :key="i"
-                                @click="link.url && $inertia.get(link.url)"
-                                :disabled="!link.url || link.active"
-                                v-html="link.label"
-                                :class="[
-                                    'px-3 py-1.5 text-xs rounded-lg transition-colors',
-                                    link.active
-                                        ? 'bg-purple-600 text-white font-bold'
-                                        : link.url
-                                          ? 'bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200'
-                                          : 'opacity-40 cursor-not-allowed text-gray-400',
-                                ]"
-                            ></button>
-                        </div>
-                    </nav>
-                </div>
+                <AppPagination
+                    v-if="workOrders.links && workOrders.links.length > 3"
+                    class="mt-6"
+                    :links="workOrders.links"
+                    :from="workOrders.from"
+                    :to="workOrders.to"
+                    :total="workOrders.total"
+                    :preserve-state="false"
+                    :preserve-scroll="false"
+                />
             </div>
 
             <!-- Empty State -->
@@ -1404,23 +1398,21 @@ const saveChecklist = async () => {
                 >
                     <div class="flex flex-wrap items-center justify-between gap-2">
                         <span class="text-xs font-bold text-gray-700 dark:text-gray-300">
-                            رفع صور جديدة
+                            {{ $t('employee_portal.upload_new_photos') }}
                         </span>
                         <!-- Photo Type Selector -->
-                        <div class="flex items-center gap-1 text-xs">
-                            <span class="text-gray-500">التصنيف:</span>
-                            <select
+                        <div class="flex items-center gap-1.5 text-xs">
+                            <span class="text-gray-500">
+                                {{ $t('employee_portal.classification') }}:
+                            </span>
+                            <SearchableSelect
                                 v-model="photoType"
-                                class="rounded-lg text-xs border-gray-300 dark:border-gray-700 dark:bg-gray-800 py-1 px-2"
-                            >
-                                <option
-                                    v-for="opt in photoTypeOptions"
-                                    :key="opt.value"
-                                    :value="opt.value"
-                                >
-                                    {{ opt.label }}
-                                </option>
-                            </select>
+                                :options="photoTypeOptions"
+                                option-label="label"
+                                option-value="value"
+                                compact
+                                class="w-36"
+                            />
                         </div>
                     </div>
 

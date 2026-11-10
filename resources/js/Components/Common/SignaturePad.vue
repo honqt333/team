@@ -4,7 +4,7 @@ import SecondaryButton from '@/Components/SecondaryButton.vue';
 
 const props = defineProps({
     modelValue: String,
-    label: String
+    label: String,
 });
 
 const emit = defineEmits(['update:modelValue', 'clear']);
@@ -18,10 +18,10 @@ let resizeObserver = null;
 onMounted(() => {
     const canvas = canvasRef.value;
     ctx.value = canvas.getContext('2d');
-    
+
     resizeCanvas();
     window.addEventListener('resize', resizeCanvas);
-    
+
     // Add a ResizeObserver to handle modal transitions
     if (canvas.parentElement) {
         resizeObserver = new ResizeObserver(() => {
@@ -50,7 +50,7 @@ const resizeCanvas = () => {
     const canvas = canvasRef.value;
     if (!canvas) return;
     const rect = canvas.parentElement.getBoundingClientRect();
-    
+
     // Save current drawing
     let tempCanvas = null;
     let tempCtx = null;
@@ -61,14 +61,14 @@ const resizeCanvas = () => {
         tempCtx = tempCanvas.getContext('2d');
         tempCtx.drawImage(canvas, 0, 0);
     }
-    
+
     canvas.width = rect.width > 0 ? rect.width : 500; // Fallback width
     canvas.height = 200;
-    
+
     ctx.value.lineWidth = 2;
     ctx.value.lineCap = 'round';
     ctx.value.strokeStyle = '#000';
-    
+
     // Restore drawing after resize
     if (tempCanvas) {
         ctx.value.drawImage(tempCanvas, 0, 0);
@@ -103,7 +103,7 @@ const getCoordinates = (e) => {
     const clientY = e.touches ? e.touches[0].clientY : e.clientY;
     return {
         x: clientX - rect.left,
-        y: clientY - rect.top
+        y: clientY - rect.top,
     };
 };
 
@@ -123,10 +123,12 @@ const saveSignature = () => {
 
 <template>
     <div class="space-y-2">
-        <label v-if="label" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+        <label v-if="label" class="block text-sm font-medium text-text-primary">
             {{ label }}
         </label>
-        <div class="relative border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-xl bg-white overflow-hidden">
+        <div
+            class="relative border-2 border-dashed border-border rounded-xl bg-surface overflow-hidden"
+        >
             <canvas
                 ref="canvasRef"
                 class="w-full h-[200px] cursor-crosshair touch-none"
@@ -138,7 +140,7 @@ const saveSignature = () => {
                 @touchmove.prevent="draw"
                 @touchend.prevent="stopDrawing"
             ></canvas>
-            
+
             <div class="absolute bottom-2 right-2">
                 <SecondaryButton type="button" @click="clear" size="xs">
                     {{ $t('common.clear') }}

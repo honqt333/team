@@ -8,7 +8,6 @@ use App\Http\Controllers\Controller;
 use App\Models\TaxPeriod;
 use App\Models\Tenant;
 use App\Services\Reports\TaxPeriodService;
-use App\Support\TenancyContext;
 use DomainException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -33,7 +32,7 @@ class TaxPeriodsController extends Controller
 
         $user = $request->user();
         $tenantId = (int) $user->tenant_id;
-        $centerId = TenancyContext::centerId();
+        $centerId = null; // One consolidated period per tenant tax registration.
 
         $yearFilter = $request->input('year');
         $statusFilter = $request->input('status');
@@ -73,7 +72,7 @@ class TaxPeriodsController extends Controller
 
         $user = $request->user();
         $tenantId = (int) $user->tenant_id;
-        $centerId = TenancyContext::centerId();
+        $centerId = null; // One consolidated period per tenant tax registration.
 
         $data = $this->taxPeriodService->get3YearsPeriods($tenantId, $centerId);
 
@@ -92,7 +91,7 @@ class TaxPeriodsController extends Controller
 
         $user = $request->user();
         $tenantId = (int) $user->tenant_id;
-        $centerId = TenancyContext::centerId();
+        $centerId = null; // One consolidated period per tenant tax registration.
 
         try {
             $meta = $this->taxPeriodService->parsePeriodKey($periodKey);
@@ -155,7 +154,7 @@ class TaxPeriodsController extends Controller
 
         $user = $request->user();
         $tenantId = (int) $user->tenant_id;
-        $centerId = TenancyContext::centerId();
+        $centerId = null; // One consolidated period per tenant tax registration.
 
         try {
             $period = $this->taxPeriodService->createPeriod(
@@ -219,8 +218,8 @@ class TaxPeriodsController extends Controller
             'transactions' => $taxPeriod->transactions,
             'tenant' => [
                 'name' => $tenant?->legal_name ?: ($tenant?->trade_name ?: $tenant?->name),
-                'vat_number' => $tenant?->taxSettings?->tax_number ?? $tenant?->tax_number ?? $tenant?->vat_number,
-                'commercial_registration' => $tenant?->cr_number ?? $tenant?->commercial_registration,
+                'vat_number' => $tenant?->taxSettings->tax_number ?? $tenant?->vat_number,
+                'commercial_registration' => $tenant->cr_number ?? null,
                 'address' => $tenant?->address,
             ],
         ]);
@@ -336,9 +335,10 @@ class TaxPeriodsController extends Controller
     {
         $this->authorize('view', $taxPeriod);
 
+        abort_if($taxPeriod->center_id !== null, 422, __('reports.tax_periods_report.legacy_branch_period'));
         $tenant = Tenant::with('taxSettings')->find($taxPeriod->tenant_id);
-        $companyName = $tenant?->legal_name ?: ($tenant?->trade_name ?: ($tenant?->name ?? ''));
-        $taxNumber = $tenant?->taxSettings?->tax_number ?? $tenant?->tax_number ?? $tenant?->vat_number ?? '';
+        $companyName = $tenant?->legal_name ?: ($tenant?->trade_name ?: ($tenant->name ?? ''));
+        $taxNumber = $tenant?->taxSettings->tax_number ?? $tenant->vat_number ?? '';
         $filename = "إقرار_ضريبة_القيمة_المضافة_ZATCA_{$taxPeriod->period_key}_".now()->format('Y-m-d').'.csv';
 
         return response()->streamDownload(function () use ($taxPeriod, $companyName, $taxNumber) {

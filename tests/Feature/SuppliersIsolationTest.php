@@ -360,4 +360,49 @@ class SuppliersIsolationTest extends TestCase
 
         $response->assertSessionHas('error');
     }
+
+    public function test_suppliers_index_sorts_by_column_and_direction(): void
+    {
+        $user = $this->createUserWithPermissions([
+            'purchasing.suppliers.view',
+        ]);
+
+        Supplier::query()->where('tenant_id', $user->tenant_id)->delete();
+
+        Supplier::create([
+            'tenant_id' => $user->tenant_id,
+            'center_id' => $user->current_center_id,
+            'name' => 'Alpha Supplier',
+            'type' => 'parts',
+            'is_active' => true,
+        ]);
+
+        Supplier::create([
+            'tenant_id' => $user->tenant_id,
+            'center_id' => $user->current_center_id,
+            'name' => 'Zulu Supplier',
+            'type' => 'services',
+            'is_active' => true,
+        ]);
+
+        // 1. Sort by name asc
+        $responseAsc = $this->actingAs($user)->get(route('app.purchasing.suppliers.index', [
+            'sort' => 'name',
+            'direction' => 'asc',
+        ]));
+        $responseAsc->assertOk();
+        $suppliersAsc = $responseAsc->inertiaPage()['props']['suppliers']['data'];
+        $this->assertEquals('Alpha Supplier', $suppliersAsc[0]['name']);
+        $this->assertEquals('Zulu Supplier', $suppliersAsc[1]['name']);
+
+        // 2. Sort by name desc
+        $responseDesc = $this->actingAs($user)->get(route('app.purchasing.suppliers.index', [
+            'sort' => 'name',
+            'direction' => 'desc',
+        ]));
+        $responseDesc->assertOk();
+        $suppliersDesc = $responseDesc->inertiaPage()['props']['suppliers']['data'];
+        $this->assertEquals('Zulu Supplier', $suppliersDesc[0]['name']);
+        $this->assertEquals('Alpha Supplier', $suppliersDesc[1]['name']);
+    }
 }

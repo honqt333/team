@@ -268,16 +268,11 @@
                                 >
                                     {{ $t('print_settings.show_center_logo') }}
                                 </span>
-                                <label class="relative inline-flex items-center cursor-pointer">
-                                    <input
-                                        type="checkbox"
-                                        v-model="form.visual.show_logo"
-                                        class="sr-only peer"
-                                    />
-                                    <div
-                                        class="w-9 h-5 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-amber-300 dark:peer-focus:ring-amber-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-600 peer-checked:bg-amber-600"
-                                    ></div>
-                                </label>
+                                <AppToggle
+                                    v-model="form.visual.show_logo"
+                                    size="sm"
+                                    color="warning"
+                                />
                             </div>
 
                             <!-- Color picker -->
@@ -463,24 +458,13 @@
                                             {{ $t('print_settings.using_global_template') }}
                                         </span>
                                     </div>
-                                    <select
+                                    <SearchableSelect
                                         v-model="form.documents[selectedDocKey].template"
-                                        class="w-full px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-xs focus:ring-1 focus:ring-amber-400 focus:border-amber-400 outline-none transition cursor-pointer font-medium"
-                                    >
-                                        <option :value="null">
-                                            ⚡
-                                            {{ $t('print_settings.default_global_template') }} ({{
-                                                getTemplateName(form.visual.active_template)
-                                            }})
-                                        </option>
-                                        <option
-                                            v-for="tmpl in availableTemplates"
-                                            :key="tmpl.id"
-                                            :value="tmpl.id"
-                                        >
-                                            {{ tmpl.name }} — {{ tmpl.description }}
-                                        </option>
-                                    </select>
+                                        :options="documentTemplateOptions"
+                                        :option-value="(option) => option.id"
+                                        option-label="label"
+                                        required
+                                    />
                                 </div>
 
                                 <!-- Custom Titles -->
@@ -634,33 +618,22 @@
                             </span>
                         </div>
                         <div class="flex items-center gap-2">
-                            <select
+                            <SearchableSelect
                                 v-model="previewDocType"
-                                class="text-[10px] px-2 py-1 rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 focus:outline-none cursor-pointer max-w-[150px] truncate"
-                            >
-                                <option
-                                    v-for="(doc, key) in form.documents"
-                                    :key="key"
-                                    :value="key"
-                                >
-                                    {{ $t('print_settings.' + key) }}
-                                </option>
-                            </select>
-                            <select
+                                :options="previewDocOptions"
+                                option-label="name"
+                                option-value="id"
+                                compact
+                                class="w-36 text-[10px]"
+                            />
+                            <SearchableSelect
                                 v-model="previewScale"
-                                class="text-[10px] px-2 py-1 rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 focus:outline-none cursor-pointer"
-                            >
-                                <option value="scale-[0.45]">45%</option>
-                                <option value="scale-[0.55]">
-                                    {{ $t('print_settings.zoom_55') }}
-                                </option>
-                                <option value="scale-[0.65]">
-                                    {{ $t('print_settings.zoom_65') }}
-                                </option>
-                                <option value="scale-[0.75]">
-                                    {{ $t('print_settings.zoom_75') }}
-                                </option>
-                            </select>
+                                :options="previewScaleOptions"
+                                option-value="value"
+                                option-label="label"
+                                required
+                                compact
+                            />
                         </div>
                     </div>
 
@@ -736,12 +709,14 @@ import { useForm } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import PageHeader from '@/Components/PageHeader.vue';
 import BackButton from '@/Components/BackButton.vue';
+import AppToggle from '@/Components/Common/AppToggle.vue';
 import { useToast } from '@/Composables/useToast';
 import TermsModal from './Modals/TermsModal.vue';
 import TermsListModal from './Modals/TermsListModal.vue';
 import TermEditModal from './Modals/TermEditModal.vue';
 import SignatureModal from './Modals/SignatureModal.vue';
 import PrintEngine from '@/Components/Print/PrintEngine.vue';
+import SearchableSelect from '@/Components/SearchableSelect.vue';
 
 const { t } = useI18n();
 const { success } = useToast();
@@ -812,6 +787,24 @@ const availableTemplates = [
     },
 ];
 
+const previewScaleOptions = computed(() => [
+    { value: 'scale-[0.45]', label: '45%' },
+    { value: 'scale-[0.55]', label: t('print_settings.zoom_55') },
+    { value: 'scale-[0.65]', label: t('print_settings.zoom_65') },
+    { value: 'scale-[0.75]', label: t('print_settings.zoom_75') },
+]);
+
+const documentTemplateOptions = computed(() => [
+    {
+        id: null,
+        label: `${t('print_settings.default_global_template')} (${getTemplateName(form.visual.active_template)})`,
+    },
+    ...availableTemplates.map((template) => ({
+        id: template.id,
+        label: `${template.name} — ${template.description}`,
+    })),
+]);
+
 function getTemplateName(id) {
     const tmpl = availableTemplates.find((t) => t.id === id);
     return tmpl ? tmpl.name : id || 'Classic A4';
@@ -840,6 +833,13 @@ function selectTemplate(template) {
 const selectedDocKey = ref('invoice');
 const previewDocType = ref('invoice');
 const previewScale = ref('scale-[0.55]');
+
+const previewDocOptions = computed(() =>
+    Object.keys(form.documents || {}).map((key) => ({
+        id: key,
+        name: t('print_settings.' + key),
+    }))
+);
 
 function selectDocument(key) {
     selectedDocKey.value = key;

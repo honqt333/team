@@ -1,25 +1,18 @@
 <template>
-    <AppLayout>
+    <AppLayout :title="$t('services_management.title')">
         <div class="space-y-6">
             <!-- Header Section -->
             <PageHeader
                 :title="$t('services_management.title')"
                 :subtitle="$t('services_management.subtitle')"
-                :totalCount="headerConfig.count"
+                :totalCount="toEnglish(headerConfig.count)"
                 :countLabel="headerConfig.countLabel"
-                :gradientFrom="headerConfig.gradientFrom"
-                :gradientTo="headerConfig.gradientTo"
-                :glowFrom="headerConfig.glowFrom"
-                :badgeBg="headerConfig.badgeBg"
-                :badgeText="headerConfig.badgeText"
-                :badgeBorder="headerConfig.badgeBorder"
-                :badgeDot="headerConfig.badgeDot"
             >
                 <template #icon>
-                    <!-- Dynamic Icon based on Active Tab -->
+                    <!-- Icon based on Active Tab -->
                     <svg
                         v-if="activeTab === 'services'"
-                        :class="['w-8 h-8', headerConfig.badgeText]"
+                        class="w-8 h-8 text-action-primary"
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
@@ -39,7 +32,7 @@
                     </svg>
                     <svg
                         v-else-if="activeTab === 'packages'"
-                        :class="['w-8 h-8', headerConfig.badgeText]"
+                        class="w-8 h-8 text-action-primary"
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
@@ -53,7 +46,7 @@
                     </svg>
                     <svg
                         v-else-if="activeTab === 'inspections'"
-                        :class="['w-8 h-8', headerConfig.badgeText]"
+                        class="w-8 h-8 text-action-primary"
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
@@ -68,16 +61,17 @@
                 </template>
 
                 <template #actions>
-                    <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                    <div class="flex items-center gap-3">
+                        <!-- Actions when activeTab === 'services' -->
                         <template v-if="activeTab === 'services'">
-                            <!-- Add Department Button -->
                             <button
                                 v-if="can('services.departments.manage') || isAnyAdmin()"
                                 @click="openCreateDepartmentModal"
-                                class="flex items-center justify-center gap-2 px-4 py-2.5 bg-white dark:bg-gray-800 border border-orange-200 dark:border-orange-700 text-orange-600 dark:text-orange-400 rounded-xl font-bold shadow-sm hover:shadow-md hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-all"
+                                type="button"
+                                class="flex items-center justify-center gap-2 px-4 py-2.5 bg-surface-secondary hover:bg-surface-secondary/80 text-content-primary border border-border-subtle rounded-xl font-bold shadow-2xs transition-colors cursor-pointer"
                             >
                                 <svg
-                                    class="w-5 h-5"
+                                    class="w-4 h-4"
                                     fill="none"
                                     stroke="currentColor"
                                     viewBox="0 0 24 24"
@@ -89,19 +83,51 @@
                                         d="M12 4v16m8-8H4"
                                     />
                                 </svg>
-                                <span>{{ $t('departments.add') }}</span>
+                                <span class="text-sm">{{ $t('departments.add') }}</span>
+                            </button>
+
+                            <button
+                                v-if="can('services.create') || isAnyAdmin()"
+                                @click="openCreateModal"
+                                type="button"
+                                class="flex items-center justify-center gap-2 px-5 py-2.5 bg-action-primary hover:bg-action-primary-hover text-white rounded-xl font-bold shadow-xs transition-colors cursor-pointer"
+                            >
+                                <svg
+                                    class="w-4 h-4"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2.5"
+                                        d="M12 4v16m8-8H4"
+                                    />
+                                </svg>
+                                <span class="text-sm">{{ $t('services_management.add') }}</span>
                             </button>
                         </template>
 
+                        <!-- Actions when activeTab === 'packages' -->
                         <template v-else-if="activeTab === 'packages'">
-                            <!-- Add Package Button -->
+                            <div
+                                class="flex items-center gap-1.5 p-1.5 bg-surface-secondary/80 dark:bg-surface-secondary/40 backdrop-blur-md rounded-2xl border border-border-subtle shadow-inner"
+                            >
+                                <AppViewModeToggle
+                                    v-model="packagesViewMode"
+                                    storage-key="services_packages_view_mode"
+                                />
+                            </div>
+
                             <button
                                 v-if="can('services.create') || isAnyAdmin()"
                                 @click="openCreatePackageModal"
-                                class="flex items-center justify-center gap-2 px-5 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl font-black shadow-lg shadow-indigo-500/25 hover:shadow-indigo-500/40 hover:-translate-y-0.5 transition-all"
+                                type="button"
+                                class="flex items-center justify-center gap-2 px-5 py-2.5 bg-action-primary hover:bg-action-primary-hover text-white rounded-xl font-bold shadow-xs transition-colors cursor-pointer"
                             >
                                 <svg
-                                    class="w-5 h-5"
+                                    class="w-4 h-4"
                                     fill="none"
                                     stroke="currentColor"
                                     viewBox="0 0 24 24"
@@ -113,19 +139,20 @@
                                         d="M12 4v16m8-8H4"
                                     />
                                 </svg>
-                                <span>{{ $t('packages.add') }}</span>
+                                <span class="text-sm">{{ $t('packages.add') }}</span>
                             </button>
                         </template>
 
+                        <!-- Actions when activeTab === 'inspections' -->
                         <template v-else-if="activeTab === 'inspections'">
-                            <!-- Add Inspection Button -->
                             <button
                                 v-if="can('services.create') || isAnyAdmin()"
                                 @click="openCategoryModal()"
-                                class="flex items-center justify-center gap-2 px-5 py-2.5 bg-gradient-to-r from-amber-500 to-orange-600 text-white rounded-xl font-black shadow-lg shadow-amber-500/25 hover:shadow-amber-500/40 hover:-translate-y-0.5 transition-all"
+                                type="button"
+                                class="flex items-center justify-center gap-2 px-5 py-2.5 bg-action-primary hover:bg-action-primary-hover text-white rounded-xl font-bold shadow-xs transition-colors cursor-pointer"
                             >
                                 <svg
-                                    class="w-5 h-5"
+                                    class="w-4 h-4"
                                     fill="none"
                                     stroke="currentColor"
                                     viewBox="0 0 24 24"
@@ -137,201 +164,100 @@
                                         d="M12 4v16m8-8H4"
                                     />
                                 </svg>
-                                <span>{{ $t('services_management.add_inspection_category') }}</span>
+                                <span class="text-sm">
+                                    {{ $t('services_management.add_inspection_category') }}
+                                </span>
                             </button>
                         </template>
                     </div>
                 </template>
 
                 <template #filters>
-                    <div class="flex flex-col md:flex-row gap-4">
-                        <div class="relative flex-1 group">
-                            <div
-                                class="absolute inset-y-0 start-0 flex items-center ps-4 pointer-events-none text-gray-400 group-focus-within:text-teal-500 transition-colors"
+                    <div class="relative group flex-1 w-full">
+                        <div
+                            class="absolute inset-y-0 start-0 ps-4 flex items-center pointer-events-none text-content-muted group-focus-within:text-action-primary transition-colors"
+                        >
+                            <svg
+                                class="w-4 h-4"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
                             >
-                                <svg
-                                    class="w-5 h-5"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        stroke-width="2"
-                                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                                    />
-                                </svg>
-                            </div>
-                            <input
-                                type="text"
-                                v-model="searchQuery"
-                                :placeholder="$t('services_management.search')"
-                                class="block w-full ps-11 pe-4 py-3.5 text-sm text-gray-900 dark:text-white bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl focus:ring-4 focus:ring-teal-500/10 focus:border-teal-500 transition-all outline-none shadow-sm"
-                            />
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                                />
+                            </svg>
                         </div>
+                        <input
+                            v-model="searchQuery"
+                            type="text"
+                            :placeholder="$t('services_management.search')"
+                            class="w-full ps-11 pe-10 py-2.5 bg-surface-primary dark:bg-surface-secondary/50 border border-border-subtle rounded-xl text-sm text-content-primary placeholder-content-muted focus:outline-hidden focus:ring-2 focus:ring-focus-ring focus:border-transparent transition-all shadow-2xs"
+                        />
+                        <button
+                            v-if="searchQuery"
+                            @click="searchQuery = ''"
+                            type="button"
+                            class="absolute inset-y-0 end-0 pe-3 flex items-center text-content-muted hover:text-content-primary transition-colors cursor-pointer"
+                        >
+                            <svg
+                                class="w-4 h-4"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M6 18L18 6M6 6l12 12"
+                                />
+                            </svg>
+                        </button>
                     </div>
                 </template>
             </PageHeader>
 
-            <!-- Filter Tabs - Modern Compact Design -->
-            <div
-                class="bg-white/50 dark:bg-gray-800/50 backdrop-blur-md rounded-2xl p-2 shadow-sm border border-gray-100 dark:border-gray-700/50 flex flex-wrap gap-2"
-            >
-                <button
-                    v-for="tab in tabs"
-                    :key="tab.key"
-                    @click="activeTab = tab.key"
-                    :class="[
-                        'relative flex items-center gap-3 px-6 py-3 rounded-xl transition-all duration-300 group',
-                        activeTab === tab.key
-                            ? 'text-white shadow-lg scale-[1.02]'
-                            : 'bg-transparent hover:bg-gray-100 dark:hover:bg-gray-700/50 text-gray-600 dark:text-gray-400',
-                    ]"
-                    :style="
-                        activeTab === tab.key
-                            ? `background: linear-gradient(135deg, ${tab.gradientFrom}, ${tab.gradientTo})`
-                            : ''
-                    "
-                >
-                    <!-- Icon Container -->
-                    <div
-                        :class="[
-                            'w-8 h-8 rounded-lg flex items-center justify-center transition-colors',
-                            activeTab === tab.key ? 'bg-white/20' : tab.bgColor,
-                        ]"
-                    >
-                        <!-- Services Icon -->
-                        <svg
-                            v-if="tab.key === 'services'"
-                            :class="[
-                                'w-4 h-4',
-                                activeTab === tab.key ? 'text-white' : tab.iconColor,
-                            ]"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                        >
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
-                            />
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                            />
-                        </svg>
-                        <!-- Packages Icon -->
-                        <svg
-                            v-else-if="tab.key === 'packages'"
-                            :class="[
-                                'w-4 h-4',
-                                activeTab === tab.key ? 'text-white' : tab.iconColor,
-                            ]"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                        >
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
-                            />
-                        </svg>
-                        <!-- Inspections Icon -->
-                        <svg
-                            v-else-if="tab.key === 'inspections'"
-                            :class="[
-                                'w-4 h-4',
-                                activeTab === tab.key ? 'text-white' : tab.iconColor,
-                            ]"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                        >
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"
-                            />
-                        </svg>
-                    </div>
-
-                    <!-- Label & Count -->
-                    <div class="flex items-center gap-3">
-                        <span class="font-bold text-sm tracking-tight">{{ tab.label }}</span>
-                        <span
-                            :class="[
-                                'px-2 py-0.5 rounded-lg text-[10px] font-black uppercase tracking-wider',
-                                activeTab === tab.key
-                                    ? 'bg-white/20 text-white'
-                                    : tab.bgColor + ' ' + tab.iconColor,
-                            ]"
-                        >
-                            {{ tab.count }}
-                        </span>
-                    </div>
-
-                    <!-- Active Indicator Dot -->
-                    <div
-                        v-if="activeTab === tab.key"
-                        class="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-white shadow-sm"
-                    ></div>
-                </button>
+            <!-- Filter Tabs - Standard AppTabs -->
+            <div class="w-full">
+                <AppTabs v-model="activeTab" :tabs="mainTabs" variant="underline" />
             </div>
 
             <!-- Services Tab Content -->
             <div v-if="activeTab === 'services'" class="space-y-6">
                 <!-- Empty State -->
-                <div
+                <AppEmptyState
                     v-if="departments.length === 0 && unassignedServices.length === 0"
-                    class="bg-white dark:bg-gray-800 rounded-2xl p-12 text-center border border-gray-200 dark:border-gray-700"
+                    :title="$t('departments.empty')"
+                    :description="$t('services_management.add_department_first')"
                 >
-                    <div
-                        class="w-16 h-16 mx-auto rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center mb-4"
-                    >
-                        <svg
-                            class="w-8 h-8 text-gray-400"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
+                    <template #actions>
+                        <button
+                            v-if="can('services.departments.manage') || isAnyAdmin()"
+                            @click="openCreateDepartmentModal"
+                            type="button"
+                            class="inline-flex items-center gap-2 px-5 py-2.5 bg-action-primary hover:bg-action-primary-hover text-white rounded-xl font-bold shadow-xs transition-colors cursor-pointer"
                         >
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="1.5"
-                                d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
-                            />
-                        </svg>
-                    </div>
-                    <p class="text-lg font-medium text-gray-900 dark:text-white mb-1">
-                        {{ $t('departments.empty') }}
-                    </p>
-                    <p class="text-gray-500 dark:text-gray-400 mb-6">
-                        {{ $t('services_management.add_department_first') }}
-                    </p>
-                    <button
-                        v-if="can('services.departments.manage') || isAnyAdmin()"
-                        @click="openCreateDepartmentModal"
-                        class="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-orange-600 to-amber-600 text-white rounded-xl font-medium shadow-lg shadow-orange-500/30 hover:shadow-xl hover:-translate-y-0.5 transition-all"
-                    >
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M12 4v16m8-8H4"
-                            />
-                        </svg>
-                        {{ $t('departments.add') }}
-                    </button>
-                </div>
+                            <svg
+                                class="w-4 h-4"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2.5"
+                                    d="M12 4v16m8-8H4"
+                                />
+                            </svg>
+                            <span>{{ $t('departments.add') }}</span>
+                        </button>
+                    </template>
+                </AppEmptyState>
 
                 <!-- Accordion by Departments -->
                 <div v-else class="space-y-4">
@@ -339,34 +265,34 @@
                     <div
                         v-for="dept in filteredDepartments"
                         :key="dept.id"
-                        class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden"
+                        class="bg-surface-primary rounded-2xl border border-border-subtle shadow-2xs overflow-hidden"
                     >
                         <!-- Department Header -->
                         <div
-                            class="flex items-center justify-between px-5 py-4 hover:bg-gray-50 dark:hover:bg-gray-900/50 transition-colors"
+                            class="flex flex-wrap sm:flex-nowrap items-center justify-between gap-3 px-4 sm:px-5 py-4 hover:bg-surface-secondary/50 transition-colors"
                         >
                             <!-- Clickable part for expand/collapse -->
                             <button
                                 @click="toggleDepartment(dept.id)"
-                                class="flex items-center gap-3 flex-1"
+                                class="flex items-center gap-3 flex-1 text-start cursor-pointer"
                             >
                                 <div
-                                    class="w-10 h-10 rounded-lg bg-gradient-to-br from-orange-500 to-amber-500 flex items-center justify-center text-white font-bold"
+                                    class="w-10 h-10 rounded-xl bg-action-primary/10 text-action-primary flex items-center justify-center font-bold text-base"
                                 >
                                     {{ getName(dept).charAt(0).toUpperCase() }}
                                 </div>
-                                <div class="text-start">
-                                    <h3 class="font-semibold text-gray-900 dark:text-white">
+                                <div>
+                                    <h3 class="font-bold text-content-primary">
                                         {{ getName(dept) }}
                                     </h3>
-                                    <p class="text-sm text-gray-500 dark:text-gray-400">
+                                    <p class="text-xs text-content-muted">
                                         {{ dept.services?.length || 0 }}
                                         {{ $t('services_management.services') }}
                                     </p>
                                 </div>
                                 <span
                                     v-if="!dept.is_active"
-                                    class="px-2 py-0.5 text-xs font-medium rounded-full bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-300"
+                                    class="px-2 py-0.5 text-xs font-medium rounded-full bg-danger-soft text-danger"
                                 >
                                     {{ $t('common.inactive') }}
                                 </span>
@@ -378,7 +304,7 @@
                                 <button
                                     v-if="can('services.create') || isAnyAdmin()"
                                     @click.stop="openCreateModalForDepartment(dept)"
-                                    class="flex items-center gap-1.5 px-3 py-1.5 text-xs bg-gradient-to-r from-teal-600 to-emerald-600 text-white rounded-lg font-bold shadow-sm hover:shadow-md hover:scale-[1.02] active:scale-[0.98] transition-all me-1"
+                                    class="flex items-center gap-1.5 px-3 py-1.5 text-xs bg-action-primary hover:bg-action-primary-hover text-white rounded-lg font-bold shadow-2xs transition-colors cursor-pointer me-1"
                                 >
                                     <svg
                                         class="w-3.5 h-3.5"
@@ -397,7 +323,7 @@
                                 </button>
                                 <button
                                     @click.stop="openEditDepartmentModal(dept)"
-                                    class="p-1.5 text-gray-500 hover:text-orange-600 hover:bg-orange-50 dark:hover:bg-orange-900/20 rounded-lg transition-colors"
+                                    class="p-1.5 text-content-muted hover:text-action-primary hover:bg-surface-secondary rounded-lg transition-colors cursor-pointer"
                                     :title="$t('departments.edit')"
                                 >
                                     <svg
@@ -416,7 +342,7 @@
                                 </button>
                                 <button
                                     @click.stop="handleDeleteDepartment(dept)"
-                                    class="p-1.5 text-gray-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                                    class="p-1.5 text-content-muted hover:text-danger hover:bg-danger-soft/20 rounded-lg transition-colors cursor-pointer"
                                     :title="$t('common.delete')"
                                 >
                                     <svg
@@ -468,7 +394,7 @@
                                 {{ $t('services_management.no_services') }}
                             </div>
                             <div v-else class="overflow-x-auto">
-                                <table class="w-full text-sm">
+                                <table class="w-full min-w-[720px] text-sm">
                                     <thead class="bg-gray-50 dark:bg-gray-900/50">
                                         <tr>
                                             <th
@@ -658,25 +584,19 @@
                                             </td>
                                             <!-- Actions -->
                                             <td class="px-4 py-3 align-middle">
-                                                <div class="flex items-center justify-center gap-1">
-                                                    <button
-                                                        @click.stop="toggleServiceActive(service)"
-                                                        :class="
-                                                            service.is_active
-                                                                ? 'bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-300'
-                                                                : 'bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-300'
+                                                <div class="flex items-center justify-center gap-2">
+                                                    <AppToggle
+                                                        :model-value="Boolean(service.is_active)"
+                                                        color="success"
+                                                        size="sm"
+                                                        @update:model-value="
+                                                            toggleServiceActive(service)
                                                         "
-                                                        class="px-2 py-0.5 text-xs font-medium rounded-full transition-all hover:opacity-80"
-                                                    >
-                                                        {{
-                                                            service.is_active
-                                                                ? $t('common.active')
-                                                                : $t('common.inactive')
-                                                        }}
-                                                    </button>
+                                                    />
                                                     <button
                                                         @click.stop="openEditModal(service)"
-                                                        class="p-1.5 text-gray-500 hover:text-teal-600 hover:bg-teal-50 dark:hover:bg-teal-900/20 rounded-lg transition-colors"
+                                                        class="p-1.5 text-content-muted hover:text-action-primary hover:bg-surface-secondary rounded-lg transition-colors cursor-pointer"
+                                                        :title="$t('common.edit')"
                                                     >
                                                         <svg
                                                             class="w-4 h-4"
@@ -722,15 +642,15 @@
                     <!-- Unassigned Services -->
                     <div
                         v-if="unassignedServices.length > 0"
-                        class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden"
+                        class="bg-surface-primary rounded-2xl border border-border-subtle shadow-2xs overflow-hidden"
                     >
                         <button
                             @click="toggleDepartment('unassigned')"
-                            class="w-full px-5 py-4 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-900/50 transition-colors"
+                            class="w-full px-5 py-4 flex items-center justify-between hover:bg-surface-secondary/50 transition-colors cursor-pointer"
                         >
                             <div class="flex items-center gap-3">
                                 <div
-                                    class="w-10 h-10 rounded-lg bg-gradient-to-br from-gray-400 to-gray-500 flex items-center justify-center text-white"
+                                    class="w-10 h-10 rounded-xl bg-surface-tertiary text-content-muted flex items-center justify-center"
                                 >
                                     <svg
                                         class="w-5 h-5"
@@ -747,10 +667,10 @@
                                     </svg>
                                 </div>
                                 <div class="text-start">
-                                    <h3 class="font-semibold text-gray-900 dark:text-white">
+                                    <h3 class="font-bold text-content-primary">
                                         {{ $t('services_management.unassigned') }}
                                     </h3>
-                                    <p class="text-sm text-gray-500 dark:text-gray-400">
+                                    <p class="text-xs text-content-muted">
                                         {{ unassignedServices.length }}
                                         {{ $t('services_management.services') }}
                                     </p>
@@ -779,7 +699,7 @@
                             class="border-t border-gray-200 dark:border-gray-700"
                         >
                             <div class="overflow-x-auto">
-                                <table class="w-full text-sm">
+                                <table class="w-full min-w-[720px] text-sm">
                                     <thead class="bg-gray-50 dark:bg-gray-900/50">
                                         <tr>
                                             <th
@@ -969,25 +889,19 @@
                                             </td>
                                             <!-- Actions -->
                                             <td class="px-4 py-3 align-middle">
-                                                <div class="flex items-center justify-center gap-1">
-                                                    <button
-                                                        @click.stop="toggleServiceActive(service)"
-                                                        :class="
-                                                            service.is_active
-                                                                ? 'bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-300'
-                                                                : 'bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-300'
+                                                <div class="flex items-center justify-center gap-2">
+                                                    <AppToggle
+                                                        :model-value="Boolean(service.is_active)"
+                                                        color="success"
+                                                        size="sm"
+                                                        @update:model-value="
+                                                            toggleServiceActive(service)
                                                         "
-                                                        class="px-2 py-0.5 text-xs font-medium rounded-full transition-all hover:opacity-80"
-                                                    >
-                                                        {{
-                                                            service.is_active
-                                                                ? $t('common.active')
-                                                                : $t('common.inactive')
-                                                        }}
-                                                    </button>
+                                                    />
                                                     <button
                                                         @click.stop="openEditModal(service)"
-                                                        class="p-1.5 text-gray-500 hover:text-teal-600 hover:bg-teal-50 dark:hover:bg-teal-900/20 rounded-lg transition-colors"
+                                                        class="p-1.5 text-content-muted hover:text-action-primary hover:bg-surface-secondary rounded-lg transition-colors cursor-pointer"
+                                                        :title="$t('common.edit')"
                                                     >
                                                         <svg
                                                             class="w-4 h-4"
@@ -1035,188 +949,224 @@
             <!-- Packages Tab Content -->
             <div v-if="activeTab === 'packages'" class="space-y-6">
                 <!-- Empty State -->
-                <div
-                    v-if="packages.length === 0"
-                    class="bg-white dark:bg-gray-800 rounded-2xl p-12 text-center border border-gray-200 dark:border-gray-700"
-                >
-                    <div
-                        class="w-16 h-16 mx-auto rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center mb-4"
-                    >
-                        <svg
-                            class="w-8 h-8 text-gray-400"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
+                <AppEmptyState v-if="filteredPackages.length === 0" :title="$t('packages.empty')">
+                    <template #actions>
+                        <button
+                            v-if="can('services.create')"
+                            @click="openCreatePackageModal"
+                            type="button"
+                            class="inline-flex items-center gap-2 px-5 py-2.5 bg-action-primary hover:bg-action-primary-hover text-white rounded-xl font-bold shadow-xs transition-colors cursor-pointer"
                         >
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="1.5"
-                                d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
-                            />
-                        </svg>
-                    </div>
-                    <p class="text-lg font-medium text-gray-900 dark:text-white mb-1">
-                        {{ $t('packages.empty') }}
-                    </p>
-                    <button
-                        v-if="can('services.create')"
-                        @click="openCreatePackageModal"
-                        class="inline-flex items-center gap-2 px-5 py-2.5 mt-4 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl font-medium shadow-lg shadow-indigo-500/30 hover:shadow-xl transition-all"
-                    >
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M12 4v16m8-8H4"
-                            />
-                        </svg>
-                        {{ $t('packages.add') }}
-                    </button>
-                </div>
+                            <svg
+                                class="w-4 h-4"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2.5"
+                                    d="M12 4v16m8-8H4"
+                                />
+                            </svg>
+                            <span>{{ $t('packages.add') }}</span>
+                        </button>
+                    </template>
+                </AppEmptyState>
 
-                <!-- Packages List -->
-                <div
-                    v-else
-                    class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden"
-                >
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-sm">
-                            <thead class="bg-gray-50 dark:bg-gray-900/50">
-                                <tr>
-                                    <th
-                                        class="px-4 py-3 text-start font-medium text-gray-500 dark:text-gray-400 align-middle text-center"
-                                    >
-                                        {{ $t('services_management.columns.number') }}
-                                    </th>
-                                    <th
-                                        class="px-4 py-3 text-start font-medium text-gray-500 dark:text-gray-400 align-middle text-center"
-                                    >
-                                        {{ $t('services_management.columns.name') }}
-                                    </th>
-                                    <th
-                                        class="px-4 py-3 text-start font-medium text-gray-500 dark:text-gray-400 align-middle text-center"
-                                    >
-                                        {{ $t('services_management.columns.base_price') }}
-                                    </th>
-                                    <th
-                                        class="px-4 py-3 text-start font-medium text-gray-500 dark:text-gray-400 align-middle text-center"
-                                    >
-                                        {{ $t('packages.items') }}
-                                    </th>
-                                    <th
-                                        class="px-4 py-3 text-start font-medium text-gray-500 dark:text-gray-400 align-middle text-center"
-                                    >
-                                        {{ $t('services_management.columns.updated_by') }}
-                                    </th>
-                                    <th
-                                        class="px-4 py-3 text-center font-medium text-gray-500 dark:text-gray-400 align-middle"
-                                    >
-                                        {{ $t('services_management.columns.actions') }}
-                                    </th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
-                                <tr
-                                    v-for="(pkg, index) in filteredPackages"
-                                    :key="pkg.id"
-                                    class="hover:bg-gray-50 dark:hover:bg-gray-900/30 transition-colors"
+                <!-- Packages List (Table or Grid) -->
+                <div v-else>
+                    <!-- Table View -->
+                    <DataTable
+                        v-if="packagesViewMode === 'table'"
+                        :items="filteredPackages"
+                        :columns="packageColumns"
+                    >
+                        <template #cell(number)="{ index }">
+                            <span class="text-content-muted">{{ index + 1 }}</span>
+                        </template>
+                        <template #cell(name)="{ item }">
+                            <button
+                                v-if="can('services.update')"
+                                @click="openEditPackageModal(item)"
+                                type="button"
+                                class="font-medium text-content-primary hover:text-action-primary hover:underline transition-colors cursor-pointer text-start"
+                            >
+                                {{ getName(item) }}
+                            </button>
+                            <span v-else class="font-medium text-content-primary">
+                                {{ getName(item) }}
+                            </span>
+                        </template>
+                        <template #cell(base_price)="{ item }">
+                            <span class="font-bold text-action-primary">
+                                {{ toEnglish(item.base_price) }} {{ $t('common.currency_sar') }}
+                            </span>
+                        </template>
+                        <template #cell(items)="{ item }">
+                            <span class="text-content-muted">
+                                {{ item.items?.length || 0 }}
+                                {{ $t('services_management.services') }}
+                            </span>
+                        </template>
+                        <template #cell(updated_by)="{ item }">
+                            <span class="text-content-muted">
+                                {{ item.updater?.name || $t('services_management.not_set') }}
+                            </span>
+                        </template>
+                        <template #cell(is_active)="{ item }">
+                            <div class="flex items-center justify-center">
+                                <AppToggle
+                                    :model-value="Boolean(item.is_active)"
+                                    color="success"
+                                    size="sm"
+                                    @update:model-value="toggleServiceActive(item)"
+                                />
+                            </div>
+                        </template>
+                        <template #cell(actions)="{ item }">
+                            <div class="flex items-center justify-center gap-1">
+                                <button
+                                    @click.stop="openEditPackageModal(item)"
+                                    class="p-1.5 text-content-muted hover:text-action-primary hover:bg-surface-secondary rounded-lg transition-colors cursor-pointer"
+                                    :title="$t('common.edit')"
                                 >
-                                    <td
-                                        class="px-4 py-3 text-gray-500 dark:text-gray-400 align-middle"
+                                    <svg
+                                        class="w-4 h-4"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
                                     >
-                                        {{ index + 1 }}
-                                    </td>
-                                    <td class="px-4 py-3 align-middle">
-                                        <button
-                                            v-if="can('services.update')"
-                                            @click="openEditPackageModal(pkg)"
-                                            class="font-medium text-gray-900 dark:text-white hover:text-indigo-600 dark:hover:text-indigo-400 hover:underline transition-colors cursor-pointer"
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                                        />
+                                    </svg>
+                                </button>
+                                <button
+                                    @click.stop="handleDelete(item)"
+                                    class="p-1.5 text-content-muted hover:text-danger hover:bg-danger-soft/20 rounded-lg transition-colors cursor-pointer"
+                                    :title="$t('common.delete')"
+                                >
+                                    <svg
+                                        class="w-4 h-4"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                                        />
+                                    </svg>
+                                </button>
+                            </div>
+                        </template>
+                    </DataTable>
+
+                    <!-- Grid View -->
+                    <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <div
+                            v-for="pkg in filteredPackages"
+                            :key="pkg.id"
+                            class="bg-surface-primary rounded-2xl border border-border-subtle p-5 shadow-2xs hover:shadow-xs transition-shadow flex flex-col justify-between gap-4"
+                        >
+                            <div class="flex items-start justify-between gap-3">
+                                <div class="flex items-center gap-3">
+                                    <div
+                                        class="w-10 h-10 rounded-xl bg-action-primary/10 text-action-primary flex items-center justify-center font-bold"
+                                    >
+                                        <svg
+                                            class="w-5 h-5"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            viewBox="0 0 24 24"
                                         >
+                                            <path
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                stroke-width="2"
+                                                d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
+                                            />
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <h3 class="font-bold text-content-primary">
                                             {{ getName(pkg) }}
-                                        </button>
-                                        <span
-                                            v-else
-                                            class="font-medium text-gray-900 dark:text-white"
+                                        </h3>
+                                        <p class="text-xs text-content-muted">
+                                            {{ pkg.items?.length || 0 }}
+                                            {{ $t('services_management.services') }}
+                                        </p>
+                                    </div>
+                                </div>
+                                <AppToggle
+                                    :model-value="Boolean(pkg.is_active)"
+                                    color="success"
+                                    size="sm"
+                                    @update:model-value="toggleServiceActive(pkg)"
+                                />
+                            </div>
+
+                            <div
+                                class="flex items-center justify-between pt-3 border-t border-border-subtle text-sm"
+                            >
+                                <div>
+                                    <span class="text-xs text-content-muted block">
+                                        {{ $t('services_management.columns.base_price') }}
+                                    </span>
+                                    <span class="font-bold text-action-primary text-base">
+                                        {{ toEnglish(pkg.base_price) }}
+                                        {{ $t('common.currency_sar') }}
+                                    </span>
+                                </div>
+                                <div class="flex items-center gap-1">
+                                    <button
+                                        @click.stop="openEditPackageModal(pkg)"
+                                        class="p-1.5 text-content-muted hover:text-action-primary hover:bg-surface-secondary rounded-lg transition-colors cursor-pointer"
+                                        :title="$t('common.edit')"
+                                    >
+                                        <svg
+                                            class="w-4 h-4"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            viewBox="0 0 24 24"
                                         >
-                                            {{ getName(pkg) }}
-                                        </span>
-                                    </td>
-                                    <td
-                                        class="px-4 py-3 font-semibold text-teal-600 dark:text-teal-400 align-middle"
+                                            <path
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                stroke-width="2"
+                                                d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                                            />
+                                        </svg>
+                                    </button>
+                                    <button
+                                        @click.stop="handleDelete(pkg)"
+                                        class="p-1.5 text-content-muted hover:text-danger hover:bg-danger-soft/20 rounded-lg transition-colors cursor-pointer"
+                                        :title="$t('common.delete')"
                                     >
-                                        {{ pkg.base_price }} {{ $t('common.currency_sar') }}
-                                    </td>
-                                    <td
-                                        class="px-4 py-3 text-gray-500 dark:text-gray-400 align-middle"
-                                    >
-                                        {{ pkg.items?.length || 0 }}
-                                        {{ $t('services_management.services') }}
-                                    </td>
-                                    <td
-                                        class="px-4 py-3 text-gray-500 dark:text-gray-400 align-middle"
-                                    >
-                                        {{ pkg.updater?.name || $t('services_management.not_set') }}
-                                    </td>
-                                    <td class="px-4 py-3 align-middle">
-                                        <div class="flex items-center justify-center gap-1">
-                                            <button
-                                                @click.stop="toggleServiceActive(pkg)"
-                                                :class="
-                                                    pkg.is_active
-                                                        ? 'bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-300'
-                                                        : 'bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-300'
-                                                "
-                                                class="px-2 py-0.5 text-xs font-medium rounded-full transition-all hover:opacity-80"
-                                            >
-                                                {{
-                                                    pkg.is_active
-                                                        ? $t('common.active')
-                                                        : $t('common.inactive')
-                                                }}
-                                            </button>
-                                            <button
-                                                @click.stop="openEditPackageModal(pkg)"
-                                                class="p-1.5 text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-lg transition-colors"
-                                            >
-                                                <svg
-                                                    class="w-4 h-4"
-                                                    fill="none"
-                                                    stroke="currentColor"
-                                                    viewBox="0 0 24 24"
-                                                >
-                                                    <path
-                                                        stroke-linecap="round"
-                                                        stroke-linejoin="round"
-                                                        stroke-width="2"
-                                                        d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-                                                    />
-                                                </svg>
-                                            </button>
-                                            <button
-                                                @click.stop="handleDelete(pkg)"
-                                                class="p-1.5 text-gray-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
-                                            >
-                                                <svg
-                                                    class="w-4 h-4"
-                                                    fill="none"
-                                                    stroke="currentColor"
-                                                    viewBox="0 0 24 24"
-                                                >
-                                                    <path
-                                                        stroke-linecap="round"
-                                                        stroke-linejoin="round"
-                                                        stroke-width="2"
-                                                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                                                    />
-                                                </svg>
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
+                                        <svg
+                                            class="w-4 h-4"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            viewBox="0 0 24 24"
+                                        >
+                                            <path
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                stroke-width="2"
+                                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                                            />
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -1224,81 +1174,51 @@
             <!-- Inspections Tab Content -->
             <div v-if="activeTab === 'inspections'" class="space-y-6">
                 <!-- Empty State -->
-                <div
+                <AppEmptyState
                     v-if="filteredConditionCategories.length === 0"
-                    class="bg-white dark:bg-gray-800 rounded-2xl p-12 text-center border border-gray-200 dark:border-gray-700"
+                    :title="$t('services_management.inspections_empty')"
                 >
-                    <div
-                        class="w-16 h-16 mx-auto rounded-full bg-amber-50 dark:bg-amber-900/20 flex items-center justify-center mb-4"
-                    >
-                        <svg
-                            class="w-8 h-8 text-amber-500"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
+                    <template #actions>
+                        <button
+                            @click="openCategoryModal()"
+                            type="button"
+                            class="inline-flex items-center gap-2 px-5 py-2.5 bg-action-primary hover:bg-action-primary-hover text-white rounded-xl font-bold shadow-xs transition-colors cursor-pointer"
                         >
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="1.5"
-                                d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"
-                            />
-                        </svg>
-                    </div>
-                    <p class="text-lg font-medium text-gray-900 dark:text-white mb-1">
-                        {{ $t('services_management.inspections_empty') }}
-                    </p>
-                    <button
-                        @click="openCategoryModal()"
-                        class="inline-flex items-center gap-2 px-5 py-2.5 mt-4 bg-gradient-to-r from-amber-500 to-amber-600 text-white rounded-xl font-medium shadow-lg shadow-amber-500/30 hover:shadow-xl transition-all"
-                    >
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M12 4v16m8-8H4"
-                            />
-                        </svg>
-                        {{ $t('services_management.add_inspection_category') }}
-                    </button>
-                </div>
+                            <svg
+                                class="w-4 h-4"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2.5"
+                                    d="M12 4v16m8-8H4"
+                                />
+                            </svg>
+                            <span>{{ $t('services_management.add_inspection_category') }}</span>
+                        </button>
+                    </template>
+                </AppEmptyState>
 
                 <!-- Inspections List -->
                 <div v-else class="space-y-6">
                     <!-- Toggle Setting & Add Button Header -->
                     <div
-                        class="flex flex-col md:flex-row md:items-center justify-between bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-200 dark:border-gray-700 gap-4 mb-4"
+                        class="flex flex-col md:flex-row md:items-center justify-between bg-surface-primary p-4 rounded-2xl border border-border-subtle shadow-2xs gap-4 mb-4"
                     >
                         <div class="flex items-center gap-3">
-                            <button
-                                @click="toggleInspectionsSetting"
-                                :class="[
-                                    'relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none',
-                                    enableSystematicInspections
-                                        ? 'bg-green-500'
-                                        : 'bg-gray-200 dark:bg-gray-700',
-                                ]"
-                                role="switch"
-                                :aria-checked="enableSystematicInspections"
-                            >
-                                <span
-                                    aria-hidden="true"
-                                    :class="[
-                                        'pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out',
-                                        enableSystematicInspections
-                                            ? $i18n.locale === 'ar'
-                                                ? '-translate-x-5'
-                                                : 'translate-x-5'
-                                            : 'translate-x-0',
-                                    ]"
-                                />
-                            </button>
+                            <AppToggle
+                                :model-value="enableSystematicInspections"
+                                color="success"
+                                @change="toggleInspectionsSetting"
+                            />
                             <div>
-                                <h4 class="text-sm font-bold text-gray-900 dark:text-white">
+                                <h4 class="text-sm font-bold text-content-primary">
                                     {{ $t('services_management.enable_inspections') }}
                                 </h4>
-                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                                <p class="text-xs text-content-muted mt-0.5">
                                     {{ $t('services_management.enable_inspections_desc') }}
                                 </p>
                             </div>
@@ -1309,20 +1229,20 @@
                     <div
                         v-for="category in filteredConditionCategories"
                         :key="category.id"
-                        class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden mb-4 shadow-sm"
+                        class="bg-surface-primary rounded-2xl border border-border-subtle overflow-hidden mb-4 shadow-2xs"
                     >
                         <div
-                            class="px-4 py-3 bg-gray-50 dark:bg-gray-900/50 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between"
+                            class="px-4 py-3 bg-surface-secondary/50 border-b border-border-subtle flex items-center justify-between"
                         >
                             <div class="flex items-center gap-3">
-                                <h3 class="text-sm font-bold text-gray-700 dark:text-gray-300">
+                                <h3 class="text-sm font-bold text-content-primary">
                                     {{ getName(category) }}
                                 </h3>
                                 <span
                                     :class="
                                         category.is_active
-                                            ? 'bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-300'
-                                            : 'bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-300'
+                                            ? 'bg-success-soft text-success'
+                                            : 'bg-danger-soft text-danger'
                                     "
                                     class="px-2 py-0.5 text-[10px] font-medium rounded-full"
                                 >
@@ -1334,32 +1254,17 @@
                                 </span>
                             </div>
                             <div class="flex items-center gap-2">
-                                <button
-                                    @click="toggleCategoryActive(category)"
+                                <AppToggle
+                                    :model-value="Boolean(category.is_active)"
                                     :disabled="category.source === 'system'"
-                                    :class="[
-                                        'px-2 py-0.5 text-[10px] font-medium rounded-full transition-all',
-                                        category.source === 'system'
-                                            ? 'opacity-50 cursor-not-allowed bg-gray-100 text-gray-500 dark:bg-gray-800'
-                                            : 'hover:opacity-80',
-                                        category.is_active && category.source !== 'system'
-                                            ? 'bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-300'
-                                            : '',
-                                        !category.is_active && category.source !== 'system'
-                                            ? 'bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-300'
-                                            : '',
-                                    ]"
-                                >
-                                    {{
-                                        category.is_active
-                                            ? $t('common.active')
-                                            : $t('common.inactive')
-                                    }}
-                                </button>
-                                <div class="w-px h-4 bg-gray-300 dark:bg-gray-600 mx-1"></div>
+                                    color="success"
+                                    size="sm"
+                                    @update:model-value="toggleCategoryActive(category)"
+                                />
+                                <div class="w-px h-4 bg-border-subtle mx-1"></div>
                                 <button
                                     @click="openInspectionModal(null, category.id)"
-                                    class="p-1 text-gray-400 hover:text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-900/20 rounded-lg transition-colors"
+                                    class="p-1 text-content-muted hover:text-action-primary hover:bg-surface-secondary rounded-lg transition-colors cursor-pointer"
                                     :title="$t('services_management.add_inspection')"
                                 >
                                     <svg
@@ -1378,7 +1283,7 @@
                                 </button>
                                 <button
                                     @click="openCategoryModal(category)"
-                                    class="p-1 text-gray-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
+                                    class="p-1 text-content-muted hover:text-action-primary hover:bg-surface-secondary rounded-lg transition-colors cursor-pointer"
                                     :title="$t('common.edit')"
                                 >
                                     <svg
@@ -1405,8 +1310,8 @@
                                         'p-1 rounded-lg transition-colors',
                                         (category.items && category.items.length > 0) ||
                                         category.source === 'system'
-                                            ? 'text-gray-300 cursor-not-allowed'
-                                            : 'text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20',
+                                            ? 'text-content-muted/30 cursor-not-allowed'
+                                            : 'text-content-muted hover:text-danger hover:bg-danger-soft/20 cursor-pointer',
                                     ]"
                                     :title="
                                         category.items && category.items.length > 0
@@ -1490,54 +1395,30 @@
                                             </div>
                                         </td>
                                         <td class="px-4 py-3 text-center align-middle">
-                                            <span
-                                                :class="
-                                                    item.is_active
-                                                        ? 'bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-300'
-                                                        : 'bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-300'
-                                                "
-                                                class="px-2 py-0.5 text-xs font-medium rounded-full"
-                                            >
-                                                {{
-                                                    item.is_active
-                                                        ? $t('common.active')
-                                                        : $t('common.inactive')
-                                                }}
-                                            </span>
+                                            <div class="flex items-center justify-center">
+                                                <AppToggle
+                                                    :model-value="Boolean(item.is_active)"
+                                                    :disabled="item.source === 'system'"
+                                                    color="success"
+                                                    size="sm"
+                                                    @update:model-value="
+                                                        toggleInspectionActive(item)
+                                                    "
+                                                />
+                                            </div>
                                         </td>
                                         <td class="px-4 py-3 align-middle">
                                             <div class="flex items-center justify-center gap-1">
-                                                <button
-                                                    @click.stop="toggleInspectionActive(item)"
-                                                    :disabled="item.source === 'system'"
-                                                    :class="[
-                                                        'px-2 py-0.5 text-xs font-medium rounded-full transition-all',
-                                                        item.source === 'system'
-                                                            ? 'opacity-50 cursor-not-allowed bg-gray-100 text-gray-500 dark:bg-gray-800'
-                                                            : 'hover:opacity-80',
-                                                        item.is_active && item.source !== 'system'
-                                                            ? 'bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-300'
-                                                            : '',
-                                                        !item.is_active && item.source !== 'system'
-                                                            ? 'bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-300'
-                                                            : '',
-                                                    ]"
-                                                >
-                                                    {{
-                                                        item.is_active
-                                                            ? $t('common.active')
-                                                            : $t('common.inactive')
-                                                    }}
-                                                </button>
                                                 <button
                                                     @click.stop="openInspectionModal(item)"
                                                     :disabled="item.source === 'system'"
                                                     :class="[
                                                         'p-1.5 rounded-lg transition-colors',
                                                         item.source === 'system'
-                                                            ? 'text-gray-300 dark:text-gray-600 cursor-not-allowed'
-                                                            : 'text-gray-500 hover:text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-900/20',
+                                                            ? 'text-content-muted/30 cursor-not-allowed'
+                                                            : 'text-content-muted hover:text-action-primary hover:bg-surface-secondary cursor-pointer',
                                                     ]"
+                                                    :title="$t('common.edit')"
                                                 >
                                                     <svg
                                                         class="w-4 h-4"
@@ -1559,9 +1440,10 @@
                                                     :class="[
                                                         'p-1.5 rounded-lg transition-colors',
                                                         item.source === 'system'
-                                                            ? 'text-gray-300 dark:text-gray-600 cursor-not-allowed'
-                                                            : 'text-gray-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20',
+                                                            ? 'text-content-muted/30 cursor-not-allowed'
+                                                            : 'text-content-muted hover:text-danger hover:bg-danger-soft/20 cursor-pointer',
                                                     ]"
+                                                    :title="$t('common.delete')"
                                                 >
                                                     <svg
                                                         class="w-4 h-4"
@@ -1673,6 +1555,11 @@ import { router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import PageHeader from '@/Components/PageHeader.vue';
+import AppTabs from '@/Components/Common/AppTabs.vue';
+import AppToggle from '@/Components/Common/AppToggle.vue';
+import AppEmptyState from '@/Components/Common/AppEmptyState.vue';
+import AppViewModeToggle from '@/Components/Common/AppViewModeToggle.vue';
+import DataTable from '@/Components/Common/DataTable.vue';
 import ServiceFormModal from '@/Components/ServiceFormModal.vue';
 import NewServiceDefinitionModal from '@/Components/NewServiceDefinitionModal.vue';
 import PackageFormModal from '@/Components/PackageFormModal.vue';
@@ -1685,12 +1572,14 @@ import { useConfirm } from '@/Composables/useConfirm';
 import { useToast } from '@/Composables/useToast';
 import { useLocalized } from '@/Composables/useLocalized';
 import { usePermission } from '@/Composables/usePermission';
+import { useNumberFormat } from '@/Composables/useNumberFormat';
 
 const { t } = useI18n();
 const { confirm } = useConfirm();
 const { success, error } = useToast();
 const { getName } = useLocalized();
 const { can, isAnyAdmin } = usePermission();
+const { toEnglish } = useNumberFormat();
 
 const props = defineProps({
     departments: {
@@ -1724,12 +1613,42 @@ const props = defineProps({
 });
 
 const activeTab = ref(new URLSearchParams(window.location.search).get('tab') || 'services');
+const packagesViewMode = ref('table');
 
 watch(activeTab, (newTab) => {
     const url = new URL(window.location);
     url.searchParams.set('tab', newTab);
     window.history.replaceState({}, '', url);
 });
+
+const mainTabs = computed(() => [
+    {
+        id: 'services',
+        label: t('services_management.title'),
+        count: totalServices.value,
+    },
+    {
+        id: 'packages',
+        label: t('packages.title'),
+        count: props.packages?.length || 0,
+    },
+    {
+        id: 'inspections',
+        label: t('services_management.inspections'),
+        count:
+            props.conditionCategories?.reduce((acc, cat) => acc + (cat.items?.length || 0), 0) || 0,
+    },
+]);
+
+const packageColumns = computed(() => [
+    { key: 'number', label: t('services_management.columns.number'), class: 'w-16 text-center' },
+    { key: 'name', label: t('services_management.columns.name') },
+    { key: 'base_price', label: t('services_management.columns.base_price') },
+    { key: 'items', label: t('packages.items') },
+    { key: 'updated_by', label: t('services_management.columns.updated_by') },
+    { key: 'is_active', label: t('common.status'), class: 'w-24 text-center' },
+    { key: 'actions', label: t('services_management.columns.actions'), class: 'w-28 text-center' },
+]);
 const showModal = ref(false);
 const selectedService = ref(null);
 const currentDepartment = ref(null);

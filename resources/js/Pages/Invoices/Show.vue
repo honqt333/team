@@ -1,4 +1,5 @@
 <template>
+    <Head :title="invoice.invoice_number" />
     <AppLayout
         :title="
             invoice.type === 'credit_note'
@@ -52,13 +53,13 @@
                 </template>
 
                 <template #actions>
-                    <div class="flex items-center gap-3">
+                    <div class="flex flex-wrap items-center justify-end gap-2 sm:gap-3">
                         <!-- Print Button -->
                         <Tooltip :content="$t('common.print')">
                             <a
                                 :href="route('app.invoices.print', invoice.id)"
                                 target="_blank"
-                                class="flex items-center gap-2 px-4 py-2 bg-white/90 dark:bg-gray-800/90 text-gray-700 dark:text-gray-200 hover:text-blue-600 dark:hover:text-blue-400 rounded-xl border border-gray-200 dark:border-gray-700 transition-all font-bold text-xs shadow-sm"
+                                class="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 bg-white/90 dark:bg-gray-800/90 text-gray-700 dark:text-gray-200 hover:text-blue-600 dark:hover:text-blue-400 rounded-xl border border-gray-200 dark:border-gray-700 transition-all font-bold text-xs shadow-sm"
                             >
                                 <svg
                                     class="w-4 h-4"
@@ -84,7 +85,7 @@
                         >
                             <button
                                 @click="showCreditNoteModal = true"
-                                class="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-rose-500 to-amber-500 hover:from-rose-600 hover:to-amber-600 text-white rounded-xl transition-all font-bold text-xs shadow-sm hover:shadow"
+                                class="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 bg-gradient-to-r from-rose-500 to-amber-500 hover:from-rose-600 hover:to-amber-600 text-white rounded-xl transition-all font-bold text-xs shadow-sm hover:shadow"
                             >
                                 <svg
                                     class="w-4 h-4 text-white"
@@ -99,7 +100,9 @@
                                         d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"
                                     />
                                 </svg>
-                                <span>{{ $t('invoices.credit_note.create_button') }}</span>
+                                <span class="hidden sm:inline">
+                                    {{ $t('invoices.credit_note.create_button') }}
+                                </span>
                             </button>
                         </Tooltip>
 
@@ -114,7 +117,7 @@
                         >
                             <button
                                 @click="showPaymentModal = true"
-                                class="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white rounded-xl transition-all font-bold text-xs shadow-sm hover:shadow"
+                                class="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white rounded-xl transition-all font-bold text-xs shadow-sm hover:shadow"
                             >
                                 <svg
                                     class="w-4 h-4 text-white"
@@ -139,12 +142,14 @@
                             </button>
                         </Tooltip>
 
-                        <div class="w-px h-6 bg-gray-200 dark:bg-gray-700 mx-1"></div>
+                        <div
+                            class="hidden sm:block w-px h-6 bg-gray-200 dark:bg-gray-700 mx-1"
+                        ></div>
 
                         <!-- Status Badge -->
                         <span
                             :class="statusClass(invoice.payment_status)"
-                            class="px-4 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-sm"
+                            class="px-3 sm:px-4 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-sm"
                         >
                             {{ $t(`invoices.status.${invoice.payment_status}`) }}
                         </span>
@@ -520,8 +525,107 @@
                         {{ $t('work_orders.cost_and_payment') }}
                     </h3>
 
-                    <div class="overflow-x-auto md:overflow-x-visible flex-1">
-                        <table class="w-full min-w-[600px] md:min-w-0 text-sm">
+                    <!-- Mobile Card Breakdown (Visible on mobile < sm) -->
+                    <div class="block sm:hidden space-y-3 mb-2">
+                        <!-- Services breakdown if present -->
+                        <div
+                            v-if="servicesSubtotal > 0"
+                            class="p-3 bg-gray-50 dark:bg-gray-900/40 rounded-xl space-y-1.5 border border-gray-100 dark:border-gray-700/50"
+                        >
+                            <div
+                                class="flex justify-between items-center text-xs font-bold text-gray-900 dark:text-white"
+                            >
+                                <span>{{ $t('work_orders.services') }}</span>
+                                <span class="font-mono">{{ formatCurrency(servicesTotal) }}</span>
+                            </div>
+                            <div
+                                class="flex justify-between items-center text-[11px] text-gray-500"
+                            >
+                                <span>
+                                    {{ $t('common.unit_price') }}:
+                                    {{ formatCurrency(servicesGross) }}
+                                </span>
+                                <span v-if="servicesDiscount > 0" class="text-red-500 italic">
+                                    -{{ formatCurrency(servicesDiscount) }}
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Spare Parts breakdown if present -->
+                        <div
+                            v-if="partsSubtotal > 0"
+                            class="p-3 bg-gray-50 dark:bg-gray-900/40 rounded-xl space-y-1.5 border border-gray-100 dark:border-gray-700/50"
+                        >
+                            <div
+                                class="flex justify-between items-center text-xs font-bold text-gray-900 dark:text-white"
+                            >
+                                <span>{{ $t('quotes.show.tabs.spare_parts') }}</span>
+                                <span class="font-mono">{{ formatCurrency(partsTotal) }}</span>
+                            </div>
+                            <div
+                                class="flex justify-between items-center text-[11px] text-gray-500"
+                            >
+                                <span>
+                                    {{ $t('common.unit_price') }}: {{ formatCurrency(partsGross) }}
+                                </span>
+                                <span v-if="partsDiscountAmt > 0" class="text-red-500 italic">
+                                    -{{ formatCurrency(partsDiscountAmt) }}
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Grand Total, Paid & Balance Summary Card -->
+                        <div
+                            class="p-3.5 bg-blue-50/70 dark:bg-blue-950/20 rounded-xl border border-blue-200/60 dark:border-blue-800/40 space-y-2"
+                        >
+                            <div
+                                class="flex justify-between items-center text-sm font-black text-blue-900 dark:text-blue-300"
+                            >
+                                <span>
+                                    {{
+                                        invoice.tax_enabled_snapshot
+                                            ? $t('invoices.grand_total')
+                                            : $t('invoices.total')
+                                    }}
+                                </span>
+                                <span class="font-mono text-base text-blue-600 dark:text-blue-400">
+                                    {{ formatCurrency(calculatedInvoiceTotal) }}
+                                </span>
+                            </div>
+                            <div
+                                class="flex justify-between items-center text-xs font-bold text-emerald-600 dark:text-emerald-400"
+                            >
+                                <span>{{ $t('invoices.paid') }}</span>
+                                <span class="font-mono">
+                                    {{ formatCurrency(invoiceActualPaid) }}
+                                </span>
+                            </div>
+                            <div
+                                v-if="invoiceBadDebt > 0"
+                                class="flex justify-between items-center text-xs font-bold text-amber-600 dark:text-amber-400"
+                            >
+                                <span>{{ $t('payments.types.bad_debt') }}</span>
+                                <span class="font-mono">{{ formatCurrency(invoiceBadDebt) }}</span>
+                            </div>
+                            <div
+                                class="pt-2 border-t border-blue-200/60 dark:border-blue-800/40 flex justify-between items-center text-sm font-black"
+                                :class="
+                                    balance > 0.01
+                                        ? 'text-red-600 dark:text-red-400'
+                                        : 'text-emerald-600 dark:text-emerald-400'
+                                "
+                            >
+                                <span>{{ $t('invoices.balance') }}</span>
+                                <span class="font-mono text-base">
+                                    {{ formatCurrency(balance) }}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Desktop Table (Visible on sm and larger) -->
+                    <div class="hidden sm:block overflow-x-auto md:overflow-x-visible flex-1">
+                        <table class="w-full min-w-[550px] md:min-w-0 text-sm">
                             <thead>
                                 <tr
                                     class="text-gray-400 dark:text-gray-500 border-b border-gray-100 dark:border-gray-700/50 pb-2"
@@ -807,7 +911,7 @@
 
             <!-- Tabs Section Selector -->
             <div
-                class="flex items-center bg-white dark:bg-gray-800 p-2 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm gap-1 w-fit"
+                class="flex items-center bg-white dark:bg-gray-800 p-1.5 sm:p-2 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm gap-1 w-full sm:w-fit overflow-x-auto no-scrollbar"
             >
                 <!-- Services Tab -->
                 <button
@@ -911,8 +1015,65 @@
                 v-show="activeTab === 'invoice_items'"
                 class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700/50 overflow-hidden"
             >
-                <div class="overflow-x-auto">
-                    <table class="w-full">
+                <!-- Mobile Card List (< sm) -->
+                <div class="block sm:hidden divide-y divide-gray-100 dark:divide-gray-700/50">
+                    <div
+                        v-for="(line, index) in serviceLines"
+                        :key="line.id"
+                        class="p-4 space-y-2 hover:bg-gray-50 dark:hover:bg-gray-700/20 transition-colors"
+                    >
+                        <div class="flex items-start justify-between gap-2">
+                            <div class="flex items-center gap-2">
+                                <span
+                                    class="w-6 h-6 rounded-md bg-blue-50 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 font-mono text-xs font-black flex items-center justify-center shrink-0"
+                                >
+                                    {{ toEnglish(index + 1) }}
+                                </span>
+                                <h4
+                                    class="text-sm font-bold text-gray-900 dark:text-white leading-tight"
+                                >
+                                    {{ line.description }}
+                                </h4>
+                            </div>
+                            <span
+                                class="text-sm font-black text-blue-600 dark:text-blue-400 font-mono shrink-0"
+                            >
+                                {{ formatCurrency(line.line_total_incl_tax) }}
+                            </span>
+                        </div>
+                        <div
+                            class="flex flex-wrap items-center justify-between text-xs text-gray-500 dark:text-gray-400 pt-1"
+                        >
+                            <span>
+                                {{ $t('common.unit_price') }}:
+                                <span class="font-mono font-semibold">
+                                    {{ formatCurrency(line.unit_price) }}
+                                </span>
+                                <span v-if="!invoice.work_order_id && line.qty > 1" class="ms-1">
+                                    × {{ toEnglish(line.qty) }}
+                                </span>
+                            </span>
+                            <span
+                                v-if="getLineDiscount(line, showExclusive) > 0.01"
+                                class="text-red-500 italic"
+                            >
+                                {{ $t('common.discount') }}: -{{
+                                    formatCurrency(getLineDiscount(line, showExclusive))
+                                }}
+                            </span>
+                            <span
+                                v-if="invoice.tax_enabled_snapshot"
+                                class="text-sky-600 dark:text-sky-400 font-mono"
+                            >
+                                {{ $t('common.vat') }}: {{ formatCurrency(line.tax_amount) }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Desktop Table (sm and larger) -->
+                <div class="hidden sm:block overflow-x-auto">
+                    <table class="w-full min-w-[640px]">
                         <thead>
                             <tr
                                 class="bg-gray-50/50 dark:bg-gray-900/50 border-b border-gray-100 dark:border-gray-700/50"
@@ -1076,8 +1237,65 @@
                 v-show="activeTab === 'parts'"
                 class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700/50 overflow-hidden"
             >
-                <div class="overflow-x-auto">
-                    <table class="w-full">
+                <!-- Mobile Card List (< sm) -->
+                <div class="block sm:hidden divide-y divide-gray-100 dark:divide-gray-700/50">
+                    <div
+                        v-for="(line, index) in partsLines"
+                        :key="line.id"
+                        class="p-4 space-y-2 hover:bg-gray-50 dark:hover:bg-gray-700/20 transition-colors"
+                    >
+                        <div class="flex items-start justify-between gap-2">
+                            <div class="flex items-center gap-2">
+                                <span
+                                    class="w-6 h-6 rounded-md bg-amber-50 dark:bg-amber-900/40 text-amber-600 dark:text-amber-400 font-mono text-xs font-black flex items-center justify-center shrink-0"
+                                >
+                                    {{ toEnglish(index + 1) }}
+                                </span>
+                                <h4
+                                    class="text-sm font-bold text-gray-900 dark:text-white leading-tight"
+                                >
+                                    {{ line.description }}
+                                </h4>
+                            </div>
+                            <span
+                                class="text-sm font-black text-amber-600 dark:text-amber-400 font-mono shrink-0"
+                            >
+                                {{ formatCurrency(line.line_total_incl_tax) }}
+                            </span>
+                        </div>
+                        <div
+                            class="flex flex-wrap items-center justify-between text-xs text-gray-500 dark:text-gray-400 pt-1"
+                        >
+                            <span>
+                                {{ $t('common.unit_price') }}:
+                                <span class="font-mono font-semibold">
+                                    {{ formatCurrency(line.unit_price) }}
+                                </span>
+                                <span v-if="line.qty > 1" class="ms-1">
+                                    × {{ toEnglish(line.qty) }}
+                                </span>
+                            </span>
+                            <span
+                                v-if="getLineDiscount(line, showExclusive) > 0.01"
+                                class="text-red-500 italic"
+                            >
+                                {{ $t('common.discount') }}: -{{
+                                    formatCurrency(getLineDiscount(line, showExclusive))
+                                }}
+                            </span>
+                            <span
+                                v-if="invoice.tax_enabled_snapshot"
+                                class="text-sky-600 dark:text-sky-400 font-mono"
+                            >
+                                {{ $t('common.vat') }}: {{ formatCurrency(line.tax_amount) }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Desktop Table (sm and larger) -->
+                <div class="hidden sm:block overflow-x-auto">
+                    <table class="w-full min-w-[640px]">
                         <thead>
                             <tr
                                 class="bg-amber-50/50 dark:bg-amber-900/10 border-b border-amber-100 dark:border-amber-800/30"
@@ -1244,7 +1462,86 @@
                     </div>
                 </div>
 
-                <div class="overflow-x-auto">
+                <!-- Mobile Card List (< sm) -->
+                <div
+                    v-if="invoice.payments && invoice.payments.length > 0"
+                    class="block sm:hidden divide-y divide-gray-100 dark:divide-gray-700/50 mb-4"
+                >
+                    <div
+                        v-for="(payment, index) in invoice.payments"
+                        :key="payment.id"
+                        class="p-4 space-y-2 hover:bg-gray-50 dark:hover:bg-gray-700/20 transition-colors rounded-xl"
+                        :class="
+                            payment.type === 'bad_debt' ? 'bg-amber-50/40 dark:bg-amber-950/10' : ''
+                        "
+                    >
+                        <div class="flex items-center justify-between gap-2">
+                            <div class="flex items-center gap-2">
+                                <span
+                                    class="w-6 h-6 rounded-md bg-emerald-50 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-400 font-mono text-xs font-black flex items-center justify-center shrink-0"
+                                >
+                                    {{ toEnglish(index + 1) }}
+                                </span>
+                                <span class="text-sm font-bold text-gray-900 dark:text-white">
+                                    <template v-if="payment.type === 'bad_debt'">
+                                        {{ $t('payments.types.bad_debt') }}
+                                    </template>
+                                    <template v-else>
+                                        {{
+                                            $t(`payments.methods.${payment.payment_method}`) ||
+                                            payment.payment_method
+                                        }}
+                                    </template>
+                                </span>
+                            </div>
+                            <span
+                                class="text-base font-black font-mono shrink-0"
+                                :class="
+                                    payment.type === 'bad_debt'
+                                        ? 'text-amber-700 dark:text-amber-400'
+                                        : 'text-emerald-600 dark:text-emerald-400'
+                                "
+                            >
+                                {{ formatCurrencyEnglish(payment.amount) }}
+                            </span>
+                        </div>
+                        <div
+                            class="flex flex-wrap items-center justify-between text-xs text-gray-500 dark:text-gray-400 pt-1"
+                        >
+                            <span class="font-mono">{{ formatDate(payment.payment_date) }}</span>
+                            <span
+                                class="px-2 py-0.5 rounded text-[10px] font-bold"
+                                :class="
+                                    payment.type === 'bad_debt'
+                                        ? 'text-amber-700 dark:text-amber-400 bg-amber-100 dark:bg-amber-950/40'
+                                        : payment.type === 'refund'
+                                          ? 'text-red-700 dark:text-red-400 bg-red-50 dark:bg-red-950/30'
+                                          : 'text-blue-700 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/30'
+                                "
+                            >
+                                {{
+                                    payment.type === 'bad_debt'
+                                        ? $t('payments.types.bad_debt')
+                                        : payment.type === 'refund'
+                                          ? $t('payments.types.refund')
+                                          : $t('payments.types.payment')
+                                }}
+                            </span>
+                            <span v-if="payment.received_by?.name">
+                                {{ payment.received_by.name }}
+                            </span>
+                        </div>
+                        <p
+                            v-if="payment.notes || payment.reference"
+                            class="text-xs text-gray-500 italic"
+                        >
+                            {{ payment.notes || payment.reference }}
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Desktop Table (sm and larger) -->
+                <div class="hidden sm:block overflow-x-auto">
                     <table class="w-full text-sm">
                         <thead>
                             <tr
@@ -1445,7 +1742,7 @@
 
 <script setup>
 import { ref, computed } from 'vue';
-import { Link, router, useForm, usePage } from '@inertiajs/vue3';
+import { Head, Link, router, useForm, usePage } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import PageHeader from '@/Components/PageHeader.vue';

@@ -2,13 +2,12 @@
 import { useForm } from '@inertiajs/vue3';
 import { computed, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { usePage } from '@inertiajs/vue3'; // Import usePage
 import BaseModal from '@/Components/BaseModal.vue';
-import TextInput from '@/Components/TextInput.vue';
-import InputLabel from '@/Components/InputLabel.vue';
-import InputError from '@/Components/InputError.vue';
-import Checkbox from '@/Components/Checkbox.vue';
-import SearchableSelect from '@/Components/SearchableSelect.vue'; // Import SearchableSelect
+import AppInput from '@/Components/App/AppInput.vue';
+import FormField from '@/Components/Common/FormField.vue';
+import AppToggle from '@/Components/Common/AppToggle.vue';
+import SelectableCard from '@/Components/Common/SelectableCard.vue';
+import SearchableSelect from '@/Components/SearchableSelect.vue';
 
 const props = defineProps({
     show: Boolean,
@@ -21,11 +20,10 @@ const props = defineProps({
         type: Array,
         default: () => [],
     },
-    // Note: employees prop removed - linking is automatic via EmployeeObserver
 });
 
 const emit = defineEmits(['close']);
-const { t, locale } = useI18n(); // Destructure locale
+const { t, locale } = useI18n();
 
 const form = useForm({
     name: '',
@@ -34,48 +32,59 @@ const form = useForm({
     password_confirmation: '',
     role_id: null,
     centers: [],
+    is_active: true,
 });
 
 const isEditing = computed(() => !!props.user);
 
 const roleOptions = computed(() => {
-    return props.roles.map(role => ({
+    return props.roles.map((role) => ({
         value: role.id,
-        label: locale.value === 'ar' ? (role.label_ar || role.name) : (role.label_en || role.name)
+        label: locale.value === 'ar' ? role.label_ar || role.name : role.label_en || role.name,
     }));
 });
 
-// Note: employeeOptions removed - linking is automatic via EmployeeObserver
-
-watch(() => props.show, (newVal) => {
-    if (newVal) {
-        if (props.user) {
-            form.name = props.user.name;
-            form.email = props.user.email;
-            form.password = '';
-            form.password_confirmation = '';
-            // Extract center IDs from user.centers relation
-            form.centers = props.user.centers ? props.user.centers.map(c => c.id) : [];
-            // Extract role ID
-            form.role_id = props.user.roles && props.user.roles.length > 0 ? props.user.roles[0].id : null;
-            // Note: employee_id removed - linking is automatic
-            form.is_active = !!props.user.is_active; // Set is_active
-        } else {
-            form.reset();
-            form.centers = [];
-            form.role_id = null;
-            form.is_active = true; // Default to active
+watch(
+    [() => props.show, () => props.user],
+    ([newShow, newUser]) => {
+        if (newShow) {
+            form.clearErrors();
+            if (newUser) {
+                form.name = newUser.name || '';
+                form.email = newUser.email || '';
+                form.password = '';
+                form.password_confirmation = '';
+                form.centers = Array.isArray(newUser.centers)
+                    ? newUser.centers.map((c) => c.id)
+                    : [];
+                form.role_id =
+                    newUser.roles && newUser.roles.length > 0 ? newUser.roles[0].id : null;
+                form.is_active = Boolean(newUser.is_active);
+            } else {
+                form.reset();
+                form.clearErrors();
+                form.name = '';
+                form.email = '';
+                form.password = '';
+                form.password_confirmation = '';
+                form.centers = props.centers?.length === 1 ? [props.centers[0].id] : [];
+                form.role_id = null;
+                form.is_active = true;
+            }
         }
-    }
-});
+    },
+    { immediate: true }
+);
 
 const submit = () => {
     if (isEditing.value) {
         form.put(route('settings.users.update', props.user.id), {
+            preserveScroll: true,
             onSuccess: () => emit('close'),
         });
     } else {
         form.post(route('settings.users.store'), {
+            preserveScroll: true,
             onSuccess: () => emit('close'),
         });
     }
@@ -85,147 +94,175 @@ const submit = () => {
 <template>
     <BaseModal
         :show="show"
-        :title="isEditing ? t('users.edit_user', 'Edit User') : t('users.create_user', 'New User')"
-        @close="emit('close')"
+        :title="
+            isEditing
+                ? t('users.edit_user', 'تعديل بيانات المستخدم')
+                : t('users.create_user', 'إضافة مستخدم جديد')
+        "
         size="2xl"
+        @close="emit('close')"
     >
         <form @submit.prevent="submit">
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <!-- Left Column: User details & credentials -->
                 <div class="space-y-4">
                     <!-- Name -->
-                    <div>
-                        <InputLabel :value="t('users.name', 'Name')">
-                            <span class="text-red-500">*</span>
-                        </InputLabel>
-                        <TextInput
+                    <FormField
+                        v-slot="field"
+                        :label="t('users.name', 'الاسم')"
+                        :error="form.errors.name"
+                        required
+                    >
+                        <AppInput
+                            :id="field.id"
+                            :aria-describedby="field.describedBy"
+                            :invalid="field.hasError"
                             v-model="form.name"
                             type="text"
-                            class="mt-1 block w-full"
+                            class="w-full"
                             required
                             autofocus
                         />
-                        <InputError class="mt-2" :message="form.errors.name" />
-                    </div>
+                    </FormField>
 
                     <!-- Email -->
-                    <div>
-                        <InputLabel :value="t('users.email', 'Email')">
-                            <span class="text-red-500">*</span>
-                        </InputLabel>
-                        <TextInput
+                    <FormField
+                        v-slot="field"
+                        :label="t('users.email', 'البريد الإلكتروني')"
+                        :error="form.errors.email"
+                        required
+                    >
+                        <AppInput
+                            :id="field.id"
+                            :aria-describedby="field.describedBy"
+                            :invalid="field.hasError"
                             v-model="form.email"
                             type="email"
-                            class="mt-1 block w-full"
+                            class="w-full"
                             required
                         />
-                        <InputError class="mt-2" :message="form.errors.email" />
-                    </div>
+                    </FormField>
 
-                    <!-- Password -->
+                    <!-- Password Fields -->
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <InputLabel :value="isEditing ? t('users.new_password', 'New Password') : t('users.password', 'Password')">
-                                <span v-if="!isEditing" class="text-red-500">*</span>
-                            </InputLabel>
-                            <TextInput
+                        <FormField
+                            v-slot="field"
+                            :label="
+                                isEditing
+                                    ? t('users.new_password', 'كلمة المرور الجديدة (اختياري)')
+                                    : t('users.password', 'كلمة المرور')
+                            "
+                            :error="form.errors.password"
+                            :required="!isEditing"
+                        >
+                            <AppInput
+                                :id="field.id"
+                                :aria-describedby="field.describedBy"
+                                :invalid="field.hasError"
                                 v-model="form.password"
                                 type="password"
-                                class="mt-1 block w-full"
+                                class="w-full"
                                 :required="!isEditing"
                             />
-                            <InputError class="mt-2" :message="form.errors.password" />
-                        </div>
-                        
-                        <div>
-                            <InputLabel :value="t('users.confirm_password', 'Confirm Password')">
-                                <span v-if="!isEditing" class="text-red-500">*</span>
-                            </InputLabel>
-                            <TextInput
+                        </FormField>
+
+                        <FormField
+                            v-slot="field"
+                            :label="t('users.confirm_password', 'تأكيد كلمة المرور')"
+                            :error="form.errors.password_confirmation"
+                            :required="!isEditing || !!form.password"
+                        >
+                            <AppInput
+                                :id="field.id"
+                                :aria-describedby="field.describedBy"
+                                :invalid="field.hasError"
                                 v-model="form.password_confirmation"
                                 type="password"
-                                class="mt-1 block w-full"
+                                class="w-full"
                                 :required="!isEditing || !!form.password"
                             />
-                        </div>
+                        </FormField>
                     </div>
 
-                    <!-- Active Status -->
-                    <div class="flex items-center gap-3 p-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
-                        <Checkbox
-                            v-model:checked="form.is_active"
-                            id="is_active"
-                            class="text-violet-600 focus:ring-violet-500 rounded"
+                    <!-- Active Status Toggle -->
+                    <div class="p-3.5 rounded-xl border border-border bg-surface-muted/50">
+                        <AppToggle
+                            v-model="form.is_active"
+                            :label="t('users.is_active', 'حساب نشط')"
+                            :description="
+                                t('users.is_active_hint', 'للسماح للمستخدم بتسجيل الدخول للنظام')
+                            "
+                            color="success"
                         />
-                        <InputLabel for="is_active" class="cursor-pointer mb-0">
-                            {{ t('users.is_active', 'Active Account') }}
-                            <div class="text-xs text-gray-500 font-normal mt-0.5">
-                                {{ t('users.is_active_hint', 'Allow user to login to the system') }}
-                            </div>
-                        </InputLabel>
                     </div>
                 </div>
 
                 <!-- Right Column: Roles & Allowed Branches -->
-                <div class="space-y-4 lg:border-l lg:dark:border-gray-700 lg:pl-6 rtl:lg:border-l-0 rtl:lg:border-r rtl:lg:pr-6 flex flex-col justify-between">
-                    <div>
-                        <InputLabel :value="t('users.role', 'Role')">
-                            <span class="text-red-500">*</span>
-                        </InputLabel>
+                <div
+                    class="space-y-4 lg:border-s lg:border-border lg:ps-6 flex flex-col justify-between"
+                >
+                    <!-- Role -->
+                    <FormField
+                        :label="t('users.role', 'الدور')"
+                        :error="form.errors.role_id"
+                        required
+                    >
                         <SearchableSelect
                             v-model="form.role_id"
                             :options="roleOptions"
                             option-label="label"
                             option-value="value"
-                            :placeholder="t('users.select_role', 'Select Role')"
+                            :placeholder="t('users.select_role', 'اختر الدور')"
                             required
-                            class="mt-1 block w-full"
+                            class="w-full"
                         />
-                        <InputError class="mt-2" :message="form.errors.role_id" />
-                    </div>
+                    </FormField>
 
                     <!-- Allowed Branches -->
                     <div class="flex-1 flex flex-col">
-                        <InputLabel :value="t('users.allowed_centers', 'Allowed Branches')">
-                            <span class="text-red-500">*</span>
-                        </InputLabel>
-                        
-                        <div class="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-48 overflow-y-auto p-1 custom-scrollbar border border-gray-100 dark:border-gray-700 rounded-xl">
-                            <label 
-                                v-for="center in centers" 
-                                :key="center.id"
-                                class="flex items-center gap-3 p-3 rounded-xl border cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 transition-all duration-200"
-                                :class="form.centers.includes(center.id) 
-                                    ? 'border-violet-500 bg-violet-50 dark:bg-violet-900/20 ring-1 ring-violet-500' 
-                                    : 'border-gray-200 dark:border-gray-700'"
+                        <FormField
+                            :label="t('users.allowed_centers', 'الفروع المتاحة')"
+                            :error="form.errors.centers"
+                            required
+                        >
+                            <div
+                                class="mt-1 grid grid-cols-1 gap-2.5 max-h-56 overflow-y-auto p-1 custom-scrollbar border border-border rounded-xl"
                             >
-                                <Checkbox 
-                                    v-model:checked="form.centers"
+                                <SelectableCard
+                                    v-for="center in centers"
+                                    :key="center.id"
+                                    v-model="form.centers"
                                     :value="center.id"
-                                    class="text-violet-600 focus:ring-violet-500 rounded"
+                                    :title="center.name"
+                                    type="checkbox"
+                                    class="p-3"
                                 />
-                                <span class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ center.name }}</span>
-                            </label>
-                        </div>
-                        <InputError class="mt-2" :message="form.errors.centers" />
+                            </div>
+                        </FormField>
                     </div>
                 </div>
             </div>
 
-            <div class="flex justify-end gap-3 pt-6 mt-6 border-t border-gray-100 dark:border-gray-800">
+            <div class="flex justify-end gap-3 pt-6 mt-6 border-t border-border">
                 <button
                     type="button"
-                    class="px-5 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors"
+                    class="px-5 py-2.5 text-sm font-medium text-text-secondary bg-surface border border-border rounded-xl hover:bg-surface-muted transition-colors cursor-pointer"
                     @click="emit('close')"
                 >
-                    {{ t('common.cancel', 'Cancel') }}
+                    {{ t('common.cancel', 'إلغاء') }}
                 </button>
                 <button
                     type="submit"
-                    class="px-5 py-2.5 text-sm font-medium text-white bg-gradient-to-r from-violet-600 to-indigo-600 rounded-xl hover:from-violet-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-violet-500 shadow-lg shadow-violet-500/30 transition-all duration-200 disabled:opacity-75 disabled:cursor-not-allowed"
+                    class="px-5 py-2.5 text-sm font-medium text-action-on bg-action-primary hover:bg-action-primary-hover rounded-xl shadow-xs transition-all duration-200 disabled:opacity-75 disabled:cursor-not-allowed cursor-pointer"
                     :disabled="form.processing"
                 >
-                    {{ form.processing ? t('common.saving', 'Saving...') : (isEditing ? t('common.update', 'Update') : t('common.save', 'Save')) }}
+                    {{
+                        form.processing
+                            ? t('common.saving', 'جاري الحفظ...')
+                            : isEditing
+                              ? t('common.update', 'تحديث')
+                              : t('common.save', 'حفظ')
+                    }}
                 </button>
             </div>
         </form>

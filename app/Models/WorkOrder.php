@@ -6,6 +6,7 @@ namespace App\Models;
 
 use App\Models\Concerns\CenterScoped;
 use App\Models\Concerns\HasTaxSnapshot;
+use App\Services\Optimization\TaxCalculator;
 use App\Support\TenancyContext;
 use App\Traits\HasWorkOrderOperations;
 use App\Traits\HasWorkOrderRelations;
@@ -14,6 +15,14 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\DB;
 
+/**
+ * @property numeric-string|float|null $total_excl_tax
+ * @property numeric-string|float|null $total_tax
+ * @property bool|null $tax_enabled_snapshot
+ * @property string|null $pricing_mode_snapshot
+ * @property numeric-string|float|null $total_incl_tax
+ * @property numeric-string|float|null $tax_rate_snapshot
+ */
 class WorkOrder extends Model
 {
     use CenterScoped, HasFactory, HasTaxSnapshot, SoftDeletes;
@@ -101,15 +110,19 @@ class WorkOrder extends Model
             $this->total_incl_tax = $netTotal;
         } else {
             $taxRate = (float) ($this->tax_rate_snapshot ?: 15.00);
+            $isInclusive = ($this->pricing_mode_snapshot ?? 'exclusive') === 'inclusive';
 
-            if (($this->pricing_mode_snapshot ?? 'exclusive') === 'inclusive') {
-                $this->total_incl_tax = $netTotal;
-                $this->total_excl_tax = round($netTotal / (1 + ($taxRate / 100)), 2);
-                $this->total_tax = round($this->total_incl_tax - $this->total_excl_tax, 2);
-            } else {
-                $this->total_tax = round($netTotal * ($taxRate / 100), 2);
-                $this->total_incl_tax = round($netTotal + $this->total_tax, 2);
-            }
+            $calc = app(TaxCalculator::class)->calculateLine(
+                unitPrice: $netTotal,
+                qty: 1.0,
+                discount: 0.0,
+                taxRate: $taxRate,
+                isInclusive: $isInclusive,
+            );
+
+            $this->total_excl_tax = $calc['line_total_excl_tax'];
+            $this->total_tax = $calc['tax_amount'];
+            $this->total_incl_tax = $calc['line_total_incl_tax'];
         }
     }
 

@@ -103,7 +103,7 @@
                     </div>
                     <button
                         v-if="payrollRun.status === 'approved'"
-                        @click="markAsPaid"
+                        @click="openPaidModal"
                         :disabled="processing"
                         class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-semibold shadow-sm transition-colors flex items-center gap-1.5 disabled:opacity-50"
                     >
@@ -305,27 +305,51 @@
                                     </a>
                                 </td>
                                 <td
-                                    class="px-4 py-3 text-end align-middle"
+                                    class="px-4 py-3 text-end align-middle whitespace-nowrap"
                                     v-if="payrollRun.status === 'draft'"
                                 >
-                                    <button
-                                        @click="deleteItem(item)"
-                                        class="text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all p-1"
+                                    <div
+                                        class="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-all"
                                     >
-                                        <svg
-                                            class="w-5 h-5"
-                                            fill="none"
-                                            stroke="currentColor"
-                                            viewBox="0 0 24 24"
+                                        <button
+                                            @click="openEditModal(item)"
+                                            class="text-gray-400 hover:text-blue-500 p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
+                                            :title="$t('common.edit')"
                                         >
-                                            <path
-                                                stroke-linecap="round"
-                                                stroke-linejoin="round"
-                                                stroke-width="2"
-                                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                                            />
-                                        </svg>
-                                    </button>
+                                            <svg
+                                                class="w-4 h-4"
+                                                fill="none"
+                                                stroke="currentColor"
+                                                viewBox="0 0 24 24"
+                                            >
+                                                <path
+                                                    stroke-linecap="round"
+                                                    stroke-linejoin="round"
+                                                    stroke-width="2"
+                                                    d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                                                />
+                                            </svg>
+                                        </button>
+                                        <button
+                                            @click="deleteItem(item)"
+                                            class="text-gray-400 hover:text-red-500 p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
+                                            :title="$t('common.delete')"
+                                        >
+                                            <svg
+                                                class="w-4 h-4"
+                                                fill="none"
+                                                stroke="currentColor"
+                                                viewBox="0 0 24 24"
+                                            >
+                                                <path
+                                                    stroke-linecap="round"
+                                                    stroke-linejoin="round"
+                                                    stroke-width="2"
+                                                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                                                />
+                                            </svg>
+                                        </button>
+                                    </div>
                                 </td>
                             </tr>
                         </tbody>
@@ -333,6 +357,165 @@
                 </div>
             </div>
         </div>
+
+        <!-- Edit Draft Item Modal -->
+        <BaseModal :show="showEditModal" @close="showEditModal = false" size="lg">
+            <template #title>
+                {{ $t('common.edit') }} - {{ editingItem?.employee?.name_ar }}
+            </template>
+            <form @submit.prevent="submitEditItem" class="space-y-4">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                        <label
+                            class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1"
+                        >
+                            {{ $t('hr.payroll.base_salary') }}
+                        </label>
+                        <input
+                            v-model.number="itemForm.base_salary"
+                            type="number"
+                            step="0.01"
+                            min="0"
+                            class="w-full px-3 py-2 text-sm border rounded-xl bg-gray-50 dark:bg-gray-900 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-emerald-500 font-mono text-gray-900 dark:text-white"
+                            required
+                        />
+                    </div>
+                    <div>
+                        <label
+                            class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1"
+                        >
+                            {{ $t('hr.payroll.allowances') }}
+                        </label>
+                        <input
+                            v-model.number="itemForm.total_allowances"
+                            type="number"
+                            step="0.01"
+                            min="0"
+                            class="w-full px-3 py-2 text-sm border rounded-xl bg-gray-50 dark:bg-gray-900 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-emerald-500 font-mono text-emerald-600 font-bold"
+                            required
+                        />
+                    </div>
+                    <div>
+                        <label
+                            class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1"
+                        >
+                            {{ $t('hr.payroll.deductions') }}
+                        </label>
+                        <input
+                            v-model.number="itemForm.total_deductions"
+                            type="number"
+                            step="0.01"
+                            min="0"
+                            class="w-full px-3 py-2 text-sm border rounded-xl bg-gray-50 dark:bg-gray-900 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-emerald-500 font-mono text-red-600 font-bold"
+                            required
+                        />
+                    </div>
+                </div>
+
+                <div
+                    class="p-4 bg-emerald-50 dark:bg-emerald-950/20 rounded-xl border border-emerald-200 dark:border-emerald-800 flex items-center justify-between"
+                >
+                    <span class="text-xs font-bold text-emerald-800 dark:text-emerald-300">
+                        {{ $t('hr.payroll.net_salary') }}:
+                    </span>
+                    <span
+                        class="text-lg font-black text-emerald-600 dark:text-emerald-400 font-mono"
+                    >
+                        {{ formatCurrency(computedNetSalary) }}
+                    </span>
+                </div>
+
+                <div>
+                    <label
+                        class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1"
+                    >
+                        {{ $t('common.notes') }}
+                    </label>
+                    <textarea
+                        v-model="itemForm.notes"
+                        rows="2"
+                        class="w-full px-3 py-2 text-sm border rounded-xl bg-gray-50 dark:bg-gray-900 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-emerald-500 text-gray-900 dark:text-white"
+                    ></textarea>
+                </div>
+
+                <div class="flex justify-end gap-2 pt-2">
+                    <button
+                        type="button"
+                        @click="showEditModal = false"
+                        class="px-4 py-2 text-xs font-semibold text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-xl hover:bg-gray-200"
+                    >
+                        {{ $t('common.cancel') }}
+                    </button>
+                    <button
+                        type="submit"
+                        :disabled="itemForm.processing"
+                        class="px-4 py-2 text-xs font-semibold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl disabled:opacity-50"
+                    >
+                        {{ itemForm.processing ? $t('common.saving') : $t('common.save') }}
+                    </button>
+                </div>
+            </form>
+        </BaseModal>
+
+        <!-- Mark Paid Modal -->
+        <BaseModal :show="showPaidModal" @close="showPaidModal = false" size="md">
+            <template #title>
+                {{ $t('hr.payroll.mark_paid') }}
+            </template>
+            <form @submit.prevent="submitMarkPaid" class="space-y-4">
+                <div>
+                    <label
+                        class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1"
+                    >
+                        {{ $t('hr.payroll.payment_date') }}
+                    </label>
+                    <input
+                        v-model="paidForm.payment_date"
+                        type="date"
+                        class="w-full px-3 py-2 text-sm border rounded-xl bg-gray-50 dark:bg-gray-900 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-emerald-500 text-gray-900 dark:text-white"
+                        required
+                    />
+                </div>
+                <div>
+                    <SearchableSelect
+                        v-model="paidForm.payment_method"
+                        :label="$t('common.payment_method')"
+                        :options="paymentMethodOptions"
+                        option-label="name"
+                        option-value="id"
+                        required
+                    />
+                </div>
+                <div>
+                    <label
+                        class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1"
+                    >
+                        {{ $t('common.reference_number') || 'رقم الحوالة / المرجع' }}
+                    </label>
+                    <input
+                        v-model="paidForm.reference_number"
+                        type="text"
+                        class="w-full px-3 py-2 text-sm border rounded-xl bg-gray-50 dark:bg-gray-900 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-emerald-500 text-gray-900 dark:text-white"
+                    />
+                </div>
+                <div class="flex justify-end gap-2 pt-2">
+                    <button
+                        type="button"
+                        @click="showPaidModal = false"
+                        class="px-4 py-2 text-xs font-semibold text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-xl hover:bg-gray-200"
+                    >
+                        {{ $t('common.cancel') }}
+                    </button>
+                    <button
+                        type="submit"
+                        :disabled="paidForm.processing"
+                        class="px-4 py-2 text-xs font-semibold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl disabled:opacity-50"
+                    >
+                        {{ paidForm.processing ? $t('common.saving') : $t('hr.payroll.mark_paid') }}
+                    </button>
+                </div>
+            </form>
+        </BaseModal>
     </AppLayout>
 </template>
 
@@ -341,10 +524,12 @@ import { useI18n } from 'vue-i18n';
 const { t } = useI18n();
 
 import { ref, computed } from 'vue';
-import { Link, router } from '@inertiajs/vue3';
+import { Link, router, useForm } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import PageHeader from '@/Components/PageHeader.vue';
 import BackButton from '@/Components/BackButton.vue';
+import BaseModal from '@/Components/BaseModal.vue';
+import SearchableSelect from '@/Components/SearchableSelect.vue';
 import { useToast } from '@/Composables/useToast';
 
 const { success, error } = useToast();
@@ -365,6 +550,74 @@ const totalDeductions = computed(
 const totalNet = computed(
     () => props.payrollRun.items?.reduce((sum, i) => sum + parseFloat(i.net_salary || 0), 0) || 0
 );
+
+// Edit Item modal
+const showEditModal = ref(false);
+const editingItem = ref(null);
+const itemForm = useForm({
+    base_salary: 0,
+    total_allowances: 0,
+    total_deductions: 0,
+    notes: '',
+});
+
+const computedNetSalary = computed(() => {
+    const base = parseFloat(itemForm.base_salary || 0);
+    const allow = parseFloat(itemForm.total_allowances || 0);
+    const deduct = parseFloat(itemForm.total_deductions || 0);
+    return Math.max(0, base + allow - deduct);
+});
+
+function openEditModal(item) {
+    editingItem.value = item;
+    itemForm.base_salary = parseFloat(item.base_salary || 0);
+    itemForm.total_allowances = parseFloat(item.total_allowances || 0);
+    itemForm.total_deductions = parseFloat(item.total_deductions || 0);
+    itemForm.notes = item.notes || '';
+    showEditModal.value = true;
+}
+
+function submitEditItem() {
+    itemForm.put(
+        route('app.hr.payroll.items.update', [props.payrollRun.id, editingItem.value.id]),
+        {
+            onSuccess: () => {
+                success(t('messages.updated_successfully'));
+                showEditModal.value = false;
+            },
+        }
+    );
+}
+
+// Mark Paid modal
+const showPaidModal = ref(false);
+const paidForm = useForm({
+    payment_date: new Date().toISOString().split('T')[0],
+    payment_method: 'bank_transfer',
+    reference_number: '',
+});
+
+const paymentMethodOptions = computed(() => [
+    { id: 'bank_transfer', name: t('financial.bank_transfer') || 'تحويل بنكي' },
+    { id: 'cash', name: t('invoices.cash') || 'نقداً' },
+    { id: 'cheque', name: t('common.cheque') || 'شيك' },
+]);
+
+function openPaidModal() {
+    paidForm.payment_date = new Date().toISOString().split('T')[0];
+    paidForm.payment_method = 'bank_transfer';
+    paidForm.reference_number = '';
+    showPaidModal.value = true;
+}
+
+function submitMarkPaid() {
+    paidForm.put(route('app.hr.payroll.mark-paid', props.payrollRun.id), {
+        onSuccess: () => {
+            success(t('hr.payroll.marked_paid'));
+            showPaidModal.value = false;
+        },
+    });
+}
 
 function regeneratePayroll() {
     if (!confirm(t('hr.payroll.recreate_confirm'))) return;
@@ -398,18 +651,6 @@ function deleteItem(item) {
     router.delete(route('app.hr.payroll.items.destroy', [props.payrollRun.id, item.id]), {
         onSuccess: () => success(t('hr.payroll.employee_excluded')),
     });
-}
-
-function markAsPaid() {
-    processing.value = true;
-    router.put(
-        route('app.hr.payroll.mark-paid', props.payrollRun.id),
-        {},
-        {
-            onSuccess: () => success(t('hr.payroll.marked_paid')),
-            onFinish: () => (processing.value = false),
-        }
-    );
 }
 
 function formatPeriod(dateStr) {

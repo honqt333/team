@@ -271,9 +271,9 @@ const scrollToHighlighted = () => {
 
 <template>
     <div ref="containerRef" class="relative">
-        <label v-if="label" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+        <label v-if="label" class="block text-sm font-medium text-text-primary mb-1">
             {{ label }}
-            <span v-if="required" class="text-red-500">*</span>
+            <span v-if="required" class="text-danger">*</span>
         </label>
 
         <div class="relative">
@@ -291,7 +291,7 @@ const scrollToHighlighted = () => {
                 type="text"
                 :placeholder="placeholder || t('common.select')"
                 :disabled="disabled"
-                class="w-full border rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-violet-500 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+                class="w-full border rounded-xl bg-surface text-text-primary focus:ring-2 focus:ring-focus-ring transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
                 :class="[
                     compact
                         ? hasPrefix
@@ -301,8 +301,8 @@ const scrollToHighlighted = () => {
                           ? 'ps-10 pe-4 py-2.5 text-sm'
                           : 'px-4 py-2.5 text-sm',
                     error
-                        ? 'border-red-500 focus:border-red-500'
-                        : 'border-gray-300 dark:border-gray-600 focus:border-violet-500',
+                        ? 'border-danger focus:border-danger'
+                        : 'border-border focus:border-action-primary',
                     { 'pr-10': selectedOption && !isOpen && !compact },
                 ]"
                 @click="handleInputClick"
@@ -316,7 +316,7 @@ const scrollToHighlighted = () => {
                 <!-- Arrow Icon -->
                 <svg
                     v-if="!selectedOption || isOpen"
-                    class="w-4 h-4 text-gray-500"
+                    class="w-4 h-4 text-text-muted"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -336,7 +336,7 @@ const scrollToHighlighted = () => {
                 @click="clearSelection"
             >
                 <svg
-                    class="w-4 h-4 text-gray-400 group-hover:text-red-500 transition-colors"
+                    class="w-4 h-4 text-text-muted group-hover:text-danger transition-colors"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -354,7 +354,7 @@ const scrollToHighlighted = () => {
         <!-- Dropdown -->
         <div
             v-if="isOpen"
-            class="absolute z-50 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg max-h-60 overflow-y-auto"
+            class="absolute z-50 w-full mt-1 bg-surface border border-border rounded-xl shadow-lg max-h-60 overflow-y-auto"
         >
             <ul v-if="filteredOptions.length > 0" ref="optionsListRef" class="py-1">
                 <li
@@ -365,8 +365,8 @@ const scrollToHighlighted = () => {
                     class="px-4 py-2 text-sm cursor-pointer flex items-center justify-between"
                     :class="[
                         highlightedIndex === index
-                            ? 'bg-violet-50 dark:bg-violet-900/50 text-violet-700 dark:text-violet-300'
-                            : 'text-gray-700 dark:text-gray-300 hover:bg-violet-50 dark:hover:bg-violet-900/50 hover:text-violet-700 dark:hover:text-violet-300',
+                            ? 'bg-selection-bg text-selection-text'
+                            : 'text-text-primary hover:bg-selection-bg hover:text-selection-text',
                         { 'font-medium': isOptionSelected(option) },
                     ]"
                 >
@@ -394,15 +394,15 @@ const scrollToHighlighted = () => {
             </ul>
             <div
                 v-else-if="!asyncSearch || (asyncSearch && searchQuery.length >= 2)"
-                class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400 text-center"
+                class="px-4 py-3 text-sm text-text-muted text-center"
             >
                 {{ t('common.no_results') }}
             </div>
-            <div v-else class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400 text-center">
+            <div v-else class="px-4 py-3 text-sm text-text-muted text-center">
                 {{ t('inventory.parts.search') }}
             </div>
         </div>
 
-        <p v-if="error" class="mt-1 text-xs text-red-500">{{ error }}</p>
+        <p v-if="error" class="mt-1 text-xs text-danger">{{ error }}</p>
     </div>
 </template>

@@ -69,6 +69,26 @@ class CustomerController
             $query->whereDate('created_at', '<=', request('date_to'));
         }
 
+        $sortableColumns = [
+            'name' => 'customers.name',
+            'phone' => 'customers.phone',
+            'type' => 'customers.type',
+            'contact_name' => 'customers.contact_name',
+            'email' => 'customers.email',
+            'balance' => 'balance',
+            'created_at' => 'customers.created_at',
+            'id' => 'customers.id',
+        ];
+
+        $sort = (string) request('sort');
+        $direction = strtolower((string) request('direction', 'desc')) === 'asc' ? 'asc' : 'desc';
+
+        if ($sort && isset($sortableColumns[$sort])) {
+            $query->orderBy($sortableColumns[$sort], $direction);
+        } else {
+            $query->orderBy('customers.id', 'desc');
+        }
+
         return $query;
     }
 
@@ -78,13 +98,12 @@ class CustomerController
 
         $customers = $this->buildCustomerQuery()
             ->withCount(['vehicles', 'quotes', 'workOrders'])
-            ->orderBy('id', 'desc')
             ->paginate(15)
             ->withQueryString();
 
         return Inertia::render('Customers/Index', [
             'customers' => $customers,
-            'filters' => request()->only(['search', 'type', 'date_from', 'date_to']),
+            'filters' => request()->only(['search', 'type', 'date_from', 'date_to', 'sort', 'direction']),
         ]);
     }
 
@@ -94,7 +113,6 @@ class CustomerController
 
         $customers = $this->buildCustomerQuery()
             ->withCount(['vehicles', 'quotes', 'workOrders'])
-            ->orderBy('id', 'desc')
             ->get();
 
         $tenant = auth()->user()->tenant;

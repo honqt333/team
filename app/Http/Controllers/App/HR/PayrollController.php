@@ -9,11 +9,13 @@ use App\Models\Center;
 use App\Models\HR\Attendance;
 use App\Models\HR\AttendanceSettings;
 use App\Models\HR\Employee;
+use App\Models\HR\Leave;
 use App\Models\HR\PayrollItem;
 use App\Models\HR\PayrollRun;
 use App\Support\TenancyContext;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 
 class PayrollController extends Controller
@@ -28,13 +30,35 @@ class PayrollController extends Controller
         $tenantId = TenancyContext::tenantId();
         $centerId = TenancyContext::centerId();
 
-        $payrollRuns = PayrollRun::where('tenant_id', $tenantId)
-            ->where('center_id', $centerId)
+        $query = PayrollRun::where('tenant_id', $tenantId)
+            ->when($centerId, function ($q) use ($centerId) {
+                $q->where(function ($sub) use ($centerId) {
+                    $sub->where('center_id', $centerId)
+                        ->orWhereNull('center_id');
+                });
+            })
             ->with(['createdBy:id,name', 'approvedBy:id,name'])
             ->withCount('items')
             ->withSum('items', 'net_salary')
-            ->orderByDesc('period_start')
-            ->paginate(12);
+            ->when($request->input('status'), function ($q, $status) {
+                $q->where('status', $status);
+            })
+            ->when($request->input('search'), function ($q, $search) {
+                $q->where(function ($sub) use ($search) {
+                    $sub->where('period_start', 'like', "%{$search}%")
+                        ->orWhere('period_end', 'like', "%{$search}%")
+                        ->orWhere('payment_date', 'like', "%{$search}%")
+                        ->orWhere('status', 'like', "%{$search}%");
+                });
+            });
+
+        $allowedSorts = ['period_start', 'period_end', 'payment_date', 'items_count', 'items_sum_net_salary', 'status', 'created_at'];
+        $sort = in_array($request->input('sort'), $allowedSorts, true) ? $request->input('sort') : 'period_start';
+        $direction = strtolower((string) ($request->input('direction') ?? $request->input('order', ''))) === 'asc' ? 'asc' : 'desc';
+
+        $query->orderBy($sort, $direction);
+
+        $payrollRuns = $query->paginate(12)->withQueryString();
 
         // Get ALL employees for managers (not filtered by center)
         $employees = Employee::where('tenant_id', $tenantId)
@@ -53,6 +77,10 @@ class PayrollController extends Controller
             'payrollRuns' => $payrollRuns,
             'employees' => $employees,
             'centers' => $centers,
+            'filters' => array_merge($request->only(['search', 'status']), [
+                'sort' => $sort,
+                'direction' => $direction,
+            ]),
         ]);
     }
 
@@ -148,13 +176,65 @@ class PayrollController extends Controller
     {
         $this->authorize('update', $payrollRun);
 
-        if ($payrollRun->status !== 'draft') {
-            return back()->with('error', __('hr.payroll.cannot_delete_item'));
-        }
+        return DB::transaction(function () use ($payrollRun, $payrollItem) {
+            $locked = PayrollRun::query()->lockForUpdate()->findOrFail($payrollRun->id);
+            $this->authorize('update', $locked);
+            $item = $locked->items()->lockForUpdate()->findOrFail($payrollItem->id);
 
-        $payrollItem->delete();
+            if ($locked->status !== 'draft') {
+                return back()->with('error', __('hr.payroll.cannot_delete_item'));
+            }
+            $item->delete();
+            $locked->logActivity('item_deleted', ['payroll_item_id' => $item->id]);
 
-        return back()->with('success', __('common.deleted_success'));
+            return back()->with('success', __('common.deleted_success'));
+        });
+    }
+
+    /**
+     * Update an individual payroll item in a draft payroll run.
+     */
+    public function updateItem(Request $request, PayrollRun $payrollRun, PayrollItem $payrollItem)
+    {
+        $this->authorize('update', $payrollRun);
+
+        $validated = $request->validate([
+            'base_salary' => 'required|numeric|min:0',
+            'total_allowances' => 'required|numeric|min:0',
+            'total_deductions' => 'required|numeric|min:0',
+            'notes' => 'nullable|string|max:500',
+        ]);
+
+        return DB::transaction(function () use ($payrollRun, $payrollItem, $validated) {
+            $locked = PayrollRun::query()->lockForUpdate()->findOrFail($payrollRun->id);
+            $this->authorize('update', $locked);
+
+            if ($locked->status !== 'draft') {
+                return back()->with('error', __('hr.payroll.cannot_edit_item'));
+            }
+
+            $item = $locked->items()->lockForUpdate()->findOrFail($payrollItem->id);
+
+            $netSalary = max(0, (float) $validated['base_salary'] + (float) $validated['total_allowances'] - (float) $validated['total_deductions']);
+
+            $item->update([
+                'base_salary' => $validated['base_salary'],
+                'total_allowances' => $validated['total_allowances'],
+                'total_deductions' => $validated['total_deductions'],
+                'net_salary' => $netSalary,
+                'notes' => $validated['notes'] ?? $item->notes,
+            ]);
+
+            $locked->logActivity('item_updated', [
+                'payroll_item_id' => $item->id,
+                'base_salary' => $validated['base_salary'],
+                'total_allowances' => $validated['total_allowances'],
+                'total_deductions' => $validated['total_deductions'],
+                'net_salary' => $netSalary,
+            ]);
+
+            return back()->with('success', __('messages.updated_successfully'));
+        });
     }
 
     /**
@@ -220,7 +300,7 @@ class PayrollController extends Controller
     }
 
     /**
-     * Calculate deductions based on attendance (late, absence).
+     * Calculate deductions based on attendance (late, absence) and approved leaves.
      */
     private function calculateAttendanceDeductions(Employee $employee, Carbon $start, Carbon $end, AttendanceSettings $settings): float
     {
@@ -228,40 +308,73 @@ class PayrollController extends Controller
             ->whereBetween('date', [$start->toDateString(), $end->toDateString()])
             ->get();
 
-        $lateDeduction = 0;
-        $absenceDeduction = 0;
+        // Get approved leaves for this employee overlapping with the period
+        $approvedLeaves = Leave::where('employee_id', $employee->id)
+            ->where('status', 'approved')
+            ->where(function ($q) use ($start, $end) {
+                $q->whereBetween('start_date', [$start->toDateString(), $end->toDateString()])
+                    ->orWhereBetween('end_date', [$start->toDateString(), $end->toDateString()])
+                    ->orWhere(function ($sub) use ($start, $end) {
+                        $sub->where('start_date', '<=', $start->toDateString())
+                            ->where('end_date', '>=', $end->toDateString());
+                    });
+            })
+            ->get();
 
-        // Count late minutes
+        // Count late minutes deduction
         $totalLateMinutes = $attendances->sum('late_minutes');
-        $lateDeduction = $totalLateMinutes * $settings->late_deduction_per_minute;
+        $lateDeduction = $totalLateMinutes * (float) ($settings->late_deduction_per_minute ?? 0);
 
-        // Count absences
-        $expectedWorkDays = 0;
+        // Daily wage calculation (Saudi Labor Law standard: monthly wage / 30)
+        $dailySalary = ($employee->base_salary + $employee->calculateTotalAllowances()) / 30;
+
+        $unexcusedAbsentDays = 0;
+        $unpaidLeaveDays = 0;
+
         $currentDate = $start->copy();
 
         while ($currentDate->lte($end)) {
+            // Only working days are subject to absence/attendance checks
             if ($settings->isWorkingDay($currentDate->dayOfWeek)) {
-                $expectedWorkDays++;
+                $dateStr = $currentDate->toDateString();
+
+                // Check if employee has an approved leave covering this day
+                $activeLeave = $approvedLeaves->first(function ($leave) use ($currentDate) {
+                    $leaveStart = Carbon::parse($leave->start_date)->startOfDay();
+                    $leaveEnd = Carbon::parse($leave->end_date)->endOfDay();
+
+                    return $currentDate->gte($leaveStart) && $currentDate->lte($leaveEnd);
+                });
+
+                if ($activeLeave) {
+                    if ($activeLeave->type === 'unpaid') {
+                        $unpaidLeaveDays++;
+                    }
+                    // Paid leaves (annual, sick, emergency, etc.) are protected from absence deduction
+                } else {
+                    // Check attendance record
+                    $att = $attendances->first(fn ($a) => Carbon::parse($a->date)->toDateString() === $dateStr);
+
+                    if (! $att || $att->status === 'absent') {
+                        $unexcusedAbsentDays++;
+                    }
+                }
             }
+
             $currentDate->addDay();
         }
 
-        $presentDays = $attendances->where('status', '!=', 'absent')->count();
-        $absentDays = max(0, $expectedWorkDays - $presentDays);
-
-        // Calculate absence deduction based on type
+        // Calculate unexcused absence deduction based on setting
         if ($settings->absence_deduction_type === 'percentage') {
-            // Daily Salary = (Base + Allowances) / 30
-            $dailySalary = ($employee->base_salary + $employee->calculateTotalAllowances()) / 30;
-            // Deduction = Days * Daily Salary * Percentage
-            // Value is stored as 100 for 100%, 50 for 50%, etc.
-            $absenceDeduction = $absentDays * $dailySalary * ($settings->absence_deduction_value / 100);
+            $absenceDeduction = $unexcusedAbsentDays * $dailySalary * ((float) ($settings->absence_deduction_value ?? 100) / 100);
         } else {
-            // Fixed amount per day
-            $absenceDeduction = $absentDays * $settings->absence_deduction_value;
+            $absenceDeduction = $unexcusedAbsentDays * (float) ($settings->absence_deduction_value ?? 0);
         }
 
-        return round($lateDeduction + $absenceDeduction, 2);
+        // Unpaid leave deduction (exact daily wage per day without absence penalty)
+        $unpaidLeaveDeduction = $unpaidLeaveDays * $dailySalary;
+
+        return round($lateDeduction + $absenceDeduction + $unpaidLeaveDeduction, 2);
     }
 
     /**
@@ -298,13 +411,18 @@ class PayrollController extends Controller
             'approved_by' => auth()->id(),
         ]);
 
+        $payrollRun->logActivity('approved', [
+            'status' => 'approved',
+            'approved_by' => auth()->id(),
+        ]);
+
         return back()->with('success', __('hr.payroll.approved_successfully'));
     }
 
     /**
      * Mark payroll as paid.
      */
-    public function markPaid(PayrollRun $payrollRun)
+    public function markPaid(Request $request, PayrollRun $payrollRun)
     {
         $this->authorize('update', $payrollRun);
 
@@ -312,9 +430,24 @@ class PayrollController extends Controller
             return back()->with('error', __('hr.payroll.must_approve_first'));
         }
 
+        $validated = $request->validate([
+            'payment_date' => 'nullable|date',
+            'payment_method' => 'nullable|string|max:50',
+            'reference_number' => 'nullable|string|max:100',
+        ]);
+
+        $paymentDate = ! empty($validated['payment_date']) ? Carbon::parse($validated['payment_date']) : now();
+
         $payrollRun->update([
             'status' => 'paid',
-            'payment_date' => now(),
+            'payment_date' => $paymentDate,
+        ]);
+
+        $payrollRun->logActivity('paid', [
+            'status' => 'paid',
+            'payment_date' => $paymentDate->toDateString(),
+            'payment_method' => $validated['payment_method'] ?? 'bank_transfer',
+            'reference_number' => $validated['reference_number'] ?? null,
         ]);
 
         // Mark associated Other Payments as paid

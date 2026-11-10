@@ -6,6 +6,7 @@ defineProps({
     items: { type: Array, default: () => [] },
     currency: { type: String, default: 'SAR' },
     limit: { type: Number, default: 5 },
+    showPrice: { type: Boolean, default: true },
 });
 
 function relativeTime(dateStr) {
@@ -61,8 +62,13 @@ function relativeTime(dateStr) {
                             </span>
                         </p>
                     </div>
-                    <div class="flex-shrink-0 text-right">
+                    <div class="flex-shrink-0 text-end">
                         <p
+                            v-if="
+                                showPrice &&
+                                item.total_incl_tax !== null &&
+                                item.total_incl_tax !== undefined
+                            "
                             class="text-sm font-semibold tabular-nums text-slate-900 dark:text-white"
                         >
                             {{
@@ -70,6 +76,9 @@ function relativeTime(dateStr) {
                                     item.total_incl_tax || 0
                                 )
                             }}
+                            <span class="text-xs font-normal text-slate-400 dark:text-slate-500">
+                                {{ currency }}
+                            </span>
                         </p>
                         <p class="text-xs text-slate-500 dark:text-slate-400">
                             {{ relativeTime(item.created_at) }}

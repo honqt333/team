@@ -231,7 +231,7 @@ class ProfileController extends Controller
             $browser = 'Chrome';
         } elseif (str_contains($userAgent, 'Firefox')) {
             $browser = 'Firefox';
-        } elseif (str_contains($userAgent, 'Safari') && ! str_contains($userAgent, 'Chrome')) {
+        } elseif (str_contains($userAgent, 'Safari')) {
             $browser = 'Safari';
         } elseif (str_contains($userAgent, 'Opera') || str_contains($userAgent, 'OPR')) {
             $browser = 'Opera';

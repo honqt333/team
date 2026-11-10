@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers\App;
 
 use App\Http\Controllers\Controller;
+use App\Models\Appointment;
 use App\Models\Customer;
 use App\Models\Invoice;
 use App\Models\Part;
@@ -12,6 +13,7 @@ use App\Models\Payment;
 use App\Models\Vehicle;
 use App\Models\WorkOrder;
 use App\Models\WorkOrderItem;
+use App\Support\Permissions;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -21,8 +23,35 @@ class DashboardController extends Controller
 {
     public function index(Request $request)
     {
-        $centerId = $request->attributes->get('center_id') ?? auth()->user()?->center_id;
-        $tenantId = auth()->user()?->tenant_id;
+        $user = auth()->user();
+        $centerId = $request->attributes->get('center_id') ?? $user?->center_id;
+        $tenantId = $user?->tenant_id;
+
+        // ─── Authorization & Role Context (Strict Server-Side Privacy) ────
+        $isSystemAdmin = (bool) ($user->is_system_admin ?? false);
+        $isSuperAdmin = (bool) ($user?->hasRole('super_admin') ?? false);
+        $isBranchManager = (bool) ($user?->hasRole('branch_manager') ?? false);
+        $isAccountant = (bool) ($user?->hasRole('accountant') ?? false);
+        $isTechnician = (bool) ($user?->hasRole('technician') && ! $isSuperAdmin && ! $isBranchManager);
+        $isReceptionist = (bool) ($user?->hasRole('receptionist') && ! $isSuperAdmin && ! $isBranchManager);
+
+        $canViewFinancials = $isSystemAdmin
+            || $isSuperAdmin
+            || $isBranchManager
+            || $isAccountant
+            || (bool) $user?->hasPermissionTo(Permissions::INVOICES_VIEW);
+
+        $canViewInventory = $isSystemAdmin
+            || $isSuperAdmin
+            || $isBranchManager
+            || $isAccountant
+            || (bool) $user?->hasPermissionTo(Permissions::INVENTORY_VIEW);
+
+        $canCreateWorkOrder = $isSystemAdmin
+            || $isSuperAdmin
+            || $isBranchManager
+            || $isReceptionist
+            || (bool) $user?->hasPermissionTo(Permissions::WORK_ORDERS_CREATE);
 
         // Date ranges
         $today = Carbon::today();
@@ -74,65 +103,110 @@ class DashboardController extends Controller
             ->pluck('count', 'status')
             ->toArray();
 
-        // ─── Revenue Stats ─────────────────────────────────────────────────
-        $revenueThisMonth = (clone $invoiceBase)
-            ->whereDate('issue_date', '>=', $thisMonth)
-            ->sum('total_incl_tax');
-
-        $revenueLastMonth = (clone $invoiceBase)
-            ->whereDate('issue_date', '>=', $lastMonth)
-            ->whereDate('issue_date', '<=', $lastMonthEnd)
-            ->sum('total_incl_tax');
-
-        $outstandingBalance = (clone $invoiceBase)
-            ->whereIn('payment_status', ['unpaid', 'partial'])
-            ->sum(DB::raw('total_incl_tax - COALESCE((SELECT SUM(amount) FROM payments WHERE payments.invoice_id = invoices.id), 0)'));
-
-        // Average invoice value (this month)
-        $avgInvoiceValue = (clone $invoiceBase)
-            ->whereDate('issue_date', '>=', $thisMonth)
-            ->avg('total_incl_tax');
-
-        // Revenue last 30 days (daily)
-        $dailyRevenue = (clone $invoiceBase)
-            ->whereDate('issue_date', '>=', $last30Days)
-            ->select(
-                DB::raw('DATE(issue_date) as date'),
-                DB::raw('SUM(total_incl_tax) as total')
-            )
-            ->groupBy('date')
-            ->orderBy('date')
-            ->get()
-            ->keyBy('date')
-            ->toArray();
-
-        // Build 30-day array
+        // ─── Revenue Stats (Protected by $canViewFinancials) ───────────────
+        $revenueThisMonth = null;
+        $revenueLastMonth = null;
+        $outstandingBalance = null;
+        $avgInvoiceValue = null;
+        $paymentsToday = null;
         $revenueChart = [];
-
-        for ($i = 29; $i >= 0; $i--) {
-            $date = Carbon::now()->subDays($i)->format('Y-m-d');
-            $revenueChart[] = [
-                'date' => $date,
-                'label' => Carbon::parse($date)->format('d/m'),
-                'total' => isset($dailyRevenue[$date]) ? round((float) $dailyRevenue[$date]['total'], 2) : 0,
-            ];
-        }
-
-        // Monthly revenue (last 6 months) for trend chart
         $monthlyRevenue = [];
+        $recentInvoices = [];
+        $topCustomers = [];
+        $overdueInvoices = 0;
 
-        for ($i = 5; $i >= 0; $i--) {
-            $start = Carbon::now()->subMonths($i)->startOfMonth();
-            $end = Carbon::now()->subMonths($i)->endOfMonth();
-            $total = (clone $invoiceBase)
-                ->whereDate('issue_date', '>=', $start)
-                ->whereDate('issue_date', '<=', $end)
+        if ($canViewFinancials) {
+            $revenueThisMonth = (clone $invoiceBase)
+                ->whereDate('issue_date', '>=', $thisMonth)
                 ->sum('total_incl_tax');
-            $monthlyRevenue[] = [
-                'month' => $start->format('Y-m'),
-                'label' => $start->locale(app()->getLocale())->isoFormat('MMM'),
-                'total' => round((float) $total, 2),
-            ];
+
+            $revenueLastMonth = (clone $invoiceBase)
+                ->whereDate('issue_date', '>=', $lastMonth)
+                ->whereDate('issue_date', '<=', $lastMonthEnd)
+                ->sum('total_incl_tax');
+
+            $outstandingBalance = (clone $invoiceBase)
+                ->whereIn('payment_status', ['unpaid', 'partial'])
+                ->sum(DB::raw('total_incl_tax - COALESCE((SELECT SUM(amount) FROM payments WHERE payments.invoice_id = invoices.id), 0)'));
+
+            $avgInvoiceValue = (clone $invoiceBase)
+                ->whereDate('issue_date', '>=', $thisMonth)
+                ->avg('total_incl_tax');
+
+            $overdueInvoices = (clone $invoiceBase)
+                ->whereIn('payment_status', ['unpaid', 'partial'])
+                ->whereDate('issue_date', '<', $last30Days)
+                ->count();
+
+            $paymentsToday = Payment::where('tenant_id', $tenantId)
+                ->when($centerId, fn ($q) => $q->where('center_id', $centerId))
+                ->whereDate('payment_date', $today)
+                ->sum('amount');
+
+            // Revenue last 30 days (daily)
+            $dailyRevenue = (clone $invoiceBase)
+                ->whereDate('issue_date', '>=', $last30Days)
+                ->select(
+                    DB::raw('DATE(issue_date) as date'),
+                    DB::raw('SUM(total_incl_tax) as total')
+                )
+                ->groupBy('date')
+                ->orderBy('date')
+                ->get()
+                ->keyBy('date')
+                ->toArray();
+
+            for ($i = 29; $i >= 0; $i--) {
+                $date = Carbon::now()->subDays($i)->format('Y-m-d');
+                $revenueChart[] = [
+                    'date' => $date,
+                    'label' => Carbon::parse($date)->format('d/m'),
+                    'total' => isset($dailyRevenue[$date]) ? round((float) $dailyRevenue[$date]['total'], 2) : 0,
+                ];
+            }
+
+            // Monthly revenue (last 6 months) for trend chart
+            for ($i = 5; $i >= 0; $i--) {
+                $start = Carbon::now()->subMonths($i)->startOfMonth();
+                $end = Carbon::now()->subMonths($i)->endOfMonth();
+                $total = (clone $invoiceBase)
+                    ->whereDate('issue_date', '>=', $start)
+                    ->whereDate('issue_date', '<=', $end)
+                    ->sum('total_incl_tax');
+                $monthlyRevenue[] = [
+                    'month' => $start->format('Y-m'),
+                    'label' => $start->locale(app()->getLocale())->isoFormat('MMM'),
+                    'total' => round((float) $total, 2),
+                ];
+            }
+
+            // Recent Invoices
+            $recentInvoices = (clone $invoiceBase)
+                ->with(['customer:id,name'])
+                ->latest('issue_date')
+                ->take(8)
+                ->get(['id', 'invoice_number', 'customer_id', 'total_incl_tax', 'payment_status', 'issue_date', 'status']);
+
+            // Top Customers (by revenue last 30 days)
+            $topCustomers = (clone $invoiceBase)
+                ->with('customer:id,name')
+                ->whereDate('issue_date', '>=', $last30Days)
+                ->select(
+                    'customer_id',
+                    DB::raw('count(*) as invoice_count'),
+                    DB::raw('SUM(total_incl_tax) as total_revenue')
+                )
+                ->groupBy('customer_id')
+                ->orderByDesc('total_revenue')
+                ->take(5)
+                ->get()
+                ->map(fn ($inv) => [
+                    'id' => $inv->customer_id,
+                    'name' => $inv->customer->name ?? '—',
+                    'invoice_count' => (int) $inv->invoice_count,
+                    'total_revenue' => round((float) $inv->total_revenue, 2),
+                ])
+                ->toArray();
         }
 
         // ─── Customer Stats ────────────────────────────────────────────────
@@ -157,41 +231,59 @@ class DashboardController extends Controller
             ->whereDate('expected_end_date', '<', $today)
             ->count();
 
-        $overdueInvoices = (clone $invoiceBase)
-            ->whereIn('payment_status', ['unpaid', 'partial'])
-            ->whereDate('issue_date', '<', $last30Days)
-            ->count();
+        $lowStockCount = 0;
+        $totalParts = 0;
+        $outOfStockCount = 0;
 
-        $lowStockCount = Part::where('parts.tenant_id', $tenantId)
-            ->join('inventory_balances', function ($join) use ($centerId) {
-                $join->on('inventory_balances.part_id', '=', 'parts.id');
+        if ($canViewInventory) {
+            $totalParts = Part::where('tenant_id', $tenantId)->count();
+            $outOfStockCount = Part::where('tenant_id', $tenantId)
+                ->whereDoesntHave('inventoryBalances', function ($q) use ($centerId) {
+                    if ($centerId) {
+                        $q->where('center_id', $centerId);
+                    }
+                    $q->where('qty_on_hand', '>', 0);
+                })
+                ->count();
 
-                if ($centerId) {
-                    $join->where('inventory_balances.center_id', $centerId);
-                }
-            })
-            ->where(function ($q) {
-                $q->where(function ($sub) {
-                    $sub->where('inventory_balances.min_stock', '>', 0)
-                        ->whereColumn('inventory_balances.qty_on_hand', '<=', 'inventory_balances.min_stock');
-                })->orWhere(function ($sub) {
-                    $sub->where(function ($zeroMin) {
-                        $zeroMin->whereNull('inventory_balances.min_stock')
-                            ->orWhere('inventory_balances.min_stock', '<=', 0);
-                    })
-                        ->where('parts.min_qty', '>', 0)
-                        ->whereColumn('inventory_balances.qty_on_hand', '<=', 'parts.min_qty');
-                });
-            })
-            ->distinct('parts.id')
-            ->count('parts.id');
+            $lowStockCount = Part::where('parts.tenant_id', $tenantId)
+                ->join('inventory_balances', function ($join) use ($centerId) {
+                    $join->on('inventory_balances.part_id', '=', 'parts.id');
 
-        // ─── Recent Work Orders ────────────────────────────────────────────
+                    if ($centerId) {
+                        $join->where('inventory_balances.center_id', $centerId);
+                    }
+                })
+                ->where(function ($q) {
+                    $q->where(function ($sub) {
+                        $sub->where('inventory_balances.min_stock', '>', 0)
+                            ->whereColumn('inventory_balances.qty_on_hand', '<=', 'inventory_balances.min_stock');
+                    })->orWhere(function ($sub) {
+                        $sub->where(function ($zeroMin) {
+                            $zeroMin->whereNull('inventory_balances.min_stock')
+                                ->orWhere('inventory_balances.min_stock', '<=', 0);
+                        })
+                            ->where('parts.min_qty', '>', 0)
+                            ->whereColumn('inventory_balances.qty_on_hand', '<=', 'parts.min_qty');
+                    });
+                })
+                ->distinct('parts.id')
+                ->count('parts.id');
+        }
+
+        // ─── Recent Work Orders (Sanitized: hide price if no financial access)
         $recentWorkOrders = (clone $workOrdersBase)
             ->with(['customer:id,name', 'vehicle:id,plate_number'])
             ->latest()
             ->take(8)
-            ->get(['id', 'code', 'status', 'customer_id', 'vehicle_id', 'total_incl_tax', 'created_at', 'expected_end_date']);
+            ->get(['id', 'code', 'status', 'customer_id', 'vehicle_id', 'total_incl_tax', 'created_at', 'expected_end_date'])
+            ->map(function ($wo) use ($canViewFinancials) {
+                if (! $canViewFinancials) {
+                    $wo->total_incl_tax = null;
+                }
+
+                return $wo;
+            });
 
         // ─── Today's Schedule (work orders with expected_end_date today) ──
         $todaySchedule = (clone $workOrdersBase)
@@ -210,18 +302,44 @@ class DashboardController extends Controller
             ->take(5)
             ->get(['id', 'code', 'status', 'customer_id', 'vehicle_id', 'created_at']);
 
-        // ─── Recent Invoices ───────────────────────────────────────────────
-        $recentInvoices = (clone $invoiceBase)
-            ->with(['customer:id,name'])
-            ->latest('issue_date')
-            ->take(8)
-            ->get(['id', 'invoice_number', 'customer_id', 'total_incl_tax', 'payment_status', 'issue_date', 'status']);
+        // ─── Ready for QC / Delivery (Cars finished or waiting customer) ──
+        $readyForDelivery = (clone $workOrdersBase)
+            ->with(['customer:id,name,phone', 'vehicle:id,plate_number'])
+            ->whereIn('status', ['ready_for_qc', 'done'])
+            ->latest()
+            ->take(6)
+            ->get(['id', 'code', 'status', 'customer_id', 'vehicle_id', 'total_incl_tax', 'expected_end_date'])
+            ->map(function ($wo) use ($canViewFinancials) {
+                if (! $canViewFinancials) {
+                    $wo->total_incl_tax = null;
+                }
 
-        // ─── Payments Today ────────────────────────────────────────────────
-        $paymentsToday = Payment::where('tenant_id', $tenantId)
+                return $wo;
+            });
+
+        // ─── Today's Appointments (Receptionist / Frontdesk focus) ─────────
+        $todayAppointments = Appointment::where('tenant_id', $tenantId)
             ->when($centerId, fn ($q) => $q->where('center_id', $centerId))
-            ->whereDate('payment_date', $today)
-            ->sum('amount');
+            ->whereDate('scheduled_at', $today)
+            ->with(['customer:id,name,phone', 'vehicle:id,plate_number'])
+            ->orderBy('scheduled_at')
+            ->take(8)
+            ->get(['id', 'customer_id', 'vehicle_id', 'scheduled_at', 'status', 'notes']);
+
+        // ─── Technician Assigned Work Orders ───────────────────────────────
+        $myAssignedWorkOrders = [];
+
+        if ($isTechnician && $user) {
+            $myAssignedWorkOrders = (clone $workOrdersBase)
+                ->whereHas('items.technicians', function ($q) use ($user) {
+                    $q->where('users.id', $user->id);
+                })
+                ->with(['customer:id,name', 'vehicle:id,plate_number'])
+                ->whereNotIn('status', ['done', 'cancelled'])
+                ->latest()
+                ->take(8)
+                ->get(['id', 'code', 'status', 'customer_id', 'vehicle_id', 'expected_end_date']);
+        }
 
         // ─── Work Orders Weekly trend (last 7 days) ─────────────────────────
         $weeklyWorkOrders = (clone $workOrdersBase)
@@ -266,9 +384,9 @@ class DashboardController extends Controller
             ->get()
             ->map(fn ($item) => [
                 'id' => $item->service_id,
-                'name' => $item->service?->name ?? '—',
+                'name' => $item->service->name ?? '—',
                 'times_used' => (int) $item->times_used,
-                'total_revenue' => round((float) $item->total_revenue, 2),
+                'total_revenue' => $canViewFinancials ? round((float) $item->total_revenue, 2) : null,
             ])
             ->toArray();
 
@@ -303,44 +421,20 @@ class DashboardController extends Controller
             ])
             ->toArray();
 
-        // ─── Top Customers (by revenue last 30 days) ──────────────────────
-        $topCustomers = (clone $invoiceBase)
-            ->with('customer:id,name')
-            ->whereDate('issue_date', '>=', $last30Days)
-            ->select(
-                'customer_id',
-                DB::raw('count(*) as invoice_count'),
-                DB::raw('SUM(total_incl_tax) as total_revenue')
-            )
-            ->groupBy('customer_id')
-            ->orderByDesc('total_revenue')
-            ->take(5)
-            ->get()
-            ->map(fn ($inv) => [
-                'id' => $inv->customer_id,
-                'name' => $inv->customer?->name ?? '—',
-                'invoice_count' => (int) $inv->invoice_count,
-                'total_revenue' => round((float) $inv->total_revenue, 2),
-            ])
-            ->toArray();
-
-        // ─── Inventory Snapshot ────────────────────────────────────────────
-        $totalParts = Part::where('tenant_id', $tenantId)->count();
-        $outOfStockCount = Part::where('parts.tenant_id', $tenantId)
-            ->leftJoin('inventory_balances', function ($join) use ($centerId) {
-                $join->on('inventory_balances.part_id', '=', 'parts.id');
-
-                if ($centerId) {
-                    $join->where('inventory_balances.center_id', '=', $centerId);
-                }
-            })
-            ->whereNull('inventory_balances.id')
-            ->orWhere(function ($q) use ($centerId) {
-                $q->where('parts.tenant_id', $centerId ?? $centerId);
-            })
-            ->count();
+        // Determine user's primary role label
+        $primaryRole = $user?->roles->first();
+        $roleLabel = $primaryRole->label_ar ?? ($isTechnician ? 'فني صيانة' : ($isReceptionist ? 'موظف استقبال' : 'عضو فريق'));
 
         return Inertia::render('Dashboard', [
+            'userContext' => [
+                'canViewFinancials' => $canViewFinancials,
+                'canViewInventory' => $canViewInventory,
+                'canCreateWorkOrder' => $canCreateWorkOrder,
+                'isTechnician' => $isTechnician,
+                'isReceptionist' => $isReceptionist,
+                'roleName' => $primaryRole->name ?? 'user',
+                'roleLabel' => $roleLabel,
+            ],
             'stats' => [
                 'workOrders' => [
                     'thisMonth' => $workOrdersThisMonth,
@@ -348,13 +442,13 @@ class DashboardController extends Controller
                     'active' => $activeWorkOrders,
                     'completedToday' => $completedToday,
                 ],
-                'revenue' => [
+                'revenue' => $canViewFinancials ? [
                     'thisMonth' => round((float) $revenueThisMonth, 2),
                     'lastMonth' => round((float) $revenueLastMonth, 2),
                     'outstanding' => round((float) max((float) $outstandingBalance, 0), 2),
                     'paymentsToday' => round((float) $paymentsToday, 2),
                     'avgInvoiceValue' => round((float) $avgInvoiceValue, 2),
-                ],
+                ] : null,
                 'customers' => [
                     'total' => $totalCustomers,
                     'thisMonth' => $customersThisMonth,
@@ -363,10 +457,10 @@ class DashboardController extends Controller
                 'vehicles' => [
                     'total' => $totalVehicles,
                 ],
-                'inventory' => [
+                'inventory' => $canViewInventory ? [
                     'totalParts' => $totalParts,
                     'outOfStock' => $outOfStockCount,
-                ],
+                ] : null,
             ],
             'charts' => [
                 'revenueDaily' => $revenueChart,
@@ -384,6 +478,9 @@ class DashboardController extends Controller
             'recentInvoices' => $recentInvoices,
             'todaySchedule' => $todaySchedule,
             'todayNewWorkOrders' => $todayNewWorkOrders,
+            'todayAppointments' => $todayAppointments,
+            'readyForDelivery' => $readyForDelivery,
+            'myAssignedWorkOrders' => $myAssignedWorkOrders,
             'topServices' => $topServices,
             'technicianPerformance' => $technicianPerformance,
             'topCustomers' => $topCustomers,

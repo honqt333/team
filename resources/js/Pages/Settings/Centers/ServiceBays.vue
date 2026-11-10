@@ -11,7 +11,7 @@
                 glowFrom="from-indigo-500"
             >
                 <template #back>
-                    <BackButton href="/app/settings" />
+                    <BackButton :href="backUrl" />
                 </template>
 
                 <template #icon>
@@ -33,37 +33,65 @@
 
             <!-- New / Edit form -->
             <div
-                class="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-5"
+                class="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-5 shadow-sm"
             >
-                <h3 class="text-sm font-bold text-gray-900 dark:text-gray-100 mb-3">
+                <h3
+                    class="text-sm font-bold text-gray-900 dark:text-gray-100 mb-4 flex items-center gap-2"
+                >
+                    <span class="w-2 h-2 rounded-full bg-primary-600"></span>
                     {{ form.id ? $t('service_bays.edit_bay') : $t('service_bays.add_bay') }}
                 </h3>
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
-                    <input
-                        v-model="form.name"
-                        type="text"
-                        :placeholder="$t('service_bays.name_placeholder')"
-                        class="rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-3 py-2 text-sm"
-                    />
-                    <input
-                        v-model="form.code"
-                        type="text"
-                        :placeholder="$t('service_bays.code_placeholder')"
-                        class="rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-3 py-2 text-sm"
-                    />
-                    <SearchableSelect
-                        v-model="form.type"
-                        :options="typeOptions"
-                        option-label="label"
-                        option-value="value"
-                        :compact="true"
-                    />
-                    <label class="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-200">
-                        <input v-model="form.is_active" type="checkbox" class="rounded" />
-                        {{ $t('service_bays.active') }}
-                    </label>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
+                    <div>
+                        <label
+                            class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1"
+                        >
+                            {{ $t('service_bays.name') }}
+                            <span class="text-rose-500">*</span>
+                        </label>
+                        <input
+                            v-model="form.name"
+                            type="text"
+                            :placeholder="$t('service_bays.name_placeholder')"
+                            class="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-3 py-2 text-sm text-gray-900 dark:text-gray-100 focus:ring-1 focus:ring-primary-500"
+                        />
+                    </div>
+                    <div>
+                        <label
+                            class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1"
+                        >
+                            {{ $t('service_bays.code') }}
+                        </label>
+                        <input
+                            v-model="form.code"
+                            type="text"
+                            :placeholder="$t('service_bays.code_placeholder')"
+                            class="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-3 py-2 text-sm text-gray-900 dark:text-gray-100 focus:ring-1 focus:ring-primary-500"
+                        />
+                    </div>
+                    <div>
+                        <label
+                            class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1"
+                        >
+                            {{ $t('service_bays.type') }}
+                        </label>
+                        <SearchableSelect
+                            v-model="form.type"
+                            :options="typeOptions"
+                            option-label="label"
+                            option-value="value"
+                            :label="''"
+                        />
+                    </div>
+                    <div class="flex items-center pb-2">
+                        <AppToggle
+                            v-model="form.is_active"
+                            :label="$t('service_bays.active')"
+                            color="success"
+                        />
+                    </div>
                 </div>
-                <div class="mt-3 flex items-center gap-2">
+                <div class="mt-4 flex items-center gap-2">
                     <button
                         type="button"
                         @click="save"
@@ -85,87 +113,91 @@
 
             <!-- List -->
             <div
-                class="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 overflow-hidden"
+                class="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 overflow-hidden shadow-sm"
             >
-                <table class="min-w-full divide-y divide-gray-100 dark:divide-gray-700">
-                    <thead class="bg-gray-50 dark:bg-gray-900/40">
-                        <tr>
-                            <th
-                                class="px-4 py-2 text-start text-xs font-bold text-gray-700 dark:text-gray-200"
-                            >
-                                {{ $t('service_bays.name') }}
-                            </th>
-                            <th
-                                class="px-4 py-2 text-start text-xs font-bold text-gray-700 dark:text-gray-200"
-                            >
-                                {{ $t('service_bays.code') }}
-                            </th>
-                            <th
-                                class="px-4 py-2 text-start text-xs font-bold text-gray-700 dark:text-gray-200"
-                            >
-                                {{ $t('service_bays.type') }}
-                            </th>
-                            <th
-                                class="px-4 py-2 text-start text-xs font-bold text-gray-700 dark:text-gray-200"
-                            >
-                                {{ $t('service_bays.status') }}
-                            </th>
-                            <th
-                                class="px-4 py-2 text-end text-xs font-bold text-gray-700 dark:text-gray-200"
-                            >
-                                {{ $t('common.actions') }}
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
-                        <tr v-for="bay in bays" :key="bay.id">
-                            <td class="px-4 py-2 text-sm">{{ bay.name }}</td>
-                            <td
-                                class="px-4 py-2 text-sm font-mono text-gray-500 dark:text-gray-400"
-                            >
-                                {{ bay.code || '—' }}
-                            </td>
-                            <td class="px-4 py-2 text-sm">
-                                {{ bay.type ? $t(`service_bays.types.${bay.type}`) : '—' }}
-                            </td>
-                            <td class="px-4 py-2 text-sm">
-                                <span
-                                    :class="
-                                        bay.is_active
-                                            ? 'inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300'
-                                            : 'inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300'
-                                    "
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-100 dark:divide-gray-700">
+                        <thead class="bg-gray-50 dark:bg-gray-900/40">
+                            <tr>
+                                <th
+                                    class="px-4 py-2 text-start text-xs font-bold text-gray-700 dark:text-gray-200"
                                 >
-                                    {{
-                                        bay.is_active ? $t('common.active') : $t('common.inactive')
-                                    }}
-                                </span>
-                            </td>
-                            <td class="px-4 py-2 text-end space-x-2">
-                                <button
-                                    type="button"
-                                    @click="edit(bay)"
-                                    class="text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:underline"
+                                    {{ $t('service_bays.name') }}
+                                </th>
+                                <th
+                                    class="px-4 py-2 text-start text-xs font-bold text-gray-700 dark:text-gray-200"
                                 >
-                                    {{ $t('common.edit') }}
-                                </button>
-                                <button
-                                    type="button"
-                                    @click="remove(bay)"
-                                    :disabled="busy"
-                                    class="text-xs font-bold text-rose-600 dark:text-rose-400 hover:underline disabled:opacity-50"
+                                    {{ $t('service_bays.code') }}
+                                </th>
+                                <th
+                                    class="px-4 py-2 text-start text-xs font-bold text-gray-700 dark:text-gray-200"
                                 >
-                                    {{ $t('common.delete') }}
-                                </button>
-                            </td>
-                        </tr>
-                        <tr v-if="!bays.length">
-                            <td colspan="5" class="px-4 py-6 text-center text-sm text-gray-400">
-                                {{ $t('service_bays.empty') }}
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+                                    {{ $t('service_bays.type') }}
+                                </th>
+                                <th
+                                    class="px-4 py-2 text-start text-xs font-bold text-gray-700 dark:text-gray-200"
+                                >
+                                    {{ $t('service_bays.status') }}
+                                </th>
+                                <th
+                                    class="px-4 py-2 text-end text-xs font-bold text-gray-700 dark:text-gray-200"
+                                >
+                                    {{ $t('common.actions') }}
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
+                            <tr v-for="bay in bays" :key="bay.id">
+                                <td class="px-4 py-2 text-sm">{{ bay.name }}</td>
+                                <td
+                                    class="px-4 py-2 text-sm font-mono text-gray-500 dark:text-gray-400"
+                                >
+                                    {{ bay.code || '—' }}
+                                </td>
+                                <td class="px-4 py-2 text-sm">
+                                    {{ bay.type ? $t(`service_bays.types.${bay.type}`) : '—' }}
+                                </td>
+                                <td class="px-4 py-2 text-sm">
+                                    <span
+                                        :class="
+                                            bay.is_active
+                                                ? 'inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300'
+                                                : 'inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300'
+                                        "
+                                    >
+                                        {{
+                                            bay.is_active
+                                                ? $t('common.active')
+                                                : $t('common.inactive')
+                                        }}
+                                    </span>
+                                </td>
+                                <td class="px-4 py-2 text-end space-x-2">
+                                    <button
+                                        type="button"
+                                        @click="edit(bay)"
+                                        class="text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:underline"
+                                    >
+                                        {{ $t('common.edit') }}
+                                    </button>
+                                    <button
+                                        type="button"
+                                        @click="remove(bay)"
+                                        :disabled="busy"
+                                        class="text-xs font-bold text-rose-600 dark:text-rose-400 hover:underline disabled:opacity-50"
+                                    >
+                                        {{ $t('common.delete') }}
+                                    </button>
+                                </td>
+                            </tr>
+                            <tr v-if="!bays.length">
+                                <td colspan="5" class="px-4 py-6 text-center text-sm text-gray-400">
+                                    {{ $t('service_bays.empty') }}
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </AppLayout>
@@ -180,6 +212,7 @@ import AppLayout from '@/Layouts/AppLayout.vue';
 import PageHeader from '@/Components/PageHeader.vue';
 import BackButton from '@/Components/BackButton.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
+import AppToggle from '@/Components/Common/AppToggle.vue';
 
 const props = defineProps({
     bays: { type: Array, default: () => [] },
@@ -187,6 +220,16 @@ const props = defineProps({
 
 const { t } = useI18n();
 const busy = ref(false);
+
+const backUrl = computed(() => {
+    if (typeof window !== 'undefined') {
+        const params = new URLSearchParams(window.location.search);
+        if (params.get('from') === 'settings') {
+            return '/app/settings';
+        }
+    }
+    return route('appointments.index');
+});
 
 const types = ['maintenance', 'polish', 'tires', 'electrical', 'wash', 'inspection', 'general'];
 

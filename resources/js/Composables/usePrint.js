@@ -357,8 +357,31 @@ export function usePrint() {
         return buildPrintSignatures(docSettings, customerSignatureUrl);
     }
 
+    /**
+     * Trigger browser print safely with optional document title.
+     */
+    function printDocument(options = {}) {
+        if (typeof window === 'undefined') return;
+        const originalTitle = document.title;
+        if (options?.title) {
+            document.title = options.title;
+        }
+        window.print();
+        if (options?.title) {
+            setTimeout(() => {
+                document.title = originalTitle;
+            }, 1000);
+        }
+    }
+
+    function print() {
+        printDocument();
+    }
+
     return {
         isRtl,
+        print,
+        printDocument,
         formatCurrency,
         formatRawPrice,
         formatDateISO,

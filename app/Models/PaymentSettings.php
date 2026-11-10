@@ -9,6 +9,13 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
 
 // @bypass-tenancy-scanner - Single-row global payment gateway config (cached, not tenant-owned)
+/**
+ * @property array<string, mixed>|null $moyasar
+ * @property array<string, mixed>|null $tap
+ * @property array<string, mixed>|null $paytabs
+ * @property array<string, mixed>|null $tabby
+ * @property array<string, mixed>|null $tamara
+ */
 class PaymentSettings extends Model
 {
     protected $table = 'payment_settings';

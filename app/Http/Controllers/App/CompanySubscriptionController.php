@@ -21,6 +21,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
+use RuntimeException;
 use Throwable;
 
 class CompanySubscriptionController extends Controller
@@ -641,7 +642,9 @@ class CompanySubscriptionController extends Controller
         try {
             return DB::transaction(function () use ($request, $subscription, $validated) {
                 $file = $request->file('receipt');
-                $path = $file->store("bank-transfer-receipts/{$subscription->tenant_id}", 'public');
+                $path = $file->store("bank-transfer-receipts/{$subscription->tenant_id}", 'local');
+
+                throw_unless($path, RuntimeException::class, 'Receipt storage failed.');
 
                 // Find the latest pending payment for this subscription, if any
                 $payment = $subscription->payments()
@@ -855,7 +858,8 @@ class CompanySubscriptionController extends Controller
 
                 // 4. Receipt — the only thing the tenant actively uploads.
                 $file = $request->file('receipt');
-                $path = $file->store("bank-transfer-receipts/{$tenant->id}", 'public');
+                $path = $file->store("bank-transfer-receipts/{$tenant->id}", 'local');
+                throw_unless($path, RuntimeException::class, 'Receipt storage failed.');
 
                 $receipt = BankTransferReceipt::create([
                     'tenant_id' => $tenant->id,

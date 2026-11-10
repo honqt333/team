@@ -1,0 +1,6 @@
+Note: Using configuration file /Users/ahmad/Herd/carag-v2/phpstan.neon.
+/Users/ahmad/Herd/carag-v2/app/Services/Invoice/SubscriptionInvoiceService.php
+/Users/ahmad/Herd/carag-v2/app/Support/ArabicPdfShaper.php
+
+ [OK] No errors                                                                 
+

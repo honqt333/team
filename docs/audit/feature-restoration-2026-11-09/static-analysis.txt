@@ -1,0 +1,5 @@
+Note: Using configuration file /private/tmp/khidmh-recovery-20261109/work/carag-v2/phpstan.neon.
+/private/tmp/khidmh-recovery-20261109/work/carag-v2/app/Http/Controllers/System/ErrorLogController.php
+
+ [OK] No errors                                                                 
+

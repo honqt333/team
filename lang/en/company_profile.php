@@ -265,4 +265,11 @@ return [
         'choose_payment_method' => 'Choose a payment method',
         'subscription_error' => 'Subscription error',
     ],
+
+    'notification_templates' => [
+        'work_order_created' => 'Hello {customer_name}, your vehicle {plate_number} has been received under work order #{code} at {center_name}.',
+        'work_order_completed' => 'Dear {customer_name}, the maintenance for vehicle {plate_number} (#{code}) is complete and ready for pickup at {center_name}.',
+        'quote_shared' => 'Hello {customer_name}, here is your quotation for vehicle {plate_number} #{code}: {url}',
+        'invoice_issued' => 'Dear {customer_name}, tax invoice #{code} has been issued for {total} SAR for vehicle {plate_number}.',
+    ],
 ];

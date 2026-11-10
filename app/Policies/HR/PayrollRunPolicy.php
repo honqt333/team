@@ -7,6 +7,7 @@ namespace App\Policies\HR;
 use App\Models\HR\PayrollRun;
 use App\Models\User;
 use App\Support\Permissions;
+use App\Support\TenancyContext;
 
 class PayrollRunPolicy
 {
@@ -24,6 +25,10 @@ class PayrollRunPolicy
     public function view(User $user, PayrollRun $payrollRun): bool
     {
         if ($payrollRun->tenant_id !== $user->tenant_id) {
+            return false;
+        }
+
+        if (! $this->checkCenterAccess($user, $payrollRun)) {
             return false;
         }
 
@@ -47,6 +52,10 @@ class PayrollRunPolicy
             return false;
         }
 
+        if (! $this->checkCenterAccess($user, $payrollRun)) {
+            return false;
+        }
+
         return $user->can(Permissions::HR_PAYROLL_UPDATE);
     }
 
@@ -64,6 +73,34 @@ class PayrollRunPolicy
             return false;
         }
 
+        if (! $this->checkCenterAccess($user, $payrollRun)) {
+            return false;
+        }
+
         return $user->can(Permissions::HR_PAYROLL_DELETE);
+    }
+
+    /**
+     * Enforce center isolation for multi-tenant and multi-center workspaces.
+     */
+    protected function checkCenterAccess(User $user, PayrollRun $payrollRun): bool
+    {
+        if ($payrollRun->center_id === null) {
+            return true;
+        }
+
+        $activeCenterId = TenancyContext::centerId() ?? $user->current_center_id;
+
+        if ($activeCenterId !== null && (int) $payrollRun->center_id === (int) $activeCenterId) {
+            return true;
+        }
+
+        // Super admin / platform admin can view across centers within tenant
+        if ($user->hasRole('super_admin') || ($user->is_system_admin ?? false)) {
+            return true;
+        }
+
+        // User must be assigned to the target center
+        return $user->centers()->where('centers.id', $payrollRun->center_id)->exists();
     }
 }

@@ -7,14 +7,6 @@
                 :subtitle="$t('quotes.subtitle')"
                 :totalCount="quotes ? toEnglish(quotes.total) : null"
                 :countLabel="$t('quotes.total_count')"
-                gradientFrom="from-amber-500"
-                gradientTo="to-orange-600"
-                glowFrom="from-amber-500"
-                glowTo="to-orange-600"
-                badgeBg="bg-amber-50/50 dark:bg-amber-900/30"
-                badgeText="text-amber-600 dark:text-amber-400"
-                badgeBorder="border-amber-100/50 dark:border-amber-800/30"
-                badgeDot="bg-amber-500"
             >
                 <template #icon>
                     <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -29,15 +21,15 @@
 
                 <template #actions>
                     <div
-                        class="flex items-center gap-1.5 p-1.5 bg-gray-50/50 dark:bg-gray-900/50 backdrop-blur-md rounded-2xl border border-gray-200/50 dark:border-gray-700/50 shadow-inner"
+                        class="flex items-center gap-1.5 p-1.5 bg-surface-secondary/70 backdrop-blur-md rounded-2xl border border-border-default shadow-inner"
                     >
                         <Tooltip :text="$t('common.export_excel')">
                             <button
                                 @click="exportQuotes"
-                                class="p-2.5 text-gray-500 hover:text-emerald-600 hover:bg-white dark:hover:bg-gray-800 rounded-xl transition-all shadow-sm hover:shadow-md"
+                                class="p-2.5 text-content-secondary hover:text-action-primary hover:bg-surface-primary rounded-xl transition-all shadow-sm hover:shadow-md"
                             >
                                 <svg
-                                    class="w-5 h-5 text-emerald-600"
+                                    class="w-5 h-5"
                                     fill="none"
                                     stroke="currentColor"
                                     viewBox="0 0 24 24"
@@ -54,47 +46,45 @@
 
                         <AppPrintButton variant="icon" @click="printQuotes" />
 
-                        <div class="w-px h-6 bg-gray-200 dark:bg-gray-700 mx-1"></div>
+                        <div class="w-px h-6 bg-border-default mx-1"></div>
 
                         <AppViewModeToggle v-model="viewMode" storage-key="quotes" />
                     </div>
 
-                    <Tooltip :text="$t('quotes.add')">
-                        <button
-                            v-if="can('quotes.create')"
-                            @click="openCreateModal"
-                            class="flex items-center justify-center gap-3 px-6 py-3 bg-gradient-to-r from-amber-600 to-orange-600 text-white rounded-2xl font-black shadow-lg shadow-amber-500/25 hover:shadow-amber-500/40 hover:-translate-y-0.5 transition-all group/add"
+                    <button
+                        v-if="can('quotes.create')"
+                        @click="openCreateModal"
+                        class="flex items-center justify-center gap-3 px-6 py-3 bg-action-primary hover:bg-action-primary-hover text-white rounded-2xl font-bold shadow-sm transition-all group/add"
+                    >
+                        <div
+                            class="w-7 h-7 rounded-lg bg-white/20 flex items-center justify-center group-hover/add:rotate-90 transition-transform duration-300"
                         >
-                            <div
-                                class="w-7 h-7 rounded-lg bg-white/20 flex items-center justify-center group-hover/add:rotate-90 transition-transform duration-300"
+                            <svg
+                                class="w-5 h-5"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
                             >
-                                <svg
-                                    class="w-5 h-5"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        stroke-width="3"
-                                        d="M12 4v16m8-8H4"
-                                    />
-                                </svg>
-                            </div>
-                            <span class="text-sm tracking-tight">{{ $t('quotes.add') }}</span>
-                        </button>
-                    </Tooltip>
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="3"
+                                    d="M12 4v16m8-8H4"
+                                />
+                            </svg>
+                        </div>
+                        <span class="text-sm tracking-tight">{{ $t('quotes.add') }}</span>
+                    </button>
                 </template>
 
                 <template #filters>
-                    <div class="flex flex-col gap-6">
-                        <!-- Search & Date Filter Row -->
-                        <div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
-                            <!-- Search Bar -->
-                            <div class="lg:col-span-6 relative group">
+                    <div class="space-y-4">
+                        <!-- Search & Date Row -->
+                        <div class="flex flex-col md:flex-row gap-4">
+                            <!-- Search -->
+                            <div class="relative flex-1 group">
                                 <div
-                                    class="absolute inset-y-0 start-0 flex items-center ps-4 pointer-events-none group-focus-within:text-amber-500 transition-colors"
+                                    class="absolute inset-y-0 start-0 flex items-center ps-4 pointer-events-none text-content-secondary group-focus-within:text-action-primary transition-colors"
                                 >
                                     <svg
                                         class="w-5 h-5"
@@ -112,133 +102,76 @@
                                 </div>
                                 <input
                                     type="text"
-                                    v-model="searchQuery"
-                                    class="block w-full ps-11 pe-4 py-3.5 text-sm text-gray-900 dark:text-white bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl focus:ring-4 focus:ring-amber-500/10 focus:border-amber-500 transition-all outline-none shadow-sm"
+                                    v-model="tableFilters.search"
+                                    class="block w-full ps-11 pe-4 py-3.5 text-sm text-content-primary bg-surface-primary border border-border-default rounded-2xl focus:ring-4 focus:ring-action-primary/10 focus:border-action-primary transition-all outline-none shadow-sm"
                                     :placeholder="$t('quotes.search')"
                                 />
                             </div>
 
-                            <!-- Date Range Filters -->
-                            <div class="lg:col-span-6 grid grid-cols-2 gap-3">
-                                <div class="relative group">
+                            <!-- Date Pickers & Reset -->
+                            <div class="flex items-center gap-3">
+                                <div class="w-40 sm:w-44">
                                     <CustomDatePicker
-                                        v-model="dateFrom"
+                                        v-model="tableFilters.date_from"
                                         :placeholder="$t('common.date_from')"
-                                        class="w-full"
+                                        @change="() => applyFilters()"
                                     />
                                 </div>
-                                <div class="relative group">
+                                <div class="w-40 sm:w-44">
                                     <CustomDatePicker
-                                        v-model="dateTo"
+                                        v-model="tableFilters.date_to"
                                         :placeholder="$t('common.date_to')"
-                                        class="w-full"
+                                        @change="() => applyFilters()"
                                     />
                                 </div>
+                                <Tooltip :text="$t('common.reset')">
+                                    <button
+                                        @click="handleResetFilters"
+                                        class="p-3.5 text-content-secondary hover:text-danger hover:bg-danger-soft rounded-2xl border border-border-default bg-surface-primary transition-all shadow-sm"
+                                    >
+                                        <svg
+                                            class="w-5 h-5"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            viewBox="0 0 24 24"
+                                        >
+                                            <path
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                stroke-width="2"
+                                                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                                            />
+                                        </svg>
+                                    </button>
+                                </Tooltip>
                             </div>
                         </div>
 
-                        <!-- Filter Tabs -->
-                        <div class="flex flex-wrap gap-3">
-                            <button
-                                v-for="tab in filterTabs"
-                                :key="tab.key"
-                                @click="setStatusFilter(tab.key)"
-                                :class="[
-                                    'relative flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-200',
-                                    currentStatus === tab.key
-                                        ? 'text-white shadow-lg'
-                                        : 'bg-white dark:bg-gray-800 hover:shadow-md border border-gray-200 dark:border-gray-700',
-                                ]"
-                                :style="
-                                    currentStatus === tab.key
-                                        ? `background: linear-gradient(135deg, ${tab.gradientFrom}, ${tab.gradientTo})`
-                                        : ''
-                                "
-                            >
-                                <!-- Icon -->
-                                <div
-                                    :class="[
-                                        'w-8 h-8 rounded-lg flex items-center justify-center',
-                                        currentStatus === tab.key ? 'bg-white/20' : tab.bgColor,
-                                    ]"
-                                >
-                                    <component
-                                        :is="tab.icon"
-                                        :class="[
-                                            'w-4 h-4',
-                                            currentStatus === tab.key
-                                                ? 'text-white'
-                                                : tab.iconColor,
-                                        ]"
-                                    />
-                                </div>
-
-                                <!-- Label & Count -->
-                                <div class="flex items-center gap-2">
-                                    <span
-                                        :class="[
-                                            'font-medium text-sm',
-                                            currentStatus === tab.key
-                                                ? 'text-white'
-                                                : 'text-gray-700 dark:text-gray-300',
-                                        ]"
-                                    >
-                                        {{ tab.label }}
-                                    </span>
-                                    <span
-                                        :class="[
-                                            'px-2 py-0.5 rounded-full text-xs font-bold',
-                                            currentStatus === tab.key
-                                                ? 'bg-white/20 text-white'
-                                                : tab.bgColor + ' ' + tab.iconColor,
-                                        ]"
-                                    >
-                                        {{ toEnglish(tab.count) }}
-                                    </span>
-                                </div>
-
-                                <!-- Selected Check -->
-                                <svg
-                                    v-if="currentStatus === tab.key"
-                                    class="w-4 h-4 text-white/80"
-                                    fill="currentColor"
-                                    viewBox="0 0 20 20"
-                                >
-                                    <path
-                                        fill-rule="evenodd"
-                                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                                        clip-rule="evenodd"
-                                    />
-                                </svg>
-                            </button>
-                        </div>
+                        <!-- Status Tabs -->
+                        <AppTabs
+                            :model-value="activeStatusTab"
+                            :tabs="tabs"
+                            variant="pills"
+                            @change="onTabChange"
+                        />
                     </div>
                 </template>
             </PageHeader>
 
             <!-- Loading State -->
-            <div v-if="!quotes" class="flex flex-col items-center justify-center py-16">
-                <div class="relative">
-                    <div
-                        class="w-12 h-12 border-4 border-amber-200 dark:border-amber-900 rounded-full"
-                    ></div>
-                    <div
-                        class="absolute top-0 left-0 w-12 h-12 border-4 border-amber-600 border-t-transparent rounded-full animate-spin"
-                    ></div>
-                </div>
-                <p class="mt-4 text-gray-500 dark:text-gray-400">{{ $t('common.loading') }}</p>
-            </div>
+            <AppTableSkeleton v-if="!quotes" :rows="6" :cols="8" />
 
             <!-- Empty State -->
-            <div
-                v-else-if="filteredQuotes.length === 0"
-                class="bg-white dark:bg-gray-800 rounded-2xl p-12 text-center border border-gray-200 dark:border-gray-700"
+            <AppEmptyState
+                v-else-if="quotes.data.length === 0"
+                :title="$t('quotes.empty')"
+                :description="$t('quotes.empty_hint')"
+                :action-text="can('quotes.create') ? $t('quotes.add') : ''"
+                @action="openCreateModal"
             >
-                <div
-                    class="w-16 h-16 mx-auto rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center mb-4"
-                >
+                <template #icon>
                     <svg
-                        class="w-8 h-8 text-gray-400"
+                        class="w-8 h-8 text-action-primary"
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
@@ -250,203 +183,159 @@
                             d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
                         />
                     </svg>
-                </div>
-                <p class="text-lg font-medium text-gray-900 dark:text-white mb-1">
-                    {{ $t('quotes.empty') }}
-                </p>
-                <p class="text-gray-500 dark:text-gray-400 mb-6">{{ $t('quotes.empty_hint') }}</p>
-                <button
-                    v-if="can('quotes.create')"
-                    @click="openCreateModal"
-                    class="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-amber-600 to-orange-600 text-white rounded-xl font-medium shadow-lg shadow-amber-500/30 hover:shadow-xl transition-all"
-                >
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            stroke-width="2"
-                            d="M12 4v16m8-8H4"
-                        />
-                    </svg>
-                    {{ $t('quotes.add') }}
-                </button>
-            </div>
+                </template>
+            </AppEmptyState>
 
             <!-- Grid View: Modern Elegant Cards -->
-            <div
-                v-else-if="viewMode === 'grid'"
-                class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4"
-            >
+            <div v-else-if="viewMode === 'grid'" class="space-y-6">
                 <div
-                    v-for="quote in filteredQuotes"
-                    :key="quote.id"
-                    @click="navigateToShow(quote)"
-                    class="group relative bg-white dark:bg-gray-800 rounded-3xl border border-gray-100 dark:border-gray-700/50 hover:border-amber-400/50 dark:hover:border-amber-500/50 hover:shadow-2xl hover:shadow-amber-500/10 hover:-translate-y-1.5 cursor-pointer transition-all duration-500 overflow-hidden flex flex-col"
+                    class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4"
                 >
-                    <!-- Top Accent / Status Gradient Line -->
                     <div
-                        class="h-1.5 w-full bg-gradient-to-r"
-                        :class="getStatusGradient(quote.status)"
-                    ></div>
+                        v-for="quote in quotes.data"
+                        :key="quote.id"
+                        @click="navigateToShow(quote)"
+                        class="group relative bg-surface-primary rounded-3xl border border-border-default hover:border-action-primary hover:shadow-xl hover:-translate-y-1 cursor-pointer transition-all duration-300 overflow-hidden flex flex-col"
+                    >
+                        <!-- Top Status Accent Line -->
+                        <div class="h-1.5 w-full" :class="getStatusLineClass(quote.status)"></div>
 
-                    <!-- Card Header: Code & Date -->
-                    <div class="px-4 py-3">
-                        <div class="flex items-center justify-between mb-2">
-                            <div class="flex flex-col gap-0.5">
-                                <div class="flex items-center gap-2">
-                                    <span
-                                        class="text-[10px] font-black text-gray-400 dark:text-gray-500 tracking-widest uppercase"
-                                    >
-                                        #{{ toEnglish(quote.code) }}
-                                    </span>
-                                </div>
-                                <div
-                                    v-if="quote.created_at"
-                                    class="text-[9px] font-bold text-slate-400"
-                                >
-                                    {{ formatDate(quote.created_at) }}
-                                </div>
-                                <!-- Converted WO Link (Under ID) -->
-                                <div
-                                    v-if="
-                                        ['converted', 'approved'].includes(quote.status) &&
-                                        (quote.converted_work_order?.id ||
-                                            quote.converted_work_order_id)
-                                    "
-                                    class="flex items-center gap-1 group/link"
-                                    @click.stop
-                                >
-                                    <Link
-                                        :href="
-                                            route(
-                                                'work-orders.show',
-                                                quote.converted_work_order?.id ||
-                                                    quote.converted_work_order_id
-                                            )
-                                        "
-                                        class="text-[10px] font-bold text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-900/40 px-2 py-0.5 rounded-lg flex items-center gap-1 hover:bg-purple-100 transition-all border border-purple-100 dark:border-purple-800/50"
-                                    >
-                                        <svg
-                                            class="w-3 h-3"
-                                            fill="none"
-                                            stroke="currentColor"
-                                            viewBox="0 0 24 24"
+                        <!-- Card Header: Code & Date -->
+                        <div class="px-4 py-3">
+                            <div class="flex items-center justify-between mb-2">
+                                <div class="flex flex-col gap-0.5">
+                                    <div class="flex items-center gap-2">
+                                        <span
+                                            class="text-[10px] font-black text-content-secondary tracking-widest uppercase"
                                         >
-                                            <path
-                                                stroke-linecap="round"
-                                                stroke-linejoin="round"
-                                                stroke-width="2"
-                                                d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
-                                            />
-                                        </svg>
-                                        {{ quote.converted_work_order?.code }}
-                                    </Link>
+                                            #{{ toEnglish(quote.code) }}
+                                        </span>
+                                    </div>
+                                    <div
+                                        v-if="quote.created_at"
+                                        class="text-[9px] font-bold text-content-secondary"
+                                    >
+                                        {{ formatDate(quote.created_at) }}
+                                    </div>
+                                    <!-- Converted WO Link -->
+                                    <div
+                                        v-if="
+                                            ['converted', 'approved'].includes(quote.status) &&
+                                            (quote.converted_work_order?.id ||
+                                                quote.converted_work_order_id)
+                                        "
+                                        class="flex items-center gap-1"
+                                        @click.stop
+                                    >
+                                        <Link
+                                            :href="
+                                                route(
+                                                    'work-orders.show',
+                                                    quote.converted_work_order?.id ||
+                                                        quote.converted_work_order_id
+                                                )
+                                            "
+                                            class="text-[10px] font-bold text-action-primary bg-surface-secondary px-2 py-0.5 rounded-lg flex items-center gap-1 hover:bg-surface-secondary/80 border border-border-default transition-all"
+                                        >
+                                            <svg
+                                                class="w-3 h-3"
+                                                fill="none"
+                                                stroke="currentColor"
+                                                viewBox="0 0 24 24"
+                                            >
+                                                <path
+                                                    stroke-linecap="round"
+                                                    stroke-linejoin="round"
+                                                    stroke-width="2"
+                                                    d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                                                />
+                                            </svg>
+                                            {{ quote.converted_work_order?.code }}
+                                        </Link>
+                                    </div>
                                 </div>
-                            </div>
-                            <div
-                                :class="[
-                                    'px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider shadow-sm',
-                                    getStatusClass(quote.status),
-                                ]"
-                            >
-                                {{ $t(`quotes.status.${quote.status}`) }}
+                                <div
+                                    :class="[
+                                        'px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider',
+                                        getStatusClass(quote.status),
+                                    ]"
+                                >
+                                    {{ $t(`quotes.status.${quote.status}`) }}
+                                </div>
                             </div>
                         </div>
-                    </div>
 
-                    <!-- Main Vehicle Info Section -->
-                    <div class="px-4 py-3 flex-1">
-                        <!-- Saudi Plate Component & Brand Logo -->
-                        <div class="flex items-center justify-center gap-3 mb-4">
-                            <!-- Manufacturer Logo -->
-                            <Tooltip
-                                :text="quote.vehicle.make.name"
-                                v-if="quote.vehicle?.make?.logo_path"
-                            >
+                        <!-- Main Vehicle Info Section -->
+                        <div class="px-4 py-3 flex-1">
+                            <div class="flex items-center justify-center gap-3 mb-4">
                                 <div
-                                    class="w-10 h-10 flex items-center justify-center p-1 bg-white dark:bg-gray-700/50 rounded-xl border border-gray-100 dark:border-gray-600 shadow-sm transition-transform hover:scale-110 cursor-pointer"
+                                    v-if="quote.vehicle?.make?.logo_path"
+                                    class="w-10 h-10 flex items-center justify-center p-1 bg-surface-secondary rounded-xl border border-border-default shadow-sm"
                                 >
                                     <img
                                         :src="`/storage/${quote.vehicle.make.logo_path}`"
                                         class="w-full h-full object-contain filter dark:brightness-110"
-                                        alt="Brand"
+                                        alt=""
                                     />
                                 </div>
-                            </Tooltip>
 
-                            <!-- Saudi Plate -->
-                            <SaudiPlateDisplay
-                                :plate-number="quote.vehicle?.plate_number"
-                                size="sm"
-                            />
-                        </div>
+                                <SaudiPlateDisplay
+                                    :plate-number="quote.vehicle?.plate_number"
+                                    size="sm"
+                                />
+                            </div>
 
-                        <!-- Vehicle Name & Customer -->
-                        <div class="space-y-3">
-                            <div class="text-center">
-                                <div class="flex flex-col items-center justify-center gap-1 mb-1">
-                                    <Tooltip :text="getVehicleName(quote.vehicle)">
+                            <div class="space-y-3">
+                                <div class="text-center">
+                                    <div
+                                        class="flex flex-col items-center justify-center gap-1 mb-1"
+                                    >
                                         <h3
-                                            class="text-sm font-black text-gray-900 dark:text-white leading-tight group-hover:text-amber-600 transition-colors cursor-pointer line-clamp-1"
+                                            class="text-sm font-bold text-content-primary leading-tight group-hover:text-action-primary transition-colors line-clamp-1"
                                         >
-                                            {{ getVehicleName(quote.vehicle) }}
+                                            {{ getVehicleName(quote.vehicle) || $t('common.na') }}
                                         </h3>
-                                    </Tooltip>
-                                    <!-- Vehicle Color Badge with Visual Indicator -->
-                                    <div
-                                        v-if="quote.vehicle?.color"
-                                        class="flex items-center gap-1.5 px-2 py-0.5 text-[9px] font-bold bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 rounded-md border border-slate-200 dark:border-slate-600 cursor-default"
-                                    >
-                                        <span
-                                            class="w-2 h-2 rounded-full border border-gray-300 dark:border-gray-600 shadow-sm"
-                                            :style="{
-                                                backgroundColor: getColorHex(quote.vehicle.color),
-                                            }"
-                                        ></span>
-                                        {{ quote.vehicle.color }}
-                                    </div>
-                                </div>
-                                <div class="flex items-center justify-center gap-1.5">
-                                    <div
-                                        class="w-4 h-4 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center"
-                                    >
-                                        <svg
-                                            class="w-2.5 h-2.5 text-slate-500"
-                                            fill="currentColor"
-                                            viewBox="0 0 20 20"
+                                        <div
+                                            v-if="quote.vehicle?.color"
+                                            class="flex items-center gap-1.5 px-2 py-0.5 text-[9px] font-bold bg-surface-secondary text-content-secondary rounded-md border border-border-default"
                                         >
-                                            <path
-                                                d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
-                                            />
-                                        </svg>
+                                            <span
+                                                class="w-2 h-2 rounded-full border border-border-default shadow-sm"
+                                                :style="{
+                                                    backgroundColor: getColorHex(
+                                                        quote.vehicle.color
+                                                    ),
+                                                }"
+                                            ></span>
+                                            {{ quote.vehicle.color }}
+                                        </div>
                                     </div>
-                                    <Tooltip :text="$t('common.customer')">
+
+                                    <div class="flex items-center justify-center gap-1.5">
                                         <span
-                                            class="text-xs font-bold text-slate-500 dark:text-slate-400 truncate max-w-[120px] cursor-pointer"
+                                            class="text-xs font-bold text-content-secondary truncate max-w-[140px]"
                                         >
                                             {{ quote.customer?.name || $t('common.unknown') }}
                                         </span>
-                                    </Tooltip>
+                                    </div>
                                 </div>
-                            </div>
 
-                            <!-- Odometer & Stats Grid -->
-                            <div
-                                class="grid grid-cols-3 gap-1 py-2 border-y border-gray-50 dark:border-gray-700/50"
-                            >
-                                <!-- KM -->
-                                <Tooltip :text="$t('work_orders.form.odometer')" class="flex-1">
+                                <!-- Stats Grid -->
+                                <div
+                                    class="grid grid-cols-3 gap-1 py-2 border-y border-border-default"
+                                >
+                                    <!-- KM -->
                                     <div
-                                        class="group/stat flex flex-col items-center justify-center border-e border-gray-100 dark:border-gray-700/50 cursor-pointer transition-colors hover:bg-slate-50 dark:hover:bg-slate-700/30 rounded-lg py-1 w-full h-full"
+                                        class="flex flex-col items-center justify-center border-e border-border-default py-1"
                                     >
                                         <span
-                                            class="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-tighter transition-colors group-hover/stat:text-amber-600"
+                                            class="text-[9px] font-bold text-content-secondary uppercase"
                                         >
                                             {{ $t('work_orders.form.odometer') }}
                                         </span>
-                                        <div class="flex items-center gap-1">
+                                        <div class="flex items-center gap-0.5">
                                             <span
-                                                class="text-[11px] font-black text-slate-700 dark:text-slate-300"
+                                                class="text-[11px] font-bold text-content-primary"
                                             >
                                                 {{
                                                     formatNumber(
@@ -456,409 +345,255 @@
                                                     )
                                                 }}
                                             </span>
-                                            <span class="text-[8px] font-black text-amber-500">
-                                                KM
-                                            </span>
                                         </div>
                                     </div>
-                                </Tooltip>
-                                <!-- Services Count -->
-                                <Tooltip :text="$t('quotes.card.services')" class="flex-1">
+
+                                    <!-- Services Count -->
                                     <div
-                                        class="group/stat flex flex-col items-center justify-center border-e border-gray-100 dark:border-gray-700/50 cursor-pointer transition-colors hover:bg-blue-50 dark:hover:bg-blue-900/10 rounded-lg py-1 w-full h-full"
+                                        class="flex flex-col items-center justify-center border-e border-border-default py-1"
                                     >
                                         <span
-                                            class="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-tighter transition-colors group-hover/stat:text-blue-600"
+                                            class="text-[9px] font-bold text-content-secondary uppercase"
                                         >
                                             {{ $t('quotes.card.services') }}
                                         </span>
-                                        <div class="flex items-center gap-1">
-                                            <span
-                                                class="text-[11px] font-black text-blue-600 dark:text-blue-400"
-                                            >
-                                                {{ toEnglish(quote.lines_count || 0) }}
-                                            </span>
-                                            <svg
-                                                class="w-2 h-2 text-blue-400"
-                                                fill="none"
-                                                stroke="currentColor"
-                                                viewBox="0 0 24 24"
-                                            >
-                                                <path
-                                                    stroke-linecap="round"
-                                                    stroke-linejoin="round"
-                                                    stroke-width="3"
-                                                    d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
-                                                />
-                                            </svg>
-                                        </div>
+                                        <span class="text-[11px] font-bold text-action-primary">
+                                            {{ toEnglish(quote.lines_count || 0) }}
+                                        </span>
                                     </div>
-                                </Tooltip>
-                                <!-- Parts Count -->
-                                <Tooltip :text="$t('quotes.card.parts')" class="flex-1">
-                                    <div
-                                        class="group/stat flex flex-col items-center justify-center cursor-pointer transition-colors hover:bg-emerald-50 dark:hover:bg-emerald-900/10 rounded-lg py-1 w-full h-full"
-                                    >
+
+                                    <!-- Parts Count -->
+                                    <div class="flex flex-col items-center justify-center py-1">
                                         <span
-                                            class="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-tighter transition-colors group-hover/stat:text-emerald-600"
+                                            class="text-[9px] font-bold text-content-secondary uppercase"
                                         >
                                             {{ $t('quotes.card.parts') }}
                                         </span>
-                                        <div class="flex items-center gap-1">
-                                            <span
-                                                class="text-[11px] font-black text-emerald-600 dark:text-emerald-400"
-                                            >
-                                                {{ toEnglish(quote.parts_count || 0) }}
-                                            </span>
-                                            <svg
-                                                class="w-2 h-2 text-emerald-400"
-                                                fill="none"
-                                                stroke="currentColor"
-                                                viewBox="0 0 24 24"
-                                            >
-                                                <path
-                                                    stroke-linecap="round"
-                                                    stroke-linejoin="round"
-                                                    stroke-width="3"
-                                                    d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
-                                                />
-                                            </svg>
-                                        </div>
+                                        <span class="text-[11px] font-bold text-content-primary">
+                                            {{ toEnglish(quote.parts_count || 0) }}
+                                        </span>
                                     </div>
-                                </Tooltip>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Footer: Total Section -->
+                        <div
+                            class="px-5 py-3.5 bg-surface-secondary/50 border-t border-border-default flex items-center justify-between mt-auto"
+                        >
+                            <span
+                                class="text-[10px] font-bold text-content-secondary uppercase tracking-wider"
+                            >
+                                {{ $t('quotes.form.grand_total') }}
+                            </span>
+                            <div class="flex items-baseline gap-1 whitespace-nowrap">
+                                <span class="text-base font-bold text-content-primary">
+                                    {{ formatCurrencyValue(quote.total) }}
+                                </span>
+                                <span class="text-[9px] font-bold text-content-secondary uppercase">
+                                    {{ $t('common.currency') }}
+                                </span>
                             </div>
                         </div>
                     </div>
+                </div>
 
-                    <!-- Footer: Total Section -->
-                    <div
-                        class="px-5 py-4 bg-slate-50/50 dark:bg-gray-900/30 border-t border-gray-100 dark:border-gray-700/50 flex items-center justify-between mt-auto"
-                    >
-                        <span
-                            class="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest"
-                        >
-                            {{ $t('quotes.form.grand_total') }}
-                        </span>
-                        <div class="flex items-baseline gap-1 whitespace-nowrap">
+                <!-- Grid Pagination -->
+                <AppPagination
+                    :links="quotes.links"
+                    :from="quotes.from"
+                    :to="quotes.to"
+                    :total="quotes.total"
+                />
+            </div>
+
+            <!-- List View: DataTable -->
+            <div v-else class="space-y-4">
+                <DataTable
+                    :data="quotes"
+                    :columns="columns"
+                    :loading="isLoading"
+                    :sort-column="sortColumn"
+                    :sort-direction="sortDirection"
+                    @sort="toggleSort"
+                    @row-click="navigateToShow"
+                >
+                    <template #cell-code="{ item }">
+                        <div class="flex flex-col items-center gap-1">
                             <span
-                                class="text-base font-black bg-gradient-to-br from-amber-600 to-orange-600 bg-clip-text text-transparent"
+                                class="text-sm font-bold text-action-primary group-hover:underline"
                             >
-                                {{ formatCurrencyValue(quote.total) }}
+                                #{{ toEnglish(item.code) }}
                             </span>
-                            <span class="text-[9px] font-black text-amber-600 uppercase">
-                                {{ $t('common.currency') }}
-                            </span>
-                        </div>
-                    </div>
-
-                    <!-- View Details Arrow (Hover Only) -->
-                    <div
-                        class="absolute top-1/2 -end-4 group-hover:end-4 opacity-0 group-hover:opacity-100 transition-all duration-500"
-                        @click.stop
-                    >
-                        <div
-                            class="w-10 h-10 rounded-2xl bg-amber-500 text-white flex items-center justify-center shadow-lg shadow-amber-500/30"
-                        >
-                            <svg
-                                class="w-6 h-6"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
+                            <div
+                                v-if="
+                                    ['converted', 'approved'].includes(item.status) &&
+                                    (item.converted_work_order?.id || item.converted_work_order_id)
+                                "
+                                class="flex items-center gap-1"
+                                @click.stop
                             >
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    stroke-width="2.5"
-                                    d="M9 5l7 7-7 7"
-                                />
-                            </svg>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- List View -->
-            <div
-                v-else
-                class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden"
-            >
-                <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                        <thead>
-                            <tr class="bg-gray-50 dark:bg-gray-900/50">
-                                <th
-                                    class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider w-12 align-middle"
+                                <Link
+                                    :href="
+                                        route(
+                                            'work-orders.show',
+                                            item.converted_work_order?.id ||
+                                                item.converted_work_order_id
+                                        )
+                                    "
+                                    class="text-[10px] font-bold text-action-primary bg-surface-secondary px-2 py-0.5 rounded-lg flex items-center gap-1 hover:bg-surface-secondary/80 border border-border-default"
                                 >
-                                    <Tooltip :text="$t('common.id')">#</Tooltip>
-                                </th>
-                                <th
-                                    @click="toggleSort('code')"
-                                    class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors align-middle"
-                                >
-                                    <Tooltip :text="$t('quotes.columns.code')">
-                                        <div class="flex items-center justify-center gap-1.5">
-                                            {{ $t('quotes.columns.code') }}
-                                            <SortIcon
-                                                :active="sortColumn === 'code'"
-                                                :direction="sortDirection"
-                                            />
-                                        </div>
-                                    </Tooltip>
-                                </th>
-                                <th
-                                    @click="toggleSort('vehicle')"
-                                    class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors align-middle"
-                                >
-                                    <Tooltip :text="$t('quotes.columns.vehicle')">
-                                        <div class="flex items-center justify-center gap-1.5">
-                                            {{ $t('quotes.columns.vehicle') }}
-                                            <SortIcon
-                                                :active="sortColumn === 'vehicle'"
-                                                :direction="sortDirection"
-                                            />
-                                        </div>
-                                    </Tooltip>
-                                </th>
-                                <th
-                                    @click="toggleSort('customer')"
-                                    class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors align-middle"
-                                >
-                                    <Tooltip :text="$t('quotes.columns.customer')">
-                                        <div class="flex items-center justify-center gap-1.5">
-                                            {{ $t('quotes.columns.customer') }}
-                                            <SortIcon
-                                                :active="sortColumn === 'customer'"
-                                                :direction="sortDirection"
-                                            />
-                                        </div>
-                                    </Tooltip>
-                                </th>
-                                <th
-                                    @click="toggleSort('services')"
-                                    class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors align-middle"
-                                >
-                                    <Tooltip :text="$t('quotes.card.services')">
-                                        <div class="flex items-center justify-center gap-1.5">
-                                            {{ $t('quotes.card.services') }}
-                                            <SortIcon
-                                                :active="sortColumn === 'services'"
-                                                :direction="sortDirection"
-                                            />
-                                        </div>
-                                    </Tooltip>
-                                </th>
-                                <th
-                                    @click="toggleSort('subtotal')"
-                                    class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors align-middle"
-                                >
-                                    <Tooltip :text="$t('quotes.form.subtotal')">
-                                        <div class="flex items-center justify-center gap-1.5">
-                                            {{ $t('quotes.form.subtotal') }}
-                                            <SortIcon
-                                                :active="sortColumn === 'subtotal'"
-                                                :direction="sortDirection"
-                                            />
-                                        </div>
-                                    </Tooltip>
-                                </th>
-                                <th
-                                    @click="toggleSort('discount')"
-                                    class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors align-middle"
-                                >
-                                    <Tooltip :text="$t('quotes.form.discount')">
-                                        <div class="flex items-center justify-center gap-1.5">
-                                            {{ $t('quotes.form.discount') }}
-                                            <SortIcon
-                                                :active="sortColumn === 'discount'"
-                                                :direction="sortDirection"
-                                            />
-                                        </div>
-                                    </Tooltip>
-                                </th>
-                                <th
-                                    @click="toggleSort('total')"
-                                    class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors align-middle"
-                                >
-                                    <Tooltip :text="$t('quotes.columns.total')">
-                                        <div class="flex items-center justify-center gap-1.5">
-                                            {{ $t('quotes.columns.total') }}
-                                            <SortIcon
-                                                :active="sortColumn === 'total'"
-                                                :direction="sortDirection"
-                                            />
-                                        </div>
-                                    </Tooltip>
-                                </th>
-                                <th
-                                    @click="toggleSort('date')"
-                                    class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors w-24 align-middle"
-                                >
-                                    <Tooltip :text="$t('common.created_at')">
-                                        <div class="flex items-center justify-center gap-1.5">
-                                            {{ $t('common.created_at') }}
-                                            <SortIcon
-                                                :active="sortColumn === 'date'"
-                                                :direction="sortDirection"
-                                            />
-                                        </div>
-                                    </Tooltip>
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody
-                            class="divide-y divide-gray-200 dark:divide-gray-700 bg-white dark:bg-gray-800"
-                        >
-                            <tr
-                                v-for="(quote, index) in sortedQuotes"
-                                :key="quote.id"
-                                @click="navigateToShow(quote)"
-                                class="hover:bg-gray-50 dark:hover:bg-gray-900/50 cursor-pointer transition-colors group"
-                            >
-                                <td
-                                    class="px-4 py-4 text-center text-sm text-gray-500 dark:text-gray-400 font-medium align-middle"
-                                >
-                                    {{ toEnglish(index + 1) }}
-                                </td>
-                                <td class="px-4 py-4 text-center whitespace-nowrap align-middle">
-                                    <div class="flex flex-col items-center gap-1">
-                                        <span
-                                            class="text-sm font-bold text-indigo-600 dark:text-indigo-400 group-hover:underline"
-                                        >
-                                            #{{ toEnglish(quote.code) }}
-                                        </span>
-                                        <!-- Converted WO Link -->
-                                        <div
-                                            v-if="
-                                                ['converted', 'approved'].includes(quote.status) &&
-                                                (quote.converted_work_order?.id ||
-                                                    quote.converted_work_order_id)
-                                            "
-                                            class="flex items-center gap-1 group/link"
-                                            @click.stop
-                                        >
-                                            <Link
-                                                :href="
-                                                    route(
-                                                        'work-orders.show',
-                                                        quote.converted_work_order?.id ||
-                                                            quote.converted_work_order_id
-                                                    )
-                                                "
-                                                class="text-[10px] font-bold text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-900/40 px-2 py-0.5 rounded-lg flex items-center gap-1 hover:bg-purple-100 transition-all border border-purple-100 dark:border-purple-800/50"
-                                            >
-                                                <svg
-                                                    class="w-3 h-3"
-                                                    fill="none"
-                                                    stroke="currentColor"
-                                                    viewBox="0 0 24 24"
-                                                >
-                                                    <path
-                                                        stroke-linecap="round"
-                                                        stroke-linejoin="round"
-                                                        stroke-width="2"
-                                                        d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
-                                                    />
-                                                </svg>
-                                                {{ quote.converted_work_order?.code }}
-                                            </Link>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td class="px-4 py-4 text-center align-middle">
-                                    <div class="flex flex-col items-center gap-1">
-                                        <SaudiPlateDisplay
-                                            :plate-number="quote.vehicle?.plate_number"
-                                            size="sm"
+                                    <svg
+                                        class="w-3 h-3"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
                                         />
-                                        <span
-                                            class="text-[10px] text-gray-500 dark:text-gray-400 font-bold truncate max-w-[120px]"
-                                        >
-                                            {{ getVehicleName(quote.vehicle) }}
-                                        </span>
-                                    </div>
-                                </td>
-                                <td class="px-4 py-4 text-center align-middle">
-                                    <div
-                                        class="text-sm font-medium text-gray-900 dark:text-gray-200"
-                                    >
-                                        {{ quote.customer?.name || '-' }}
-                                    </div>
-                                </td>
-                                <td class="px-4 py-4 text-center align-middle">
-                                    <span
-                                        class="inline-flex items-center justify-center px-2.5 py-0.5 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 text-xs font-bold"
-                                    >
-                                        {{ toEnglish(quote.lines_count || 0) }}
-                                    </span>
-                                </td>
-                                <td class="px-4 py-4 text-center align-middle">
-                                    <span
-                                        class="text-sm font-medium text-gray-600 dark:text-gray-400"
-                                    >
-                                        {{ formatNumber(quote.subtotal || 0) }}
-                                    </span>
-                                </td>
-                                <td class="px-4 py-4 text-center align-middle">
-                                    <span
-                                        class="text-sm font-medium text-red-600 dark:text-red-400"
-                                    >
-                                        {{ formatNumber(quote.total_discount || 0) }}
-                                    </span>
-                                </td>
-                                <td class="px-4 py-4 text-center align-middle">
-                                    <span
-                                        class="text-sm font-black text-amber-600 dark:text-amber-400"
-                                    >
-                                        {{ formatNumber(quote.total || 0) }}
-                                    </span>
-                                </td>
-                                <td class="px-4 py-4 text-center whitespace-nowrap align-middle">
-                                    <span
-                                        class="text-[11px] text-gray-500 dark:text-gray-400 font-medium"
-                                    >
-                                        {{ formatDate(quote.created_at) }}
-                                    </span>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+                                    </svg>
+                                    {{ item.converted_work_order?.code }}
+                                </Link>
+                            </div>
+                        </div>
+                    </template>
 
-            <!-- Infinite Scroll Sentinel -->
-            <div ref="loadMoreSentinel" class="py-6 flex justify-center w-full">
-                <div
-                    v-if="loadingMore"
-                    class="flex items-center gap-2 text-gray-500 dark:text-gray-400"
-                >
-                    <svg
-                        class="animate-spin h-5 w-5"
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                    >
-                        <circle
-                            class="opacity-25"
-                            cx="12"
-                            cy="12"
-                            r="10"
-                            stroke="currentColor"
-                            stroke-width="4"
-                        ></circle>
-                        <path
-                            class="opacity-75"
-                            fill="currentColor"
-                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                        ></path>
-                    </svg>
-                    <span class="text-sm font-medium">{{ $t('common.loading') }}</span>
-                </div>
-                <div
-                    v-else-if="allQuotes.length >= (quotes?.total || 0) && (quotes?.total || 0) > 0"
-                    class="text-sm text-gray-400 dark:text-gray-600"
-                >
-                    {{ $t('quotes.all_loaded') }}
-                </div>
+                    <template #cell-vehicle="{ item }">
+                        <div class="flex flex-col items-center gap-1">
+                            <SaudiPlateDisplay
+                                :plate-number="item.vehicle?.plate_number"
+                                size="sm"
+                            />
+                            <span
+                                class="text-[10px] text-content-secondary font-bold truncate max-w-[120px]"
+                            >
+                                {{ getVehicleName(item.vehicle) }}
+                            </span>
+                        </div>
+                    </template>
+
+                    <template #cell-customer="{ item }">
+                        <span class="text-sm font-medium text-content-primary">
+                            {{ item.customer?.name || '-' }}
+                        </span>
+                    </template>
+
+                    <template #cell-services="{ item }">
+                        <span
+                            class="inline-flex items-center justify-center px-2.5 py-0.5 rounded-full bg-surface-secondary text-content-primary text-xs font-bold border border-border-default"
+                        >
+                            {{ toEnglish(item.lines_count || 0) }}
+                        </span>
+                    </template>
+
+                    <template #cell-subtotal="{ item }">
+                        <span class="text-sm font-medium text-content-secondary">
+                            {{ formatCurrencyValue(item.subtotal || 0) }}
+                        </span>
+                    </template>
+
+                    <template #cell-discount="{ item }">
+                        <span class="text-sm font-medium text-danger">
+                            {{ formatCurrencyValue(item.total_discount || 0) }}
+                        </span>
+                    </template>
+
+                    <template #cell-total="{ item }">
+                        <span class="text-sm font-bold text-content-primary">
+                            {{ formatCurrencyValue(item.total || 0) }}
+                        </span>
+                    </template>
+
+                    <template #cell-created_at="{ item }">
+                        <span
+                            class="text-[11px] text-content-secondary font-medium whitespace-nowrap"
+                        >
+                            {{ formatDate(item.created_at) }}
+                        </span>
+                    </template>
+
+                    <template #cell-status="{ item }">
+                        <span
+                            :class="[
+                                'px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider',
+                                getStatusClass(item.status),
+                            ]"
+                        >
+                            {{ $t(`quotes.status.${item.status}`) }}
+                        </span>
+                    </template>
+
+                    <template #cell-actions="{ item }">
+                        <div class="flex items-center justify-center gap-1.5" @click.stop>
+                            <Tooltip :text="$t('common.view')">
+                                <button
+                                    @click="navigateToShow(item)"
+                                    class="p-2 text-content-secondary hover:text-action-primary hover:bg-surface-secondary rounded-lg transition-colors"
+                                >
+                                    <svg
+                                        class="w-4 h-4"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                                        />
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                                        />
+                                    </svg>
+                                </button>
+                            </Tooltip>
+
+                            <Tooltip
+                                v-if="
+                                    can('quotes.update') &&
+                                    (item.status === 'draft' || item.status === 'sent')
+                                "
+                                :text="$t('common.edit')"
+                            >
+                                <button
+                                    @click="openEditModal(item)"
+                                    class="p-2 text-content-secondary hover:text-action-primary hover:bg-surface-secondary rounded-lg transition-colors"
+                                >
+                                    <svg
+                                        class="w-4 h-4"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                                        />
+                                    </svg>
+                                </button>
+                            </Tooltip>
+                        </div>
+                    </template>
+
+                    <template #pagination>
+                        <AppPagination
+                            :links="quotes.links"
+                            :from="quotes.from"
+                            :to="quotes.to"
+                            :total="quotes.total"
+                        />
+                    </template>
+                </DataTable>
             </div>
         </div>
 
@@ -875,12 +610,18 @@
             @saved="handleSaved"
         />
 
-        <!-- Print Section (Teleported to body for printing) -->
+        <!-- Print Section -->
         <Teleport to="body">
             <div class="print-section hidden">
-                <StandardReportHeader :title="$t('quotes.title')" />
+                <StandardReportHeader :title="$t('quotes.title')">
+                    <template #extra>
+                        <div class="text-[11px] text-content-secondary">
+                            {{ $t('common.count') || 'العدد' }}:
+                            <span class="font-mono font-bold">{{ quotes.data.length }}</span>
+                        </div>
+                    </template>
+                </StandardReportHeader>
 
-                <!-- Table -->
                 <table class="print-table">
                     <thead>
                         <tr>
@@ -904,7 +645,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr v-for="(quote, index) in sortedQuotes" :key="quote.id">
+                        <tr v-for="(quote, index) in quotes.data" :key="quote.id">
                             <td class="align-middle">{{ toEnglish(index + 1) }}</td>
                             <td class="align-middle">{{ toEnglish(quote.code) }}</td>
                             <td class="align-middle">{{ formatDate(quote.created_at) }}</td>
@@ -913,7 +654,9 @@
                             </td>
                             <td class="align-middle">{{ quote.customer?.name || '-' }}</td>
                             <td class="align-middle">{{ toEnglish(quote.lines_count || 0) }}</td>
-                            <td class="align-middle">{{ formatNumber(quote.total || 0) }}</td>
+                            <td class="align-middle">
+                                {{ formatCurrencyValue(quote.total || 0) }}
+                            </td>
                         </tr>
                     </tbody>
                 </table>
@@ -925,20 +668,23 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted, onUnmounted, h } from 'vue';
+import { ref, computed, watch } from 'vue';
 import { Link, router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
-import axios from 'axios';
 import { useToast } from '@/Composables/useToast';
-import { useConfirm } from '@/Composables/useConfirm';
 import { useNumberFormat } from '@/Composables/useNumberFormat';
+import { useServerTable } from '@/Composables/useServerTable';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import PageHeader from '@/Components/PageHeader.vue';
 import AppPrintButton from '@/Components/Common/AppPrintButton.vue';
 import AppViewModeToggle from '@/Components/Common/AppViewModeToggle.vue';
+import AppTabs from '@/Components/Common/AppTabs.vue';
+import AppEmptyState from '@/Components/Common/AppEmptyState.vue';
+import AppTableSkeleton from '@/Components/Common/AppTableSkeleton.vue';
+import DataTable from '@/Components/Common/DataTable.vue';
+import AppPagination from '@/Components/Common/AppPagination.vue';
 import QuoteFormModal from '@/Components/Quotes/QuoteFormModal.vue';
 import Tooltip from '@/Components/Tooltip.vue';
-import SortIcon from '@/Components/Common/SortIcon.vue';
 import StandardReportHeader from '@/Components/Print/StandardReportHeader.vue';
 import StandardReportFooter from '@/Components/Print/StandardReportFooter.vue';
 import CustomDatePicker from '@/Components/CustomDatePicker.vue';
@@ -986,284 +732,142 @@ const props = defineProps({
 
 const { t } = useI18n();
 const { success } = useToast();
-const { confirm } = useConfirm();
 const { formatCurrency: formatCurrencyEN, toEnglish } = useNumberFormat();
 const { can } = usePermission();
+
 const showModal = ref(false);
 const selectedQuote = ref(null);
-const activeTab = ref(localStorage.getItem('quotesActiveTab') || 'pending');
 const viewMode = ref(localStorage.getItem('quotesViewMode') || 'grid');
 
-// Infinite Scroll Refs
-const allQuotes = ref(props.quotes?.data || []);
-const nextPageUrl = ref(props.quotes?.next_page_url);
-const loadingMore = ref(false);
-const loadMoreSentinel = ref(null);
-let observer = null;
+const {
+    filters: tableFilters,
+    sortColumn,
+    sortDirection,
+    isLoading,
+    applyFilters,
+    toggleSort,
+    resetFilters,
+    cancelDebouncedSearch,
+} = useServerTable({
+    routeUrl: '/app/quotes',
+    initialFilters: {
+        search: props.filters?.search || '',
+        status: props.filters?.status || 'pending',
+        date_from: props.filters?.date_from || '',
+        date_to: props.filters?.date_to || '',
+    },
+    initialSort: {
+        column: props.filters?.sort || 'created_at',
+        direction: props.filters?.direction || 'desc',
+    },
+    debounceMs: 350,
+});
 
-// Watch props change (filters, etc)
-watch(
-    () => props.quotes,
-    (newVal) => {
-        if (newVal) {
-            allQuotes.value = newVal.data;
-            nextPageUrl.value = newVal.next_page_url;
-        }
-    }
-);
+const activeStatusTab = computed(() => tableFilters.status || 'pending');
 
-// Load more data
-const loadMore = async () => {
-    if (loadingMore.value || !nextPageUrl.value) return;
-
-    loadingMore.value = true;
-    try {
-        const url = new URL(nextPageUrl.value);
-        // Map to API endpoint
-        const apiUrl = url.toString().replace('/app/quotes', '/app/api/quotes-index');
-
-        const response = await axios.get(apiUrl);
-        const data = response.data;
-
-        allQuotes.value.push(...data.data);
-        nextPageUrl.value = data.next_page_url;
-    } catch (e) {
-        console.error('Failed to load more quotes', e);
-    } finally {
-        loadingMore.value = false;
-    }
+const onTabChange = (tabId) => {
+    cancelDebouncedSearch?.();
+    tableFilters.status = tabId;
+    applyFilters();
 };
 
-// Intersection Observer Setup
-onMounted(() => {
-    observer = new IntersectionObserver(
-        (entries) => {
-            if (entries[0].isIntersecting && nextPageUrl.value) {
-                loadMore();
-            }
-        },
-        {
-            root: null,
-            threshold: 0.1,
+const handleResetFilters = () => {
+    cancelDebouncedSearch?.();
+    tableFilters.search = '';
+    tableFilters.date_from = '';
+    tableFilters.date_to = '';
+    applyFilters();
+};
+
+watch([() => tableFilters.date_from, () => tableFilters.date_to], () => {
+    applyFilters();
+});
+
+watch(
+    () => props.filters,
+    (newFilters) => {
+        if (!newFilters) return;
+        if (newFilters.search !== undefined && newFilters.search !== tableFilters.search) {
+            tableFilters.search = newFilters.search || '';
         }
-    );
-
-    if (loadMoreSentinel.value) {
-        observer.observe(loadMoreSentinel.value);
-    }
-
-    // Check sentinel ref changes (in case of tab switch/v-if)
-    watch(loadMoreSentinel, (el) => {
-        if (observer) observer.disconnect();
-        if (el) observer.observe(el);
-    });
-});
-
-onUnmounted(() => {
-    if (observer) observer.disconnect();
-});
-
-// Icons for filter tabs (Render functions for Vue 3 SFC compatibility)
-const createIcon =
-    (d, strokeWidth = 2) =>
-    (props, { attrs }) =>
-        h(
-            'svg',
-            {
-                fill: 'none',
-                stroke: 'currentColor',
-                viewBox: '0 0 24 24',
-                ...attrs,
-            },
-            [
-                h('path', {
-                    'stroke-linecap': 'round',
-                    'stroke-linejoin': 'round',
-                    'stroke-width': strokeWidth,
-                    d,
-                }),
-            ]
-        );
-
-const IconAll = createIcon(
-    'M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10'
-);
-const IconPending = createIcon('M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z');
-const IconApproved = createIcon('M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z');
-const IconConverted = createIcon('M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4');
-const IconRejected = createIcon(
-    'M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z'
+        if (newFilters.status !== undefined && newFilters.status !== tableFilters.status) {
+            tableFilters.status = newFilters.status || 'pending';
+        }
+        if (newFilters.date_from !== undefined && newFilters.date_from !== tableFilters.date_from) {
+            tableFilters.date_from = newFilters.date_from || '';
+        }
+        if (newFilters.date_to !== undefined && newFilters.date_to !== tableFilters.date_to) {
+            tableFilters.date_to = newFilters.date_to || '';
+        }
+        if (newFilters.sort !== undefined && newFilters.sort !== sortColumn.value) {
+            sortColumn.value = newFilters.sort || 'created_at';
+        }
+        if (newFilters.direction !== undefined && newFilters.direction !== sortDirection.value) {
+            sortDirection.value = newFilters.direction || 'desc';
+        }
+    },
+    { deep: true }
 );
 
-const filterTabs = computed(() => [
+const tabs = computed(() => [
     {
-        key: 'pending',
+        id: 'pending',
         label: t('quotes.tabs.without_card'),
-        icon: IconPending,
-        iconColor: 'text-amber-500',
-        bgColor: 'bg-amber-100 dark:bg-amber-900/30',
-        gradientFrom: '#f59e0b',
-        gradientTo: '#d97706',
-        count: props.filterCounts.pending || 0,
+        count: props.filterCounts?.pending || 0,
     },
     {
-        key: 'all',
+        id: 'all',
         label: t('quotes.tabs.all'),
-        icon: IconAll,
-        iconColor: 'text-slate-500',
-        bgColor: 'bg-slate-100 dark:bg-slate-900/30',
-        gradientFrom: '#64748b',
-        gradientTo: '#475569',
-        count: props.filterCounts.all || 0,
+        count: props.filterCounts?.all || 0,
     },
     {
-        key: 'approved',
+        id: 'approved',
         label: t('quotes.status.approved'),
-        icon: IconApproved,
-        iconColor: 'text-emerald-500',
-        bgColor: 'bg-emerald-100 dark:bg-emerald-900/30',
-        gradientFrom: '#10b981',
-        gradientTo: '#059669',
-        count: props.filterCounts.approved || 0,
+        count: props.filterCounts?.approved || 0,
     },
     {
-        key: 'converted',
+        id: 'converted',
         label: t('quotes.status.converted'),
-        icon: IconConverted,
-        iconColor: 'text-blue-500',
-        bgColor: 'bg-blue-100 dark:bg-blue-900/30',
-        gradientFrom: '#3b82f6',
-        gradientTo: '#2563eb',
-        count: props.filterCounts.converted || 0,
+        count: props.filterCounts?.converted || 0,
     },
     {
-        key: 'rejected',
+        id: 'rejected',
         label: t('quotes.status.rejected'),
-        icon: IconRejected,
-        iconColor: 'text-red-500',
-        bgColor: 'bg-red-100 dark:bg-red-900/30',
-        gradientFrom: '#ef4444',
-        gradientTo: '#dc2626',
-        count: props.filterCounts.rejected || 0,
+        count: props.filterCounts?.rejected || 0,
     },
 ]);
 
-// Determine current status from URL filters
-const currentStatus = computed(() => props.filters.status || 'pending');
-
-const searchQuery = ref(props.filters.search || '');
-const dateFrom = ref(props.filters.date_from || '');
-const dateTo = ref(props.filters.date_to || '');
-
-function setStatusFilter(status) {
-    router.get(
-        route('app.quotes.index'),
-        {
-            status: status,
-            search: searchQuery.value,
-            date_from: dateFrom.value,
-            date_to: dateTo.value,
-        },
-        {
-            preserveState: true,
-            preserveScroll: true,
-            replace: true,
-        }
-    );
-}
-
-const filters = ref({
-    search: props.filters.search || '',
-    status: '',
-    date_from: props.filters.date_from || '',
-    date_to: props.filters.date_to || '',
-});
-
-const debounce = (fn, delay) => {
-    let timeoutId;
-    return (...args) => {
-        clearTimeout(timeoutId);
-        timeoutId = setTimeout(() => fn(...args), delay);
-    };
-};
-
-const updateFilters = debounce(() => {
-    router.get(
-        route('app.quotes.index'),
-        {
-            search: searchQuery.value,
-            status: currentStatus.value,
-            date_from: dateFrom.value,
-            date_to: dateTo.value,
-        },
-        {
-            preserveState: true,
-            preserveScroll: true,
-            replace: true,
-        }
-    );
-}, 300);
-
-watch([searchQuery, dateFrom, dateTo], () => {
-    updateFilters();
-});
-
-watch(viewMode, (newMode) => {
-    localStorage.setItem('quotesViewMode', newMode);
-});
-
-watch(activeTab, (newTab) => {
-    localStorage.setItem('quotesActiveTab', newTab);
-});
-
-// Computed: Count of quotes without work card (not converted and not rejected)
-const pendingCount = computed(() => {
-    if (!props.quotes?.data) return 0;
-    return props.quotes.data.filter((q) => q.status !== 'converted' && q.status !== 'rejected')
-        .length;
-});
-
-// Computed: Total count
-const allCount = computed(() => {
-    return props.quotes?.total || 0;
-});
-
-// Computed: Check if any filters are active
-const hasActiveFilters = computed(() => {
-    return filters.value.search || filters.value.status || filters.value.dateRange !== 'all';
-});
-
-// Computed: Filter quotes - using allQuotes ref for infinite scroll
-const filteredQuotes = computed(() => {
-    return allQuotes.value;
-});
-
-function clearFilters() {
-    filters.value = {
-        search: '',
-        status: '',
-        dateRange: 'all',
-    };
-}
+const columns = computed(() => [
+    { key: 'code', label: t('quotes.columns.code'), sortable: true, align: 'center' },
+    { key: 'vehicle', label: t('quotes.columns.vehicle'), sortable: true, align: 'center' },
+    { key: 'customer', label: t('quotes.columns.customer'), sortable: true, align: 'center' },
+    { key: 'services', label: t('quotes.card.services'), sortable: true, align: 'center' },
+    { key: 'subtotal', label: t('quotes.form.subtotal'), sortable: true, align: 'center' },
+    { key: 'discount', label: t('quotes.form.discount'), sortable: true, align: 'center' },
+    { key: 'total', label: t('quotes.columns.total'), sortable: true, align: 'center' },
+    { key: 'created_at', label: t('common.created_at'), sortable: true, align: 'center' },
+    { key: 'status', label: t('common.status'), sortable: false, align: 'center' },
+    { key: 'actions', label: t('common.actions'), sortable: false, align: 'center' },
+]);
 
 function getStatusClass(status) {
     const classes = {
-        draft: 'bg-gray-100 text-gray-700 dark:bg-gray-900/50 dark:text-gray-300',
-        sent: 'bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300',
-        approved: 'bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-300',
-        rejected: 'bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-300',
-        converted: 'bg-purple-100 text-purple-700 dark:bg-purple-900/50 dark:text-purple-300',
+        draft: 'bg-surface-secondary text-content-secondary border border-border-default',
+        sent: 'bg-info-soft text-info',
+        approved: 'bg-success-soft text-success',
+        rejected: 'bg-danger-soft text-danger',
+        converted: 'bg-action-primary/10 text-action-primary',
     };
     return classes[status] || classes.draft;
 }
 
-function getStatusGradient(status) {
+function getStatusLineClass(status) {
     const classes = {
-        draft: 'from-gray-400 to-gray-500',
-        sent: 'from-blue-400 to-blue-500',
-        approved: 'from-emerald-400 to-emerald-500',
-        rejected: 'from-red-400 to-red-500',
-        converted: 'from-purple-400 to-purple-500',
+        draft: 'bg-border-default',
+        sent: 'bg-info',
+        approved: 'bg-success',
+        rejected: 'bg-danger',
+        converted: 'bg-action-primary',
     };
     return classes[status] || classes.draft;
 }
@@ -1271,14 +875,14 @@ function getStatusGradient(status) {
 function getVehicleName(vehicle) {
     if (!vehicle) return '';
     const parts = [];
-    if (vehicle.make?.name) parts.push(vehicle.make.name);
-    if (vehicle.model?.name) parts.push(vehicle.model.name);
+    if (vehicle.make?.name_ar || vehicle.make?.name_en || vehicle.make?.name) {
+        parts.push(vehicle.make.name_ar || vehicle.make.name_en || vehicle.make.name);
+    }
+    if (vehicle.model?.name_ar || vehicle.model?.name_en || vehicle.model?.name) {
+        parts.push(vehicle.model.name_ar || vehicle.model.name_en || vehicle.model.name);
+    }
     if (vehicle.year) parts.push(vehicle.year);
-    return parts.join(' ') || '';
-}
-
-function formatCurrency(amount) {
-    return formatCurrencyEN(amount) + ' ' + t('common.currency');
+    return parts.join(' ') || vehicle.make_other || '';
 }
 
 function formatDate(dateString) {
@@ -1291,7 +895,7 @@ function formatDate(dateString) {
 }
 
 function getColorHex(colorName) {
-    if (!colorName) return '#e2e8f0';
+    if (!colorName) return '#9ca3af';
     const colors = {
         أبيض: '#ffffff',
         White: '#ffffff',
@@ -1310,7 +914,7 @@ function getColorHex(colorName) {
         أخضر: '#008000',
         Green: '#008000',
     };
-    return colors[colorName] || '#e2e8f0';
+    return colors[colorName] || '#9ca3af';
 }
 
 function formatCurrencyValue(value) {
@@ -1319,14 +923,7 @@ function formatCurrencyValue(value) {
 
 function formatNumber(value) {
     if (value === null || value === undefined) return '0';
-    return value.toLocaleString('en-US');
-}
-
-function getWhatsAppNumber(customer) {
-    if (!customer) return null;
-    const phone = customer.whatsapp || customer.phone;
-    if (!phone) return null;
-    return phone.replace(/[^\d+]/g, '').replace(/^\+/, '');
+    return Number(value).toLocaleString('en-US');
 }
 
 function openCreateModal() {
@@ -1351,100 +948,19 @@ function closeModal() {
     selectedQuote.value = null;
 }
 
-// ==================== Sorting Logic ====================
-const sortColumn = ref('');
-const sortDirection = ref('asc'); // 'asc' or 'desc'
-
-function toggleSort(column) {
-    if (sortColumn.value === column) {
-        // Toggle direction
-        sortDirection.value = sortDirection.value === 'asc' ? 'desc' : 'asc';
-    } else {
-        // New column
-        sortColumn.value = column;
-        sortDirection.value = 'asc';
-    }
-}
-
-// Sorted quotes based on selected column
-const sortedQuotes = computed(() => {
-    if (!sortColumn.value) return filteredQuotes.value;
-
-    const sorted = [...filteredQuotes.value].sort((a, b) => {
-        let valA, valB;
-
-        switch (sortColumn.value) {
-            case 'code':
-                valA = a.code || '';
-                valB = b.code || '';
-                break;
-            case 'vehicle':
-                valA = a.vehicle?.plate_number || '';
-                valB = b.vehicle?.plate_number || '';
-                break;
-            case 'customer':
-                valA = a.customer?.name || '';
-                valB = b.customer?.name || '';
-                break;
-            case 'services':
-                valA = a.lines_count || 0;
-                valB = b.lines_count || 0;
-                break;
-            case 'subtotal':
-                valA = parseFloat(a.subtotal) || 0;
-                valB = parseFloat(b.subtotal) || 0;
-                break;
-            case 'discount':
-                valA = parseFloat(a.total_discount) || 0;
-                valB = parseFloat(b.total_discount) || 0;
-                break;
-            case 'total':
-                valA = parseFloat(a.total) || 0;
-                valB = parseFloat(b.total) || 0;
-                break;
-            case 'date':
-                valA = a.created_at ? new Date(a.created_at).getTime() : 0;
-                valB = b.created_at ? new Date(b.created_at).getTime() : 0;
-                break;
-            default:
-                return 0;
-        }
-
-        if (valA < valB) return sortDirection.value === 'asc' ? -1 : 1;
-        if (valA > valB) return sortDirection.value === 'asc' ? 1 : -1;
-        return 0;
-    });
-
-    return sorted;
-});
-
-// Export quotes to Excel
 function exportQuotes() {
     const params = new URLSearchParams();
-    if (searchQuery.value) params.append('search', searchQuery.value);
-    if (currentStatus.value && currentStatus.value !== 'all')
-        params.append('status', currentStatus.value);
-    if (dateFrom.value) params.append('date_from', dateFrom.value);
-    if (dateTo.value) params.append('date_to', dateTo.value);
+    if (tableFilters.search) params.append('search', tableFilters.search);
+    if (tableFilters.status && tableFilters.status !== 'all')
+        params.append('status', tableFilters.status);
+    if (tableFilters.date_from) params.append('date_from', tableFilters.date_from);
+    if (tableFilters.date_to) params.append('date_to', tableFilters.date_to);
 
     window.location.href =
         route('app.quotes.export') + (params.toString() ? '?' + params.toString() : '');
 }
 
-// Print quotes
-async function printQuotes() {
-    // We can only print what's currently loaded in allQuotes
-    // If the user wants to print everything, they should scroll to the bottom first
-    // Or we could fetch everything here, but usually printing current view is expected
-
-    // Check if we need to load more data to have everything (up to a limit for performance)
-    if (nextPageUrl.value && allQuotes.value.length < (props.quotes?.total || 0)) {
-        // Option to warn user or just print what's loaded
-        // For now, print what's loaded like in WorkOrders
-        await new Promise((resolve) => setTimeout(resolve, 100));
-    }
-
-    // Trigger print
+function printQuotes() {
     window.print();
 }
 
@@ -1454,3 +970,37 @@ function handleSaved() {
     router.reload({ only: ['quotes'] });
 }
 </script>
+
+<style scoped>
+@media print {
+    .print-section {
+        display: block !important;
+        font-family:
+            'IBM Plex Sans Arabic',
+            system-ui,
+            -apple-system,
+            sans-serif !important;
+        padding: 20px;
+        background: white;
+    }
+
+    .print-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 12px;
+    }
+
+    .print-table th,
+    .print-table td {
+        border: 1px solid #e5e7eb;
+        padding: 8px;
+        text-align: center !important;
+    }
+
+    .print-table th {
+        background-color: #f9fafb !important;
+        -webkit-print-color-adjust: exact;
+        font-weight: bold;
+    }
+}
+</style>

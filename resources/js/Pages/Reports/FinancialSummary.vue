@@ -2050,9 +2050,9 @@ const formatShopAddress = (shop) => {
     if (addr) {
         const parts = [];
         if (addr.city) parts.push(addr.city);
-        if (addr.district) parts.push('حي ' + addr.district);
-        if (addr.street) parts.push('شارع ' + addr.street);
-        if (addr.building_number) parts.push('مبنى ' + addr.building_number);
+        if (addr.district) parts.push(`${t('common.district')} ${addr.district}`);
+        if (addr.street) parts.push(`${t('common.street')} ${addr.street}`);
+        if (addr.building_number) parts.push(`${t('common.building')} ${addr.building_number}`);
         if (addr.address_line) parts.push(addr.address_line);
         if (parts.length > 0) return parts.join('، ');
     }
@@ -2104,7 +2104,10 @@ const selectedCenterName = computed(() => {
 
 const dateRangeSubtitle = computed(() => {
     if (props.filters.start_date && props.filters.end_date) {
-        return `من ${props.filters.start_date} إلى ${props.filters.end_date}`;
+        return t('reports.date_from_to', {
+            from: props.filters.start_date,
+            to: props.filters.end_date,
+        });
     }
     const preset = datePresets.value.find((p) => p.id === currentRange.value);
     if (preset) return preset.label;

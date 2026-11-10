@@ -623,10 +623,6 @@ textarea.input-enterprise {
 </style>
 
 <style scoped>
-.font-premium {
-    font-family: 'Outfit', 'Inter', 'Cairo', sans-serif;
-}
-
 .animate-fade-in {
     animation: fadeIn 0.3s ease-out;
 }

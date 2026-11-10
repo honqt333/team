@@ -6,7 +6,7 @@
         "build": "node scripts/generate-page-manifest.mjs && vite build",
         "build:manifest": "node scripts/generate-page-manifest.mjs",
         "dev": "vite",
-        "type-check": "vue-tsc --noEmit || true",
+        "type-check": "vue-tsc --noEmit",
         "test": "vitest run",
         "test:watch": "vitest",
         "test:coverage": "vitest run --coverage",

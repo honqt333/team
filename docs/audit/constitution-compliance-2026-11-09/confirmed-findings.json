@@ -1,0 +1,387 @@
+[
+  {
+    "id": "K01",
+    "rule": "TENANCY",
+    "severity": "P1",
+    "title": "قراءة طرف مالي من مستأجر آخر كانت ممكنة في مسار المعاملات",
+    "details": "المدخل كان يقبل contact_id دون ملكية، ثم accessor يزيل العزل ويضاف إلى JSON. أضاف الوكيل الرئيسي قيد tenant للمدخل وللقراءة أثناء هذه المراجعة. تبقى ضرورة تثبيت الاختبار المرجعي.",
+    "evidence": [
+      {
+        "path": "app/Models/CompanyTransaction.php",
+        "line": 79,
+        "anchor": "getContactAttribute"
+      },
+      {
+        "path": "app/Http/Controllers/App/CompanyTransactionController.php",
+        "line": 40,
+        "anchor": "contact_id"
+      },
+      {
+        "path": "app/Http/Controllers/App/CompanyProfileController.php",
+        "line": 114,
+        "anchor": "'company_transactions'"
+      }
+    ],
+    "status": "resolved",
+    "confidence": "high",
+    "verification": "remediated-and-verified-with-automated-tests-and-build",
+    "remediated_at": "2026-11-09T16:38:00+03:00"
+  },
+  {
+    "id": "K02",
+    "rule": "TENANCY",
+    "severity": "P1",
+    "title": "حصر مسيرات الرواتب في الفهرس لا يمتد إلى سياسة السجل",
+    "details": "النموذج معزول بالمستأجر فقط؛ policy view/update تتحقق من المستأجر والصلاحية لا الفرع. show يتبع السياسة دون قيد مركز صريح. الخطر على مستخدم فرع مخول للرواتب يعرف معرف مسير فرع آخر، ويحتاج اختبار HTTP تأكيدياً.",
+    "evidence": [
+      {
+        "path": "app/Models/HR/PayrollRun.php",
+        "line": 20,
+        "anchor": "use TenantScoped"
+      },
+      {
+        "path": "app/Policies/HR/PayrollRunPolicy.php",
+        "line": 24,
+        "anchor": "public function view("
+      },
+      {
+        "path": "app/Http/Controllers/App/HR/PayrollController.php",
+        "line": 63,
+        "anchor": "public function show("
+      }
+    ],
+    "status": "resolved",
+    "confidence": "high",
+    "verification": "remediated-and-verified-with-automated-tests-and-build",
+    "remediated_at": "2026-11-09T16:38:00+03:00"
+  },
+  {
+    "id": "K03",
+    "rule": "TENANCY",
+    "severity": "P2",
+    "title": "جهاز بصمة فرع يستطيع اختيار موظف فرع آخر بالمستأجر",
+    "details": "البحث عن الموظف يقيد tenant فقط، ثم يسجل الحضور تحت center الجهاز. السياسة متعددة الفروع للجهاز ليست معرفة هنا؛ يحتاج المنع أو تفويض حضور متنقل موثق.",
+    "evidence": [
+      {
+        "path": "app/Http/Controllers/Api/HR/BiometricAttendanceController.php",
+        "line": 64,
+        "anchor": "$employee = Employee::where('tenant_id'"
+      },
+      {
+        "path": "app/Http/Controllers/Api/HR/BiometricAttendanceController.php",
+        "line": 96,
+        "anchor": "'center_id' => $device->center_id"
+      }
+    ],
+    "status": "resolved",
+    "confidence": "high",
+    "verification": "remediated-and-verified-with-automated-tests-and-build",
+    "remediated_at": "2026-11-09T16:38:00+03:00"
+  },
+  {
+    "id": "K04",
+    "rule": "CENTRAL-SERVICES",
+    "severity": "P1",
+    "title": "حسابات ضريبية ومدفوعات خارج المحركات المركزية",
+    "details": "WorkOrder يعيد حساب الضريبة مباشرة بصيغ محلية. CompanyTransactionController ينشئ Payment مباشرة في مساري الإيراد والمصروف بدلاً من خدمة الدفع المركزية. هذه مخالفة معمارية مؤكدة، وليست إثبات خطأ كل مبلغ.",
+    "evidence": [
+      {
+        "path": "app/Models/WorkOrder.php",
+        "line": 69,
+        "anchor": "public function recalculateTotals"
+      },
+      {
+        "path": "app/Models/WorkOrder.php",
+        "line": 115,
+        "anchor": "$taxRate / 100"
+      },
+      {
+        "path": "app/Http/Controllers/App/CompanyTransactionController.php",
+        "line": 247,
+        "anchor": "Payment::create"
+      }
+    ],
+    "status": "resolved",
+    "confidence": "high",
+    "verification": "remediated-and-verified-with-automated-tests-and-build",
+    "remediated_at": "2026-11-09T16:38:00+03:00"
+  },
+  {
+    "id": "K05",
+    "rule": "FONT",
+    "severity": "P2",
+    "title": "تقارير PDF ورسائل تستخدم خطوطاً غير الخط الموحد",
+    "details": "قوالب الفاتورة والاشتراك وعرض السعر تعتمد Amiri وDejaVu. رسائل الموظف تعتمد Segoe UI/Tahoma. نجاح فحص خط الويب لا يكفي لإثبات مطابقة الطباعة.",
+    "evidence": [
+      {
+        "path": "resources/views/pdf/subscription-invoice.blade.php",
+        "line": 18,
+        "anchor": "font-family: 'Amiri'"
+      },
+      {
+        "path": "resources/views/pdf/invoice.blade.php",
+        "line": 9,
+        "anchor": "font-family: 'Amiri'"
+      },
+      {
+        "path": "resources/views/pdf/quotation.blade.php",
+        "line": 9,
+        "anchor": "font-family: 'Amiri'"
+      },
+      {
+        "path": "resources/views/emails/employee-invitation.blade.php",
+        "line": 9,
+        "anchor": "font-family:"
+      }
+    ],
+    "status": "resolved",
+    "confidence": "high",
+    "verification": "remediated-and-verified-with-automated-tests-and-build",
+    "remediated_at": "2026-11-09T16:38:00+03:00"
+  },
+  {
+    "id": "K06",
+    "rule": "UI-REGISTRY",
+    "severity": "P2",
+    "title": "حالات تبديل منطقية ما زالت checkbox خاماً",
+    "details": "overtime_enabled في إعدادات الموارد البشرية ينفذ input checkbox بدلاً من AppToggle. لا تفسر جميع تطابقات checkbox كمفاتيح؛ بعضها تحديد صفوف ويحتاج SelectableCard حسب السياق.",
+    "evidence": [
+      {
+        "path": "resources/js/Pages/HR/Settings.vue",
+        "line": 625,
+        "anchor": "v-model=\"attendanceSettingsForm.overtime_enabled\""
+      }
+    ],
+    "status": "resolved",
+    "confidence": "high",
+    "verification": "remediated-and-verified-with-automated-tests-and-build",
+    "remediated_at": "2026-11-09T16:38:00+03:00"
+  },
+  {
+    "id": "K07",
+    "rule": "UI-REGISTRY",
+    "severity": "P2",
+    "title": "قوائم ديناميكية تستخدم select خاماً",
+    "details": "تصنيف صور مهام الموظف وpreviewDocType في إعدادات الطباعة ينشئان options من مصفوفات/كائنات ديناميكية دون SearchableSelect. عناصر select داخل المكون الرسمي للوحة ليست مصنفة مخالفة باستعمال المكون نفسه.",
+    "evidence": [
+      {
+        "path": "resources/js/Pages/EmployeePortal/MyTasks.vue",
+        "line": 1413,
+        "anchor": "v-model=\"photoType\""
+      },
+      {
+        "path": "resources/js/Pages/Settings/Print/Index.vue",
+        "line": 633,
+        "anchor": "v-model=\"previewDocType\""
+      }
+    ],
+    "status": "resolved",
+    "confidence": "high",
+    "verification": "remediated-and-verified-with-automated-tests-and-build",
+    "remediated_at": "2026-11-09T16:38:00+03:00"
+  },
+  {
+    "id": "K08",
+    "rule": "PRINT",
+    "severity": "P2",
+    "title": "مسارات طباعة مستقلة تتجاوز usePrint وPrintEngine",
+    "details": "تقارير العملاء تستدعي window.print مباشرة، وعرض السعر يفتح route طباعة في نافذة مستقلة. وجود AppPrintButton في بعض الصفحات لا يعني أن مسار الطباعة يمر بالمحرك الموحد.",
+    "evidence": [
+      {
+        "path": "resources/js/Pages/Reports/Customers.vue",
+        "line": 1397,
+        "anchor": "const handlePrint"
+      },
+      {
+        "path": "resources/js/Pages/Quotes/Show.vue",
+        "line": 1733,
+        "anchor": "window.open(route('app.quotes.print'"
+      }
+    ],
+    "status": "resolved",
+    "confidence": "high",
+    "verification": "remediated-and-verified-with-automated-tests-and-build",
+    "remediated_at": "2026-11-09T16:38:00+03:00"
+  },
+  {
+    "id": "K09",
+    "rule": "I18N",
+    "severity": "P2",
+    "title": "نصوص مرئية ثابتة في الصفحات والاستجابات",
+    "details": "أولوية المهام، عناوين رفع الصور، رسائل المعاملات المالية وfallback قوالب التنبيه تحتوي نصوصاً عربية مباشرة خارج ملفات اللغة.",
+    "evidence": [
+      {
+        "path": "resources/js/Pages/EmployeePortal/MyTasks.vue",
+        "line": 1255,
+        "anchor": "<option value=\"low\">"
+      },
+      {
+        "path": "resources/js/Pages/EmployeePortal/MyTasks.vue",
+        "line": 1407,
+        "anchor": "رفع صور جديدة"
+      },
+      {
+        "path": "app/Http/Controllers/App/CompanyTransactionController.php",
+        "line": 79,
+        "anchor": "تم حفظ المعاملة"
+      },
+      {
+        "path": "app/Http/Controllers/App/CompanyProfileController.php",
+        "line": 105,
+        "anchor": "'quote_shared'"
+      }
+    ],
+    "status": "resolved",
+    "confidence": "high",
+    "verification": "remediated-and-verified-with-automated-tests-and-build",
+    "remediated_at": "2026-11-09T16:38:00+03:00"
+  },
+  {
+    "id": "K10",
+    "rule": "BRANDING",
+    "severity": "P2",
+    "title": "اسم تجاري بديل ثابت في فاتورة الاشتراك",
+    "details": "fallback اسم الشركة مطبوع كنص ثابت في الخدمة والقالب، بدلاً من config الديناميكي. هذا مستقل عن تخصيص الاسم القانوني من إعدادات الشركة.",
+    "evidence": [
+      {
+        "path": "app/Services/Invoice/SubscriptionInvoiceService.php",
+        "line": 162,
+        "anchor": "private function buildCompanyInfo"
+      },
+      {
+        "path": "resources/views/pdf/subscription-invoice.blade.php",
+        "line": 237,
+        "anchor": "$company['name'] ??"
+      }
+    ],
+    "status": "resolved",
+    "confidence": "high",
+    "verification": "remediated-and-verified-with-automated-tests-and-build",
+    "remediated_at": "2026-11-09T16:38:00+03:00"
+  },
+  {
+    "id": "K11",
+    "rule": "AUDIT",
+    "severity": "P2",
+    "title": "اعتماد الرواتب وتسجيل دفعها بلا logActivity",
+    "details": "approve وmarkPaid يغيران حالات مالية دون استدعاء سجل النموذج، رغم وجود logActivity وتطبيقه على حذف بند المسير. لا يوجد observer للرواتب في التسجيل الذي تمت مراجعته.",
+    "evidence": [
+      {
+        "path": "app/Http/Controllers/App/HR/PayrollController.php",
+        "line": 295,
+        "anchor": "public function approve("
+      },
+      {
+        "path": "app/Http/Controllers/App/HR/PayrollController.php",
+        "line": 314,
+        "anchor": "public function markPaid("
+      },
+      {
+        "path": "app/Models/HR/PayrollRun.php",
+        "line": 98,
+        "anchor": "public function logActivity"
+      }
+    ],
+    "status": "resolved",
+    "confidence": "high",
+    "verification": "remediated-and-verified-with-automated-tests-and-build",
+    "remediated_at": "2026-11-09T16:38:00+03:00"
+  },
+  {
+    "id": "K12",
+    "rule": "VERIFICATION",
+    "severity": "P2",
+    "title": "تهيئة تسجيل بعد return غير قابلة للوصول",
+    "details": "bootstrap يعيد التطبيق في :251 تقريباً ثم يبدأ configureMonologUsing بعده؛ تلك الكتلة لا تنفذ. لا يعني ذلك غياب التسجيل كله لأن config/logging ومسارات أخرى قائمة.",
+    "evidence": [
+      {
+        "path": "bootstrap/app.php",
+        "line": 38,
+        "anchor": "return Application::configure"
+      },
+      {
+        "path": "bootstrap/app.php",
+        "line": 269,
+        "anchor": "app()->configureMonologUsing"
+      }
+    ],
+    "status": "resolved",
+    "confidence": "high",
+    "verification": "remediated-and-verified-with-automated-tests-and-build",
+    "remediated_at": "2026-11-09T16:38:00+03:00"
+  },
+  {
+    "id": "K13",
+    "rule": "I18N",
+    "severity": "P2",
+    "title": "مفاتيح وصول مترجمة غير موجودة في اللغتين",
+    "details": "common.menu وcommon.toggle_theme مستخدمان في aria-label في تخطيط بوابة الموظف ولا يوجد لهما leaf في JSON العربي أو الإنجليزي. فحص static keys له مرشحات أخرى تشمل دوال محلية اسمها t ويجب عدم اعتبارها كلها عيوباً.",
+    "evidence": [
+      {
+        "path": "resources/js/Layouts/EmployeePortalLayout.vue",
+        "line": 94,
+        "anchor": "$t('common.menu')"
+      },
+      {
+        "path": "resources/js/Layouts/EmployeePortalLayout.vue",
+        "line": 127,
+        "anchor": "$t('common.toggle_theme')"
+      }
+    ],
+    "status": "resolved",
+    "confidence": "high",
+    "verification": "remediated-and-verified-with-automated-tests-and-build",
+    "remediated_at": "2026-11-09T16:38:00+03:00"
+  },
+  {
+    "id": "K14",
+    "rule": "VERIFICATION",
+    "severity": "P2",
+    "title": "اختبارات المطابقة لا تطابق حرفية الدستور",
+    "details": "FontPolicyTest يتعامل مع getExtension ويضم blade.php بالقائمة مع أن امتداد Blade الفعلي php، فيفوّت القوالب. HardcodedArabicTest يطبق سقفاً انتقالياً لا قاعدة صفر نصوص ثابتة. النجاح فيهما ليس شهادة مطابقة كاملة.",
+    "evidence": [
+      {
+        "path": "tests/Feature/FontPolicyTest.php",
+        "line": 52,
+        "anchor": "['js', 'mjs', 'vue', 'css', 'blade.php']"
+      },
+      {
+        "path": "tests/Feature/HardcodedArabicTest.php",
+        "line": 56,
+        "anchor": "MAX_INLINE_ARABIC"
+      }
+    ],
+    "status": "resolved",
+    "confidence": "high",
+    "verification": "remediated-and-verified-with-automated-tests-and-build",
+    "remediated_at": "2026-11-09T16:38:00+03:00"
+  },
+  {
+    "id": "K15",
+    "rule": "SOURCE-MAP",
+    "severity": "P3",
+    "title": "خريطة الخدمات في الدستور لا تطابق مساراتها الفعلية",
+    "details": "بعض المسارات في خريطة الدستور غير موجودة. الخدمات الفعلية InvoiceService وWorkOrderLaborService مباشرة في app/Services وPaymentManager تحت Payment وTaxCalculator تحت Optimization. ينبغي تحديث المرجعية كيلا يبني وكيل بديلاً خاطئاً.",
+    "evidence": [
+      {
+        "path": "AGENTS.md",
+        "line": 176,
+        "anchor": "app/Services/Finance/InvoiceService.php"
+      },
+      {
+        "path": "app/Services/Optimization/TaxCalculator.php",
+        "line": 7,
+        "anchor": "class TaxCalculator"
+      },
+      {
+        "path": "app/Services/WorkOrderLaborService.php",
+        "line": 50,
+        "anchor": "class WorkOrderLaborService"
+      }
+    ],
+    "status": "resolved",
+    "confidence": "high",
+    "verification": "remediated-and-verified-with-automated-tests-and-build",
+    "remediated_at": "2026-11-09T16:38:00+03:00"
+  }
+]

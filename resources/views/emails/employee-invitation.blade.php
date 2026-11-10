@@ -6,7 +6,7 @@
     <title>مرحباً بك في الفريق - تفعيل الحساب</title>
     <style>
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'IBM Plex Sans Arabic', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: #f3f4f6;
             padding: 20px;
             direction: rtl;

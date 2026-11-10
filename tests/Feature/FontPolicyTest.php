@@ -49,7 +49,10 @@ class FontPolicyTest extends TestCase
 
         foreach (['resources/js', 'resources/css', 'resources/views'] as $dir) {
             foreach (File::allFiles(base_path($dir)) as $file) {
-                if (in_array($file->getExtension(), ['js', 'mjs', 'vue', 'css', 'blade.php'], true)) {
+                $ext = $file->getExtension();
+                $filename = $file->getFilename();
+
+                if (in_array($ext, ['js', 'mjs', 'vue', 'css'], true) || str_ends_with($filename, '.blade.php')) {
                     $files[] = $file->getPathname();
                 }
             }
@@ -132,6 +135,29 @@ class FontPolicyTest extends TestCase
             '/css/fonts.css',
             $blade,
             'The layout must link the self-hosted font stylesheet.'
+        );
+    }
+
+    public function test_no_source_or_view_file_names_a_parallel_font_family(): void
+    {
+        $parallelFonts = ['Cairo', 'Tajawal', 'Figtree', 'Amiri', 'DejaVu'];
+        $offenders = [];
+
+        foreach ($this->sourceFiles() as $file) {
+            $code = $this->withoutComments(File::get($file));
+
+            foreach ($parallelFonts as $font) {
+                if (str_contains($code, "'{$font}'") || str_contains($code, "\"{$font}\"")) {
+                    $rel = str_replace(base_path().'/', '', $file);
+                    $offenders[] = "{$rel} (names {$font})";
+                }
+            }
+        }
+
+        $this->assertSame(
+            [],
+            $offenders,
+            'Parallel fonts found in source files. The constitution strictly mandates IBM Plex Sans Arabic as the ONLY font family.'
         );
     }
 }

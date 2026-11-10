@@ -34,8 +34,26 @@ class PartsController extends Controller
             ->when($request->input('status') === 'inactive', fn ($q) => $q->where('is_active', false))
             ->when($request->input('category'), fn ($q, $catId) => $q->where('category_id', $catId))
             ->with(['unit', 'category', 'inventoryBalances.warehouse.center'])
-            ->withSum('inventoryBalances', 'qty_on_hand')
-            ->orderBy('name_ar');
+            ->withSum('inventoryBalances', 'qty_on_hand');
+
+        $sortableColumns = [
+            'sku' => 'sku',
+            'name' => 'name_ar',
+            'name_ar' => 'name_ar',
+            'name_en' => 'name_en',
+            'qty' => 'inventory_balances_sum_qty_on_hand',
+            'is_active' => 'is_active',
+            'id' => 'id',
+        ];
+
+        $sort = (string) $request->input('sort');
+        $direction = strtolower((string) $request->input('direction', 'asc')) === 'desc' ? 'desc' : 'asc';
+
+        if ($sort && isset($sortableColumns[$sort])) {
+            $query->orderBy($sortableColumns[$sort], $direction);
+        } else {
+            $query->orderBy('name_ar', 'asc');
+        }
 
         $parts = $query->paginate(25)->withQueryString();
 
@@ -60,7 +78,7 @@ class PartsController extends Controller
             'categories' => $categories,
             'units' => $units,
             'warehouses' => $warehouses,
-            'filters' => $request->only(['search', 'status', 'category']),
+            'filters' => $request->only(['search', 'status', 'category', 'sort', 'direction']),
         ]);
     }
 

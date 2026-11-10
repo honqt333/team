@@ -17,6 +17,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Spatie\Permission\PermissionRegistrar;
 use Spatie\Permission\Traits\HasRoles;
@@ -56,6 +57,8 @@ class User extends Authenticatable implements MustVerifyEmail
     protected $hidden = [
         'password',
         'remember_token',
+        'invitation_token_hash',
+        'invitation_expires_at',
         'two_factor_secret',
         'two_factor_recovery_codes',
     ];
@@ -120,6 +123,7 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return [
             'email_verified_at' => 'datetime',
+            'invitation_expires_at' => 'datetime',
             'password' => 'hashed',
             'is_active' => 'boolean',
             'is_system_admin' => 'boolean',
@@ -229,5 +233,15 @@ class User extends Authenticatable implements MustVerifyEmail
     public function sendPasswordResetNotification($token): void
     {
         $this->notify(new ResetPasswordNotification($token));
+    }
+
+    public function logActivity(string $action, array $context = []): void
+    {
+        Log::notice($action, [
+            'tenant_id' => $this->tenant_id,
+            'user_id' => $this->id,
+            'actor_id' => auth()->id(),
+            'context' => $context,
+        ]);
     }
 }

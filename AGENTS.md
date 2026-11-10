@@ -125,6 +125,44 @@ flowchart LR
 | **CustomDatePicker** | `@/Components/CustomDatePicker.vue` | **إلزامي:** منتقي التواريخ الموحد الداعم للوضعين الداكن والفاتح. |
 | **ConfirmModal** | `@/Components/ConfirmModal.vue` | **إلزامي:** نوافذ التأكيد للإجراءات الحرجة (الحذف، الإلغاء، الاسترجاع). |
 | **PrintEngine** | `@/Components/Print/PrintEngine.vue` | **إلزامي:** محرك الطباعة الموحد عبر `usePrint`. |
+| **AppToggle** | `@/Components/Common/AppToggle.vue` | **إلزامي:** مفتاح التبديل الموحد (Toggle Switch) لجميع حالات التبديل المنطقي (On/Off). يمنع استخدام وسوم Checkbox الخام. |
+| **FormField** | `@/Components/Common/FormField.vue` | **إلزامي:** غلاف الحقول الموحد (Label + Asterisk + Control + Hint + Error). |
+| **FormSection** | `@/Components/Common/FormSection.vue` | **إلزامي:** بطاقة تجميع الحقول الموحدة مع Header ووصف وأزرار فرعية. |
+| **SelectableCard** | `@/Components/Common/SelectableCard.vue` | **إلزامي:** بطاقة التحديد المرئية كبديل حديث لـ Checkbox/Radio في القوائم. |
+| **RadioGroup** | `@/Components/Common/RadioGroup.vue` | **إلزامي:** مجموعة أزرار الراديو الموحدة المتوافقة مع إمكانية الوصول. |
+| **DataTable** | `@/Components/Common/DataTable.vue` | **إلزامي:** محرك عرض الجداول وقوائم البيانات الموحد (يدعم الترتيب والتحميل والتفريغ). |
+| **AppPagination** | `@/Components/Common/AppPagination.vue` | **إلزامي:** شريط التنقل بين الصفحات الموحد بالاعتماد على Design Tokens. |
+
+#### معايير مفتاح التبديل الموحد (`AppToggle.vue`)
+- **إلزامي لجميع حالات التبديل المنطقي (On/Off Switches):**
+  - يمنع منعاً باتاً إنشاء أو كتابة أزرار تبديل عبر وسوم HTML الخام مثل `<input type="checkbox" class="sr-only peer">` أو محاكاة الـ Switches عبر وسوم الـ `after:` يدويًا.
+  - المكون المعتمد الوحيد هو `@/Components/Common/AppToggle.vue`.
+- **الخصائص المدعومة (Props):**
+  - `v-model`: يدعم القيم المنطقية (`Boolean`)، أو القيم المخصصة (`true-value` / `false-value` مثل `"1"` و `"0"`):، أو المصفوفات (`Array` لقوائم الصلاحيات عند تمرير `:value="item"`).
+  - `size`: المقاسات المعتمدة (`sm`, `md`, `lg`)، مع محاذاة وتوسيط رأسي هندسي دقيق (`p-0.5 items-center`).
+  - `color`: الألوان المعتمدة (`primary`, `success`, `danger`, `warning`, `violet`, `blue`).
+  - `label` و `description`: دعم النصوص والعناوين والأوصاف مع محاذاة رأسية ذكية تلقائياً (`items-start pt-0.5` عند وجود سطرين).
+  - `disabled`: إيقاف التفاعل تلقائياً مع خفض الشفافية ومنع النقر.
+- **نماذج الاستخدام القياسية:**
+  ```vue
+  <!-- 1. استخدام مجرد داخل بطاقة أو سطر جدول -->
+  <AppToggle v-model="form.is_active" />
+
+  <!-- 2. استخدام مع نص وصفي فرعي ولون مخصص -->
+  <AppToggle
+      v-model="form.is_active"
+      :label="$t('common.active')"
+      :description="$t('services.active_hint')"
+      color="success"
+  />
+
+  <!-- 3. استخدام مع مصفوفة صلاحيات (Array Binding) -->
+  <AppToggle
+      v-model="form.permissions"
+      :value="permission.name"
+      :label="permission.label"
+  />
+  ```
 
 ---
 
@@ -134,8 +172,8 @@ flowchart LR
 | :--- | :--- | :--- |
 | **المستأجرين والفروع** | `app/Models/Concerns/TenantScoped.php`<br/>`app/Models/Concerns/CenterScoped.php`<br/>`app/Support/TenancyContext.php` | تطبيق العزل التلقائي والتحقق من السياق |
 | **الصلاحيات والتفويض** | `app/Support/Permissions.php`<br/>`app/Policies/` | المصدر الوحيد لأسماء الصلاحيات والسياسات |
-| **كروت العمل والعمالة** | `app/Models/WorkOrder.php`<br/>`app/Models/WorkOrderItem.php`<br/>`app/Services/WorkOrders/WorkOrderLaborService.php` | احتساب الوقت وحالات كروت العمل |
-| **الفواتير والمدفوعات والضريبة** | `app/Services/Finance/InvoiceService.php`<br/>`app/Services/Finance/PaymentManager.php`<br/>`app/Services/TaxCalculator.php` | العمليات المالية ذرية (Atomic) ومقفلة |
+| **كروت العمل والعمالة** | `app/Models/WorkOrder.php`<br/>`app/Models/WorkOrderItem.php`<br/>`app/Services/WorkOrderLaborService.php` | احتساب الوقت وحالات كروت العمل |
+| **الفواتير والمدفوعات والضريبة** | `app/Services/InvoiceService.php`<br/>`app/Services/Payment/PaymentManager.php`<br/>`app/Services/Optimization/TaxCalculator.php` | العمليات المالية ذرية (Atomic) ومقفلة |
 | **المخزون وحركات القطع** | `app/Services/Inventory/InventoryService.php`<br/>`app/Models/InventoryMove.php` | حركات المستودعات والكميات المتوفرة |
 | **محرك الطباعة** | `resources/js/Composables/usePrint.js`<br/>`resources/js/Components/Print/PrintEngine.vue` | يمنع إنشاء شاشات أو نوافذ طباعة مستقلة |
 | **ملفات الترجمة واللغة** | `resources/js/i18n/lang/ar.json` & `en.json`<br/>`lang/ar/` & `lang/en/` | التدويل إلزامي للواجهة والخلفية |
@@ -149,7 +187,7 @@ flowchart LR
 3. ❌ **ممنوع إنشاء مكونات أو خدمات موازية:** إذا كان هناك مكون معتمد أو خدمة قائمة، يجب استخدامها والتكامل معها.
 4. ❌ **ممنوع النصوص الثابتة (Hardcoded Strings):** كل كلمة تظهر للمستخدم مكانها ملفات الترجمة المعتمدة.
 5. ❌ **ممنوع تعديل ملفات المهاجرة السابقة:** أي تعديل على الجداول يكون عبر Migration جديدة ملحقة وقابلة للتراجع.
-6. ❌ **ممنوع استخدام عناصر HTML الخام للبيانات:** يمنع استخدام `<select>` العادي للقوائم، أو حقول عادية للوحات السعودية والتواقيع.
+6. ❌ **ممنوع استخدام عناصر HTML الخام للبيانات:** يمنع استخدام `<select>` العادي للقوائم، أو حقول عادية للوحات السعودية والتواقيع، أو كتابة وسوم `<input type="checkbox">` ومحاكاة مفاتيح التبديل يدوياً بدلاً من استخدام `AppToggle` المعتمد.
 7. ❌ **ممنوع الاعتماد على إخفاء الأزرار كأمان:** التفويض الحقيقي مكانه السياسات في الخادم (`Policies`).
 8. ❌ **ممنوع التراجع عن معايير الخطوط:** الخط المعتمد الوحيد هو `IBM Plex Sans Arabic`.
 9. ❌ **ممنوع عكس ترتيب الهيدر:** شريط الأدوات أولاً، يليه زر الإجراء الأساسي في أقصى الزاوية الخارجية.

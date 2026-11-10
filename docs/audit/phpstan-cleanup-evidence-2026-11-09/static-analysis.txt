@@ -1,0 +1,7 @@
+Note: Using configuration file [project]/phpstan.neon.
+   0/571 [░░░░░░░░░░░░░░░░░░░░░░░░░░░░]   0%
+ 571/571 [▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓] 100%
+
+
+ [OK] No errors                                                                 
+

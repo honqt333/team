@@ -129,7 +129,6 @@ class DeveloperController extends Controller
 
                 // Build proper namespace including subdirectories
                 $relativePath = $file->getPathname();
-                $baseDir = $iterator->getSubIterator()->getSubPath();
                 $relativeFromBase = str_replace($basePath.DIRECTORY_SEPARATOR, '', $relativePath);
                 $namespacePath = substr($relativeFromBase, 0, -4); // Remove .php
                 $className = 'App\\Models\\'.str_replace(DIRECTORY_SEPARATOR, '\\', $namespacePath);

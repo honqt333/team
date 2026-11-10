@@ -39,8 +39,12 @@ class EmployeeController extends Controller
         $status = $request->get('status', 'active');
         $isSuperAdmin = auth()->user()->hasRole('super_admin');
 
+        $allowedSorts = ['employee_number', 'name_ar', 'name_en', 'base_salary', 'created_at'];
+        $sort = in_array($request->input('sort'), $allowedSorts, true) ? $request->input('sort') : 'name_ar';
+        $direction = strtolower((string) ($request->input('direction') ?? $request->input('order', ''))) === 'desc' ? 'desc' : 'asc';
+
         $employees = Employee::where('tenant_id', $tenantId)
-            ->when(! $isSuperAdmin, fn ($q) => $q->where('center_id', $centerId))
+            ->when(! $isSuperAdmin, fn ($q) => $q->where(fn ($sub) => $sub->where('center_id', $centerId)->orWhereNull('center_id')))
             ->when($isSuperAdmin && $request->center_id, fn ($q) => $q->where('center_id', $request->center_id))
             ->when($status === 'active', fn ($q) => $q->active())
             ->when($status === 'inactive', fn ($q) => $q->where('status', '!=', 'active'))
@@ -53,21 +57,25 @@ class EmployeeController extends Controller
                         ->orWhere('phone', 'like', "%{$search}%");
                 });
             })
-            ->orderBy('name_ar')
+            ->orderBy($sort, $direction)
             ->paginate(20)
             ->withQueryString();
 
         return Inertia::render('HR/Employees/Index', [
             'employees' => $employees,
-            'filters' => array_merge($request->only(['search', 'center_id']), ['status' => $status]),
+            'filters' => array_merge($request->only(['search', 'center_id']), [
+                'status' => $status,
+                'sort' => $sort,
+                'direction' => $direction,
+            ]),
             'counts' => [
                 'active' => Employee::where('tenant_id', $tenantId)
-                    ->when(! $isSuperAdmin, fn ($q) => $q->where('center_id', $centerId))
+                    ->when(! $isSuperAdmin, fn ($q) => $q->where(fn ($sub) => $sub->where('center_id', $centerId)->orWhereNull('center_id')))
                     ->when($isSuperAdmin && $request->center_id, fn ($q) => $q->where('center_id', $request->center_id))
                     ->active()
                     ->count(),
                 'inactive' => Employee::where('tenant_id', $tenantId)
-                    ->when(! $isSuperAdmin, fn ($q) => $q->where('center_id', $centerId))
+                    ->when(! $isSuperAdmin, fn ($q) => $q->where(fn ($sub) => $sub->where('center_id', $centerId)->orWhereNull('center_id')))
                     ->when($isSuperAdmin && $request->center_id, fn ($q) => $q->where('center_id', $request->center_id))
                     ->where('status', '!=', 'active')
                     ->count(),
@@ -99,7 +107,7 @@ class EmployeeController extends Controller
         $isSuperAdmin = auth()->user()->hasRole('super_admin');
 
         $employees = Employee::where('tenant_id', $tenantId)
-            ->when(! $isSuperAdmin, fn ($q) => $q->where('center_id', $centerId))
+            ->when(! $isSuperAdmin, fn ($q) => $q->where(fn ($sub) => $sub->where('center_id', $centerId)->orWhereNull('center_id')))
             ->active()
             ->with(['jobTitle:id,name_ar,name_en', 'department:id,name_ar,name_en'])
             ->orderBy('name_ar')
@@ -151,20 +159,10 @@ class EmployeeController extends Controller
             'gender' => 'required|in:male,female',
             'nationality_id' => 'required|exists:nationalities,id',
             'job_title_id' => 'required|exists:hr_job_titles,id',
+            'department_id' => 'nullable|exists:departments,id',
             'center_id' => 'nullable|exists:centers,id',
             'default_shift_id' => 'nullable|exists:hr_shifts,id',
         ]);
-
-        // Security Check: Restrict "Management" department to Super Admin
-        if (isset($validated['department_id'])) {
-            $this->checkManagementRestriction($validated['department_id']);
-        }
-
-        // Check if user has permission to management if center_id is null
-        if (empty($validated['center_id']) && ! auth()->user()->hasRole('super_admin')) {
-            $validated['center_id'] = TenancyContext::centerId();
-            Log::info('Auto-assigned center_id', ['center_id' => $validated['center_id']]);
-        }
 
         try {
             $employee = new Employee;
@@ -331,11 +329,6 @@ class EmployeeController extends Controller
         $employee->fill($validated);
         $employee->save();
 
-        // Security Check: Restrict "Management" department to Super Admin if changed
-        if (isset($validated['department_id']) && $validated['department_id'] != $employee->getOriginal('department_id')) {
-            $this->checkManagementRestriction($validated['department_id']);
-        }
-
         return back()->with('success', __('messages.updated_successfully'));
     }
 
@@ -375,29 +368,6 @@ class EmployeeController extends Controller
     }
 
     /**
-     * Check if the selected department is "Management" and restrict it to Super Admin.
-     */
-    private function checkManagementRestriction($departmentId)
-    {
-        if (auth()->user()->hasRole('super_admin')) {
-            return;
-        }
-
-        $department = Department::find($departmentId);
-
-        if (! $department) {
-            return;
-        }
-
-        $isManagement = str_contains($department->name_en, 'Management') ||
-                        str_contains($department->name_ar, 'الإدارة');
-
-        if ($isManagement) {
-            abort(403, 'إضافة موظفين لقسم الإدارة متاح فقط للمدير العام (Super Admin).');
-        }
-    }
-
-    /**
      * Update employee's user roles.
      */
     public function updateRoles(Request $request, Employee $employee)
@@ -427,6 +397,11 @@ class EmployeeController extends Controller
             $rolesToSync[] = 'employee';
         }
 
+        $this->authorize('update', $employee->user);
+
+        foreach (Role::where('tenant_id', $tenantId)->whereIn('name', $rolesToSync)->get() as $role) {
+            $this->authorize('assignRole', [User::class, $role]);
+        }
         $employee->user->syncRoles($rolesToSync);
         Log::info("Updated roles for employee {$employee->id}", ['roles' => $rolesToSync]);
 

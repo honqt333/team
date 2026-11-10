@@ -82,6 +82,21 @@ class BiometricAttendanceController extends Controller
             ], 404);
         }
 
+        // Center isolation: prevent recording attendance across different centers
+        if ($device->center_id && $employee->center_id && $employee->center_id !== $device->center_id) {
+            Log::warning('Biometric: Cross-center attendance rejected', [
+                'employee_id' => $employee->id,
+                'employee_center_id' => $employee->center_id,
+                'device_center_id' => $device->center_id,
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'error' => 'cross_center_unauthorized',
+                'message' => 'Employee belongs to a different center',
+            ], 403);
+        }
+
         // Parse timestamp
         $timestamp = isset($validated['timestamp'])
             ? Carbon::parse($validated['timestamp'])
@@ -195,6 +210,18 @@ class BiometricAttendanceController extends Controller
                     'index' => $index,
                     'identifier' => $record['employee_identifier'],
                     'error' => 'employee_not_found',
+                ];
+                continue;
+            }
+
+            // Center isolation check
+            if ($device->center_id && $employee->center_id && $employee->center_id !== $device->center_id) {
+                $results['failed']++;
+                $results['errors'][] = [
+                    'index' => $index,
+                    'identifier' => $record['employee_identifier'],
+                    'error' => 'cross_center_unauthorized',
+                    'message' => 'Employee belongs to a different center',
                 ];
                 continue;
             }

@@ -1,4 +1,6 @@
 <script setup>
+import AppToggle from '@/Components/Common/AppToggle.vue';
+
 defineProps({ form: Object, addItem: Function, removeItem: Function, tab: String });
 </script>
 
@@ -105,18 +107,11 @@ defineProps({ form: Object, addItem: Function, removeItem: Function, tab: String
                             {{ $t('tenant_site.landing.toggle_typed_desc') }}
                         </p>
                     </div>
-                    <label class="relative inline-flex items-center cursor-pointer">
-                        <input
-                            type="checkbox"
-                            v-model="form.settings.landing_hero_typed_enabled"
-                            true-value="1"
-                            false-value="0"
-                            class="sr-only peer"
-                        />
-                        <div
-                            class="w-11 h-6 bg-gray-200 dark:bg-gray-700 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 dark:peer-focus:ring-indigo-800 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"
-                        ></div>
-                    </label>
+                    <AppToggle
+                        v-model="form.settings.landing_hero_typed_enabled"
+                        true-value="1"
+                        false-value="0"
+                    />
                 </div>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
                     <div>
@@ -262,18 +257,11 @@ defineProps({ form: Object, addItem: Function, removeItem: Function, tab: String
                         {{ $t('tenant_site.landing.toggle_section_desc') }}
                     </p>
                 </div>
-                <label class="relative inline-flex items-center cursor-pointer">
-                    <input
-                        type="checkbox"
-                        v-model="form.settings.landing_features_enabled"
-                        true-value="1"
-                        false-value="0"
-                        class="sr-only peer"
-                    />
-                    <div
-                        class="w-11 h-6 bg-gray-200 dark:bg-gray-700 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 dark:peer-focus:ring-indigo-800 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"
-                    ></div>
-                </label>
+                <AppToggle
+                    v-model="form.settings.landing_features_enabled"
+                    true-value="1"
+                    false-value="0"
+                />
             </div>
             <div
                 class="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-6 pb-6 border-b border-gray-200 dark:border-gray-700"
@@ -444,18 +432,11 @@ defineProps({ form: Object, addItem: Function, removeItem: Function, tab: String
                         {{ $t('tenant_site.landing.toggle_plans_desc') }}
                     </p>
                 </div>
-                <label class="relative inline-flex items-center cursor-pointer">
-                    <input
-                        type="checkbox"
-                        v-model="form.settings.landing_pricing_enabled"
-                        true-value="1"
-                        false-value="0"
-                        class="sr-only peer"
-                    />
-                    <div
-                        class="w-11 h-6 bg-gray-200 dark:bg-gray-700 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 dark:peer-focus:ring-indigo-800 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"
-                    ></div>
-                </label>
+                <AppToggle
+                    v-model="form.settings.landing_pricing_enabled"
+                    true-value="1"
+                    false-value="0"
+                />
             </div>
             <h3 class="text-lg leading-6 font-semibold text-gray-900 dark:text-white pb-4 mt-6">
                 {{ $t('tenant_site.landing.plans_section_settings') }}
@@ -547,18 +528,11 @@ defineProps({ form: Object, addItem: Function, removeItem: Function, tab: String
                         {{ $t('tenant_site.landing.toggle_metrics_desc') }}
                     </p>
                 </div>
-                <label class="relative inline-flex items-center cursor-pointer">
-                    <input
-                        type="checkbox"
-                        v-model="form.settings.landing_stats_enabled"
-                        true-value="1"
-                        false-value="0"
-                        class="sr-only peer"
-                    />
-                    <div
-                        class="w-11 h-6 bg-gray-200 dark:bg-gray-700 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 dark:peer-focus:ring-indigo-800 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"
-                    ></div>
-                </label>
+                <AppToggle
+                    v-model="form.settings.landing_stats_enabled"
+                    true-value="1"
+                    false-value="0"
+                />
             </div>
             <div class="flex items-center justify-between mt-6 mb-6">
                 <h3 class="text-lg leading-6 font-semibold text-gray-900 dark:text-white">
@@ -803,18 +777,11 @@ defineProps({ form: Object, addItem: Function, removeItem: Function, tab: String
                         {{ $t('tenant_site.landing.toggle_faq_desc') }}
                     </p>
                 </div>
-                <label class="relative inline-flex items-center cursor-pointer">
-                    <input
-                        type="checkbox"
-                        v-model="form.settings.landing_faq_enabled"
-                        true-value="1"
-                        false-value="0"
-                        class="sr-only peer"
-                    />
-                    <div
-                        class="w-11 h-6 bg-gray-200 dark:bg-gray-700 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 dark:peer-focus:ring-indigo-800 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"
-                    ></div>
-                </label>
+                <AppToggle
+                    v-model="form.settings.landing_faq_enabled"
+                    true-value="1"
+                    false-value="0"
+                />
             </div>
             <div class="flex items-center justify-between mt-6 mb-6">
                 <h3 class="text-lg leading-6 font-semibold text-gray-900 dark:text-white">
@@ -916,18 +883,11 @@ defineProps({ form: Object, addItem: Function, removeItem: Function, tab: String
                         {{ $t('tenant_site.landing.toggle_contact_desc') }}
                     </p>
                 </div>
-                <label class="relative inline-flex items-center cursor-pointer">
-                    <input
-                        type="checkbox"
-                        v-model="form.settings.landing_contact_enabled"
-                        true-value="1"
-                        false-value="0"
-                        class="sr-only peer"
-                    />
-                    <div
-                        class="w-11 h-6 bg-gray-200 dark:bg-gray-700 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 dark:peer-focus:ring-indigo-800 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"
-                    ></div>
-                </label>
+                <AppToggle
+                    v-model="form.settings.landing_contact_enabled"
+                    true-value="1"
+                    false-value="0"
+                />
             </div>
             <div
                 class="mt-4 p-6 bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-500 rounded-lg"

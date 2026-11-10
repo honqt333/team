@@ -302,4 +302,49 @@ class CustomersCrudTest extends TestCase
             ->has('ledger')
         );
     }
+
+    public function test_customers_index_sorts_by_column_and_direction(): void
+    {
+        $user = $this->createUserWithPermissions(['crm.customers.view']);
+
+        $custA = Customer::create([
+            'tenant_id' => $user->tenant_id,
+            'center_id' => $user->current_center_id,
+            'type' => 'individual',
+            'name' => 'Alpha Customer',
+            'phone' => '+966501111111',
+        ]);
+
+        $custZ = Customer::create([
+            'tenant_id' => $user->tenant_id,
+            'center_id' => $user->current_center_id,
+            'type' => 'company',
+            'name' => 'Zulu Customer',
+            'phone' => '+966509999999',
+        ]);
+
+        // Ascending by name
+        $responseAsc = $this->actingAs($user)->get(route('customers.index', [
+            'sort' => 'name',
+            'direction' => 'asc',
+        ]));
+        $responseAsc->assertOk();
+        $responseAsc->assertInertia(fn ($page) => $page
+            ->component('Customers/Index')
+            ->where('customers.data.0.id', $custA->id)
+            ->where('customers.data.1.id', $custZ->id)
+        );
+
+        // Descending by name
+        $responseDesc = $this->actingAs($user)->get(route('customers.index', [
+            'sort' => 'name',
+            'direction' => 'desc',
+        ]));
+        $responseDesc->assertOk();
+        $responseDesc->assertInertia(fn ($page) => $page
+            ->component('Customers/Index')
+            ->where('customers.data.0.id', $custZ->id)
+            ->where('customers.data.1.id', $custA->id)
+        );
+    }
 }

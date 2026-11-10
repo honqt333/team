@@ -96,7 +96,7 @@ class HealthController
                 'latency_ms' => round((microtime(true) - $start) * 1000, 2),
             ];
         } catch (Throwable $e) {
-            Log::warning('Health check: DB failed', ['exception' => $e]);
+            Log::warning('Health check: DB failed', ['exception_class' => $e::class]);
 
             return [
                 'status' => 'fail',
@@ -129,7 +129,7 @@ class HealthController
                 'latency_ms' => round((microtime(true) - $start) * 1000, 2),
             ];
         } catch (Throwable $e) {
-            Log::warning('Health check: cache failed', ['exception' => $e]);
+            Log::warning('Health check: cache failed', ['exception_class' => $e::class]);
 
             return [
                 'status' => 'fail',
@@ -159,7 +159,7 @@ class HealthController
                 'latency_ms' => round((microtime(true) - $start) * 1000, 2),
             ];
         } catch (Throwable $e) {
-            Log::warning('Health check: queue failed', ['exception' => $e]);
+            Log::warning('Health check: queue failed', ['exception_class' => $e::class]);
 
             return [
                 'status' => 'fail',
@@ -168,21 +168,9 @@ class HealthController
         }
     }
 
-    /**
-     * Strip DSN/credentials out of exception messages before returning
-     * them on the public health endpoint — we don't want a Redis DSN or
-     * DB password leaking just because the broker is down.
-     */
-    private function sanititiseError(Throwable $e): string
+    /** Return a stable public error code; connection details stay private. */
+    private function sanitiseError(Throwable $e): string
     {
-        $msg = $e->getMessage();
-
-        // mysql: "SQLSTATE[HY000] [2002] ..." — keep the prefix, drop anything
-        // after the first colon pair that contains hostnames / passwords.
-        // Generic enough that it works for PDOException, RedisException, etc.
-        $msg = preg_replace('/(password|secret|token)=[^;\s]+/i', '$1=***', $msg) ?? $msg;
-
-        // Truncate so a runaway exception doesn't blow up the JSON response.
-        return mb_substr($msg, 0, 200);
+        return 'dependency_unavailable';
     }
 }

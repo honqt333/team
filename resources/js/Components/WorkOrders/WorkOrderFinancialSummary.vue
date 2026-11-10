@@ -7,7 +7,94 @@
             {{ $t('work_orders.cost_and_payment') }}
         </h3>
 
-        <div class="overflow-x-auto flex-1">
+        <!-- Mobile Card Breakdown (Visible on mobile < sm) -->
+        <div class="block sm:hidden space-y-3 mb-2">
+            <!-- Services breakdown if present -->
+            <div
+                v-if="totals.services.total > 0"
+                class="p-3 bg-gray-50 dark:bg-gray-900/40 rounded-xl space-y-1.5 border border-gray-100 dark:border-gray-700/50"
+            >
+                <div
+                    class="flex justify-between items-center text-xs font-bold text-gray-900 dark:text-white"
+                >
+                    <span>{{ $t('work_orders.services_total') }}</span>
+                    <span class="font-mono">{{ formatCurrency(totals.services.total) }}</span>
+                </div>
+                <div class="flex justify-between items-center text-[11px] text-gray-500">
+                    <span>
+                        {{ $t('work_orders.price') }}: {{ formatCurrency(totals.services.price) }}
+                    </span>
+                    <span v-if="totals.services.discount > 0" class="text-red-500 italic">
+                        -{{ formatCurrency(totals.services.discount) }}
+                    </span>
+                </div>
+            </div>
+
+            <!-- Spare Parts breakdown if present -->
+            <div
+                v-if="totals.parts.total > 0"
+                class="p-3 bg-gray-50 dark:bg-gray-900/40 rounded-xl space-y-1.5 border border-gray-100 dark:border-gray-700/50"
+            >
+                <div
+                    class="flex justify-between items-center text-xs font-bold text-gray-900 dark:text-white"
+                >
+                    <span>{{ $t('work_orders.parts_total') }}</span>
+                    <span class="font-mono">{{ formatCurrency(totals.parts.total) }}</span>
+                </div>
+                <div class="flex justify-between items-center text-[11px] text-gray-500">
+                    <span>
+                        {{ $t('work_orders.price') }}: {{ formatCurrency(totals.parts.price) }}
+                    </span>
+                    <span v-if="totals.parts.discount > 0" class="text-red-500 italic">
+                        -{{ formatCurrency(totals.parts.discount) }}
+                    </span>
+                </div>
+            </div>
+
+            <!-- Grand Total, Paid & Balance Summary Card -->
+            <div
+                class="p-3.5 bg-amber-50/70 dark:bg-amber-950/20 rounded-xl border border-amber-200/60 dark:border-amber-800/40 space-y-2"
+            >
+                <div
+                    class="flex justify-between items-center text-sm font-black text-amber-900 dark:text-amber-300"
+                >
+                    <span>{{ $t('work_orders.total') }}</span>
+                    <span class="font-mono text-base text-amber-600 dark:text-amber-400">
+                        {{ formatCurrency(totals.grand.total) }}
+                    </span>
+                </div>
+                <div
+                    v-if="creditNotesTotal > 0"
+                    class="flex justify-between items-center text-xs font-bold text-red-600 dark:text-red-400"
+                >
+                    <span>{{ $t('invoices.credit_notes_total') }}</span>
+                    <span class="font-mono">-{{ formatCurrency(creditNotesTotal) }}</span>
+                </div>
+                <div
+                    class="flex justify-between items-center text-xs font-bold text-green-600 dark:text-green-500"
+                >
+                    <span>{{ $t('work_orders.paid') }}</span>
+                    <span class="font-mono">{{ formatCurrency(totalPaid) }}</span>
+                </div>
+                <div
+                    v-if="badDebt > 0"
+                    class="flex justify-between items-center text-xs font-bold text-amber-600 dark:text-amber-500"
+                >
+                    <span>{{ $t('payments.types.bad_debt') }}</span>
+                    <span class="font-mono">{{ formatCurrency(badDebt) }}</span>
+                </div>
+                <div
+                    class="pt-2 border-t border-amber-200/60 dark:border-amber-800/40 flex justify-between items-center text-sm font-black"
+                    :class="balance > 0 ? 'text-orange-600 dark:text-orange-500' : 'text-gray-500'"
+                >
+                    <span>{{ $t('work_orders.balance') }}</span>
+                    <span class="font-mono text-base">{{ formatCurrency(balance) }}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Desktop Table (Visible on sm and larger) -->
+        <div class="hidden sm:block overflow-x-auto flex-1">
             <table class="w-full text-xs">
                 <thead>
                     <tr

@@ -15,6 +15,7 @@ import { useI18n } from 'vue-i18n';
 import { usePage, router } from '@inertiajs/vue3';
 import PrintLayout from '@/Components/Print/PrintLayout.vue';
 import { buildPrintSignatures } from '@/Utils/printSignatures';
+import { usePrint } from '@/Composables/usePrint';
 
 const props = defineProps({
     quote: Object,
@@ -22,6 +23,7 @@ const props = defineProps({
 
 const page = usePage();
 const { t, locale } = useI18n();
+const { print } = usePrint();
 const isRtl = computed(() => locale.value === 'ar');
 
 const goBack = () => {
@@ -36,12 +38,12 @@ const goBack = () => {
         window.history.back();
     }
 };
-const printPage = () => window.print();
+const printPage = () => print();
 
 onMounted(() => {
     // Automatically trigger print dialog
     setTimeout(() => {
-        window.print();
+        print();
     }, 500);
 });
 

@@ -80,21 +80,25 @@ class Part extends Model
     // Relationships
     // ─────────────────────────────────────────────────────────────
 
+    /** @return BelongsTo<Tenant, $this> */
     public function tenant(): BelongsTo
     {
         return $this->belongsTo(Tenant::class);
     }
 
+    /** @return BelongsTo<InventoryUnit, $this> */
     public function unit(): BelongsTo
     {
         return $this->belongsTo(InventoryUnit::class, 'unit_id');
     }
 
+    /** @return BelongsTo<InventoryUnit, $this> */
     public function purchaseUnit(): BelongsTo
     {
         return $this->belongsTo(InventoryUnit::class, 'purchase_unit_id');
     }
 
+    /** @return BelongsTo<InventoryCategory, $this> */
     public function category(): BelongsTo
     {
         return $this->belongsTo(InventoryCategory::class, 'category_id');

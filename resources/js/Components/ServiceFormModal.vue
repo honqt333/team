@@ -65,7 +65,7 @@
                 </div>
 
                 <!-- Catalog selector row -->
-                <div class="flex items-start gap-3">
+                <div class="flex flex-col sm:flex-row items-stretch sm:items-start gap-3">
                     <!-- SearchableSelect takes all remaining space -->
                     <div class="flex-1 min-w-0">
                         <label
@@ -78,11 +78,45 @@
                             :options="filteredCatalogServices"
                             :label="''"
                             :placeholder="$t('services_management.select_service_placeholder')"
-                            :option-label="(s) => `${s.name_ar} — ${s.name_en}`"
+                            :option-label="
+                                (s) =>
+                                    `${s.name_ar} — ${s.name_en}${showAllCatalogServices && s.department_name_ar ? ` (${s.department_name_ar})` : ''}`
+                            "
                             option-value="id"
                         />
+                        <div
+                            v-if="
+                                !showAllCatalogServices &&
+                                filteredCatalogServices.length === 0 &&
+                                otherBranchesServices.length > 0
+                            "
+                            class="mt-2 flex flex-col sm:flex-row sm:items-center justify-between gap-1.5"
+                        >
+                            <p class="text-xs text-amber-600 dark:text-amber-400">
+                                {{ $t('services_management.no_services_in_dept') }}
+                            </p>
+                            <button
+                                type="button"
+                                @click="showAllCatalogServices = true"
+                                class="text-xs text-indigo-600 dark:text-indigo-400 underline font-semibold hover:text-indigo-800 text-start sm:text-end"
+                            >
+                                {{ $t('services_management.show_all_catalog_services') }}
+                            </button>
+                        </div>
+                        <div
+                            v-else-if="showAllCatalogServices && otherBranchesServices.length > 0"
+                            class="mt-2 flex items-center justify-end"
+                        >
+                            <button
+                                type="button"
+                                @click="showAllCatalogServices = false"
+                                class="text-xs text-gray-500 dark:text-gray-400 underline hover:text-gray-700"
+                            >
+                                {{ $t('services_management.show_dept_services_only') }}
+                            </button>
+                        </div>
                         <p
-                            v-if="filteredCatalogServices.length === 0"
+                            v-else-if="filteredCatalogServices.length === 0"
                             class="mt-1.5 text-xs text-amber-600 dark:text-amber-400"
                         >
                             {{ $t('services_management.no_services_in_dept') }}
@@ -90,11 +124,11 @@
                     </div>
 
                     <!-- Add new definition button -->
-                    <div class="flex-shrink-0 pt-7">
+                    <div class="flex-shrink-0 sm:pt-7">
                         <button
                             type="button"
                             @click="$emit('open-new-definition')"
-                            class="px-4 py-2.5 bg-white dark:bg-gray-800 border border-indigo-200 dark:border-indigo-700 text-indigo-600 dark:text-indigo-400 rounded-xl font-bold text-sm shadow-sm hover:bg-indigo-50 dark:hover:bg-indigo-900/20 hover:shadow-md transition-all flex items-center gap-1.5 whitespace-nowrap"
+                            class="w-full sm:w-auto justify-center px-4 py-2.5 bg-white dark:bg-gray-800 border border-indigo-200 dark:border-indigo-700 text-indigo-600 dark:text-indigo-400 rounded-xl font-bold text-sm shadow-sm hover:bg-indigo-50 dark:hover:bg-indigo-900/20 hover:shadow-md transition-all flex items-center gap-1.5 whitespace-nowrap"
                         >
                             <svg
                                 class="w-4 h-4"
@@ -168,7 +202,7 @@
                  ═══════════════════════════════════════════════════════ -->
             <template v-if="service?.id">
                 <!-- Names -->
-                <div class="grid grid-cols-2 gap-4">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                         <label
                             class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5"
@@ -210,7 +244,7 @@
                 </div>
 
                 <!-- Descriptions -->
-                <div class="grid grid-cols-2 gap-4">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                         <label
                             class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5"
@@ -240,7 +274,7 @@
                 </div>
 
                 <!-- Duration & Warranty -->
-                <div class="grid grid-cols-2 gap-4">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                         <label
                             class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5"
@@ -336,7 +370,7 @@
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                         {{ $t('services_management.form.type') }}
                     </label>
-                    <div class="grid grid-cols-2 gap-3">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <label
                             :class="[
                                 'flex items-center gap-3 p-3 rounded-xl border-2 cursor-pointer transition-all',
@@ -590,7 +624,9 @@
         </form>
 
         <template #footer>
-            <div class="flex items-center justify-between w-full">
+            <div
+                class="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-between gap-3 w-full"
+            >
                 <div>
                     <span
                         v-if="Object.keys(form.errors).length > 0"
@@ -608,11 +644,11 @@
                         }}
                     </span>
                 </div>
-                <div class="flex items-center gap-3">
+                <div class="flex items-center justify-end gap-3 w-full sm:w-auto">
                     <button
                         type="button"
                         @click="$emit('close')"
-                        class="px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white font-medium transition-colors"
+                        class="flex-1 sm:flex-initial px-4 py-2.5 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white font-medium transition-colors text-center"
                     >
                         {{ $t('common.cancel') }}
                     </button>
@@ -623,7 +659,7 @@
                             (!selectedCatalogService && !service?.id) ||
                             !!minPriceValidationError
                         "
-                        class="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-700 hover:to-emerald-700 text-white rounded-xl font-semibold shadow-lg shadow-teal-500/30 hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                        class="flex-1 sm:flex-initial inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-700 hover:to-emerald-700 text-white rounded-xl font-semibold shadow-lg shadow-teal-500/30 hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed transition-all"
                     >
                         <svg
                             v-if="form.processing"
@@ -678,13 +714,16 @@ const { scrollToError } = useFormScrollToError();
 
 // ─── Catalog filtering ────────────────────────────────────────────────────────
 const selectedCatalogServiceId = ref('');
+const showAllCatalogServices = ref(false);
 
 /**
- * Show only services whose department name matches the currently open department.
+ * Show only services whose department name matches the currently open department,
+ * or all catalog services when showAllCatalogServices is toggled.
  * Matching is done by name (Arabic or English) because department IDs differ per branch.
  */
 const filteredCatalogServices = computed(() => {
-    if (!props.currentDepartment) return props.otherBranchesServices;
+    if (!props.currentDepartment || showAllCatalogServices.value)
+        return props.otherBranchesServices;
     const arName = props.currentDepartment.name_ar?.trim().toLowerCase();
     const enName = props.currentDepartment.name_en?.trim().toLowerCase();
     return props.otherBranchesServices.filter((s) => {
@@ -694,9 +733,12 @@ const filteredCatalogServices = computed(() => {
     });
 });
 
-const selectedCatalogService = computed(
-    () => filteredCatalogServices.value.find((s) => s.id === selectedCatalogServiceId.value) ?? null
-);
+const selectedCatalogService = computed(() => {
+    const list = showAllCatalogServices.value
+        ? props.otherBranchesServices
+        : filteredCatalogServices.value;
+    return list.find((s) => s.id === selectedCatalogServiceId.value) ?? null;
+});
 
 // Auto-select a newly-created service when pendingCatalogServiceId arrives
 // (triggered after NewServiceDefinitionModal saves + page reloads)

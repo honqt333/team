@@ -1,32 +1,6 @@
-<template>
-    <!--
-        StatusBadge — a small pill that shows a friendly
-        status label. The internal codes from the backend
-        (e.g. "checked_in", "ready_for_qc") are translated
-        here into words the customer can understand.
-
-        The mapping lives in a computed `palette` and a
-        `friendlyLabel` function so the dashboard does not
-        leak raw status keys to the customer.
-    -->
-    <span
-        class="text-[10px] uppercase tracking-wide font-bold px-2 py-0.5 rounded-full inline-flex items-center gap-1"
-        :style="{
-            backgroundColor: palette.bg,
-            color: palette.fg,
-        }"
-    >
-        <span
-            v-if="showDot"
-            class="w-1.5 h-1.5 rounded-full"
-            :style="{ backgroundColor: palette.fg }"
-        />
-        <span>{{ label }}</span>
-    </span>
-</template>
-
 <script setup>
 import { computed } from 'vue';
+import Badge from '@/Components/Common/StatusBadge.vue';
 
 const props = defineProps({
     status: { type: String, required: true },
@@ -62,3 +36,13 @@ const palette = computed(() => {
     }
 });
 </script>
+
+<template>
+    <Badge
+        :label="label"
+        :show-dot="showDot"
+        :dot-color="palette.fg"
+        class="text-[10px] uppercase tracking-wide font-bold px-2 py-0.5 rounded-full gap-1"
+        :style="{ backgroundColor: palette.bg, color: palette.fg }"
+    />
+</template>

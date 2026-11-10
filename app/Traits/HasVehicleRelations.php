@@ -18,26 +18,31 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 
 trait HasVehicleRelations
 {
+    /** @return BelongsTo<Tenant, $this> */
     public function tenant(): BelongsTo
     {
         return $this->belongsTo(Tenant::class);
     }
 
+    /** @return BelongsTo<Center, $this> */
     public function center(): BelongsTo
     {
         return $this->belongsTo(Center::class);
     }
 
+    /** @return BelongsTo<Customer, $this> */
     public function customer(): BelongsTo
     {
         return $this->belongsTo(Customer::class);
     }
 
+    /** @return BelongsTo<VehicleMake, $this> */
     public function make(): BelongsTo
     {
         return $this->belongsTo(VehicleMake::class, 'make_id');
     }
 
+    /** @return BelongsTo<VehicleModel, $this> */
     public function model(): BelongsTo
     {
         return $this->belongsTo(VehicleModel::class, 'model_id');

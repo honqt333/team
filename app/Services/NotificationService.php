@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Models\InternalNotification;
+use App\Models\Tenant;
 use App\Models\User;
 
 class NotificationService
@@ -22,7 +23,24 @@ class NotificationService
         ?int $actorId = null,
         ?string $icon = null,
         ?array $data = null,
-    ): InternalNotification {
+    ): ?InternalNotification {
+        // Respect tenant in-app notification preference if configured (bypass for test notifications)
+        if ($type !== 'system_test') {
+            $tenant = Tenant::find($tenantId);
+
+            if ($tenant) {
+                $settings = $tenant->getEffectiveNotificationSettings();
+
+                if (isset($settings['channels']['in_app']) && ! $settings['channels']['in_app']) {
+                    return null;
+                }
+
+                if (isset($settings['events'][$type]['in_app']) && ! $settings['events'][$type]['in_app']) {
+                    return null;
+                }
+            }
+        }
+
         return InternalNotification::create([
             'tenant_id' => $tenantId,
             'user_id' => $userId,

@@ -566,11 +566,9 @@
                             />
                         </svg>
                         {{
-                            $t(
-                                'common.fix_errors_count',
-                                { count: Object.keys(form.errors).length },
-                                `${Object.keys(form.errors).length} أخطاء تحتاج تصحيح`
-                            )
+                            $t('common.fix_errors_count', {
+                                count: Object.keys(form.errors).length,
+                            })
                         }}
                     </span>
                 </div>
@@ -632,16 +630,8 @@ import { useFormScrollToError } from '@/Composables/useFormScrollToError';
 import BaseModal from '@/Components/BaseModal.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 import { useToast } from '@/Composables/useToast';
+import { useDebounce } from '@/Composables/useDebounce';
 import axios from 'axios';
-
-// Native debounce implementation
-function debounce(fn, delay) {
-    let timeoutId;
-    return function (...args) {
-        clearTimeout(timeoutId);
-        timeoutId = setTimeout(() => fn.apply(this, args), delay);
-    };
-}
 
 const { formatCurrency, formatQuantity, toEnglish } = useNumberFormat();
 const { scrollToError } = useFormScrollToError();
@@ -889,7 +879,7 @@ const fetchParts = async (query = '') => {
     }
 };
 
-const handleAsyncSearch = debounce((query) => {
+const handleAsyncSearch = useDebounce((query) => {
     fetchParts(query);
 }, 300);
 

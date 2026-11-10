@@ -1,14 +1,40 @@
 [
   {
     "url": "https://carag-v2.test/landing-preview",
-    "isRepresentativeRun": true,
-    "htmlPath": "/Users/ahmad/Herd/carag-v2/docs/landing-preview/lhci-report/carag_v2_test-landing_preview-2026_11_08_06_41_49.report.html",
-    "jsonPath": "/Users/ahmad/Herd/carag-v2/docs/landing-preview/lhci-report/carag_v2_test-landing_preview-2026_11_08_06_41_49.report.json",
+    "isRepresentativeRun": false,
+    "htmlPath": "/Users/ahmad/Herd/carag-v2/docs/landing-preview/lhci-report/carag_v2_test-landing_preview-2026_11_08_08_41_14.report.html",
+    "jsonPath": "/Users/ahmad/Herd/carag-v2/docs/landing-preview/lhci-report/carag_v2_test-landing_preview-2026_11_08_08_41_14.report.json",
     "summary": {
-      "performance": 0.61,
-      "accessibility": 0.96,
+      "performance": 0.99,
+      "accessibility": 1,
       "best-practices": 1,
-      "seo": 0.92,
+      "seo": 1,
+      "agentic-browsing": 1
+    }
+  },
+  {
+    "url": "https://carag-v2.test/landing-preview",
+    "isRepresentativeRun": false,
+    "htmlPath": "/Users/ahmad/Herd/carag-v2/docs/landing-preview/lhci-report/carag_v2_test-landing_preview-2026_11_08_08_42_12.report.html",
+    "jsonPath": "/Users/ahmad/Herd/carag-v2/docs/landing-preview/lhci-report/carag_v2_test-landing_preview-2026_11_08_08_42_12.report.json",
+    "summary": {
+      "performance": 0.93,
+      "accessibility": 1,
+      "best-practices": 1,
+      "seo": 1,
+      "agentic-browsing": 1
+    }
+  },
+  {
+    "url": "https://carag-v2.test/landing-preview",
+    "isRepresentativeRun": true,
+    "htmlPath": "/Users/ahmad/Herd/carag-v2/docs/landing-preview/lhci-report/carag_v2_test-landing_preview-2026_11_08_08_41_44.report.html",
+    "jsonPath": "/Users/ahmad/Herd/carag-v2/docs/landing-preview/lhci-report/carag_v2_test-landing_preview-2026_11_08_08_41_44.report.json",
+    "summary": {
+      "performance": 0.97,
+      "accessibility": 1,
+      "best-practices": 1,
+      "seo": 1,
       "agentic-browsing": 1
     }
   }

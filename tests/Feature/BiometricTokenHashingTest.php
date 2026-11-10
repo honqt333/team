@@ -6,6 +6,7 @@ namespace Tests\Feature;
 
 use App\Models\Center;
 use App\Models\HR\BiometricDevice;
+use App\Models\HR\Employee;
 use App\Models\Tenant;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
@@ -205,5 +206,37 @@ class BiometricTokenHashingTest extends TestCase
 
         $response->assertStatus(401);
         $this->assertFalse((bool) $response->json('success'));
+    }
+
+    public function test_device_cannot_clock_in_employee_from_different_center(): void
+    {
+        $tenant = Tenant::factory()->create();
+        $centerA = Center::factory()->create(['tenant_id' => $tenant->id]);
+        $centerB = Center::factory()->create(['tenant_id' => $tenant->id]);
+
+        $device = BiometricDevice::create([
+            'tenant_id' => $tenant->id,
+            'center_id' => $centerA->id,
+            'name' => 'Center A Reader',
+            'device_type' => 'zkteco',
+        ]);
+
+        $employeeB = Employee::create([
+            'tenant_id' => $tenant->id,
+            'center_id' => $centerB->id,
+            'employee_number' => 'EMP-B-001',
+            'name_ar' => 'موظف فرع ب',
+            'name_en' => 'Branch B Employee',
+        ]);
+
+        $response = $this->withHeader('Authorization', 'Bearer '.$device->api_token)
+            ->postJson('/api/v1/attendance/clock', [
+                'employee_identifier' => 'EMP-B-001',
+                'action' => 'check_in',
+            ]);
+
+        $response->assertStatus(403);
+        $this->assertFalse((bool) $response->json('success'));
+        $this->assertSame('cross_center_unauthorized', $response->json('error'));
     }
 }

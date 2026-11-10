@@ -30,13 +30,37 @@ class PurchaseOrdersController extends Controller
         $query = PurchaseOrder::forTenant($user->tenant_id)
             ->forCenter($centerId)
             ->with(['supplier:id,name', 'warehouse:id,name'])
+            ->withCount('items')
             ->when($request->input('search'), function ($q, $search) {
                 $q->where('code', 'like', "%{$search}%")
                     ->orWhereHas('supplier', fn ($sq) => $sq->where('name', 'like', "%{$search}%"));
             })
             ->when($request->input('status'), fn ($q, $status) => $q->ofStatus($status))
-            ->when($request->input('supplier_id'), fn ($q, $id) => $q->where('supplier_id', $id))
-            ->orderBy('created_at', 'desc');
+            ->when($request->input('supplier_id'), fn ($q, $id) => $q->where('supplier_id', $id));
+
+        $sort = (string) $request->input('sort');
+        $direction = strtolower((string) $request->input('direction', 'desc')) === 'asc' ? 'asc' : 'desc';
+
+        if ($sort === 'code') {
+            $query->orderBy('code', $direction);
+        } elseif ($sort === 'supplier') {
+            $query->orderBy(
+                Supplier::select('name')
+                    ->whereColumn('suppliers.id', 'purchase_orders.supplier_id')
+                    ->limit(1),
+                $direction
+            );
+        } elseif ($sort === 'order_date') {
+            $query->orderBy('order_date', $direction);
+        } elseif ($sort === 'total') {
+            $query->orderBy('total', $direction);
+        } elseif ($sort === 'status') {
+            $query->orderBy('status', $direction);
+        } elseif ($sort === 'created_at') {
+            $query->orderBy('created_at', $direction);
+        } else {
+            $query->orderByDesc('created_at');
+        }
 
         $orders = $query->paginate(25)->withQueryString();
 
@@ -45,7 +69,13 @@ class PurchaseOrdersController extends Controller
         return Inertia::render('Purchasing/Orders/Index', [
             'orders' => $orders,
             'suppliers' => $suppliers,
-            'filters' => $request->only(['search', 'status', 'supplier_id']),
+            'filters' => array_merge(
+                $request->only(['search', 'status', 'supplier_id']),
+                [
+                    'sort' => $sort ?: null,
+                    'direction' => $sort ? $direction : null,
+                ]
+            ),
             'statuses' => [
                 PurchaseOrder::STATUS_DRAFT,
                 PurchaseOrder::STATUS_SENT,

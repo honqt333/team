@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Requests\App\Users;
 
+use App\Models\Role;
 use App\Models\User;
 use App\Support\TenancyContext;
 use Illuminate\Contracts\Validation\ValidationRule;
@@ -39,7 +40,8 @@ class UpdateUserRequest extends FormRequest
      */
     public function rules(): array
     {
-        $userId = $this->route('user')?->id;
+        $userParam = $this->route('user');
+        $userId = $userParam instanceof User ? $userParam->id : $userParam;
 
         return [
             'name' => ['required', 'string', 'max:255'],
@@ -54,8 +56,16 @@ class UpdateUserRequest extends FormRequest
             ],
             'password' => ['nullable', 'confirmed', 'min:8'], // Optional on update
             'centers' => ['required', 'array', 'min:1'],
-            'centers.*' => ['exists:centers,id'],
-            'role_id' => ['nullable', 'exists:roles,id'],
+            'centers.*' => [Rule::exists('centers', 'id')->where('tenant_id', TenancyContext::tenantId())],
+            'role_id' => ['nullable', 'integer', Rule::exists('roles', 'id')->where('tenant_id', TenancyContext::tenantId())->where('guard_name', 'web'),
+                function ($attribute, $value, $fail) {
+                    $role = Role::find($value);
+
+                    if (! $role || ! $this->user()->can('assignRole', [User::class, $role])) {
+                        $fail(__('messages.cannot_edit_system_role'));
+                    }
+                }],
+            'is_active' => ['sometimes', 'boolean'],
             // `prohibited`, NOT `forbidden`: Laravel has no `forbidden`
             // rule, so the validator would raise
             // BadMethodCallException("Method ...::validateForbidden does

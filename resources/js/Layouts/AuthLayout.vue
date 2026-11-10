@@ -32,7 +32,7 @@ onMounted(() => {
                         class="w-12 h-12 object-contain"
                     />
                 </div>
-                <h1 class="text-2xl font-bold text-white font-cairo">
+                <h1 class="text-2xl font-bold text-white">
                     {{ $t('common.app_name') }}
                 </h1>
                 <p class="text-violet-200 text-sm mt-1">
@@ -85,7 +85,7 @@ onMounted(() => {
                         class="w-20 h-20 object-contain"
                     />
                 </div>
-                <h1 class="text-4xl font-bold text-white font-cairo mb-4">
+                <h1 class="text-4xl font-bold text-white mb-4">
                     {{ $t('common.app_name') }}
                 </h1>
                 <p class="text-xl text-violet-200">
@@ -147,9 +147,3 @@ onMounted(() => {
         </div>
     </div>
 </template>
-
-<style scoped>
-.font-cairo {
-    font-family: 'Cairo', system-ui, sans-serif;
-}
-</style>

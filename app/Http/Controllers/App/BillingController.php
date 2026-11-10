@@ -11,7 +11,9 @@ use App\Models\Billing\Subscription;
 use App\Models\Billing\SubscriptionPayment;
 use App\Models\PaymentSettings;
 use App\Services\Payment\PaymentManager;
+use App\Support\Permissions;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -45,6 +47,18 @@ class BillingController extends Controller
     public function __construct(
         protected PaymentManager $paymentManager
     ) {}
+
+    public function downloadReceipt(Request $request, BankTransferReceipt $receipt)
+    {
+        abort_unless((int) $receipt->tenant_id === (int) $request->user()->tenant_id, 403);
+        $this->authorize(Permissions::COMPANY_MANAGE);
+        $disk = Storage::disk(
+            Storage::disk('local')->exists($receipt->receipt_path ?? '') ? 'local' : 'public'
+        );
+        abort_unless($receipt->receipt_path && $disk->exists($receipt->receipt_path), 404);
+
+        return $disk->response($receipt->receipt_path, basename($receipt->receipt_path), ['Cache-Control' => 'private, no-store'], 'inline');
+    }
 
     public function index(Request $request): Response
     {
@@ -235,6 +249,7 @@ class BillingController extends Controller
 
         return Inertia::render('Settings/Billing/Index', [
             'current_subscription' => $currentSubscription,
+            'storage_usage' => $tenant->storage_usage,
             'available_plans' => $plans,
             'subscription_history' => $subscriptionHistory,
             'recent_payments' => $recentPayments,

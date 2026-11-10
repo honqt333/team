@@ -1,0 +1,1 @@
+resources/js/Pages/System/Developer/Index.vue(284,2): error TS1005: ')' expected.

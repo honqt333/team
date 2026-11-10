@@ -1,6 +1,8 @@
 <template>
     <div class="print-engine-wrapper">
-        <component :is="activeTemplate" v-bind="props" :documentType="normalizedDocType" />
+        <slot>
+            <component :is="activeTemplate" v-bind="props" :documentType="normalizedDocType" />
+        </slot>
     </div>
 </template>
 
@@ -8,6 +10,7 @@
 import { computed } from 'vue';
 import TemplateDefaultA4 from './PrintTemplates/TemplateDefaultA4.vue';
 import TemplateThermal80 from './PrintTemplates/TemplateThermal80.vue';
+import TemplateCustomersReport from './PrintTemplates/TemplateCustomersReport.vue';
 
 const props = defineProps({
     documentType: {
@@ -53,10 +56,14 @@ const templates = {
     TemplateThermal80,
     TemplateModernA4: TemplateDefaultA4,
     TemplateSleekThermal: TemplateThermal80,
+    TemplateCustomersReport,
 };
 
 // Resolve the active template component (document-specific template takes precedence over global visual default)
 const activeTemplate = computed(() => {
+    if (props.documentType === 'customers_report') {
+        return TemplateCustomersReport;
+    }
     const activeName =
         props.documentSettings?.template ||
         props.visualSettings?.active_template ||

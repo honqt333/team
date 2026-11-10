@@ -13,7 +13,12 @@ use App\Traits\HasInvoiceRelations;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Log;
 
+/**
+ * @property float|null $debt_offset
+ * @property float|null $net_refund_due
+ */
 class Invoice extends Model
 {
     use CenterScoped, HasFactory, HasInvoiceRelations, HasTaxSnapshot, SoftDeletes;
@@ -214,5 +219,10 @@ class Invoice extends Model
             ->where($field ?? $this->getRouteKeyName(), $value)
             ->where('tenant_id', TenancyContext::tenantId())
             ->first();
+    }
+
+    public function logActivity(string $action): void
+    {
+        Log::notice('invoice.'.$action, ['tenant_id' => $this->tenant_id, 'center_id' => $this->center_id, 'invoice_id' => $this->id, 'user_id' => auth()->id()]);
     }
 }

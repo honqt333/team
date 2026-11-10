@@ -1,5 +1,5 @@
 <template>
-    <Teleport to="body">
+    <Modal :show="show" :closeable="closeable" unstyled @close="closeModal">
         <Transition name="modal">
             <div
                 v-if="show"
@@ -13,7 +13,7 @@
                 <!-- Backdrop -->
                 <div
                     class="fixed inset-0 bg-black bg-opacity-50 dark:bg-opacity-70 transition-opacity"
-                    @click="closeModal"
+                    @click="closeOnBackdrop"
                 ></div>
 
                 <!-- Dynamic Wrapper -->
@@ -41,6 +41,9 @@
                                 <slot name="title">{{ title }}</slot>
                             </h3>
                             <button
+                                v-if="closeable"
+                                type="button"
+                                :aria-label="$t('common.close')"
                                 @click="closeModal"
                                 class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
                             >
@@ -83,17 +86,19 @@
                 </div>
             </div>
         </Transition>
-    </Teleport>
+    </Modal>
 </template>
 
 <script setup>
-import { watch, computed } from 'vue';
+import { computed } from 'vue';
+import Modal from '@/Components/Modal.vue';
 
 const props = defineProps({
     show: {
         type: Boolean,
         default: false,
     },
+    closeable: { type: Boolean, default: true },
     title: {
         type: String,
         default: '',
@@ -137,22 +142,8 @@ function closeModal() {
     emit('close');
 }
 
-// Close on Escape key
-watch(
-    () => props.show,
-    (value) => {
-        if (value) {
-            document.addEventListener('keydown', onEscape);
-        } else {
-            document.removeEventListener('keydown', onEscape);
-        }
-    }
-);
-
-function onEscape(e) {
-    if (e.key === 'Escape') {
-        closeModal();
-    }
+function closeOnBackdrop() {
+    if (props.closeable) closeModal();
 }
 </script>
 

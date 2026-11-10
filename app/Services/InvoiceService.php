@@ -252,11 +252,13 @@ class InvoiceService
      */
     public function issueInvoice(Invoice $invoice): Invoice
     {
-        if ($invoice->status !== 'draft') {
-            throw new Exception('Only draft invoices can be issued.');
-        }
-
         return DB::transaction(function () use ($invoice) {
+            $locked = Invoice::query()->lockForUpdate()->findOrFail($invoice->id);
+
+            if ($locked->status !== 'draft') {
+                throw new Exception(__('invoices.only_draft_can_be_issued'));
+            }
+            $invoice->setRawAttributes($locked->getAttributes(), true);
             $tenantId = $invoice->tenant_id;
             $centerId = $invoice->center_id;
 
@@ -279,6 +281,8 @@ class InvoiceService
                 'issue_date' => now(),
                 // 'icv' => $icv, // Add column if needed in schema, currently storing in ZATCA payload
             ]);
+
+            $invoice->logActivity('issued');
 
             // TODO: ZATCA Chaining logic (Prev Hash) would happen here.
 

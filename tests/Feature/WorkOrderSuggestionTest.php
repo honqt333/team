@@ -167,6 +167,21 @@ class WorkOrderSuggestionTest extends TestCase
         Http::assertNothingSent();
     }
 
+    public function test_authenticated_web_session_can_request_suggestions(): void
+    {
+        Http::fake();
+        $user = $this->createTenantUserWithWorkOrderUpdatePermission();
+        $order = $this->createWorkOrderFor($user);
+
+        $this->actingAs($user, 'web')
+            ->postJson(route('work-orders.suggestions', $order), ['complaint' => 'Brake inspection'])
+            ->assertOk()
+            ->assertJsonPath('meta.work_order_id', $order->id)
+            ->assertJsonPath('meta.provider', 'mock');
+
+        Http::assertNothingSent();
+    }
+
     // ---------- #5 With OPENAI_API_KEY + Http::fake → provider=openai ----------
 
     public function test_response_uses_openai_provider_when_api_key_is_configured(): void

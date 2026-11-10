@@ -32,20 +32,59 @@ class InventoryTransfersController extends Controller
 
         $query = InventoryTransfer::query()
             ->with(['fromWarehouse', 'toWarehouse', 'createdByUser'])
-            ->where('tenant_id', auth()->user()->tenant_id)
-            ->orderBy('created_at', 'desc');
+            ->withCount('items')
+            ->where('tenant_id', auth()->user()->tenant_id);
 
         // Status filter
         if ($request->filled('status')) {
             $query->where('status', $request->status);
         }
 
-        // Search
-        if ($request->filled('search')) {
-            $query->where('code', 'like', '%'.$request->search.'%');
+        // Warehouse filter (from / to)
+        if ($request->filled('warehouse_id')) {
+            $query->where(function ($q) use ($request) {
+                $q->where('from_warehouse_id', $request->warehouse_id)
+                    ->orWhere('to_warehouse_id', $request->warehouse_id);
+            });
         }
 
-        $transfers = $query->paginate(20)->withQueryString();
+        // Search
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('code', 'like', "%{$search}%")
+                    ->orWhereHas('fromWarehouse', fn ($w) => $w->where('name', 'like', "%{$search}%"))
+                    ->orWhereHas('toWarehouse', fn ($w) => $w->where('name', 'like', "%{$search}%"));
+            });
+        }
+
+        // Whitelist sorting
+        $sort = (string) $request->input('sort');
+        $direction = strtolower((string) ($request->input('direction') ?? 'desc')) === 'asc' ? 'asc' : 'desc';
+
+        if ($sort === 'code') {
+            $query->orderBy('code', $direction);
+        } elseif ($sort === 'status') {
+            $query->orderBy('status', $direction);
+        } elseif ($sort === 'created_at') {
+            $query->orderBy('created_at', $direction);
+        } elseif ($sort === 'from_warehouse') {
+            $query->orderBy(
+                Warehouse::select('name')->whereColumn('warehouses.id', 'inventory_transfers.from_warehouse_id')->limit(1),
+                $direction
+            );
+        } elseif ($sort === 'to_warehouse') {
+            $query->orderBy(
+                Warehouse::select('name')->whereColumn('warehouses.id', 'inventory_transfers.to_warehouse_id')->limit(1),
+                $direction
+            );
+        } elseif ($sort === 'items_count') {
+            $query->orderBy('items_count', $direction);
+        } else {
+            $query->orderBy('created_at', 'desc');
+        }
+
+        $transfers = $query->paginate(25)->withQueryString();
 
         $warehouses = Warehouse::where('is_active', true)
             ->whereHas('center', function ($query) {
@@ -56,7 +95,13 @@ class InventoryTransfersController extends Controller
 
         return Inertia::render('Inventory/Transfers/Index', [
             'transfers' => $transfers,
-            'filters' => $request->only(['status', 'search']),
+            'filters' => array_merge(
+                $request->only(['status', 'search', 'warehouse_id']),
+                [
+                    'sort' => $sort ?: null,
+                    'direction' => $sort ? $direction : null,
+                ]
+            ),
             'warehouses' => $warehouses,
         ]);
     }

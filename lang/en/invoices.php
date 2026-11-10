@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 return [
+    'only_draft_can_be_issued' => 'Only draft invoices can be issued.',
     'all_statuses' => 'All Statuses',
     'already_exists' => 'Invoice already exists for this order',
     'columns' => [

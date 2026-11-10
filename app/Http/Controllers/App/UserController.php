@@ -12,6 +12,7 @@ use App\Models\Role;
 use App\Models\User;
 use App\Support\TenancyContext;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Inertia\Inertia;
 
@@ -46,7 +47,7 @@ class UserController extends Controller
             'users' => $users,
             'filters' => $request->only(['search']),
             'centers' => Center::where('tenant_id', $tenantId)->get(['id', 'name']),
-            'roles' => Role::where('tenant_id', $tenantId)->get(['id', 'name', 'label_ar', 'label_en']),
+            'roles' => Role::where('tenant_id', $tenantId)->where('name', '!=', 'super_admin')->get(['id', 'name', 'label_ar', 'label_en']),
             // Note: employees list removed - linking is automatic via EmployeeObserver
         ]);
     }
@@ -58,30 +59,35 @@ class UserController extends Controller
     {
         $this->authorize('create', User::class);
 
-        $validated = $request->validated();
-        $tenantId = TenancyContext::tenantId();
+        return DB::transaction(function () use ($request) {
 
-        $user = User::create([
-            'tenant_id' => $tenantId,
-            'name' => $validated['name'],
-            'email' => $validated['email'],
-            'password' => Hash::make($validated['password']),
-            'current_center_id' => $validated['centers'][0], // Default to first center
-            'is_active' => $request->boolean('is_active', true),
-        ]);
+            $validated = $request->validated();
+            $tenantId = TenancyContext::tenantId();
 
-        $centers = collect($validated['centers'])->mapWithKeys(function ($centerId) use ($tenantId) {
-            return [$centerId => ['tenant_id' => $tenantId]];
-        })->all();
+            $user = User::create([
+                'tenant_id' => $tenantId,
+                'name' => $validated['name'],
+                'email' => $validated['email'],
+                'password' => Hash::make($validated['password']),
+                'current_center_id' => $validated['centers'][0], // Default to first center
+                'is_active' => $request->boolean('is_active', true),
+            ]);
 
-        $user->centers()->sync($centers);
+            $centers = collect($validated['centers'])->mapWithKeys(function ($centerId) use ($tenantId) {
+                return [$centerId => ['tenant_id' => $tenantId]];
+            })->all();
 
-        // Sync Role
-        if (! empty($validated['role_id'])) {
-            $user->syncRoles([$validated['role_id']]);
-        }
+            $user->centers()->sync($centers);
 
-        return back()->with('success', __('messages.created_successfully'));
+            // Sync Role
+            if (! empty($validated['role_id'])) {
+                $user->syncRoles([$validated['role_id']]);
+            }
+
+            $user->logActivity('user.created');
+
+            return back()->with('success', __('messages.created_successfully'));
+        });
     }
 
     /**
@@ -91,49 +97,56 @@ class UserController extends Controller
     {
         $this->authorize('update', $user);
 
-        $validated = $request->validated();
+        return DB::transaction(function () use ($request, $user) {
 
-        $data = [
-            'name' => $validated['name'],
-            'email' => $validated['email'],
-        ];
+            $validated = $request->validated();
 
-        if (! empty($validated['password'])) {
-            $data['password'] = Hash::make($validated['password']);
-        }
+            $data = [
+                'name' => $validated['name'],
+                'email' => $validated['email'],
+            ];
 
-        if ($request->has('is_active')) {
-            $data['is_active'] = $request->boolean('is_active');
-        }
+            if (! empty($validated['password'])) {
+                $data['password'] = Hash::make($validated['password']);
+            }
 
-        $user->update($data);
+            if ($request->has('is_active')) {
+                $data['is_active'] = $request->boolean('is_active');
+            }
 
-        $tenantId = TenancyContext::tenantId();
-        $centers = collect($validated['centers'])->mapWithKeys(function ($centerId) use ($tenantId) {
-            return [$centerId => ['tenant_id' => $tenantId]];
-        })->all();
+            $user->update($data);
 
-        $user->centers()->sync($centers);
+            $tenantId = TenancyContext::tenantId();
+            $centers = collect($validated['centers'])->mapWithKeys(function ($centerId) use ($tenantId) {
+                return [$centerId => ['tenant_id' => $tenantId]];
+            })->all();
 
-        // Ensure current_center_id is valid after sync
-        if ($user->current_center_id && ! array_key_exists($user->current_center_id, $centers)) {
-            $newId = ! empty($centers) ? array_key_first($centers) : null;
-            $user->update(['current_center_id' => $newId]);
-        } elseif (! $user->current_center_id && ! empty($centers)) {
-            $user->update(['current_center_id' => array_key_first($centers)]);
-        }
+            $user->centers()->sync($centers);
 
-        // Sync Role
-        if (! empty($validated['role_id'])) {
-            $user->syncRoles([$validated['role_id']]);
-        }
-        // If you want to allow unassigning roles:
-        // $user->syncRoles([]);
+            // Ensure current_center_id is valid after sync
+            if ($user->current_center_id && ! array_key_exists($user->current_center_id, $centers)) {
+                $newId = ! empty($centers) ? array_key_first($centers) : null;
+                $user->update(['current_center_id' => $newId]);
+            } elseif (! $user->current_center_id && ! empty($centers)) {
+                $user->update(['current_center_id' => array_key_first($centers)]);
+            }
 
-        // Note: Employee linking is automatic via EmployeeObserver
-        // Manual linking from User side is not allowed
+            // Sync Role
+            if (array_key_exists('role_id', $validated)) {
+                if (! empty($validated['role_id'])) {
+                    $user->syncRoles([$validated['role_id']]);
+                } else {
+                    $user->syncRoles([]);
+                }
+            }
 
-        return back()->with('success', __('messages.updated_successfully'));
+            // Note: Employee linking is automatic via EmployeeObserver
+            // Manual linking from User side is not allowed
+
+            $user->logActivity('user.updated');
+
+            return back()->with('success', __('messages.updated_successfully'));
+        });
     }
 
     /**
@@ -150,6 +163,8 @@ class UserController extends Controller
         $user->is_active = ! $user->is_active;
         $user->save();
 
+        $user->logActivity('user.updated');
+
         return back()->with('success', __('messages.updated_successfully'));
     }
 
@@ -161,6 +176,7 @@ class UserController extends Controller
         $this->authorize('delete', $user);
 
         $user->delete();
+        $user->logActivity('user.deleted');
 
         return back()->with('success', __('messages.deleted_successfully'));
     }

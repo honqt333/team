@@ -274,7 +274,7 @@ const statusChips = computed(() => [
                         <td class="px-4 py-2.5 text-end">
                             <a
                                 v-if="r.receipt_path"
-                                :href="`/storage/${r.receipt_path}`"
+                                :href="r.receipt_url"
                                 target="_blank"
                                 rel="noopener"
                                 class="text-xs font-semibold text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300"

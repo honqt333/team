@@ -30,7 +30,7 @@ const submit = () => {
         <Head :title="isRTL ? 'نسيت كلمة المرور' : 'Forgot Password'" />
 
         <!-- Title -->
-        <h2 class="text-2xl font-bold text-gray-900 dark:text-white text-center mb-4 font-cairo">
+        <h2 class="text-2xl font-bold text-gray-900 dark:text-white text-center mb-4">
             {{ $t('auth.forgot_password') }}
         </h2>
 
@@ -102,9 +102,3 @@ const submit = () => {
         </form>
     </AuthLayout>
 </template>
-
-<style scoped>
-.font-cairo {
-    font-family: 'Cairo', system-ui, sans-serif;
-}
-</style>

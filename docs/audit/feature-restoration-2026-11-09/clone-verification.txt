@@ -1,0 +1,1 @@
+Fresh clone from final bundle succeeded; verified 29 restored and protected source paths.

@@ -71,6 +71,7 @@ use App\Services\CustomerPortal\SystemSmsOtpChannel;
 use App\Services\Email\SmtpConfigService;
 use App\Services\Messaging\NullSmsService;
 use App\Services\Messaging\SmsService;
+use App\Support\Permissions;
 use Closure;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Facades\Gate;
@@ -161,15 +162,8 @@ class AppServiceProvider extends ServiceProvider
             'credit_note' => Invoice::class,
         ]);
 
-        // Register the Amiri Arabic font with DomPDF so PDF
-        // generation can render Arabic text correctly. Without
-        // a font that has Arabic glyphs + shaping tables (GPOS /
-        // GSUB), DomPDF prints every character in left-to-right
-        // source order — the result is "ورب ةمدخ" instead of
-        // "خدمة برو". The font files ship in resources/fonts/
-        // (Amiri-Regular.ttf, Amiri-Bold.ttf) and are committed
-        // so the same fix works on macOS, Linux, and Windows
-        // without any system font installation.
+        // Register the IBM Plex Sans Arabic font with DomPDF so PDF
+        // generation renders with the unified brand typography.
         $this->registerArabicFontForDomPDF();
 
         // Apply SMTP from the default email integration (DB-driven) before
@@ -196,6 +190,12 @@ class AppServiceProvider extends ServiceProvider
         } catch (Throwable $e) {
             // Silently fail if DB is not ready or restricted during boot
         }
+
+        Gate::define('viewSystemErrorLog', static function (User|AdminUser $user): bool {
+            return $user instanceof AdminUser
+                ? $user->hasPermission(Permissions::SYSTEM_DEVELOPER_ACCESS)
+                : (bool) $user->is_system_admin;
+        });
 
         // Register policies
         Gate::policy(Customer::class, CustomerPolicy::class);

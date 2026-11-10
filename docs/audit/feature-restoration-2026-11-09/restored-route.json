@@ -1,0 +1,1 @@
+[{"domain":null,"method":"GET|HEAD","uri":"system\/error-log","name":"system.error-log.index","action":"App\\Http\\Controllers\\System\\ErrorLogController@index","middleware":["web","Illuminate\\Auth\\Middleware\\Authenticate:web,admin","App\\Http\\Middleware\\EnsureSystemAdmin","App\\Http\\Middleware\\EnsureSystemPermission:system.developer.access"],"path":null}]

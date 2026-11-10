@@ -18,11 +18,13 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 
 trait HasPurchaseInvoiceRelations
 {
+    /** @return BelongsTo<Supplier, $this> */
     public function supplier(): BelongsTo
     {
         return $this->belongsTo(Supplier::class);
     }
 
+    /** @return BelongsTo<PurchaseOrder, $this> */
     public function purchaseOrder(): BelongsTo
     {
         return $this->belongsTo(PurchaseOrder::class);
@@ -33,11 +35,13 @@ trait HasPurchaseInvoiceRelations
         return $this->hasMany(PurchaseInvoiceLine::class);
     }
 
+    /** @return BelongsTo<Tenant, $this> */
     public function tenant(): BelongsTo
     {
         return $this->belongsTo(Tenant::class);
     }
 
+    /** @return BelongsTo<Center, $this> */
     public function center(): BelongsTo
     {
         return $this->belongsTo(Center::class);

@@ -100,10 +100,10 @@ class CompanyProfileController extends Controller
                 'default_warranty_days' => (int) $tenant->getWorkflowSetting('default_warranty_days', 30),
             ],
             'notifications' => [
-                'work_order_created' => $tenant->getNotificationTemplate('work_order_created', 'مرحباً {customer_name}، تم استلام مركبتك {plate_number} برقم كرت صيانة #{code} في {center_name}.'),
-                'work_order_completed' => $tenant->getNotificationTemplate('work_order_completed', 'عزيزنا {customer_name}، اكتملت صيانة مركبتك {plate_number} (#{code}) وأصبحت جاهزة للاستلام في {center_name}.'),
-                'quote_shared' => $tenant->getNotificationTemplate('quote_shared', 'مرحباً {customer_name}، تفضل عرض السعر الخاص بمركبتك {plate_number} رقم {code}، يمكنك الاطلاع عليه هنا: {url}'),
-                'invoice_issued' => $tenant->getNotificationTemplate('invoice_issued', 'عزيزنا {customer_name}، تم إصدار الفاتورة الضريبية رقم {code} بمبلغ {total} ر.س لمركبتك {plate_number}.'),
+                'work_order_created' => $tenant->getNotificationTemplate('work_order_created', __('company_profile.notification_templates.work_order_created')),
+                'work_order_completed' => $tenant->getNotificationTemplate('work_order_completed', __('company_profile.notification_templates.work_order_completed')),
+                'quote_shared' => $tenant->getNotificationTemplate('quote_shared', __('company_profile.notification_templates.quote_shared')),
+                'invoice_issued' => $tenant->getNotificationTemplate('invoice_issued', __('company_profile.notification_templates.invoice_issued')),
             ],
             'admin_user' => [
                 'id' => $adminUser->id,

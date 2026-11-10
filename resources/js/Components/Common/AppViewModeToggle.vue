@@ -47,7 +47,7 @@ const setViewMode = (mode) => {
 
 <template>
     <div
-        class="inline-flex items-center gap-0.5 p-0.5 bg-gray-100/80 dark:bg-gray-800/80 rounded-xl border border-gray-200/60 dark:border-gray-700/60 shadow-2xs"
+        class="inline-flex items-center gap-0.5 p-0.5 bg-surface-muted/80 rounded-xl border border-border shadow-2xs"
         role="group"
         :aria-label="t('common.view_mode')"
     >
@@ -58,10 +58,10 @@ const setViewMode = (mode) => {
                 @click="setViewMode('grid')"
                 :class="[
                     size === 'sm' ? 'p-1.5' : 'p-2',
-                    'rounded-lg transition-all duration-200 flex items-center justify-center',
+                    'rounded-lg transition-all duration-200 flex items-center justify-center cursor-pointer',
                     modelValue === 'grid'
-                        ? 'bg-white dark:bg-gray-700 text-indigo-600 dark:text-indigo-400 shadow-sm font-semibold'
-                        : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 hover:bg-white/50 dark:hover:bg-gray-700/50',
+                        ? 'bg-surface text-action-primary shadow-xs font-semibold'
+                        : 'text-text-muted hover:text-text-primary hover:bg-surface/50',
                 ]"
                 :aria-pressed="modelValue === 'grid'"
             >
@@ -83,10 +83,10 @@ const setViewMode = (mode) => {
                 @click="setViewMode('list')"
                 :class="[
                     size === 'sm' ? 'p-1.5' : 'p-2',
-                    'rounded-lg transition-all duration-200 flex items-center justify-center',
+                    'rounded-lg transition-all duration-200 flex items-center justify-center cursor-pointer',
                     modelValue === 'list'
-                        ? 'bg-white dark:bg-gray-700 text-indigo-600 dark:text-indigo-400 shadow-sm font-semibold'
-                        : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 hover:bg-white/50 dark:hover:bg-gray-700/50',
+                        ? 'bg-surface text-action-primary shadow-xs font-semibold'
+                        : 'text-text-muted hover:text-text-primary hover:bg-surface/50',
                 ]"
                 :aria-pressed="modelValue === 'list'"
             >

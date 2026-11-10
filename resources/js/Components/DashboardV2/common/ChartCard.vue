@@ -9,10 +9,10 @@ defineEmits(['action']);
 
 <template>
     <section
-        class="overflow-hidden rounded-xl border border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-800"
+        class="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-2xs transition-shadow hover:shadow-xs dark:border-slate-800 dark:bg-slate-800/90"
     >
         <header
-            class="flex items-center justify-between gap-2 border-b border-slate-100 px-5 py-3 dark:border-slate-700"
+            class="flex items-center justify-between gap-2 border-b border-slate-100/80 px-5 py-3.5 dark:border-slate-700/80 bg-slate-50/50 dark:bg-slate-800/50"
         >
             <div class="min-w-0 flex-1">
                 <h3 class="truncate text-sm font-semibold text-slate-900 dark:text-white">

@@ -2,8 +2,7 @@
 /**
  * AppSelect — Carag V2 Design System primitive.
  *
- * Wraps SelectInput.vue to keep existing form behavior but
- * exposes the same field API as AppInput (label, hint, error,
+ * Renders a native select for static options and exposes the same field API as AppInput (label, hint, error,
  * aria-*). Visual styling is token-driven.
  */
 import { computed, ref, useAttrs } from 'vue';

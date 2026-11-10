@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Models\HR;
 
 use App\Models\Center;
+use App\Models\Concerns\CenterScoped;
 use App\Models\Concerns\TenantScoped;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -12,11 +13,12 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Log;
 
 class PayrollRun extends Model
 {
+    use CenterScoped, TenantScoped;
     use HasFactory, SoftDeletes;
-    use TenantScoped;
 
     protected $table = 'hr_payroll_runs';
 
@@ -92,5 +94,10 @@ class PayrollRun extends Model
     public function getTotalNetSalaryAttribute(): float
     {
         return $this->items->sum('net_salary');
+    }
+
+    public function logActivity(string $action, array $context = []): void
+    {
+        Log::notice('payroll.'.$action, array_merge($context, ['tenant_id' => $this->tenant_id, 'payroll_run_id' => $this->id, 'user_id' => auth()->id()]));
     }
 }

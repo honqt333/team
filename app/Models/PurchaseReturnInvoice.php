@@ -6,6 +6,7 @@ namespace App\Models;
 
 use App\Models\Concerns\TenantScoped;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class PurchaseReturnInvoice extends Model
@@ -27,7 +28,8 @@ class PurchaseReturnInvoice extends Model
     ];
 
     // Relationships
-    public function purchaseInvoice()
+    /** @return BelongsTo<PurchaseInvoice, $this> */
+    public function purchaseInvoice(): BelongsTo
     {
         return $this->belongsTo(PurchaseInvoice::class);
     }
@@ -42,7 +44,8 @@ class PurchaseReturnInvoice extends Model
         return $this->belongsTo(Tenant::class);
     }
 
-    public function center()
+    /** @return BelongsTo<Center, $this> */
+    public function center(): BelongsTo
     {
         return $this->belongsTo(Center::class);
     }

@@ -104,10 +104,39 @@ class VehicleController
             })
             ->when($request->make_id, fn ($q, $makeId) => $q->where('make_id', $makeId))
             ->when($request->date_from, fn ($q, $date) => $q->whereDate('created_at', '>=', $date))
-            ->when($request->date_to, fn ($q, $date) => $q->whereDate('created_at', '<=', $date))
-            ->latest()
-            ->paginate(20)
-            ->withQueryString();
+            ->when($request->date_to, fn ($q, $date) => $q->whereDate('created_at', '<=', $date));
+
+        $sort = (string) $request->input('sort');
+        $direction = strtolower((string) $request->input('direction', 'asc')) === 'desc' ? 'desc' : 'asc';
+
+        if ($sort === 'customer') {
+            $vehicles->orderBy(
+                Customer::select('name')
+                    ->whereColumn('customers.id', 'vehicles.customer_id')
+                    ->limit(1),
+                $direction
+            );
+        } elseif ($sort === 'make') {
+            $vehicles->orderBy(
+                VehicleMake::select('name_ar')
+                    ->whereColumn('vehicle_makes.id', 'vehicles.make_id')
+                    ->limit(1),
+                $direction
+            );
+        } elseif ($sort === 'model') {
+            $vehicles->orderBy(
+                VehicleModel::select('name_ar')
+                    ->whereColumn('vehicle_models.id', 'vehicles.model_id')
+                    ->limit(1),
+                $direction
+            );
+        } elseif (in_array($sort, ['plate_number', 'year', 'odometer', 'created_at', 'id'], true)) {
+            $vehicles->orderBy("vehicles.{$sort}", $direction);
+        } else {
+            $vehicles->latest('vehicles.id');
+        }
+
+        $vehicles = $vehicles->paginate(20)->withQueryString();
 
         $vehicles->getCollection()->each(function ($vehicle) {
             if ($vehicle->customer) {
@@ -155,10 +184,39 @@ class VehicleController
             })
             ->when($request->make_id, fn ($q, $makeId) => $q->where('make_id', $makeId))
             ->when($request->date_from, fn ($q, $date) => $q->whereDate('created_at', '>=', $date))
-            ->when($request->date_to, fn ($q, $date) => $q->whereDate('created_at', '<=', $date))
-            ->latest()
-            ->paginate(20)
-            ->withQueryString();
+            ->when($request->date_to, fn ($q, $date) => $q->whereDate('created_at', '<=', $date));
+
+        $sort = (string) $request->input('sort');
+        $direction = strtolower((string) $request->input('direction', 'asc')) === 'desc' ? 'desc' : 'asc';
+
+        if ($sort === 'customer') {
+            $vehicles->orderBy(
+                Customer::select('name')
+                    ->whereColumn('customers.id', 'vehicles.customer_id')
+                    ->limit(1),
+                $direction
+            );
+        } elseif ($sort === 'make') {
+            $vehicles->orderBy(
+                VehicleMake::select('name_ar')
+                    ->whereColumn('vehicle_makes.id', 'vehicles.make_id')
+                    ->limit(1),
+                $direction
+            );
+        } elseif ($sort === 'model') {
+            $vehicles->orderBy(
+                VehicleModel::select('name_ar')
+                    ->whereColumn('vehicle_models.id', 'vehicles.model_id')
+                    ->limit(1),
+                $direction
+            );
+        } elseif (in_array($sort, ['plate_number', 'year', 'odometer', 'created_at', 'id'], true)) {
+            $vehicles->orderBy("vehicles.{$sort}", $direction);
+        } else {
+            $vehicles->latest('vehicles.id');
+        }
+
+        $vehicles = $vehicles->paginate(20)->withQueryString();
 
         // Get customers for the dropdown
         $customers = Customer::query()
@@ -186,7 +244,13 @@ class VehicleController
             'makes' => $makes,
             'colors' => $colors,
             'modelsByMake' => $modelsByMake,
-            'filters' => $request->only(['search', 'make_id', 'date_from', 'date_to']),
+            'filters' => array_merge(
+                $request->only(['search', 'make_id', 'date_from', 'date_to']),
+                [
+                    'sort' => $sort ?: null,
+                    'direction' => $sort ? $direction : null,
+                ]
+            ),
         ]);
     }
 

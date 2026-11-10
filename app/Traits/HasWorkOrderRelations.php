@@ -28,26 +28,31 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 
 trait HasWorkOrderRelations
 {
+    /** @return BelongsTo<Tenant, $this> */
     public function tenant(): BelongsTo
     {
         return $this->belongsTo(Tenant::class);
     }
 
+    /** @return BelongsTo<Center, $this> */
     public function center(): BelongsTo
     {
         return $this->belongsTo(Center::class);
     }
 
+    /** @return BelongsTo<Customer, $this> */
     public function customer(): BelongsTo
     {
         return $this->belongsTo(Customer::class);
     }
 
+    /** @return BelongsTo<Vehicle, $this> */
     public function vehicle(): BelongsTo
     {
         return $this->belongsTo(Vehicle::class);
     }
 
+    /** @return BelongsTo<Quote, $this> */
     public function quote(): BelongsTo
     {
         return $this->belongsTo(Quote::class);

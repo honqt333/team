@@ -1,0 +1,3 @@
+quote simultaneous requests: one accepted, one rejected: PASS
+One terminal decision and one notification: PASS
+Isolated test database removed

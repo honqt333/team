@@ -827,8 +827,8 @@ const { formatQuantity, formatCurrency, toEnglish } = useNumberFormat();
 const can = (permission) => page.props.auth?.permissions?.includes(permission) ?? false;
 
 const breadcrumbItems = computed(() => [
-    { label: t('inventory.hub.title', 'المخزون'), href: route('app.inventory.hub') },
-    { label: t('inventory.parts.title', 'قطع الغيار'), href: route('app.inventory.parts.index') },
+    { label: t('inventory.hub.title'), href: route('app.inventory.hub') },
+    { label: t('inventory.parts.title'), href: route('app.inventory.parts.index') },
     {
         label:
             locale.value === 'ar'

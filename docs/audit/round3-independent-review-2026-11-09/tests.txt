@@ -1,0 +1,40 @@
+
+   PASS  Tests\Feature\PurchasePaymentSafetyTest
+  ✓ purchase payment lifecycle full payment and deletion                 5.62s  
+  ✓ purchase payment partial payments and incremental deletion           0.64s  
+  ✓ purchase payment rejects overpayment beyond balance                  0.59s  
+  ✓ purchase payment rejects negative or zero amount                     0.49s  
+  ✓ purchase payment deletion via eloquent triggers recalculation        0.46s  
+
+   PASS  Tests\Feature\ArabicPdfShapingTest
+  ✓ shaper converts arabic characters to presentation glyphs             0.06s  
+  ✓ shaper preserves html tags and style blocks                          0.05s  
+  ✓ shaper handles non arabic text cleanly                               0.07s  
+  ✓ shaper handles non breaking spaces in labels                         0.05s  
+
+   PASS  Tests\Feature\HardcodedArabicTest
+  ✓ no new hardcoded arabic in the vue sources                           5.68s  
+  ✓ company transactions controller has zero hardcoded arabic strings    0.07s  
+  ✓ the extractor finds the remaining arabic                             5.08s  
+  ✓ the locale files have the same keys                                  0.06s  
+  ✓ the locale files carry the same placeholders                         0.07s  
+
+   PASS  Tests\Feature\FinancialSafetyAuditAcceptanceTest
+  ✓ r01 financial summary excludes draft and cancelled sales invoices    1.24s  
+  ✓ r01 financial summary excludes draft and cancelled credit notes      1.36s  
+  ✓ r01 financial summary excludes draft and cancelled purchases         1.42s  
+  ✓ r01 financial summary excludes draft company transactions            0.84s  
+  ✓ r02 linked company revenue is counted exactly once in financial tot… 0.86s  
+  ✓ r02 linked company expense is counted exactly once in financial tot… 1.04s  
+  ✓ r02 cancelled linked invoice does not count in sales or income       0.83s  
+  ✓ r02 unlinked company revenue is safely counted in income             0.79s  
+  ✓ r02 tax period deduplicates linked company transactions              0.88s  
+  ✓ r02 cash register deduplicates payments and company transactions     0.91s  
+  ✓ r03 revenue transaction is classified as income in tax collection    0.83s  
+  ✓ r03 expense transaction is classified as expense in tax collection   0.99s  
+  ✓ r03 legacy income type is supported in tax collection                2.43s  
+  ✓ r03 draft and deleted company transactions are excluded from tax co… 4.50s  
+
+  Tests:    28 passed (88 assertions)
+  Duration: 38.08s
+

@@ -2,12 +2,21 @@
     <div class="inline-flex" @mouseenter="show" @mouseleave="hide" ref="trigger">
         <slot />
 
-        <Teleport to="body">
-            <Transition enter-active-class="transition ease-out duration-200" enter-from-class="opacity-0 translate-y-1"
-                enter-to-class="opacity-100 translate-y-0" leave-active-class="transition ease-in duration-150"
-                leave-from-class="opacity-100 translate-y-0" leave-to-class="opacity-0 translate-y-1">
-                <div v-if="isVisible" ref="tooltip" :style="tooltipStyle"
-                    class="fixed z-[9999] px-3 py-2 text-sm font-medium text-white bg-gray-900 rounded-lg shadow-xl whitespace-nowrap pointer-events-none">
+        <Teleport :to="activeModalElement || 'body'">
+            <Transition
+                enter-active-class="transition ease-out duration-200"
+                enter-from-class="opacity-0 translate-y-1"
+                enter-to-class="opacity-100 translate-y-0"
+                leave-active-class="transition ease-in duration-150"
+                leave-from-class="opacity-100 translate-y-0"
+                leave-to-class="opacity-0 translate-y-1"
+            >
+                <div
+                    v-if="isVisible"
+                    ref="tooltip"
+                    :style="tooltipStyle"
+                    class="fixed z-[9999] px-3 py-2 text-sm font-medium text-white bg-gray-900 rounded-lg shadow-xl whitespace-nowrap pointer-events-none"
+                >
                     {{ tooltipText }}
                     <!-- Arrow -->
                     <div :class="['absolute w-2 h-2 bg-gray-900 rotate-45', arrowClasses]"></div>
@@ -18,22 +27,23 @@
 </template>
 
 <script setup>
+import { activeModalElement } from '@/Support/modalStack';
 import { ref, computed, nextTick } from 'vue';
 
 const props = defineProps({
     text: {
         type: String,
-        default: ''
+        default: '',
     },
     content: {
         type: String,
-        default: ''
+        default: '',
     },
     position: {
         type: String,
         default: 'top',
-        validator: (value) => ['top', 'bottom', 'left', 'right'].includes(value)
-    }
+        validator: (value) => ['top', 'bottom', 'left', 'right'].includes(value),
+    },
 });
 
 const tooltipText = computed(() => props.text || props.content);
@@ -87,16 +97,21 @@ const updatePosition = () => {
 
 const tooltipStyle = computed(() => ({
     top: `${position.value.top}px`,
-    left: `${position.value.left}px`
+    left: `${position.value.left}px`,
 }));
 
 const arrowClasses = computed(() => {
     switch (props.position) {
-        case 'top': return 'top-full left-1/2 -translate-x-1/2 -mt-1';
-        case 'bottom': return 'bottom-full left-1/2 -translate-x-1/2 -mb-1';
-        case 'left': return 'left-full top-1/2 -translate-y-1/2 -ms-1';
-        case 'right': return 'right-full top-1/2 -translate-y-1/2 -me-1';
-        default: return 'top-full left-1/2 -translate-x-1/2 -mt-1';
+        case 'top':
+            return 'top-full left-1/2 -translate-x-1/2 -mt-1';
+        case 'bottom':
+            return 'bottom-full left-1/2 -translate-x-1/2 -mb-1';
+        case 'left':
+            return 'left-full top-1/2 -translate-y-1/2 -ms-1';
+        case 'right':
+            return 'right-full top-1/2 -translate-y-1/2 -me-1';
+        default:
+            return 'top-full left-1/2 -translate-x-1/2 -mt-1';
     }
 });
 </script>

@@ -19,7 +19,6 @@ use App\Http\Middleware\SetLocale;
 use App\Http\Middleware\SetPermissionsTeam;
 use App\Http\Middleware\TrackAiUsage;
 use App\Http\Middleware\UsePortalSessionCookie;
-use App\Logging\JsonFormatter;
 use App\Providers\EventServiceProvider;
 use App\Providers\RouteServiceProvider;
 use Illuminate\Foundation\Application;
@@ -29,8 +28,6 @@ use Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
 use Inertia\Inertia;
-use Monolog\Handler\StreamHandler;
-use Monolog\Logger;
 use Spatie\Permission\Middleware\PermissionMiddleware;
 use Spatie\Permission\Middleware\RoleMiddleware;
 use Spatie\Permission\Middleware\RoleOrPermissionMiddleware;
@@ -249,37 +246,3 @@ return Application::configure(basePath: dirname(__DIR__))
                 ->setStatusCode(403);
         });
     })->create();
-
-/*
-|--------------------------------------------------------------------------
-| Monolog / Structured Logging bootstrap
-|--------------------------------------------------------------------------
-|
-| For any non-local environment we force the *default* logger to emit JSON
-| via App\Logging\JsonFormatter so downstream log shippers (Fluent Bit /
-| Vector / Loki / Cloud Logging) can index the records without parsing.
-| The correlation_id / tenant_id / user_id / route fields are added to
-| every record automatically via App\Http\Middleware\SentryContext's
-| Log::shareContext() call.
-|
-| In local we keep Laravel's default stack so developers can read
-| human-friendly logs with stack traces in the terminal.
-*/
-if (! app()->environment('local')) {
-    app()->configureMonologUsing(function (Logger $monolog): void {
-        $formatter = new JsonFormatter;
-        $stream = env('LOG_STRUCTURED_STREAM', 'php://stdout');
-
-        foreach ($monolog->getHandlers() as $handler) {
-            if (method_exists($handler, 'setFormatter')) {
-                $handler->setFormatter($formatter);
-            }
-        }
-
-        // Always add a stdout JSON handler in addition to existing ones so
-        // container log shippers can scrape stdout regardless of the configured
-        // LOG_CHANNEL. We respect LOG_STRUCTURED_STREAM for the destination
-        // (e.g. php://stderr in production pods that stream stderr only).
-        $monolog->pushHandler((new StreamHandler($stream, Logger::INFO))->setFormatter($formatter));
-    });
-}

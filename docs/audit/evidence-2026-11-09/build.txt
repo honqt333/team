@@ -1,0 +1,30 @@
+
+> build
+> node scripts/generate-page-manifest.mjs && vite build
+
+wrote resources/js/Pages/page-manifest.js with 242 pages
+vite v7.3.7 building client environment for production...
+transforming...
+✓ 215 modules transformed.
+✗ Build failed in 8.90s
+error during build:
+[vite:vue] [vue/compiler-sfc] This experimental syntax requires enabling one of the following parser plugin(s): "jsx", "flow", "typescript". (47:57)
+
+[project]/resources/js/Pages/System/Developer/Index.vue
+269|  
+270|  const tabs = [
+271|      { id: 'violations', label: 'Violations', icon: () => <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.46 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg> },
+   |                                                           ^
+272|      { id: 'graph', label: 'Graph', icon: () => <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg> },
+273|      { id: 'performance', label: 'Performance', icon: () => <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg> },
+file: [project]/resources/js/Pages/System/Developer/Index.vue:47:57
+    at constructor ([project]/node_modules/@babel/parser/lib/index.js:369:19)
+    at Parser.raise ([project]/node_modules/@babel/parser/lib/index.js:6600:19)
+    at Parser.expectOnePlugin ([project]/node_modules/@babel/parser/lib/index.js:6634:18)
+    at Parser.parseExprAtom ([project]/node_modules/@babel/parser/lib/index.js:8307:24)
+    at Parser.parseExprSubscripts ([project]/node_modules/@babel/parser/lib/index.js:7985:23)
+    at Parser.parseUpdate ([project]/node_modules/@babel/parser/lib/index.js:7970:21)
+    at Parser.parseMaybeUnary ([project]/node_modules/@babel/parser/lib/index.js:7950:23)
+    at Parser.parseMaybeUnaryOrPrivate ([project]/node_modules/@babel/parser/lib/index.js:7796:61)
+    at Parser.parseExprOps ([project]/node_modules/@babel/parser/lib/index.js:7801:23)
+    at Parser.parseMaybeConditional ([project]/node_modules/@babel/parser/lib/index.js:7778:23)

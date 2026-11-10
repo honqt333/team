@@ -427,26 +427,13 @@
                             </label>
                             <div class="flex items-center gap-3">
                                 <!-- Allow Lower Toggle -->
-                                <label
+                                <AppToggle
                                     v-if="selectedVehicle && lastVehicleOdometer > 0"
-                                    class="flex items-center gap-2 cursor-pointer group"
-                                >
-                                    <div class="relative">
-                                        <input
-                                            type="checkbox"
-                                            v-model="form.allow_lower_odometer"
-                                            class="sr-only peer"
-                                        />
-                                        <div
-                                            class="w-8 h-4 bg-gray-200 dark:bg-gray-700 rounded-full peer peer-checked:bg-amber-500 transition-all after:content-[''] after:absolute after:top-0.5 after:start-0.5 after:bg-white after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:after:translate-x-4 rtl:peer-checked:after:-translate-x-4"
-                                        ></div>
-                                    </div>
-                                    <span
-                                        class="text-[10px] font-bold text-gray-500 group-hover:text-amber-600 transition-colors uppercase tracking-wider"
-                                    >
-                                        {{ $t('quotes.allow_lower_odometer') }}
-                                    </span>
-                                </label>
+                                    v-model="form.allow_lower_odometer"
+                                    size="sm"
+                                    color="warning"
+                                    :label="$t('quotes.allow_lower_odometer')"
+                                />
 
                                 <button
                                     type="button"
@@ -732,6 +719,8 @@ import VehicleFormModal from '@/Components/Vehicles/VehicleFormModal.vue';
 import VehicleMileageModal from '@/Components/Vehicles/VehicleMileageModal.vue';
 import Tooltip from '@/Components/Tooltip.vue';
 import SaudiPlateDisplay from '@/Components/Vehicles/SaudiPlateDisplay.vue';
+import AppToggle from '@/Components/Common/AppToggle.vue';
+import { useDebounce } from '@/Composables/useDebounce';
 import axios from 'axios';
 
 const props = defineProps({
@@ -931,14 +920,10 @@ watch(
 );
 
 // Debounce search
-let debounceTimer = null;
-function debouncedSearch() {
-    clearTimeout(debounceTimer);
-    debounceTimer = setTimeout(() => {
-        searchQuery.value = toEnglish(searchQuery.value);
-        performSearch();
-    }, 300);
-}
+const debouncedSearch = useDebounce(() => {
+    searchQuery.value = toEnglish(searchQuery.value);
+    performSearch();
+}, 300);
 
 async function performSearch() {
     if (searchQuery.value.length < 2) {

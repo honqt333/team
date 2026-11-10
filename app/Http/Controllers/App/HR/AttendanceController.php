@@ -27,12 +27,19 @@ class AttendanceController extends Controller
         $date = $request->input('date') ? Carbon::parse($request->input('date')) : Carbon::today();
 
         // Get center attendance settings
-        $settings = AttendanceSettings::getForCenter($centerId);
+        $settings = $centerId ? AttendanceSettings::getForCenter((int) $centerId) : null;
 
-        // Get all active employees for this tenant and center
-        $employees = Employee::where('tenant_id', $tenantId)
-            ->where('center_id', $centerId)
-            ->active()
+        // Get all active employees for this tenant and center (including HQ/management employees)
+        $employeesQuery = Employee::where('tenant_id', $tenantId)->active();
+
+        if ($centerId) {
+            $employeesQuery->where(function ($q) use ($centerId) {
+                $q->where('center_id', $centerId)
+                    ->orWhereNull('center_id');
+            });
+        }
+
+        $employees = $employeesQuery
             ->with(['attendance' => function ($query) use ($date) {
                 $query->whereDate('date', $date->format('Y-m-d'));
             }])
@@ -84,27 +91,67 @@ class AttendanceController extends Controller
                 ];
             });
 
-        // Calculate stats
+        // Calculate stats on all employees
         $totalLateMinutes = $employees->sum(fn ($e) => $e['attendance']['late_minutes'] ?? 0);
         $lateCount = $employees->filter(fn ($e) => ($e['attendance']['late_minutes'] ?? 0) > 0)->count();
         $onLeaveCount = $employees->filter(fn ($e) => $e['is_on_leave'])->count();
+        $presentCount = $employees->filter(fn ($e) => $e['attendance'] && $e['attendance']['status'] === 'present')->count();
+        $absentCount = $employees->filter(fn ($e) => (! $e['attendance'] && ! $e['is_on_leave']) || ($e['attendance'] && $e['attendance']['status'] === 'absent'))->count();
+
+        $search = $request->input('search');
+        $statusFilter = $request->input('status');
+
+        $filteredEmployees = $employees
+            ->when($search, function ($collection, $search) {
+                $search = mb_strtolower((string) $search);
+
+                return $collection->filter(function ($e) use ($search) {
+                    return str_contains(mb_strtolower((string) ($e['name_ar'] ?? '')), $search)
+                        || str_contains(mb_strtolower((string) ($e['name_en'] ?? '')), $search)
+                        || str_contains(mb_strtolower((string) ($e['employee_number'] ?? '')), $search);
+                });
+            })
+            ->when($statusFilter, function ($collection, $statusFilter) {
+                return $collection->filter(function ($e) use ($statusFilter) {
+                    if ($statusFilter === 'present') {
+                        return $e['attendance'] && $e['attendance']['status'] === 'present';
+                    }
+
+                    if ($statusFilter === 'absent') {
+                        return (! $e['attendance'] && ! $e['is_on_leave']) || ($e['attendance'] && $e['attendance']['status'] === 'absent');
+                    }
+
+                    if ($statusFilter === 'late') {
+                        return ($e['attendance']['late_minutes'] ?? 0) > 0;
+                    }
+
+                    if ($statusFilter === 'leave') {
+                        return $e['is_on_leave'] || ($e['attendance'] && $e['attendance']['status'] === 'leave');
+                    }
+
+                    return true;
+                });
+            })
+            ->values();
 
         return Inertia::render('HR/Attendance/Index', [
-            'employees' => $employees,
+            'employees' => $filteredEmployees,
             'filters' => [
                 'date' => $date->format('Y-m-d'),
+                'search' => $search ?? '',
+                'status' => $statusFilter ?? '',
             ],
             'stats' => [
                 'total' => $employees->count(),
-                'present' => $employees->filter(fn ($e) => $e['attendance'] && $e['attendance']['status'] === 'present')->count(),
-                'absent' => $employees->filter(fn ($e) => ! $e['attendance'] && ! $e['is_on_leave'])->count(),
+                'present' => $presentCount,
+                'absent' => $absentCount,
                 'leave' => $onLeaveCount,
                 'late_count' => $lateCount,
                 'total_late_minutes' => $totalLateMinutes,
             ],
             'settings' => [
-                'grace_period_minutes' => $settings->grace_period_minutes,
-                'overtime_enabled' => $settings->overtime_enabled,
+                'grace_period_minutes' => $settings?->grace_period_minutes ?? 10,
+                'overtime_enabled' => $settings?->overtime_enabled ?? true,
             ],
         ]);
     }
@@ -117,9 +164,16 @@ class AttendanceController extends Controller
         $centerId = TenancyContext::centerId();
         $date = $request->input('date') ? Carbon::parse($request->input('date')) : Carbon::today();
 
-        $employees = Employee::where('tenant_id', $tenantId)
-            ->where('center_id', $centerId)
-            ->active()
+        $employeesQuery = Employee::where('tenant_id', $tenantId)->active();
+
+        if ($centerId) {
+            $employeesQuery->where(function ($q) use ($centerId) {
+                $q->where('center_id', $centerId)
+                    ->orWhereNull('center_id');
+            });
+        }
+
+        $employees = $employeesQuery
             ->with(['attendance' => function ($query) use ($date) {
                 $query->whereDate('date', $date->format('Y-m-d'));
             }, 'jobTitle', 'department'])

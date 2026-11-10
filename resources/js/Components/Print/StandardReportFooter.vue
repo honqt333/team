@@ -6,7 +6,7 @@
             <!-- Prepared by (User) -->
             <div class="flex items-center gap-1.5">
                 <span class="text-gray-400">
-                    {{ preparedByLabel || $t('common.prepared_by') || 'تمت الطباعة بواسطة' }}:
+                    {{ preparedByLabel || $t('common.prepared_by') }}:
                 </span>
                 <span class="font-bold text-gray-700">{{ userName }}</span>
             </div>

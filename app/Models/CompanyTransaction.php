@@ -45,6 +45,12 @@ class CompanyTransaction extends Model
 
     protected $appends = ['contact'];
 
+    /** @return BelongsTo<Center, $this> */
+    public function center(): BelongsTo
+    {
+        return $this->belongsTo(Center::class);
+    }
+
     public function incomeCategory(): BelongsTo
     {
         return $this->belongsTo(IncomeCategory::class);
@@ -73,11 +79,11 @@ class CompanyTransaction extends Model
     public function getContactAttribute()
     {
         if ($this->contact_type === 'customer' && $this->contact_id) {
-            return Customer::withoutGlobalScopes()->find($this->contact_id);
+            return Customer::withoutGlobalScope('center_scoped')->where('tenant_id', $this->tenant_id)->find($this->contact_id);
         }
 
         if ($this->contact_type === 'supplier' && $this->contact_id) {
-            return Supplier::withoutGlobalScopes()->find($this->contact_id);
+            return Supplier::where('tenant_id', $this->tenant_id)->find($this->contact_id);
         }
 
         return null;

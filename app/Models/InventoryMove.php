@@ -75,13 +75,18 @@ class InventoryMove extends Model
      * `workOrder` only exists on WorkOrderItemPart (and the move's reference_type
      * may legitimately be other models that don't have a `workOrder` relation).
      */
-    public function getWorkOrderAttribute(): ?WorkOrder
+    public function resolveReference(): ?Model
     {
         try {
-            $ref = $this->reference;
+            return $this->relationLoaded('reference') ? $this->getRelation('reference') : $this->reference()->getResults();
         } catch (Throwable) {
             return null;
         }
+    }
+
+    public function getWorkOrderAttribute(): ?WorkOrder
+    {
+        $ref = $this->resolveReference();
 
         if ($ref instanceof WorkOrderItemPart) {
             return $ref->workOrder;

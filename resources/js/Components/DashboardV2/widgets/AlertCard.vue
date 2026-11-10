@@ -1,4 +1,6 @@
 <script setup>
+import { Link } from '@inertiajs/vue3';
+
 defineProps({
     title: { type: String, required: true },
     count: { type: Number, default: 0 },
@@ -41,11 +43,11 @@ const colorMap = {
 </script>
 
 <template>
-    <a
+    <Link
         v-if="href"
         :href="href"
         :class="[
-            'group flex items-center gap-3 rounded-lg border p-4 transition-all hover:shadow-sm',
+            'group flex items-center gap-3.5 rounded-2xl border p-4 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md',
             colorMap[color]?.bg || colorMap.slate.bg,
             colorMap[color]?.border || colorMap.slate.border,
         ]"
@@ -53,7 +55,7 @@ const colorMap = {
         <div
             v-if="icon"
             :class="[
-                'flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-md',
+                'flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl shadow-2xs transition-transform duration-200 group-hover:scale-105',
                 colorMap[color]?.iconBg || colorMap.slate.iconBg,
                 colorMap[color]?.iconText || colorMap.slate.iconText,
             ]"
@@ -76,7 +78,7 @@ const colorMap = {
             </p>
         </div>
         <svg
-            class="h-4 w-4 flex-shrink-0 text-slate-400 transition-transform group-hover:translate-x-1 dark:text-slate-500"
+            class="h-4 w-4 flex-shrink-0 text-slate-400 transition-transform rtl:rotate-180 group-hover:translate-x-1 rtl:group-hover:-translate-x-1 dark:text-slate-500"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -88,11 +90,11 @@ const colorMap = {
                 d="M9 5l7 7-7 7"
             />
         </svg>
-    </a>
+    </Link>
     <div
         v-else
         :class="[
-            'flex items-center gap-3 rounded-lg border p-4',
+            'flex items-center gap-3.5 rounded-2xl border p-4',
             colorMap[color]?.bg || colorMap.slate.bg,
             colorMap[color]?.border || colorMap.slate.border,
         ]"
@@ -100,7 +102,7 @@ const colorMap = {
         <div
             v-if="icon"
             :class="[
-                'flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-md',
+                'flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl shadow-2xs',
                 colorMap[color]?.iconBg || colorMap.slate.iconBg,
                 colorMap[color]?.iconText || colorMap.slate.iconText,
             ]"

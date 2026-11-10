@@ -116,7 +116,7 @@
                  ═══════════════════════════════════════════════════════ -->
             <template v-else>
                 <!-- Names Row -->
-                <div class="grid grid-cols-2 gap-4">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <!-- Name Arabic -->
                     <div>
                         <label
@@ -357,23 +357,14 @@
                             <span class="text-xs text-gray-500 dark:text-gray-400">
                                 {{ $t('pricing.fixed_amount') }}
                             </span>
-                            <label class="relative inline-flex items-center cursor-pointer">
-                                <input
-                                    type="checkbox"
-                                    v-model="minPriceAsPercentage"
-                                    class="sr-only peer"
-                                />
-                                <div
-                                    class="w-9 h-5 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-indigo-300 dark:peer-focus:ring-indigo-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-600 peer-checked:bg-indigo-600"
-                                ></div>
-                            </label>
+                            <AppToggle v-model="minPriceAsPercentage" size="sm" />
                             <span class="text-xs text-gray-500 dark:text-gray-400">
                                 {{ $t('pricing.percentage') }}
                             </span>
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-2 gap-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <!-- Input field -->
                         <div class="relative">
                             <input
@@ -444,38 +435,37 @@
             </div>
 
             <!-- Active Toggle -->
-            <div class="flex items-center gap-3">
-                <label class="relative inline-flex items-center cursor-pointer">
-                    <input type="checkbox" v-model="form.is_active" class="sr-only peer" />
-                    <div
-                        class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 dark:peer-focus:ring-indigo-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-indigo-600"
-                    ></div>
-                </label>
-                <span class="text-sm font-medium text-gray-700 dark:text-gray-300">
-                    {{ $t('services_management.form.is_active') }}
-                </span>
+            <div>
+                <AppToggle
+                    v-model="form.is_active"
+                    :label="$t('services_management.form.is_active')"
+                />
             </div>
         </form>
 
         <template #footer>
-            <button
-                type="button"
-                @click="$emit('close')"
-                class="px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white font-medium transition-colors"
+            <div
+                class="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-2 sm:gap-3 w-full"
             >
-                {{ $t('common.cancel') }}
-            </button>
-            <button
-                @click="submitForm"
-                :disabled="
-                    form.processing ||
-                    minPriceValidationError ||
-                    (!service?.id && !selectedCatalogPackageId)
-                "
-                class="px-5 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl font-medium shadow-lg shadow-indigo-500/30 hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-            >
-                {{ form.processing ? $t('common.loading') : $t('common.save') }}
-            </button>
+                <button
+                    type="button"
+                    @click="$emit('close')"
+                    class="px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white font-medium transition-colors text-center"
+                >
+                    {{ $t('common.cancel') }}
+                </button>
+                <button
+                    @click="submitForm"
+                    :disabled="
+                        form.processing ||
+                        minPriceValidationError ||
+                        (!service?.id && !selectedCatalogPackageId)
+                    "
+                    class="px-5 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl font-medium shadow-lg shadow-indigo-500/30 hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed transition-all text-center"
+                >
+                    {{ form.processing ? $t('common.loading') : $t('common.save') }}
+                </button>
+            </div>
         </template>
     </BaseModal>
 </template>
@@ -486,6 +476,7 @@ import { useForm } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import BaseModal from '@/Components/BaseModal.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
+import AppToggle from '@/Components/Common/AppToggle.vue';
 import { useLocalized } from '@/Composables/useLocalized';
 
 const props = defineProps({

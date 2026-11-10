@@ -315,4 +315,77 @@ class VehiclesCrudTest extends TestCase
         // Assert source vehicle was soft-deleted
         $this->assertSoftDeleted('vehicles', ['id' => $sourceVehicle->id]);
     }
+
+    public function test_vehicles_index_sorts_by_column_and_direction(): void
+    {
+        $user = $this->createUserWithPermissions([
+            'crm.vehicles.view',
+        ]);
+
+        $customerA = Customer::factory()->create([
+            'tenant_id' => $user->tenant_id,
+            'name' => 'Alpha Customer',
+        ]);
+
+        $customerZ = Customer::factory()->create([
+            'tenant_id' => $user->tenant_id,
+            'name' => 'Zulu Customer',
+        ]);
+
+        $vehicle1 = Vehicle::create([
+            'tenant_id' => $user->tenant_id,
+            'center_id' => $user->current_center_id,
+            'customer_id' => $customerA->id,
+            'plate_number' => 'AAA 1111',
+            'year' => 2010,
+        ]);
+
+        $vehicle2 = Vehicle::create([
+            'tenant_id' => $user->tenant_id,
+            'center_id' => $user->current_center_id,
+            'customer_id' => $customerZ->id,
+            'plate_number' => 'ZZZ 9999',
+            'year' => 2024,
+        ]);
+
+        // 1. Sort by plate_number asc
+        $responseAsc = $this->actingAs($user)->get(route('vehicles.index', [
+            'sort' => 'plate_number',
+            'direction' => 'asc',
+        ]));
+        $responseAsc->assertOk();
+        $vehiclesAsc = $responseAsc->inertiaPage()['props']['vehicles']['data'];
+        $this->assertEquals('AAA 1111', $vehiclesAsc[0]['plate_number']);
+        $this->assertEquals('ZZZ 9999', $vehiclesAsc[1]['plate_number']);
+
+        // 2. Sort by plate_number desc
+        $responseDesc = $this->actingAs($user)->get(route('vehicles.index', [
+            'sort' => 'plate_number',
+            'direction' => 'desc',
+        ]));
+        $responseDesc->assertOk();
+        $vehiclesDesc = $responseDesc->inertiaPage()['props']['vehicles']['data'];
+        $this->assertEquals('ZZZ 9999', $vehiclesDesc[0]['plate_number']);
+        $this->assertEquals('AAA 1111', $vehiclesDesc[1]['plate_number']);
+
+        // 3. Sort by customer asc (via subquery)
+        $responseCustAsc = $this->actingAs($user)->get(route('vehicles.index', [
+            'sort' => 'customer',
+            'direction' => 'asc',
+        ]));
+        $responseCustAsc->assertOk();
+        $vehiclesCustAsc = $responseCustAsc->inertiaPage()['props']['vehicles']['data'];
+        $this->assertEquals($customerA->id, $vehiclesCustAsc[0]['customer_id']);
+        $this->assertEquals($customerZ->id, $vehiclesCustAsc[1]['customer_id']);
+
+        // 4. Sort by year desc
+        $responseYearDesc = $this->actingAs($user)->get(route('vehicles.index', [
+            'sort' => 'year',
+            'direction' => 'desc',
+        ]));
+        $responseYearDesc->assertOk();
+        $vehiclesYearDesc = $responseYearDesc->inertiaPage()['props']['vehicles']['data'];
+        $this->assertEquals(2024, $vehiclesYearDesc[0]['year']);
+        $this->assertEquals(2010, $vehiclesYearDesc[1]['year']);
+    }
 }

@@ -93,33 +93,33 @@ class CashRegisterReportService
 
             foreach ($payments as $p) {
                 $isPurchase = ! empty($p->purchase_invoice_id);
-                $isRefund = ($p->type?->value ?? $p->type) === 'refund';
-                $isBadDebt = ($p->type?->value ?? $p->type) === 'bad_debt';
+                $isRefund = ($p->type->value ?? $p->type) === 'refund';
+                $isBadDebt = ($p->type->value ?? $p->type) === 'bad_debt';
 
                 $cat = 'sales_payment';
                 $debit = (float) $p->amount;
                 $credit = 0.0;
-                $refNo = $p->invoice?->invoice_number ?? ($p->workOrder?->code ?? ($p->reference ?: 'PAY-'.str_pad((string) $p->id, 5, '0', STR_PAD_LEFT)));
-                $desc = __('reports.cash_register_report.sales_payment_desc').' '.($p->invoice?->customer?->name ?? $p->workOrder?->customer?->name ?? __('reports.cash_register_report.cash_customer'));
+                $refNo = $p->invoice->invoice_number ?? ($p->workOrder->code ?? ($p->reference ?: 'PAY-'.str_pad((string) $p->id, 5, '0', STR_PAD_LEFT)));
+                $desc = __('reports.cash_register_report.sales_payment_desc').' '.($p->invoice?->customer->name ?? $p->workOrder?->customer->name ?? __('reports.cash_register_report.cash_customer'));
 
                 if ($isPurchase) {
                     $cat = 'purchase_payment';
                     $debit = 0.0;
                     $credit = (float) $p->amount;
-                    $refNo = $p->purchaseInvoice?->code ?? ($p->purchaseInvoice?->invoice_number ?? ($p->reference ?: 'PAY-'.$p->id));
-                    $desc = __('reports.cash_register_report.purchase_payment_desc').' '.($p->purchaseInvoice?->supplier?->name ?? __('reports.cash_register_report.general_supplier'));
+                    $refNo = $p->purchaseInvoice->code ?? ($p->purchaseInvoice->invoice_number ?? ($p->reference ?: 'PAY-'.$p->id));
+                    $desc = __('reports.cash_register_report.purchase_payment_desc').' '.($p->purchaseInvoice?->supplier->name ?? __('reports.cash_register_report.general_supplier'));
                 } elseif ($isRefund) {
                     $cat = 'refund';
                     $debit = 0.0;
                     $credit = (float) $p->amount;
                     $refNo = $p->reference ?: ($p->invoice?->invoice_number ?: 'REF-'.$p->id);
-                    $desc = __('reports.cash_register_report.refund_desc').' '.($p->invoice?->customer?->name ?? $p->workOrder?->customer?->name ?? __('reports.cash_register_report.general_customer'));
+                    $desc = __('reports.cash_register_report.refund_desc').' '.($p->invoice?->customer->name ?? $p->workOrder?->customer->name ?? __('reports.cash_register_report.general_customer'));
                 } elseif ($isBadDebt) {
                     $cat = 'bad_debt';
                     $debit = 0.0;
                     $credit = (float) $p->amount;
                     $refNo = $p->reference ?: 'BD-'.$p->id;
-                    $desc = __('reports.cash_register_report.bad_debt_desc').' '.($p->invoice?->customer?->name ?? __('reports.cash_register_report.general_customer'));
+                    $desc = __('reports.cash_register_report.bad_debt_desc').' '.($p->invoice?->customer->name ?? __('reports.cash_register_report.general_customer'));
                 }
 
                 $items->push([
@@ -137,18 +137,24 @@ class CashRegisterReportService
                     'debit' => $debit,
                     'credit' => $credit,
                     'user_id' => $p->received_by,
-                    'user_name' => $p->receivedBy?->name ?? __('reports.cash_register_report.system_admin'),
-                    'user_photo' => $p->receivedBy?->photo_url ?? null,
+                    'user_name' => $p->receivedBy->name ?? __('reports.cash_register_report.system_admin'),
+                    'user_photo' => $p->receivedBy->photo_url ?? null,
                     'center_id' => $p->center_id,
-                    'center_name' => $p->center?->name ?? __('reports.cash_register_report.main_center'),
+                    'center_name' => $p->center->name ?? __('reports.cash_register_report.main_center'),
                 ]);
             }
         }
 
         // 2. Company Transactions (Revenue & Expenses)
-        if ($transactionType === 'all' || in_array($transactionType, ['revenue', 'expense'], true)) {
+        $includeCompanyTransactions = ($paymentMethod === 'all' || $paymentMethod === 'cash')
+            && ($transactionType === 'all' || in_array($transactionType, ['revenue', 'expense'], true));
+
+        if ($includeCompanyTransactions) {
             $trxQuery = CompanyTransaction::query()
                 ->where('tenant_id', $tenantId)
+                ->where('status', 'approved')
+                ->whereNull('invoice_id')
+                ->whereNull('purchase_invoice_id')
                 ->with(['center']);
 
             if ($targetCenterIds !== null) {
@@ -208,7 +214,7 @@ class CashRegisterReportService
                     'user_name' => __('reports.cash_register_report.financial_officer'),
                     'user_photo' => null,
                     'center_id' => $trx->center_id,
-                    'center_name' => $trx->center?->name ?? 'المركز الرئيسي',
+                    'center_name' => $trx->center->name ?? __('reports.cash_register_report.main_center'),
                 ]);
             }
         }

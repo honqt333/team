@@ -37,7 +37,7 @@ function formatTime(dateStr) {
                         </span>
                     </div>
                     <div
-                        class="min-w-0 flex-1 border-l border-slate-200 pl-3 dark:border-slate-700"
+                        class="min-w-0 flex-1 border-s border-slate-200 ps-3 dark:border-slate-700"
                     >
                         <div class="flex items-center justify-between gap-2">
                             <p

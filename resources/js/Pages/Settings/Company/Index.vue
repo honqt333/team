@@ -440,16 +440,7 @@
                             <span class="text-sm font-medium text-gray-700 dark:text-gray-300">
                                 {{ $t('common.vat') }}
                             </span>
-                            <label class="relative inline-flex items-center cursor-pointer">
-                                <input
-                                    type="checkbox"
-                                    v-model="form.vat.vat_enabled"
-                                    class="sr-only peer"
-                                />
-                                <div
-                                    class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-emerald-300 dark:peer-focus:ring-emerald-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-emerald-600"
-                                ></div>
-                            </label>
+                            <AppToggle v-model="form.vat.vat_enabled" color="success" />
                         </div>
 
                         <div v-if="form.vat.vat_enabled" class="space-y-6">
@@ -553,18 +544,10 @@
                                         <span class="text-sm text-gray-600 dark:text-gray-400">
                                             {{ $t('company_profile.vat.services_inclusive') }}
                                         </span>
-                                        <label
-                                            class="relative inline-flex items-center cursor-pointer"
-                                        >
-                                            <input
-                                                type="checkbox"
-                                                v-model="form.vat.services_inclusive"
-                                                class="sr-only peer"
-                                            />
-                                            <div
-                                                class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-emerald-300 dark:peer-focus:ring-emerald-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-emerald-600"
-                                            ></div>
-                                        </label>
+                                        <AppToggle
+                                            v-model="form.vat.services_inclusive"
+                                            color="success"
+                                        />
                                     </div>
                                 </div>
 
@@ -629,18 +612,10 @@
                                         <span class="text-sm text-gray-600 dark:text-gray-400">
                                             {{ $t('company_profile.vat.parts_inclusive') }}
                                         </span>
-                                        <label
-                                            class="relative inline-flex items-center cursor-pointer"
-                                        >
-                                            <input
-                                                type="checkbox"
-                                                v-model="form.vat.parts_inclusive"
-                                                class="sr-only peer"
-                                            />
-                                            <div
-                                                class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-emerald-300 dark:peer-focus:ring-emerald-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-emerald-600"
-                                            ></div>
-                                        </label>
+                                        <AppToggle
+                                            v-model="form.vat.parts_inclusive"
+                                            color="success"
+                                        />
                                     </div>
                                 </div>
                             </div>
@@ -676,16 +651,10 @@
                                         {{ $t('company_profile.vat.show_amount_before_vat') }}
                                     </span>
                                 </div>
-                                <label class="relative inline-flex items-center cursor-pointer">
-                                    <input
-                                        type="checkbox"
-                                        v-model="form.vat.show_amount_before_vat"
-                                        class="sr-only peer"
-                                    />
-                                    <div
-                                        class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-emerald-300 dark:peer-focus:ring-emerald-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-emerald-600"
-                                    ></div>
-                                </label>
+                                <AppToggle
+                                    v-model="form.vat.show_amount_before_vat"
+                                    color="success"
+                                />
                             </div>
 
                             <!-- VAT Explanation Modal -->
@@ -740,18 +709,10 @@
                                                         )
                                                     }}
                                                 </span>
-                                                <label
-                                                    class="relative inline-flex items-center cursor-pointer"
-                                                >
-                                                    <input
-                                                        type="checkbox"
-                                                        v-model="vatExplanationToggle"
-                                                        class="sr-only peer"
-                                                    />
-                                                    <div
-                                                        class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-emerald-300 dark:peer-focus:ring-emerald-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-emerald-600"
-                                                    ></div>
-                                                </label>
+                                                <AppToggle
+                                                    v-model="vatExplanationToggle"
+                                                    color="success"
+                                                />
                                             </div>
 
                                             <!-- Example Table -->
@@ -939,17 +900,11 @@
                                         {{ $t('company_profile.zatca.qr_enabled_hint') }}
                                     </p>
                                 </div>
-                                <label class="relative inline-flex items-center cursor-pointer">
-                                    <input
-                                        type="checkbox"
-                                        v-model="form.zatca.qr_enabled"
-                                        :disabled="!props.vat?.vat_enabled"
-                                        class="sr-only peer"
-                                    />
-                                    <div
-                                        class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-emerald-300 dark:peer-focus:ring-emerald-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-emerald-600"
-                                    ></div>
-                                </label>
+                                <AppToggle
+                                    v-model="form.zatca.qr_enabled"
+                                    :disabled="!props.vat?.vat_enabled"
+                                    color="success"
+                                />
                             </div>
                         </div>
 
@@ -1420,18 +1375,10 @@
                                         }}
                                     </p>
                                 </div>
-                                <label
-                                    class="relative inline-flex items-center cursor-pointer shrink-0 mt-1"
-                                >
-                                    <input
-                                        type="checkbox"
-                                        v-model="form.workflow.allow_lower_odometer"
-                                        class="sr-only peer"
-                                    />
-                                    <div
-                                        class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-600"
-                                    ></div>
-                                </label>
+                                <AppToggle
+                                    v-model="form.workflow.allow_lower_odometer"
+                                    color="success"
+                                />
                             </div>
 
                             <!-- Require Phone on Creation -->
@@ -1450,18 +1397,10 @@
                                         }}
                                     </p>
                                 </div>
-                                <label
-                                    class="relative inline-flex items-center cursor-pointer shrink-0 mt-1"
-                                >
-                                    <input
-                                        type="checkbox"
-                                        v-model="form.workflow.require_phone_on_creation"
-                                        class="sr-only peer"
-                                    />
-                                    <div
-                                        class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-600"
-                                    ></div>
-                                </label>
+                                <AppToggle
+                                    v-model="form.workflow.require_phone_on_creation"
+                                    color="success"
+                                />
                             </div>
 
                             <!-- Max Discount Percentage -->
@@ -2707,6 +2646,7 @@ import { useI18n } from 'vue-i18n';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import PageHeader from '@/Components/PageHeader.vue';
 import BackButton from '@/Components/BackButton.vue';
+import AppToggle from '@/Components/Common/AppToggle.vue';
 import Tooltip from '@/Components/Tooltip.vue';
 import { useToast } from '@/Composables/useToast';
 import CompanyTransactionModal from './Modals/CompanyTransactionModal.vue';

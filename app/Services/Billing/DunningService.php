@@ -403,7 +403,7 @@ EOT;
 
         // Phase 7.1 — attach the invoice PDF so the tenant has
         // a copy in their inbox. We pass the storage path
-        // (relative to the public disk) and let the mailable
+        // (relative to the private disk) and let the mailable
         // resolve it at send-time. The PDF must already exist
         // (or be generated on the fly here).
         $attachmentPath = $this->resolveInvoiceAttachment($invoice);
@@ -442,12 +442,12 @@ EOT;
 
             // getPdfPath returns an absolute filesystem path;
             // SubscriptionOverdueMail::attachments() wants a
-            // path relative to the public disk. Strip the
+            // path relative to the private disk. Strip the
             // disk root to convert.
-            $publicRoot = Storage::disk('public')->path('');
+            $privateRoot = Storage::disk('local')->path('');
 
-            if (str_starts_with($relativePath, $publicRoot)) {
-                return ltrim(substr($relativePath, strlen($publicRoot)), '/');
+            if (str_starts_with($relativePath, $privateRoot)) {
+                return ltrim(substr($relativePath, strlen($privateRoot)), '/');
             }
 
             return null;

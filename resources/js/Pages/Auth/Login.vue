@@ -57,7 +57,7 @@ const submit = () => {
         />
 
         <!-- Title -->
-        <h2 class="text-2xl font-bold text-gray-900 dark:text-white text-center mb-2 font-cairo">
+        <h2 class="text-2xl font-bold text-gray-900 dark:text-white text-center mb-2">
             {{ $t('auth.admin_panel') }}
         </h2>
         <p v-if="props.asAdmin" class="text-sm text-gray-500 dark:text-gray-400 text-center mb-8">
@@ -213,9 +213,3 @@ const submit = () => {
         </form>
     </AuthLayout>
 </template>
-
-<style scoped>
-.font-cairo {
-    font-family: 'Cairo', system-ui, sans-serif;
-}
-</style>

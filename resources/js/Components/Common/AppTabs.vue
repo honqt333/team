@@ -62,7 +62,7 @@ const selectTab = (tab) => {
 
 <template>
     <!-- Underline Variant -->
-    <div v-if="variant === 'underline'" class="border-b border-gray-200 dark:border-gray-700">
+    <div v-if="variant === 'underline'" class="border-b border-border">
         <nav class="-mb-px flex gap-6 sm:gap-8 overflow-x-auto no-scrollbar" aria-label="Tabs">
             <button
                 v-for="tab in tabs"
@@ -73,8 +73,8 @@ const selectTab = (tab) => {
                 :class="[
                     'group inline-flex items-center gap-2 py-4 px-1 border-b-2 font-medium text-sm sm:text-base whitespace-nowrap transition-all duration-200 focus:outline-none',
                     modelValue === tab.id
-                        ? 'border-indigo-600 text-indigo-600 dark:border-indigo-400 dark:text-indigo-400 font-semibold'
-                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:border-gray-600',
+                        ? 'border-action-primary text-action-primary font-semibold'
+                        : 'border-transparent text-text-secondary hover:text-text-primary hover:border-border',
                     tab.disabled ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer',
                 ]"
                 :aria-current="modelValue === tab.id ? 'page' : undefined"
@@ -94,8 +94,8 @@ const selectTab = (tab) => {
                     :class="[
                         'ms-2 py-0.5 px-2 rounded-full text-xs font-semibold transition-colors',
                         modelValue === tab.id
-                            ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/50 dark:text-indigo-300'
-                            : 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400 group-hover:bg-gray-200',
+                            ? 'bg-selection-bg text-action-primary'
+                            : 'bg-surface-muted text-text-secondary group-hover:bg-surface-raised',
                     ]"
                 >
                     {{ tab.count }}
@@ -107,7 +107,7 @@ const selectTab = (tab) => {
     <!-- Pills / Segmented Variant -->
     <div
         v-else
-        class="inline-flex p-1.5 bg-gray-100 dark:bg-gray-800/90 rounded-2xl border border-gray-200 dark:border-gray-700 max-w-full overflow-x-auto no-scrollbar gap-1"
+        class="inline-flex p-1.5 bg-surface-muted/90 rounded-2xl border border-border max-w-full overflow-x-auto no-scrollbar gap-1"
         role="tablist"
     >
         <button
@@ -119,8 +119,8 @@ const selectTab = (tab) => {
             :class="[
                 'inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium whitespace-nowrap transition-all duration-200 focus:outline-none',
                 modelValue === tab.id
-                    ? 'bg-white dark:bg-gray-700 text-indigo-600 dark:text-indigo-400 shadow-sm font-semibold'
-                    : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-white/40 dark:hover:bg-gray-750',
+                    ? 'bg-surface text-action-primary shadow-xs font-semibold'
+                    : 'text-text-secondary hover:text-text-primary hover:bg-surface/40',
                 tab.disabled ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer',
             ]"
             role="tab"
@@ -132,8 +132,8 @@ const selectTab = (tab) => {
                 class="ms-1.5 py-0.5 px-2 rounded-full text-xs font-semibold"
                 :class="
                     modelValue === tab.id
-                        ? 'bg-indigo-50 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300'
-                        : 'bg-gray-200/70 text-gray-600 dark:bg-gray-600 dark:text-gray-300'
+                        ? 'bg-selection-bg text-action-primary'
+                        : 'bg-surface-muted text-text-secondary'
                 "
             >
                 {{ tab.count }}

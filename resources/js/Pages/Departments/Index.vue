@@ -1,21 +1,12 @@
 <template>
-    <AppLayout>
-        <Head :title="$t('departments.title')" />
-
+    <AppLayout :title="$t('departments.title')">
         <div class="space-y-6">
             <!-- Header Section -->
             <PageHeader
                 :title="$t('departments.title')"
-                :subtitle="$t('departments.subtitle', 'إدارة الأقسام وفئات العمل')"
-                gradientFrom="from-orange-600"
-                gradientTo="to-amber-600"
-                glowFrom="from-orange-500"
-                badgeBg="bg-orange-50/50 dark:bg-orange-900/30"
-                badgeText="text-orange-600 dark:text-orange-400"
-                badgeBorder="border-orange-100/50 dark:border-orange-800/30"
-                badgeDot="bg-orange-500"
-                :totalCount="departments ? departments.total : null"
-                :countLabel="$t('departments.total_count')"
+                :subtitle="$t('departments.subtitle')"
+                :totalCount="departments ? toEnglish(departments.total) : '0'"
+                :countLabel="$t('departments.title')"
             >
                 <template #icon>
                     <svg
@@ -27,21 +18,68 @@
                         <path
                             stroke-linecap="round"
                             stroke-linejoin="round"
-                            stroke-width="2"
+                            stroke-width="2.2"
                             d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
                         />
                     </svg>
                 </template>
 
                 <template #actions>
-                    <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-                        <!-- Search -->
-                        <div class="relative">
+                    <div class="flex items-center gap-3">
+                        <!-- Actions Toolbar -->
+                        <div
+                            class="flex items-center gap-1.5 p-1.5 bg-surface-secondary/80 dark:bg-surface-secondary/40 backdrop-blur-md rounded-2xl border border-border-subtle shadow-inner"
+                        >
+                            <AppPrintButton
+                                variant="icon"
+                                @click="handlePrint"
+                                :title="$t('common.print')"
+                            />
+
+                            <div class="w-px h-6 bg-border-subtle mx-1"></div>
+
+                            <AppViewModeToggle
+                                v-model="viewMode"
+                                storage-key="departments_view_mode"
+                            />
+                        </div>
+
+                        <!-- Add Button (Anchored Outer Left in RTL) -->
+                        <button
+                            v-if="canManage"
+                            @click="openCreateModal"
+                            type="button"
+                            class="flex items-center justify-center gap-2 px-5 py-2.5 bg-action-primary hover:bg-action-primary-hover text-white rounded-xl font-bold shadow-xs transition-colors cursor-pointer"
+                        >
+                            <svg
+                                class="w-4 h-4"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2.5"
+                                    d="M12 4v16m8-8H4"
+                                />
+                            </svg>
+                            <span class="text-sm">
+                                {{ $t('departments.add') }}
+                            </span>
+                        </button>
+                    </div>
+                </template>
+
+                <template #filters>
+                    <div class="flex flex-col md:flex-row items-center gap-3 no-print">
+                        <!-- Search Box -->
+                        <div class="relative group flex-1 w-full">
                             <div
-                                class="absolute inset-y-0 start-0 ps-3 flex items-center pointer-events-none"
+                                class="absolute inset-y-0 start-0 ps-4 flex items-center pointer-events-none text-content-muted group-focus-within:text-action-primary transition-colors"
                             >
                                 <svg
-                                    class="w-4 h-4 text-gray-400"
+                                    class="w-5 h-5"
                                     fill="none"
                                     stroke="currentColor"
                                     viewBox="0 0 24 24"
@@ -56,184 +94,138 @@
                             </div>
                             <input
                                 type="text"
-                                v-model="searchQuery"
+                                v-model="tableFilters.search"
                                 :placeholder="$t('departments.search')"
-                                class="w-full sm:w-64 ps-10 pe-4 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all"
+                                class="block w-full ps-11 pe-4 py-2.5 text-sm text-content-primary bg-surface-primary border border-border-subtle rounded-xl focus:ring-2 focus:ring-action-primary/20 focus:border-action-primary transition-all outline-none placeholder-content-muted shadow-xs"
                             />
                         </div>
 
-                        <!-- Add Button -->
-                        <button
-                            v-if="can('departments.create')"
-                            @click="openCreateModal"
-                            class="flex items-center justify-center gap-2 px-4 py-2 bg-gradient-to-r from-orange-600 to-amber-600 text-white rounded-xl text-sm font-semibold shadow-md shadow-orange-500/20 hover:shadow-lg hover:shadow-orange-500/30 hover:-translate-y-0.5 transition-all"
-                        >
-                            <svg
-                                class="w-4 h-4"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                            >
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    stroke-width="2"
-                                    d="M12 4v16m8-8H4"
+                        <div class="flex flex-wrap items-center gap-2.5 w-full md:w-auto">
+                            <!-- Status Filter -->
+                            <div class="w-full sm:w-44">
+                                <SearchableSelect
+                                    v-model="tableFilters.status"
+                                    :options="statusOptions"
+                                    option-label="label"
+                                    option-value="value"
+                                    :placeholder="$t('common.status')"
+                                    :label="''"
+                                    @change="applyFilters"
                                 />
-                            </svg>
-                            <span>{{ $t('departments.add') }}</span>
-                        </button>
+                            </div>
+
+                            <!-- Reset Button -->
+                            <button
+                                v-if="hasActiveFilters"
+                                @click="handleResetFilters"
+                                type="button"
+                                class="p-2.5 text-content-muted hover:text-danger hover:bg-danger-soft rounded-xl border border-border-subtle bg-surface-primary transition-colors cursor-pointer shadow-xs"
+                                :title="$t('common.reset_filter') || $t('common.reset')"
+                            >
+                                <svg
+                                    class="w-4 h-4"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2"
+                                        d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                                    />
+                                </svg>
+                            </button>
+                        </div>
                     </div>
                 </template>
             </PageHeader>
 
             <!-- Loading State -->
-            <div v-if="!departments" class="flex flex-col items-center justify-center py-16">
-                <div class="relative">
-                    <div
-                        class="w-12 h-12 border-4 border-orange-200 dark:border-orange-900 rounded-full"
-                    ></div>
-                    <div
-                        class="absolute top-0 left-0 w-12 h-12 border-4 border-orange-600 border-t-transparent rounded-full animate-spin"
-                    ></div>
-                </div>
-                <p class="mt-4 text-gray-500 dark:text-gray-400">{{ $t('common.loading') }}</p>
-            </div>
+            <AppTableSkeleton v-if="!departments" :rows="5" :cols="5" />
 
-            <!-- Empty State -->
-            <div
-                v-else-if="filteredDepartments.length === 0"
-                class="bg-white dark:bg-gray-800 rounded-2xl p-12 text-center border border-gray-200 dark:border-gray-700"
-            >
+            <!-- Main Content -->
+            <div v-else>
+                <!-- Empty State -->
                 <div
-                    class="w-16 h-16 mx-auto rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center mb-4"
+                    v-if="!departments.data || departments.data.length === 0"
+                    class="bg-surface-primary rounded-2xl border border-border-subtle p-12"
                 >
-                    <svg
-                        class="w-8 h-8 text-gray-400"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                    >
-                        <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            stroke-width="1.5"
-                            d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
-                        />
-                    </svg>
+                    <AppEmptyState
+                        :title="$t('departments.empty')"
+                        :description="$t('departments.empty_hint')"
+                        :action-text="canManage ? $t('departments.add') : ''"
+                        @action="openCreateModal"
+                    />
                 </div>
-                <p class="text-lg font-medium text-gray-900 dark:text-white mb-1">
-                    {{ $t('departments.empty') }}
-                </p>
-                <p class="text-gray-500 dark:text-gray-400 mb-6">
-                    {{ $t('departments.empty_hint') }}
-                </p>
-                <button
-                    @click="openCreateModal"
-                    class="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-orange-600 to-amber-600 text-white rounded-xl font-medium shadow-lg shadow-orange-500/30 hover:shadow-xl transition-all"
-                >
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            stroke-width="2"
-                            d="M12 4v16m8-8H4"
-                        />
-                    </svg>
-                    {{ $t('departments.add') }}
-                </button>
-            </div>
 
-            <!-- Table View -->
-            <div
-                v-else
-                class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden"
-            >
-                <div class="overflow-x-auto">
-                    <table class="min-w-full">
-                        <thead>
-                            <tr class="bg-gray-50 dark:bg-gray-900/50">
-                                <th
-                                    class="px-5 py-3 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle text-center"
-                                >
-                                    {{ $t('departments.columns.name') }}
-                                </th>
-                                <th
-                                    class="px-5 py-3 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle text-center"
-                                >
-                                    {{ $t('departments.columns.description') }}
-                                </th>
-                                <th
-                                    class="px-5 py-3 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle text-center"
-                                >
-                                    {{ $t('departments.columns.services_count') }}
-                                </th>
-                                <th
-                                    class="px-5 py-3 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle text-center"
-                                >
-                                    {{ $t('departments.columns.status') }}
-                                </th>
-                                <th
-                                    class="px-5 py-3 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle text-center"
-                                >
-                                    {{ $t('common.actions') }}
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
-                            <tr
-                                v-for="dept in filteredDepartments"
-                                :key="dept.id"
-                                class="hover:bg-gray-50 dark:hover:bg-gray-900/50 transition-colors"
+                <!-- GRID VIEW -->
+                <div v-else-if="viewMode === 'grid'" class="space-y-6 no-print">
+                    <div
+                        class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"
+                    >
+                        <div
+                            v-for="dept in departments.data"
+                            :key="dept.id"
+                            class="group relative flex flex-col bg-surface-primary rounded-2xl border border-border-subtle hover:border-border-strong hover:shadow-md transition-all duration-300 overflow-hidden p-5"
+                        >
+                            <!-- Card Header -->
+                            <div
+                                class="flex items-center justify-between gap-3 pb-3 border-b border-border-subtle"
                             >
-                                <td class="px-5 py-4 align-middle">
-                                    <div class="flex items-center gap-3">
-                                        <div
-                                            class="w-9 h-9 rounded-lg flex items-center justify-center text-sm font-bold text-white flex-shrink-0 bg-gradient-to-br from-orange-500 to-amber-500"
-                                        >
-                                            {{ getName(dept).charAt(0).toUpperCase() }}
-                                        </div>
-                                        <span class="font-medium text-gray-900 dark:text-white">
-                                            {{ getName(dept) }}
-                                        </span>
+                                <div class="flex items-center gap-3 min-w-0">
+                                    <div
+                                        class="w-9 h-9 rounded-xl flex items-center justify-center text-sm font-bold text-white flex-shrink-0 bg-action-primary"
+                                    >
+                                        {{ getName(dept).charAt(0).toUpperCase() }}
                                     </div>
-                                </td>
-                                <td
-                                    class="px-5 py-4 text-gray-600 dark:text-gray-400 max-w-xs truncate align-middle"
-                                >
+                                    <div class="truncate">
+                                        <h3 class="font-bold text-sm text-content-primary truncate">
+                                            {{ getName(dept) }}
+                                        </h3>
+                                        <p
+                                            v-if="dept.name_en && $i18n.locale === 'ar'"
+                                            class="text-xs text-content-muted truncate"
+                                        >
+                                            {{ dept.name_en }}
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <AppToggle
+                                    :model-value="dept.is_active"
+                                    @update:model-value="toggleActive(dept)"
+                                    :disabled="togglingId === dept.id || !canManage"
+                                    size="sm"
+                                    color="success"
+                                />
+                            </div>
+
+                            <!-- Body -->
+                            <div class="py-4 space-y-2 flex-1">
+                                <p class="text-xs text-content-secondary line-clamp-2">
                                     {{ dept.description || '—' }}
-                                </td>
-                                <td class="px-5 py-4 align-middle">
-                                    <span
-                                        class="px-2 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300"
-                                    >
-                                        {{ dept.services_count }} {{ $t('departments.services') }}
-                                    </span>
-                                </td>
-                                <td class="px-5 py-4 align-middle">
-                                    <button
-                                        @click="toggleActive(dept)"
-                                        :disabled="togglingId === dept.id"
-                                        :class="
-                                            dept.is_active
-                                                ? 'bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-300'
-                                                : 'bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-300'
-                                        "
-                                        class="px-3 py-1 text-xs font-medium rounded-full transition-all hover:opacity-80 disabled:opacity-50"
-                                    >
-                                        {{
-                                            dept.is_active
-                                                ? $t('common.active')
-                                                : $t('common.inactive')
-                                        }}
-                                    </button>
-                                </td>
-                                <td class="px-5 py-4 align-middle">
-                                    <div class="flex items-center gap-2">
+                                </p>
+                            </div>
+
+                            <!-- Card Footer -->
+                            <div
+                                class="pt-3 border-t border-border-subtle mt-auto flex items-center justify-between text-xs"
+                            >
+                                <span
+                                    class="px-2.5 py-1 rounded-full text-xs font-medium font-mono bg-surface-secondary text-content-secondary border border-border-subtle"
+                                >
+                                    {{ toEnglish(dept.services_count || 0) }}
+                                    {{ $t('departments.services') }}
+                                </span>
+
+                                <div class="flex items-center gap-1">
+                                    <Tooltip :text="$t('common.edit')">
                                         <button
-                                            v-if="can('departments.edit')"
+                                            v-if="canManage"
                                             @click="openEditModal(dept)"
-                                            class="p-2 text-gray-500 hover:text-orange-600 hover:bg-orange-50 dark:hover:bg-orange-900/20 rounded-lg transition-colors"
+                                            type="button"
+                                            class="p-1.5 text-content-secondary hover:text-action-primary hover:bg-surface-secondary rounded-lg transition-colors cursor-pointer"
                                         >
                                             <svg
                                                 class="w-4 h-4"
@@ -249,10 +241,14 @@
                                                 />
                                             </svg>
                                         </button>
+                                    </Tooltip>
+
+                                    <Tooltip :text="$t('common.delete')">
                                         <button
-                                            v-if="can('departments.delete')"
+                                            v-if="canManage"
                                             @click="handleDelete(dept)"
-                                            class="p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                                            type="button"
+                                            class="p-1.5 text-content-secondary hover:text-danger hover:bg-danger-soft rounded-lg transition-colors cursor-pointer"
                                         >
                                             <svg
                                                 class="w-4 h-4"
@@ -268,29 +264,132 @@
                                                 />
                                             </svg>
                                         </button>
-                                    </div>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+                                    </Tooltip>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
-            <!-- Pagination -->
-            <div
-                v-if="departments && departments.data.length > 0"
-                class="text-sm text-gray-500 dark:text-gray-400"
-            >
-                {{ $t('customers.showing') }}
-                <span class="font-medium text-gray-900 dark:text-white">
-                    {{ departments.from }}
-                </span>
-                -
-                <span class="font-medium text-gray-900 dark:text-white">{{ departments.to }}</span>
-                {{ $t('customers.of') }}
-                <span class="font-medium text-gray-900 dark:text-white">
-                    {{ departments.total }}
-                </span>
+                    <!-- Pagination for Grid -->
+                    <div v-if="departments?.links?.length >= 3" class="mt-6">
+                        <AppPagination
+                            :links="departments.links"
+                            :from="departments.from"
+                            :to="departments.to"
+                            :total="departments.total"
+                        />
+                    </div>
+                </div>
+
+                <!-- LIST VIEW (DataTable) -->
+                <div v-else class="space-y-4 no-print">
+                    <DataTable
+                        :data="departments"
+                        :columns="columns"
+                        :loading="isLoading"
+                        :sort-column="sortColumn"
+                        :sort-direction="sortDirection"
+                        @sort="toggleSort"
+                        :empty-title="$t('departments.empty')"
+                        :empty-description="$t('departments.empty_hint')"
+                    >
+                        <template #cell-name="{ item }">
+                            <div class="flex items-center gap-3">
+                                <div
+                                    class="w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold text-white flex-shrink-0 bg-action-primary"
+                                >
+                                    {{ getName(item).charAt(0).toUpperCase() }}
+                                </div>
+                                <div class="flex flex-col">
+                                    <span class="font-bold text-sm text-content-primary">
+                                        {{ getName(item) }}
+                                    </span>
+                                    <span
+                                        v-if="item.name_en && $i18n.locale === 'ar'"
+                                        class="text-xs text-content-muted"
+                                    >
+                                        {{ item.name_en }}
+                                    </span>
+                                </div>
+                            </div>
+                        </template>
+
+                        <template #cell-description="{ item }">
+                            <span class="text-xs text-content-secondary line-clamp-1 max-w-xs">
+                                {{ item.description || '—' }}
+                            </span>
+                        </template>
+
+                        <template #cell-services_count="{ item }">
+                            <span
+                                class="px-2.5 py-1 text-xs font-medium font-mono rounded-full bg-surface-secondary text-content-secondary border border-border-subtle"
+                            >
+                                {{ toEnglish(item.services_count || 0) }}
+                                {{ $t('departments.services') }}
+                            </span>
+                        </template>
+
+                        <template #cell-is_active="{ item }">
+                            <AppToggle
+                                :model-value="item.is_active"
+                                @update:model-value="toggleActive(item)"
+                                :disabled="togglingId === item.id || !canManage"
+                                size="sm"
+                                color="success"
+                            />
+                        </template>
+
+                        <template #cell-actions="{ item }">
+                            <div class="flex items-center justify-center gap-1" @click.stop>
+                                <Tooltip :text="$t('common.edit')">
+                                    <button
+                                        v-if="canManage"
+                                        @click="openEditModal(item)"
+                                        type="button"
+                                        class="p-2 text-content-secondary hover:text-action-primary hover:bg-surface-secondary rounded-xl transition-all cursor-pointer"
+                                    >
+                                        <svg
+                                            class="w-4 h-4"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            viewBox="0 0 24 24"
+                                        >
+                                            <path
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                stroke-width="2"
+                                                d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                                            />
+                                        </svg>
+                                    </button>
+                                </Tooltip>
+
+                                <Tooltip :text="$t('common.delete')">
+                                    <button
+                                        v-if="canManage"
+                                        @click="handleDelete(item)"
+                                        type="button"
+                                        class="p-2 text-content-secondary hover:text-danger hover:bg-danger-soft rounded-xl transition-all cursor-pointer"
+                                    >
+                                        <svg
+                                            class="w-4 h-4"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            viewBox="0 0 24 24"
+                                        >
+                                            <path
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                stroke-width="2"
+                                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                                            />
+                                        </svg>
+                                    </button>
+                                </Tooltip>
+                            </div>
+                        </template>
+                    </DataTable>
+                </div>
             </div>
         </div>
 
@@ -302,51 +401,182 @@
             @close="closeModal"
             @saved="handleSaved"
         />
+
+        <!-- Print Section -->
+        <Teleport to="body">
+            <div class="print-section hidden">
+                <StandardReportHeader
+                    :title="$t('departments.title')"
+                    :subtitle="$t('departments.subtitle')"
+                />
+
+                <table class="w-full mt-6">
+                    <thead>
+                        <tr>
+                            <th
+                                class="px-4 py-3 text-center text-xs font-bold uppercase border-b-2 align-middle"
+                            >
+                                {{ $t('departments.columns.name') }}
+                            </th>
+                            <th
+                                class="px-4 py-3 text-center text-xs font-bold uppercase border-b-2 align-middle"
+                            >
+                                {{ $t('departments.columns.description') }}
+                            </th>
+                            <th
+                                class="px-4 py-3 text-center text-xs font-bold uppercase border-b-2 align-middle"
+                            >
+                                {{ $t('departments.columns.services_count') }}
+                            </th>
+                            <th
+                                class="px-4 py-3 text-center text-xs font-bold uppercase border-b-2 align-middle"
+                            >
+                                {{ $t('departments.columns.status') }}
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="dept in departments?.data || []" :key="dept.id" class="border-b">
+                            <td class="px-4 py-3 text-center text-sm font-bold align-middle">
+                                {{ getName(dept) }}
+                            </td>
+                            <td class="px-4 py-3 text-center text-sm align-middle">
+                                {{ dept.description || '—' }}
+                            </td>
+                            <td class="px-4 py-3 text-center text-sm font-mono align-middle">
+                                {{ toEnglish(dept.services_count || 0) }}
+                            </td>
+                            <td class="px-4 py-3 text-center text-sm align-middle">
+                                {{ dept.is_active ? $t('common.active') : $t('common.inactive') }}
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <StandardReportFooter class="mt-8 border-t pt-4" />
+            </div>
+        </Teleport>
     </AppLayout>
 </template>
 
 <script setup>
 import { ref, computed } from 'vue';
-import { Head, router } from '@inertiajs/vue3';
+import { router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import PageHeader from '@/Components/PageHeader.vue';
+import DataTable from '@/Components/Common/DataTable.vue';
+import AppPagination from '@/Components/Common/AppPagination.vue';
+import AppViewModeToggle from '@/Components/Common/AppViewModeToggle.vue';
+import AppPrintButton from '@/Components/Common/AppPrintButton.vue';
+import AppEmptyState from '@/Components/Common/AppEmptyState.vue';
+import AppToggle from '@/Components/Common/AppToggle.vue';
+import AppTableSkeleton from '@/Components/Common/AppTableSkeleton.vue';
+import SearchableSelect from '@/Components/SearchableSelect.vue';
+import Tooltip from '@/Components/Tooltip.vue';
 import DepartmentFormModal from '@/Components/DepartmentFormModal.vue';
+import StandardReportHeader from '@/Components/Print/StandardReportHeader.vue';
+import StandardReportFooter from '@/Components/Print/StandardReportFooter.vue';
 import { useConfirm } from '@/Composables/useConfirm';
 import { useToast } from '@/Composables/useToast';
 import { useLocalized } from '@/Composables/useLocalized';
 import { usePermission } from '@/Composables/usePermission';
+import { useServerTable } from '@/Composables/useServerTable';
+import { useNumberFormat } from '@/Composables/useNumberFormat';
 
 const { t } = useI18n();
 const { confirm } = useConfirm();
 const { success } = useToast();
 const { getName } = useLocalized();
-const { can } = usePermission();
+const { can, isAnyAdmin } = usePermission();
+const { toEnglish } = useNumberFormat();
 
 const props = defineProps({
     departments: {
         type: Object,
-        default: null,
+        default: () => ({}),
+    },
+    filters: {
+        type: Object,
+        default: () => ({}),
     },
 });
 
 const showModal = ref(false);
 const selectedDepartment = ref(null);
-const searchQuery = ref('');
 const togglingId = ref(null);
 
-const filteredDepartments = computed(() => {
-    const list = props.departments?.data || [];
-    if (!searchQuery.value) return list;
+const viewMode = ref(localStorage.getItem('departments_view_mode') || 'list');
 
-    const query = searchQuery.value.toLowerCase();
-    return list.filter(
-        (dept) =>
-            dept.name_ar?.toLowerCase().includes(query) ||
-            dept.name_en?.toLowerCase().includes(query) ||
-            dept.description?.toLowerCase().includes(query)
-    );
+const statusOptions = [
+    { value: '', label: t('common.all') },
+    { value: 'active', label: t('common.active') },
+    { value: 'inactive', label: t('common.inactive') },
+];
+
+const canManage = computed(() => can('services.departments.manage') || isAnyAdmin());
+
+const {
+    filters: tableFilters,
+    sortColumn,
+    sortDirection,
+    isLoading,
+    applyFilters,
+    toggleSort,
+} = useServerTable({
+    routeUrl: () => route('departments.index'),
+    initialFilters: {
+        search: props.filters?.search || '',
+        status: props.filters?.status || '',
+    },
+    initialSort: {
+        column: props.filters?.sort || 'sort_order',
+        direction: props.filters?.direction || 'asc',
+    },
 });
+
+const hasActiveFilters = computed(() => {
+    return Boolean(tableFilters.search || tableFilters.status);
+});
+
+const handleResetFilters = () => {
+    tableFilters.search = '';
+    tableFilters.status = '';
+    applyFilters();
+};
+
+const columns = computed(() => [
+    {
+        key: 'name',
+        label: t('departments.columns.name'),
+        sortable: true,
+        align: 'start',
+    },
+    {
+        key: 'description',
+        label: t('departments.columns.description'),
+        sortable: false,
+        align: 'start',
+    },
+    {
+        key: 'services_count',
+        label: t('departments.columns.services_count'),
+        sortable: true,
+        align: 'start',
+    },
+    {
+        key: 'is_active',
+        label: t('departments.columns.status'),
+        sortable: true,
+        align: 'start',
+    },
+    {
+        key: 'actions',
+        label: t('common.actions'),
+        sortable: false,
+        align: 'center',
+    },
+]);
 
 function openCreateModal() {
     selectedDepartment.value = null;
@@ -369,7 +599,7 @@ function handleSaved() {
     router.reload({ only: ['departments'] });
 }
 
-async function toggleActive(dept) {
+function toggleActive(dept) {
     togglingId.value = dept.id;
     router.patch(
         `/app/departments/${dept.id}/toggle-active`,
@@ -403,5 +633,9 @@ async function handleDelete(dept) {
             console.error('Failed to delete:', errors);
         },
     });
+}
+
+function handlePrint() {
+    window.print();
 }
 </script>

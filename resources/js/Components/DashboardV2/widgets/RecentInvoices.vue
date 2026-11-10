@@ -42,7 +42,7 @@ function formatDate(dateStr) {
                             {{ item.customer?.name || '—' }}
                         </p>
                     </div>
-                    <div class="flex-shrink-0 text-right">
+                    <div class="flex-shrink-0 text-end">
                         <p
                             class="text-sm font-semibold tabular-nums text-slate-900 dark:text-white"
                         >

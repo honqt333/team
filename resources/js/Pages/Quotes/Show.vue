@@ -39,26 +39,11 @@
                         </Tooltip>
 
                         <!-- Print -->
-                        <Tooltip v-if="quote.lines?.length > 0" :text="$t('common.print')">
-                            <button
-                                @click="printQuote"
-                                class="p-2.5 text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-xl transition-all"
-                            >
-                                <svg
-                                    class="w-5 h-5"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        stroke-width="2"
-                                        d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"
-                                    />
-                                </svg>
-                            </button>
-                        </Tooltip>
+                        <AppPrintButton
+                            v-if="quote.lines?.length > 0"
+                            variant="icon"
+                            @click="printQuote"
+                        />
 
                         <div
                             v-if="
@@ -502,7 +487,97 @@
                         {{ $t('work_orders.cost_and_payment') }}
                     </h3>
 
-                    <div class="overflow-x-auto flex-1">
+                    <!-- Mobile Card Breakdown (Visible on mobile < sm) -->
+                    <div class="block sm:hidden space-y-3 mb-2">
+                        <!-- Services breakdown if present -->
+                        <div
+                            v-if="totals.services.total > 0"
+                            class="p-3 bg-gray-50 dark:bg-gray-900/40 rounded-xl space-y-1.5 border border-gray-100 dark:border-gray-700/50"
+                        >
+                            <div
+                                class="flex justify-between items-center text-xs font-bold text-gray-900 dark:text-white"
+                            >
+                                <span>{{ $t('quotes.show.tabs.services') }}</span>
+                                <span class="font-mono">
+                                    {{ formatCurrency(totals.services.total) }}
+                                </span>
+                            </div>
+                            <div
+                                class="flex justify-between items-center text-[11px] text-gray-500"
+                            >
+                                <span>
+                                    {{ $t('work_orders.price') }}:
+                                    {{ formatCurrency(totals.services.price) }}
+                                </span>
+                                <span
+                                    v-if="totals.services.discount > 0"
+                                    class="text-red-500 italic"
+                                >
+                                    -{{ formatCurrency(totals.services.discount) }}
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Spare Parts breakdown if present -->
+                        <div
+                            v-if="totals.parts.total > 0"
+                            class="p-3 bg-gray-50 dark:bg-gray-900/40 rounded-xl space-y-1.5 border border-gray-100 dark:border-gray-700/50"
+                        >
+                            <div
+                                class="flex justify-between items-center text-xs font-bold text-gray-900 dark:text-white"
+                            >
+                                <span>{{ $t('quotes.show.tabs.spare_parts') }}</span>
+                                <span class="font-mono">
+                                    {{ formatCurrency(totals.parts.total) }}
+                                </span>
+                            </div>
+                            <div
+                                class="flex justify-between items-center text-[11px] text-gray-500"
+                            >
+                                <span>
+                                    {{ $t('work_orders.price') }}:
+                                    {{ formatCurrency(totals.parts.price) }}
+                                </span>
+                                <span v-if="totals.parts.discount > 0" class="text-red-500 italic">
+                                    -{{ formatCurrency(totals.parts.discount) }}
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Grand Total Card -->
+                        <div
+                            class="p-3.5 bg-amber-50/70 dark:bg-amber-950/20 rounded-xl border border-amber-200/60 dark:border-amber-800/40 space-y-2"
+                        >
+                            <div
+                                class="flex justify-between items-center text-sm font-black text-amber-900 dark:text-amber-300"
+                            >
+                                <span>{{ $t('common.total') }}</span>
+                                <span
+                                    class="font-mono text-base text-amber-600 dark:text-amber-400"
+                                >
+                                    {{ formatCurrency(totals.grand.total) }}
+                                </span>
+                            </div>
+                            <div
+                                v-if="hasTax"
+                                class="flex justify-between items-center text-xs text-gray-500"
+                            >
+                                <span>
+                                    {{
+                                        $t('common.vat_with_rate', {
+                                            rate: quote.tax_rate_snapshot || 15,
+                                        })
+                                    }}
+                                </span>
+                                <span class="font-mono">
+                                    {{ formatCurrency(totals.grand.tax) }}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Desktop Table (Visible on sm and larger) -->
+                    <div class="hidden sm:block overflow-x-auto flex-1">
                         <table class="w-full text-xs">
                             <thead>
                                 <tr
@@ -1284,6 +1359,7 @@ import PrimaryButton from '@/Components/PrimaryButton.vue';
 import SecondaryButton from '@/Components/SecondaryButton.vue';
 import SignaturePad from '@/Components/Common/SignaturePad.vue';
 import PartsDisplay from '@/Components/Common/PartsDisplay.vue';
+import AppPrintButton from '@/Components/Common/AppPrintButton.vue';
 import Tooltip from '@/Components/Tooltip.vue';
 import SaudiPlateDisplay from '@/Components/Vehicles/SaudiPlateDisplay.vue';
 

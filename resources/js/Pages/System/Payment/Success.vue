@@ -1,32 +1,35 @@
 <template>
     <SystemLayout>
         <div class="max-w-xl mx-auto py-6 text-center">
-            <!-- Success Icon -->
-            <div
-                class="w-20 h-20 mx-auto bg-emerald-100 dark:bg-emerald-900/30 rounded-full flex items-center justify-center mb-6"
+            <PageHeader
+                :title="$t('system.payment.success_title')"
+                :subtitle="$t('system.payment.success_subtitle')"
             >
-                <svg
-                    class="w-10 h-10 text-emerald-600 dark:text-emerald-400"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                >
-                    <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M5 13l4 4L19 7"
-                    />
-                </svg>
-            </div>
+                <template #icon>
+                    <div
+                        class="w-12 h-12 rounded-full bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center text-emerald-600 dark:text-emerald-400"
+                    >
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M5 13l4 4L19 7"
+                            />
+                        </svg>
+                    </div>
+                </template>
+            </PageHeader>
 
             <!-- Success Message -->
-            <h1 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-                {{ $t('system.payment.success_title') }}
-            </h1>
-            <p class="text-gray-500 dark:text-gray-400 mb-8">
-                {{ $t('system.payment.success_message') }}
-            </p>
+            <div class="space-y-4 text-center">
+                <h1 class="text-2xl font-bold text-gray-900 dark:text-white">
+                    {{ $t('system.payment.success_title') }}
+                </h1>
+                <p class="text-gray-500 dark:text-gray-400">
+                    {{ $t('system.payment.success_message') }}
+                </p>
+            </div>
 
             <!-- Payment Details -->
             <div
@@ -62,59 +65,65 @@
                     </div>
                     <div class="flex justify-between">
                         <span class="text-gray-600 dark:text-gray-400">
-                            {{ $t('payments.form.date') }}
+                            {{ $t('system.payment.transaction_date') }}
                         </span>
-                        <span class="font-medium text-gray-900 dark:text-white">
-                            {{ formatDate(payment.paid_at) }}
+                        <span class="font-mono text-gray-900 dark:text-white">
+                            {{ formatDate(payment.created_at) }}
                         </span>
                     </div>
                 </div>
             </div>
 
             <!-- Actions -->
-            <div class="flex justify-center gap-4">
-                <Link
-                    href="/system/subscriptions"
-                    class="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium transition-colors"
+            <div class="flex flex-col sm:flex-row gap-3 justify-center">
+                <a
+                    :href="route('system.subscriptions.show', subscription)"
+                    class="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl transition-colors"
                 >
-                    {{ $t('subscription.view_plans') }}
-                </Link>
-                <Link
-                    href="/system"
-                    class="px-6 py-2.5 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-lg font-medium transition-colors"
+                    {{ $t('system.payment.view_subscription') }}
+                </a>
+                <a
+                    :href="route('system.subscriptions.index')"
+                    class="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 font-semibold rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
                 >
-                    {{ $t('common.home') }}
-                </Link>
+                    {{ $t('system.payment.view_all_subscriptions') }}
+                </a>
             </div>
         </div>
     </SystemLayout>
 </template>
 
 <script setup>
+import { computed } from 'vue';
+import { Head, router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
-const { t } = useI18n();
-
-import { Link } from '@inertiajs/vue3';
 import SystemLayout from '@/Layouts/SystemLayout.vue';
+import PageHeader from '@/Components/PageHeader.vue';
+import { useNumberFormat } from '@/Composables/useNumberFormat';
 
-defineProps({
-    payment: Object,
+const { t } = useI18n();
+const { toEnglish } = useNumberFormat();
+
+const props = defineProps({
+    payment: { type: Object, required: true },
+    subscription: { type: Object, required: true },
 });
 
 const getPaymentMethodLabel = (method) => {
-    const labels = {
-        creditcard: t('common.credit_card'),
-        mada: t('payments.methods.mada'),
-        visa: 'Visa',
-        mastercard: 'Mastercard',
-        applepay: 'Apple Pay',
+    const map = {
+        moyasar: 'Moyasar',
+        tap: 'Tap',
+        paytabs: 'PayTabs',
+        tabby: 'Tabby',
+        tamara: 'Tamara',
+        bank_transfer: 'Bank Transfer',
     };
-    return labels[method] || method || '-';
+    return map[method] || method;
 };
 
-const formatDate = (date) => {
-    if (!date) return '-';
-    return new Date(date).toLocaleDateString('ar-SA-u-nu-latn', {
+const formatDate = (dateStr) => {
+    if (!dateStr) return '—';
+    return new Date(dateStr).toLocaleDateString('ar-SA', {
         year: 'numeric',
         month: 'long',
         day: 'numeric',

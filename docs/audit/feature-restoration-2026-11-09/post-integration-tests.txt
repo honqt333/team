@@ -1,0 +1,71 @@
+
+   PASS  Tests\Feature\WorkOrderSuggestionTest
+  ✓ unauthenticated request is rejected                                 20.27s  
+  ✓ user without tenant id is fail closed by track ai usage middleware   0.37s  
+  ✓ user in tenant a cannot query tenant b work order                    5.91s  
+  ✓ response uses mock provider when no openai key is configured         5.63s  
+  ✓ response uses openai provider when api key is configured             3.90s  
+  ✓ ai hallucinated item id from another tenant is dropped               7.32s  
+  ✓ empty catalog returns 200 with empty suggestions                     2.86s  
+  ✓ invalid complaint too short returns 422                              1.49s  
+  ✓ non json response from provider returns 502                          4.36s  
+
+   PASS  Tests\Feature\System\ErrorLogControllerTest
+  ✓ tenant user is denied                                                2.00s  
+  ✓ system account without developer permission is denied                0.22s  
+  ✓ authorized account sees empty state                                  0.25s  
+  ✓ records are filtered bounded and sensitive context is omitted        0.28s  
+  ✓ large file read is capped                                            0.17s  
+  ✓ filter does not accept paths or unknown levels                       0.40s  
+
+   PASS  Tests\Feature\InitialSystemRecoveryTest
+  ✓ standalone setup creates dependencies and is repeatable              8.57s  
+  ✓ default database seeder keeps the full bootstrap chain               3.61s  
+  ✓ logo seed preserves existing artwork and skips tenant makes          0.82s  
+
+   PASS  Tests\Feature\System\SystemPermissionsTest
+  ✓ the registry exposes every ability it defines                        0.09s  
+  ✓ every ability in the registry is a declared permission constant      0.11s  
+  ✓ no ability is declared twice in the registry                         0.07s  
+  ✓ no role default list holds a duplicate                               0.08s  
+  ✓ every role default ability is distinct within the role               0.13s  
+  ✓ the support role holds nothing that moves money or configuration     0.09s  
+  ✓ super admin holds every ability                                      0.10s  
+  ✓ super admin bypasses an explicit permission list                     0.13s  
+  ✓ the role decides when the account carries no list                    0.11s  
+  ✓ the admin role can operate but not destroy                           0.23s  
+  ✓ the support role is read only for the money surface                  0.30s  
+  ✓ an explicit list overrides the role defaults                         0.19s  
+  ✓ an explicit list can grant what the role cannot                      0.11s  
+  ✓ an empty list falls back to the role                                 0.16s  
+  ✓ a null list falls back to the role                                   0.10s  
+  ✓ unknown abilities are filtered out                                   0.08s  
+  ✓ the admin user form cannot store an unknown ability                  0.16s  
+  ✓ the middleware refuses an account without the ability                0.17s  
+  ✓ the middleware allows an account with the ability                    0.13s  
+  ✓ the admin roster can be read but not changed without the manage abi… 0.23s  
+  ✓ the admin roster is closed to an account without the view ability    0.16s  
+  ✓ the middleware lets the platform owner through                       0.16s  
+  ✓ a route without an ability is not affected by the middleware         0.12s  
+  ✓ every ability declared on a route exists in the registry             0.08s  
+  ✓ every system write route declares an ability                         0.07s  
+  ✓ a new ability can be added to the registry without touching the mod… 0.09s  
+  ✓ the registry groups are the source of the admin user form            0.09s  
+
+   PASS  Tests\Feature\HardcodedArabicTest
+  ✓ no new hardcoded arabic in the vue sources                          19.19s  
+  ✓ company transactions controller has zero hardcoded arabic strings    0.04s  
+  ✓ the extractor finds the remaining arabic                             9.23s  
+  ✓ the locale files have the same keys                                  0.05s  
+  ✓ the locale files carry the same placeholders                         0.06s  
+
+   PASS  Tests\Feature\FontPolicyTest
+  ✓ no source file loads fonts from google                               0.11s  
+  ✓ the font token does not name a parallel family                       0.04s  
+  ✓ the self hosted font stylesheet is served and declares the family    0.04s  
+  ✓ the layout links the local font stylesheet                           0.04s  
+  ✓ no source or view file names a parallel font family                  0.12s  
+
+  Tests:    55 passed (581 assertions)
+  Duration: 101.26s
+

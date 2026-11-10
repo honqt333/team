@@ -1,0 +1,1520 @@
+Note: Using configuration file [project]/phpstan.neon.
+   0/571 [░░░░░░░░░░░░░░░░░░░░░░░░░░░░]   0%
+ 571/571 [▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓] 100%
+
+Instructions for interpreting errors
+---------
+
+Each error has an associated identifier, like `argument.type`
+or `return.missing`.
+
+Each error identifier has documentation at URL https://phpstan.org/error-identifiers/<identifier>
+This page contains code example, explanation why is this an error
+and instruction how to fix it.
+Before fixing the error, fetch the documentation page for its identifier.
+
+The error usually indicates a real bug or incorrect type in the code. Fix the underlying cause, do not just make the error go away.
+Do not add `@phpstan-ignore` comments, `@phpstan-ignore-next-line` comments, or baseline entries to suppress the error.
+Do not use assert() or inline @var PHPDoc tag to override PHPStan's inferred type.
+Do not add type casts just to silence errors.
+Do not widen parameter or return types just to make the error go away.
+ ------ ----------------------------------------------------------------------- 
+  Line   Http/Controllers/App/DashboardController.php                           
+ ------ ----------------------------------------------------------------------- 
+  31     Using nullsafe property access "?->is_system_admin" on left side of    
+         ?? is unnecessary. Use -> instead.                                     
+         🪪  nullsafe.neverNull                                                 
+  205    Using nullsafe property access "?->name" on left side of ?? is         
+         unnecessary. Use -> instead.                                           
+         🪪  nullsafe.neverNull                                                 
+  282    Access to an undefined property                                        
+         App\Models\WorkOrder::$total_incl_tax.                                 
+         🪪  property.notFound                                                  
+         💡  Learn more: https://phpstan.org/blog/solving-phpstan-access-to-und  
+         efined-property                                                        
+  313    Access to an undefined property                                        
+         App\Models\WorkOrder::$total_incl_tax.                                 
+         🪪  property.notFound                                                  
+         💡  Learn more: https://phpstan.org/blog/solving-phpstan-access-to-und  
+         efined-property                                                        
+  384    Using nullsafe property access "?->name" on left side of ?? is         
+         unnecessary. Use -> instead.                                           
+         🪪  nullsafe.neverNull                                                 
+  423    Using nullsafe property access "?->label_ar" on left side of ?? is     
+         unnecessary. Use -> instead.                                           
+         🪪  nullsafe.neverNull                                                 
+  432    Using nullsafe property access "?->name" on left side of ?? is         
+         unnecessary. Use -> instead.                                           
+         🪪  nullsafe.neverNull                                                 
+ ------ ----------------------------------------------------------------------- 
+
+ ------ ---------------------------------------------------------------------- 
+  Line   Http/Controllers/App/HelpController.php                               
+ ------ ---------------------------------------------------------------------- 
+  23     Called 'env' outside of the config directory which returns null when  
+         the config is cached, use 'config'.                                   
+         🪪  larastan.noEnvCallsOutsideOfConfig                                
+ ------ ---------------------------------------------------------------------- 
+
+ ------ -------------------------------------------- 
+  Line   Http/Controllers/App/ProfileController.php  
+ ------ -------------------------------------------- 
+  234    Negated boolean expression is always true.  
+         🪪  booleanNot.alwaysTrue                   
+ ------ -------------------------------------------- 
+
+ ------ -------------------------------------------------------------- 
+  Line   Http/Controllers/App/Reports/Concerns/ReportScopingTrait.php  
+ ------ -------------------------------------------------------------- 
+  121    Result of && is always false.                                 
+         🪪  booleanAnd.alwaysFalse                                    
+ ------ -------------------------------------------------------------- 
+
+ ------ ---------------------------------------------------------------------- 
+  Line   Http/Controllers/App/Reports/Concerns/ReportScopingTrait.php (in      
+         context of class App\Http\Controllers\App\ReportsController)          
+ ------ ---------------------------------------------------------------------- 
+  100    Using nullsafe property access "?->tax_number" on left side of ?? is  
+         unnecessary. Use -> instead.                                          
+         🪪  nullsafe.neverNull                                                
+  101    Using nullsafe property access "?->tax_number" on left side of ?? is  
+         unnecessary. Use -> instead.                                          
+         🪪  nullsafe.neverNull                                                
+  105    Using nullsafe property access "?->name" on left side of ?? is        
+         unnecessary. Use -> instead.                                          
+         🪪  nullsafe.neverNull                                                
+  121    Variable $range in empty() always exists and is not falsy.            
+         🪪  empty.variable                                                    
+ ------ ---------------------------------------------------------------------- 
+
+ ------ ---------------------------------------------------------------------- 
+  Line   Http/Controllers/App/Reports/Concerns/ReportScopingTrait.php (in      
+         context of class                                                      
+         App\Http\Controllers\App\Reports\FinancialReportsController)          
+ ------ ---------------------------------------------------------------------- 
+  100    Using nullsafe property access "?->tax_number" on left side of ?? is  
+         unnecessary. Use -> instead.                                          
+         🪪  nullsafe.neverNull                                                
+  101    Using nullsafe property access "?->tax_number" on left side of ?? is  
+         unnecessary. Use -> instead.                                          
+         🪪  nullsafe.neverNull                                                
+  105    Using nullsafe property access "?->name" on left side of ?? is        
+         unnecessary. Use -> instead.                                          
+         🪪  nullsafe.neverNull                                                
+  121    Variable $range in empty() always exists and is not falsy.            
+         🪪  empty.variable                                                    
+ ------ ---------------------------------------------------------------------- 
+
+ ------ ----------------------------------------------------------------------- 
+  Line   Http/Controllers/App/Reports/FinancialReportsController.php            
+ ------ ----------------------------------------------------------------------- 
+  188    Using nullsafe property access "?->postal_code" on left side of ?? is  
+         unnecessary. Use -> instead.                                           
+         🪪  nullsafe.neverNull                                                 
+  189    Using nullsafe property access "?->city" on left side of ?? is         
+         unnecessary. Use -> instead.                                           
+         🪪  nullsafe.neverNull                                                 
+  190    Using nullsafe property access "?->district" on left side of ?? is     
+         unnecessary. Use -> instead.                                           
+         🪪  nullsafe.neverNull                                                 
+  191    Using nullsafe property access "?->city" on left side of ?? is         
+         unnecessary. Use -> instead.                                           
+         🪪  nullsafe.neverNull                                                 
+ ------ ----------------------------------------------------------------------- 
+
+ ------ ----------------------------------------------------------------------- 
+  Line   Http/Controllers/App/Reports/TaxPeriodsController.php                  
+ ------ ----------------------------------------------------------------------- 
+  221    Access to an undefined property App\Models\Tenant::$tax_number.        
+         🪪  property.notFound                                                  
+         💡  Learn more: https://phpstan.org/blog/solving-phpstan-access-to-und  
+         efined-property                                                        
+  221    Using nullsafe property access "?->tax_number" on left side of ?? is   
+         unnecessary. Use -> instead.                                           
+         🪪  nullsafe.neverNull                                                 
+  221    Using nullsafe property access "?->tax_number" on left side of ?? is   
+         unnecessary. Use -> instead.                                           
+         🪪  nullsafe.neverNull                                                 
+  222    Access to an undefined property                                        
+         App\Models\Tenant::$commercial_registration.                           
+         🪪  property.notFound                                                  
+         💡  Learn more: https://phpstan.org/blog/solving-phpstan-access-to-und  
+         efined-property                                                        
+  222    Using nullsafe property access "?->cr_number" on left side of ?? is    
+         unnecessary. Use -> instead.                                           
+         🪪  nullsafe.neverNull                                                 
+  340    Using nullsafe property access "?->name" on left side of ?? is         
+         unnecessary. Use -> instead.                                           
+         🪪  nullsafe.neverNull                                                 
+  341    Access to an undefined property App\Models\Tenant::$tax_number.        
+         🪪  property.notFound                                                  
+         💡  Learn more: https://phpstan.org/blog/solving-phpstan-access-to-und  
+         efined-property                                                        
+  341    Using nullsafe property access "?->tax_number" on left side of ?? is   
+         unnecessary. Use -> instead.                                           
+         🪪  nullsafe.neverNull                                                 
+  341    Using nullsafe property access "?->tax_number" on left side of ?? is   
+         unnecessary. Use -> instead.                                           
+         🪪  nullsafe.neverNull                                                 
+  341    Using nullsafe property access "?->vat_number" on left side of ?? is   
+         unnecessary. Use -> instead.                                           
+         🪪  nullsafe.neverNull                                                 
+ ------ ----------------------------------------------------------------------- 
+
+ ------ ----------------------------------------------------------------------- 
+  Line   Http/Controllers/App/ReportsController.php                             
+ ------ ----------------------------------------------------------------------- 
+  153    Using nullsafe property access "?->type" on left side of ?? is         
+         unnecessary. Use -> instead.                                           
+         🪪  nullsafe.neverNull                                                 
+  154    Using nullsafe property access "?->type" on left side of ?? is         
+         unnecessary. Use -> instead.                                           
+         🪪  nullsafe.neverNull                                                 
+  156    Using nullsafe property access "?->name" on left side of ?? is         
+         unnecessary. Use -> instead.                                           
+         🪪  nullsafe.neverNull                                                 
+  157    Using nullsafe property access "?->name" on left side of ?? is         
+         unnecessary. Use -> instead.                                           
+         🪪  nullsafe.neverNull                                                 
+  254    Using nullsafe property access "?->tax_number" on left side of ?? is   
+         unnecessary. Use -> instead.                                           
+         🪪  nullsafe.neverNull                                                 
+  257    Using nullsafe property access "?->name" on left side of ?? is         
+         unnecessary. Use -> instead.                                           
+         🪪  nullsafe.neverNull                                                 
+  344    Using nullsafe property access "?->name" on left side of ?? is         
+         unnecessary. Use -> instead.                                           
+         🪪  nullsafe.neverNull                                                 
+  345    Using nullsafe property access "?->name" on left side of ?? is         
+         unnecessary. Use -> instead.                                           
+         🪪  nullsafe.neverNull                                                 
+  346    Using nullsafe property access "?->name" on left side of ?? is         
+         unnecessary. Use -> instead.                                           
+         🪪  nullsafe.neverNull                                                 
+  349    Using nullsafe property access "?->phone" on left side of ?? is        
+         unnecessary. Use -> instead.                                           
+         🪪  nullsafe.neverNull                                                 
+  350    Using nullsafe property access "?->phone" on left side of ?? is        
+         unnecessary. Use -> instead.                                           
+         🪪  nullsafe.neverNull                                                 
+  351    Using nullsafe property access "?->phone" on left side of ?? is        
+         unnecessary. Use -> instead.                                           
+         🪪  nullsafe.neverNull                                                 
+  354    Using nullsafe property access "?->invoice_number" on left side of ??  
+         is unnecessary. Use -> instead.                                        
+         🪪  nullsafe.neverNull                                                 
+  355    Using nullsafe property access "?->invoice_number" on left side of ??  
+         is unnecessary. Use -> instead.                                        
+         🪪  nullsafe.neverNull                                                 
+  358    Using nullsafe property access "?->code" on left side of ?? is         
+         unnecessary. Use -> instead.                                           
+         🪪  nullsafe.neverNull                                                 
+  359    Using nullsafe property access "?->make_other" on left side of ?? is   
+         unnecessary. Use -> instead.                                           
+         🪪  nullsafe.neverNull                                                 
+  359    Using nullsafe property access "?->model_other" on left side of ?? is  
+         unnecessary. Use -> instead.                                           
+         🪪  nullsafe.neverNull                                                 
+  359    Using nullsafe property access "?->name_ar" on left side of ?? is      
+         unnecessary. Use -> instead.                                           
+         🪪  nullsafe.neverNull                                                 
+  359    Using nullsafe property access "?->name_ar" on left side of ?? is      
+         unnecessary. Use -> instead.                                           
+         🪪  nullsafe.neverNull                                                 
+  360    Using nullsafe property access "?->plate_number" on left side of ??    
+         is unnecessary. Use -> instead.                                        
+         🪪  nullsafe.neverNull                                                 
+  371    Using nullsafe property access "?->name" on left side of ?? is         
+         unnecessary. Use -> instead.                                           
+         🪪  nullsafe.neverNull                                                 
+  382    Using nullsafe property access "?->name" on left side of ?? is         
+         unnecessary. Use -> instead.                                           
+         🪪  nullsafe.neverNull                                                 
+  425    Variable $centerFilter in empty() always exists and is not falsy.      
+         🪪  empty.variable                                                     
+  614    Using nullsafe property access "?->name_ar" on left side of ?? is      
+         unnecessary. Use -> instead.                                           
+         🪪  nullsafe.neverNull                                                 
+  615    Using nullsafe property access "?->name_ar" on left side of ?? is      
+         unnecessary. Use -> instead.                                           
+         🪪  nullsafe.neverNull                                                 
+  638    Parameter #1 $callback of method                                       
+         Illuminate\Database\Eloquent\Collection<int,Illuminate\Database\Eloqu  
+         ent\Model>::map() expects callable(Illuminate\Database\Eloquent\Model  
+         , int): array{id: int, invoice_number: string, type:                   
+         'credit_note'|'debit_note'|'invoice', subtype:                         
+         'simplified'|'standard', status:                                       
+         'cancelled'|'draft'|'reported'|'valid', payment_status:                
+         'paid'|'partial'|'unpaid', payment_status_label: string, issue_date:   
+         non-falsy-string, due_date: non-falsy-string|null, supply_date:        
+         non-falsy-string, is_overdue: bool, center: array{id: mixed, name:     
+         mixed}|null, customer: array{id?: mixed, name: mixed, phone: mixed,    
+         type: mixed, tax_number: mixed}, work_order: array{id: mixed, code:    
+         mixed, vehicle: array{id: mixed, plate_number: mixed, make: mixed,     
+         model: mixed, year: mixed}|null}|null, total_excl_tax: float,          
+         total_discount: float, total_tax: float, total_incl_tax: float,        
+         total_paid: float, remaining: 0|float}, Closure(App\Models\Invoice):   
+         array{id: int, invoice_number: string, type:                           
+         'credit_note'|'debit_note'|'invoice', subtype:                         
+         'simplified'|'standard', status:                                       
+         'cancelled'|'draft'|'reported'|'valid', payment_status:                
+         'paid'|'partial'|'unpaid', payment_status_label: string, issue_date:   
+         non-falsy-string, due_date: non-falsy-string|null, supply_date:        
+         non-falsy-string, is_overdue: bool, center: array{id: mixed, name:     
+         mixed}|null, customer: array{id?: mixed, name: mixed, phone: mixed,    
+         type: mixed, tax_number: mixed}, work_order: array{id: mixed, code:    
+         mixed, vehicle: array{id: mixed, plate_number: mixed, make: mixed,     
+         model: mixed, year: mixed}|null}|null, total_excl_tax: float,          
+         total_discount: float, total_tax: float, total_incl_tax: float,        
+         total_paid: float, remaining: 0|float} given.                          
+         🪪  argument.type                                                      
+  660    Parameter #1 $callback of method                                       
+         Illuminate\Support\Collection<(int|string),Illuminate\Support\Collect  
+         ion<int, array<string, array<string, mixed>|bool|float|int|string|nul  
+         l>>>::map() expects callable(Illuminate\Support\Collection<int, array  
+         {id: int, invoice_number: string, type:                                
+         'credit_note'|'debit_note'|'invoice', subtype:                         
+         'simplified'|'standard', status:                                       
+         'cancelled'|'draft'|'reported'|'valid', payment_status:                
+         'paid'|'partial'|'unpaid', payment_status_label: string, issue_date:   
+         non-falsy-string, due_date: non-falsy-string|null, supply_date:        
+         non-falsy-string, is_overdue: bool, center: array{id: mixed, name:     
+         mixed}|null, customer: array{id?: mixed, name: mixed, phone: mixed,    
+         type: mixed, tax_number: mixed}, work_order: array{id: mixed, code:    
+         mixed, vehicle: array{id: mixed, plate_number: mixed, make: mixed,     
+         model: mixed, year: mixed}|null}|null, total_excl_tax: float,          
+         total_discount: float, total_tax: float, total_incl_tax: float,        
+         total_paid: float, remaining: 0|float}>, int|string): array{group_key  
+         : int|string, group_name: string, total_records: int<0, max>,          
+         total_subtotal: float, total_discount: float, total_vat: float,        
+         total_invoice_amount: float, total_paid: float,                        
+         total_payment_remaining: float, items: Illuminate\Support\Collection<  
+         int, array{id: int, invoice_number: string, type:                      
+         'credit_note'|'debit_note'|'invoice', subtype:                         
+         'simplified'|'standard', status:                                       
+         'cancelled'|'draft'|'reported'|'valid', payment_status:                
+         'paid'|'partial'|'unpaid', payment_status_label: string, issue_date:   
+         non-falsy-string, due_date: non-falsy-string|null, supply_date:        
+         non-falsy-string, is_overdue: bool, center: array{id: mixed, name:     
+         mixed}|null, customer: array{id?: mixed, name: mixed, phone: mixed,    
+         type: mixed, tax_number: mixed}, work_order: array{id: mixed, code:    
+         mixed, vehicle: array{id: mixed, plate_number: mixed, make: mixed,     
+         model: mixed, year: mixed}|null}|null, total_excl_tax: float,          
+         total_discount: float, total_tax: float, total_incl_tax: float,        
+         total_paid: float, remaining: 0|float}>}, Closure(mixed, mixed): arra  
+         y{group_key: int|string, group_name: string, total_records: int<0,     
+         max>, total_subtotal: float, total_discount: float, total_vat: float,  
+         total_invoice_amount: float, total_paid: float,                        
+         total_payment_remaining: float, items: Illuminate\Support\Collection<  
+         int, array{id: int, invoice_number: string, type:                      
+         'credit_note'|'debit_note'|'invoice', subtype:                         
+         'simplified'|'standard', status:                                       
+         'cancelled'|'draft'|'reported'|'valid', payment_status:                
+         'paid'|'partial'|'unpaid', payment_status_label: string, issue_date:   
+         non-falsy-string, due_date: non-falsy-string|null, supply_date:        
+         non-falsy-string, is_overdue: bool, center: array{id: mixed, name:     
+         mixed}|null, customer: array{id?: mixed, name: mixed, phone: mixed,    
+         type: mixed, tax_number: mixed}, work_order: array{id: mixed, code:    
+         mixed, vehicle: array{id: mixed, plate_number: mixed, make: mixed,     
+         model: mixed, year: mixed}|null}|null, total_excl_tax: float,          
+         total_discount: float, total_tax: float, total_incl_tax: float,        
+         total_paid: float, remaining: 0|float}>} given.                        
+         🪪  argument.type                                                      
+         💡  Offset 'items' (Illuminate\Support\Collection<int, array{id: int,   
+         invoice_number: string, type: 'credit_note'|'debit_note'|'invoice',    
+         subtype: 'simplified'|'standard', status:                              
+         'cancelled'|'draft'|'reported'|'valid', payment_status:                
+         'paid'|'partial'|'unpaid', payment_status_label: string, issue_date:   
+         non-falsy-string, ...}>) does not accept type Illuminate\Support\Coll  
+         ection<int, array{id: int, invoice_number: string, type: 'credit_note  
+         '|'debit_note'|'invoice', subtype: 'simplified'|'standard', status:    
+         'cancelled'|'draft'|'reported'|'valid', payment_status:                
+         'paid'|'partial'|'unpaid', payment_status_label: string, issue_date:   
+         non-falsy-string, ...}>: Template type TValue on class Illuminate\Sup  
+         port\Collection is not covariant. Learn more: https://phpstan.org/blo  
+         g/whats-up-with-template-covariant                                     
+  661    Anonymous function should return array{group_key: (int|string),        
+         group_name: string, total_records: int<0, max>, total_subtotal:        
+         float, total_discount: float, total_vat: float, total_invoice_amount:  
+         float, total_paid: float, ...} but returns array{group_key:            
+         (int|string), group_name: string, total_records: int<0, max>,          
+         total_subtotal: float, total_discount: float, total_vat: float,        
+         total_invoice_amount: float, total_paid: float, ...}.                  
+         🪪  return.type                                                        
+         💡  Offset 'items' (Illuminate\Support\Collection<int, array{id: int,   
+         invoice_number: string, type: 'credit_note'|'debit_note'|'invoice',    
+         subtype: 'simplified'|'standard', status:                              
+         'cancelled'|'draft'|'reported'|'valid', payment_status:                
+         'paid'|'partial'|'unpaid', payment_status_label: string, issue_date:   
+         non-falsy-string, ...}>) does not accept type Illuminate\Support\Coll  
+         ection<int, array{id: int, invoice_number: string, type: 'credit_note  
+         '|'debit_note'|'invoice', subtype: 'simplified'|'standard', status:    
+         'cancelled'|'draft'|'reported'|'valid', payment_status:                
+         'paid'|'partial'|'unpaid', payment_status_label: string, issue_date:   
+         non-falsy-string, ...}>: Template type TValue on class Illuminate\Sup  
+         port\Collection is not covariant. Learn more: https://phpstan.org/blo  
+         g/whats-up-with-template-covariant                                     
+  682    Parameter #1 $callback of method                                       
+         Illuminate\Pagination\AbstractPaginator<int,Illuminate\Database\Eloqu  
+         ent\Model>::through() contains unresolvable type.                      
+         🪪  argument.unresolvableType                                          
+  682    Parameter #1 $callback of method                                       
+         Illuminate\Pagination\AbstractPaginator<int,Illuminate\Database\Eloqu  
+         ent\Model>::through() expects callable(Illuminate\Database\Eloquent\M  
+         odel, int): array{id: int, invoice_number: string, type:               
+         'credit_note'|'debit_note'|'invoice', subtype:                         
+         'simplified'|'standard', status:                                       
+         'cancelled'|'draft'|'reported'|'valid', payment_status:                
+         'paid'|'partial'|'unpaid', payment_status_label: string, issue_date:   
+         non-falsy-string, due_date: non-falsy-string|null, supply_date:        
+         non-falsy-string, is_overdue: bool, center: array{id: mixed, name:     
+         mixed}|null, customer: array{id?: mixed, name: mixed, phone: mixed,    
+         type: mixed, tax_number: mixed}, work_order: array{id: mixed, code:    
+         mixed, vehicle: array{id: mixed, plate_number: mixed, make: mixed,     
+         model: mixed, year: mixed}|null}|null, total_excl_tax: float,          
+         total_discount: float, total_tax: float, total_incl_tax: float,        
+         total_paid: float, remaining: 0|float}, Closure(App\Models\Invoice):   
+         array{id: int, invoice_number: string, type:                           
+         'credit_note'|'debit_note'|'invoice', subtype:                         
+         'simplified'|'standard', status:                                       
+         'cancelled'|'draft'|'reported'|'valid', payment_status:                
+         'paid'|'partial'|'unpaid', payment_status_label: string, issue_date:   
+         non-falsy-string, due_date: non-falsy-string|null, supply_date:        
+         non-falsy-string, is_overdue: bool, center: array{id: mixed, name:     
+         mixed}|null, customer: array{id?: mixed, name: mixed, phone: mixed,    
+         type: mixed, tax_number: mixed}, work_order: array{id: mixed, code:    
+         mixed, vehicle: array{id: mixed, plate_number: mixed, make: mixed,     
+         model: mixed, year: mixed}|null}|null, total_excl_tax: float,          
+         total_discount: float, total_tax: float, total_incl_tax: float,        
+         total_paid: float, remaining: 0|float} given.                          
+         🪪  argument.type                                                      
+  813    Using nullsafe property access "?->name" on left side of ?? is         
+         unnecessary. Use -> instead.                                           
+         🪪  nullsafe.neverNull                                                 
+  814    Using nullsafe property access "?->type" on left side of ?? is         
+         unnecessary. Use -> instead.                                           
+         🪪  nullsafe.neverNull                                                 
+  815    Using nullsafe property access "?->phone" on left side of ?? is        
+         unnecessary. Use -> instead.                                           
+         🪪  nullsafe.neverNull                                                 
+  816    Using nullsafe property access "?->tax_number" on left side of ?? is   
+         unnecessary. Use -> instead.                                           
+         🪪  nullsafe.neverNull                                                 
+  833    Using nullsafe property access "?->name" on left side of ?? is         
+         unnecessary. Use -> instead.                                           
+         🪪  nullsafe.neverNull                                                 
+  843    Using nullsafe property access "?->plate_number" on left side of ??    
+         is unnecessary. Use -> instead.                                        
+         🪪  nullsafe.neverNull                                                 
+  1091   Parameter #1 $callback of method                                       
+         Illuminate\Database\Eloquent\Collection<int,Illuminate\Database\Eloqu  
+         ent\Model>::map() expects callable(Illuminate\Database\Eloquent\Model  
+         , int): array{id: int, code: string, invoice_number: string|null,      
+         issue_date: non-falsy-string, due_date: non-falsy-string|null,         
+         status: 'cancelled'|'draft'|'open'|'paid', payment_status:             
+         'paid'|'partial'|'unpaid', is_overdue: bool, subtotal: float,          
+         discount_amount: float, tax_amount: float, total: float, paid:         
+         0|float, balance: float, notes: string|null, center: array{id: mixed,  
+         name: mixed}|null, supplier: array{id: mixed, name: mixed, phone:      
+         mixed, type: mixed, tax_number: mixed}|null, purchase_order:           
+         array{id: mixed, code: mixed}|null},                                   
+         Closure(App\Models\PurchaseInvoice): array{id: int, code: string,      
+         invoice_number: string|null, issue_date: non-falsy-string, due_date:   
+         non-falsy-string|null, status: 'cancelled'|'draft'|'open'|'paid',      
+         payment_status: 'paid'|'partial'|'unpaid', is_overdue: bool,           
+         subtotal: float, discount_amount: float, tax_amount: float, total:     
+         float, paid: 0|float, balance: float, notes: string|null, center:      
+         array{id: mixed, name: mixed}|null, supplier: array{id: mixed, name:   
+         mixed, phone: mixed, type: mixed, tax_number: mixed}|null,             
+         purchase_order: array{id: mixed, code: mixed}|null} given.             
+         🪪  argument.type                                                      
+  1114   Parameter #1 $callback of method                                       
+         Illuminate\Support\Collection<(int|string),Illuminate\Support\Collect  
+         ion<int, array<string, array<string, mixed>|bool|float|int|string|nul  
+         l>>>::map() expects callable(Illuminate\Support\Collection<int, array  
+         {id: int, code: string, invoice_number: string|null, issue_date:       
+         non-falsy-string, due_date: non-falsy-string|null, status:             
+         'cancelled'|'draft'|'open'|'paid', payment_status:                     
+         'paid'|'partial'|'unpaid', is_overdue: bool, subtotal: float,          
+         discount_amount: float, tax_amount: float, total: float, paid:         
+         0|float, balance: float, notes: string|null, center: array{id: mixed,  
+         name: mixed}|null, supplier: array{id: mixed, name: mixed, phone:      
+         mixed, type: mixed, tax_number: mixed}|null, purchase_order:           
+         array{id: mixed, code: mixed}|null}>, int|string): array{group_key: i  
+         nt|string, group_name: string, total_records: int<0, max>,             
+         total_subtotal: float, total_discount: float, total_vat: float,        
+         total_invoice_amount: float, total_paid: float,                        
+         total_payment_remaining: float, items: Illuminate\Support\Collection<  
+         int, array{id: int, code: string, invoice_number: string|null,         
+         issue_date: non-falsy-string, due_date: non-falsy-string|null,         
+         status: 'cancelled'|'draft'|'open'|'paid', payment_status:             
+         'paid'|'partial'|'unpaid', is_overdue: bool, subtotal: float,          
+         discount_amount: float, tax_amount: float, total: float, paid:         
+         0|float, balance: float, notes: string|null, center: array{id: mixed,  
+         name: mixed}|null, supplier: array{id: mixed, name: mixed, phone:      
+         mixed, type: mixed, tax_number: mixed}|null, purchase_order:           
+         array{id: mixed, code: mixed}|null}>}, Closure(mixed, mixed): array{g  
+         roup_key: int|string, group_name: string, total_records: int<0, max>,  
+         total_subtotal: float, total_discount: float, total_vat: float,        
+         total_invoice_amount: float, total_paid: float,                        
+         total_payment_remaining: float, items: Illuminate\Support\Collection<  
+         int, array{id: int, code: string, invoice_number: string|null,         
+         issue_date: non-falsy-string, due_date: non-falsy-string|null,         
+         status: 'cancelled'|'draft'|'open'|'paid', payment_status:             
+         'paid'|'partial'|'unpaid', is_overdue: bool, subtotal: float,          
+         discount_amount: float, tax_amount: float, total: float, paid:         
+         0|float, balance: float, notes: string|null, center: array{id: mixed,  
+         name: mixed}|null, supplier: array{id: mixed, name: mixed, phone:      
+         mixed, type: mixed, tax_number: mixed}|null, purchase_order:           
+         array{id: mixed, code: mixed}|null}>} given.                           
+         🪪  argument.type                                                      
+         💡  Offset 'items' (Illuminate\Support\Collection<int, array{id: int,   
+         code: string, invoice_number: string|null, issue_date:                 
+         non-falsy-string, due_date: non-falsy-string|null, status:             
+         'cancelled'|'draft'|'open'|'paid', payment_status:                     
+         'paid'|'partial'|'unpaid', is_overdue: bool, ...}>) does not accept t  
+         ype Illuminate\Support\Collection<int, array{id: int, code: string, i  
+         nvoice_number: string, issue_date: non-falsy-string, due_date:         
+         non-falsy-string, status: 'cancelled'|'draft'|'open'|'paid',           
+         payment_status: 'paid'|'partial'|'unpaid', is_overdue: bool, ...}>: T  
+         emplate type TValue on class Illuminate\Support\Collection is not      
+         covariant. Learn more: https://phpstan.org/blog/whats-up-with-templat  
+         e-covariant                                                            
+  1115   Anonymous function should return array{group_key: (int|string),        
+         group_name: string, total_records: int<0, max>, total_subtotal:        
+         float, total_discount: float, total_vat: float, total_invoice_amount:  
+         float, total_paid: float, ...} but returns array{group_key:            
+         (int|string), group_name: string, total_records: int<0, max>,          
+         total_subtotal: float, total_discount: float, total_vat: float,        
+         total_invoice_amount: float, total_paid: float, ...}.                  
+         🪪  return.type                                                        
+         💡  Offset 'items' (Illuminate\Support\Collection<int, array{id: int,   
+         code: string, invoice_number: string|null, issue_date:                 
+         non-falsy-string, due_date: non-falsy-string|null, status:             
+         'cancelled'|'draft'|'open'|'paid', payment_status:                     
+         'paid'|'partial'|'unpaid', is_overdue: bool, ...}>) does not accept t  
+         ype Illuminate\Support\Collection<int, array{id: int, code: string, i  
+         nvoice_number: string, issue_date: non-falsy-string, due_date:         
+         non-falsy-string, status: 'cancelled'|'draft'|'open'|'paid',           
+         payment_status: 'paid'|'partial'|'unpaid', is_overdue: bool, ...}>: T  
+         emplate type TValue on class Illuminate\Support\Collection is not      
+         covariant. Learn more: https://phpstan.org/blog/whats-up-with-templat  
+         e-covariant                                                            
+  1135   Parameter #1 $callback of method                                       
+         Illuminate\Pagination\AbstractPaginator<int,Illuminate\Database\Eloqu  
+         ent\Model>::through() contains unresolvable type.                      
+         🪪  argument.unresolvableType                                          
+  1135   Parameter #1 $callback of method                                       
+         Illuminate\Pagination\AbstractPaginator<int,Illuminate\Database\Eloqu  
+         ent\Model>::through() expects callable(Illuminate\Database\Eloquent\M  
+         odel, int): array{id: int, code: string, invoice_number: string|null,  
+         issue_date: non-falsy-string, due_date: non-falsy-string|null,         
+         status: 'cancelled'|'draft'|'open'|'paid', payment_status:             
+         'paid'|'partial'|'unpaid', is_overdue: bool, subtotal: float,          
+         discount_amount: float, tax_amount: float, total: float, paid:         
+         0|float, balance: float, notes: string|null, center: array{id: mixed,  
+         name: mixed}|null, supplier: array{id: mixed, name: mixed, phone:      
+         mixed, type: mixed, tax_number: mixed}|null, purchase_order:           
+         array{id: mixed, code: mixed}|null},                                   
+         Closure(App\Models\PurchaseInvoice): array{id: int, code: string,      
+         invoice_number: string|null, issue_date: non-falsy-string, due_date:   
+         non-falsy-string|null, status: 'cancelled'|'draft'|'open'|'paid',      
+         payment_status: 'paid'|'partial'|'unpaid', is_overdue: bool,           
+         subtotal: float, discount_amount: float, tax_amount: float, total:     
+         float, paid: 0|float, balance: float, notes: string|null, center:      
+         array{id: mixed, name: mixed}|null, supplier: array{id: mixed, name:   
+         mixed, phone: mixed, type: mixed, tax_number: mixed}|null,             
+         purchase_order: array{id: mixed, code: mixed}|null} given.             
+         🪪  argument.type                                                      
+  1268   Using nullsafe property access "?->name" on left side of ?? is         
+         unnecessary. Use -> instead.                                           
+         🪪  nullsafe.neverNull                                                 
+  1272   Using nullsafe property access "?->name" on left side of ?? is         
+         unnecessary. Use -> instead.                                           
+         🪪  nullsafe.neverNull                                                 
+  1273   Using nullsafe property access "?->phone" on left side of ?? is        
+         unnecessary. Use -> instead.                                           
+         🪪  nullsafe.neverNull                                                 
+  1274   Using nullsafe property access "?->tax_number" on left side of ?? is   
+         unnecessary. Use -> instead.                                           
+         🪪  nullsafe.neverNull                                                 
+  1449   Access to an undefined property                                        
+         App\Models\PurchaseReturnInvoice::$purchaseInvoice.                    
+         🪪  property.notFound                                                  
+         💡  Learn more: https://phpstan.org/blog/solving-phpstan-access-to-und  
+         efined-property                                                        
+  1481   Access to an undefined property                                        
+         App\Models\PurchaseReturnInvoice::$center.                             
+         🪪  property.notFound                                                  
+         💡  Learn more: https://phpstan.org/blog/solving-phpstan-access-to-und  
+         efined-property                                                        
+  1509   Parameter #1 $callback of method                                       
+         Illuminate\Database\Eloquent\Collection<int,Illuminate\Database\Eloqu  
+         ent\Model>::map() expects callable(Illuminate\Database\Eloquent\Model  
+         , int): array{id: lowercase-string&non-falsy-string, raw_id: int,      
+         record_type: 'purchase_invoice', code: string, invoice_number:         
+         string|null, issue_date: non-falsy-string, due_date:                   
+         non-falsy-string|null, status: 'cancelled'|'draft'|'open'|'paid',      
+         payment_status: 'paid'|'partial'|'unpaid', subtotal: float,            
+         discount_amount: float, raw_discount: float, tax_amount: float,        
+         total: float, paid: 0|float, balance: float, bad_debt: 0.0, notes:     
+         string|null, show_url: string|null, has_returns: bool, returns_count:  
+         int<0, max>, returns_total: float, debit_notes_total: float,           
+         return_invoices: array<int, array{id: mixed, code: mixed, total: floa  
+         t, create_debit_note: bool, return_date: mixed, show_url:              
+         string|null}>, center: array{id: mixed, name: mixed}|null, supplier:   
+         array{id: mixed, name: mixed, phone: mixed, type: mixed, tax_number:   
+         mixed}|null}, Closure(App\Models\PurchaseInvoice): array{id:           
+         lowercase-string&non-falsy-string, raw_id: int, record_type:           
+         'purchase_invoice', code: string, invoice_number: string|null,         
+         issue_date: non-falsy-string, due_date: non-falsy-string|null,         
+         status: 'cancelled'|'draft'|'open'|'paid', payment_status:             
+         'paid'|'partial'|'unpaid', subtotal: float, discount_amount: float,    
+         raw_discount: float, tax_amount: float, total: float, paid: 0|float,   
+         balance: float, bad_debt: 0.0, notes: string|null, show_url:           
+         string|null, has_returns: bool, returns_count: int<0, max>,            
+         returns_total: float, debit_notes_total: float, return_invoices:       
+         array<int, array{id: mixed, code: mixed, total: float, create_debit_n  
+         ote: bool, return_date: mixed, show_url: string|null}>, center: array  
+         {id: mixed, name: mixed}|null, supplier: array{id: mixed, name:        
+         mixed, phone: mixed, type: mixed, tax_number: mixed}|null} given.      
+         🪪  argument.type                                                      
+  1514   Strict comparison using === between non-falsy-string and '' will       
+         always evaluate to false.                                              
+         🪪  identical.alwaysFalse                                              
+  1733   Using nullsafe property access "?->name" on left side of ?? is         
+         unnecessary. Use -> instead.                                           
+         🪪  nullsafe.neverNull                                                 
+  1737   Using nullsafe property access "?->name" on left side of ?? is         
+         unnecessary. Use -> instead.                                           
+         🪪  nullsafe.neverNull                                                 
+  1738   Using nullsafe property access "?->phone" on left side of ?? is        
+         unnecessary. Use -> instead.                                           
+         🪪  nullsafe.neverNull                                                 
+  1739   Using nullsafe property access "?->tax_number" on left side of ?? is   
+         unnecessary. Use -> instead.                                           
+         🪪  nullsafe.neverNull                                                 
+  1753   Strict comparison using === between non-falsy-string and '' will       
+         always evaluate to false.                                              
+         🪪  identical.alwaysFalse                                              
+  1763   Using nullsafe property access "?->name" on left side of ?? is         
+         unnecessary. Use -> instead.                                           
+         🪪  nullsafe.neverNull                                                 
+  1763   Using nullsafe property access "?->name" on left side of ?? is         
+         unnecessary. Use -> instead.                                           
+         🪪  nullsafe.neverNull                                                 
+  1766   Using nullsafe property access "?->code" on left side of ?? is         
+         unnecessary. Use -> instead.                                           
+         🪪  nullsafe.neverNull                                                 
+  1767   Using nullsafe property access "?->name" on left side of ?? is         
+         unnecessary. Use -> instead.                                           
+         🪪  nullsafe.neverNull                                                 
+  1768   Using nullsafe property access "?->phone" on left side of ?? is        
+         unnecessary. Use -> instead.                                           
+         🪪  nullsafe.neverNull                                                 
+  1769   Using nullsafe property access "?->tax_number" on left side of ?? is   
+         unnecessary. Use -> instead.                                           
+         🪪  nullsafe.neverNull                                                 
+  1814   Variable $centerFilter in empty() always exists and is not falsy.      
+         🪪  empty.variable                                                     
+  1839   Relation 'purchaseInvoice' is not found in                             
+         App\Models\PurchaseReturnInvoice model.                                
+         🪪  larastan.relationExistence                                         
+  1843   Relation 'purchaseInvoice' is not found in                             
+         App\Models\PurchaseReturnInvoice model.                                
+         🪪  larastan.relationExistence                                         
+  1848   Relation 'purchaseInvoice' is not found in                             
+         App\Models\PurchaseReturnInvoice model.                                
+         🪪  larastan.relationExistence                                         
+  2032   Dead catch - Throwable is never thrown in the try block.               
+         🪪  catch.neverThrown                                                  
+  2039   Using nullsafe property access "?->code" on left side of ?? is         
+         unnecessary. Use -> instead.                                           
+         🪪  nullsafe.neverNull                                                 
+  2045   Left side of && is always true.                                        
+         🪪  booleanAnd.leftAlwaysTrue                                          
+  2051   Class App\Models\PurchaseReturn not found.                             
+         🪪  class.notFound                                                     
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols   
+  2053   Access to property $code on an unknown class                           
+         App\Models\PurchaseReturn.                                             
+         🪪  class.notFound                                                     
+         💡  Learn more at https://phpstan.org/user-guide/discovering-symbols   
+  2102   Using nullsafe property access "?->name_ar" on left side of ?? is      
+         unnecessary. Use -> instead.                                           
+         🪪  nullsafe.neverNull                                                 
+  2102   Using nullsafe property access "?->name_en" on left side of ?? is      
+         unnecessary. Use -> instead.                                           
+         🪪  nullsafe.neverNull                                                 
+  2103   Using nullsafe property access "?->name_ar" on left side of ?? is      
+         unnecessary. Use -> instead.                                           
+         🪪  nullsafe.neverNull                                                 
+  2103   Using nullsafe property access "?->name_en" on left side of ?? is      
+         unnecessary. Use -> instead.                                           
+         🪪  nullsafe.neverNull                                                 
+  2121   Parameter #1 $callback of method                                       
+         Illuminate\Database\Eloquent\Collection<int,Illuminate\Database\Eloqu  
+         ent\Model>::map() expects callable(Illuminate\Database\Eloquent\Model  
+         , int): array{id: int, move_type: string, move_type_label: string,     
+         is_incoming: bool, qty: float, unit_cost: float, total_cost: float,    
+         sale_price: float|null, total_sale_amount: float|null,                 
+         balance_before: float, balance_after: float, posted_at:                
+         non-falsy-string|null, notes: string|null, reference_label: 'أمر       
+         عمل'|'إشعار دائن'|'سند استلام'|'فاتورة مبيعات'|'مرتجع                  
+         شراء'|'ملاحظة'|'—', reference_code: mixed, reference_url:              
+         string|null, center: array{id: mixed, name: mixed}|null, warehouse:    
+         array{id: mixed, name: mixed, code: mixed}|null, part: array{id:       
+         mixed, sku: mixed, barcode: mixed, name_ar: mixed, name_en: mixed,     
+         unit_name: mixed, category_name: mixed}|null, posted_by: array{id:     
+         mixed, name: mixed}|null}, Closure(App\Models\InventoryMove):          
+         array{id: int, move_type: string, move_type_label: string,             
+         is_incoming: bool, qty: float, unit_cost: float, total_cost: float,    
+         sale_price: float|null, total_sale_amount: float|null,                 
+         balance_before: float, balance_after: float, posted_at:                
+         non-falsy-string|null, notes: string|null, reference_label: 'أمر       
+         عمل'|'إشعار دائن'|'سند استلام'|'فاتورة مبيعات'|'مرتجع                  
+         شراء'|'ملاحظة'|'—', reference_code: mixed, reference_url:              
+         string|null, center: array{id: mixed, name: mixed}|null, warehouse:    
+         array{id: mixed, name: mixed, code: mixed}|null, part: array{id:       
+         mixed, sku: mixed, barcode: mixed, name_ar: mixed, name_en: mixed,     
+         unit_name: mixed, category_name: mixed}|null, posted_by: array{id:     
+         mixed, name: mixed}|null} given.                                       
+         🪪  argument.type                                                      
+  2133   Parameter #1 $callback of method                                       
+         Illuminate\Support\Collection<(int|string),Illuminate\Support\Collect  
+         ion<int, array<string, mixed>>>::map() expects callable(Illuminate\Su  
+         pport\Collection<int, array{id: int, move_type: string, move_type_lab  
+         el: string, is_incoming: bool, qty: float, unit_cost: float,           
+         total_cost: float, sale_price: float|null, total_sale_amount:          
+         float|null, balance_before: float, balance_after: float, posted_at:    
+         non-falsy-string|null, notes: string|null, reference_label: 'أمر       
+         عمل'|'إشعار دائن'|'سند استلام'|'فاتورة مبيعات'|'مرتجع                  
+         شراء'|'ملاحظة'|'—', reference_code: mixed, reference_url:              
+         string|null, center: array{id: mixed, name: mixed}|null, warehouse:    
+         array{id: mixed, name: mixed, code: mixed}|null, part: array{id:       
+         mixed, sku: mixed, barcode: mixed, name_ar: mixed, name_en: mixed,     
+         unit_name: mixed, category_name: mixed}|null, posted_by: array{id:     
+         mixed, name: mixed}|null}>, int|string): array{group_key: int|string,  
+          group_name: string, total_records: int<0, max>, total_incoming:       
+         float, total_outgoing: float, net_qty: float, total_cost: float,       
+         items: Illuminate\Support\Collection<int, array{id: int, move_type: s  
+         tring, move_type_label: string, is_incoming: bool, qty: float,         
+         unit_cost: float, total_cost: float, sale_price: float|null,           
+         total_sale_amount: float|null, balance_before: float, balance_after:   
+         float, posted_at: non-falsy-string|null, notes: string|null,           
+         reference_label: 'أمر عمل'|'إشعار دائن'|'سند استلام'|'فاتورة           
+         مبيعات'|'مرتجع شراء'|'ملاحظة'|'—', reference_code: mixed,              
+         reference_url: string|null, center: array{id: mixed, name:             
+         mixed}|null, warehouse: array{id: mixed, name: mixed, code:            
+         mixed}|null, part: array{id: mixed, sku: mixed, barcode: mixed,        
+         name_ar: mixed, name_en: mixed, unit_name: mixed, category_name:       
+         mixed}|null, posted_by: array{id: mixed, name: mixed}|null}>}, Closur  
+         e(mixed, mixed): array{group_key: int|string, group_name: string,      
+         total_records: int<0, max>, total_incoming: float, total_outgoing:     
+         float, net_qty: float, total_cost: float, items:                       
+         Illuminate\Support\Collection<int, array{id: int, move_type: string,   
+         move_type_label: string, is_incoming: bool, qty: float, unit_cost:     
+         float, total_cost: float, sale_price: float|null, total_sale_amount:   
+         float|null, balance_before: float, balance_after: float, posted_at:    
+         non-falsy-string|null, notes: string|null, reference_label: 'أمر       
+         عمل'|'إشعار دائن'|'سند استلام'|'فاتورة مبيعات'|'مرتجع                  
+         شراء'|'ملاحظة'|'—', reference_code: mixed, reference_url:              
+         string|null, center: array{id: mixed, name: mixed}|null, warehouse:    
+         array{id: mixed, name: mixed, code: mixed}|null, part: array{id:       
+         mixed, sku: mixed, barcode: mixed, name_ar: mixed, name_en: mixed,     
+         unit_name: mixed, category_name: mixed}|null, posted_by: array{id:     
+         mixed, name: mixed}|null}>} given.                                     
+         🪪  argument.type                                                      
+         💡  Offset 'items' (Illuminate\Support\Collection<int, array{id: int,   
+         move_type: string, move_type_label: string, is_incoming: bool, qty:    
+         float, unit_cost: float, total_cost: float, sale_price: float|null,    
+         ...}>) does not accept type Illuminate\Support\Collection<int, array{  
+         id: int, move_type: string, move_type_label: string, is_incoming:      
+         bool, qty: float, unit_cost: float, total_cost: float, sale_price:     
+         float, ...}>: Template type TValue on class Illuminate\Support\Collec  
+         tion is not covariant. Learn more: https://phpstan.org/blog/whats-up-  
+         with-template-covariant                                                
+  2137   Anonymous function should return array{group_key: (int|string),        
+         group_name: string, total_records: int<0, max>, total_incoming:        
+         float, total_outgoing: float, net_qty: float, total_cost: float,       
+         items: Illuminate\Support\Collection<int, array{id: int, move_type: s  
+         tring, move_type_label: string, is_incoming: bool, qty: float,         
+         unit_cost: float, total_cost: float, sale_price: float|null, ...}>} b  
+         ut returns array{group_key: (int|string), group_name: string,          
+         total_records: int<0, max>, total_incoming: float, total_outgoing:     
+         float, net_qty: float, total_cost: float, items:                       
+         Illuminate\Support\Collection<int, array{id: int, move_type: string,   
+         move_type_label: string, is_incoming: bool, qty: float, unit_cost:     
+         float, total_cost: float, sale_price: float|null, ...}>}.              
+         🪪  return.type                                                        
+         💡  Offset 'items' (Illuminate\Support\Collection<int, array{id: int,   
+         move_type: string, move_type_label: string, is_incoming: bool, qty:    
+         float, unit_cost: float, total_cost: float, sale_price: float|null,    
+         ...}>) does not accept type Illuminate\Support\Collection<int, array{  
+         id: int, move_type: string, move_type_label: string, is_incoming:      
+         bool, qty: float, unit_cost: float, total_cost: float, sale_price:     
+         float, ...}>: Template type TValue on class Illuminate\Support\Collec  
+         tion is not covariant. Learn more: https://phpstan.org/blog/whats-up-  
+         with-template-covariant                                                
+  2155   Parameter #1 $callback of method                                       
+         Illuminate\Pagination\AbstractPaginator<int,Illuminate\Database\Eloqu  
+         ent\Model>::through() contains unresolvable type.                      
+         🪪  argument.unresolvableType                                          
+  2155   Parameter #1 $callback of method                                       
+         Illuminate\Pagination\AbstractPaginator<int,Illuminate\Database\Eloqu  
+         ent\Model>::through() expects callable(Illuminate\Database\Eloquent\M  
+         odel, int): array{id: int, move_type: string, move_type_label:         
+         string, is_incoming: bool, qty: float, unit_cost: float, total_cost:   
+         float, sale_price: float|null, total_sale_amount: float|null,          
+         balance_before: float, balance_after: float, posted_at:                
+         non-falsy-string|null, notes: string|null, reference_label: 'أمر       
+         عمل'|'إشعار دائن'|'سند استلام'|'فاتورة مبيعات'|'مرتجع                  
+         شراء'|'ملاحظة'|'—', reference_code: mixed, reference_url:              
+         string|null, center: array{id: mixed, name: mixed}|null, warehouse:    
+         array{id: mixed, name: mixed, code: mixed}|null, part: array{id:       
+         mixed, sku: mixed, barcode: mixed, name_ar: mixed, name_en: mixed,     
+         unit_name: mixed, category_name: mixed}|null, posted_by: array{id:     
+         mixed, name: mixed}|null}, Closure(App\Models\InventoryMove):          
+         array{id: int, move_type: string, move_type_label: string,             
+         is_incoming: bool, qty: float, unit_cost: float, total_cost: float,    
+         sale_price: float|null, total_sale_amount: float|null,                 
+         balance_before: float, balance_after: float, posted_at:                
+         non-falsy-string|null, notes: string|null, reference_label: 'أمر       
+         عمل'|'إشعار دائن'|'سند استلام'|'فاتورة مبيعات'|'مرتجع                  
+         شراء'|'ملاحظة'|'—', reference_code: mixed, reference_url:              
+         string|null, center: array{id: mixed, name: mixed}|null, warehouse:    
+         array{id: mixed, name: mixed, code: mixed}|null, part: array{id:       
+         mixed, sku: mixed, barcode: mixed, name_ar: mixed, name_en: mixed,     
+         unit_name: mixed, category_name: mixed}|null, posted_by: array{id:     
+         mixed, name: mixed}|null} given.                                       
+         🪪  argument.type                                                      
+  2288   Dead catch - Throwable is never thrown in the try block.               
+         🪪  catch.neverThrown                                                  
+  2293   Using nullsafe property access "?->code" on left side of ?? is         
+         unnecessary. Use -> instead.                                           
+         🪪  nullsafe.neverNull                                                 
+  2305   Using nullsafe property access "?->name" on left side of ?? is         
+         unnecessary. Use -> instead.                                           
+         🪪  nullsafe.neverNull                                                 
+  2306   Using nullsafe property access "?->name" on left side of ?? is         
+         unnecessary. Use -> instead.                                           
+         🪪  nullsafe.neverNull                                                 
+  2307   Using nullsafe property access "?->sku" on left side of ?? is          
+         unnecessary. Use -> instead.                                           
+         🪪  nullsafe.neverNull                                                 
+  2308   Using nullsafe property access "?->name_ar" on left side of ?? is      
+         unnecessary. Use -> instead.                                           
+         🪪  nullsafe.neverNull                                                 
+  2308   Using nullsafe property access "?->name_en" on left side of ?? is      
+         unnecessary. Use -> instead.                                           
+         🪪  nullsafe.neverNull                                                 
+  2309   Using nullsafe property access "?->name_ar" on left side of ?? is      
+         unnecessary. Use -> instead.                                           
+         🪪  nullsafe.neverNull                                                 
+  2319   Using nullsafe property access "?->name" on left side of ?? is         
+         unnecessary. Use -> instead.                                           
+         🪪  nullsafe.neverNull                                                 
+  2543   Using nullsafe property access "?->name_ar" on left side of ?? is      
+         unnecessary. Use -> instead.                                           
+         🪪  nullsafe.neverNull                                                 
+  2544   Using nullsafe property access "?->name_ar" on left side of ?? is      
+         unnecessary. Use -> instead.                                           
+         🪪  nullsafe.neverNull                                                 
+  2576   Parameter #1 $callback of method                                       
+         Illuminate\Support\Collection<(int|string),Illuminate\Support\Collect  
+         ion<int, array<string, mixed>>>::map() expects callable(Illuminate\Su  
+         pport\Collection<int, array{id: mixed, code: mixed, status: mixed, en  
+         try_date: non-falsy-string|null, opened_at: non-falsy-string|null,     
+         closed_at: non-falsy-string|null, expected_end_date:                   
+         non-falsy-string|null, created_at: non-falsy-string|null, is_overdue:  
+         bool, odometer: mixed, total_excl_tax: float, total_tax: float,        
+         total_incl_tax: float, parts_cost: float, net_amount: float,           
+         total_paid: float, balance: float, bad_debt: float, total_discount:    
+         float, center: array{id: mixed, name: mixed}|null, customer:           
+         array{id: mixed, name: mixed, phone: mixed, type: mixed}|null,         
+         vehicle: array{id: mixed, plate_number: mixed, make_name: mixed,       
+         model_name: mixed, year: mixed, odometer: mixed}|null, invoice:        
+         array{id: mixed, invoice_number: mixed, status: mixed,                 
+         total_incl_tax: float, total_paid: float}|null}>, int|string): array{  
+         group_key: int|string, group_name: string, total_records: int<0,       
+         max>, total_amount: float, total_paid: float, total_remaining: float,  
+         total_bad_debt: float, net_amount: float, tickets:                     
+         Illuminate\Support\Collection<int, array{id: mixed, code: mixed, stat  
+         us: mixed, entry_date: non-falsy-string|null, opened_at:               
+         non-falsy-string|null, closed_at: non-falsy-string|null,               
+         expected_end_date: non-falsy-string|null, created_at:                  
+         non-falsy-string|null, is_overdue: bool, odometer: mixed,              
+         total_excl_tax: float, total_tax: float, total_incl_tax: float,        
+         parts_cost: float, net_amount: float, total_paid: float, balance:      
+         float, bad_debt: float, total_discount: float, center: array{id:       
+         mixed, name: mixed}|null, customer: array{id: mixed, name: mixed,      
+         phone: mixed, type: mixed}|null, vehicle: array{id: mixed,             
+         plate_number: mixed, make_name: mixed, model_name: mixed, year:        
+         mixed, odometer: mixed}|null, invoice: array{id: mixed,                
+         invoice_number: mixed, status: mixed, total_incl_tax: float,           
+         total_paid: float}|null}>}, Closure(mixed, mixed): array{group_key: i  
+         nt|string, group_name: string, total_records: int<0, max>,             
+         total_amount: float, total_paid: float, total_remaining: float,        
+         total_bad_debt: float, net_amount: float, tickets:                     
+         Illuminate\Support\Collection<int, array{id: mixed, code: mixed, stat  
+         us: mixed, entry_date: non-falsy-string|null, opened_at:               
+         non-falsy-string|null, closed_at: non-falsy-string|null,               
+         expected_end_date: non-falsy-string|null, created_at:                  
+         non-falsy-string|null, is_overdue: bool, odometer: mixed,              
+         total_excl_tax: float, total_tax: float, total_incl_tax: float,        
+         parts_cost: float, net_amount: float, total_paid: float, balance:      
+         float, bad_debt: float, total_discount: float, center: array{id:       
+         mixed, name: mixed}|null, customer: array{id: mixed, name: mixed,      
+         phone: mixed, type: mixed}|null, vehicle: array{id: mixed,             
+         plate_number: mixed, make_name: mixed, model_name: mixed, year:        
+         mixed, odometer: mixed}|null, invoice: array{id: mixed,                
+         invoice_number: mixed, status: mixed, total_incl_tax: float,           
+         total_paid: float}|null}>} given.                                      
+         🪪  argument.type                                                      
+         💡  Offset 'tickets' (Illuminate\Support\Collection<int, array{id: mix  
+         ed, code: mixed, status: mixed, entry_date: non-falsy-string|null,     
+         opened_at: non-falsy-string|null, closed_at: non-falsy-string|null,    
+         expected_end_date: non-falsy-string|null, created_at:                  
+         non-falsy-string|null, ...}>) does not accept type Illuminate\Support  
+         \Collection<int, array{id: mixed, code: mixed, status: mixed, entry_d  
+         ate: non-falsy-string, opened_at: non-falsy-string, closed_at:         
+         non-falsy-string, expected_end_date: non-falsy-string, created_at:     
+         non-falsy-string, ...}>: Template type TValue on class Illuminate\Sup  
+         port\Collection is not covariant. Learn more: https://phpstan.org/blo  
+         g/whats-up-with-template-covariant                                     
+  2577   Anonymous function should return array{group_key: (int|string),        
+         group_name: string, total_records: int<0, max>, total_amount: float,   
+         total_paid: float, total_remaining: float, total_bad_debt: float,      
+         net_amount: float, ...} but returns array{group_key: (int|string),     
+         group_name: string, total_records: int<0, max>, total_amount: float,   
+         total_paid: float, total_remaining: float, total_bad_debt: float,      
+         net_amount: float, ...}.                                               
+         🪪  return.type                                                        
+         💡  Offset 'tickets' (Illuminate\Support\Collection<int, array{id: mix  
+         ed, code: mixed, status: mixed, entry_date: non-falsy-string|null,     
+         opened_at: non-falsy-string|null, closed_at: non-falsy-string|null,    
+         expected_end_date: non-falsy-string|null, created_at:                  
+         non-falsy-string|null, ...}>) does not accept type Illuminate\Support  
+         \Collection<int, array{id: mixed, code: mixed, status: mixed, entry_d  
+         ate: non-falsy-string, opened_at: non-falsy-string, closed_at:         
+         non-falsy-string, expected_end_date: non-falsy-string, created_at:     
+         non-falsy-string, ...}>: Template type TValue on class Illuminate\Sup  
+         port\Collection is not covariant. Learn more: https://phpstan.org/blo  
+         g/whats-up-with-template-covariant                                     
+  2653   Using nullsafe property access "?->name" on left side of ?? is         
+         unnecessary. Use -> instead.                                           
+         🪪  nullsafe.neverNull                                                 
+  2654   Using nullsafe property access "?->cr_number" on left side of ?? is    
+         unnecessary. Use -> instead.                                           
+         🪪  nullsafe.neverNull                                                 
+  2655   Using nullsafe property access "?->tax_number" on left side of ?? is   
+         unnecessary. Use -> instead.                                           
+         🪪  nullsafe.neverNull                                                 
+  2656   Using nullsafe property access "?->address" on left side of ?? is      
+         unnecessary. Use -> instead.                                           
+         🪪  nullsafe.neverNull                                                 
+  2657   Using nullsafe property access "?->phone" on left side of ?? is        
+         unnecessary. Use -> instead.                                           
+         🪪  nullsafe.neverNull                                                 
+  2658   Using nullsafe property access "?->name" on left side of ?? is         
+         unnecessary. Use -> instead.                                           
+         🪪  nullsafe.neverNull                                                 
+  2755   Using nullsafe property access "?->make_other" on left side of ?? is   
+         unnecessary. Use -> instead.                                           
+         🪪  nullsafe.neverNull                                                 
+  2755   Using nullsafe property access "?->model_other" on left side of ?? is  
+         unnecessary. Use -> instead.                                           
+         🪪  nullsafe.neverNull                                                 
+  2755   Using nullsafe property access "?->name_ar" on left side of ?? is      
+         unnecessary. Use -> instead.                                           
+         🪪  nullsafe.neverNull                                                 
+  2755   Using nullsafe property access "?->name_ar" on left side of ?? is      
+         unnecessary. Use -> instead.                                           
+         🪪  nullsafe.neverNull                                                 
+  2755   Using nullsafe property access "?->year" on left side of ?? is         
+         unnecessary. Use -> instead.                                           
+         🪪  nullsafe.neverNull                                                 
+  2759   Using nullsafe property access "?->name" on left side of ?? is         
+         unnecessary. Use -> instead.                                           
+         🪪  nullsafe.neverNull                                                 
+  2764   Using nullsafe property access "?->name" on left side of ?? is         
+         unnecessary. Use -> instead.                                           
+         🪪  nullsafe.neverNull                                                 
+  2765   Using nullsafe property access "?->phone" on left side of ?? is        
+         unnecessary. Use -> instead.                                           
+         🪪  nullsafe.neverNull                                                 
+  2766   Using nullsafe property access "?->type" on left side of ?? is         
+         unnecessary. Use -> instead.                                           
+         🪪  nullsafe.neverNull                                                 
+  2768   Using nullsafe property access "?->plate_number" on left side of ??    
+         is unnecessary. Use -> instead.                                        
+         🪪  nullsafe.neverNull                                                 
+  2769   Using nullsafe property access "?->odometer" on left side of ?? is     
+         unnecessary. Use -> instead.                                           
+         🪪  nullsafe.neverNull                                                 
+  2770   Using nullsafe property access "?->invoice_number" on left side of ??  
+         is unnecessary. Use -> instead.                                        
+         🪪  nullsafe.neverNull                                                 
+  2974   Access to an undefined property                                        
+         App\Models\WorkOrderItem::$tax_amount.                                 
+         🪪  property.notFound                                                  
+         💡  Learn more: https://phpstan.org/blog/solving-phpstan-access-to-und  
+         efined-property                                                        
+  2976   Access to an undefined property                                        
+         App\Models\WorkOrderItem::$is_taxable.                                 
+         🪪  property.notFound                                                  
+         💡  Learn more: https://phpstan.org/blog/solving-phpstan-access-to-und  
+         efined-property                                                        
+  2976   Access to an undefined property                                        
+         App\Models\WorkOrderItem::$tax_rate_snapshot.                          
+         🪪  property.notFound                                                  
+         💡  Learn more: https://phpstan.org/blog/solving-phpstan-access-to-und  
+         efined-property                                                        
+  2977   Access to an undefined property                                        
+         App\Models\WorkOrderItem::$tax_rate_snapshot.                          
+         🪪  property.notFound                                                  
+         💡  Learn more: https://phpstan.org/blog/solving-phpstan-access-to-und  
+         efined-property                                                        
+  3000   Using nullsafe property access "?->code" on left side of ?? is         
+         unnecessary. Use -> instead.                                           
+         🪪  nullsafe.neverNull                                                 
+  3001   Using nullsafe property access "?->status" on left side of ?? is       
+         unnecessary. Use -> instead.                                           
+         🪪  nullsafe.neverNull                                                 
+  3003   Using nullsafe property access "?->name" on left side of ?? is         
+         unnecessary. Use -> instead.                                           
+         🪪  nullsafe.neverNull                                                 
+  3011   Using nullsafe property access "?->name" on left side of ?? is         
+         unnecessary. Use -> instead.                                           
+         🪪  nullsafe.neverNull                                                 
+  3012   Using nullsafe property access "?->phone" on left side of ?? is        
+         unnecessary. Use -> instead.                                           
+         🪪  nullsafe.neverNull                                                 
+  3013   Using nullsafe property access "?->type" on left side of ?? is         
+         unnecessary. Use -> instead.                                           
+         🪪  nullsafe.neverNull                                                 
+  3019   Using nullsafe property access "?->plate_number" on left side of ??    
+         is unnecessary. Use -> instead.                                        
+         🪪  nullsafe.neverNull                                                 
+  3047   Parameter #1 $callback of method                                       
+         Illuminate\Database\Eloquent\Collection<int,Illuminate\Database\Eloqu  
+         ent\Model>::map() expects callable(Illuminate\Database\Eloquent\Model  
+         , int): array{id: int, work_order_id: int<0, max>, ticket_no: mixed,   
+         ticket_status: mixed, center_id: int<0, max>, center_name: mixed,      
+         service_id: int<0, max>|null, service_name: mixed, department_id:      
+         int|null, department_name: mixed, status:                              
+         'cancelled'|'completed'|'in_progress'|'on_hold'|'pending', customer:   
+         array{id: mixed, name: mixed, phone: mixed, type: mixed}, vehicle:     
+         array{make_name: mixed, model_name: mixed, year: mixed, plate_number:  
+         mixed, display_name: string}, start_date: mixed, due_date:             
+         non-falsy-string|null, completed_date: non-falsy-string|null, qty:     
+         float, unit_price: float, service_price: float, service_discount:      
+         float, service_cost: float, service_vat: float, total_amount: float,   
+         is_vat_inclusive: bool, is_warranty: bool, warranty_remaining_days:    
+         int, is_overdue: bool}, Closure(App\Models\WorkOrderItem): array{id:   
+         int, work_order_id: int<0, max>, ticket_no: mixed, ticket_status:      
+         mixed, center_id: int<0, max>, center_name: mixed, service_id: int<0,  
+         max>|null, service_name: mixed, department_id: int|null,               
+         department_name: mixed, status:                                        
+         'cancelled'|'completed'|'in_progress'|'on_hold'|'pending', customer:   
+         array{id: mixed, name: mixed, phone: mixed, type: mixed}, vehicle:     
+         array{make_name: mixed, model_name: mixed, year: mixed, plate_number:  
+         mixed, display_name: string}, start_date: mixed, due_date:             
+         non-falsy-string|null, completed_date: non-falsy-string|null, qty:     
+         float, unit_price: float, service_price: float, service_discount:      
+         float, service_cost: float, service_vat: float, total_amount: float,   
+         is_vat_inclusive: bool, is_warranty: bool, warranty_remaining_days:    
+         int, is_overdue: bool} given.                                          
+         🪪  argument.type                                                      
+  3062   Parameter #1 $callback of method                                       
+         Illuminate\Support\Collection<(int|string),Illuminate\Support\Collect  
+         ion<int, array<string, mixed>>>::map() expects callable(Illuminate\Su  
+         pport\Collection<int, array{id: int, work_order_id: int<0, max>,       
+         ticket_no: mixed, ticket_status: mixed, center_id: int<0, max>,        
+         center_name: mixed, service_id: int<0, max>|null, service_name:        
+         mixed, department_id: int|null, department_name: mixed, status:        
+         'cancelled'|'completed'|'in_progress'|'on_hold'|'pending', customer:   
+         array{id: mixed, name: mixed, phone: mixed, type: mixed}, vehicle:     
+         array{make_name: mixed, model_name: mixed, year: mixed, plate_number:  
+         mixed, display_name: string}, start_date: mixed, due_date:             
+         non-falsy-string|null, completed_date: non-falsy-string|null, qty:     
+         float, unit_price: float, service_price: float, service_discount:      
+         float, service_cost: float, service_vat: float, total_amount: float,   
+         is_vat_inclusive: bool, is_warranty: bool, warranty_remaining_days:    
+         int, is_overdue: bool}>, int|string): array{group_key: int|string,     
+         group_name: string, total_records: int<0, max>, total_service_price:   
+         float, total_service_discount: float, total_service_cost: float,       
+         total_service_vat: float, total_amount: float, services:               
+         Illuminate\Support\Collection<int, array{id: int, work_order_id:       
+         int<0, max>, ticket_no: mixed, ticket_status: mixed, center_id:        
+         int<0, max>, center_name: mixed, service_id: int<0, max>|null,         
+         service_name: mixed, department_id: int|null, department_name: mixed,  
+         status: 'cancelled'|'completed'|'in_progress'|'on_hold'|'pending',     
+         customer: array{id: mixed, name: mixed, phone: mixed, type: mixed},    
+         vehicle: array{make_name: mixed, model_name: mixed, year: mixed,       
+         plate_number: mixed, display_name: string}, start_date: mixed,         
+         due_date: non-falsy-string|null, completed_date:                       
+         non-falsy-string|null, qty: float, unit_price: float, service_price:   
+         float, service_discount: float, service_cost: float, service_vat:      
+         float, total_amount: float, is_vat_inclusive: bool, is_warranty:       
+         bool, warranty_remaining_days: int, is_overdue: bool}>},               
+         Closure(mixed, mixed): array{group_key: int|string, group_name:        
+         string, total_records: int<0, max>, total_service_price: float,        
+         total_service_discount: float, total_service_cost: float,              
+         total_service_vat: float, total_amount: float, services:               
+         Illuminate\Support\Collection<int, array{id: int, work_order_id:       
+         int<0, max>, ticket_no: mixed, ticket_status: mixed, center_id:        
+         int<0, max>, center_name: mixed, service_id: int<0, max>|null,         
+         service_name: mixed, department_id: int|null, department_name: mixed,  
+         status: 'cancelled'|'completed'|'in_progress'|'on_hold'|'pending',     
+         customer: array{id: mixed, name: mixed, phone: mixed, type: mixed},    
+         vehicle: array{make_name: mixed, model_name: mixed, year: mixed,       
+         plate_number: mixed, display_name: string}, start_date: mixed,         
+         due_date: non-falsy-string|null, completed_date:                       
+         non-falsy-string|null, qty: float, unit_price: float, service_price:   
+         float, service_discount: float, service_cost: float, service_vat:      
+         float, total_amount: float, is_vat_inclusive: bool, is_warranty:       
+         bool, warranty_remaining_days: int, is_overdue: bool}>} given.         
+         🪪  argument.type                                                      
+         💡  Offset 'services' (Illuminate\Support\Collection<int, array{id:    
+         int, work_order_id: int<0, max>, ticket_no: mixed, ticket_status:      
+         mixed, center_id: int<0, max>, center_name: mixed, service_id: int<0,  
+         max>|null, service_name: mixed, ...}>) does not accept type            
+         Illuminate\Support\Collection<int, array{id: int, work_order_id:       
+         int<0, max>, ticket_no: mixed, ticket_status: mixed, center_id:        
+         int<0, max>, center_name: mixed, service_id: int<0, max>,              
+         service_name: mixed, ...}>: Template type TValue on class              
+         Illuminate\Support\Collection is not covariant. Learn more: https://p  
+         hpstan.org/blog/whats-up-with-template-covariant                       
+  3063   Anonymous function should return array{group_key: (int|string),        
+         group_name: string, total_records: int<0, max>, total_service_price:   
+         float, total_service_discount: float, total_service_cost: float,       
+         total_service_vat: float, total_amount: float, ...} but returns        
+         array{group_key: (int|string), group_name: string, total_records:      
+         int<0, max>, total_service_price: float, total_service_discount:       
+         float, total_service_cost: float, total_service_vat: float,            
+         total_amount: float, ...}.                                             
+         🪪  return.type                                                        
+         💡  Offset 'services' (Illuminate\Support\Collection<int, array{id:    
+         int, work_order_id: int<0, max>, ticket_no: mixed, ticket_status:      
+         mixed, center_id: int<0, max>, center_name: mixed, service_id: int<0,  
+         max>|null, service_name: mixed, ...}>) does not accept type            
+         Illuminate\Support\Collection<int, array{id: int, work_order_id:       
+         int<0, max>, ticket_no: mixed, ticket_status: mixed, center_id:        
+         int<0, max>, center_name: mixed, service_id: int<0, max>,              
+         service_name: mixed, ...}>: Template type TValue on class              
+         Illuminate\Support\Collection is not covariant. Learn more: https://p  
+         hpstan.org/blog/whats-up-with-template-covariant                       
+  3082   Parameter #1 $callback of method                                       
+         Illuminate\Pagination\AbstractPaginator<int,Illuminate\Database\Eloqu  
+         ent\Model>::through() contains unresolvable type.                      
+         🪪  argument.unresolvableType                                          
+  3082   Parameter #1 $callback of method                                       
+         Illuminate\Pagination\AbstractPaginator<int,Illuminate\Database\Eloqu  
+         ent\Model>::through() expects callable(Illuminate\Database\Eloquent\M  
+         odel, int): array{id: int, work_order_id: int<0, max>, ticket_no:      
+         mixed, ticket_status: mixed, center_id: int<0, max>, center_name:      
+         mixed, service_id: int<0, max>|null, service_name: mixed,              
+         department_id: int|null, department_name: mixed, status:               
+         'cancelled'|'completed'|'in_progress'|'on_hold'|'pending', customer:   
+         array{id: mixed, name: mixed, phone: mixed, type: mixed}, vehicle:     
+         array{make_name: mixed, model_name: mixed, year: mixed, plate_number:  
+         mixed, display_name: string}, start_date: mixed, due_date:             
+         non-falsy-string|null, completed_date: non-falsy-string|null, qty:     
+         float, unit_price: float, service_price: float, service_discount:      
+         float, service_cost: float, service_vat: float, total_amount: float,   
+         is_vat_inclusive: bool, is_warranty: bool, warranty_remaining_days:    
+         int, is_overdue: bool}, Closure(App\Models\WorkOrderItem): array{id:   
+         int, work_order_id: int<0, max>, ticket_no: mixed, ticket_status:      
+         mixed, center_id: int<0, max>, center_name: mixed, service_id: int<0,  
+         max>|null, service_name: mixed, department_id: int|null,               
+         department_name: mixed, status:                                        
+         'cancelled'|'completed'|'in_progress'|'on_hold'|'pending', customer:   
+         array{id: mixed, name: mixed, phone: mixed, type: mixed}, vehicle:     
+         array{make_name: mixed, model_name: mixed, year: mixed, plate_number:  
+         mixed, display_name: string}, start_date: mixed, due_date:             
+         non-falsy-string|null, completed_date: non-falsy-string|null, qty:     
+         float, unit_price: float, service_price: float, service_discount:      
+         float, service_cost: float, service_vat: float, total_amount: float,   
+         is_vat_inclusive: bool, is_warranty: bool, warranty_remaining_days:    
+         int, is_overdue: bool} given.                                          
+         🪪  argument.type                                                      
+  3159   Using nullsafe property access "?->name" on left side of ?? is         
+         unnecessary. Use -> instead.                                           
+         🪪  nullsafe.neverNull                                                 
+  3161   Using nullsafe property access "?->name" on left side of ?? is         
+         unnecessary. Use -> instead.                                           
+         🪪  nullsafe.neverNull                                                 
+  3282   Using nullsafe property access "?->code" on left side of ?? is         
+         unnecessary. Use -> instead.                                           
+         🪪  nullsafe.neverNull                                                 
+  3283   Using nullsafe property access "?->name" on left side of ?? is         
+         unnecessary. Use -> instead.                                           
+         🪪  nullsafe.neverNull                                                 
+  3287   Using nullsafe property access "?->name" on left side of ?? is         
+         unnecessary. Use -> instead.                                           
+         🪪  nullsafe.neverNull                                                 
+  3288   Using nullsafe property access "?->phone" on left side of ?? is        
+         unnecessary. Use -> instead.                                           
+         🪪  nullsafe.neverNull                                                 
+  3290   Using nullsafe property access "?->plate_number" on left side of ??    
+         is unnecessary. Use -> instead.                                        
+         🪪  nullsafe.neverNull                                                 
+  3553   Using nullsafe property access "?->name" on left side of ?? is         
+         unnecessary. Use -> instead.                                           
+         🪪  nullsafe.neverNull                                                 
+  3554   Using nullsafe property access "?->name" on left side of ?? is         
+         unnecessary. Use -> instead.                                           
+         🪪  nullsafe.neverNull                                                 
+  3580   Variable $makeId in empty() always exists and is not falsy.            
+         🪪  empty.variable                                                     
+  3617   Using nullsafe property access "?->name" on left side of ?? is         
+         unnecessary. Use -> instead.                                           
+         🪪  nullsafe.neverNull                                                 
+  3618   Using nullsafe property access "?->cr_number" on left side of ?? is    
+         unnecessary. Use -> instead.                                           
+         🪪  nullsafe.neverNull                                                 
+  3619   Access to an undefined property App\Models\Tenant::$tax_number.        
+         🪪  property.notFound                                                  
+         💡  Learn more: https://phpstan.org/blog/solving-phpstan-access-to-und  
+         efined-property                                                        
+  3619   Using nullsafe property access "?->tax_number" on left side of ?? is   
+         unnecessary. Use -> instead.                                           
+         🪪  nullsafe.neverNull                                                 
+  3620   Using nullsafe property access "?->address" on left side of ?? is      
+         unnecessary. Use -> instead.                                           
+         🪪  nullsafe.neverNull                                                 
+  3621   Using nullsafe property access "?->phone" on left side of ?? is        
+         unnecessary. Use -> instead.                                           
+         🪪  nullsafe.neverNull                                                 
+  3622   Using nullsafe property access "?->name" on left side of ?? is         
+         unnecessary. Use -> instead.                                           
+         🪪  nullsafe.neverNull                                                 
+  3851   Access to an undefined property                                        
+         App\Models\WorkOrder::$total_incl_tax.                                 
+         🪪  property.notFound                                                  
+         💡  Learn more: https://phpstan.org/blog/solving-phpstan-access-to-und  
+         efined-property                                                        
+  3871   Using nullsafe property access "?->make_other" on left side of ?? is   
+         unnecessary. Use -> instead.                                           
+         🪪  nullsafe.neverNull                                                 
+  3871   Using nullsafe property access "?->model_other" on left side of ?? is  
+         unnecessary. Use -> instead.                                           
+         🪪  nullsafe.neverNull                                                 
+  3871   Using nullsafe property access "?->name_ar" on left side of ?? is      
+         unnecessary. Use -> instead.                                           
+         🪪  nullsafe.neverNull                                                 
+  3871   Using nullsafe property access "?->name_ar" on left side of ?? is      
+         unnecessary. Use -> instead.                                           
+         🪪  nullsafe.neverNull                                                 
+  3871   Using nullsafe property access "?->year" on left side of ?? is         
+         unnecessary. Use -> instead.                                           
+         🪪  nullsafe.neverNull                                                 
+  3878   Using nullsafe property access "?->name" on left side of ?? is         
+         unnecessary. Use -> instead.                                           
+         🪪  nullsafe.neverNull                                                 
+  3885   Using nullsafe property access "?->name" on left side of ?? is         
+         unnecessary. Use -> instead.                                           
+         🪪  nullsafe.neverNull                                                 
+  3886   Using nullsafe property access "?->phone" on left side of ?? is        
+         unnecessary. Use -> instead.                                           
+         🪪  nullsafe.neverNull                                                 
+  3887   Using nullsafe property access "?->type" on left side of ?? is         
+         unnecessary. Use -> instead.                                           
+         🪪  nullsafe.neverNull                                                 
+  3888   Using nullsafe property access "?->tax_number" on left side of ?? is   
+         unnecessary. Use -> instead.                                           
+         🪪  nullsafe.neverNull                                                 
+  3893   Using nullsafe property access "?->plate_number" on left side of ??    
+         is unnecessary. Use -> instead.                                        
+         🪪  nullsafe.neverNull                                                 
+  3895   Using nullsafe property access "?->odometer" on left side of ?? is     
+         unnecessary. Use -> instead.                                           
+         🪪  nullsafe.neverNull                                                 
+ ------ ----------------------------------------------------------------------- 
+
+ ------ -------------------------------------------------------------- 
+  Line   Http/Controllers/System/DeveloperController.php               
+ ------ -------------------------------------------------------------- 
+  132    Call to an undefined method RecursiveIterator::getSubPath().  
+         🪪  method.notFound                                           
+ ------ -------------------------------------------------------------- 
+
+ ------ ---------------------------------------------------------------------- 
+  Line   Http/Controllers/System/HelpSettingsController.php                    
+ ------ ---------------------------------------------------------------------- 
+  316    Called 'env' outside of the config directory which returns null when  
+         the config is cached, use 'config'.                                   
+         🪪  larastan.noEnvCallsOutsideOfConfig                                
+  404    Called 'env' outside of the config directory which returns null when  
+         the config is cached, use 'config'.                                   
+         🪪  larastan.noEnvCallsOutsideOfConfig                                
+ ------ ---------------------------------------------------------------------- 
+
+ ------ ---------------------------------------------------------------------- 
+  Line   Http/Controllers/System/SupportHubController.php                      
+ ------ ---------------------------------------------------------------------- 
+  73     Called 'env' outside of the config directory which returns null when  
+         the config is cached, use 'config'.                                   
+         🪪  larastan.noEnvCallsOutsideOfConfig                                
+ ------ ---------------------------------------------------------------------- 
+
+ ------ ----------------------------------------------------------------------- 
+  Line   Http/Controllers/System/SystemSettingsHubController.php                
+ ------ ----------------------------------------------------------------------- 
+  60     Parameter #1 $config of method                                         
+         App\Http\Controllers\System\SystemSettingsHubController::maskGatewayC  
+         onfig() expects array|null, string|null given.                         
+         🪪  argument.type                                                      
+  61     Parameter #1 $config of method                                         
+         App\Http\Controllers\System\SystemSettingsHubController::maskGatewayC  
+         onfig() expects array|null, string|null given.                         
+         🪪  argument.type                                                      
+  62     Parameter #1 $config of method                                         
+         App\Http\Controllers\System\SystemSettingsHubController::maskGatewayC  
+         onfig() expects array|null, string|null given.                         
+         🪪  argument.type                                                      
+  63     Parameter #1 $config of method                                         
+         App\Http\Controllers\System\SystemSettingsHubController::maskGatewayC  
+         onfig() expects array|null, string|null given.                         
+         🪪  argument.type                                                      
+  64     Parameter #1 $config of method                                         
+         App\Http\Controllers\System\SystemSettingsHubController::maskGatewayC  
+         onfig() expects array|null, string|null given.                         
+         🪪  argument.type                                                      
+ ------ ----------------------------------------------------------------------- 
+
+ ------ ----------------------------------------------------------------- 
+  Line   Models/InventoryMove.php                                         
+ ------ ----------------------------------------------------------------- 
+  82     Dead catch - Throwable is never thrown in the try block.         
+         🪪  catch.neverThrown                                            
+  87     Method App\Models\InventoryMove::getWorkOrderAttribute() should  
+         return App\Models\WorkOrder|null but returns                     
+         Illuminate\Database\Eloquent\Model|null.                         
+         🪪  return.type                                                  
+  95     Method App\Models\InventoryMove::getWorkOrderAttribute() should  
+         return App\Models\WorkOrder|null but returns                     
+         Illuminate\Database\Eloquent\Model|null.                         
+         🪪  return.type                                                  
+ ------ ----------------------------------------------------------------- 
+
+ ------ ----------------------------------------------------------------------- 
+  Line   Models/Quote.php                                                       
+ ------ ----------------------------------------------------------------------- 
+  288    Access to an undefined property App\Models\Quote::$total_incl_tax.     
+         🪪  property.notFound                                                  
+         💡  Learn more: https://phpstan.org/blog/solving-phpstan-access-to-und  
+         efined-property                                                        
+  292    Access to an undefined property App\Models\Quote::$total_incl_tax.     
+         🪪  property.notFound                                                  
+         💡  Learn more: https://phpstan.org/blog/solving-phpstan-access-to-und  
+         efined-property                                                        
+ ------ ----------------------------------------------------------------------- 
+
+ ------ ----------------------------------------------------------------------- 
+  Line   Policies/UserPolicy.php                                                
+ ------ ----------------------------------------------------------------------- 
+  81     Access to an undefined property App\Models\Role::$tenant_id.           
+         🪪  property.notFound                                                  
+         💡  Learn more: https://phpstan.org/blog/solving-phpstan-access-to-und  
+         efined-property                                                        
+ ------ ----------------------------------------------------------------------- 
+
+ ------ ----------------------------------------------------------------------- 
+  Line   Services/CreditNoteService.php                                         
+ ------ ----------------------------------------------------------------------- 
+  46     Access to an undefined property                                        
+         App\Models\WorkOrder::$tax_rate_snapshot.                              
+         🪪  property.notFound                                                  
+         💡  Learn more: https://phpstan.org/blog/solving-phpstan-access-to-und  
+         efined-property                                                        
+  85     Strict comparison using !== between mixed and null will always         
+         evaluate to true.                                                      
+         🪪  notIdentical.alwaysTrue                                            
+         💡  Type null has already been eliminated from mixed.                  
+  120    Strict comparison using !== between mixed and null will always         
+         evaluate to true.                                                      
+         🪪  notIdentical.alwaysTrue                                            
+         💡  Type null has already been eliminated from mixed.                  
+  224    Access to an undefined property                                        
+         App\Models\WorkOrder::$tax_rate_snapshot.                              
+         🪪  property.notFound                                                  
+         💡  Learn more: https://phpstan.org/blog/solving-phpstan-access-to-und  
+         efined-property                                                        
+  507    Access to an undefined property App\Models\Invoice::$debt_offset.      
+         🪪  property.notFound                                                  
+         💡  Learn more: https://phpstan.org/blog/solving-phpstan-access-to-und  
+         efined-property                                                        
+  508    Access to an undefined property App\Models\Invoice::$net_refund_due.   
+         🪪  property.notFound                                                  
+         💡  Learn more: https://phpstan.org/blog/solving-phpstan-access-to-und  
+         efined-property                                                        
+  605    Strict comparison using !== between mixed and null will always         
+         evaluate to true.                                                      
+         🪪  notIdentical.alwaysTrue                                            
+         💡  Type null has already been eliminated from mixed.                  
+  616    Using nullsafe property access "?->warehouse_id" on left side of ??    
+         is unnecessary. Use -> instead.                                        
+         🪪  nullsafe.neverNull                                                 
+  623    Using nullsafe property access "?->part_number" on left side of ?? is  
+         unnecessary. Use -> instead.                                           
+         🪪  nullsafe.neverNull                                                 
+  623    Using nullsafe property access "?->sku" on left side of ?? is          
+         unnecessary. Use -> instead.                                           
+         🪪  nullsafe.neverNull                                                 
+  804    Using nullsafe property access "?->cost_price" on left side of ?? is   
+         unnecessary. Use -> instead.                                           
+         🪪  nullsafe.neverNull                                                 
+  966    Access to an undefined property App\Models\Invoice::$debt_offset.      
+         🪪  property.notFound                                                  
+         💡  Learn more: https://phpstan.org/blog/solving-phpstan-access-to-und  
+         efined-property                                                        
+  967    Access to an undefined property App\Models\Invoice::$net_refund_due.   
+         🪪  property.notFound                                                  
+         💡  Learn more: https://phpstan.org/blog/solving-phpstan-access-to-und  
+         efined-property                                                        
+ ------ ----------------------------------------------------------------------- 
+
+ ------ ------------------------------------------------------------------- 
+  Line   Services/Media/ImageOptimizer.php                                  
+ ------ ------------------------------------------------------------------- 
+  140    Call to function is_object() with GdImage will always evaluate to  
+         true.                                                              
+         🪪  function.alreadyNarrowedType                                   
+ ------ ------------------------------------------------------------------- 
+
+ ------ --------------------------------------------------------------------- 
+  Line   Services/Media/OpenGraphImage.php                                    
+ ------ --------------------------------------------------------------------- 
+  182    Comparison operation "<" between int<1, max> and 1 is always false.  
+         🪪  smaller.alwaysFalse                                              
+  182    Comparison operation "<" between int<1, max> and 1 is always false.  
+         🪪  smaller.alwaysFalse                                              
+  182    Result of || is always false.                                        
+         🪪  booleanOr.alwaysFalse                                            
+  262    Comparison operation "<" between int<1, max> and 1 is always false.  
+         🪪  smaller.alwaysFalse                                              
+  262    Comparison operation "<" between int<1, max> and 1 is always false.  
+         🪪  smaller.alwaysFalse                                              
+  262    Result of || is always false.                                        
+         🪪  booleanOr.alwaysFalse                                            
+ ------ --------------------------------------------------------------------- 
+
+ ------ ----------------------------------------------------------------------- 
+  Line   Services/Print/PrintService.php                                        
+ ------ ----------------------------------------------------------------------- 
+  40     Property App\Services\Print\PrintService::$documentViews (array<int,   
+         string>) does not accept default value of type array<string, string>.  
+         🪪  property.defaultValue                                              
+  73     Property App\Services\Print\PrintService::$paperSizes (array<int, str  
+         ing>) does not accept default value of type array<string, string>.     
+         🪪  property.defaultValue                                              
+  93     Property App\Services\Print\PrintService::$orientations (array<int, s  
+         tring>) does not accept default value of type array<string, string>.   
+         🪪  property.defaultValue                                              
+  377    Using nullsafe property access "?->subscription_vat_rate" on left      
+         side of ?? is unnecessary. Use -> instead.                             
+         🪪  nullsafe.neverNull                                                 
+  447    Access to an undefined property                                        
+         App\Models\PaymentSettings::$company_center_name.                      
+         🪪  property.notFound                                                  
+         💡  Learn more: https://phpstan.org/blog/solving-phpstan-access-to-und  
+         efined-property                                                        
+ ------ ----------------------------------------------------------------------- 
+
+ ------ ----------------------------------------------------------------------- 
+  Line   Services/Reports/CashRegisterReportService.php                         
+ ------ ----------------------------------------------------------------------- 
+  96     Using nullsafe property access "?->value" on left side of ?? is        
+         unnecessary. Use -> instead.                                           
+         🪪  nullsafe.neverNull                                                 
+  97     Using nullsafe property access "?->value" on left side of ?? is        
+         unnecessary. Use -> instead.                                           
+         🪪  nullsafe.neverNull                                                 
+  102    Using nullsafe property access "?->code" on left side of ?? is         
+         unnecessary. Use -> instead.                                           
+         🪪  nullsafe.neverNull                                                 
+  102    Using nullsafe property access "?->invoice_number" on left side of ??  
+         is unnecessary. Use -> instead.                                        
+         🪪  nullsafe.neverNull                                                 
+  103    Using nullsafe property access "?->name" on left side of ?? is         
+         unnecessary. Use -> instead.                                           
+         🪪  nullsafe.neverNull                                                 
+  103    Using nullsafe property access "?->name" on left side of ?? is         
+         unnecessary. Use -> instead.                                           
+         🪪  nullsafe.neverNull                                                 
+  109    Using nullsafe property access "?->code" on left side of ?? is         
+         unnecessary. Use -> instead.                                           
+         🪪  nullsafe.neverNull                                                 
+  109    Using nullsafe property access "?->invoice_number" on left side of ??  
+         is unnecessary. Use -> instead.                                        
+         🪪  nullsafe.neverNull                                                 
+  110    Using nullsafe property access "?->name" on left side of ?? is         
+         unnecessary. Use -> instead.                                           
+         🪪  nullsafe.neverNull                                                 
+  116    Using nullsafe property access "?->name" on left side of ?? is         
+         unnecessary. Use -> instead.                                           
+         🪪  nullsafe.neverNull                                                 
+  116    Using nullsafe property access "?->name" on left side of ?? is         
+         unnecessary. Use -> instead.                                           
+         🪪  nullsafe.neverNull                                                 
+  122    Using nullsafe property access "?->name" on left side of ?? is         
+         unnecessary. Use -> instead.                                           
+         🪪  nullsafe.neverNull                                                 
+  140    Using nullsafe property access "?->name" on left side of ?? is         
+         unnecessary. Use -> instead.                                           
+         🪪  nullsafe.neverNull                                                 
+  141    Using nullsafe property access "?->photo_url" on left side of ?? is    
+         unnecessary. Use -> instead.                                           
+         🪪  nullsafe.neverNull                                                 
+  143    Using nullsafe property access "?->name" on left side of ?? is         
+         unnecessary. Use -> instead.                                           
+         🪪  nullsafe.neverNull                                                 
+  150    Relation 'center' is not found in App\Models\CompanyTransaction        
+         model.                                                                 
+         🪪  larastan.relationExistence                                         
+  211    Using nullsafe property access "?->name" on left side of ?? is         
+         unnecessary. Use -> instead.                                           
+         🪪  nullsafe.neverNull                                                 
+ ------ ----------------------------------------------------------------------- 
+
+ ------ ----------------------------------------------------------------------- 
+  Line   Services/Reports/TaxPeriodService.php                                  
+ ------ ----------------------------------------------------------------------- 
+  57     Using nullsafe property access "?->transactions_count" on left side    
+         of ?? is unnecessary. Use -> instead.                                  
+         🪪  nullsafe.neverNull                                                 
+  58     Using nullsafe property access "?->income_transactions_count" on left  
+         side of ?? is unnecessary. Use -> instead.                             
+         🪪  nullsafe.neverNull                                                 
+  59     Using nullsafe property access "?->expense_transactions_count" on      
+         left side of ?? is unnecessary. Use -> instead.                        
+         🪪  nullsafe.neverNull                                                 
+  198    Using nullsafe property access "?->name" on left side of ?? is         
+         unnecessary. Use -> instead.                                           
+         🪪  nullsafe.neverNull                                                 
+  241    Using nullsafe property access "?->name" on left side of ?? is         
+         unnecessary. Use -> instead.                                           
+         🪪  nullsafe.neverNull                                                 
+  242    Using nullsafe property access "?->tax_number" on left side of ?? is   
+         unnecessary. Use -> instead.                                           
+         🪪  nullsafe.neverNull                                                 
+  255    Relation 'purchaseInvoice' is not found in                             
+         App\Models\PurchaseReturnInvoice model.                                
+         🪪  larastan.relationExistence                                         
+  284    Using nullsafe property access "?->name" on left side of ?? is         
+         unnecessary. Use -> instead.                                           
+         🪪  nullsafe.neverNull                                                 
+  285    Using nullsafe property access "?->tax_number" on left side of ?? is   
+         unnecessary. Use -> instead.                                           
+         🪪  nullsafe.neverNull                                                 
+  341    Parameter #1 $array of function usort contains unresolvable type.      
+         🪪  argument.unresolvableType                                          
+  341    Parameter #2 $callback of function usort contains unresolvable type.   
+         🪪  argument.unresolvableType                                          
+ ------ ----------------------------------------------------------------------- 
+
+ [ERROR] Found 255 errors                                                       
+
+Script vendor/bin/phpstan analyse --memory-limit=512M handling the stan event returned with error code 1

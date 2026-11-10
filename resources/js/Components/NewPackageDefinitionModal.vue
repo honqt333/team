@@ -25,81 +25,67 @@
 
         <form @submit.prevent="submitForm" class="space-y-5">
             <!-- Names Row -->
-            <div class="grid grid-cols-2 gap-4">
-                <div>
-                    <label
-                        class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5"
-                    >
-                        {{ $t('services_management.form.name_ar') }}
-                        <span class="text-red-500">*</span>
-                    </label>
-                    <input
-                        type="text"
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <FormField
+                    v-slot="field"
+                    :label="$t('services_management.form.name_ar')"
+                    :error="form.errors.name_ar"
+                    required
+                >
+                    <AppInput
+                        :id="field.id"
+                        :aria-describedby="field.describedBy"
+                        :invalid="field.hasError"
                         v-model="form.name_ar"
                         dir="rtl"
                         :placeholder="$t('services_management.form.name_ar_placeholder')"
-                        class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
-                        :class="{ 'border-red-500': form.errors.name_ar }"
+                        class="w-full"
+                        required
                     />
-                    <p
-                        v-if="form.errors.name_ar"
-                        class="mt-1.5 text-sm text-red-600 dark:text-red-400"
-                    >
-                        {{ form.errors.name_ar }}
-                    </p>
-                </div>
-                <div>
-                    <label
-                        class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5"
-                    >
-                        {{ $t('services_management.form.name_en') }}
-                        <span class="text-red-500">*</span>
-                    </label>
-                    <input
-                        type="text"
+                </FormField>
+                <FormField
+                    v-slot="field"
+                    :label="$t('services_management.form.name_en')"
+                    :error="form.errors.name_en"
+                    required
+                >
+                    <AppInput
+                        :id="field.id"
+                        :aria-describedby="field.describedBy"
+                        :invalid="field.hasError"
                         v-model="form.name_en"
                         dir="ltr"
                         :placeholder="$t('services_management.form.name_en_placeholder')"
-                        class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
-                        :class="{ 'border-red-500': form.errors.name_en }"
+                        class="w-full"
+                        required
                     />
-                    <p
-                        v-if="form.errors.name_en"
-                        class="mt-1.5 text-sm text-red-600 dark:text-red-400"
-                    >
-                        {{ form.errors.name_en }}
-                    </p>
-                </div>
+                </FormField>
             </div>
 
             <!-- Descriptions Row -->
-            <div class="grid grid-cols-2 gap-4">
-                <div>
-                    <label
-                        class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5"
-                    >
-                        {{ $t('services_management.form.description_ar') }}
-                    </label>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <FormField
+                    :label="$t('services_management.form.description_ar')"
+                    :error="form.errors.description_ar"
+                >
                     <textarea
                         v-model="form.description_ar"
                         rows="2"
                         dir="rtl"
-                        class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500 focus:border-transparent resize-none transition-all"
+                        class="w-full px-4 py-2.5 border border-border dark:border-gray-600 rounded-xl bg-surface dark:bg-gray-900 text-text-primary dark:text-gray-100 focus:ring-2 focus:ring-focus-ring focus:border-action-primary resize-none transition-all"
                     ></textarea>
-                </div>
-                <div>
-                    <label
-                        class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5"
-                    >
-                        {{ $t('services_management.form.description_en') }}
-                    </label>
+                </FormField>
+                <FormField
+                    :label="$t('services_management.form.description_en')"
+                    :error="form.errors.description_en"
+                >
                     <textarea
                         v-model="form.description_en"
                         rows="2"
                         dir="ltr"
-                        class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500 focus:border-transparent resize-none transition-all"
+                        class="w-full px-4 py-2.5 border border-border dark:border-gray-600 rounded-xl bg-surface dark:bg-gray-900 text-text-primary dark:text-gray-100 focus:ring-2 focus:ring-focus-ring focus:border-action-primary resize-none transition-all"
                     ></textarea>
-                </div>
+                </FormField>
             </div>
 
             <!-- Package Items Section -->
@@ -212,41 +198,19 @@
             </div>
 
             <!-- Toggles Row -->
-            <div class="grid grid-cols-2 gap-4">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <!-- Active Toggle -->
-                <div class="flex items-center gap-3">
-                    <label class="relative inline-flex items-center cursor-pointer">
-                        <input type="checkbox" v-model="form.is_active" class="sr-only peer" />
-                        <div
-                            class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 dark:peer-focus:ring-indigo-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-indigo-600"
-                        ></div>
-                    </label>
-                    <span class="text-sm font-medium text-gray-700 dark:text-gray-300">
-                        {{ $t('services_management.form.is_active') }}
-                    </span>
-                </div>
+                <AppToggle
+                    v-model="form.is_active"
+                    :label="$t('services_management.form.is_active')"
+                />
 
                 <!-- Allow Price Override Toggle -->
-                <div class="flex items-start gap-3">
-                    <label class="relative inline-flex items-center cursor-pointer mt-0.5">
-                        <input
-                            type="checkbox"
-                            v-model="form.allow_price_override"
-                            class="sr-only peer"
-                        />
-                        <div
-                            class="w-11 h-6 bg-gray-200 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-indigo-600"
-                        ></div>
-                    </label>
-                    <div>
-                        <span class="text-sm font-medium text-gray-700 dark:text-gray-300">
-                            {{ $t('pricing.allow_price_override') }}
-                        </span>
-                        <p class="text-xs text-gray-400 dark:text-gray-500 mt-0.5">
-                            {{ $t('pricing.allow_price_override_hint') }}
-                        </p>
-                    </div>
-                </div>
+                <AppToggle
+                    v-model="form.allow_price_override"
+                    :label="$t('pricing.allow_price_override')"
+                    :description="$t('pricing.allow_price_override_hint')"
+                />
             </div>
 
             <!-- Notice: Price will be set separately -->
@@ -273,20 +237,24 @@
         </form>
 
         <template #footer>
-            <button
-                type="button"
-                @click="$emit('close')"
-                class="px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white font-medium transition-colors"
+            <div
+                class="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-2 sm:gap-3 w-full"
             >
-                {{ $t('common.cancel') }}
-            </button>
-            <button
-                @click="submitForm"
-                :disabled="form.processing || form.items.length === 0"
-                class="px-5 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl font-medium shadow-lg shadow-indigo-500/30 hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-            >
-                {{ form.processing ? $t('common.loading') : $t('common.save') }}
-            </button>
+                <button
+                    type="button"
+                    @click="$emit('close')"
+                    class="px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white font-medium transition-colors text-center"
+                >
+                    {{ $t('common.cancel') }}
+                </button>
+                <button
+                    @click="submitForm"
+                    :disabled="form.processing || form.items.length === 0"
+                    class="px-5 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl font-medium shadow-lg shadow-indigo-500/30 hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed transition-all text-center"
+                >
+                    {{ form.processing ? $t('common.loading') : $t('common.save') }}
+                </button>
+            </div>
         </template>
     </BaseModal>
 </template>
@@ -297,6 +265,9 @@ import { useForm, usePage } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import BaseModal from '@/Components/BaseModal.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
+import AppToggle from '@/Components/Common/AppToggle.vue';
+import FormField from '@/Components/Common/FormField.vue';
+import AppInput from '@/Components/App/AppInput.vue';
 import { useLocalized } from '@/Composables/useLocalized';
 
 const props = defineProps({

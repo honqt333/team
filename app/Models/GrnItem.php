@@ -36,6 +36,7 @@ class GrnItem extends Model
     // Relationships
     // ─────────────────────────────────────────────────────────────
 
+    /** @return BelongsTo<GoodsReceivedNote, $this> */
     public function goodsReceivedNote(): BelongsTo
     {
         return $this->belongsTo(GoodsReceivedNote::class);

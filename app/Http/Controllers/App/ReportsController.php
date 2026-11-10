@@ -20,7 +20,6 @@ use App\Models\InventoryMove;
 use App\Models\Invoice;
 use App\Models\Payment;
 use App\Models\PurchaseInvoice;
-use App\Models\PurchaseReturn;
 use App\Models\PurchaseReturnInvoice;
 use App\Models\Service;
 use App\Models\Supplier;
@@ -43,7 +42,6 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use Inertia\Response;
 use Symfony\Component\HttpFoundation\StreamedResponse;
-use Throwable;
 
 class ReportsController extends Controller
 {
@@ -117,8 +115,8 @@ class ReportsController extends Controller
             ->get()
             ->map(fn ($row) => [
                 'method' => $row->payment_method,
-                'total' => (float) $row->total_amount,
-                'count' => (int) $row->count,
+                'total' => (float) $row->getAttribute('total_amount'),
+                'count' => (int) $row->getAttribute('count'),
             ]);
 
         $relations = [
@@ -150,11 +148,11 @@ class ReportsController extends Controller
                 return match ($groupBy) {
                     'method' => $payment->payment_method ?: 'other',
                     'center' => $payment->center?->name ?: 'المركز الرئيسي',
-                    'customer_type' => $payment->workOrder?->customer?->type
-                        ?? $payment->invoice?->customer?->type
+                    'customer_type' => $payment->workOrder?->customer->type
+                        ?? $payment->invoice?->customer->type
                         ?? 'individual',
-                    'customer' => $payment->workOrder?->customer?->name
-                        ?? $payment->invoice?->customer?->name
+                    'customer' => $payment->workOrder?->customer->name
+                        ?? $payment->invoice?->customer->name
                         ?? 'عميل غير محدد',
                     'supplier' => $payment->purchaseInvoice?->supplier?->name ?: 'مورد غير محدد',
                     default => 'all',
@@ -251,10 +249,10 @@ class ReportsController extends Controller
             'centers' => $centers,
             'companyInfo' => [
                 'name' => $tenant->legal_name ?: $tenant->name,
-                'vat_number' => $tenant->taxSettings?->tax_number ?? $tenant->vat_number ?? '',
+                'vat_number' => $tenant->taxSettings->tax_number ?? $tenant->vat_number ?? '',
                 'cr_number' => $tenant->cr_number ?? '',
                 'logo_path' => $tenant->logo_path ?? '',
-                'center_name' => $currentCenter?->name ?? '',
+                'center_name' => $currentCenter->name ?? '',
             ],
             'payments' => $payments,
             'groupedPayments' => $groupedPayments,
@@ -341,23 +339,23 @@ class ReportsController extends Controller
 
             $query->chunk(200, function ($payments) use ($output) {
                 foreach ($payments as $payment) {
-                    $partyName = $payment->workOrder?->customer?->name
-                        ?? $payment->invoice?->customer?->name
-                        ?? $payment->purchaseInvoice?->supplier?->name
+                    $partyName = $payment->workOrder?->customer->name
+                        ?? $payment->invoice?->customer->name
+                        ?? $payment->purchaseInvoice?->supplier->name
                         ?? '—';
 
-                    $phone = $payment->workOrder?->customer?->phone
-                        ?? $payment->invoice?->customer?->phone
-                        ?? $payment->purchaseInvoice?->supplier?->phone
+                    $phone = $payment->workOrder?->customer->phone
+                        ?? $payment->invoice?->customer->phone
+                        ?? $payment->purchaseInvoice?->supplier->phone
                         ?? '—';
 
-                    $invoiceNo = $payment->invoice?->invoice_number
-                        ?? $payment->purchaseInvoice?->invoice_number
+                    $invoiceNo = $payment->invoice->invoice_number
+                        ?? $payment->purchaseInvoice->invoice_number
                         ?? '—';
 
-                    $woNo = $payment->workOrder?->work_order_number ?? $payment->workOrder?->code ?? '—';
-                    $vehicleStr = ($payment->workOrder?->vehicle?->make?->name_ar ?? $payment->workOrder?->vehicle?->make_other ?? '').' '.($payment->workOrder?->vehicle?->model?->name_ar ?? $payment->workOrder?->vehicle?->model_other ?? '');
-                    $plate = $payment->workOrder?->vehicle?->plate_number ?? '—';
+                    $woNo = $payment->workOrder?->work_order_number ?? $payment->workOrder->code ?? '—';
+                    $vehicleStr = ($payment->workOrder?->vehicle?->make->name_ar ?? $payment->workOrder?->vehicle->make_other ?? '').' '.($payment->workOrder?->vehicle?->model->name_ar ?? $payment->workOrder?->vehicle->model_other ?? '');
+                    $plate = $payment->workOrder?->vehicle->plate_number ?? '—';
 
                     $typeVal = $payment->type instanceof PaymentType ? $payment->type->value : (string) $payment->type;
                     $typeLabel = match ($typeVal) {
@@ -368,7 +366,7 @@ class ReportsController extends Controller
 
                     fputcsv($output, [
                         $payment->reference ?: ('REC-'.$payment->id),
-                        $payment->center?->name ?? 'المركز الرئيسي',
+                        $payment->center->name ?? 'المركز الرئيسي',
                         $payment->payment_date?->format('Y-m-d H:i') ?? '—',
                         $typeLabel,
                         $partyName,
@@ -379,7 +377,7 @@ class ReportsController extends Controller
                         $plate,
                         $payment->payment_method,
                         number_format((float) $payment->amount, 2, '.', ''),
-                        $payment->receivedBy?->name ?? '—',
+                        $payment->receivedBy->name ?? '—',
                         $payment->notes ?? '',
                     ]);
                 }
@@ -422,7 +420,7 @@ class ReportsController extends Controller
 
         $accessibleCenterIds = $this->accessibleCenterIds();
 
-        if ($centerFilter !== 'all' && ! empty($centerFilter)) {
+        if ($centerFilter !== 'all') {
             $requestedCenterId = (int) $centerFilter;
 
             // A centre the signed-in user cannot read is not applied:
@@ -611,8 +609,8 @@ class ReportsController extends Controller
                     'vehicle' => $inv->workOrder->vehicle ? [
                         'id' => $inv->workOrder->vehicle->id,
                         'plate_number' => $inv->workOrder->vehicle->plate_number,
-                        'make' => $inv->workOrder->vehicle->make?->name_ar ?? $inv->workOrder->vehicle->make_other,
-                        'model' => $inv->workOrder->vehicle->model?->name_ar ?? $inv->workOrder->vehicle->model_other,
+                        'make' => $inv->workOrder->vehicle->make->name_ar ?? $inv->workOrder->vehicle->make_other,
+                        'model' => $inv->workOrder->vehicle->model->name_ar ?? $inv->workOrder->vehicle->model_other,
                         'year' => $inv->workOrder->vehicle->year,
                     ] : null,
                 ] : null,
@@ -635,6 +633,7 @@ class ReportsController extends Controller
                 ->orderBy('issue_date', 'desc')
                 ->limit(2000)
                 ->get()
+                ->toBase()
                 ->map($mapInvoice);
 
             $grouped = $allInvoices->groupBy(function ($inv) use ($groupBy) {
@@ -668,7 +667,7 @@ class ReportsController extends Controller
                     'total_invoice_amount' => (float) $items->sum('total_incl_tax'),
                     'total_paid' => (float) $items->sum('total_paid'),
                     'total_payment_remaining' => (float) $items->sum('remaining'),
-                    'items' => $items->values(),
+                    'items' => $items->values()->all(),
                 ];
             })->values();
         } else {
@@ -810,10 +809,10 @@ class ReportsController extends Controller
                     $remaining = max(0, (float) $inv->total_incl_tax - (float) $inv->total_paid);
                     $isOverdue = $inv->due_date && $inv->due_date->isPast() && $inv->payment_status !== 'paid';
 
-                    $customerName = $inv->customer?->name ?? $inv->customer_name_snapshot ?? '—';
-                    $customerType = ($inv->customer?->type ?? '') === 'company' ? 'شركة / منشأة' : 'فرد';
-                    $customerPhone = $inv->customer?->phone ?? '—';
-                    $customerVat = $inv->customer?->tax_number ?? $inv->customer_vat_snapshot ?? '—';
+                    $customerName = $inv->customer->name ?? $inv->customer_name_snapshot ?? '—';
+                    $customerType = ($inv->customer->type ?? '') === 'company' ? 'شركة / منشأة' : 'فرد';
+                    $customerPhone = $inv->customer->phone ?? '—';
+                    $customerVat = $inv->customer->tax_number ?? $inv->customer_vat_snapshot ?? '—';
 
                     $invType = match ($inv->type instanceof InvoiceType ? $inv->type->value : (string) $inv->type) {
                         'credit_note' => 'إشعار دائن',
@@ -830,7 +829,7 @@ class ReportsController extends Controller
 
                     fputcsv($output, [
                         $index++,
-                        $inv->center?->name ?? 'المركز الرئيسي',
+                        $inv->center->name ?? 'المركز الرئيسي',
                         $inv->invoice_number,
                         $invType,
                         $inv->workOrder?->code ?: '—',
@@ -840,7 +839,7 @@ class ReportsController extends Controller
                         $customerType,
                         $customerPhone,
                         $customerVat,
-                        $inv->workOrder?->vehicle?->plate_number ?? '—',
+                        $inv->workOrder?->vehicle->plate_number ?? '—',
                         number_format((float) $inv->total_excl_tax, 2, '.', ''),
                         number_format($discount, 2, '.', ''),
                         number_format((float) $inv->total_tax, 2, '.', ''),
@@ -863,6 +862,7 @@ class ReportsController extends Controller
     /**
      * Build reusable invoices query with multi-tenancy, center and filters.
      */
+    /** @return Builder<Invoice> */
     private function buildInvoicesQuery(
         int $tenantId,
         ?int $centerId,
@@ -1088,6 +1088,7 @@ class ReportsController extends Controller
                 ->orderBy('issue_date', 'desc')
                 ->limit(2000)
                 ->get()
+                ->toBase()
                 ->map($mapPurchaseInvoice);
 
             $grouped = $allInvoices->groupBy(function ($inv) use ($groupBy) {
@@ -1122,7 +1123,7 @@ class ReportsController extends Controller
                     'total_invoice_amount' => (float) $items->sum('total'),
                     'total_paid' => (float) $items->sum('paid'),
                     'total_payment_remaining' => (float) $items->sum('balance'),
-                    'items' => $items->values(),
+                    'items' => $items->values()->all(),
                 ];
             })->values();
         } else {
@@ -1265,13 +1266,13 @@ class ReportsController extends Controller
 
                     fputcsv($output, [
                         $index++,
-                        $inv->center?->name ?? 'المركز الرئيسي',
+                        $inv->center->name ?? 'المركز الرئيسي',
                         $inv->code,
                         $inv->invoice_number ?: '—',
                         $inv->purchaseOrder?->code ?: '—',
-                        $inv->supplier?->name ?? '—',
-                        $inv->supplier?->phone ?? '—',
-                        $inv->supplier?->tax_number ?? '—',
+                        $inv->supplier->name ?? '—',
+                        $inv->supplier->phone ?? '—',
+                        $inv->supplier->tax_number ?? '—',
                         $inv->issue_date?->format('Y-m-d') ?? '—',
                         $inv->due_date?->format('Y-m-d') ?? '—',
                         number_format((float) $inv->subtotal, 2, '.', ''),
@@ -1506,12 +1507,13 @@ class ReportsController extends Controller
                     'returnInvoices:id,purchase_invoice_id,code,return_date,subtotal,tax_amount,total,create_debit_note',
                 ])
                 ->get()
+                ->toBase()
                 ->map($mapSupplierInvoice);
         }
 
         $returnItems = collect();
 
-        if ($documentType !== 'invoices' && ($paymentStatus === 'all' || $paymentStatus === '')) {
+        if ($documentType !== 'invoices' && $paymentStatus === 'all') {
             $returnItems = (clone $returnQuery)
                 ->with([
                     'center:id,name',
@@ -1519,6 +1521,7 @@ class ReportsController extends Controller
                     'purchaseInvoice.supplier:id,name,phone,type,tax_number',
                 ])
                 ->get()
+                ->toBase()
                 ->map($mapSupplierReturn);
         }
 
@@ -1561,7 +1564,7 @@ class ReportsController extends Controller
                     'total_invoice_amount' => $total,
                     'total_paid' => $paid,
                     'total_payment_remaining' => $balance,
-                    'items' => $items->values(),
+                    'items' => $items->values()->all(),
                 ];
             })->values();
         } else {
@@ -1730,13 +1733,13 @@ class ReportsController extends Controller
                         fputcsv($output, [
                             $index++,
                             'فاتورة شراء',
-                            $inv->center?->name ?? 'المركز الرئيسي',
+                            $inv->center->name ?? 'المركز الرئيسي',
                             $inv->code,
                             $inv->invoice_number ?: '—',
                             '—',
-                            $inv->supplier?->name ?? '—',
-                            $inv->supplier?->phone ?? '—',
-                            $inv->supplier?->tax_number ?? '—',
+                            $inv->supplier->name ?? '—',
+                            $inv->supplier->phone ?? '—',
+                            $inv->supplier->tax_number ?? '—',
                             $inv->issue_date?->format('Y-m-d') ?? '—',
                             number_format((float) $inv->subtotal, 2, '.', ''),
                             number_format($adjusted, 2, '.', ''),
@@ -1750,7 +1753,7 @@ class ReportsController extends Controller
                 });
             }
 
-            if ($documentType !== 'invoices' && ($paymentStatus === 'all' || $paymentStatus === '')) {
+            if ($documentType !== 'invoices' && $paymentStatus === 'all') {
                 $returnQuery->chunk(200, function ($returns) use ($output, &$index) {
                     foreach ($returns as $ret) {
                         $isDebit = (bool) $ret->create_debit_note;
@@ -1760,13 +1763,13 @@ class ReportsController extends Controller
                         fputcsv($output, [
                             $index++,
                             $isDebit ? 'إشعار مدين للمورد' : 'فاتورة مرتجعة',
-                            $ret->center?->name ?? ($parent?->center?->name ?? 'المركز الرئيسي'),
+                            $ret->center->name ?? ($parent?->center->name ?? 'المركز الرئيسي'),
                             $ret->code,
                             $ret->notes ?: ($isDebit ? 'إشعار مدين للمورد' : 'مرتجع بضاعة'),
-                            $parent?->code ?? '—',
-                            $parent?->supplier?->name ?? '—',
-                            $parent?->supplier?->phone ?? '—',
-                            $parent?->supplier?->tax_number ?? '—',
+                            $parent->code ?? '—',
+                            $parent?->supplier->name ?? '—',
+                            $parent?->supplier->phone ?? '—',
+                            $parent?->supplier->tax_number ?? '—',
                             $ret->return_date?->format('Y-m-d') ?? '—',
                             number_format(-(float) $ret->subtotal, 2, '.', ''),
                             number_format($tot, 2, '.', ''),
@@ -1811,7 +1814,7 @@ class ReportsController extends Controller
 
         $accessibleCenterIds = $this->accessibleCenterIds();
 
-        if ($centerFilter !== 'all' && ! empty($centerFilter)) {
+        if ($centerFilter !== 'all') {
             $requestedCenterId = (int) $centerFilter;
 
             if ($accessibleCenterIds === null || in_array($requestedCenterId, $accessibleCenterIds, true)) {
@@ -1861,6 +1864,7 @@ class ReportsController extends Controller
     /**
      * Build reusable purchase invoices query with multi-tenancy, center and filters.
      */
+    /** @return Builder<PurchaseInvoice> */
     private function buildPurchaseInvoicesQuery(
         int $tenantId,
         ?int $centerId,
@@ -2027,28 +2031,24 @@ class ReportsController extends Controller
             $refCode = '—';
             $refUrl = null;
 
-            try {
-                $ref = $move->reference;
-            } catch (Throwable) {
-                $ref = null;
-            }
+            $ref = $move->resolveReference();
 
             if ($ref instanceof WorkOrderItemPart) {
                 $refLabel = 'أمر عمل';
                 $wo = $move->work_order;
-                $refCode = $wo?->code ?? ('#'.($ref->work_order_id ?? $move->reference_id));
+                $refCode = $wo->code ?? ('#'.($ref->work_order_id ?? $move->reference_id));
                 $refUrl = $wo && Route::has('work-orders.show') ? route('work-orders.show', $wo->id) : null;
             } elseif ($ref instanceof Invoice) {
                 $isCreditNote = ($ref->type === 'credit_note' || (is_object($ref->type) && $ref->type->value === 'credit_note'));
                 $refLabel = $isCreditNote ? 'إشعار دائن' : 'فاتورة مبيعات';
                 $refCode = $ref->invoice_number ?: ('#'.$ref->id);
-                $refUrl = $ref && Route::has('app.invoices.show') ? route('app.invoices.show', $ref->id) : null;
+                $refUrl = Route::has('app.invoices.show') ? route('app.invoices.show', $ref->id) : null;
             } elseif ($ref instanceof GrnItem) {
                 $refLabel = 'سند استلام';
                 $grn = $ref->goodsReceivedNote;
                 $refCode = $grn?->code ?: ('#'.($ref->goods_received_note_id ?? $move->reference_id));
                 $refUrl = $grn && Route::has('app.purchasing.grn.show') ? route('app.purchasing.grn.show', $grn->id) : null;
-            } elseif ($ref instanceof PurchaseReturn) {
+            } elseif ($ref instanceof PurchaseReturnInvoice) {
                 $refLabel = 'مرتجع شراء';
                 $refCode = $ref->code ?: ('#'.$move->reference_id);
             } elseif (! empty($move->notes)) {
@@ -2099,8 +2099,8 @@ class ReportsController extends Controller
                     'barcode' => $move->part->barcode,
                     'name_ar' => $move->part->name_ar,
                     'name_en' => $move->part->name_en,
-                    'unit_name' => $move->part->unit?->name_ar ?? $move->part->unit?->name_en ?? 'حبة',
-                    'category_name' => $move->part->category?->name_ar ?? $move->part->category?->name_en ?? '—',
+                    'unit_name' => $move->part->unit->name_ar ?? $move->part->unit->name_en ?? 'حبة',
+                    'category_name' => $move->part->category->name_ar ?? $move->part->category->name_en ?? '—',
                 ] : null,
                 'posted_by' => $move->postedByUser ? [
                     'id' => $move->postedByUser->id,
@@ -2118,6 +2118,7 @@ class ReportsController extends Controller
                 ->orderBy('posted_at', 'desc')
                 ->limit(2000)
                 ->get()
+                ->toBase()
                 ->map($mapStockActivity);
 
             $grouped = $allMoves->groupBy(function ($m) use ($groupBy) {
@@ -2142,7 +2143,7 @@ class ReportsController extends Controller
                     'total_outgoing' => $outgoing,
                     'net_qty' => round($incoming - $outgoing, 3),
                     'total_cost' => (float) $items->sum('total_cost'),
-                    'items' => $items->values(),
+                    'items' => $items->values()->all(),
                 ];
             })->values();
         } else {
@@ -2283,14 +2284,10 @@ class ReportsController extends Controller
 
                     $refText = '—';
 
-                    try {
-                        $ref = $m->reference;
-                    } catch (Throwable) {
-                        $ref = null;
-                    }
+                    $ref = $m->resolveReference();
 
                     if ($ref instanceof WorkOrderItemPart) {
-                        $refText = 'كرت عمل: '.($m->work_order?->code ?? ('#'.$ref->work_order_id));
+                        $refText = 'كرت عمل: '.($m->work_order->code ?? ('#'.$ref->work_order_id));
                     } elseif ($ref instanceof Invoice) {
                         $isCreditNote = ($ref->type === 'credit_note' || (is_object($ref->type) && $ref->type->value === 'credit_note'));
                         $refText = ($isCreditNote ? 'إشعار دائن: ' : 'فاتورة مبيعات: ').($ref->invoice_number ?: ('#'.$ref->id));
@@ -2302,11 +2299,11 @@ class ReportsController extends Controller
 
                     fputcsv($output, [
                         $index++,
-                        $m->center?->name ?? 'المركز الرئيسي',
-                        $m->warehouse?->name ?? 'المستودع الرئيسي',
-                        $m->part?->sku ?? '—',
-                        $m->part?->name_ar ?? $m->part?->name_en ?? '—',
-                        $m->part?->category?->name_ar ?? '—',
+                        $m->center->name ?? 'المركز الرئيسي',
+                        $m->warehouse->name ?? 'المستودع الرئيسي',
+                        $m->part->sku ?? '—',
+                        $m->part->name_ar ?? $m->part->name_en ?? '—',
+                        $m->part?->category->name_ar ?? '—',
                         InventoryMove::getMoveTypeLabel($m->move_type),
                         $m->posted_at?->format('Y-m-d H:i') ?? '—',
                         number_format($before, 3, '.', ''),
@@ -2316,7 +2313,7 @@ class ReportsController extends Controller
                         number_format((float) $m->total_cost, 2, '.', ''),
                         $refText,
                         $m->notes ?: '—',
-                        $m->postedByUser?->name ?? '—',
+                        $m->postedByUser->name ?? '—',
                     ]);
                 }
             });
@@ -2331,6 +2328,7 @@ class ReportsController extends Controller
     /**
      * Build reusable stock activities query with multi-tenancy, center and filters.
      */
+    /** @return Builder<InventoryMove> */
     private function buildStockActivitiesQuery(
         int $tenantId,
         ?int $centerId,
@@ -2481,6 +2479,7 @@ class ReportsController extends Controller
         $statusBreakdown = (clone $kpiQuery)
             ->selectRaw('status, count(*) as count, sum(total_incl_tax) as total_amount')
             ->groupBy('status')
+            ->toBase()
             ->get()
             ->map(fn ($r) => [
                 'status' => $r->status,
@@ -2540,8 +2539,8 @@ class ReportsController extends Controller
                 'vehicle' => $wo->vehicle ? [
                     'id' => $wo->vehicle->id,
                     'plate_number' => $wo->vehicle->plate_number,
-                    'make_name' => $wo->vehicle->make?->name_ar ?? $wo->vehicle->make_other ?? '',
-                    'model_name' => $wo->vehicle->model?->name_ar ?? $wo->vehicle->model_other ?? '',
+                    'make_name' => $wo->vehicle->make->name_ar ?? $wo->vehicle->make_other ?? '',
+                    'model_name' => $wo->vehicle->model->name_ar ?? $wo->vehicle->model_other ?? '',
                     'year' => $wo->vehicle->year,
                     'odometer' => $wo->odometer ?? $wo->vehicle->odometer,
                 ] : null,
@@ -2561,6 +2560,7 @@ class ReportsController extends Controller
                 ->orderBy('id', 'desc')
                 ->limit(2000)
                 ->get()
+                ->toBase()
                 ->map($mapTicket);
 
             $grouped = $allTickets->groupBy(function ($ticket) use ($groupBy) {
@@ -2583,7 +2583,7 @@ class ReportsController extends Controller
                     'total_remaining' => (float) $items->sum('balance'),
                     'total_bad_debt' => (float) $items->sum('bad_debt'),
                     'net_amount' => (float) $items->sum('net_amount'),
-                    'tickets' => $items->values(),
+                    'tickets' => $items->values()->all(),
                 ];
             })->values();
         } else {
@@ -2650,12 +2650,12 @@ class ReportsController extends Controller
             'tickets' => $tickets,
             'groupedTickets' => $groupedTickets,
             'companyInfo' => [
-                'name' => $tenant?->name ?? 'مركز صيانة',
-                'commercial_register' => $tenant?->cr_number ?? null,
-                'tax_number' => $tenant?->tax_number ?? null,
-                'address' => $tenant?->address ?? null,
-                'phone' => $tenant?->phone ?? null,
-                'center_name' => $currentCenter?->name ?? null,
+                'name' => $tenant->name ?? 'مركز صيانة',
+                'commercial_register' => $tenant->cr_number ?? null,
+                'tax_number' => null,
+                'address' => $tenant->address ?? null,
+                'phone' => $tenant->phone ?? null,
+                'center_name' => $currentCenter->name ?? null,
             ],
         ]);
     }
@@ -2752,22 +2752,22 @@ class ReportsController extends Controller
                         $badDebt = (float) $wo->bad_debt;
                         $net = (float) ($wo->total_incl_tax - $partsCost);
 
-                        $vehicleName = trim(($wo->vehicle?->make?->name_ar ?? $wo->vehicle?->make_other ?? '').' '.($wo->vehicle?->model?->name_ar ?? $wo->vehicle?->model_other ?? '').' '.($wo->vehicle?->year ?? ''));
+                        $vehicleName = trim(($wo->vehicle?->make->name_ar ?? $wo->vehicle->make_other ?? '').' '.($wo->vehicle?->model->name_ar ?? $wo->vehicle->model_other ?? '').' '.($wo->vehicle->year ?? ''));
 
                         fputcsv($handle, [
                             $wo->code,
-                            $wo->center?->name ?? 'المركز الرئيسي',
+                            $wo->center->name ?? 'المركز الرئيسي',
                             $wo->status,
                             $wo->entry_date ? Carbon::parse($wo->entry_date)->format('Y-m-d') : '',
                             $wo->expected_end_date ? Carbon::parse($wo->expected_end_date)->format('Y-m-d') : '',
                             $wo->closed_at ? Carbon::parse($wo->closed_at)->format('Y-m-d H:i') : '',
-                            $wo->customer?->name ?? 'عميل غير مسجل',
-                            $wo->customer?->phone ?? '',
-                            $wo->customer?->type ?? '',
+                            $wo->customer->name ?? 'عميل غير مسجل',
+                            $wo->customer->phone ?? '',
+                            $wo->customer->type ?? '',
                             $vehicleName,
-                            $wo->vehicle?->plate_number ?? '',
-                            $wo->odometer ?? $wo->vehicle?->odometer ?? '',
-                            $wo->invoice?->invoice_number ?? '',
+                            $wo->vehicle->plate_number ?? '',
+                            $wo->odometer ?? $wo->vehicle->odometer ?? '',
+                            $wo->invoice->invoice_number ?? '',
                             number_format((float) $wo->total_excl_tax, 2, '.', ''),
                             number_format((float) $wo->total_tax, 2, '.', ''),
                             number_format((float) $wo->total_incl_tax, 2, '.', ''),
@@ -2789,6 +2789,7 @@ class ReportsController extends Controller
     /**
      * Build the filtered WorkOrder query.
      */
+    /** @return Builder<WorkOrder> */
     private function buildTicketsQuery(
         int $tenantId,
         ?int $centerId,
@@ -2811,7 +2812,7 @@ class ReportsController extends Controller
         $user = auth()->user();
         $userCenterIds = $user?->centers()->pluck('centers.id')->toArray() ?? [];
 
-        if ($centerFilter !== 'all' && ! empty($centerFilter)) {
+        if ($centerFilter !== 'all') {
             $query->where('center_id', (int) $centerFilter);
         } else {
             if (! empty($userCenterIds)) {
@@ -2853,7 +2854,7 @@ class ReportsController extends Controller
             $query->whereHas('customer', fn ($c) => $c->where('type', $customerType));
         }
 
-        if ($makeId !== 'all' && ! empty($makeId)) {
+        if ($makeId !== 'all') {
             $query->whereHas('vehicle', fn ($v) => $v->where('make_id', $makeId));
         }
 
@@ -2997,10 +2998,10 @@ class ReportsController extends Controller
             return [
                 'id' => $item->id,
                 'work_order_id' => $item->work_order_id,
-                'ticket_no' => $wo?->code ?? ('#'.$item->work_order_id),
-                'ticket_status' => $wo?->status ?? 'unknown',
+                'ticket_no' => $wo->code ?? ('#'.$item->work_order_id),
+                'ticket_status' => $wo->status ?? 'unknown',
                 'center_id' => $item->center_id,
-                'center_name' => $center?->name ?? 'المركز الرئيسي',
+                'center_name' => $center->name ?? 'المركز الرئيسي',
                 'service_id' => $item->service_id,
                 'service_name' => $item->title ?: ($service?->name_ar ?: $service?->name_en ?: 'خدمة صيانة'),
                 'department_id' => $item->department_id,
@@ -3008,15 +3009,15 @@ class ReportsController extends Controller
                 'status' => $item->status,
                 'customer' => [
                     'id' => $customer?->id,
-                    'name' => $customer?->name ?? 'عميل غير مسجل',
-                    'phone' => $customer?->phone ?? '',
-                    'type' => $customer?->type ?? 'individual',
+                    'name' => $customer->name ?? 'عميل غير مسجل',
+                    'phone' => $customer->phone ?? '',
+                    'type' => $customer->type ?? 'individual',
                 ],
                 'vehicle' => [
                     'make_name' => $makeName,
                     'model_name' => $modelName,
                     'year' => $vehicle?->year,
-                    'plate_number' => $vehicle?->plate_number ?? '',
+                    'plate_number' => $vehicle->plate_number ?? '',
                     'display_name' => trim("{$makeName} {$modelName} ".($vehicle?->year ? "({$vehicle->year})" : '')),
                 ],
                 'start_date' => $item->started_at?->format('Y-m-d') ?: ($wo?->opened_at?->format('Y-m-d') ?: $item->created_at->format('Y-m-d')),
@@ -3044,6 +3045,7 @@ class ReportsController extends Controller
                 ->with($relations)
                 ->orderBy('work_order_items.id', 'desc')
                 ->get()
+                ->toBase()
                 ->map($mapService);
 
             $grouped = $allServices->groupBy(function ($item) use ($groupBy) {
@@ -3069,7 +3071,7 @@ class ReportsController extends Controller
                     'total_service_cost' => (float) $items->sum('service_cost'),
                     'total_service_vat' => (float) $items->sum('service_vat'),
                     'total_amount' => (float) $items->sum('total_amount'),
-                    'services' => $items->values(),
+                    'services' => $items->values()->all(),
                 ];
             })->values();
         } else {
@@ -3156,9 +3158,9 @@ class ReportsController extends Controller
             'models' => $models,
             'centers' => $centers,
             'meta' => [
-                'tenant_name' => $tenant?->name ?? 'مركز صيانة السيارات',
+                'tenant_name' => $tenant->name ?? 'مركز صيانة السيارات',
                 'tenant_logo' => $tenant?->logo_url,
-                'center_name' => $currentCenter?->name ?? 'المركز الرئيسي',
+                'center_name' => $currentCenter->name ?? 'المركز الرئيسي',
                 'printed_at' => now()->format('Y-m-d H:i'),
                 'prepared_by' => auth()->user()->name,
             ],
@@ -3279,15 +3281,15 @@ class ReportsController extends Controller
 
                     fputcsv($handle, [
                         $rowNumber++,
-                        $wo?->code ?? ('#'.$item->work_order_id),
-                        $center?->name ?? 'المركز الرئيسي',
+                        $wo->code ?? ('#'.$item->work_order_id),
+                        $center->name ?? 'المركز الرئيسي',
                         $department ? ($department->name_ar ?: $department->name_en) : 'عام',
                         $item->title ?: ($service?->name_ar ?: $service?->name_en ?: 'خدمة'),
                         $item->status,
-                        $customer?->name ?? '',
-                        $customer?->phone ?? '',
+                        $customer->name ?? '',
+                        $customer->phone ?? '',
                         trim("{$makeName} {$modelName} {$vehicle?->year}"),
-                        $vehicle?->plate_number ?? '',
+                        $vehicle->plate_number ?? '',
                         $item->started_at?->format('Y-m-d') ?: ($wo?->opened_at?->format('Y-m-d') ?: ''),
                         $item->due_date?->format('Y-m-d') ?: ($wo?->expected_end_date ? Carbon::parse($wo->expected_end_date)->format('Y-m-d') : ''),
                         $qty,
@@ -3312,6 +3314,7 @@ class ReportsController extends Controller
     /**
      * Build unified query for Services report.
      */
+    /** @return Builder<WorkOrderItem> */
     protected function buildServicesQuery(
         int $tenantId,
         ?int $centerId,
@@ -3550,8 +3553,8 @@ class ReportsController extends Controller
                         'vip' => __('reports.customers_report.type_vip'),
                         default => (string) $key,
                     },
-                    'customer' => $items->first()?->customer?->name ?? 'عميل غير مسجل',
-                    'center' => $items->first()?->center?->name ?? 'المركز الرئيسي',
+                    'customer' => $items->first()?->customer->name ?? 'عميل غير مسجل',
+                    'center' => $items->first()?->center->name ?? 'المركز الرئيسي',
                     default => (string) $key,
                 };
 
@@ -3577,7 +3580,7 @@ class ReportsController extends Controller
         $centers = Center::where('tenant_id', $tenantId)->select('id', 'name')->orderBy('name')->get();
         $customers = Customer::where('tenant_id', $tenantId)->select('id', 'name', 'phone', 'type')->orderBy('name')->get();
         $makes = VehicleMake::select('id', 'name_ar', 'name_en')->orderBy('name_ar')->get();
-        $models = ($makeId !== 'all' && ! empty($makeId))
+        $models = ($makeId !== 'all')
             ? VehicleModel::where('make_id', (int) $makeId)->select('id', 'make_id', 'name_ar', 'name_en')->orderBy('name_ar')->get()
             : collect();
 
@@ -3614,12 +3617,12 @@ class ReportsController extends Controller
             'makes' => $makes,
             'models' => $models,
             'companyInfo' => [
-                'name' => $tenant?->name ?? 'مركز صيانة',
-                'commercial_register' => $tenant?->cr_number ?? null,
-                'tax_number' => $tenant?->tax_number ?? null,
-                'address' => $tenant?->address ?? null,
-                'phone' => $tenant?->phone ?? null,
-                'center_name' => $currentCenter?->name ?? null,
+                'name' => $tenant->name ?? 'مركز صيانة',
+                'commercial_register' => $tenant->cr_number ?? null,
+                'tax_number' => null,
+                'address' => $tenant->address ?? null,
+                'phone' => $tenant->phone ?? null,
+                'center_name' => $currentCenter->name ?? null,
             ],
         ]);
     }
@@ -3763,7 +3766,7 @@ class ReportsController extends Controller
         $user = auth()->user();
         $userCenterIds = $user?->centers()->pluck('centers.id')->toArray() ?? [];
 
-        if ($centerFilter !== 'all' && ! empty($centerFilter)) {
+        if ($centerFilter !== 'all') {
             $query->where('center_id', (int) $centerFilter);
         } else {
             if (! empty($userCenterIds)) {
@@ -3803,7 +3806,7 @@ class ReportsController extends Controller
             });
         }
 
-        if ($makeId !== 'all' && ! empty($makeId)) {
+        if ($makeId !== 'all') {
             $query->whereHas('vehicle', function (Builder $vq) use ($makeId) {
                 $vq->where('make_id', (int) $makeId);
             });
@@ -3868,31 +3871,31 @@ class ReportsController extends Controller
             $isOverdue = Carbon::parse($wo->expected_end_date)->isPast();
         }
 
-        $vehicleName = trim(($wo->vehicle?->make?->name_ar ?? $wo->vehicle?->make_other ?? '').' '.($wo->vehicle?->model?->name_ar ?? $wo->vehicle?->model_other ?? '').' '.($wo->vehicle?->year ?? ''));
+        $vehicleName = trim(($wo->vehicle?->make->name_ar ?? $wo->vehicle->make_other ?? '').' '.($wo->vehicle?->model->name_ar ?? $wo->vehicle->model_other ?? '').' '.($wo->vehicle->year ?? ''));
 
         return [
             'id' => $wo->id,
             'code' => $wo->code,
             'status' => $wo->status,
             'center_id' => $wo->center_id,
-            'center_name' => $wo->center?->name ?? 'المركز الرئيسي',
+            'center_name' => $wo->center->name ?? 'المركز الرئيسي',
             'is_overdue' => $isOverdue,
             'entry_date' => $wo->entry_date ? Carbon::parse($wo->entry_date)->format('Y-m-d') : ($wo->created_at ? $wo->created_at->format('Y-m-d') : ''),
             'expected_end_date' => $wo->expected_end_date ? Carbon::parse($wo->expected_end_date)->format('Y-m-d') : null,
             'closed_at' => $wo->closed_at ? Carbon::parse($wo->closed_at)->format('Y-m-d H:i') : null,
             'customer' => [
                 'id' => $wo->customer?->id,
-                'name' => $wo->customer?->name ?? 'عميل غير مسجل',
-                'phone' => $wo->customer?->phone ?? '',
-                'type' => $wo->customer?->type ?? 'individual',
-                'tax_number' => $wo->customer?->tax_number ?? '',
+                'name' => $wo->customer->name ?? 'عميل غير مسجل',
+                'phone' => $wo->customer->phone ?? '',
+                'type' => $wo->customer->type ?? 'individual',
+                'tax_number' => $wo->customer->tax_number ?? '',
             ],
             'vehicle' => [
                 'id' => $wo->vehicle?->id,
                 'name' => $vehicleName,
-                'plate_number' => $wo->vehicle?->plate_number ?? '',
+                'plate_number' => $wo->vehicle->plate_number ?? '',
                 'year' => $wo->vehicle?->year,
-                'odometer' => $wo->odometer ?? $wo->vehicle?->odometer ?? null,
+                'odometer' => $wo->odometer ?? $wo->vehicle->odometer ?? null,
             ],
             'invoice' => $wo->invoice ? [
                 'id' => $wo->invoice->id,
@@ -4026,7 +4029,7 @@ class ReportsController extends Controller
                         'total_avg_contribution_by_service_hours' => $groupAvgByHours,
                         'total_weighted_avg_contribution' => $groupWeighted,
                     ],
-                    'items' => $items->values(),
+                    'items' => $items->values()->all(),
                 ];
             }
             $groupedEmployees = $groupSummaryList;
@@ -4257,7 +4260,7 @@ class ReportsController extends Controller
             ->where('wo.tenant_id', $tenantId);
 
         // Center scoping
-        if ($centerFilter !== 'all' && ! empty($centerFilter)) {
+        if ($centerFilter !== 'all') {
             $query->where('wo.center_id', (int) $centerFilter);
         } elseif ($centerId) {
             $query->where('wo.center_id', $centerId);
@@ -4900,7 +4903,7 @@ class ReportsController extends Controller
             ->whereNull('vehicles.deleted_at');
 
         // Center scoping
-        if ($centerFilter !== 'all' && ! empty($centerFilter)) {
+        if ($centerFilter !== 'all') {
             $query->where('work_orders.center_id', (int) $centerFilter);
         } else {
             if (! empty($userCenterIds)) {

@@ -224,7 +224,6 @@ jobs:
   type-check-frontend:
     name: Type-Check Frontend (vue-tsc)
     runs-on: ubuntu-latest
-    continue-on-error: true # Non-blocking during TS migration
     steps:
       - uses: actions/checkout@v4
 
@@ -238,10 +237,7 @@ jobs:
         run: npm ci
 
       - name: Run vue-tsc
-        # TODO: remove `|| true` once the TypeScript migration in Phase 2 is complete.
-        # The script itself also has `|| true` as belt-and-suspenders; both must be removed
-        # together so the job becomes blocking.
-        run: npm run type-check || true
+        run: npm run type-check
 
   lint-frontend:
     name: Lint Frontend (ESLint + Prettier)

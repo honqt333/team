@@ -4,8 +4,8 @@ import { useI18n } from 'vue-i18n';
 import { computed } from 'vue';
 import BaseModal from '@/Components/BaseModal.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
+import AppToggle from '@/Components/Common/AppToggle.vue';
 import { useToast } from '@/Composables/useToast';
-
 
 const props = defineProps({
     show: Boolean,
@@ -55,15 +55,30 @@ const submit = () => {
     <BaseModal :show="show" @close="close" size="lg">
         <template #title>
             <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-600 to-cyan-600 flex items-center justify-center">
-                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0zM15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                <div
+                    class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-600 to-cyan-600 flex items-center justify-center"
+                >
+                    <svg
+                        class="w-5 h-5 text-white"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0zM15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                        />
                     </svg>
                 </div>
                 <div>
-                    <h3 class="font-semibold text-gray-900 dark:text-white">{{ t('company_profile.branches.add') }}</h3>
-                    <p class="text-sm text-gray-500 dark:text-gray-400">{{ t('company_profile.branches.subtitle') }}</p>
+                    <h3 class="font-semibold text-gray-900 dark:text-white">
+                        {{ t('company_profile.branches.add') }}
+                    </h3>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">
+                        {{ t('company_profile.branches.subtitle') }}
+                    </p>
                 </div>
             </div>
         </template>
@@ -72,34 +87,58 @@ const submit = () => {
             <!-- Name AR + Name EN -->
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-                        {{ t('company_profile.branches.name_ar') }} <span class="text-red-500">*</span>
+                    <label
+                        class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5"
+                    >
+                        {{ t('company_profile.branches.name_ar') }}
+                        <span class="text-red-500">*</span>
                     </label>
                     <input
                         v-model="form.name_ar"
                         type="text"
                         required
                         dir="rtl"
-                        :class="['w-full px-4 py-2.5 rounded-xl border bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all',
-                            form.errors.name_ar ? 'border-red-500' : 'border-gray-300 dark:border-gray-600']"
+                        :class="[
+                            'w-full px-4 py-2.5 rounded-xl border bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all',
+                            form.errors.name_ar
+                                ? 'border-red-500'
+                                : 'border-gray-300 dark:border-gray-600',
+                        ]"
                         :placeholder="t('company_profile.branches.name_ar_placeholder')"
                     />
-                    <p v-if="form.errors.name_ar" class="mt-1.5 text-sm text-red-600 dark:text-red-400">{{ form.errors.name_ar }}</p>
+                    <p
+                        v-if="form.errors.name_ar"
+                        class="mt-1.5 text-sm text-red-600 dark:text-red-400"
+                    >
+                        {{ form.errors.name_ar }}
+                    </p>
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-                        {{ t('company_profile.branches.name_en') }} <span class="text-red-500">*</span>
+                    <label
+                        class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5"
+                    >
+                        {{ t('company_profile.branches.name_en') }}
+                        <span class="text-red-500">*</span>
                     </label>
                     <input
                         v-model="form.name_en"
                         type="text"
                         required
                         dir="ltr"
-                        :class="['w-full px-4 py-2.5 rounded-xl border bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all',
-                            form.errors.name_en ? 'border-red-500' : 'border-gray-300 dark:border-gray-600']"
+                        :class="[
+                            'w-full px-4 py-2.5 rounded-xl border bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all',
+                            form.errors.name_en
+                                ? 'border-red-500'
+                                : 'border-gray-300 dark:border-gray-600',
+                        ]"
                         :placeholder="t('company_profile.branches.name_en_placeholder')"
                     />
-                    <p v-if="form.errors.name_en" class="mt-1.5 text-sm text-red-600 dark:text-red-400">{{ form.errors.name_en }}</p>
+                    <p
+                        v-if="form.errors.name_en"
+                        class="mt-1.5 text-sm text-red-600 dark:text-red-400"
+                    >
+                        {{ form.errors.name_en }}
+                    </p>
                 </div>
             </div>
 
@@ -120,29 +159,51 @@ const submit = () => {
             <!-- Manager + Phone -->
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                    <label
+                        class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5"
+                    >
                         {{ t('company_profile.branches.manager_name') }}
                     </label>
                     <input
                         v-model="form.manager_name"
                         type="text"
-                        :class="['w-full px-4 py-2.5 rounded-xl border bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all',
-                            form.errors.manager_name ? 'border-red-500' : 'border-gray-300 dark:border-gray-600']"
+                        :class="[
+                            'w-full px-4 py-2.5 rounded-xl border bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all',
+                            form.errors.manager_name
+                                ? 'border-red-500'
+                                : 'border-gray-300 dark:border-gray-600',
+                        ]"
                     />
-                    <p v-if="form.errors.manager_name" class="mt-1.5 text-sm text-red-600 dark:text-red-400">{{ form.errors.manager_name }}</p>
+                    <p
+                        v-if="form.errors.manager_name"
+                        class="mt-1.5 text-sm text-red-600 dark:text-red-400"
+                    >
+                        {{ form.errors.manager_name }}
+                    </p>
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                    <label
+                        class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5"
+                    >
                         {{ t('company_profile.branches.phone') }}
                     </label>
                     <input
                         v-model="form.phone"
                         type="text"
                         dir="ltr"
-                        :class="['w-full px-4 py-2.5 rounded-xl border bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all',
-                            form.errors.phone ? 'border-red-500' : 'border-gray-300 dark:border-gray-600']"
+                        :class="[
+                            'w-full px-4 py-2.5 rounded-xl border bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all',
+                            form.errors.phone
+                                ? 'border-red-500'
+                                : 'border-gray-300 dark:border-gray-600',
+                        ]"
                     />
-                    <p v-if="form.errors.phone" class="mt-1.5 text-sm text-red-600 dark:text-red-400">{{ form.errors.phone }}</p>
+                    <p
+                        v-if="form.errors.phone"
+                        class="mt-1.5 text-sm text-red-600 dark:text-red-400"
+                    >
+                        {{ form.errors.phone }}
+                    </p>
                 </div>
             </div>
 
@@ -155,38 +216,47 @@ const submit = () => {
                     v-model="form.email"
                     type="email"
                     dir="ltr"
-                    :class="['w-full px-4 py-2.5 rounded-xl border bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all',
-                        form.errors.email ? 'border-red-500' : 'border-gray-300 dark:border-gray-600']"
+                    :class="[
+                        'w-full px-4 py-2.5 rounded-xl border bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all',
+                        form.errors.email
+                            ? 'border-red-500'
+                            : 'border-gray-300 dark:border-gray-600',
+                    ]"
                 />
-                <p v-if="form.errors.email" class="mt-1.5 text-sm text-red-600 dark:text-red-400">{{ form.errors.email }}</p>
+                <p v-if="form.errors.email" class="mt-1.5 text-sm text-red-600 dark:text-red-400">
+                    {{ form.errors.email }}
+                </p>
             </div>
 
             <!-- Active Toggle -->
-            <div class="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900/50 rounded-xl border border-gray-200 dark:border-gray-700">
+            <div
+                class="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900/50 rounded-xl border border-gray-200 dark:border-gray-700"
+            >
                 <div>
-                    <p class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ t('common.active') }}</p>
-                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{{ t('company_profile.branches.active_help') }}</p>
+                    <p class="text-sm font-medium text-gray-700 dark:text-gray-300">
+                        {{ t('common.active') }}
+                    </p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                        {{ t('company_profile.branches.active_help') }}
+                    </p>
                 </div>
-                <button
-                    type="button"
-                    @click="form.is_active = !form.is_active"
-                    :aria-pressed="form.is_active"
-                    :class="['relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2',
-                        form.is_active ? 'bg-blue-600' : 'bg-gray-200 dark:bg-gray-700']"
-                >
-                    <span :class="['inline-block h-4 w-4 transform rounded-full bg-white transition-transform shadow-sm',
-                        form.is_active ? 'translate-x-6 rtl:-translate-x-6' : 'translate-x-1 rtl:-translate-x-1']" />
-                </button>
+                <AppToggle v-model="form.is_active" color="blue" />
             </div>
         </form>
 
         <template #footer>
-            <button type="button" @click="close"
-                class="px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white font-medium transition-colors">
+            <button
+                type="button"
+                @click="close"
+                class="px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white font-medium transition-colors"
+            >
                 {{ t('common.cancel') }}
             </button>
-            <button @click="submit" :disabled="form.processing"
-                class="px-5 py-2.5 bg-gradient-to-r from-blue-600 to-cyan-600 text-white rounded-xl font-medium shadow-lg shadow-blue-500/30 hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed transition-all">
+            <button
+                @click="submit"
+                :disabled="form.processing"
+                class="px-5 py-2.5 bg-gradient-to-r from-blue-600 to-cyan-600 text-white rounded-xl font-medium shadow-lg shadow-blue-500/30 hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+            >
                 {{ form.processing ? t('common.loading') : t('common.save') }}
             </button>
         </template>

@@ -34,6 +34,7 @@ class Warehouse extends Model
     // Relationships
     // ─────────────────────────────────────────────────────────────
 
+    /** @return BelongsTo<Center, $this> */
     public function center(): BelongsTo
     {
         return $this->belongsTo(Center::class);

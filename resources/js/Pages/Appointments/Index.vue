@@ -31,7 +31,7 @@
                 <template #actions>
                     <Link
                         v-if="can('crm.appointments.manage')"
-                        :href="route('service-bays.index')"
+                        :href="route('service-bays.index', { from: 'appointments' })"
                         class="px-4 py-2.5 rounded-xl text-sm font-semibold text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow transition-all flex items-center gap-2"
                     >
                         <svg
@@ -192,13 +192,12 @@
                                     class="mt-1.5 text-sm font-semibold text-gray-900 dark:text-gray-100"
                                 >
                                     {{ appt.customer?.name || '—' }}
-                                    <span
-                                        v-if="appt.vehicle"
-                                        class="text-gray-500 dark:text-gray-400 font-mono text-xs"
-                                        dir="ltr"
-                                    >
-                                        {{ appt.vehicle.plate_number }}
-                                    </span>
+                                    <SaudiPlateDisplay
+                                        v-if="appt.vehicle?.plate_number"
+                                        :plate-number="appt.vehicle.plate_number"
+                                        size="sm"
+                                        class="ms-2 align-middle inline-flex"
+                                    />
                                 </h4>
                                 <p
                                     v-if="appt.services?.length"
@@ -277,6 +276,74 @@
                 <h3 class="text-base font-bold text-gray-900 dark:text-gray-100">
                     {{ $t('appointments.new') }}
                 </h3>
+                <!-- Quick Vehicle/Customer Search -->
+                <div class="relative">
+                    <div class="relative">
+                        <input
+                            v-model="quickSearchQuery"
+                            type="text"
+                            @input="onQuickSearchInput"
+                            :placeholder="$t('appointments.search_vehicle_or_customer')"
+                            class="w-full px-3 py-2 ps-9 text-xs rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-1 focus:ring-primary-500 focus:bg-white dark:focus:bg-gray-800 transition"
+                        />
+                        <svg
+                            class="w-4 h-4 absolute start-3 top-1/2 -translate-y-1/2 text-gray-400"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                            />
+                        </svg>
+                        <span
+                            v-if="searchingQuick"
+                            class="absolute end-3 top-1/2 -translate-y-1/2 text-xs text-gray-400 animate-pulse"
+                        >
+                            ...
+                        </span>
+                    </div>
+
+                    <!-- Quick search dropdown -->
+                    <div
+                        v-if="quickSearchResults.length > 0"
+                        class="absolute z-20 start-0 end-0 mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-xl max-h-48 overflow-y-auto divide-y divide-gray-100 dark:divide-gray-700"
+                    >
+                        <button
+                            v-for="v in quickSearchResults"
+                            :key="v.id"
+                            type="button"
+                            @click="selectQuickVehicle(v)"
+                            class="w-full text-start p-2.5 hover:bg-gray-50 dark:hover:bg-gray-700/50 flex items-center justify-between transition text-xs"
+                        >
+                            <div class="flex items-center gap-2">
+                                <SaudiPlateDisplay :plate-number="v.plate_number" size="sm" />
+                                <div>
+                                    <div class="font-medium text-gray-800 dark:text-gray-200">
+                                        {{
+                                            [v.make?.name, v.model?.name, v.year]
+                                                .filter(Boolean)
+                                                .join(' ')
+                                        }}
+                                    </div>
+                                    <div class="text-[11px] text-gray-500 dark:text-gray-400">
+                                        {{ v.customer?.name }}
+                                        {{ v.customer?.phone ? '(' + v.customer.phone + ')' : '' }}
+                                    </div>
+                                </div>
+                            </div>
+                            <span
+                                class="text-[10px] text-primary-600 dark:text-primary-400 font-bold"
+                            >
+                                {{ $t('common.select') }}
+                            </span>
+                        </button>
+                    </div>
+                </div>
+
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                     <div>
                         <label
@@ -284,11 +351,15 @@
                         >
                             {{ $t('appointments.customer') }}
                         </label>
-                        <input
+                        <SearchableSelect
                             v-model="form.customer_id"
-                            type="number"
-                            class="w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-3 py-2 text-sm"
+                            :options="customerOptions"
+                            option-label="label"
+                            option-value="value"
                             :placeholder="$t('appointments.customer_placeholder')"
+                            :search-placeholder="$t('common.search')"
+                            :label="''"
+                            @search="onCustomerSearch"
                         />
                     </div>
                     <div>
@@ -297,12 +368,54 @@
                         >
                             {{ $t('appointments.vehicle') }}
                         </label>
-                        <input
+                        <SearchableSelect
                             v-model="form.vehicle_id"
-                            type="number"
-                            class="w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-3 py-2 text-sm"
-                            :placeholder="$t('appointments.vehicle_placeholder')"
+                            :options="vehicleOptions"
+                            option-label="label"
+                            option-value="value"
+                            :placeholder="
+                                form.customer_id
+                                    ? vehicleOptions.length
+                                        ? $t('appointments.vehicle_placeholder')
+                                        : $t('appointments.no_vehicles')
+                                    : $t('appointments.select_customer_first')
+                            "
+                            :search-placeholder="$t('common.search')"
+                            :disabled="!form.customer_id || vehicleOptions.length === 0"
+                            :label="''"
                         />
+                    </div>
+
+                    <!-- Selected Vehicle Banner -->
+                    <div
+                        v-if="selectedVehicle"
+                        class="col-span-1 md:col-span-2 bg-primary-50 dark:bg-primary-950/30 border border-primary-200 dark:border-primary-800/50 rounded-lg p-2.5 flex items-center justify-between"
+                    >
+                        <div class="flex items-center gap-3">
+                            <SaudiPlateDisplay
+                                :plate-number="selectedVehicle.plate_number"
+                                size="sm"
+                            />
+                            <div class="text-xs">
+                                <span class="font-bold text-gray-800 dark:text-gray-200">
+                                    {{
+                                        [
+                                            selectedVehicle.make?.name,
+                                            selectedVehicle.model?.name,
+                                            selectedVehicle.year,
+                                        ]
+                                            .filter(Boolean)
+                                            .join(' ')
+                                    }}
+                                </span>
+                                <span
+                                    v-if="selectedCustomer"
+                                    class="text-gray-500 dark:text-gray-400 ms-2"
+                                >
+                                    ({{ selectedCustomer.name }})
+                                </span>
+                            </div>
+                        </div>
                     </div>
                     <div>
                         <label
@@ -463,13 +576,14 @@
 </template>
 
 <script setup>
-import { reactive, ref, computed } from 'vue';
+import { reactive, ref, computed, watch } from 'vue';
 import { Head, Link, router } from '@inertiajs/vue3';
 import axios from 'axios';
 import { useI18n } from 'vue-i18n';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import PageHeader from '@/Components/PageHeader.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
+import SaudiPlateDisplay from '@/Components/Vehicles/SaudiPlateDisplay.vue';
 import { usePermission } from '@/Composables/usePermission';
 import { canMarkNoShow } from '@/Utils/appointments';
 
@@ -478,6 +592,7 @@ const props = defineProps({
     bays: { type: Array, default: () => [] },
     techs: { type: Array, default: () => [] },
     services: { type: Array, default: () => [] },
+    customers: { type: Array, default: () => [] },
     filters: { type: Object, default: () => ({}) },
     statuses: { type: Array, default: () => [] },
 });
@@ -500,6 +615,145 @@ const form = reactive({
     service_ids: [],
     notes: '',
 });
+
+const customerList = ref([...props.customers]);
+const searchingCustomers = ref(false);
+
+watch(
+    () => props.customers,
+    (newVal) => {
+        if (Array.isArray(newVal)) {
+            const existingIds = new Set(customerList.value.map((c) => c.id));
+            newVal.forEach((c) => {
+                if (!existingIds.has(c.id)) {
+                    customerList.value.push(c);
+                }
+            });
+        }
+    },
+    { immediate: true }
+);
+
+const customerOptions = computed(() => {
+    return customerList.value.map((c) => ({
+        value: c.id,
+        label: `${c.name}${c.phone ? ' (' + c.phone + ')' : ''}`,
+    }));
+});
+
+const selectedCustomer = computed(() => {
+    return customerList.value.find((c) => String(c.id) === String(form.customer_id)) || null;
+});
+
+const vehicleOptions = computed(() => {
+    if (!selectedCustomer.value || !Array.isArray(selectedCustomer.value.vehicles)) return [];
+    return selectedCustomer.value.vehicles.map((v) => {
+        const makeName = v.make?.name || '';
+        const modelName = v.model?.name || '';
+        const carInfo = [makeName, modelName, v.year].filter(Boolean).join(' ');
+        const plate = v.plate_number || '';
+        return {
+            value: v.id,
+            label: carInfo ? `${plate} - ${carInfo}` : plate || `#${v.id}`,
+            plate: plate,
+            makeModel: carInfo,
+            raw: v,
+        };
+    });
+});
+
+const selectedVehicle = computed(() => {
+    if (!form.vehicle_id || !selectedCustomer.value?.vehicles) return null;
+    return (
+        selectedCustomer.value.vehicles.find((v) => String(v.id) === String(form.vehicle_id)) ||
+        null
+    );
+});
+
+watch(
+    () => form.customer_id,
+    (newVal) => {
+        if (!newVal) {
+            form.vehicle_id = '';
+            return;
+        }
+        const cust = customerList.value.find((c) => String(c.id) === String(newVal));
+        if (cust?.vehicles?.length === 1) {
+            form.vehicle_id = cust.vehicles[0].id;
+        } else if (!cust?.vehicles?.some((v) => String(v.id) === String(form.vehicle_id))) {
+            form.vehicle_id = '';
+        }
+    }
+);
+
+// Quick vehicle search
+const quickSearchQuery = ref('');
+const quickSearchResults = ref([]);
+const searchingQuick = ref(false);
+let quickSearchTimer = null;
+
+function onQuickSearchInput() {
+    clearTimeout(quickSearchTimer);
+    const q = quickSearchQuery.value?.trim();
+    if (!q || q.length < 2) {
+        quickSearchResults.value = [];
+        return;
+    }
+    quickSearchTimer = setTimeout(async () => {
+        searchingQuick.value = true;
+        try {
+            const res = await axios.get('/app/api/vehicles/search', { params: { q } });
+            quickSearchResults.value = Array.isArray(res.data) ? res.data : [];
+        } catch (e) {
+            console.error('Quick vehicle search error', e);
+        } finally {
+            searchingQuick.value = false;
+        }
+    }, 300);
+}
+
+function selectQuickVehicle(v) {
+    if (v.customer) {
+        const existingCust = customerList.value.find((c) => c.id === v.customer.id);
+        if (!existingCust) {
+            customerList.value.push({
+                ...v.customer,
+                vehicles: [v],
+            });
+        } else {
+            if (!Array.isArray(existingCust.vehicles)) {
+                existingCust.vehicles = [];
+            }
+            if (!existingCust.vehicles.some((ev) => ev.id === v.id)) {
+                existingCust.vehicles.push(v);
+            }
+        }
+        form.customer_id = v.customer.id;
+    }
+    form.vehicle_id = v.id;
+    quickSearchQuery.value = '';
+    quickSearchResults.value = [];
+}
+
+async function onCustomerSearch(query) {
+    if (!query || query.length < 2) return;
+    searchingCustomers.value = true;
+    try {
+        const res = await axios.get('/app/api/customers/search', { params: { q: query } });
+        if (Array.isArray(res.data)) {
+            const existingIds = new Set(customerList.value.map((c) => c.id));
+            res.data.forEach((c) => {
+                if (!existingIds.has(c.id)) {
+                    customerList.value.push(c);
+                }
+            });
+        }
+    } catch (e) {
+        console.error('Customer search error', e);
+    } finally {
+        searchingCustomers.value = false;
+    }
+}
 
 const filters = reactive({ ...props.filters });
 
@@ -554,6 +808,8 @@ function openCreate() {
     form.estimated_end_at = '';
     form.service_ids = [];
     form.notes = '';
+    quickSearchQuery.value = '';
+    quickSearchResults.value = [];
     showForm.value = true;
 }
 

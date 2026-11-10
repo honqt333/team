@@ -242,6 +242,7 @@ return [
         'base_salary' => 'Base Salary',
         'cannot_approve' => 'Cannot approve this payroll',
         'cannot_delete_item' => 'Cannot delete item from approved payroll',
+        'cannot_edit_item' => 'Cannot edit item in approved or paid payroll',
         'cannot_regenerate' => 'Cannot regenerate approved or paid payroll',
         'deductions' => 'Deductions',
         'details' => 'Details',

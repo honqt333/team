@@ -75,7 +75,7 @@ class WorkOrderWarrantiesController
                     'service_date' => $item->workOrder?->created_at?->format('Y-m-d'),
                     'center_name_ar' => $item->workOrder?->center?->name_ar,
                     'center_name_en' => $item->workOrder?->center?->name_en,
-                    'claims' => $claims,
+                    'claims' => $claims->all(),
                 ];
             });
 

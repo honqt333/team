@@ -7,8 +7,10 @@ namespace App\Services\Invoice;
 use App\Models\Billing\Subscription;
 use App\Models\Billing\SubscriptionInvoice;
 use App\Models\PaymentSettings;
+use App\Support\ArabicPdfShaper;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Storage;
+use RuntimeException;
 
 class SubscriptionInvoiceService
 {
@@ -106,7 +108,7 @@ class SubscriptionInvoiceService
      */
     public function generatePdf(SubscriptionInvoice $invoice): string
     {
-        $invoice->load(['subscription.plan', 'tenant']);
+        $invoice->loadMissing(['subscription.plan', 'tenant']);
 
         // Pull company info from PaymentSettings so the PDF header
         // and footer reflect the admin's edits at
@@ -127,24 +129,30 @@ class SubscriptionInvoiceService
         // loadView so the <img> tags in the view are fetched and
         // embedded. The default config has this off (sensible
         // for arbitrary HTML), so we toggle it explicitly here.
-        $pdf = app('dompdf.wrapper');
-        $pdf->getDomPDF()->getOptions()->set('isRemoteEnabled', true);
-
-        $pdf->loadView('pdf.subscription-invoice', [
+        $rawHtml = (string) view('pdf.subscription-invoice', [
             'invoice' => $invoice,
             'tenant' => $invoice->tenant,
             'subscription' => $invoice->subscription,
             'plan' => $invoice->subscription->plan,
             'company' => $companyInfo,
             'vat_rate' => $vatRate,
-        ]);
+        ])->render();
+
+        $shapedHtml = ArabicPdfShaper::shapeHtml($rawHtml);
+
+        $pdf = app('dompdf.wrapper');
+        $pdf->getDomPDF()->getOptions()->set('isRemoteEnabled', true);
+        $pdf->loadHtml($shapedHtml);
 
         // Set paper to A4
         $pdf->setPaper('a4');
 
         // Store PDF
         $filename = "invoices/subscription/{$invoice->invoice_number}.pdf";
-        Storage::disk('public')->put($filename, $pdf->output());
+
+        if (! Storage::disk('local')->put($filename, $pdf->output())) {
+            throw new RuntimeException('Invoice PDF storage failed.');
+        }
 
         return $filename;
     }
@@ -158,9 +166,9 @@ class SubscriptionInvoiceService
     private function buildCompanyInfo(?PaymentSettings $settings): array
     {
         $name = $settings?->company_legal_name
-            ?: ($settings?->company_legal_name_en ?: 'Khidma Pro');
+            ?: ($settings?->company_legal_name_en ?: config('app.name_ar', 'خدمة برو'));
         $nameEn = $settings?->company_legal_name_en
-            ?: ($settings?->company_legal_name ?: 'Khidma Pro');
+            ?: ($settings?->company_legal_name ?: config('app.name', 'Khidmh Pro'));
 
         // Convert logo + stamp paths to data: URLs (base64-encoded).
         // DomPDF in a CLI / headless context can't reliably fetch
@@ -235,14 +243,14 @@ class SubscriptionInvoiceService
     {
         $filename = "invoices/subscription/{$invoice->invoice_number}.pdf";
 
-        if (Storage::disk('public')->exists($filename)) {
-            return Storage::disk('public')->path($filename);
+        if (Storage::disk('local')->exists($filename)) {
+            return Storage::disk('local')->path($filename);
         }
 
         // Generate if not exists
         $this->generatePdf($invoice);
 
-        return Storage::disk('public')->path($filename);
+        return Storage::disk('local')->path($filename);
     }
 
     /**
@@ -252,10 +260,10 @@ class SubscriptionInvoiceService
     {
         $filename = "invoices/subscription/{$invoice->invoice_number}.pdf";
 
-        if (! Storage::disk('public')->exists($filename)) {
+        if (! Storage::disk('local')->exists($filename)) {
             $this->generatePdf($invoice);
         }
 
-        return Storage::disk('public')->url($filename);
+        return route('system.invoices.download', ['invoice' => $invoice->id, 'inline' => 1]);
     }
 }

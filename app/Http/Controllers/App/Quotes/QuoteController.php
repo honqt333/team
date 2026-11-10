@@ -41,67 +41,7 @@ class QuoteController extends Controller
     {
         $this->authorize('viewAny', Quote::class);
 
-        $quotes = Quote::with(['customer', 'vehicle.make',
-            'vehicle.customer', 'vehicle.model', 'convertedWorkOrder:id,code'])
-            ->withCount(['lines', 'parts'])
-            ->when($request->search, function ($query, $search) {
-                $query->where(function ($q) use ($search) {
-                    $q->where('id', 'like', "%{$search}%")
-                        ->orWhere('code', 'like', "%{$search}%")
-                        ->orWhereHas('customer', fn ($c) => $c->where('name', 'like', "%{$search}%"))
-                        ->orWhereHas('vehicle', fn ($v) => $v->where('plate_number', 'like', "%{$search}%"));
-                });
-            })
-            ->when($request->status && $request->status !== 'all', function ($query) use ($request) {
-                if ($request->status === 'pending') {
-                    $query->whereIn('status', [Quote::STATUS_DRAFT, Quote::STATUS_SENT]);
-                } else {
-                    $query->where('status', $request->status);
-                }
-            })
-            ->when($request->date_range && $request->date_range !== 'all', function ($query, $range) {
-                $now = now();
-                $date = match ($range) {
-                    'today' => $now->startOfDay(),
-                    'week' => $now->subDays(7),
-                    'month' => $now->subMonth(),
-                    '30days' => $now->subDays(30),
-                    default => null
-                };
-
-                if ($date) {
-                    $query->where('created_at', '>=', $date);
-                }
-            })
-            ->when($request->date_from, function ($query, $date) {
-                $query->whereDate('created_at', '>=', $date);
-            })
-            ->when($request->date_to, function ($query, $date) {
-                $query->whereDate('created_at', '<=', $date);
-            })
-            ->orderByDesc('created_at')
-            ->paginate(20)
-            ->withQueryString();
-
-        return response()->json($quotes);
-    }
-
-    /**
-     * Display a listing of quotes.
-     */
-    public function index(Request $request): Response
-    {
-        $this->authorize('viewAny', Quote::class);
-
-        $status = $request->input('status', 'pending');
-
-        $filterCounts = [
-            'all' => Quote::count(),
-            'pending' => Quote::whereIn('status', [Quote::STATUS_DRAFT, Quote::STATUS_SENT])->count(),
-            'approved' => Quote::where('status', Quote::STATUS_APPROVED)->count(),
-            'converted' => Quote::where('status', Quote::STATUS_CONVERTED)->count(),
-            'rejected' => Quote::where('status', Quote::STATUS_REJECTED)->count(),
-        ];
+        $status = $request->filled('status') ? (string) $request->input('status') : 'pending';
 
         $quotes = Quote::with(['customer', 'vehicle.make',
             'vehicle.customer', 'vehicle.model', 'convertedWorkOrder:id,code'])
@@ -110,7 +50,7 @@ class QuoteController extends Controller
                 $query->where(function ($q) use ($search) {
                     $q->where('id', 'like', "%{$search}%")
                         ->orWhere('code', 'like', "%{$search}%")
-                        ->orWhereHas('customer', fn ($c) => $c->where('name', 'like', "%{$search}%"))
+                        ->orWhereHas('customer', fn ($c) => $c->where('name', 'like', "%{$search}%")->orWhere('phone', 'like', "%{$search}%"))
                         ->orWhereHas('vehicle', fn ($v) => $v->where('plate_number', 'like', "%{$search}%"));
                 });
             })
@@ -140,9 +80,127 @@ class QuoteController extends Controller
             })
             ->when($request->date_to, function ($query, $date) {
                 $query->whereDate('created_at', '<=', $date);
+            });
+
+        $sort = (string) $request->input('sort');
+        $direction = strtolower((string) $request->input('direction', 'desc')) === 'asc' ? 'asc' : 'desc';
+
+        if ($sort === 'code') {
+            $quotes->orderBy('quotes.code', $direction);
+        } elseif ($sort === 'customer') {
+            $quotes->orderBy(
+                Customer::select('name')
+                    ->whereColumn('customers.id', 'quotes.customer_id')
+                    ->limit(1),
+                $direction
+            );
+        } elseif ($sort === 'vehicle') {
+            $quotes->orderBy(
+                Vehicle::select('plate_number')
+                    ->whereColumn('vehicles.id', 'quotes.vehicle_id')
+                    ->limit(1),
+                $direction
+            );
+        } elseif ($sort === 'services' || $sort === 'lines_count') {
+            $quotes->orderBy('lines_count', $direction);
+        } elseif (in_array($sort, ['subtotal', 'total_discount', 'discount', 'total', 'created_at', 'id'], true)) {
+            $column = $sort === 'discount' ? 'total_discount' : $sort;
+            $quotes->orderBy("quotes.{$column}", $direction);
+        } else {
+            $quotes->orderByDesc('quotes.created_at');
+        }
+
+        $quotes = $quotes->paginate(20)
+            ->withQueryString();
+
+        return response()->json($quotes);
+    }
+
+    /**
+     * Display a listing of quotes.
+     */
+    public function index(Request $request): Response
+    {
+        $this->authorize('viewAny', Quote::class);
+
+        $status = $request->filled('status') ? (string) $request->input('status') : 'pending';
+
+        $filterCounts = [
+            'all' => Quote::count(),
+            'pending' => Quote::whereIn('status', [Quote::STATUS_DRAFT, Quote::STATUS_SENT])->count(),
+            'approved' => Quote::where('status', Quote::STATUS_APPROVED)->count(),
+            'converted' => Quote::where('status', Quote::STATUS_CONVERTED)->count(),
+            'rejected' => Quote::where('status', Quote::STATUS_REJECTED)->count(),
+        ];
+
+        $quotes = Quote::with(['customer', 'vehicle.make',
+            'vehicle.customer', 'vehicle.model', 'convertedWorkOrder:id,code'])
+            ->withCount(['lines', 'parts'])
+            ->when($request->search, function ($query, $search) {
+                $query->where(function ($q) use ($search) {
+                    $q->where('id', 'like', "%{$search}%")
+                        ->orWhere('code', 'like', "%{$search}%")
+                        ->orWhereHas('customer', fn ($c) => $c->where('name', 'like', "%{$search}%")->orWhere('phone', 'like', "%{$search}%"))
+                        ->orWhereHas('vehicle', fn ($v) => $v->where('plate_number', 'like', "%{$search}%"));
+                });
             })
-            ->orderByDesc('created_at')
-            ->paginate(20)
+            ->when($status && $status !== 'all', function ($query) use ($status) {
+                if ($status === 'pending') {
+                    $query->whereIn('status', [Quote::STATUS_DRAFT, Quote::STATUS_SENT]);
+                } else {
+                    $query->where('status', $status);
+                }
+            })
+            ->when($request->date_range && $request->date_range !== 'all', function ($query, $range) {
+                $now = now();
+                $date = match ($range) {
+                    'today' => $now->startOfDay(),
+                    'week' => $now->subDays(7),
+                    'month' => $now->subMonth(),
+                    '30days' => $now->subDays(30),
+                    default => null
+                };
+
+                if ($date) {
+                    $query->where('created_at', '>=', $date);
+                }
+            })
+            ->when($request->date_from, function ($query, $date) {
+                $query->whereDate('created_at', '>=', $date);
+            })
+            ->when($request->date_to, function ($query, $date) {
+                $query->whereDate('created_at', '<=', $date);
+            });
+
+        $sort = (string) $request->input('sort');
+        $direction = strtolower((string) $request->input('direction', 'desc')) === 'asc' ? 'asc' : 'desc';
+
+        if ($sort === 'code') {
+            $quotes->orderBy('quotes.code', $direction);
+        } elseif ($sort === 'customer') {
+            $quotes->orderBy(
+                Customer::select('name')
+                    ->whereColumn('customers.id', 'quotes.customer_id')
+                    ->limit(1),
+                $direction
+            );
+        } elseif ($sort === 'vehicle') {
+            $quotes->orderBy(
+                Vehicle::select('plate_number')
+                    ->whereColumn('vehicles.id', 'quotes.vehicle_id')
+                    ->limit(1),
+                $direction
+            );
+        } elseif ($sort === 'services' || $sort === 'lines_count') {
+            $quotes->orderBy('lines_count', $direction);
+        } elseif (in_array($sort, ['subtotal', 'total_discount', 'discount', 'total', 'created_at', 'id'], true)) {
+            $column = $sort === 'discount' ? 'total_discount' : $sort;
+            $quotes->orderBy("quotes.{$column}", $direction);
+        } else {
+            $quotes->orderByDesc('quotes.created_at');
+        }
+
+        $quotes = $quotes->paginate(20)
             ->withQueryString();
 
         $customers = Customer::orderBy('name')->get();
@@ -174,7 +232,14 @@ class QuoteController extends Controller
             'makes' => $makes,
             'colors' => $colors,
             'modelsByMake' => $modelsByMake,
-            'filters' => array_merge($request->only(['search', 'date_range', 'date_from', 'date_to']), ['status' => $status]),
+            'filters' => array_merge(
+                $request->only(['search', 'date_range', 'date_from', 'date_to']),
+                [
+                    'status' => $status,
+                    'sort' => $sort ?: null,
+                    'direction' => $sort ? $direction : null,
+                ]
+            ),
             'filterCounts' => $filterCounts,
         ]);
     }

@@ -1,0 +1,25 @@
+
+   PASS  Tests\Feature\FirstBatchSecurityTest
+  ✓ invitation is consumed once and old signed links are rejected        6.93s  
+  ✓ invitation cannot reactivate disabled account                        0.28s  
+  ✓ invitation requires two factor before authenticating                 0.36s  
+  ✓ user manager cannot assign owner or foreign role or foreign center   0.75s  
+  ✓ user manager cannot reset owner password                             0.93s  
+  ✓ role manager cannot create reserved role or grant unheld permission  0.94s  
+  ✓ backup false write fails and blocks tenant deletion                  0.38s  
+  ✓ backup success is verified against saved bytes                       0.39s  
+  ✓ legacy document migration is dry run and verifies before removing    0.04s  
+  ✓ user manager cannot take over custom privileged account              0.42s  
+  ✓ receipt download requires permission and tenant ownership            0.81s  
+  ✓ expired or rotated invitation is rejected                            0.31s  
+  ✓ private invoice url uses authorized route and preserves download     0.48s  
+
+   PASS  Tests\Feature\System\InvoicePdfCompanyInfoTest
+  ✓ pdf header uses company name from settings                           2.88s  
+  ✓ pdf falls back to default when no settings                           1.54s  
+  ✓ pdf uses settings updated after initial invoice                      1.69s  
+  ✓ pdf renders with company stamp                                       0.48s  
+
+  Tests:    17 passed (69 assertions)
+  Duration: 19.76s
+

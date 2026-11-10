@@ -3,6 +3,21 @@
 declare(strict_types=1);
 
 return [
+    'already_converted' => 'Quote has already been converted.',
+    'approval_required' => 'Quote must be approved before conversion.',
+
+    'public_cannot_approve' => 'This quote cannot be approved.',
+    'public_cannot_reject' => 'This quote cannot be rejected.',
+    'public_expired' => 'This quote has expired.',
+    'public_approved' => 'Quote approved successfully.',
+    'public_rejected' => 'Quote rejection recorded.',
+    'empty_decision' => 'An empty quote cannot be actioned.',
+    'approved_title' => 'Quote #:code approved',
+    'approved_body' => 'The customer approved the quote through its share link.',
+    'rejected_title' => 'Quote #:code rejected',
+    'rejected_body' => 'The quote was rejected.',
+    'approved_converted_body' => 'The quote was approved and converted to a work order.',
+
     'actions' => [
         'approve' => 'Approve',
         'convert_to_work_order' => 'Convert To Work Order',

@@ -11,6 +11,7 @@ use App\Models\PurchaseInvoice;
 use App\Models\PurchaseReturnInvoice;
 use App\Models\Quote;
 use App\Models\WorkOrder;
+use App\Support\ArabicPdfShaper;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Mail\Message;
 use Illuminate\Support\Facades\Log;
@@ -36,7 +37,7 @@ class PrintService
     /** @var string Default storage disk for generated PDFs */
     protected string $disk = 'public';
 
-    /** @var array<int, string> Supported document types with their view paths */
+    /** @var array<string, string> Supported document types with their view paths */
     protected array $documentViews = [
         // App invoices
         'invoice' => 'pdf.invoice',
@@ -69,7 +70,7 @@ class PrintService
         'vehicles' => 'pdf.vehicles',
     ];
 
-    /** @var array<int, string> Paper sizes per document type */
+    /** @var array<string, string> Paper sizes per document type */
     protected array $paperSizes = [
         'invoice' => 'a4',
         'proforma_invoice' => 'a4',
@@ -89,7 +90,7 @@ class PrintService
         'vehicles' => 'a4',
     ];
 
-    /** @var array<int, string> Paper orientations per document type */
+    /** @var array<string, string> Paper orientations per document type */
     protected array $orientations = [
         'condition_report' => 'landscape',
         'payroll' => 'landscape',
@@ -125,7 +126,8 @@ class PrintService
         // Generate PDF
         $pdf = app('dompdf.wrapper');
         $pdf->getDomPDF()->getOptions()->set('isRemoteEnabled', true);
-        $pdf->loadView($view, $viewData);
+        $html = $this->renderShapedHtml($view, $viewData);
+        $pdf->loadHtml($html);
 
         // Set paper size and orientation
         $paper = $this->paperSizes[$documentType] ?? 'a4';
@@ -159,7 +161,8 @@ class PrintService
 
         $pdf = app('dompdf.wrapper');
         $pdf->getDomPDF()->getOptions()->set('isRemoteEnabled', true);
-        $pdf->loadView($view, $viewData);
+        $html = $this->renderShapedHtml($view, $viewData);
+        $pdf->loadHtml($html);
 
         $paper = $this->paperSizes[$documentType] ?? 'a4';
         $orientation = $this->orientations[$documentType] ?? 'portrait';
@@ -233,6 +236,18 @@ class PrintService
         $filename = $this->generateFilename($documentType, $model, false);
 
         return Storage::disk($this->disk)->delete($filename);
+    }
+
+    /**
+     * Render the view and shape any Arabic text for DomPDF.
+     *
+     * @param array<string, mixed> $viewData
+     */
+    protected function renderShapedHtml(string $view, array $viewData): string
+    {
+        $rawHtml = (string) view($view, $viewData)->render();
+
+        return ArabicPdfShaper::shapeHtml($rawHtml);
     }
 
     /**
@@ -374,7 +389,7 @@ class PrintService
         ]);
 
         $paymentSettings = PaymentSettings::first();
-        $vatRate = (float) ($paymentSettings?->subscription_vat_rate ?? 15);
+        $vatRate = (float) ($paymentSettings->subscription_vat_rate ?? 15);
 
         return [
             'invoice' => $invoice,
@@ -444,7 +459,7 @@ class PrintService
             'phone' => $settings?->company_phone,
             'email' => $settings?->company_email,
             'website' => $settings?->company_website,
-            'center_name' => $settings?->company_center_name,
+            'center_name' => $settings?->company_legal_name,
             'logo_url' => $logoDataUrl,
             'stamp_url' => $stampDataUrl,
         ];

@@ -2,14 +2,14 @@
 /**
  * AppCheckbox — Carag V2 Design System primitive.
  *
- * Wraps the legacy Checkbox.vue with token-driven visuals, full
+ * Renders a native checkbox with token-driven visuals, full
  * a11y (aria-invalid, aria-describedby), and label/hint/error.
  */
 import { computed, useSlots } from 'vue';
 
 const props = defineProps({
     id: { type: String, default: null },
-    modelValue: { type: Boolean, default: false },
+    modelValue: { type: [Boolean, Array], default: false },
     label: { type: String, default: null },
     hint: { type: String, default: null },
     error: { type: String, default: null },
@@ -33,9 +33,19 @@ const describedBy = computed(() => {
     return ids.length ? ids.join(' ') : undefined;
 });
 
-const onInput = (e) => {
-    emit('update:modelValue', e.target.checked);
-    emit('change', e);
+const isChecked = computed(() =>
+    Array.isArray(props.modelValue) ? props.modelValue.includes(props.value) : props.modelValue
+);
+
+const onInput = (event) => {
+    const checked = event.target.checked;
+    const next = Array.isArray(props.modelValue)
+        ? checked
+            ? [...new Set([...props.modelValue, props.value])]
+            : props.modelValue.filter((value) => value !== props.value)
+        : checked;
+    emit('update:modelValue', next);
+    emit('change', event);
 };
 </script>
 
@@ -45,16 +55,21 @@ const onInput = (e) => {
         :class="{
             'app-checkbox--error': !!error,
             'app-checkbox--disabled': disabled,
-            'app-checkbox--checked': modelValue,
+            'app-checkbox--checked': isChecked,
         }"
     >
-        <label class="app-checkbox__row" :for="fieldId">
+        <component
+            :is="label || $slots.default ? 'label' : 'span'"
+            class="app-checkbox__row"
+            :for="label || $slots.default ? fieldId : undefined"
+        >
             <span class="app-checkbox__visual">
                 <input
                     :id="fieldId"
                     type="checkbox"
-                    :checked="modelValue"
+                    :checked="isChecked"
                     :disabled="disabled"
+                    :required="required"
                     :value="value"
                     :aria-invalid="error ? 'true' : undefined"
                     :aria-required="required ? 'true' : undefined"
@@ -64,7 +79,7 @@ const onInput = (e) => {
                 />
                 <span class="app-checkbox__box" aria-hidden="true">
                     <svg
-                        v-if="modelValue"
+                        v-if="isChecked"
                         width="12"
                         height="12"
                         viewBox="0 0 24 24"
@@ -84,7 +99,7 @@ const onInput = (e) => {
                 <slot />
                 <span v-if="required" class="app-checkbox__required" aria-hidden="true">*</span>
             </span>
-        </label>
+        </component>
 
         <p v-if="hint && !error" :id="hintId" class="app-checkbox__hint">{{ hint }}</p>
         <p v-if="error" :id="errorId" class="app-checkbox__error" role="alert">{{ error }}</p>

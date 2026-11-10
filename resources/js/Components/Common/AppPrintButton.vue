@@ -60,11 +60,11 @@ const buttonClasses = computed(() => {
     // Variant classes
     const variantClasses = {
         primary:
-            'bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm hover:shadow focus:ring-indigo-500',
+            'bg-action-primary hover:bg-action-primary-hover text-action-on shadow-xs focus:ring-focus-ring',
         secondary:
-            'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-750 shadow-sm focus:ring-indigo-500',
-        ghost: 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 focus:ring-gray-500',
-        icon: 'text-gray-500 hover:text-indigo-600 dark:text-gray-400 dark:hover:text-indigo-400 hover:bg-white dark:hover:bg-gray-800 rounded-xl shadow-sm hover:shadow focus:ring-indigo-500 border border-transparent hover:border-gray-200 dark:hover:border-gray-700',
+            'bg-surface text-text-primary border border-border hover:bg-surface-muted shadow-xs focus:ring-focus-ring',
+        ghost: 'text-text-secondary hover:text-text-primary hover:bg-surface-muted focus:ring-focus-ring',
+        icon: 'text-text-secondary hover:text-action-primary hover:bg-selection-bg rounded-xl shadow-xs hover:shadow-sm focus:ring-focus-ring border border-transparent hover:border-border',
     }[props.variant];
 
     return [

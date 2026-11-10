@@ -422,9 +422,25 @@ class InvoicesController extends Controller
             })
             ->when($request->input('payment_status'), fn ($q, $s) => $q->where('payment_status', $s))
             ->when($request->input('date_from'), fn ($q, $d) => $q->whereDate('issue_date', '>=', $d))
-            ->when($request->input('date_to'), fn ($q, $d) => $q->whereDate('issue_date', '<=', $d))
-            ->orderBy('issue_date', 'desc')
-            ->orderBy('id', 'desc');
+            ->when($request->input('date_to'), fn ($q, $d) => $q->whereDate('issue_date', '<=', $d));
+
+        $sortableColumns = [
+            'invoice_number' => 'invoice_number',
+            'issue_date' => 'issue_date',
+            'total_incl_tax' => 'total_incl_tax',
+            'total_excl_tax' => 'total_excl_tax',
+            'balance' => 'balance',
+        ];
+
+        $sortColumn = (string) $request->input('sort');
+        $sortDirection = strtolower((string) $request->input('direction', 'desc')) === 'asc' ? 'asc' : 'desc';
+
+        if ($sortColumn && isset($sortableColumns[$sortColumn])) {
+            $baseQuery->orderBy($sortableColumns[$sortColumn], $sortDirection);
+        } else {
+            $baseQuery->orderBy('issue_date', 'desc')
+                ->orderBy('id', 'desc');
+        }
 
         // Sales Invoices tab: standard sales invoices (exclude credit notes)
         $invoices = (clone $baseQuery)
@@ -448,7 +464,7 @@ class InvoicesController extends Controller
         return Inertia::render('Invoices/Sales/Index', [
             'invoices' => $invoices,
             'returns' => $returns,
-            'filters' => $request->only(['search', 'payment_status', 'date_from', 'date_to', 'tab']),
+            'filters' => $request->only(['search', 'payment_status', 'date_from', 'date_to', 'tab', 'sort', 'direction']),
         ]);
     }
 
@@ -477,12 +493,43 @@ class InvoicesController extends Controller
             })
             ->when($request->input('status'), fn ($q, $s) => $q->where('status', $s))
             ->when($request->input('date_from'), fn ($q, $d) => $q->whereDate('issue_date', '>=', $d))
-            ->when($request->input('date_to'), fn ($q, $d) => $q->whereDate('issue_date', '<=', $d))
-            ->orderBy('id', 'desc');
+            ->when($request->input('date_to'), fn ($q, $d) => $q->whereDate('issue_date', '<=', $d));
+
+        $sort = (string) $request->input('sort');
+        $direction = strtolower((string) $request->input('direction', 'desc')) === 'asc' ? 'asc' : 'desc';
+
+        if ($sort === 'code') {
+            $query->orderBy('code', $direction);
+        } elseif ($sort === 'invoice_number') {
+            $query->orderBy('invoice_number', $direction);
+        } elseif ($sort === 'supplier') {
+            $query->orderBy(
+                Supplier::select('name')
+                    ->whereColumn('suppliers.id', 'purchase_invoices.supplier_id')
+                    ->limit(1),
+                $direction
+            );
+        } elseif ($sort === 'issue_date') {
+            $query->orderBy('issue_date', $direction);
+        } elseif ($sort === 'due_date') {
+            $query->orderBy('due_date', $direction);
+        } elseif ($sort === 'subtotal') {
+            $query->orderBy('subtotal', $direction);
+        } elseif ($sort === 'total') {
+            $query->orderBy('total', $direction);
+        } elseif ($sort === 'balance') {
+            $query->orderBy('balance', $direction);
+        } elseif ($sort === 'status') {
+            $query->orderBy('status', $direction);
+        } elseif ($sort === 'created_at') {
+            $query->orderBy('created_at', $direction);
+        } else {
+            $query->orderBy('id', 'desc');
+        }
 
         $invoices = $query->paginate(25)->withQueryString();
 
-        $returns = PurchaseReturnInvoice::where('tenant_id', $tenantId)
+        $returnsQuery = PurchaseReturnInvoice::where('tenant_id', $tenantId)
             ->where('center_id', $centerId)
             ->whereHas('purchaseInvoice', function ($q) {
                 $q->whereNotExists(function ($sub) {
@@ -499,10 +546,25 @@ class InvoicesController extends Controller
                 });
             })
             ->when($request->input('date_from'), fn ($q, $d) => $q->whereDate('return_date', '>=', $d))
-            ->when($request->input('date_to'), fn ($q, $d) => $q->whereDate('return_date', '<=', $d))
-            ->orderBy('id', 'desc')
-            ->paginate(25, ['*'], 'returns_page')
-            ->withQueryString();
+            ->when($request->input('date_to'), fn ($q, $d) => $q->whereDate('return_date', '<=', $d));
+
+        if ($request->input('tab') === 'returns') {
+            if ($sort === 'code') {
+                $returnsQuery->orderBy('code', $direction);
+            } elseif ($sort === 'return_date') {
+                $returnsQuery->orderBy('return_date', $direction);
+            } elseif ($sort === 'total') {
+                $returnsQuery->orderBy('total', $direction);
+            } elseif ($sort === 'subtotal') {
+                $returnsQuery->orderBy('subtotal', $direction);
+            } else {
+                $returnsQuery->orderBy('id', 'desc');
+            }
+        } else {
+            $returnsQuery->orderBy('id', 'desc');
+        }
+
+        $returns = $returnsQuery->paginate(25, ['*'], 'returns_page')->withQueryString();
 
         $suppliers = Supplier::forTenant($tenantId)->forCenter($centerId)->active()->get(['id', 'name']);
         $defaultWarehouse = Warehouse::forCenter($centerId)->default()->first();
@@ -512,7 +574,13 @@ class InvoicesController extends Controller
         return Inertia::render('Invoices/Purchasing/Index', [
             'invoices' => $invoices,
             'returns' => $returns,
-            'filters' => $request->only(['search', 'status', 'date_from', 'date_to']),
+            'filters' => array_merge(
+                $request->only(['search', 'status', 'date_from', 'date_to', 'tab']),
+                [
+                    'sort' => $sort ?: null,
+                    'direction' => $sort ? $direction : null,
+                ]
+            ),
             'statuses' => [
                 PurchaseInvoice::STATUS_DRAFT,
                 PurchaseInvoice::STATUS_OPEN,

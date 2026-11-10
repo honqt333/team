@@ -37,7 +37,7 @@ function initials(name) {
                         {{ $t('dashboard.invoice_count', { n: customer.invoice_count }) }}
                     </p>
                 </div>
-                <div class="flex-shrink-0 text-left">
+                <div class="flex-shrink-0 text-end">
                     <p class="text-sm font-semibold tabular-nums text-slate-900 dark:text-white">
                         {{
                             new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 }).format(

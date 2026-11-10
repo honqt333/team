@@ -964,11 +964,9 @@
                             />
                         </svg>
                         {{
-                            $t(
-                                'common.fix_errors_count',
-                                { count: Object.keys(form.errors).length },
-                                `${Object.keys(form.errors).length} أخطاء تحتاج تصحيح`
-                            )
+                            $t('common.fix_errors_count', {
+                                count: Object.keys(form.errors).length,
+                            })
                         }}
                     </span>
                 </div>
@@ -1077,7 +1075,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted } from 'vue';
+import { ref, computed, watch, nextTick, onMounted } from 'vue';
 import { router, useForm, Link } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import { useLocalized } from '@/Composables/useLocalized';
@@ -1110,6 +1108,7 @@ const props = defineProps({
     warehouses: { type: Array, default: () => [] },
     readOnly: { type: Boolean, default: false },
     initialTab: { type: String, default: 'service' },
+    initialServiceId: { type: Number, default: null },
 });
 
 const emit = defineEmits(['close', 'saved']);
@@ -2259,6 +2258,11 @@ watch(
                 pendingParts.value = [];
                 localTechnicians.value = [];
                 localNotes.value = [];
+                if (props.initialServiceId) {
+                    nextTick(() => {
+                        if (props.show && !props.item) form.service_id = props.initialServiceId;
+                    });
+                }
             }
         }
     },

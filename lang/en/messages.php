@@ -3,6 +3,12 @@
 declare(strict_types=1);
 
 return [
+    'setup' => [
+        'main_center' => 'Main center',
+        'complete' => 'Initial system setup completed.',
+        'logo_write_failed' => 'Unable to save the vehicle make logo.',
+    ],
+
     'attachment_deleted' => 'Attachment deleted successfully',
     'attachment_uploaded' => 'Attachment Uploaded',
     'attachments_uploaded_successfully' => 'Attachments uploaded successfully',
@@ -286,6 +292,22 @@ return [
         'website' => [
             'saved' => 'The website settings were updated successfully',
         ],
+    ],
+    'company_transactions' => [
+        'saved' => 'Company transaction saved as draft successfully',
+        'updated' => 'Company transaction updated successfully',
+        'deleted' => 'Company transaction deleted successfully',
+        'approved' => 'Financial transaction approved and invoice issued successfully',
+        'cannot_edit_approved' => 'Approved transactions cannot be edited',
+        'cannot_delete_approved' => 'Approved transactions cannot be deleted',
+        'already_approved' => 'This transaction is already approved',
+        'contact_required_for_taxable' => 'Contact must be selected when taxable is enabled for tax compliance',
+        'approve_failed' => 'An error occurred during approval: :message',
+        'payment_note' => 'Automatic payment for company transaction #:id',
+        'general_admin_customer' => 'General Administrative Customer',
+        'general_admin_supplier' => 'General Administrative Supplier',
+        'cash_customer' => 'Cash Customer',
+        'admin_expenses' => 'Company Administrative Expenses',
     ],
     'appointment_not_found' => 'The appointment was not found',
     'center_unavailable' => 'This center is not available',

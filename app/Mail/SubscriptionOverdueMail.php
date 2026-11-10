@@ -76,12 +76,12 @@ class SubscriptionOverdueMail extends Mailable implements ShouldQueue
             return [];
         }
 
-        if (! Storage::disk('public')->exists($this->attachmentPath)) {
+        if (! Storage::disk('local')->exists($this->attachmentPath)) {
             return [];
         }
 
         return [
-            Attachment::fromStorageDisk('public', $this->attachmentPath)
+            Attachment::fromStorageDisk('local', $this->attachmentPath)
                 ->as(basename($this->attachmentPath))
                 ->withMime('application/pdf'),
         ];

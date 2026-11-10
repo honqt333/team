@@ -26,11 +26,17 @@ declare module '@/Composables/useLocalized' {
 }
 
 declare module '@/Composables/useToast' {
+    interface ToastOptions {
+        title?: string;
+        duration?: number;
+        fromFlash?: boolean;
+    }
     export function useToast(): {
-        success: (message: string) => void;
-        error: (message: string) => void;
-        info: (message: string) => void;
-        warning: (message: string) => void;
+        clear: () => void;
+        success: (message: string, options?: ToastOptions) => number | null;
+        error: (message: string, options?: ToastOptions) => number | null;
+        info: (message: string, options?: ToastOptions) => number | null;
+        warning: (message: string, options?: ToastOptions) => number | null;
     };
 }
 

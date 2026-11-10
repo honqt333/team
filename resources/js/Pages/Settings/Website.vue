@@ -480,16 +480,10 @@
                                     العمل أو العروض السريعة
                                 </p>
                             </div>
-                            <label class="relative inline-flex items-center cursor-pointer">
-                                <input
-                                    type="checkbox"
-                                    v-model="form.settings.announcement_bar.enabled"
-                                    class="sr-only peer"
-                                />
-                                <div
-                                    class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-pink-600"
-                                ></div>
-                            </label>
+                            <AppToggle
+                                v-model="form.settings.announcement_bar.enabled"
+                                color="danger"
+                            />
                         </div>
 
                         <div v-if="form.settings.announcement_bar.enabled" class="space-y-3 pt-2">
@@ -628,18 +622,11 @@
 
                                     <div class="flex items-center gap-2">
                                         <!-- Active toggle -->
-                                        <label
-                                            class="relative inline-flex items-center cursor-pointer me-2"
-                                        >
-                                            <input
-                                                type="checkbox"
-                                                v-model="banner.is_active"
-                                                class="sr-only peer"
-                                            />
-                                            <div
-                                                class="w-9 h-5 bg-gray-300 peer-focus:outline-none rounded-full peer dark:bg-gray-600 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-500"
-                                            ></div>
-                                        </label>
+                                        <AppToggle
+                                            v-model="banner.is_active"
+                                            size="sm"
+                                            color="success"
+                                        />
 
                                         <!-- Delete button -->
                                         <button
@@ -1586,16 +1573,10 @@
                                         }}
                                     </span>
                                 </div>
-                                <label class="relative inline-flex items-center cursor-pointer">
-                                    <input
-                                        type="checkbox"
-                                        v-model="form.settings.enable_portal_lookup"
-                                        class="sr-only peer"
-                                    />
-                                    <div
-                                        class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-pink-600"
-                                    ></div>
-                                </label>
+                                <AppToggle
+                                    v-model="form.settings.enable_portal_lookup"
+                                    color="danger"
+                                />
                             </div>
 
                             <!-- Online booking toggle -->
@@ -1612,16 +1593,10 @@
                                         إظهار زر حجز الموعد المباشر في هيدر الموقع وكروت الخدمات
                                     </span>
                                 </div>
-                                <label class="relative inline-flex items-center cursor-pointer">
-                                    <input
-                                        type="checkbox"
-                                        v-model="form.settings.enable_online_booking"
-                                        class="sr-only peer"
-                                    />
-                                    <div
-                                        class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-pink-600"
-                                    ></div>
-                                </label>
+                                <AppToggle
+                                    v-model="form.settings.enable_online_booking"
+                                    color="danger"
+                                />
                             </div>
                         </div>
                     </section>
@@ -1776,6 +1751,7 @@ import AppLayout from '@/Layouts/AppLayout.vue';
 import PageHeader from '@/Components/PageHeader.vue';
 import ColorField from '@/Components/ColorField.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
+import AppToggle from '@/Components/Common/AppToggle.vue';
 import { useI18n } from 'vue-i18n';
 import { usePage, useForm } from '@inertiajs/vue3';
 import { computed, ref, h } from 'vue';

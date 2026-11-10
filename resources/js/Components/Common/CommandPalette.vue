@@ -206,18 +206,16 @@ defineExpose({ open, close });
         >
             <div
                 v-if="isOpen"
-                class="fixed inset-0 z-50 overflow-y-auto p-4 sm:p-6 md:p-20 bg-gray-900/60 backdrop-blur-sm flex items-start justify-center"
+                class="fixed inset-0 z-50 overflow-y-auto p-4 sm:p-6 md:p-20 bg-black/60 backdrop-blur-sm flex items-start justify-center"
                 @click.self="close"
             >
                 <div
-                    class="w-full max-w-xl bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 overflow-hidden transform transition-all animate-fade-in"
+                    class="w-full max-w-xl bg-surface rounded-2xl shadow-2xl border border-border overflow-hidden transform transition-all animate-fade-in"
                 >
                     <!-- Search Input Bar -->
-                    <div
-                        class="relative flex items-center px-4 border-b border-gray-100 dark:border-gray-700/80"
-                    >
+                    <div class="relative flex items-center px-4 border-b border-border">
                         <svg
-                            class="w-5 h-5 text-gray-400 dark:text-gray-500 shrink-0"
+                            class="w-5 h-5 text-text-muted shrink-0"
                             fill="none"
                             stroke="currentColor"
                             viewBox="0 0 24 24"
@@ -236,23 +234,21 @@ defineExpose({ open, close });
                             :placeholder="
                                 $t('common.quick_search') || 'ابحث عن أي قسم، كرت عمل، أو صفحة...'
                             "
-                            class="w-full py-4 px-3 bg-transparent text-sm sm:text-base text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 border-0 focus:outline-none focus:ring-0"
+                            class="w-full py-4 px-3 bg-transparent text-sm sm:text-base text-text-primary placeholder:text-text-muted border-0 focus:outline-none focus:ring-0"
                         />
                         <button
                             type="button"
                             @click="close"
-                            class="p-1 rounded-lg text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-xs font-mono"
+                            class="p-1 rounded-lg text-text-muted hover:text-text-primary hover:bg-surface-muted transition-colors text-xs font-mono"
                         >
                             ESC
                         </button>
                     </div>
 
                     <!-- Results List -->
-                    <div
-                        class="max-h-80 overflow-y-auto p-2 divide-y divide-gray-50 dark:divide-gray-700/40"
-                    >
+                    <div class="max-h-80 overflow-y-auto p-2 divide-y divide-border/60">
                         <div v-if="filteredCommands.length === 0" class="p-8 text-center">
-                            <p class="text-sm text-gray-500 dark:text-gray-400">
+                            <p class="text-sm text-text-muted">
                                 {{ $t('common.no_results') || 'لم يتم العثور على نتائج مطابقة' }}
                             </p>
                         </div>
@@ -267,8 +263,8 @@ defineExpose({ open, close });
                                 :class="[
                                     'w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-start text-sm transition-all cursor-pointer',
                                     idx === selectedIndex
-                                        ? 'bg-indigo-50 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300'
-                                        : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50',
+                                        ? 'bg-selection-bg text-action-primary'
+                                        : 'text-text-secondary hover:bg-surface-muted hover:text-text-primary',
                                 ]"
                             >
                                 <div class="flex items-center gap-3 min-w-0">
@@ -276,8 +272,8 @@ defineExpose({ open, close });
                                         :class="[
                                             'w-8 h-8 rounded-lg flex items-center justify-center shrink-0 transition-colors',
                                             idx === selectedIndex
-                                                ? 'bg-indigo-600 text-white'
-                                                : 'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400',
+                                                ? 'bg-action-primary text-action-on'
+                                                : 'bg-surface-muted text-text-muted',
                                         ]"
                                     >
                                         <svg
@@ -297,7 +293,7 @@ defineExpose({ open, close });
                                     <span class="font-medium truncate">{{ item.label }}</span>
                                 </div>
                                 <span
-                                    class="text-[11px] font-semibold text-gray-400 dark:text-gray-500 shrink-0 px-2 py-0.5 rounded-md bg-gray-50 dark:bg-gray-700/40"
+                                    class="text-[11px] font-semibold text-text-muted shrink-0 px-2 py-0.5 rounded-md bg-surface-muted border border-border/60"
                                 >
                                     {{ item.category }}
                                 </span>
@@ -307,23 +303,23 @@ defineExpose({ open, close });
 
                     <!-- Footer hint -->
                     <div
-                        class="px-4 py-2.5 bg-gray-50/80 dark:bg-gray-800/80 border-t border-gray-100 dark:border-gray-700/80 flex items-center justify-between text-[11px] text-gray-400 dark:text-gray-500"
+                        class="px-4 py-2.5 bg-surface-muted/60 border-t border-border flex items-center justify-between text-[11px] text-text-muted"
                     >
                         <div class="flex items-center gap-2">
                             <span>للتنقل:</span>
                             <kbd
-                                class="px-1.5 py-0.5 rounded bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600"
+                                class="px-1.5 py-0.5 rounded bg-surface border border-border text-text-secondary font-mono"
                             >
                                 ↑
                             </kbd>
                             <kbd
-                                class="px-1.5 py-0.5 rounded bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600"
+                                class="px-1.5 py-0.5 rounded bg-surface border border-border text-text-secondary font-mono"
                             >
                                 ↓
                             </kbd>
                             <span>للاختيار:</span>
                             <kbd
-                                class="px-1.5 py-0.5 rounded bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600"
+                                class="px-1.5 py-0.5 rounded bg-surface border border-border text-text-secondary font-mono"
                             >
                                 ↵
                             </kbd>
@@ -331,7 +327,7 @@ defineExpose({ open, close });
                         <div>
                             <span>لإغلاق النافذة:</span>
                             <kbd
-                                class="px-1.5 py-0.5 rounded bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600"
+                                class="px-1.5 py-0.5 rounded bg-surface border border-border text-text-secondary font-mono"
                             >
                                 ESC
                             </kbd>

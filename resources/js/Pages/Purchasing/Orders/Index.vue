@@ -1,89 +1,59 @@
 <template>
-    <AppLayout>
+    <AppLayout :title="$t('purchasing.orders.title')">
         <div class="space-y-6">
             <!-- Header -->
             <PageHeader
                 :title="$t('purchasing.orders.title')"
                 :subtitle="$t('purchasing.orders.subtitle')"
-                :totalCount="orders.total"
+                :totalCount="orders?.total ? toEnglish(orders.total) : '0'"
                 :countLabel="$t('purchasing.orders.title')"
-                gradientFrom="from-blue-600"
-                gradientTo="to-indigo-700"
-                glowFrom="from-blue-500"
-                badgeBg="bg-blue-50/50 dark:bg-blue-900/30"
-                badgeText="text-blue-600 dark:text-blue-400"
-                badgeBorder="border-blue-100/50 dark:border-blue-800/30"
-                badgeDot="bg-blue-500"
             >
                 <template #icon>
-                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg
+                        class="w-8 h-8 text-white"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                    >
                         <path
                             stroke-linecap="round"
                             stroke-linejoin="round"
-                            stroke-width="2.5"
+                            stroke-width="2.2"
                             d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
                         />
                     </svg>
                 </template>
 
                 <template #actions>
-                    <div
-                        class="flex items-center gap-1.5 p-1.5 bg-gray-50/50 dark:bg-gray-900/50 backdrop-blur-md rounded-2xl border border-gray-200/50 dark:border-gray-700/50 shadow-inner"
-                    >
-                        <!-- Export/Print Group -->
-                        <div class="flex items-center gap-1">
-                            <button
-                                @click="exportOrders"
-                                class="p-2.5 text-gray-500 hover:text-blue-600 hover:bg-white dark:hover:bg-gray-800 rounded-xl transition-all shadow-sm hover:shadow-md"
-                                :title="$t('common.export')"
-                            >
-                                <svg
-                                    class="w-5 h-5"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        stroke-width="2.5"
-                                        d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                                    />
-                                </svg>
-                            </button>
-                            <button
-                                @click="printOrders"
-                                class="p-2.5 text-gray-500 hover:text-blue-600 hover:bg-white dark:hover:bg-gray-800 rounded-xl transition-all shadow-sm hover:shadow-md"
-                                :title="$t('common.print')"
-                            >
-                                <svg
-                                    class="w-5 h-5"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        stroke-width="2.5"
-                                        d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"
-                                    />
-                                </svg>
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Create Order Button -->
-                    <button
-                        v-if="can('purchasing.pos.create') || isAnyAdmin()"
-                        @click="openCreateModal"
-                        class="flex items-center justify-center gap-3 px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-700 text-white rounded-2xl font-black shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 hover:-translate-y-0.5 transition-all group/add"
-                    >
+                    <div class="flex items-center gap-3">
+                        <!-- Actions Toolbar -->
                         <div
-                            class="w-7 h-7 rounded-lg bg-white/20 flex items-center justify-center group-hover/add:rotate-90 transition-transform duration-300"
+                            class="flex items-center gap-1.5 p-1.5 bg-surface-secondary/80 dark:bg-surface-secondary/40 backdrop-blur-md rounded-2xl border border-border-subtle shadow-inner"
+                        >
+                            <AppPrintButton
+                                variant="icon"
+                                @click="printOrders"
+                                :title="$t('common.print')"
+                            />
+
+                            <!-- Divider -->
+                            <div class="w-px h-6 bg-border-subtle mx-1"></div>
+
+                            <!-- View Toggle Group -->
+                            <AppViewModeToggle
+                                v-model="viewMode"
+                                storage-key="purchasing_orders_view_mode"
+                            />
+                        </div>
+
+                        <!-- Create Order Button (Anchored Outer Left in RTL) -->
+                        <button
+                            v-if="can('purchasing.pos.create') || isAnyAdmin()"
+                            @click="openCreateModal"
+                            class="flex items-center justify-center gap-2 px-5 py-2.5 bg-action-primary hover:bg-action-primary-hover text-white rounded-xl font-bold shadow-xs transition-colors cursor-pointer"
                         >
                             <svg
-                                class="w-5 h-5"
+                                class="w-4 h-4"
                                 fill="none"
                                 stroke="currentColor"
                                 viewBox="0 0 24 24"
@@ -91,23 +61,23 @@
                                 <path
                                     stroke-linecap="round"
                                     stroke-linejoin="round"
-                                    stroke-width="3"
+                                    stroke-width="2.5"
                                     d="M12 4v16m8-8H4"
                                 />
                             </svg>
-                        </div>
-                        <span class="text-sm tracking-tight">
-                            {{ $t('purchasing.orders.add') }}
-                        </span>
-                    </button>
+                            <span class="text-sm">
+                                {{ $t('purchasing.orders.add') }}
+                            </span>
+                        </button>
+                    </div>
                 </template>
 
                 <template #filters>
-                    <div class="flex flex-col md:flex-row items-center gap-4">
+                    <div class="flex flex-col md:flex-row items-center gap-3 no-print">
                         <!-- Search Box -->
                         <div class="relative group flex-1 w-full">
                             <div
-                                class="absolute inset-y-0 start-0 flex items-center ps-4 pointer-events-none text-gray-400 group-focus-within:text-blue-500 transition-colors"
+                                class="absolute inset-y-0 start-0 flex items-center ps-4 pointer-events-none text-content-muted group-focus-within:text-action-primary transition-colors"
                             >
                                 <svg
                                     class="w-5 h-5"
@@ -124,19 +94,34 @@
                                 </svg>
                             </div>
                             <input
-                                v-model="localFilters.search"
+                                v-model="tableFilters.search"
                                 type="text"
                                 :placeholder="$t('purchasing.orders.search_placeholder')"
-                                class="block w-full ps-11 pe-4 py-3.5 text-sm text-gray-900 dark:text-white bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all outline-none shadow-sm placeholder-gray-400"
-                                @input="debouncedSearch"
+                                class="block w-full ps-11 pe-4 py-2.5 text-sm text-content-primary bg-surface-primary border border-border-subtle rounded-xl focus:ring-2 focus:ring-action-primary/20 focus:border-action-primary transition-all outline-none placeholder-content-muted shadow-xs"
                             />
                         </div>
 
-                        <div class="flex items-center gap-3 w-full md:w-auto">
-                            <!-- Status Filter -->
-                            <div class="w-full md:w-56">
+                        <div class="flex flex-wrap items-center gap-2.5 w-full md:w-auto">
+                            <!-- Supplier Filter -->
+                            <div v-if="suppliers && suppliers.length > 0" class="w-full sm:w-48">
                                 <SearchableSelect
-                                    v-model="localFilters.status"
+                                    v-model="tableFilters.supplier_id"
+                                    :options="[
+                                        { id: '', name: $t('purchasing.orders.select_supplier') },
+                                        ...suppliers,
+                                    ]"
+                                    option-label="name"
+                                    option-value="id"
+                                    :placeholder="$t('purchasing.orders.select_supplier')"
+                                    :label="''"
+                                    @change="applyFilters"
+                                />
+                            </div>
+
+                            <!-- Status Filter -->
+                            <div class="w-full sm:w-44">
+                                <SearchableSelect
+                                    v-model="tableFilters.status"
                                     :options="statusOptions"
                                     option-label="label"
                                     option-value="value"
@@ -148,12 +133,14 @@
 
                             <!-- Reset Button -->
                             <button
-                                @click="resetFilters"
-                                class="p-3.5 text-gray-500 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-2xl border border-gray-100 dark:border-gray-700 bg-white dark:bg-gray-800 transition-all shadow-sm"
-                                :title="$t('common.reset')"
+                                v-if="hasActiveFilters"
+                                @click="handleResetFilters"
+                                type="button"
+                                class="p-2.5 text-content-muted hover:text-danger hover:bg-danger-soft rounded-xl border border-border-subtle bg-surface-primary transition-colors cursor-pointer shadow-xs"
+                                :title="$t('common.reset_filter') || $t('common.reset')"
                             >
                                 <svg
-                                    class="w-5 h-5"
+                                    class="w-4 h-4"
                                     fill="none"
                                     stroke="currentColor"
                                     viewBox="0 0 24 24"
@@ -171,95 +158,181 @@
                 </template>
             </PageHeader>
 
-            <!-- Orders Table -->
-            <div
-                class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden"
-            >
-                <div class="overflow-x-auto">
-                    <table class="w-full">
-                        <thead class="bg-gray-50 dark:bg-gray-700">
-                            <tr>
-                                <th
-                                    class="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase align-middle"
-                                >
-                                    {{ $t('purchasing.orders.code') }}
-                                </th>
-                                <th
-                                    class="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase align-middle"
-                                >
-                                    {{ $t('purchasing.orders.supplier') }}
-                                </th>
-                                <th
-                                    class="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase align-middle"
-                                >
-                                    {{ $t('purchasing.orders.date') }}
-                                </th>
-                                <th
-                                    class="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase align-middle"
-                                >
-                                    {{ $t('purchasing.orders.total') }}
-                                </th>
-                                <th
-                                    class="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase align-middle"
-                                >
-                                    {{ $t('common.status') }}
-                                </th>
-                                <th
-                                    class="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase align-middle"
-                                >
-                                    {{ $t('common.actions') }}
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
-                            <tr
-                                v-for="order in orders.data"
-                                :key="order.id"
-                                class="hover:bg-gray-50 dark:hover:bg-gray-700/50"
+            <!-- Loading State -->
+            <AppTableSkeleton v-if="!orders" :rows="6" :cols="6" />
+
+            <!-- Main Content -->
+            <div v-else>
+                <!-- Empty State -->
+                <div
+                    v-if="!orders.data || orders.data.length === 0"
+                    class="bg-surface-primary rounded-2xl border border-border-subtle p-12"
+                >
+                    <AppEmptyState
+                        :title="$t('purchasing.orders.empty')"
+                        :description="$t('purchasing.orders.empty_hint')"
+                        :action-text="
+                            can('purchasing.pos.create') || isAnyAdmin()
+                                ? $t('purchasing.orders.add')
+                                : ''
+                        "
+                        @action="openCreateModal"
+                    />
+                </div>
+
+                <!-- GRID VIEW -->
+                <div v-else-if="viewMode === 'grid'" class="space-y-6 no-print">
+                    <div
+                        class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"
+                    >
+                        <Link
+                            v-for="order in orders.data"
+                            :key="order.id"
+                            :href="route('app.purchasing.orders.show', order.id)"
+                            class="group relative flex flex-col bg-surface-primary rounded-2xl border border-border-subtle hover:border-border-strong hover:shadow-md transition-all duration-300 overflow-hidden p-5"
+                        >
+                            <!-- Card Header -->
+                            <div
+                                class="flex items-center justify-between gap-2 pb-3 border-b border-border-subtle"
                             >
-                                <td
-                                    class="px-4 py-3 text-center text-sm font-mono text-blue-600 dark:text-blue-400 align-middle"
-                                    dir="ltr"
-                                    lang="en"
+                                <span
+                                    class="font-bold font-mono text-sm text-action-primary group-hover:underline"
                                 >
-                                    <Link
-                                        :href="route('app.purchasing.orders.show', order.id)"
-                                        class="hover:underline"
-                                    >
-                                        {{ order.code }}
-                                    </Link>
-                                </td>
-                                <td
-                                    class="px-4 py-3 text-center text-sm text-gray-900 dark:text-white align-middle"
+                                    #{{ toEnglish(order.code) }}
+                                </span>
+                                <span :class="getStatusBadgeClass(order.status)">
+                                    {{ getStatusLabel(order.status) }}
+                                </span>
+                            </div>
+
+                            <!-- Supplier & Warehouse -->
+                            <div class="py-4 space-y-2">
+                                <div
+                                    class="text-sm font-semibold text-content-primary line-clamp-1"
                                 >
-                                    {{ order.supplier?.name }}
-                                </td>
-                                <td
-                                    class="px-4 py-3 text-center text-sm text-gray-600 dark:text-gray-300 align-middle"
-                                    dir="ltr"
-                                    lang="en"
+                                    {{ order.supplier?.name || '-' }}
+                                </div>
+                                <div
+                                    v-if="order.warehouse"
+                                    class="text-xs text-content-muted flex items-center gap-1"
                                 >
-                                    {{ formatDate(order.order_date) }}
-                                </td>
-                                <td
-                                    class="px-4 py-3 text-center text-sm font-medium text-gray-900 dark:text-white font-mono align-middle"
-                                    dir="ltr"
-                                    lang="en"
-                                >
-                                    {{ formatCurrency(order.total) }}
-                                </td>
-                                <td class="px-4 py-3 text-center align-middle">
-                                    <span :class="getStatusBadgeClass(order.status)">
-                                        {{ getStatusLabel(order.status) }}
+                                    <span>{{ $t('purchasing.orders.warehouse') }}:</span>
+                                    <span class="text-content-secondary font-medium">
+                                        {{ order.warehouse.name }}
                                     </span>
-                                </td>
-                                <td class="px-4 py-3 text-center align-middle">
+                                </div>
+                            </div>
+
+                            <!-- Bottom Info -->
+                            <div class="pt-3 border-t border-border-subtle mt-auto space-y-2">
+                                <div class="flex items-center justify-between text-xs">
+                                    <span class="text-content-muted">
+                                        {{ $t('purchasing.orders.items') }}:
+                                    </span>
+                                    <span class="font-mono text-content-secondary font-medium">
+                                        {{ toEnglish(order.items_count || 0) }}
+                                    </span>
+                                </div>
+                                <div class="flex items-center justify-between text-xs">
+                                    <span class="text-content-muted">
+                                        {{ $t('purchasing.orders.date') }}:
+                                    </span>
+                                    <span class="font-mono text-content-secondary">
+                                        {{ formatDate(order.order_date) }}
+                                    </span>
+                                </div>
+                                <div
+                                    class="flex items-center justify-between pt-1 text-sm font-bold border-t border-border-subtle/60"
+                                >
+                                    <span class="text-content-muted text-xs">
+                                        {{ $t('purchasing.orders.total') }}:
+                                    </span>
+                                    <span class="font-mono text-content-primary">
+                                        {{ formatCurrency(order.total) }}
+                                    </span>
+                                </div>
+                            </div>
+                        </Link>
+                    </div>
+
+                    <!-- Pagination for Grid -->
+                    <div v-if="orders?.links?.length >= 3" class="mt-6">
+                        <AppPagination
+                            :links="orders.links"
+                            :from="orders.from"
+                            :to="orders.to"
+                            :total="orders.total"
+                        />
+                    </div>
+                </div>
+
+                <!-- LIST VIEW (DataTable) -->
+                <div v-else class="space-y-4 no-print">
+                    <DataTable
+                        :data="orders"
+                        :columns="columns"
+                        :loading="isLoading"
+                        :sort-column="sortColumn"
+                        :sort-direction="sortDirection"
+                        @sort="toggleSort"
+                        @row-click="navigateToOrder"
+                        :empty-title="$t('purchasing.orders.empty')"
+                        :empty-description="$t('purchasing.orders.empty_hint')"
+                    >
+                        <template #cell-code="{ item }">
+                            <Link
+                                :href="route('app.purchasing.orders.show', item.id)"
+                                class="font-bold text-action-primary hover:underline font-mono"
+                            >
+                                #{{ toEnglish(item.code) }}
+                            </Link>
+                        </template>
+
+                        <template #cell-supplier="{ item }">
+                            <span class="text-sm font-medium text-content-primary">
+                                {{ item.supplier?.name || '-' }}
+                            </span>
+                        </template>
+
+                        <template #cell-warehouse="{ item }">
+                            <span class="text-xs text-content-secondary">
+                                {{ item.warehouse?.name || '-' }}
+                            </span>
+                        </template>
+
+                        <template #cell-order_date="{ item }">
+                            <span class="text-xs text-content-secondary font-mono">
+                                {{ formatDate(item.order_date) }}
+                            </span>
+                        </template>
+
+                        <template #cell-items_count="{ item }">
+                            <span class="text-xs font-mono text-content-secondary">
+                                {{ toEnglish(item.items_count || 0) }}
+                            </span>
+                        </template>
+
+                        <template #cell-total="{ item }">
+                            <span class="text-sm font-bold text-content-primary font-mono">
+                                {{ formatCurrency(item.total) }}
+                            </span>
+                        </template>
+
+                        <template #cell-status="{ item }">
+                            <span :class="getStatusBadgeClass(item.status)">
+                                {{ getStatusLabel(item.status) }}
+                            </span>
+                        </template>
+
+                        <template #cell-actions="{ item }">
+                            <div class="flex items-center justify-center gap-1" @click.stop>
+                                <Tooltip :text="$t('common.view')">
                                     <Link
-                                        :href="route('app.purchasing.orders.show', order.id)"
-                                        class="p-2 text-gray-500 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400"
+                                        :href="route('app.purchasing.orders.show', item.id)"
+                                        class="p-2 text-content-secondary hover:text-action-primary hover:bg-surface-secondary rounded-xl transition-all"
                                     >
                                         <svg
-                                            class="w-4 h-4 mx-auto"
+                                            class="w-4 h-4"
                                             fill="none"
                                             stroke="currentColor"
                                             viewBox="0 0 24 24"
@@ -278,18 +351,10 @@
                                             />
                                         </svg>
                                     </Link>
-                                </td>
-                            </tr>
-                            <tr v-if="!orders.data.length">
-                                <td
-                                    colspan="6"
-                                    class="px-4 py-12 text-center text-gray-500 dark:text-gray-400 align-middle"
-                                >
-                                    {{ $t('purchasing.orders.empty') }}
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
+                                </Tooltip>
+                            </div>
+                        </template>
+                    </DataTable>
                 </div>
             </div>
         </div>
@@ -341,9 +406,9 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr v-for="order in orders.data" :key="order.id" class="border-b">
+                        <tr v-for="order in orders?.data || []" :key="order.id" class="border-b">
                             <td class="px-4 py-3 text-center text-sm font-mono align-middle">
-                                {{ order.code }}
+                                {{ toEnglish(order.code) }}
                             </td>
                             <td class="px-4 py-3 text-center text-sm align-middle">
                                 {{ order.supplier?.name }}
@@ -369,20 +434,28 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
-import { Link, router, usePage } from '@inertiajs/vue3';
+import { ref, computed, watch } from 'vue';
+import { Link, router } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
-import { debounce } from 'lodash-es';
 import { useI18n } from 'vue-i18n';
-import SearchableSelect from '@/Components/SearchableSelect.vue';
+import { useNumberFormat } from '@/Composables/useNumberFormat';
+import { usePermission } from '@/Composables/usePermission';
+import { useServerTable } from '@/Composables/useServerTable';
 import PageHeader from '@/Components/PageHeader.vue';
+import AppPrintButton from '@/Components/Common/AppPrintButton.vue';
+import AppViewModeToggle from '@/Components/Common/AppViewModeToggle.vue';
+import AppPagination from '@/Components/Common/AppPagination.vue';
+import AppEmptyState from '@/Components/Common/AppEmptyState.vue';
+import AppTableSkeleton from '@/Components/Common/AppTableSkeleton.vue';
+import DataTable from '@/Components/Common/DataTable.vue';
+import SearchableSelect from '@/Components/SearchableSelect.vue';
+import Tooltip from '@/Components/Tooltip.vue';
 import PurchaseOrderFormModal from '@/Components/Purchasing/PurchaseOrderFormModal.vue';
 import StandardReportHeader from '@/Components/Print/StandardReportHeader.vue';
 import StandardReportFooter from '@/Components/Print/StandardReportFooter.vue';
-import { usePermission } from '@/Composables/usePermission';
 
 const { t } = useI18n();
-const page = usePage();
+const { toEnglish, formatCurrency } = useNumberFormat();
 const { can, isAnyAdmin } = usePermission();
 
 const props = defineProps({
@@ -395,45 +468,97 @@ const props = defineProps({
     defaultWarehouse: Object,
 });
 
-const localFilters = ref({
-    search: props.filters?.search || '',
-    status: props.filters?.status || '',
+// View mode state
+const viewMode = ref(localStorage.getItem('purchasing_orders_view_mode') || 'list');
+watch(viewMode, (mode) => {
+    localStorage.setItem('purchasing_orders_view_mode', mode);
 });
 
-const applyFilters = () => {
-    router.get(
-        route('app.purchasing.orders.index'),
-        {
-            search: localFilters.value.search || undefined,
-            status: localFilters.value.status || undefined,
-        },
-        { preserveState: true, preserveScroll: true }
-    );
-};
+const {
+    filters: tableFilters,
+    sortColumn,
+    sortDirection,
+    isLoading,
+    applyFilters,
+    toggleSort,
+    cancelDebouncedSearch,
+} = useServerTable({
+    routeUrl: '/app/purchasing/orders',
+    initialFilters: {
+        search: props.filters?.search || '',
+        status: props.filters?.status || '',
+        supplier_id: props.filters?.supplier_id || '',
+    },
+    initialSort: {
+        column: props.filters?.sort || 'created_at',
+        direction: props.filters?.direction || 'desc',
+    },
+    debounceMs: 350,
+});
 
-const debouncedSearch = debounce(applyFilters, 300);
+const hasActiveFilters = computed(() => {
+    return Boolean(tableFilters.search || tableFilters.status || tableFilters.supplier_id);
+});
 
-const resetFilters = () => {
-    localFilters.value.search = '';
-    localFilters.value.status = '';
+const handleResetFilters = () => {
+    cancelDebouncedSearch?.();
+    tableFilters.search = '';
+    tableFilters.status = '';
+    tableFilters.supplier_id = '';
     applyFilters();
 };
 
-const exportOrders = () => {
-    // Implement export if needed
+watch(
+    () => props.filters,
+    (newFilters) => {
+        if (!newFilters) return;
+        if (newFilters.search !== undefined && newFilters.search !== tableFilters.search) {
+            tableFilters.search = newFilters.search || '';
+        }
+        if (newFilters.status !== undefined && newFilters.status !== tableFilters.status) {
+            tableFilters.status = newFilters.status || '';
+        }
+        if (
+            newFilters.supplier_id !== undefined &&
+            newFilters.supplier_id !== tableFilters.supplier_id
+        ) {
+            tableFilters.supplier_id = newFilters.supplier_id || '';
+        }
+        if (newFilters.sort !== undefined && newFilters.sort !== sortColumn.value) {
+            sortColumn.value = newFilters.sort || 'created_at';
+        }
+        if (newFilters.direction !== undefined && newFilters.direction !== sortDirection.value) {
+            sortDirection.value = newFilters.direction || 'desc';
+        }
+    },
+    { deep: true }
+);
+
+const columns = computed(() => [
+    { key: 'code', label: t('purchasing.orders.code'), sortable: true, align: 'start' },
+    { key: 'supplier', label: t('purchasing.orders.supplier'), sortable: true, align: 'start' },
+    { key: 'warehouse', label: t('purchasing.orders.warehouse'), sortable: false, align: 'start' },
+    { key: 'order_date', label: t('purchasing.orders.date'), sortable: true, align: 'start' },
+    { key: 'items_count', label: t('purchasing.orders.items'), sortable: false, align: 'start' },
+    { key: 'total', label: t('purchasing.orders.total'), sortable: true, align: 'start' },
+    { key: 'status', label: t('common.status'), sortable: true, align: 'start' },
+    { key: 'actions', label: t('common.actions'), sortable: false, align: 'center' },
+]);
+
+const navigateToOrder = (order) => {
+    if (order?.id) {
+        router.visit(route('app.purchasing.orders.show', order.id));
+    }
 };
 
 const printOrders = () => {
     window.print();
 };
 
-const formatDate = (date) => new Date(date).toLocaleDateString('en-US');
-
-const formatCurrency = (value) =>
-    new Intl.NumberFormat('en-US', {
-        style: 'currency',
-        currency: 'SAR',
-    }).format(value || 0);
+const formatDate = (date) => {
+    if (!date) return '-';
+    return new Date(date).toLocaleDateString('en-GB', { numberingSystem: 'latn' });
+};
 
 const getStatusLabel = (status) => {
     const labels = {
@@ -448,21 +573,18 @@ const getStatusLabel = (status) => {
 
 const getStatusBadgeClass = (status) => {
     const classes = {
-        draft: 'bg-gray-100 text-gray-700 border-gray-200 dark:bg-gray-800/50 dark:text-gray-400 dark:border-gray-700',
-        sent: 'bg-blue-50 text-blue-700 border-blue-100 dark:bg-blue-900/30 dark:text-blue-400 dark:border-blue-800/30',
-        partial:
-            'bg-amber-50 text-amber-700 border-amber-100 dark:bg-amber-900/30 dark:text-amber-400 dark:border-amber-800/30',
-        received:
-            'bg-emerald-50 text-emerald-700 border-emerald-100 dark:bg-emerald-900/30 dark:text-emerald-400 dark:border-emerald-800/30',
-        cancelled:
-            'bg-red-50 text-red-700 border-red-100 dark:bg-red-900/30 dark:text-red-400 dark:border-red-800/30',
+        draft: 'bg-surface-secondary text-content-secondary border-border-default',
+        sent: 'bg-info-soft text-info border-info/20',
+        partial: 'bg-warning-soft text-warning border-warning/20',
+        received: 'bg-success-soft text-success border-success/20',
+        cancelled: 'bg-danger-soft text-danger border-danger/20',
     };
-    return `inline-flex px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider border shadow-sm ${classes[status] || 'bg-gray-100'}`;
+    return `inline-flex px-2.5 py-1 rounded-full text-xs font-bold border shadow-xs ${classes[status] || 'bg-surface-secondary text-content-secondary'}`;
 };
 
 const statusOptions = computed(() => {
     const allOption = { value: '', label: t('purchasing.orders.all_statuses') };
-    const mappedStatuses = props.statuses.map((status) => ({
+    const mappedStatuses = (props.statuses || []).map((status) => ({
         value: status,
         label: getStatusLabel(status),
     }));
@@ -471,18 +593,13 @@ const statusOptions = computed(() => {
 
 // Modal Logic
 const showCreateModal = ref(false);
-const showEditModal = ref(false);
-const editingOrder = ref(null);
 
 const openCreateModal = () => {
-    editingOrder.value = null;
     showCreateModal.value = true;
 };
 
 const onSaved = () => {
-    // Refresh page or list handled by Inertia automatically if using visit/reload,
-    // but the modal submit does onSuccess so we might just need to ensure data is fresh.
-    // The prop `orders` will update if the controller redirects back or returns fresh data.
-    // Usually Inertia handles this.
+    router.reload({ only: ['orders'] });
+    showCreateModal.value = false;
 };
 </script>

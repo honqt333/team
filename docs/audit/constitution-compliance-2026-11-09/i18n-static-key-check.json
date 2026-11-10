@@ -1,0 +1,544 @@
+{
+  "ar_leaves": 7459,
+  "en_leaves": 7459,
+  "missing_ar_keys": [],
+  "missing_en_keys": [],
+  "vue_static_key_candidates": [
+    {
+      "path": "resources/js/Layouts/EmployeePortalLayout.vue",
+      "line": 94,
+      "key": "common.menu",
+      "missing_ar": true,
+      "missing_en": true
+    },
+    {
+      "path": "resources/js/Layouts/EmployeePortalLayout.vue",
+      "line": 127,
+      "key": "common.toggle_theme",
+      "missing_ar": true,
+      "missing_en": true
+    },
+    {
+      "path": "resources/js/Pages/Dashboard.vue",
+      "line": 266,
+      "key": "status.ready_for_qc",
+      "missing_ar": true,
+      "missing_en": true
+    },
+    {
+      "path": "resources/js/Pages/Public/LandingPreview.vue",
+      "line": 185,
+      "key": "title_ar",
+      "missing_ar": true,
+      "missing_en": true
+    },
+    {
+      "path": "resources/js/Pages/Public/LandingPreview.vue",
+      "line": 186,
+      "key": "description_ar",
+      "missing_ar": true,
+      "missing_en": true
+    },
+    {
+      "path": "resources/js/Pages/Public/LandingPreview.vue",
+      "line": 188,
+      "key": "title_ar",
+      "missing_ar": true,
+      "missing_en": true
+    },
+    {
+      "path": "resources/js/Pages/Public/LandingPreview.vue",
+      "line": 189,
+      "key": "description_ar",
+      "missing_ar": true,
+      "missing_en": true
+    },
+    {
+      "path": "resources/js/Pages/Public/LandingPreview.vue",
+      "line": 226,
+      "key": "title_ar",
+      "missing_ar": true,
+      "missing_en": true
+    },
+    {
+      "path": "resources/js/Pages/Public/LandingPreview.vue",
+      "line": 227,
+      "key": "description_ar",
+      "missing_ar": true,
+      "missing_en": true
+    },
+    {
+      "path": "resources/js/Pages/Public/LandingPreview.vue",
+      "line": 289,
+      "key": "maintenance_title_ar",
+      "missing_ar": true,
+      "missing_en": true
+    },
+    {
+      "path": "resources/js/Pages/Public/LandingPreview.vue",
+      "line": 290,
+      "key": "maintenance_message_ar",
+      "missing_ar": true,
+      "missing_en": true
+    },
+    {
+      "path": "resources/js/Pages/Public/landing/CtaSection.vue",
+      "line": 26,
+      "key": "hero_cta_text_ar",
+      "missing_ar": true,
+      "missing_en": true
+    },
+    {
+      "path": "resources/js/Pages/Public/landing/HeroSection.vue",
+      "line": 97,
+      "key": "hero_title_ar",
+      "missing_ar": true,
+      "missing_en": true
+    },
+    {
+      "path": "resources/js/Pages/Public/landing/HeroSection.vue",
+      "line": 106,
+      "key": "hero_typed_prefix_ar",
+      "missing_ar": true,
+      "missing_en": true
+    },
+    {
+      "path": "resources/js/Pages/Public/landing/HeroSection.vue",
+      "line": 109,
+      "key": "hero_typed_prefix_ar",
+      "missing_ar": true,
+      "missing_en": true
+    },
+    {
+      "path": "resources/js/Pages/Public/landing/HeroSection.vue",
+      "line": 122,
+      "key": "hero_typed_suffix_ar",
+      "missing_ar": true,
+      "missing_en": true
+    },
+    {
+      "path": "resources/js/Pages/Public/landing/HeroSection.vue",
+      "line": 125,
+      "key": "hero_typed_suffix_ar",
+      "missing_ar": true,
+      "missing_en": true
+    },
+    {
+      "path": "resources/js/Pages/Public/landing/HeroSection.vue",
+      "line": 131,
+      "key": "hero_typed_prefix_ar",
+      "missing_ar": true,
+      "missing_en": true
+    },
+    {
+      "path": "resources/js/Pages/Public/landing/HeroSection.vue",
+      "line": 133,
+      "key": "hero_typed_suffix_ar",
+      "missing_ar": true,
+      "missing_en": true
+    },
+    {
+      "path": "resources/js/Pages/Public/landing/HeroSection.vue",
+      "line": 136,
+      "key": "hero_subtitle_ar",
+      "missing_ar": true,
+      "missing_en": true
+    },
+    {
+      "path": "resources/js/Pages/Public/landing/HeroSection.vue",
+      "line": 145,
+      "key": "hero_cta_text_ar",
+      "missing_ar": true,
+      "missing_en": true
+    },
+    {
+      "path": "resources/js/Pages/Public/landing/PricingSection.vue",
+      "line": 31,
+      "key": "pricing_title_ar",
+      "missing_ar": true,
+      "missing_en": true
+    },
+    {
+      "path": "resources/js/Pages/Public/landing/PricingSection.vue",
+      "line": 32,
+      "key": "pricing_subtitle_ar",
+      "missing_ar": true,
+      "missing_en": true
+    },
+    {
+      "path": "resources/js/Pages/Public/landing/LandingFooter.vue",
+      "line": 39,
+      "key": "title_ar",
+      "missing_ar": true,
+      "missing_en": true
+    },
+    {
+      "path": "resources/js/Pages/Public/landing/LandingFooter.vue",
+      "line": 40,
+      "key": "footer_about_ar",
+      "missing_ar": true,
+      "missing_en": true
+    },
+    {
+      "path": "resources/js/Pages/Public/landing/LandingFooter.vue",
+      "line": 94,
+      "key": "address_ar",
+      "missing_ar": true,
+      "missing_en": true
+    },
+    {
+      "path": "resources/js/Pages/Public/landing/LandingFooter.vue",
+      "line": 95,
+      "key": "address_ar",
+      "missing_ar": true,
+      "missing_en": true
+    },
+    {
+      "path": "resources/js/Pages/Public/landing/LandingFooter.vue",
+      "line": 102,
+      "key": "copyright_text_ar",
+      "missing_ar": true,
+      "missing_en": true
+    },
+    {
+      "path": "resources/js/Pages/Public/landing/LandingHeader.vue",
+      "line": 44,
+      "key": "title_ar",
+      "missing_ar": true,
+      "missing_en": true
+    },
+    {
+      "path": "resources/js/Pages/Public/landing/LandingHeader.vue",
+      "line": 52,
+      "key": "title_ar",
+      "missing_ar": true,
+      "missing_en": true
+    },
+    {
+      "path": "resources/js/Pages/Public/landing/LandingHeader.vue",
+      "line": 123,
+      "key": "login_button_text_ar",
+      "missing_ar": true,
+      "missing_en": true
+    },
+    {
+      "path": "resources/js/Pages/Public/landing/LandingHeader.vue",
+      "line": 131,
+      "key": "hero_cta_text_ar",
+      "missing_ar": true,
+      "missing_en": true
+    },
+    {
+      "path": "resources/js/Pages/Public/landing/LandingHeader.vue",
+      "line": 176,
+      "key": "login_button_text_ar",
+      "missing_ar": true,
+      "missing_en": true
+    },
+    {
+      "path": "resources/js/Pages/Public/landing/LandingHeader.vue",
+      "line": 184,
+      "key": "hero_cta_text_ar",
+      "missing_ar": true,
+      "missing_en": true
+    },
+    {
+      "path": "resources/js/Pages/Public/landing/FeaturesSection.vue",
+      "line": 31,
+      "key": "features_title_ar",
+      "missing_ar": true,
+      "missing_en": true
+    },
+    {
+      "path": "resources/js/Pages/Public/landing/FeaturesSection.vue",
+      "line": 32,
+      "key": "features_subtitle_ar",
+      "missing_ar": true,
+      "missing_en": true
+    },
+    {
+      "path": "resources/js/Pages/Public/landing/AudienceSection.vue",
+      "line": 28,
+      "key": "audience_tag_ar",
+      "missing_ar": true,
+      "missing_en": true
+    },
+    {
+      "path": "resources/js/Pages/Public/landing/AudienceSection.vue",
+      "line": 30,
+      "key": "audience_title_ar",
+      "missing_ar": true,
+      "missing_en": true
+    },
+    {
+      "path": "resources/js/Pages/Public/landing/AudienceSection.vue",
+      "line": 32,
+      "key": "audience_subtitle_ar",
+      "missing_ar": true,
+      "missing_en": true
+    },
+    {
+      "path": "resources/js/Pages/Public/landing/AudienceSection.vue",
+      "line": 37,
+      "key": "audience_note_title_ar",
+      "missing_ar": true,
+      "missing_en": true
+    },
+    {
+      "path": "resources/js/Pages/Public/landing/AudienceSection.vue",
+      "line": 40,
+      "key": "audience_note_text_ar",
+      "missing_ar": true,
+      "missing_en": true
+    },
+    {
+      "path": "resources/js/Pages/System/Security/TwoFactorChallenge.vue",
+      "line": 36,
+      "key": "system.security.add_extra_layer",
+      "missing_ar": true,
+      "missing_en": true
+    },
+    {
+      "path": "resources/js/Pages/System/Payment/Failed.vue",
+      "line": 5,
+      "key": "system.payment.failed_title",
+      "missing_ar": true,
+      "missing_en": true
+    },
+    {
+      "path": "resources/js/Pages/System/Payment/Failed.vue",
+      "line": 6,
+      "key": "system.payment.failed_subtitle",
+      "missing_ar": true,
+      "missing_en": true
+    },
+    {
+      "path": "resources/js/Pages/System/Payment/Failed.vue",
+      "line": 32,
+      "key": "system.payment.failed_title",
+      "missing_ar": true,
+      "missing_en": true
+    },
+    {
+      "path": "resources/js/Pages/System/Payment/Failed.vue",
+      "line": 74,
+      "key": "system.payment.payment_method",
+      "missing_ar": true,
+      "missing_en": true
+    },
+    {
+      "path": "resources/js/Pages/System/Payment/Failed.vue",
+      "line": 82,
+      "key": "system.payment.created_at",
+      "missing_ar": true,
+      "missing_en": true
+    },
+    {
+      "path": "resources/js/Pages/System/Payment/Failed.vue",
+      "line": 97,
+      "key": "system.payment.retry_payment",
+      "missing_ar": true,
+      "missing_en": true
+    },
+    {
+      "path": "resources/js/Pages/System/Payment/Failed.vue",
+      "line": 103,
+      "key": "system.payment.view_subscription",
+      "missing_ar": true,
+      "missing_en": true
+    },
+    {
+      "path": "resources/js/Pages/System/Payment/Checkout.vue",
+      "line": 92,
+      "key": "system.payment.gateway_not_configured",
+      "missing_ar": true,
+      "missing_en": true
+    },
+    {
+      "path": "resources/js/Pages/System/Payment/Checkout.vue",
+      "line": 95,
+      "key": "system.payment.gateway_not_configured_desc",
+      "missing_ar": true,
+      "missing_en": true
+    },
+    {
+      "path": "resources/js/Pages/System/Payment/Checkout.vue",
+      "line": 105,
+      "key": "system.payment.configure_gateway",
+      "missing_ar": true,
+      "missing_en": true
+    },
+    {
+      "path": "resources/js/Pages/System/Payment/Checkout.vue",
+      "line": 143,
+      "key": "system.payment.select_this_gateway",
+      "missing_ar": true,
+      "missing_en": true
+    },
+    {
+      "path": "resources/js/Pages/System/Payment/Checkout.vue",
+      "line": 160,
+      "key": "system.payment.proceeding",
+      "missing_ar": true,
+      "missing_en": true
+    },
+    {
+      "path": "resources/js/Pages/System/Payment/Checkout.vue",
+      "line": 162,
+      "key": "system.payment.proceed_to_payment",
+      "missing_ar": true,
+      "missing_en": true
+    },
+    {
+      "path": "resources/js/Pages/System/Payment/Checkout.vue",
+      "line": 199,
+      "key": "system.payment.gateway.bank_transfer",
+      "missing_ar": true,
+      "missing_en": true
+    },
+    {
+      "path": "resources/js/Pages/System/Payment/Success.vue",
+      "line": 6,
+      "key": "system.payment.success_subtitle",
+      "missing_ar": true,
+      "missing_en": true
+    },
+    {
+      "path": "resources/js/Pages/System/Payment/Success.vue",
+      "line": 73,
+      "key": "system.payment.transaction_date",
+      "missing_ar": true,
+      "missing_en": true
+    },
+    {
+      "path": "resources/js/Pages/System/Payment/Success.vue",
+      "line": 88,
+      "key": "system.payment.view_subscription",
+      "missing_ar": true,
+      "missing_en": true
+    },
+    {
+      "path": "resources/js/Pages/System/Payment/Success.vue",
+      "line": 94,
+      "key": "system.payment.view_all_subscriptions",
+      "missing_ar": true,
+      "missing_en": true
+    },
+    {
+      "path": "resources/js/Pages/Settings/Roles/Index.vue",
+      "line": 213,
+      "key": "roles.cannot_delete_has_users",
+      "missing_ar": true,
+      "missing_en": true
+    },
+    {
+      "path": "resources/js/Pages/Settings/Roles/Index.vue",
+      "line": 227,
+      "key": "common.no_results_search",
+      "missing_ar": true,
+      "missing_en": true
+    },
+    {
+      "path": "resources/js/Pages/Settings/Roles/Index.vue",
+      "line": 228,
+      "key": "roles.empty_description",
+      "missing_ar": true,
+      "missing_en": true
+    },
+    {
+      "path": "resources/js/Pages/Settings/Roles/RoleFormModal.vue",
+      "line": 164,
+      "key": "roles.label_ar_placeholder",
+      "missing_ar": true,
+      "missing_en": true
+    },
+    {
+      "path": "resources/js/Pages/Settings/Roles/RoleFormModal.vue",
+      "line": 180,
+      "key": "roles.label_en_placeholder",
+      "missing_ar": true,
+      "missing_en": true
+    },
+    {
+      "path": "resources/js/Pages/Settings/Roles/RoleFormModal.vue",
+      "line": 190,
+      "key": "roles.system_name_hint",
+      "missing_ar": true,
+      "missing_en": true
+    },
+    {
+      "path": "resources/js/Pages/Settings/Roles/RoleFormModal.vue",
+      "line": 201,
+      "key": "roles.system_name_placeholder",
+      "missing_ar": true,
+      "missing_en": true
+    },
+    {
+      "path": "resources/js/Pages/Settings/Roles/RoleFormModal.vue",
+      "line": 214,
+      "key": "roles.description_placeholder",
+      "missing_ar": true,
+      "missing_en": true
+    },
+    {
+      "path": "resources/js/Pages/Settings/Roles/RoleFormModal.vue",
+      "line": 225,
+      "key": "roles.selected_permissions",
+      "missing_ar": true,
+      "missing_en": true
+    },
+    {
+      "path": "resources/js/Pages/Settings/Users/Index.vue",
+      "line": 281,
+      "key": "common.no_results_search",
+      "missing_ar": true,
+      "missing_en": true
+    },
+    {
+      "path": "resources/js/Pages/Settings/Users/Index.vue",
+      "line": 282,
+      "key": "users.empty_description",
+      "missing_ar": true,
+      "missing_en": true
+    },
+    {
+      "path": "resources/js/Components/Common/AppPagination.vue",
+      "line": 86,
+      "key": "common.pagination",
+      "missing_ar": true,
+      "missing_en": true
+    },
+    {
+      "path": "resources/js/Components/Common/DataTable.vue",
+      "line": 232,
+      "key": "common.no_records_found",
+      "missing_ar": true,
+      "missing_en": true
+    },
+    {
+      "path": "resources/js/Components/DashboardV2/tabs/OverviewTab.vue",
+      "line": 113,
+      "key": "crm.vehicles.title",
+      "missing_ar": true,
+      "missing_en": true
+    },
+    {
+      "path": "resources/js/Components/DashboardV2/tabs/OverviewTab.vue",
+      "line": 199,
+      "key": "status.ready_for_qc",
+      "missing_ar": true,
+      "missing_en": true
+    },
+    {
+      "path": "resources/js/Components/DashboardV2/tabs/OverviewTab.vue",
+      "line": 231,
+      "key": "status.ready_for_qc",
+      "missing_ar": true,
+      "missing_en": true
+    }
+  ],
+  "limitations": [
+    "Dynamic keys and fallback semantics require runtime/context validation",
+    "No claim that Arabic text in comments or SVG is a UI violation"
+  ]
+}

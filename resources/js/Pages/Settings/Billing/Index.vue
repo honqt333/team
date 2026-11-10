@@ -17,6 +17,7 @@ const { t } = useI18n();
 
 const props = defineProps({
     current_subscription: { type: Object, default: null },
+    storage_usage: { type: Object, default: () => ({}) },
     available_plans: { type: Array, default: () => [] },
     subscription_history: { type: Array, default: () => [] },
     recent_payments: { type: Array, default: () => [] },
@@ -198,6 +199,110 @@ const noPlanLabel = () => t('system.billing.page.no_plan');
                     :subscription="current_subscription"
                     @renew="handleRenewCurrent"
                 />
+            </section>
+
+            <!-- Storage Quota Meter (Tenant Storage Allocation & Metering) -->
+            <section v-if="storage_usage && storage_usage.allocated_gb">
+                <div
+                    class="rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-5 sm:p-6 shadow-sm"
+                >
+                    <div
+                        class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4"
+                    >
+                        <div class="flex items-center gap-3">
+                            <div
+                                class="p-2.5 rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400"
+                            >
+                                <svg
+                                    class="w-6 h-6"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2"
+                                        d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4"
+                                    />
+                                </svg>
+                            </div>
+                            <div>
+                                <h3 class="text-base font-semibold text-gray-900 dark:text-white">
+                                    {{ t('system.billing.storage.title') }}
+                                </h3>
+                                <p class="text-xs text-gray-500 dark:text-gray-400">
+                                    {{ t('system.billing.storage.subtitle') }}
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center gap-2">
+                            <span
+                                class="text-xs font-semibold px-2.5 py-1 rounded-full"
+                                :class="
+                                    storage_usage.is_exceeded
+                                        ? 'bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-400'
+                                        : storage_usage.usage_percentage > 80
+                                          ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400'
+                                          : 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'
+                                "
+                            >
+                                {{
+                                    storage_usage.is_unlimited
+                                        ? t('system.billing.storage.unlimited')
+                                        : `${storage_usage.usage_percentage}% ${t('system.billing.storage.used')}`
+                                }}
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Progress bar -->
+                    <div class="space-y-2">
+                        <div
+                            class="w-full h-3 rounded-full bg-gray-100 dark:bg-gray-700 overflow-hidden"
+                        >
+                            <div
+                                class="h-full rounded-full transition-all duration-500"
+                                :class="
+                                    storage_usage.is_exceeded
+                                        ? 'bg-rose-500'
+                                        : storage_usage.usage_percentage > 80
+                                          ? 'bg-amber-500'
+                                          : 'bg-gradient-to-r from-blue-500 to-indigo-600'
+                                "
+                                :style="{
+                                    width: `${storage_usage.is_unlimited ? 5 : Math.max(1, storage_usage.usage_percentage)}%`,
+                                }"
+                            ></div>
+                        </div>
+
+                        <div
+                            class="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400 pt-1"
+                        >
+                            <span>
+                                {{ t('system.billing.storage.used_space') }}:
+                                <strong class="text-gray-800 dark:text-gray-200">
+                                    {{
+                                        storage_usage.used_mb > 1024
+                                            ? `${storage_usage.used_gb} GB`
+                                            : `${storage_usage.used_mb} MB`
+                                    }}
+                                </strong>
+                            </span>
+                            <span>
+                                {{ t('system.billing.storage.allocated_limit') }}:
+                                <strong class="text-gray-800 dark:text-gray-200">
+                                    {{
+                                        storage_usage.is_unlimited
+                                            ? t('system.billing.storage.unlimited')
+                                            : `${storage_usage.allocated_gb} GB`
+                                    }}
+                                </strong>
+                            </span>
+                        </div>
+                    </div>
+                </div>
             </section>
 
             <!-- 2. Available plans (upgrade / downgrade / renew) -->

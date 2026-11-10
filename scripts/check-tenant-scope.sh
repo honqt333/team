@@ -1,10 +1,12 @@
-#!/bin/sh
-set -e
+#!/usr/bin/env bash
+set -euo pipefail
 
 cd "$(dirname "$0")/.."
 
 # Only exempt true root models (no tenant_id, no center_id, no @bypass)
 EXEMPTIONS="User.php|Role.php|Permission.php|Tenant.php|Center.php"
+
+[ -d app/Models ] || { echo "Model directory missing" >&2; exit 2; }
 
 FAILED=0
 TOTAL_CHECKED=0
@@ -13,7 +15,7 @@ TOTAL_EXEMPT=0
 echo "=== Tenant Scope Audit ==="
 echo ""
 
-find app/Models -name "*.php" -not -path "*/Concerns/*" | while read -r f; do
+while IFS= read -r -d '' f; do
     [ -f "$f" ] || continue
     BASENAME=$(basename "$f")
     TOTAL_CHECKED=$((TOTAL_CHECKED+1))
@@ -47,7 +49,16 @@ find app/Models -name "*.php" -not -path "*/Concerns/*" | while read -r f; do
     else
         echo "  · $BASENAME (no tenant/center - OK)"
     fi
-done
+done < <(find app/Models -name "*.php" -not -path "*/Concerns/*" -print0)
 
 echo ""
 echo "=== Tenant Scope Audit Completed ==="
+
+printf "Checked: %s; exempt: %s; violations: %s\n" "$TOTAL_CHECKED" "$TOTAL_EXEMPT" "$FAILED"
+if [ "$TOTAL_CHECKED" -eq 0 ]; then
+    echo "No models checked" >&2
+    exit 2
+fi
+if [ "$FAILED" -gt 0 ]; then
+    exit 1
+fi

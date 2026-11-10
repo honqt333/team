@@ -10,6 +10,7 @@ use Exception;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Notification;
 use Illuminate\Support\Facades\URL;
+use Illuminate\Support\Str;
 use Log;
 
 class WelcomeEmployeeInvitation extends Notification
@@ -34,10 +35,17 @@ class WelcomeEmployeeInvitation extends Notification
      */
     protected function sendInvitationEmail(object $notifiable): void
     {
+        // Rotation revokes every previous invitation for this identity.
+        $token = Str::random(64);
+        $expires = now()->addDays(3);
+        $notifiable->forceFill([
+            'invitation_token_hash' => hash('sha256', $token),
+            'invitation_expires_at' => $expires,
+        ])->save();
         $activationUrl = URL::signedRoute(
             'invitations.accept',
-            ['user' => $notifiable->id],
-            now()->addDays(3)
+            ['user' => $notifiable->id, 'token' => $token],
+            $expires
         );
 
         // Load template from database

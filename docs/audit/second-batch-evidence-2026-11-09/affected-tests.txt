@@ -1,0 +1,51 @@
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\InvoicingSecurityTest::test_immutability_of_issued_invoice(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\InvoicingSecurityTest::test_sequential_numbering_with_locking(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   PASS  Tests\Feature\SecondBatchFinancialSafetyTest
+  ✓ stale draft cannot change issued number or consume another sequenc… 17.49s  
+  ✓ period is consolidated and browser amounts are ignored               7.02s  
+  ✓ credit note is negative and drafts and deleted documents are exclud… 3.86s  
+  ✓ existing legacy period is preserved and cannot be posted or recreat… 0.44s  
+  ✓ unknown or duplicate transaction identifiers are rejected            1.27s  
+  ✓ branch invoice permission does not expose consolidated data          1.78s  
+  ✓ posted period cannot be recreated through stale instance             1.83s  
+  ✓ paid payroll item cannot be deleted through another draft or its pa… 0.80s  
+  ✓ posting rejects a transaction already selected in another posted pe… 1.42s  
+  ✓ unselected transactions do not block future eligibility              2.05s  
+
+   PASS  Tests\Feature\TaxPeriodsReportTest
+  ✓ guest is redirected to login                                         0.13s  
+  ✓ authenticated user can view tax periods index                        0.50s  
+  ✓ user can view three years periods json                               0.56s  
+  ✓ user can preview and create tax period                               0.69s  
+  ✓ user can view and post tax period                                    1.19s  
+  ✓ user cannot access another tenants tax period                        1.18s  
+  ✓ user can export tax period excel and zatca                           0.62s  
+
+   PASS  Tests\Feature\InvoicingSecurityTest
+  ✓ immutability of issued invoice                                       0.49s  
+  ✓ sequential numbering with locking                                    0.60s  
+
+   PASS  Tests\Unit\Services\InvoiceServiceTest
+  ✓ create from work order creates draft invoice with lines              3.37s  
+  ✓ create from work order ignores cancelled items and parts             3.94s  
+  ✓ issue invoice assigns sequential invoice number and status           0.86s  
+  ✓ issue invoice throws exception if not draft                          1.35s  
+  ✓ get proforma data returns structured data without persisting         4.13s  
+  ✓ generate zatca qr encodes base64 tlv                                 0.99s  
+
+   PASS  Tests\Feature\PaymentConcurrencySafetyTest
+  ✓ a payment larger than the balance is refused                         0.87s  
+  ✓ the balance is re read inside the transaction                        1.16s  
+  ✓ paying in full records the remaining balance only                    1.25s  
+  ✓ a second pay full cannot settle the same invoice twice               2.35s  
+  ✓ a non positive payment is refused                                    1.03s  
+  ✓ a normal payment still works                                         0.92s  
+  ✓ the endpoint refuses an amount above the balance                     1.20s  
+  ✓ a collector arriving after the invoice was settled gets an error     1.48s  
+
+  Tests:    33 passed (242 assertions)
+  Duration: 69.02s
+

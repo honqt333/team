@@ -1,0 +1,65 @@
+
+   PASS  Tests\Feature\FinancialSafetyAuditAcceptanceTest
+  ✓ r01 financial summary excludes draft and cancelled sales invoices    5.10s  
+  ✓ r01 financial summary excludes draft and cancelled credit notes      0.96s  
+  ✓ r01 financial summary excludes draft and cancelled purchases         0.94s  
+  ✓ r01 financial summary excludes draft company transactions            0.84s  
+  ✓ r02 linked company revenue is counted exactly once in financial tot… 1.06s  
+  ✓ r02 linked company expense is counted exactly once in financial tot… 1.09s  
+  ✓ r02 cancelled linked invoice does not count in sales or income       0.71s  
+  ✓ r02 unlinked company revenue is safely counted in income             0.83s  
+  ✓ r02 tax period deduplicates linked company transactions              0.82s  
+  ✓ r02 cash register deduplicates payments and company transactions     0.81s  
+  ✓ r03 revenue transaction is classified as income in tax collection    0.78s  
+  ✓ r03 expense transaction is classified as expense in tax collection   0.76s  
+  ✓ r03 legacy income type is supported in tax collection                0.70s  
+  ✓ r03 draft and deleted company transactions are excluded from tax co… 0.68s  
+  ✓ tax period excludes company transaction when linked to cancelled dr… 0.71s  
+  ✓ tax period excludes company transaction when linked to purchase inv… 0.79s  
+  ✓ cash register payment method filter excludes cash company transacti… 0.70s  
+  ✓ cash register payment method filter includes cash company transacti… 0.68s  
+  ✓ cash register excludes company transaction linked to invoice even w… 0.68s  
+
+   PASS  Tests\Feature\CashRegisterReportTest
+  ✓ guest is redirected to login                                         0.09s  
+  ✓ wrshah legacy redirects                                              0.45s  
+  ✓ authenticated user can view cash register report                     0.56s  
+  ✓ cash register calculates debit credit and balance accurately         0.42s  
+  ✓ cash register filters by payment method                              0.43s  
+  ✓ cash register exports csv successfully                               0.63s  
+
+   PASS  Tests\Feature\TaxPeriodsReportTest
+  ✓ guest is redirected to login                                         0.07s  
+  ✓ authenticated user can view tax periods index                        0.39s  
+  ✓ user can view three years periods json                               0.51s  
+  ✓ user can preview and create tax period                               0.51s  
+  ✓ user can view and post tax period                                    0.57s  
+  ✓ user cannot access another tenants tax period                        0.77s  
+  ✓ user can export tax period excel and zatca                           0.43s  
+
+   PASS  Tests\Feature\PurchasePaymentSafetyTest
+  ✓ purchase payment lifecycle full payment and deletion                 1.15s  
+  ✓ purchase payment partial payments and incremental deletion           0.51s  
+  ✓ purchase payment rejects overpayment beyond balance                  0.47s  
+  ✓ purchase payment rejects negative or zero amount                     0.81s  
+  ✓ purchase payment deletion via eloquent triggers recalculation        0.69s  
+
+   PASS  Tests\Feature\ArabicPdfShapingTest
+  ✓ shaper converts arabic characters to presentation glyphs             0.07s  
+  ✓ shaper preserves html tags and style blocks                          0.11s  
+  ✓ shaper handles non arabic text cleanly                               0.04s  
+  ✓ shaper handles non breaking spaces in labels                         0.06s  
+  ✓ escaped html entities remain escaped and never become html elements  0.06s  
+  ✓ escaped scripts and styles in user text remain escaped               0.08s  
+  ✓ html comments are preserved                                          0.05s  
+
+   PASS  Tests\Feature\HardcodedArabicTest
+  ✓ no new hardcoded arabic in the vue sources                           4.44s  
+  ✓ company transactions controller has zero hardcoded arabic strings    0.04s  
+  ✓ the extractor finds the remaining arabic                             4.08s  
+  ✓ the locale files have the same keys                                  0.04s  
+  ✓ the locale files carry the same placeholders                         0.06s  
+
+  Tests:    49 passed (339 assertions)
+  Duration: 38.44s
+

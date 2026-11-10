@@ -1,0 +1,191 @@
+
+   PASS  Tests\Feature\CashRegisterReportTest
+  ✓ guest is redirected to login                                        12.09s  
+  ✓ wrshah legacy redirects                                              1.16s  
+  ✓ authenticated user can view cash register report                     0.70s  
+  ✓ cash register calculates debit credit and balance accurately         0.76s  
+  ✓ cash register filters by payment method                              0.71s  
+  ✓ cash register exports csv successfully                               1.40s  
+
+   PASS  Tests\Feature\CustomersReportTest
+  ✓ guest is redirected to login                                         0.10s  
+  ✓ authenticated user can view customers report                         0.79s  
+  ✓ customers report kpis and financial calculations                     1.51s  
+  ✓ filtering customers report by payment status                         1.08s  
+  ✓ customers report grouped by customer                                 1.12s  
+  ✓ export customers report csv                                          0.77s  
+  ✓ tenant data isolation in customers report                            1.83s  
+
+   PASS  Tests\Feature\EmployeesReportTest
+  ✓ guest is redirected to login                                         0.24s  
+  ✓ wrshah redirect to employees report                                  0.99s  
+  ✓ authenticated user can view employees report                         1.02s  
+  ✓ employees report calculates kpis accurately                          7.44s  
+  ✓ employees report filters by employee and job title                   7.98s  
+  ✓ employees report groups data by job title                            5.94s  
+  ✓ employees report exports csv successfully                            5.32s  
+
+   PASS  Tests\Feature\FinancialSummaryReportTest
+  ✓ guest is redirected to login                                         0.06s  
+  ✓ wrshah legacy redirects                                              0.67s  
+  ✓ authenticated user can view financial summary report                 1.02s  
+  ✓ financial summary aggregates sales and returns                       0.74s  
+  ✓ financial summary filters by center                                  3.32s  
+  ✓ financial summary export csv                                         2.52s  
+
+   PASS  Tests\Feature\InvoicesReportTest
+  ✓ guest is redirected to login                                         0.22s  
+  ✓ authenticated user can view invoices report                          1.51s  
+  ✓ invoices report calculates kpis accurately                           1.34s  
+  ✓ invoices report filters by overdue                                   0.96s  
+  ✓ invoices report filters by date type                                 2.21s  
+  ✓ invoices report groups data                                          0.56s  
+  ✓ invoices report exports csv successfully                             0.43s  
+
+   PASS  Tests\Feature\PaymentsReportTest
+  ✓ guest is redirected to login                                         0.05s  
+  ✓ authenticated user can view payments report                          0.40s  
+  ✓ filtering payments report by method and range                        0.46s  
+  ✓ export payments report csv                                           0.34s  
+  ✓ payments report handles null or empty filter parameters              0.41s  
+  ✓ payments report loads work order and vehicle without column errors   0.69s  
+  ✓ payments report group by method returns grouped payments             0.73s  
+  ✓ payments report handles bad debt kpi                                 0.72s  
+  ✓ payments report with linked invoices loads successfully              0.87s  
+
+   PASS  Tests\Feature\PurchaseInvoicesReportTest
+  ✓ guest is redirected to login                                         0.08s  
+  ✓ authenticated user can view purchase invoices report                 0.68s  
+  ✓ purchase invoices report calculates kpis accurately                  0.76s  
+  ✓ purchase invoices report filters by overdue                          0.61s  
+  ✓ purchase invoices report filters by date type                        0.93s  
+  ✓ purchase invoices report groups data                                 1.12s  
+  ✓ purchase invoices report exports csv successfully                    0.50s  
+
+   PASS  Tests\Feature\ServicesReportTest
+  ✓ guest is redirected to login                                         0.11s  
+  ✓ authenticated user can view services report                          0.57s  
+  ✓ filtering services report by department and status                   0.62s  
+  ✓ services report filters by specific branch                           0.71s  
+  ✓ services report group by                                             0.84s  
+  ✓ services report under warranty and overdue filters                   1.12s  
+  ✓ export services report csv                                           1.00s  
+
+   PASS  Tests\Feature\StockActivitiesReportTest
+  ✓ guest is redirected to login                                         0.06s  
+  ✓ authenticated user can view stock activities report                  0.52s  
+  ✓ stock activities report calculates kpis accurately                   0.58s  
+  ✓ stock activities report filters by move type                         0.70s  
+  ✓ stock activities report groups data                                  0.71s  
+  ✓ stock activities report handles credit note polymorphic reference c… 0.62s  
+  ✓ stock activities report exports csv successfully                     1.00s  
+  ✓ unknown polymorphic reference is safe to display                     0.05s  
+
+   PASS  Tests\Feature\SuppliersReportTest
+  ✓ guest is redirected to login                                         0.05s  
+  ✓ wrshah redirect to suppliers report                                  0.50s  
+  ✓ authenticated user can view suppliers report                         0.55s  
+  ✓ suppliers report calculates kpis accurately                          0.50s  
+  ✓ suppliers report filters by supplier and payment status              0.75s  
+  ✓ suppliers report groups data by supplier                             1.04s  
+  ✓ suppliers report exports csv successfully                            0.61s  
+  ✓ suppliers report accounts for return invoices and debit notes        0.68s  
+
+   PASS  Tests\Feature\TaxPeriodsReportTest
+  ✓ guest is redirected to login                                         0.10s  
+  ✓ authenticated user can view tax periods index                        0.70s  
+  ✓ user can view three years periods json                               0.52s  
+  ✓ user can preview and create tax period                               0.75s  
+  ✓ user can view and post tax period                                    1.12s  
+  ✓ user cannot access another tenants tax period                        2.94s  
+  ✓ user can export tax period excel and zatca                           1.17s  
+
+   PASS  Tests\Feature\TicketsReportTest
+  ✓ guest is redirected to login                                         0.11s  
+  ✓ authenticated user can view tickets report                           0.65s  
+  ✓ filtering tickets report by status and range                         0.83s  
+  ✓ export tickets report csv                                            0.74s  
+  ✓ tickets report group by returns grouped tickets                      1.18s  
+  ✓ tickets report with linked parts and payments                        1.37s  
+  ✓ orders route redirects to tickets                                    0.87s  
+  ✓ tickets report filters by specific branch                            1.64s  
+
+   PASS  Tests\Feature\VehiclesReportTest
+  ✓ guest is redirected to login                                         0.19s  
+  ✓ wrshah redirect to vehicles report                                   0.44s  
+  ✓ authenticated user can view vehicles report                          0.45s  
+  ✓ vehicles report calculates kpis accurately                           0.38s  
+  ✓ vehicles report filters by make model and status                     0.45s  
+  ✓ vehicles report groups data by shop and status                       0.36s  
+  ✓ vehicles report exports csv successfully                             0.33s  
+  ✓ vehicles report filters by warehouse parts only                      0.37s  
+
+   PASS  Tests\Feature\CompanyTransactionAuthorizationTest
+  ✓ a user without the invoice permission cannot create a transaction    0.40s  
+  ✓ a user without the invoice permission cannot approve a transaction   0.44s  
+  ✓ a user without the invoice permission cannot edit or delete a trans… 0.41s  
+  ✓ a financial user can still create and approve                        0.43s  
+  ✓ the total is derived server side                                     0.38s  
+  ✓ the total is derived server side on update                           0.50s  
+  ✓ a user from another tenant cannot approve                            4.03s  
+  ✓ the contact search does not leak across tenants                      8.88s  
+  ✓ the contact search still finds the callers own contacts              2.72s  
+  ✓ the supplier search does not leak across tenants                     2.14s  
+  ✓ the unimplemented resource routes are not registered                 0.65s  
+  ✓ foreign contact category and center are rejected and legacy contact… 3.24s  
+
+   PASS  Tests\Feature\CompanyTransactionsTest
+  ✓ user can create draft company transaction                            1.19s  
+  ✓ user can update draft company transaction                            1.77s  
+  ✓ user can delete draft company transaction                            2.04s  
+  ✓ taxable transaction requires contact                                 3.34s  
+  ✓ approving taxable revenue generates sales invoice                    2.02s  
+  ✓ approving taxable expense generates purchase invoice                 1.81s  
+  ✓ tenancy isolation on company transactions                            3.12s  
+
+   PASS  Tests\Feature\ProfileTest
+  ✓ profile page is displayed                                            1.77s  
+  ✓ profile page shares required wrshah props                            2.13s  
+  ✓ user profile legacy routes redirect                                  2.65s  
+  ✓ user preferences can be updated                                      2.17s  
+  ✓ profile information can be updated                                   2.42s  
+  ✓ email verification status is unchanged when the email address is un… 4.65s  
+
+   PASS  Tests\Feature\HelpPageTest
+  ✓ guest is redirected to login                                         0.27s  
+  ✓ authenticated user can view help page                                4.41s  
+
+   PASS  Tests\Feature\System\HelpSettingsTest
+  ✓ guest cannot access system help settings                             0.74s  
+  ✓ regular user cannot access system help settings                      2.37s  
+  ✓ system admin can view help settings                                  1.79s  
+  ✓ system admin can update help settings                                1.96s  
+  ✓ system admin can reset help settings to defaults                     3.08s  
+  ✓ system admin can fetch video metadata automatically                  2.42s  
+
+   PASS  Tests\Feature\DeveloperCenterTest
+  ✓ regular tenant user is forbidden from developer console              0.28s  
+  ✓ system admin can access developer console                            0.38s  
+  ✓ audit orchestrator runs successfully and records snapshots          19.63s  
+
+   PASS  Tests\Feature\IntegrationSecretsLeakTest
+  ✓ the integrations list does not leak provider secrets                 0.07s  
+  ✓ the integrations list does not carry the config column at all        0.05s  
+  ✓ the integrations list still renders the catalogue                    0.05s  
+  ✓ the integration detail masks a password typed secret                 0.05s  
+  ✓ the integration detail masks credentials that are not password type… 0.05s  
+  ✓ the integration detail still shows non sensitive configuration       0.05s  
+  ✓ saving the form without retyping the secret preserves the stored va… 0.05s  
+  ✓ saving the form with a new secret replaces the stored value          0.04s  
+
+   PASS  Tests\Unit\ImageOptimizerTest
+  ✓ large png is converted to a smaller webp                             0.77s  
+  ✓ palette png is converted                                             0.46s  
+  ✓ small image is left untouched                                        0.03s  
+  ✓ webp input is never re encoded                                       0.93s  
+  ✓ non image is rejected                                                0.21s  
+  ✓ wide image is scaled down to the max width                           3.46s  
+
+  Tests:    145 passed (1578 assertions)
+  Duration: 208.72s
+

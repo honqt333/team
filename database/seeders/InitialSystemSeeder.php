@@ -7,6 +7,7 @@ namespace Database\Seeders;
 use App\Models\Center;
 use App\Models\Tenant;
 use App\Models\User;
+use App\Services\TenantSetupService;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 use Spatie\Permission\Models\Role;
@@ -21,13 +22,17 @@ class InitialSystemSeeder extends Seeder
      */
     public function run(): void
     {
+        $this->call(PermissionsSeeder::class);
+
         // 1. Create Main Tenant
         $tenant = Tenant::firstOrCreate(
             ['slug' => 'khidmh'],
             [
-                'name' => 'Khidmh Pro',
+                'name' => config('app.name', 'Khidmh Pro'),
             ]
         );
+
+        app(TenantSetupService::class)->seedRolesForTenant($tenant->id);
 
         // 2. Create Main Center. We use a tenant-scoped unique
         // slug so the seeder is safe to re-run and idempotent
@@ -37,7 +42,7 @@ class InitialSystemSeeder extends Seeder
             ['slug' => $centerSlug],
             [
                 'tenant_id' => $tenant->id,
-                'name' => 'المركز الرئيسي',
+                'name' => __('messages.setup.main_center'),
                 'is_active' => true,
             ]
         );
@@ -82,7 +87,15 @@ class InitialSystemSeeder extends Seeder
             }
         }
 
-        $this->command->info('✅ Initial System Setup Complete!');
+        $this->call([
+            MetadataSeeder::class,
+            ServiceSeeder::class,
+            VehicleConditionSeeder::class,
+            VehicleMakeLogoSeeder::class,
+            CommunicationTemplateSeeder::class,
+        ]);
+
+        $this->command->info(__('messages.setup.complete'));
         $this->command->info('📧 Email: admin@khidmh.pro');
         $this->command->info('🔑 Password: [As requested]');
     }

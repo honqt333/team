@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Requests\App\Users;
 
+use App\Models\Role;
 use App\Models\User;
 use App\Support\TenancyContext;
 use Illuminate\Contracts\Validation\ValidationRule;
@@ -40,9 +41,17 @@ class StoreUserRequest extends FormRequest
             ],
             'password' => ['required', 'confirmed', 'min:8'],
             'centers' => ['required', 'array', 'min:1'],
-            'centers.*' => ['exists:centers,id'],
-            'role_id' => ['nullable', 'exists:roles,id'],
-            'employee_id' => ['nullable', 'exists:hr_employees,id'],
+            'centers.*' => [Rule::exists('centers', 'id')->where('tenant_id', TenancyContext::tenantId())],
+            'role_id' => ['nullable', 'integer', Rule::exists('roles', 'id')->where('tenant_id', TenancyContext::tenantId())->where('guard_name', 'web'),
+                function ($attribute, $value, $fail) {
+                    $role = Role::find($value);
+
+                    if (! $role || ! $this->user()->can('assignRole', [User::class, $role])) {
+                        $fail(__('messages.cannot_edit_system_role'));
+                    }
+                }],
+            'employee_id' => ['nullable', Rule::exists('hr_employees', 'id')->where('tenant_id', TenancyContext::tenantId())],
+            'is_active' => ['sometimes', 'boolean'],
             // `prohibited`, NOT `forbidden`: Laravel has no `forbidden`
             // rule, so the validator would raise
             // BadMethodCallException("Method ...::validateForbidden does

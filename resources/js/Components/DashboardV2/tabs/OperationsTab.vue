@@ -10,6 +10,7 @@ import TopServices from '@/Components/DashboardV2/widgets/TopServices.vue';
 import TechnicianPerformance from '@/Components/DashboardV2/widgets/TechnicianPerformance.vue';
 
 defineProps({
+    userContext: { type: Object, default: () => ({}) },
     stats: { type: Object, required: true },
     charts: { type: Object, required: true },
     recentWorkOrders: { type: Array, default: () => [] },
@@ -109,7 +110,12 @@ const ICONS = {
                 :action="$t('dashboard.view_all')"
                 @action="navigate('/app/work-orders')"
             >
-                <RecentWorkOrders :items="recentWorkOrders" :currency="currency" :limit="6" />
+                <RecentWorkOrders
+                    :items="recentWorkOrders"
+                    :currency="currency"
+                    :limit="6"
+                    :show-price="userContext?.canViewFinancials"
+                />
             </ChartCard>
         </div>
 

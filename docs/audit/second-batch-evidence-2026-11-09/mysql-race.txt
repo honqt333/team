@@ -1,0 +1,4 @@
+invoice simultaneous requests: one accepted, one rejected: PASS
+period simultaneous requests: one accepted, one rejected: PASS
+Persisted invoice sequence and single consolidated period: PASS
+Isolated test database removed

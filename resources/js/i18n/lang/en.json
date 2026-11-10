@@ -138,6 +138,12 @@
         "attachment_deleted": "Attachment deleted",
         "attachment_limits_hint": "Allowed formats: PDF, JPG, PNG. Max size: 1 MB.",
         "attachments_uploaded_successfully": "Attachments uploaded successfully",
+        "click_to_browse": "browse from device",
+        "drag_and_drop_files": "Drag and drop files here or",
+        "file_too_large": "File is too large: {file} (maximum {size})",
+        "max_file_size": "Max size per file: {size} MB",
+        "supported_formats": "Supported formats: {formats}",
+        "upload_files": "Upload files",
         "back": "Back",
         "basic_info": "Basic data",
         "btn_create_quote": "Create an evaluation",
@@ -209,7 +215,6 @@
         "export": "Export",
         "export_excel": "Export Excel",
         "female": "Female",
-        "file_too_large": "File is too large: {file} (maximum {size})",
         "finance": "Finance",
         "fixed_amount": "Fixed Amount",
         "from": "From",
@@ -245,6 +250,7 @@
         "manual_update": "Manual update",
         "max": "Max",
         "max_size": "Max size {size}",
+        "menu": "Menu",
         "minute": "Minute",
         "minutes": "Minute",
         "monthly": "Monthly",
@@ -287,6 +293,7 @@
         "records": "Register",
         "remove": "Remove",
         "reset": "Reset",
+        "reset_filter": "Reset Filters",
         "reset_filters": "Reset Filters",
         "results": "Results",
         "save": "Save",
@@ -433,6 +440,7 @@
         "previous": "Previous",
         "time": "Time",
         "view_mode": "View mode",
+        "toggle_theme": "Toggle Theme",
         "form_has_errors": "Please check fields with errors ({count})",
         "remaining_required": "{count} required fields remaining",
         "try_adjusting_search": "Try adjusting the search",
@@ -1009,6 +1017,9 @@
         "new_quote": "New Quote",
         "new_this_month": "{n} new this month",
         "new_work_order": "New Work Order",
+        "workshop_board": "Workshop Board",
+        "appointments": "Appointments",
+        "inventory": "Inventory & Parts",
         "no_alerts_attention": "No alerts need your attention right now.",
         "no_data": "No data available",
         "no_recent_invoices": "No recent invoices",
@@ -1076,7 +1087,7 @@
         "unpaid_invoices": "Unpaid invoices",
         "view_all": "View all",
         "vs_last_month": "vs last month",
-        "vs_last_period": "vs :value",
+        "vs_last_period": "vs {value}",
         "weekly_work_orders": "Weekly Work Orders",
         "work_orders_status": "Work Orders by Status",
         "work_orders_this_month": "Work Orders This Month",
@@ -1144,7 +1155,21 @@
         "no_tasks_filtered": "No tasks match the filters",
         "notes": "Notes",
         "photos": "Photos",
-        "search_tasks_placeholder": "Search tasks..."
+        "search_tasks_placeholder": "Search tasks...",
+        "upload_new_photos": "Upload new photos",
+        "classification": "Classification",
+        "priorities": {
+            "low": "Low",
+            "normal": "Normal",
+            "high": "High",
+            "urgent": "Urgent"
+        },
+        "photo_types": {
+            "general": "General",
+            "before": "Before work",
+            "after": "After work",
+            "damage": "Damage / defects"
+        }
     },
     "errors": {
         "403": {
@@ -1164,6 +1189,7 @@
             "check_out": "Log out",
             "daily_report": "Daily attendance report",
             "date": "History",
+            "empty_hint": "No active employees found for this center to mark attendance",
             "early_leave": "Early departure",
             "holiday": "Vacation",
             "late": "Late",
@@ -1289,6 +1315,7 @@
             "no_allowances": "There are no allowances",
             "no_deductions": "There are no discounts",
             "no_employees": "There are no employees",
+            "empty_hint": "Start by adding a new employee to assign permissions, departments, and salaries",
             "no_job_title": "There is no job title",
             "no_user_account": "There is no user account for this employee",
             "no_user_link": "Without tying",
@@ -1356,6 +1383,12 @@
             "manage_deductions": "Manage discounts",
             "other_payments": {
                 "add": "Add batch",
+                "edit": "Edit payment",
+                "delete_confirm_title": "Delete payment",
+                "delete_confirm_message": "Are you sure you want to delete this payment? This action cannot be undone.",
+                "approve_confirm_title": "Approve payment",
+                "approve_confirm_message": "Are you sure you want to approve this payment? It will be included in upcoming payroll runs.",
+                "empty_hint": "No other payments recorded currently",
                 "payment_title": "Address",
                 "title": "Other payments",
                 "types": {
@@ -1452,6 +1485,7 @@
             "must_approve_first": "The route must be approved before it can be registered as paid",
             "net_salary": "Net",
             "no_payrolls": "There are no drones",
+            "empty_hint": "Start by generating a new payroll run for the current period to calculate dues, allowances, and deductions",
             "paid": "Paid",
             "payment_date": "Exchange date",
             "pending": "Pending",
@@ -1632,6 +1666,7 @@
             "cost": "Cost",
             "date": "History",
             "empty": "No movements",
+            "empty_hint": "No inventory movements matching the specified criteria were found",
             "no_moves_desc": "No incoming or outgoing movements recorded for this part yet.",
             "receipt": "Receipt",
             "receipt_created": "The receipt was registered successfully",
@@ -1768,6 +1803,7 @@
             "current": "Current stock",
             "current_stock": "Current quantity",
             "empty": "There are no credits",
+            "empty_hint": "No inventory balances match the current search criteria or no stock recorded yet.",
             "no_balances_desc": "No warehouse balances recorded for this part yet.",
             "in_stock": "Available",
             "insufficient": "The quantity demanded is greater than what is available",
@@ -1803,6 +1839,7 @@
             "created": "The transfer was created successfully",
             "edit": "Modify conversion",
             "empty": "There are no transfers",
+            "empty_hint": "Get started by creating a new transfer to move parts between warehouses and branches",
             "from": "From warehouse",
             "item_added": "Item added",
             "item_exists": "This item already exists",
@@ -1985,6 +2022,7 @@
             "create": "Create Direct Purchase Invoice",
             "discount": "Discount",
             "due_date_label": "Due Date",
+            "empty_hint": "Get started by creating a new purchase invoice to record parts and materials from suppliers",
             "invoice": "Purchase Invoice",
             "invoice_number": "Supplier Invoice No.",
             "invoice_number_placeholder": "Enter supplier direct invoice number",
@@ -1992,6 +2030,7 @@
             "overdue_days": "{days} days overdue",
             "remaining": "Remaining",
             "return_invoice": "Purchase Return Invoice",
+            "returns_empty_hint": "No purchase returns recorded yet",
             "statuses": {
                 "cancelled": "Cancelled",
                 "draft": "Draft",
@@ -2054,6 +2093,7 @@
             "partial": "Partially paid",
             "reported": "Reported",
             "unpaid": "Unpaid",
+            "overdue": "Overdue",
             "valid": "Valid"
         },
         "subtotal": "Total before tax",
@@ -2817,6 +2857,7 @@
         "updated_success": "Profile updated successfully"
     },
     "purchasing": {
+        "order": "Purchase Order",
         "grn": {
             "cancelled": "The receipt document has been cancelled",
             "code": "GRN Code",
@@ -2883,6 +2924,7 @@
             "unit_factor": "Conversion Factor"
         },
         "orders": {
+            "order": "Purchase Order",
             "actions": {
                 "receive": "Receipt of the goods",
                 "send": "Send to supplier"
@@ -2905,6 +2947,7 @@
             "due_date": "Due Date",
             "edit": "Modify a purchase order",
             "empty": "There are no purchase orders",
+            "empty_hint": "Start by creating your first purchase order to replenish stock and track purchases",
             "errors": {
                 "full_payment_required": "Full payment is required for Cash orders."
             },
@@ -2975,6 +3018,7 @@
             "edit": "Edit Supplier",
             "email": "Email",
             "empty": "There are no suppliers",
+            "empty_hint": "Get started by adding a new supplier to manage purchasing and supplier invoices",
             "form": {
                 "lat": "Latitude",
                 "lng": "Longitude"
@@ -3381,6 +3425,7 @@
         "customers": "Customers",
         "employees": "Employees / Workers",
         "financial_summary": "Financial Summary",
+        "date_from_to": "From {from} to {to}",
         "inventory_activities": "Inventory Activities",
         "invoices": "Invoices",
         "orders": "Orders",
@@ -4362,6 +4407,7 @@
             "main_center": "Main Center"
         },
         "tax_periods_report": {
+            "consolidated_notice": "This period consolidates every branch of the company tax registration, regardless of the active branch.",
             "title": "Tax Periods & VAT Declaration",
             "subtitle": "Manage quarterly tax periods and generate ZATCA-compliant VAT declarations",
             "back_to_reports": "Back to Reports",
@@ -4544,6 +4590,8 @@
         "minutes": "Minute",
         "no_services": "There are no services in this section",
         "no_services_in_dept": "No services found for this department in other branches. You can add a new definition.",
+        "show_all_catalog_services": "Show all services from other branches",
+        "show_dept_services_only": "Show department services only",
         "not_set": "Not specified",
         "previous_warranty_claims": "Previous Warranty Inquiries",
         "remaining_duration": "Remaining Duration",
@@ -4605,6 +4653,10 @@
                 "description": "Manage brands, models, and colors",
                 "title": "Vehicle settings"
             },
+            "notifications": {
+                "description": "Control notification channels, event triggers, and message templates",
+                "title": "Notification Settings"
+            },
             "users": {
                 "description": "Managing system users and their permissions",
                 "title": "Users"
@@ -4616,6 +4668,74 @@
         },
         "subtitle": "Manage system settings and configuration",
         "title": "Settings",
+        "notifications": {
+            "title": "Notification & Alert Settings",
+            "subtitle": "Manage communication channels, automated notification events, and customized message templates",
+            "saved_successfully": "Notification settings saved successfully",
+            "test_sent_successfully": "Test notification sent successfully to notification bell",
+            "test_title": "System Test Notification",
+            "test_body": "Test notification received successfully at {time}. Notification settings are functioning properly.",
+            "tabs": {
+                "channels": "Delivery Channels",
+                "events": "Notification Events",
+                "templates": "Message Templates"
+            },
+            "channels": {
+                "title": "Configured Notification Channels",
+                "description": "Enable or disable communication channels used for customer and team alerts",
+                "in_app": "Internal In-App Notifications (Bell)",
+                "in_app_desc": "Display live badge alerts and notifications in the top bar for logged-in users",
+                "email": "Email Notifications",
+                "email_desc": "Send alerts and invoices via email to customers or management",
+                "email_recipient": "Designated Management Email",
+                "email_recipient_hint": "Email address where operational and sensitive alerts will be sent",
+                "sms": "SMS Text Messages",
+                "sms_desc": "Send verified text messages to customers and staff for designated events",
+                "whatsapp": "WhatsApp Messages",
+                "whatsapp_desc": "Send instant notifications, quotations, and invoices directly via WhatsApp",
+                "whatsapp_phone": "Designated WhatsApp Number",
+                "whatsapp_phone_hint": "Center phone number in international format (e.g. 9665xxxxxxxx)"
+            },
+            "events": {
+                "title": "Notification Event Matrix",
+                "description": "Select the active delivery channels for each system event",
+                "table_event": "Event / Document",
+                "table_in_app": "In-App",
+                "table_email": "Email",
+                "table_sms": "SMS",
+                "table_whatsapp": "WhatsApp",
+                "appointment_booked": "New Appointment Booked",
+                "appointment_reminder": "Upcoming Appointment Reminder",
+                "appointment_cancelled": "Appointment Cancelled",
+                "work_order_created": "New Work Order Created",
+                "work_order_status_changed": "Work Order Status Updated",
+                "work_order_completed": "Vehicle Ready & Work Order Completed",
+                "quote_shared": "Quotation Shared with Customer",
+                "quote_approved": "Quotation Approved by Customer",
+                "invoice_issued": "Tax Invoice Issued",
+                "payment_received": "Payment Received / Receipt Created",
+                "low_stock_alert": "Low Inventory Stock Alert"
+            },
+            "templates": {
+                "title": "Message Templates",
+                "description": "Customize automated notification text with dynamic placeholders",
+                "variables_hint": "Available variables:",
+                "work_order_created": "Work Order Creation Notice",
+                "work_order_completed": "Work Order Completion & Vehicle Ready Notice",
+                "quote_shared": "Quotation Shared Notice",
+                "invoice_issued": "Tax Invoice Issued Notice",
+                "appointment_booked": "Appointment Confirmation Notice",
+                "appointment_reminder": "Appointment Reminder Notice",
+                "low_stock_alert": "Low Stock Alert Notice"
+            },
+            "actions": {
+                "save": "Save Changes",
+                "saving": "Saving...",
+                "send_test": "Send Test Notification",
+                "sending_test": "Sending...",
+                "reset_defaults": "Reset Defaults"
+            }
+        },
         "print": {
             "signatures": {
                 "title": "Signature library",
@@ -4919,6 +5039,7 @@
         "fix_the_following": "Please correct the following errors:"
     },
     "vehicles": {
+        "model_required": "Please select the vehicle model.",
         "add": "Add vehicle",
         "all_loaded": "All vehicles have been loaded",
         "columns": {
@@ -5022,6 +5143,28 @@
         "delete_reading_confirm": "Are you sure you want to delete the odometer reading ("
     },
     "work_orders": {
+        "suggestions": {
+            "errors": {
+                "center_required": "A center identifier is required to run AI suggestions.",
+                "invalid_response": "AI returned an invalid response.",
+                "tenant_required": "AI usage tracking requires an active tenant.",
+                "unavailable": "The suggestion service is temporarily unavailable. Please try again later.",
+                "request_failed": "Unable to load suggestions. Please try again."
+            },
+            "unavailable": "The suggested item is unavailable. Choose it from the current catalog.",
+            "panel_title": "Maintenance suggestions",
+            "panel_subtitle": "Suggested services and parts based on the customer complaint",
+            "powered_by_ai": "AI-assisted suggestions",
+            "refresh": "Get suggestions",
+            "empty": "No suggestions to display.",
+            "add": "Review and add",
+            "provided_by": "Provided by {provider}",
+            "confidence_high": "High confidence",
+            "confidence_medium": "Medium confidence",
+            "confidence_low": "Low confidence",
+            "type_service": "Service",
+            "type_part": "Part"
+        },
         "allow_credit_override": "Allow credit limit override and proceed",
         "credit_limit_exceeded": "Customer credit limit exceeded. Outstanding: :balance SAR, Limit: :limit SAR.",
         "credit_limit_warning_desc": "The customer outstanding balance has reached or exceeded the approved credit limit. Please collect outstanding balances or enable override below.",
@@ -5475,14 +5618,6 @@
             "pending": "Pending",
             "ready_for_qc": "Ready for QC"
         },
-        "suggestions": {
-            "errors": {
-                "center_required": "A center identifier is required to run AI suggestions.",
-                "invalid_response": "AI returned an invalid response.",
-                "tenant_required": "AI usage tracking requires an active tenant.",
-                "unavailable": "The suggestion service is temporarily unavailable. Please try again later."
-            }
-        },
         "credit_note": {
             "no_cash_movement_hint": "💡 No deduction or cash movement will be recorded; the credit note stays as an amount owed to the customer on their account.",
             "load_error": "An error occurred while loading the return data"
@@ -5599,7 +5734,8 @@
             "feedbacks_support": "Feedbacks & Support",
             "activity_log": "Activity Log",
             "system_settings": "System Settings",
-            "support_hub": "Support & Messages"
+            "support_hub": "Support & Messages",
+            "error_log": "Error log"
         },
         "notifications": {
             "title": "Notifications",
@@ -6895,6 +7031,14 @@
             }
         },
         "billing": {
+            "storage": {
+                "title": "Cloud Storage Quota",
+                "subtitle": "Storage consumption for documents, photos, and attachments saved in your account",
+                "used": "used",
+                "unlimited": "Unlimited",
+                "used_space": "Used space",
+                "allocated_limit": "Plan allocation limit"
+            },
             "page": {
                 "title": "Billing",
                 "subtitle": "Manage your subscription, payment methods, and receipts",
@@ -7294,7 +7438,30 @@
                 "contact_messages": "Contact Messages",
                 "help": "Help Center"
             }
-        }
+        },
+        "error_log": {
+            "title": "Error log",
+            "description": "Bounded log view with context and sensitive values omitted.",
+            "all_levels": "All levels",
+            "timestamp": "Time",
+            "level": "Level",
+            "message": "Message",
+            "limit": "Record limit",
+            "truncated": "Only the end of the log file is shown.",
+            "empty": "No matching entries",
+            "levels": {
+                "debug": "Debug",
+                "info": "Info",
+                "notice": "Notice",
+                "warning": "Warning",
+                "error": "Error",
+                "critical": "Critical",
+                "alert": "Alert",
+                "emergency": "Emergency"
+            },
+            "refresh": "Refresh log"
+        },
+        "nav": {}
     },
     "subscription": {
         "bank_transfer_pending": "Your bank transfer subscription request has been received. Your subscription will be activated once the transfer is verified.",
@@ -7498,10 +7665,14 @@
         "all": "All",
         "clear_filters": "Clear filters",
         "empty": "No appointments for the current filters",
-        "customer": "Customer ID",
-        "vehicle": "Vehicle ID",
-        "customer_placeholder": "Customer ID",
-        "vehicle_placeholder": "Vehicle ID",
+        "customer": "Customer",
+        "vehicle": "Vehicle",
+        "customer_placeholder": "Select customer...",
+        "vehicle_placeholder": "Select vehicle...",
+        "no_vehicles": "No vehicles registered for this customer",
+        "select_customer_first": "Please select a customer first",
+        "search_vehicle_or_customer": "Quick search by plate or customer name...",
+        "selected_vehicle": "Selected Vehicle",
         "bay": "Bay",
         "tech": "Technician",
         "no_bay": "No specific bay",

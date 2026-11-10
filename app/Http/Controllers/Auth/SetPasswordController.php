@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules;
 use Inertia\Inertia;
@@ -20,9 +21,7 @@ class SetPasswordController extends Controller
      */
     public function show(Request $request, User $user)
     {
-        if (! $request->hasValidSignature()) {
-            abort(403, 'Invalid or expired invitation link.');
-        }
+        $this->assertInvitation($request, $user);
 
         return Inertia::render('Auth/SetPassword', [
             'user' => [
@@ -34,6 +33,7 @@ class SetPasswordController extends Controller
             'signature_params' => [
                 'expires' => $request->query('expires'),
                 'signature' => $request->query('signature'),
+                'token' => $request->query('token'),
             ],
         ]);
     }
@@ -43,20 +43,34 @@ class SetPasswordController extends Controller
      */
     public function store(Request $request, User $user)
     {
-        if (! $request->hasValidSignature()) {
-            abort(403, 'Invalid or expired invitation link.');
-        }
+        $this->assertInvitation($request, $user);
 
         $request->validate([
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ]);
 
-        $user->forceFill([
-            'password' => Hash::make($request->password),
-            'email_verified_at' => now(), // Ensure confirmed
-            'is_active' => true,
-        ])->save();
+        $user = DB::transaction(function () use ($request, $user) {
+            $locked = User::query()->lockForUpdate()->findOrFail($user->id);
+            $this->assertInvitation($request, $locked);
+            $locked->forceFill([
+                'password' => Hash::make($request->password),
+                'email_verified_at' => now(),
+                'invitation_token_hash' => null,
+                'invitation_expires_at' => null,
+            ])->save();
+            $locked->logActivity('user.invitation.accepted');
 
+            return $locked;
+        });
+
+        $request->session()->regenerate();
+
+        if ($user->two_factor_confirmed_at !== null) {
+            $request->session()->put('2fa:user_id', $user->id);
+            Auth::guard('web')->logout();
+
+            return redirect()->route('app.2fa.challenge');
+        }
         Auth::login($user);
 
         // Set team context for role checking (required by Spatie Permission)
@@ -74,5 +88,17 @@ class SetPasswordController extends Controller
         }
 
         return redirect()->intended(route('dashboard'));
+    }
+
+    private function assertInvitation(Request $request, User $user): void
+    {
+        $token = $request->query('token');
+        abort_unless($request->hasValidSignature()
+            && $user->is_active
+            && is_string($token)
+            && $user->invitation_token_hash
+            && $user->invitation_expires_at?->isFuture()
+            && hash_equals($user->invitation_token_hash, hash('sha256', $token)),
+            403, __('auth.invitation_invalid'));
     }
 }

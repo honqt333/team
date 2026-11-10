@@ -56,11 +56,11 @@ class InventoryBalanceController extends Controller
         }
 
         // Whitelist allowed sort columns and order directions to prevent SQL injection.
-        $allowedSorts = ['qty_on_hand', 'min_stock', 'created_at', 'sku', 'name'];
+        $allowedSorts = ['qty_on_hand', 'min_stock', 'wac_cost', 'sale_price', 'min_sale_price', 'created_at', 'sku', 'name'];
         $sort = in_array($request->input('sort'), $allowedSorts, true)
             ? $request->input('sort')
             : 'qty_on_hand';
-        $order = strtolower((string) $request->input('order', '')) === 'asc' ? 'asc' : 'desc';
+        $order = strtolower((string) ($request->input('direction') ?? $request->input('order', ''))) === 'asc' ? 'asc' : 'desc';
 
         $query = InventoryBalance::forWarehouse($warehouse->id)
             ->with(['part' => fn ($q) => $q->select('id', 'sku', 'name_ar', 'name_en', 'unit_id', 'category_id', 'description')->with(['category', 'unit'])])
@@ -131,7 +131,11 @@ class InventoryBalanceController extends Controller
             'warehouse' => $warehouse,
             'warehouses' => $warehouses, // Pass list
             'categories' => $categories,
-            'filters' => $request->only(['search', 'category', 'stock_status', 'warehouse_id']),
+            'filters' => array_merge($request->only(['search', 'category', 'stock_status', 'warehouse_id']), [
+                'sort' => $sort,
+                'direction' => $order,
+                'order' => $order,
+            ]),
             'stats' => $stats,
         ]);
     }

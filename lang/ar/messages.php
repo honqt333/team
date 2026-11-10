@@ -3,6 +3,12 @@
 declare(strict_types=1);
 
 return [
+    'setup' => [
+        'main_center' => 'المركز الرئيسي',
+        'complete' => 'اكتمل إعداد النظام الأساسي.',
+        'logo_write_failed' => 'تعذر حفظ شعار المركبة.',
+    ],
+
     'attachment_deleted' => 'تم حذف المرفق بنجاح',
     'attachment_uploaded' => 'تم رفع المرفق',
     'attachments_uploaded_successfully' => 'تم رفع المرفقات بنجاح',
@@ -286,6 +292,21 @@ return [
         'website' => [
             'saved' => 'تم تحديث إعدادات الموقع بنجاح',
         ],
+    ],
+    'company_transactions' => [
+        'saved' => 'تم حفظ المعاملة الإدارية بنجاح كمسودة',
+        'updated' => 'تم تحديث المعاملة الإدارية بنجاح',
+        'deleted' => 'تم حذف المعاملة الإدارية بنجاح',
+        'cannot_edit_approved' => 'لا يمكن تعديل المعاملات المعتمدة',
+        'cannot_delete_approved' => 'لا يمكن حذف المعاملات المعتمدة',
+        'already_approved' => 'هذه المعاملة معتمدة بالفعل',
+        'contact_required_for_taxable' => 'يجب تحديد العميل/المورد عند تفعيل خاضع للضريبة لضمان التوافق مع الفوترة الضريبية',
+        'approve_failed' => 'حدث خطأ أثناء الاعتماد: :message',
+        'payment_note' => 'تسجيل دفع تلقائي لمعاملة إدارية رقم :id',
+        'general_admin_customer' => 'عميل إداري عام',
+        'general_admin_supplier' => 'مورد إداري عام',
+        'cash_customer' => 'عميل نقدي',
+        'admin_expenses' => 'مصروفات إدارية للشركة',
     ],
     'appointment_not_found' => 'الموعد غير موجود',
     'center_unavailable' => 'هذا الفرع غير متاح',

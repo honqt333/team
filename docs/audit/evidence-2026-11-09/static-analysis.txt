@@ -1,0 +1,14 @@
+Note: Using configuration file [project]/phpstan.neon.
+Invalid entries in ignoreErrors:
+Path "[project]/app/Services/HR/AttendanceCalculationService.php" is neither a directory, nor a file path, nor a fnmatch pattern.
+
+Path "[project]/app/Services/HR/AttendanceCalculationService.php" is neither a directory, nor a file path, nor a fnmatch pattern.
+
+Path "[project]/app/Services/HR/AttendanceCalculationService.php" is neither a directory, nor a file path, nor a fnmatch pattern.
+
+Path "[project]/app/Services/HR/AttendanceCalculationService.php" is neither a directory, nor a file path, nor a fnmatch pattern.
+
+To ignore non-existent paths in ignoreErrors,
+set reportUnmatchedIgnoredErrors: false in your configuration file.
+
+Script vendor/bin/phpstan analyse --memory-limit=512M handling the stan event returned with error code 1

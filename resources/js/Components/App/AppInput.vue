@@ -2,8 +2,7 @@
 /**
  * AppInput — Carag V2 Design System primitive.
  *
- * Wraps the legacy TextInput.vue to keep backwards-compat with
- * every existing form, but exposes a token-styled surface, full
+ * Renders a native input and exposes a token-styled surface, full
  * a11y (aria-invalid, aria-describedby, aria-required), and
  * helper props (label, hint, error, prefix, suffix, optional
  * currency suffix when type="number").
@@ -12,7 +11,7 @@
  *   - default: nothing (the input is rendered for you)
  *   - prefix / suffix: positioned in the field's start/end edges
  */
-import { computed, ref, useAttrs } from 'vue';
+import { computed, onMounted, ref, useAttrs } from 'vue';
 
 const props = defineProps({
     id: { type: String, default: null },
@@ -20,6 +19,7 @@ const props = defineProps({
     label: { type: String, default: null },
     hint: { type: String, default: null },
     error: { type: String, default: null },
+    invalid: { type: Boolean, default: false },
     type: {
         type: String,
         default: 'text',
@@ -44,6 +44,7 @@ const emit = defineEmits(['update:modelValue', 'blur', 'focus', 'enter']);
 const attrs = useAttrs();
 
 const inputEl = ref(null);
+const hasError = computed(() => props.invalid || !!props.error);
 const fieldId = computed(() => props.id || `app-input-${Math.random().toString(36).slice(2, 10)}`);
 const hintId = computed(() => `${fieldId.value}-hint`);
 const errorId = computed(() => `${fieldId.value}-error`);
@@ -54,7 +55,11 @@ const describedBy = computed(() => {
     return ids.length ? ids.join(' ') : undefined;
 });
 
-const onInput = (e) => emit('update:modelValue', e.target.value);
+const onInput = (event) => {
+    const value = event.target.value;
+    const number = parseFloat(value);
+    emit('update:modelValue', props.type === 'number' && !Number.isNaN(number) ? number : value);
+};
 const onBlur = (e) => emit('blur', e);
 const onFocus = (e) => emit('focus', e);
 const onKeyup = (e) => {
@@ -63,12 +68,15 @@ const onKeyup = (e) => {
 
 const focus = () => inputEl.value?.focus();
 defineExpose({ focus });
+onMounted(() => {
+    if (props.autofocus) focus();
+});
 </script>
 
 <template>
     <div
         class="app-field"
-        :class="{ 'app-field--error': !!error, 'app-field--disabled': disabled }"
+        :class="{ 'app-field--error': hasError, 'app-field--disabled': disabled }"
     >
         <label v-if="label" :for="fieldId" class="app-field__label">
             {{ label }}
@@ -90,10 +98,11 @@ defineExpose({ focus });
                 :disabled="disabled"
                 :readonly="readonly"
                 :autocomplete="autocomplete"
+                :autofocus="autofocus"
                 :min="min"
                 :max="max"
                 :step="step"
-                :aria-invalid="error ? 'true' : undefined"
+                :aria-invalid="hasError ? 'true' : undefined"
                 :aria-required="required ? 'true' : undefined"
                 :aria-describedby="describedBy"
                 v-bind="attrs"

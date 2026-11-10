@@ -24,19 +24,18 @@ class QuoteConversionService
      */
     public function convert(Quote $quote, User $user): WorkOrder
     {
-        // Load missing relationships to ensure lines and parts collections are up-to-date
-        $quote->loadMissing(['lines.service', 'parts']);
-
-        // Validate quote can be converted
-        if ($quote->isConverted()) {
-            throw new InvalidArgumentException('Quote has already been converted.');
-        }
-
-        if (! $quote->isApproved()) {
-            throw new InvalidArgumentException('Quote must be approved before conversion.');
-        }
-
         return DB::transaction(function () use ($quote, $user) {
+            $locked = Quote::query()->lockForUpdate()->findOrFail($quote->id);
+            $quote->setRawAttributes($locked->getAttributes(), true);
+            $quote->load(['lines.service', 'parts']);
+
+            if ($quote->isConverted()) {
+                throw new InvalidArgumentException(__('quotes.already_converted'));
+            }
+
+            if (! $quote->isApproved()) {
+                throw new InvalidArgumentException(__('quotes.approval_required'));
+            }
             // Generate work order code
             $code = WorkOrder::generateCode($quote->tenant_id, $quote->center_id);
 

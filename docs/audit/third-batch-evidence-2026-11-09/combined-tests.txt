@@ -1,0 +1,82 @@
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\InvoicingSecurityTest::test_immutability_of_issued_invoice(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   WARN  Metadata found in doc-comment for method Tests\Feature\InvoicingSecurityTest::test_sequential_numbering_with_locking(). Metadata in doc-comments is deprecated and will no longer be supported in PHPUnit 12. Update your test code to use attributes instead.
+
+   PASS  Tests\Feature\FirstBatchSecurityTest
+  ✓ invitation is consumed once and old signed links are rejected        7.24s  
+  ✓ invitation cannot reactivate disabled account                        0.93s  
+  ✓ invitation requires two factor before authenticating                 0.52s  
+  ✓ user manager cannot assign owner or foreign role or foreign center   3.43s  
+  ✓ user manager cannot reset owner password                             0.96s  
+  ✓ role manager cannot create reserved role or grant unheld permission  0.78s  
+  ✓ backup false write fails and blocks tenant deletion                  0.90s  
+  ✓ backup success is verified against saved bytes                       0.66s  
+  ✓ legacy document migration is dry run and verifies before removing    0.05s  
+  ✓ user manager cannot take over custom privileged account              0.66s  
+  ✓ receipt download requires permission and tenant ownership            1.39s  
+  ✓ expired or rotated invitation is rejected                            1.42s  
+  ✓ private invoice url uses authorized route and preserves download     0.93s  
+
+   PASS  Tests\Feature\SecondBatchFinancialSafetyTest
+  ✓ stale draft cannot change issued number or consume another sequence  2.46s  
+  ✓ period is consolidated and browser amounts are ignored               4.54s  
+  ✓ credit note is negative and drafts and deleted documents are exclud… 3.81s  
+  ✓ existing legacy period is preserved and cannot be posted or recreat… 0.37s  
+  ✓ unknown or duplicate transaction identifiers are rejected            1.33s  
+  ✓ branch invoice permission does not expose consolidated data          0.63s  
+  ✓ posted period cannot be recreated through stale instance             1.17s  
+  ✓ paid payroll item cannot be deleted through another draft or its pa… 0.97s  
+  ✓ posting rejects a transaction already selected in another posted pe… 1.00s  
+  ✓ unselected transactions do not block future eligibility              0.84s  
+
+   PASS  Tests\Feature\ThirdBatchSafetyTest
+  ✓ database outage returns safe 503                                     0.05s  
+  ✓ cache outage returns safe 503                                        0.04s  
+  ✓ queue outage returns safe 503                                        0.07s  
+  ✓ public decision is terminal and only logged once                     0.98s  
+  ✓ rejection is terminal and expired or deleted quotes cannot be actio… 5.05s  
+  ✓ tenant scope gate rejects a violation and accepts a scoped model     0.14s  
+  ✓ legacy report is tenant specific and does not modify records         2.24s  
+  ✓ stale approved quote cannot create a second work order               1.09s  
+
+   PASS  Tests\Feature\HealthTest
+  ✓ healthz returns ok                                                   0.05s  
+  ✓ readyz returns check status                                          0.05s  
+  ✓ healthz does not require auth                                        0.04s  
+  ✓ readyz emits correlation header even when degraded                   0.03s  
+
+   PASS  Tests\Feature\QuoteSignatureSecurityTest
+  ✓ an svg signature does not approve the quote publicly                 2.48s  
+  ✓ an svg signature is refused on the staff route                       0.92s  
+  ✓ a png that claims to be an svg is refused                            0.90s  
+  ✓ a payload that is not an image is refused                            1.23s  
+  ✓ an oversized signature is refused                                    1.17s  
+  ✓ a real png signature is stored with a trusted extension              1.17s  
+
+   PASS  Tests\Feature\QuotesTest
+  ✓ can create quote with services                                       1.14s  
+  ✓ approving quote converts to work card                                1.42s  
+  ✓ quote lines copied correctly on conversion                           1.68s  
+  ✓ rejecting quote does not create work card                            1.13s  
+  ✓ cannot approve without permission                                    1.08s  
+  ✓ conversion is idempotent                                             1.13s  
+  ✓ min price validation on quote lines                                  0.98s  
+  ✓ quote line parts total accessor returns float                        0.99s  
+
+   PASS  Tests\Feature\TaxPeriodsReportTest
+  ✓ guest is redirected to login                                         0.07s  
+  ✓ authenticated user can view tax periods index                        0.77s  
+  ✓ user can view three years periods json                               0.64s  
+  ✓ user can preview and create tax period                               0.80s  
+  ✓ user can view and post tax period                                    0.67s  
+  ✓ user cannot access another tenants tax period                        0.84s  
+  ✓ user can export tax period excel and zatca                           0.42s  
+
+   PASS  Tests\Feature\InvoicingSecurityTest
+  ✓ immutability of issued invoice                                       0.31s  
+  ✓ sequential numbering with locking                                    0.34s  
+
+  Tests:    58 passed (371 assertions)
+  Duration: 69.25s
+

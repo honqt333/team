@@ -1,4 +1,5 @@
 <template>
+    <Head :title="workOrder.work_order_number" />
     <AppLayout>
         <div class="space-y-6">
             <!-- Header Actions Bar (extracted to WorkOrderHeader) -->
@@ -41,6 +42,13 @@
 
                 <!-- Customer Complaint & Initial Assessment (extracted to WorkOrderComplaintAssessment) -->
                 <WorkOrderComplaintAssessment :work-order="workOrder" />
+
+                <WorkOrderSuggestionsPanel
+                    v-if="!isReadOnly && canUseSuggestions"
+                    :work-order="workOrder"
+                    :endpoint="route('work-orders.suggestions', workOrder.id)"
+                    @add="reviewSuggestedItem"
+                />
 
                 <!-- Tabs container (extracted to WorkOrderTabsContainer) -->
                 <WorkOrderTabsContainer :tabs="tabs" v-model:active-tab="activeTab">
@@ -196,6 +204,7 @@
             :warehouses="warehouses"
             :read-only="isReadOnly"
             :initial-tab="serviceModalInitialTab"
+            :initial-service-id="suggestedServiceId"
             @close="showItemModal ? closeItemModal() : closeServiceModal()"
             @saved="showItemModal ? handleItemSaved() : handleServiceSaved()"
         />
@@ -203,6 +212,7 @@
         <!-- Add Part Modal -->
         <WorkOrderPartModal
             :show="showAddPartModal"
+            :suggested-part="suggestedPart"
             :workOrder="workOrder"
             :part="selectedPartToEdit"
             :units="inventoryUnits"
@@ -639,7 +649,7 @@
 
 import BackButton from '@/Components/BackButton.vue';
 import { ref, computed, watch } from 'vue';
-import { Link, router, usePage } from '@inertiajs/vue3';
+import { Head, Link, router, usePage } from '@inertiajs/vue3';
 import axios from 'axios';
 import { useI18n } from 'vue-i18n';
 import AppLayout from '@/Layouts/AppLayout.vue';
@@ -665,6 +675,7 @@ import PartsDisplay from '@/Components/Common/PartsDisplay.vue';
 import WorkOrderIssueMoreModal from '@/Components/WorkOrders/WorkOrderIssueMoreModal.vue';
 import WorkOrderReturnModal from '@/Components/WorkOrders/WorkOrderReturnModal.vue';
 import WorkOrderCreditNoteModal from '@/Components/WorkOrders/WorkOrderCreditNoteModal.vue';
+import WorkOrderSuggestionsPanel from '@/Components/WorkOrders/WorkOrderSuggestionsPanel.vue';
 import WorkOrderCustomerCard from '@/Components/WorkOrders/WorkOrderCustomerCard.vue';
 import WorkOrderFinancialSummary from '@/Components/WorkOrders/WorkOrderFinancialSummary.vue';
 import WorkOrderInfoCards from '@/Components/WorkOrders/WorkOrderInfoCards.vue';
@@ -963,6 +974,43 @@ const {
     handleItemSaved,
 } = notes;
 // ─────────────────────────────────────────────────────────────────────────────
+
+const suggestedServiceId = ref(null);
+const suggestedPart = ref(null);
+const suggestionPage = usePage();
+const canUseSuggestions = computed(() =>
+    (suggestionPage.props.auth?.permissions || []).includes('crm.work_orders.update')
+);
+
+async function reviewSuggestedItem(suggestion) {
+    if (isReadOnly.value || !canUseSuggestions.value) return;
+    if (suggestion.itemType === 'service') {
+        const service = props.services.find((item) => Number(item.id) === suggestion.itemId);
+        if (!service) return errorToast(t('work_orders.suggestions.unavailable'));
+        suggestedServiceId.value = service.id;
+        openAddServiceModal(service.department_id);
+    } else if (suggestion.itemType === 'part') {
+        try {
+            const { data } = await axios.get(route('app.inventory.parts.search'), {
+                params: { q: suggestion.name },
+            });
+            const part = data.find((item) => Number(item.id) === suggestion.itemId);
+            if (!part) return errorToast(t('work_orders.suggestions.unavailable'));
+            suggestedPart.value = part;
+            selectedPartToEdit.value = null;
+            showAddPartModal.value = true;
+        } catch {
+            errorToast(t('work_orders.suggestions.unavailable'));
+        }
+    }
+}
+
+watch(showServiceModal, (open) => {
+    if (!open) suggestedServiceId.value = null;
+});
+watch(showAddPartModal, (open) => {
+    if (!open) suggestedPart.value = null;
+});
 
 function openAddPartModal() {
     selectedPartToEdit.value = null;

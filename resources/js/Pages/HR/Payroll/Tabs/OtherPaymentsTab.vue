@@ -3,11 +3,11 @@
         <!-- Header with filter and button -->
         <div class="flex flex-wrap items-center justify-between gap-4">
             <!-- Center Filter -->
-            <div class="w-60" v-if="$page.props.auth.available_centers?.length > 1">
+            <div class="w-60" v-if="$page.props.auth?.available_centers?.length > 1">
                 <SearchableSelect
                     :modelValue="selectedCenter"
                     @update:modelValue="(value) => emit('center-change', value)"
-                    :options="[{ id: '', name: $t('common.all') }, ...centers]"
+                    :options="[{ id: '', name: $t('common.all') }, ...(centers || [])]"
                     option-label="name"
                     option-value="id"
                     :label="$t('common.center')"
@@ -17,204 +17,222 @@
 
             <!-- Add Payment Button -->
             <button
+                type="button"
                 @click="openModal"
-                class="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 flex items-center gap-2"
-                :class="{ 'ml-auto': !($page.props.auth.available_centers?.length > 1) }"
+                class="flex items-center justify-center gap-2 px-5 py-2.5 bg-action-primary hover:bg-action-primary-hover text-white rounded-xl font-bold shadow-xs transition-colors cursor-pointer ms-auto"
             >
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path
                         stroke-linecap="round"
                         stroke-linejoin="round"
-                        stroke-width="2"
+                        stroke-width="2.5"
                         d="M12 4v16m8-8H4"
                     />
                 </svg>
-                {{ $t('hr.financial.other_payments.add') }}
+                <span class="text-sm">
+                    {{ $t('hr.financial.other_payments.add') }}
+                </span>
             </button>
         </div>
 
+        <!-- Empty State -->
+        <div v-if="!loading && (!payments?.data || payments.data.length === 0)" class="py-8">
+            <AppEmptyState
+                :title="$t('hr.financial.other_payments.title')"
+                :description="$t('hr.financial.other_payments.empty_hint')"
+                :action-text="$t('hr.financial.other_payments.add')"
+                @action="openModal"
+            />
+        </div>
+
         <!-- Payments Table -->
-        <div
-            class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden"
-        >
-            <div class="overflow-x-auto">
-                <table
-                    class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400"
-                >
-                    <thead
-                        class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400"
+        <div v-else class="space-y-4">
+            <DataTable
+                :data="payments?.data || payments || []"
+                :columns="columns"
+                :loading="loading"
+            >
+                <!-- Employee Column Slot -->
+                <template #cell-employee="{ item }">
+                    <Link
+                        v-if="item.employee"
+                        :href="
+                            route('app.hr.employees.show', {
+                                employee: item.employee_id,
+                                tab: 'financial',
+                            })
+                        "
+                        class="font-semibold text-content-primary hover:text-action-primary transition-colors"
                     >
-                        <tr>
-                            <th scope="col" class="px-6 py-3">{{ $t('common.employee') }}</th>
-                            <th scope="col" class="px-6 py-3">
-                                {{ $t('hr.financial.other_payments.payment_title') }}
-                            </th>
-                            <th scope="col" class="px-6 py-3">{{ $t('common.amount') }}</th>
-                            <th scope="col" class="px-6 py-3">
-                                {{ $t('hr.payroll.payment_date') }}
-                            </th>
-                            <th scope="col" class="px-6 py-3">{{ $t('common.status') }}</th>
-                            <th scope="col" class="px-6 py-3">{{ $t('common.actions') }}</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr v-if="loading">
-                            <td colspan="6" class="px-6 py-4 text-center text-gray-500">
-                                {{ $t('common.loading') }}...
-                            </td>
-                        </tr>
-                        <template v-else-if="payments?.data?.length">
-                            <tr
-                                v-for="payment in payments.data"
-                                :key="payment.id"
-                                class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600"
+                        {{ item.employee.name_ar || item.employee.name_en }}
+                    </Link>
+                    <span v-else class="text-content-muted">—</span>
+                </template>
+
+                <!-- Title Slot -->
+                <template #cell-title="{ item }">
+                    <span class="text-sm text-content-secondary font-medium">{{ item.title }}</span>
+                </template>
+
+                <!-- Amount Slot -->
+                <template #cell-amount="{ item }">
+                    <span class="font-bold font-mono text-success">
+                        {{ formatCurrency(item.amount) }}
+                    </span>
+                </template>
+
+                <!-- Payment Date Slot -->
+                <template #cell-payment_date="{ item }">
+                    <span class="text-xs text-content-muted font-mono">
+                        {{ formatDate(item.payment_date) }}
+                    </span>
+                </template>
+
+                <!-- Status Slot -->
+                <template #cell-status="{ item }">
+                    <span
+                        :class="[
+                            'px-2.5 py-1 rounded-full text-[11px] font-bold border shadow-2xs',
+                            getStatusClass(item.status),
+                        ]"
+                    >
+                        {{ $t(`hr.payroll.statuses.${item.status}`) }}
+                    </span>
+                </template>
+
+                <!-- Actions Slot -->
+                <template #cell-actions="{ item }">
+                    <div class="flex items-center justify-end gap-1.5">
+                        <template v-if="item.status === 'pending'">
+                            <!-- Approve button -->
+                            <button
+                                type="button"
+                                @click="approvePayment(item)"
+                                class="p-2 text-content-muted hover:text-info hover:bg-surface-secondary rounded-lg transition-colors cursor-pointer"
+                                :title="$t('hr.payroll.approve')"
                             >
-                                <td
-                                    class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
+                                <svg
+                                    class="w-4 h-4"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
                                 >
-                                    <Link
-                                        :href="
-                                            route('app.hr.employees.show', {
-                                                employee: payment.employee_id,
-                                                tab: 'financial',
-                                            })
-                                        "
-                                        class="hover:text-emerald-600 transition-colors"
-                                    >
-                                        {{ payment.employee?.name_ar }}
-                                    </Link>
-                                </td>
-                                <td class="px-6 py-4">{{ payment.title }}</td>
-                                <td class="px-6 py-4 font-mono font-bold text-emerald-600">
-                                    {{ formatCurrency(payment.amount) }}
-                                </td>
-                                <td class="px-6 py-4">{{ formatDate(payment.payment_date) }}</td>
-                                <td class="px-6 py-4">
-                                    <span
-                                        :class="getStatusClass(payment.status)"
-                                        class="px-2 py-1 rounded-full text-xs font-bold"
-                                    >
-                                        {{ $t(`hr.payroll.statuses.${payment.status}`) }}
-                                    </span>
-                                </td>
-                                <td class="px-6 py-4 flex items-center gap-2">
-                                    <template v-if="payment.status === 'pending'">
-                                        <button
-                                            @click="approvePayment(payment)"
-                                            class="text-blue-600 hover:text-blue-900"
-                                            title="Approve"
-                                        >
-                                            <svg
-                                                class="w-5 h-5"
-                                                fill="none"
-                                                stroke="currentColor"
-                                                viewBox="0 0 24 24"
-                                            >
-                                                <path
-                                                    stroke-linecap="round"
-                                                    stroke-linejoin="round"
-                                                    stroke-width="2"
-                                                    d="M5 13l4 4L19 7"
-                                                />
-                                            </svg>
-                                        </button>
-                                        <button
-                                            @click="editPayment(payment)"
-                                            class="text-blue-600 hover:text-blue-900"
-                                        >
-                                            <svg
-                                                class="w-5 h-5"
-                                                fill="none"
-                                                stroke="currentColor"
-                                                viewBox="0 0 24 24"
-                                            >
-                                                <path
-                                                    stroke-linecap="round"
-                                                    stroke-linejoin="round"
-                                                    stroke-width="2"
-                                                    d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-                                                />
-                                            </svg>
-                                        </button>
-                                        <button
-                                            @click="deletePayment(payment)"
-                                            class="text-red-600 hover:text-red-900"
-                                        >
-                                            <svg
-                                                class="w-5 h-5"
-                                                fill="none"
-                                                stroke="currentColor"
-                                                viewBox="0 0 24 24"
-                                            >
-                                                <path
-                                                    stroke-linecap="round"
-                                                    stroke-linejoin="round"
-                                                    stroke-width="2"
-                                                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                                                />
-                                            </svg>
-                                        </button>
-                                    </template>
-                                    <template v-else-if="payment.status === 'approved'">
-                                        <button
-                                            @click="payPayment(payment)"
-                                            class="text-emerald-600 hover:text-emerald-900"
-                                            title="Mark as Paid"
-                                        >
-                                            <svg
-                                                class="w-5 h-5"
-                                                fill="none"
-                                                stroke="currentColor"
-                                                viewBox="0 0 24 24"
-                                            >
-                                                <path
-                                                    stroke-linecap="round"
-                                                    stroke-linejoin="round"
-                                                    stroke-width="2"
-                                                    d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"
-                                                />
-                                            </svg>
-                                        </button>
-                                    </template>
-                                </td>
-                            </tr>
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2"
+                                        d="M5 13l4 4L19 7"
+                                    />
+                                </svg>
+                            </button>
+
+                            <!-- Edit button -->
+                            <button
+                                type="button"
+                                @click="editPayment(item)"
+                                class="p-2 text-content-muted hover:text-action-primary hover:bg-surface-secondary rounded-lg transition-colors cursor-pointer"
+                                :title="$t('common.edit')"
+                            >
+                                <svg
+                                    class="w-4 h-4"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2"
+                                        d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                                    />
+                                </svg>
+                            </button>
+
+                            <!-- Delete button -->
+                            <button
+                                type="button"
+                                @click="deletePayment(item)"
+                                class="p-2 text-content-muted hover:text-danger hover:bg-surface-secondary rounded-lg transition-colors cursor-pointer"
+                                :title="$t('common.delete')"
+                            >
+                                <svg
+                                    class="w-4 h-4"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2"
+                                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                                    />
+                                </svg>
+                            </button>
                         </template>
-                        <tr v-else>
-                            <td colspan="6" class="px-6 py-4 text-center text-gray-500">
-                                {{ $t('common.no_records') }}
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
+
+                        <template v-else-if="item.status === 'approved'">
+                            <!-- Mark as Paid button -->
+                            <button
+                                type="button"
+                                @click="payPayment(item)"
+                                class="p-2 text-content-muted hover:text-success hover:bg-surface-secondary rounded-lg transition-colors cursor-pointer"
+                                :title="$t('hr.payroll.mark_paid')"
+                            >
+                                <svg
+                                    class="w-4 h-4"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2"
+                                        d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"
+                                    />
+                                </svg>
+                            </button>
+                        </template>
+                    </div>
+                </template>
+            </DataTable>
+
             <!-- Pagination -->
             <div
-                v-if="payments?.meta"
-                class="px-6 py-4 border-t border-gray-200 dark:border-gray-700 flex justify-center"
+                v-if="payments?.links && payments.links.length > 3"
+                class="flex justify-center pt-2"
             >
-                <div class="flex gap-2">
-                    <Link
-                        v-for="link in payments.meta.links"
-                        :key="link.label"
-                        :href="link.url || '#'"
-                        class="px-3 py-1 rounded-md text-sm"
+                <nav class="flex items-center gap-1.5" aria-label="Pagination">
+                    <button
+                        v-for="(link, idx) in payments.links"
+                        :key="idx"
+                        type="button"
+                        :disabled="!link.url || link.active"
+                        @click="handleNavigate(link.url)"
                         :class="[
+                            'px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors cursor-pointer',
                             link.active
-                                ? 'bg-emerald-600 text-white'
-                                : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700',
-                            !link.url ? 'opacity-50 cursor-not-allowed' : '',
+                                ? 'bg-action-primary text-white shadow-xs'
+                                : link.url
+                                  ? 'bg-surface-primary dark:bg-surface-secondary/40 text-content-secondary hover:text-content-primary hover:bg-surface-secondary border border-border-subtle'
+                                  : 'text-content-muted opacity-40 cursor-not-allowed',
                         ]"
                         v-safe-html="link.label"
                     />
-                </div>
+                </nav>
             </div>
         </div>
 
-        <!-- Modal -->
+        <!-- Add/Edit Modal -->
         <BaseModal
             :show="showModal"
             @close="closeModal"
-            :title="editMode ? 'تعديل دفعة' : $t('hr.financial.other_payments.add')"
+            :title="
+                editMode
+                    ? $t('hr.financial.other_payments.edit')
+                    : $t('hr.financial.other_payments.add')
+            "
         >
             <form @submit.prevent="submit" class="space-y-4">
                 <div>
@@ -232,19 +250,19 @@
 
                 <div>
                     <InputLabel :value="$t('hr.financial.other_payments.payment_title')" />
-                    <TextInput v-model="form.title" class="w-full" />
+                    <AppInput v-model="form.title" class="w-full" />
                     <InputError :message="errors.title?.[0]" />
                 </div>
 
                 <div>
                     <InputLabel :value="$t('common.amount')" />
-                    <TextInput v-model="form.amount" type="number" step="0.01" class="w-full" />
+                    <AppInput v-model="form.amount" type="number" step="0.01" class="w-full" />
                     <InputError :message="errors.amount?.[0]" />
                 </div>
 
                 <div>
                     <InputLabel :value="$t('hr.payroll.payment_date')" />
-                    <TextInput v-model="form.payment_date" type="date" class="w-full" />
+                    <CustomDatePicker v-model="form.payment_date" class="w-full" />
                     <InputError :message="errors.payment_date?.[0]" />
                 </div>
 
@@ -252,15 +270,27 @@
                     <InputLabel :value="$t('common.notes')" />
                     <textarea
                         v-model="form.notes"
-                        class="w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-emerald-500 focus:ring-emerald-500 rounded-md shadow-sm"
+                        class="w-full border-border-subtle dark:bg-surface-secondary/50 dark:text-content-primary focus:border-action-primary focus:ring-action-primary rounded-xl shadow-2xs text-sm"
                         rows="3"
                     ></textarea>
                     <InputError :message="errors.notes?.[0]" />
                 </div>
 
-                <div class="flex justify-end gap-3 mt-6">
-                    <SecondaryButton @click="closeModal">{{ $t('common.cancel') }}</SecondaryButton>
-                    <PrimaryButton :disabled="processing">{{ $t('common.save') }}</PrimaryButton>
+                <div class="flex justify-end gap-3 pt-4 border-t border-border-subtle">
+                    <button
+                        type="button"
+                        @click="closeModal"
+                        class="px-4 py-2 bg-surface-secondary text-content-secondary hover:text-content-primary rounded-xl text-sm font-semibold transition-colors cursor-pointer"
+                    >
+                        {{ $t('common.cancel') }}
+                    </button>
+                    <button
+                        type="submit"
+                        :disabled="processing"
+                        class="px-5 py-2 bg-action-primary hover:bg-action-primary-hover text-white rounded-xl text-sm font-bold shadow-xs transition-colors cursor-pointer disabled:opacity-50"
+                    >
+                        {{ $t('common.save') }}
+                    </button>
                 </div>
             </form>
         </BaseModal>
@@ -268,34 +298,50 @@
 </template>
 
 <script setup>
-import { ref, reactive } from 'vue';
+import { ref, reactive, computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { Link } from '@inertiajs/vue3';
-import { useToast } from '@/Composables/useToast';
-import { useConfirm } from '@/Composables/useConfirm';
-import BaseModal from '@/Components/BaseModal.vue';
-import InputLabel from '@/Components/InputLabel.vue';
-import TextInput from '@/Components/TextInput.vue';
-import InputError from '@/Components/InputError.vue';
-import PrimaryButton from '@/Components/PrimaryButton.vue';
-import SecondaryButton from '@/Components/SecondaryButton.vue';
-import SearchableSelect from '@/Components/SearchableSelect.vue';
 import axios from 'axios';
 
-const props = defineProps({
-    payments: Object, // Paginator
-    employees: Array, // All employees from all centers
-    centers: Array, // Centers list for filter dropdown
-    loading: Boolean,
-    selectedCenter: [Number, null], // Currently selected center filter
-});
+import DataTable from '@/Components/Common/DataTable.vue';
+import AppEmptyState from '@/Components/Common/AppEmptyState.vue';
+import BaseModal from '@/Components/BaseModal.vue';
+import CustomDatePicker from '@/Components/CustomDatePicker.vue';
+import InputLabel from '@/Components/InputLabel.vue';
+import AppInput from '@/Components/App/AppInput.vue';
+import InputError from '@/Components/InputError.vue';
+import SearchableSelect from '@/Components/SearchableSelect.vue';
 
-const emit = defineEmits(['refresh', 'center-change']);
+import { useToast } from '@/Composables/useToast';
+import { useConfirm } from '@/Composables/useConfirm';
+
+const { t } = useI18n();
 const { success, error: showError } = useToast();
 const { confirm } = useConfirm();
+
+const props = defineProps({
+    payments: Object,
+    employees: Array,
+    centers: Array,
+    loading: Boolean,
+    selectedCenter: [Number, String, null],
+});
+
+const emit = defineEmits(['refresh', 'center-change', 'page-update']);
+
 const showModal = ref(false);
 const editMode = ref(false);
 const editingId = ref(null);
 const processing = ref(false);
+
+const columns = computed(() => [
+    { key: 'employee', label: t('common.employee') },
+    { key: 'title', label: t('hr.financial.other_payments.payment_title') },
+    { key: 'amount', label: t('common.amount'), align: 'center' },
+    { key: 'payment_date', label: t('hr.payroll.payment_date'), align: 'center' },
+    { key: 'status', label: t('common.status'), align: 'center' },
+    { key: 'actions', label: t('common.actions'), align: 'end' },
+]);
 
 const form = reactive({
     employee_id: '',
@@ -338,6 +384,18 @@ function closeModal() {
     resetForm();
 }
 
+async function handleNavigate(url) {
+    if (!url) return;
+    try {
+        const response = await axios.get(url, {
+            params: { center_id: props.selectedCenter },
+        });
+        emit('page-update', response.data);
+    } catch (e) {
+        console.error('[DEBUG] Failed to navigate page', e);
+    }
+}
+
 async function submit() {
     processing.value = true;
     Object.keys(errors).forEach((key) => delete errors[key]);
@@ -345,10 +403,10 @@ async function submit() {
     try {
         if (editMode.value) {
             await axios.put(route('app.hr.payroll.other-payments.update', editingId.value), form);
-            success('تم التحديث بنجاح');
+            success(t('common.updated_success'));
         } else {
-            const response = await axios.post(route('app.hr.payroll.other-payments.store'), form);
-            success('تم الإضافة بنجاح');
+            await axios.post(route('app.hr.payroll.other-payments.store'), form);
+            success(t('common.created_success'));
         }
         closeModal();
         emit('refresh', true);
@@ -357,8 +415,7 @@ async function submit() {
         if (e.response?.status === 422) {
             Object.assign(errors, e.response.data.errors);
         } else {
-            showError('حدث خطأ غير متوقع');
-            console.error(e);
+            showError(t('common.error'));
         }
     } finally {
         processing.value = false;
@@ -368,10 +425,10 @@ async function submit() {
 async function deletePayment(payment) {
     if (
         !(await confirm({
-            title: 'حذف الدفعة',
-            message: 'هل أنت متأكد من حذف هذه الدفعة؟ لا يمكن التراجع عن هذا الإجراء.',
-            confirmText: 'حذف',
-            cancelText: 'إلغاء',
+            title: t('hr.financial.other_payments.delete_confirm_title'),
+            message: t('hr.financial.other_payments.delete_confirm_message'),
+            confirmText: t('common.delete'),
+            cancelText: t('common.cancel'),
             type: 'danger',
         }))
     )
@@ -379,10 +436,10 @@ async function deletePayment(payment) {
 
     try {
         await axios.delete(route('app.hr.payroll.other-payments.destroy', payment.id));
-        success('تم الحذف بنجاح');
+        success(t('common.deleted_success'));
         emit('refresh', true);
     } catch (e) {
-        showError('حدث خطأ أثناء الحذف');
+        showError(t('common.error'));
         console.error(e);
     }
 }
@@ -390,10 +447,10 @@ async function deletePayment(payment) {
 async function approvePayment(payment) {
     if (
         !(await confirm({
-            title: 'اعتماد الدفعة',
-            message: 'هل أنت متأكد من اعتماد هذه الدفعة؟ سيتم إدراجها في المسيرات القادمة.',
-            confirmText: 'اعتماد',
-            cancelText: 'إلغاء',
+            title: t('hr.financial.other_payments.approve_confirm_title'),
+            message: t('hr.financial.other_payments.approve_confirm_message'),
+            confirmText: t('hr.payroll.approve'),
+            cancelText: t('common.cancel'),
             type: 'warning',
         }))
     )
@@ -401,10 +458,10 @@ async function approvePayment(payment) {
 
     try {
         await axios.put(route('app.hr.payroll.other-payments.approve', payment.id));
-        success('تم الاعتماد بنجاح');
+        success(t('hr.payroll.approved_successfully'));
         emit('refresh', true);
     } catch (e) {
-        showError('حدث خطأ أثناء الاعتماد');
+        showError(t('common.error'));
         console.error(e);
     }
 }
@@ -412,43 +469,24 @@ async function approvePayment(payment) {
 async function payPayment(payment) {
     try {
         await axios.put(route('app.hr.payroll.other-payments.pay', payment.id));
-        success('تم التسجيل كمدفوع');
+        success(t('hr.payroll.marked_paid'));
         emit('refresh', true);
     } catch (e) {
-        showError('حدث خطأ أثناء التسجيل');
+        showError(t('common.error'));
         console.error(e);
-    }
-}
-
-function isPositive(type) {
-    return ['bonus', 'compensation'].includes(type);
-}
-
-function getTypeClass(type) {
-    switch (type) {
-        case 'bonus':
-            return 'bg-green-100 text-green-800';
-        case 'compensation':
-            return 'bg-emerald-100 text-emerald-800';
-        case 'advance':
-            return 'bg-yellow-100 text-yellow-800';
-        case 'penalty':
-            return 'bg-red-100 text-red-800';
-        default:
-            return 'bg-gray-100 text-gray-800';
     }
 }
 
 function getStatusClass(status) {
     switch (status) {
         case 'pending':
-            return 'bg-yellow-100 text-yellow-800';
+            return 'bg-warning-soft text-warning border-warning/20';
         case 'approved':
-            return 'bg-blue-100 text-blue-800';
+            return 'bg-info-soft text-info border-info/20';
         case 'paid':
-            return 'bg-emerald-100 text-emerald-800';
+            return 'bg-success-soft text-success border-success/20';
         default:
-            return 'bg-gray-100 text-gray-800';
+            return 'bg-surface-secondary text-content-muted border-border-subtle';
     }
 }
 
@@ -459,7 +497,7 @@ function formatCurrency(amount) {
 }
 
 function formatDate(date) {
-    if (!date) return '-';
+    if (!date) return '—';
     return new Date(date).toLocaleDateString('ar-SA-u-nu-latn');
 }
 </script>

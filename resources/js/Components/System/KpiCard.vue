@@ -81,7 +81,7 @@ const trendColor = computed(() => {
     if (props.trend === null || props.trend === undefined || props.trend === 0) {
         return 'text-gray-400';
     }
-    const positive = props.trendUp;
+    const positive = trendUp.value;
     const isGood = props.trendInverse ? !positive : positive;
     return isGood ? 'text-emerald-600' : 'text-rose-600';
 });

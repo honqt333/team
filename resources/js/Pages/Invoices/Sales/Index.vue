@@ -5,27 +5,12 @@
             <PageHeader
                 :title="$t('invoices.sales.title')"
                 :subtitle="$t('invoices.sales.subtitle')"
-                :totalCount="
-                    activeTab === 'invoices'
-                        ? invoices?.total
-                            ? toEnglish(invoices.total)
-                            : '0'
-                        : returns?.total
-                          ? toEnglish(returns.total)
-                          : '0'
-                "
+                :totalCount="activeData?.total ? toEnglish(activeData.total) : '0'"
                 :countLabel="
                     activeTab === 'invoices'
                         ? $t('invoices.sales.tab_invoices')
                         : $t('invoices.sales.tab_returns')
                 "
-                gradientFrom="from-blue-600"
-                gradientTo="to-indigo-600"
-                glowFrom="from-blue-500"
-                badgeBg="bg-blue-50/50 dark:bg-blue-900/30"
-                badgeText="text-blue-600 dark:text-blue-400"
-                badgeBorder="border-blue-100/50 dark:border-blue-800/30"
-                badgeDot="bg-blue-500"
             >
                 <template #back>
                     <BackButton :href="route('app.invoices.hub')" />
@@ -33,7 +18,7 @@
 
                 <template #icon>
                     <svg
-                        class="w-9 h-9 text-white"
+                        class="w-8 h-8 text-white"
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
@@ -41,17 +26,17 @@
                         <path
                             stroke-linecap="round"
                             stroke-linejoin="round"
-                            stroke-width="2.5"
+                            stroke-width="2.2"
                             d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
                         />
                     </svg>
                 </template>
 
                 <template #actions>
-                    <div class="flex items-center gap-4">
-                        <!-- Actions Group -->
+                    <div class="flex items-center gap-2">
+                        <!-- View Mode Toggle -->
                         <div
-                            class="flex items-center gap-1.5 p-1.5 bg-gray-50/50 dark:bg-gray-900/50 backdrop-blur-md rounded-2xl border border-gray-200/50 dark:border-gray-700/50 shadow-inner"
+                            class="flex items-center gap-1.5 p-1 bg-surface-muted rounded-xl border border-border"
                         >
                             <AppViewModeToggle
                                 v-model="viewMode"
@@ -64,12 +49,12 @@
                 <template #filters>
                     <div class="flex flex-wrap items-end gap-3">
                         <!-- Search -->
-                        <div class="relative group lg:w-48">
+                        <div class="relative group min-w-[200px] flex-1 sm:flex-initial">
                             <div
-                                class="absolute inset-y-0 start-0 ps-4 flex items-center pointer-events-none text-gray-400 group-focus-within:text-blue-500 transition-colors"
+                                class="absolute inset-y-0 start-0 ps-3.5 flex items-center pointer-events-none text-text-muted group-focus-within:text-action-primary transition-colors"
                             >
                                 <svg
-                                    class="w-5 h-5"
+                                    class="w-4 h-4"
                                     fill="none"
                                     stroke="currentColor"
                                     viewBox="0 0 24 24"
@@ -84,126 +69,105 @@
                             </div>
                             <input
                                 type="text"
-                                v-model="localFilters.search"
+                                v-model="tableFilters.search"
                                 :placeholder="$t('common.search')"
-                                class="block w-full ps-11 pe-4 py-3 text-sm text-gray-900 dark:text-white bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all outline-none shadow-sm"
+                                class="block w-full ps-10 pe-4 py-2.5 text-sm text-text-primary bg-surface border border-border rounded-xl focus:ring-2 focus:ring-focus-ring focus:border-action-primary transition-all outline-none"
                             />
                         </div>
 
                         <!-- Date From -->
-                        <div class="lg:w-36">
-                            <label
-                                class="block text-[10px] font-bold text-gray-500 dark:text-gray-400 mb-1 px-1 uppercase tracking-wider"
-                            >
+                        <div class="w-full sm:w-36">
+                            <label class="block text-[11px] font-bold text-text-secondary mb-1">
                                 {{ $t('common.date_from') }}
                             </label>
                             <CustomDatePicker
-                                v-model="localFilters.date_from"
-                                class="!rounded-2xl"
+                                v-model="tableFilters.date_from"
+                                @update:modelValue="() => applyFilters()"
                             />
                         </div>
 
                         <!-- Date To -->
-                        <div class="lg:w-36">
-                            <label
-                                class="block text-[10px] font-bold text-gray-500 dark:text-gray-400 mb-1 px-1 uppercase tracking-wider"
-                            >
+                        <div class="w-full sm:w-36">
+                            <label class="block text-[11px] font-bold text-text-secondary mb-1">
                                 {{ $t('common.date_to') }}
                             </label>
-                            <CustomDatePicker v-model="localFilters.date_to" class="!rounded-2xl" />
+                            <CustomDatePicker
+                                v-model="tableFilters.date_to"
+                                @update:modelValue="() => applyFilters()"
+                            />
                         </div>
 
                         <!-- Status Filter -->
-                        <div class="lg:w-40">
-                            <label
-                                class="block text-[10px] font-bold text-gray-500 dark:text-gray-400 mb-1 px-1 uppercase tracking-wider"
-                            >
+                        <div class="w-full sm:w-44">
+                            <label class="block text-[11px] font-bold text-text-secondary mb-1">
                                 {{ $t('common.status') }}
                             </label>
                             <SearchableSelect
-                                v-model="localFilters.payment_status"
+                                v-model="tableFilters.payment_status"
                                 :options="statusOptions"
                                 option-label="label"
                                 option-value="value"
                                 :placeholder="$t('invoices.all_statuses')"
-                                class="!rounded-2xl"
+                                @update:modelValue="() => applyFilters()"
                                 compact
                             />
                         </div>
+
+                        <!-- Reset Filters Button -->
+                        <button
+                            v-if="hasActiveFilters"
+                            type="button"
+                            @click="resetAllFilters"
+                            class="px-3 py-2.5 text-xs font-semibold text-text-secondary hover:text-danger hover:bg-danger-soft rounded-xl border border-border transition-colors flex items-center gap-1.5 cursor-pointer"
+                        >
+                            <svg
+                                class="w-3.5 h-3.5"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M6 18L18 6M6 6l12 12"
+                                />
+                            </svg>
+                            <span>{{ $t('common.reset_filters') }}</span>
+                        </button>
                     </div>
                 </template>
             </PageHeader>
 
-            <!-- Premium Tabs Section -->
-            <div class="flex flex-wrap gap-3">
-                <button
-                    v-for="tab in tabs"
-                    :key="tab.key"
-                    @click="switchTab(tab.key)"
-                    :class="[
-                        'relative flex items-center gap-3 px-5 py-3 rounded-2xl transition-all duration-300 group',
-                        activeTab === tab.key
-                            ? tab.key === 'returns'
-                                ? 'bg-gradient-to-br from-rose-500 to-amber-600 text-white shadow-lg shadow-rose-500/25 scale-[1.02]'
-                                : 'bg-gradient-to-br from-blue-500 to-indigo-600 text-white shadow-lg shadow-blue-500/25 scale-[1.02]'
-                            : 'bg-white dark:bg-gray-800 hover:bg-blue-50 dark:hover:bg-blue-900/10 border border-gray-100 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:shadow-md',
-                    ]"
-                >
-                    <!-- Tab Icon Container -->
-                    <div
-                        :class="[
-                            'w-8 h-8 rounded-xl flex items-center justify-center transition-colors duration-300',
-                            activeTab === tab.key
-                                ? 'bg-white/20'
-                                : 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 group-hover:bg-blue-600 group-hover:text-white',
-                        ]"
-                    >
-                        <svg
-                            class="w-4 h-4 flex-shrink-0"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                            v-safe-html="tab.iconPath"
-                        />
-                    </div>
-
-                    <span class="font-black tracking-tight text-sm uppercase">
-                        {{ tab.label }}
-                    </span>
-
-                    <!-- Tab Count Badge -->
-                    <span
-                        v-if="tab.count > 0"
-                        :class="[
-                            'px-2 py-0.5 rounded-lg text-[10px] font-black min-w-[24px] text-center',
-                            activeTab === tab.key
-                                ? 'bg-white/20 text-white'
-                                : 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400',
-                        ]"
-                    >
-                        {{ toEnglish(tab.count) }}
-                    </span>
-                </button>
+            <!-- Unified Tabs Section -->
+            <div class="flex items-center justify-between">
+                <AppTabs v-model="activeTab" :tabs="tabs" variant="pills" @change="onTabChange" />
             </div>
 
             <!-- Tab Content -->
-            <div class="p-0">
-                <!-- INVOICES TAB -->
-                <div v-show="activeTab === 'invoices'">
+            <div class="space-y-6">
+                <!-- GRID VIEW (Cards) -->
+                <div v-if="viewMode === 'grid'">
                     <!-- Empty State -->
                     <AppEmptyState
-                        v-if="!invoices.data?.length"
-                        :title="$t('invoices.sales.title')"
-                        :description="
-                            $t('invoices.sales.empty_hint') ||
-                            'لا توجد فواتير مبيعات مطابقة لمعايير البحث الحالية.'
+                        v-if="!activeRows.length"
+                        :title="
+                            activeTab === 'returns'
+                                ? $t('invoices.sales.no_returns')
+                                : $t('invoices.sales.title')
                         "
-                        :action-text="$t('nav.work_orders')"
-                        :action-href="route('work-orders.index')"
+                        :description="
+                            activeTab === 'returns'
+                                ? $t('common.no_records_found', 'لم يتم العثور على أي سجلات مطابقة')
+                                : $t('invoices.sales.empty_hint') ||
+                                  $t('common.no_records_found', 'لم يتم العثور على أي سجلات مطابقة')
+                        "
+                        :action-text="activeTab === 'returns' ? '' : $t('nav.work_orders')"
+                        :action-href="activeTab === 'returns' ? '' : route('work-orders.index')"
                     >
                         <template #icon>
                             <svg
-                                class="w-8 h-8 text-blue-500"
+                                class="w-8 h-8 text-action-primary"
                                 fill="none"
                                 stroke="currentColor"
                                 viewBox="0 0 24 24"
@@ -218,210 +182,32 @@
                         </template>
                     </AppEmptyState>
 
-                    <!-- Grid View -->
-                    <div
-                        v-else-if="viewMode === 'grid'"
-                        class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 p-4"
-                    >
-                        <Link
-                            v-for="invoice in invoices.data"
-                            :key="invoice.id"
-                            :href="route('app.invoices.show', invoice.id)"
-                            class="group relative flex flex-col bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700/50 hover:border-blue-400 dark:hover:border-blue-500 hover:shadow-[0_20px_40px_-10px_rgba(59,130,246,0.2)] transition-all duration-300 cursor-pointer overflow-hidden"
-                        >
-                            <!-- Top gradient stripe -->
-                            <div class="h-1 w-full" :class="stripeClass(invoice.payment_status)" />
-
-                            <div class="p-5">
-                                <!-- Number + Status -->
-                                <div class="flex items-start justify-between mb-4">
-                                    <div>
-                                        <span
-                                            class="text-xs font-black text-blue-600 dark:text-blue-400 tracking-wide"
-                                        >
-                                            #{{ invoice.invoice_number }}
-                                        </span>
-                                        <p
-                                            class="mt-1 text-sm font-bold text-gray-900 dark:text-white truncate max-w-[140px]"
-                                        >
-                                            {{ invoice.customer?.name || '—' }}
-                                        </p>
-                                    </div>
-                                    <span
-                                        :class="statusClass(invoice.payment_status)"
-                                        class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-bold"
-                                    >
-                                        {{ $t(`invoices.status.${invoice.payment_status}`) }}
-                                    </span>
-                                </div>
-
-                                <!-- Financials -->
-                                <div
-                                    class="space-y-2 pt-3 border-t border-gray-100 dark:border-gray-700"
-                                >
-                                    <div class="flex justify-between items-center text-xs">
-                                        <span class="text-gray-500 dark:text-gray-400">
-                                            {{ $t('invoices.total') }}
-                                        </span>
-                                        <span
-                                            class="font-bold text-gray-900 dark:text-white"
-                                            dir="ltr"
-                                        >
-                                            {{ formatCurrency(invoice.total_incl_tax) }}
-                                        </span>
-                                    </div>
-                                    <div class="flex justify-between items-center text-xs">
-                                        <span class="text-gray-500 dark:text-gray-400">
-                                            {{ $t('invoices.balance') }}
-                                        </span>
-                                        <span
-                                            :class="
-                                                invoice.balance > 0
-                                                    ? 'text-red-500 dark:text-red-400'
-                                                    : 'text-emerald-600 dark:text-emerald-400'
-                                            "
-                                            class="font-bold"
-                                            dir="ltr"
-                                        >
-                                            {{ formatCurrency(invoice.balance) }}
-                                        </span>
-                                    </div>
-                                    <div
-                                        v-if="(invoice.bad_debt || 0) > 0"
-                                        class="flex justify-between items-center text-xs"
-                                    >
-                                        <span
-                                            class="text-amber-600 dark:text-amber-400 font-medium"
-                                        >
-                                            {{ $t('payments.types.bad_debt') }}
-                                        </span>
-                                        <span
-                                            class="font-bold text-amber-600 dark:text-amber-400"
-                                            dir="ltr"
-                                        >
-                                            {{ formatCurrency(invoice.bad_debt) }}
-                                        </span>
-                                    </div>
-                                    <div class="flex justify-between items-center text-xs">
-                                        <span class="text-gray-500 dark:text-gray-400">
-                                            {{ $t('invoices.issue_date') }}
-                                        </span>
-                                        <span class="text-gray-600 dark:text-gray-300">
-                                            {{ formatDate(invoice.issue_date) }}
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-                        </Link>
-                    </div>
-
-                    <!-- List View -->
+                    <!-- Cards Grid -->
                     <div
                         v-else
-                        class="w-full bg-white dark:bg-gray-800 rounded-b-2xl overflow-hidden"
+                        class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"
                     >
-                        <div class="w-full overflow-x-auto">
-                            <table
-                                class="w-full min-w-[800px] divide-y divide-gray-100 dark:divide-gray-700/50"
-                            >
-                                <thead>
-                                    <tr class="bg-gray-50/50 dark:bg-gray-900/80">
-                                        <th
-                                            class="px-4 py-4 text-center text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em] align-middle"
-                                        >
-                                            #
-                                        </th>
-                                        <th
-                                            class="px-4 py-4 text-center text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em] align-middle"
-                                        >
-                                            {{ $t('invoices.invoice_number') }}
-                                        </th>
-                                        <th
-                                            class="px-4 py-4 text-center text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em] align-middle"
-                                        >
-                                            {{ $t('invoices.issue_date') }}
-                                        </th>
-                                        <th
-                                            class="px-4 py-4 text-center text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em] align-middle"
-                                        >
-                                            {{ $t('common.customer') }}
-                                        </th>
-                                        <th
-                                            class="px-4 py-4 text-center text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em] align-middle"
-                                        >
-                                            {{ $t('invoices.gross_total') }}
-                                        </th>
-                                        <th
-                                            class="px-4 py-4 text-center text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em] align-middle"
-                                        >
-                                            {{ $t('invoices.discount') }}
-                                        </th>
-                                        <th
-                                            class="px-4 py-4 text-center text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em] align-middle"
-                                        >
-                                            {{ $t('invoices.subtotal') }}
-                                        </th>
-                                        <th
-                                            class="px-4 py-4 text-center text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em] align-middle"
-                                        >
-                                            {{ $t('common.vat') }}
-                                        </th>
-                                        <th
-                                            class="px-4 py-4 text-center text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em] align-middle"
-                                        >
-                                            {{ $t('invoices.grand_total') }}
-                                        </th>
-                                        <th
-                                            class="px-4 py-4 text-center text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em] align-middle"
-                                        >
-                                            {{ $t('invoices.balance') }}
-                                        </th>
-                                        <th
-                                            class="px-4 py-4 text-center text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em] align-middle"
-                                        >
-                                            {{ $t('common.status') }}
-                                        </th>
-                                        <th
-                                            class="px-4 py-4 text-end text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em] align-middle text-center"
-                                        >
-                                            {{ $t('common.actions') }}
-                                        </th>
-                                    </tr>
-                                </thead>
-                                <tbody class="divide-y divide-gray-50 dark:divide-gray-700/30">
-                                    <tr
-                                        v-for="(invoice, index) in invoices.data"
-                                        :key="invoice.id"
-                                        class="group hover:bg-blue-50/30 dark:hover:bg-blue-900/10 transition-all duration-200"
-                                    >
-                                        <!-- # -->
-                                        <td
-                                            class="px-4 py-4 text-center text-xs text-gray-400 font-mono align-middle"
-                                        >
-                                            {{ toEnglish(index + 1) }}
-                                        </td>
+                        <Link
+                            v-for="invoice in activeRows"
+                            :key="invoice.id"
+                            :href="route('app.invoices.show', invoice.id)"
+                            class="group relative flex flex-col bg-surface rounded-2xl border border-border hover:border-action-primary hover:shadow-md transition-all duration-200 cursor-pointer overflow-hidden"
+                        >
+                            <!-- Top status stripe -->
+                            <div class="h-1 w-full" :class="stripeClass(invoice.payment_status)" />
 
-                                        <!-- رقم الفاتورة -->
-                                        <td class="px-4 py-4 text-center align-middle">
-                                            <Link
-                                                :href="route('app.invoices.show', invoice.id)"
-                                                class="font-bold text-blue-600 dark:text-blue-400 hover:underline"
+                            <div class="p-5 flex-1 flex flex-col justify-between">
+                                <div>
+                                    <!-- Number + Status -->
+                                    <div class="flex items-start justify-between gap-2 mb-3">
+                                        <div>
+                                            <span
+                                                class="text-xs font-bold text-action-primary font-mono tracking-wide"
                                             >
-                                                {{ invoice.invoice_number }}
-                                            </Link>
-                                        </td>
-
-                                        <!-- تاريخ الفاتورة -->
-                                        <td
-                                            class="px-4 py-4 text-center text-sm text-gray-600 dark:text-gray-300 font-mono align-middle"
-                                        >
-                                            {{ formatDate(invoice.issue_date) }}
-                                        </td>
-
-                                        <!-- العميل -->
-                                        <td class="px-4 py-4 text-center align-middle">
+                                                #{{ invoice.invoice_number }}
+                                            </span>
                                             <p
-                                                class="font-medium text-gray-900 dark:text-white truncate max-w-[180px] mx-auto"
+                                                class="mt-1 text-sm font-bold text-text-primary truncate max-w-[150px]"
                                             >
                                                 {{
                                                     invoice.customer_name_snapshot ||
@@ -429,294 +215,70 @@
                                                     '—'
                                                 }}
                                             </p>
-                                        </td>
-
-                                        <!-- المجموع -->
-                                        <td
-                                            class="px-4 py-4 text-center text-sm font-bold text-gray-900 dark:text-white font-mono align-middle"
-                                            dir="ltr"
+                                        </div>
+                                        <span
+                                            :class="statusClass(invoice.payment_status)"
+                                            class="inline-flex items-center px-2 py-0.5 rounded-lg text-[11px] font-semibold shrink-0"
                                         >
-                                            {{ formatCurrency(getGrossTotal(invoice)) }}
-                                        </td>
+                                            {{ $t(`invoices.status.${invoice.payment_status}`) }}
+                                        </span>
+                                    </div>
 
-                                        <!-- الخصم -->
-                                        <td
-                                            class="px-4 py-4 text-center text-sm font-medium text-rose-600 dark:text-rose-400 font-mono align-middle"
-                                            dir="ltr"
-                                        >
-                                            {{ formatCurrency(getDiscount(invoice)) }}
-                                        </td>
+                                    <!-- Original invoice reference if return -->
+                                    <div
+                                        v-if="invoice.original_invoice"
+                                        class="text-xs text-text-muted mb-2 font-mono flex items-center gap-1"
+                                    >
+                                        <span>{{ $t('invoices.original_invoice') }}:</span>
+                                        <span class="text-action-primary font-semibold">
+                                            #{{ invoice.original_invoice.invoice_number }}
+                                        </span>
+                                    </div>
 
-                                        <!-- المجموع الفرعي -->
-                                        <td
-                                            class="px-4 py-4 text-center text-sm font-bold text-gray-900 dark:text-white font-mono align-middle"
-                                            dir="ltr"
-                                        >
-                                            {{ formatCurrency(invoice.total_excl_tax) }}
-                                        </td>
-
-                                        <!-- VAT -->
-                                        <td
-                                            class="px-4 py-4 text-center text-sm font-medium text-gray-500 dark:text-gray-400 font-mono align-middle"
-                                            dir="ltr"
-                                        >
-                                            {{ formatCurrency(invoice.total_tax) }}
-                                        </td>
-
-                                        <!-- مبلغ الفاتورة -->
-                                        <td
-                                            class="px-4 py-4 text-center text-sm font-black text-gray-900 dark:text-white font-mono align-middle"
-                                            dir="ltr"
-                                        >
-                                            {{ formatCurrency(invoice.total_incl_tax) }}
-                                        </td>
-
-                                        <!-- الباقي -->
-                                        <td
-                                            class="px-4 py-4 text-center text-sm font-bold font-mono align-middle"
-                                            dir="ltr"
-                                            :class="
-                                                invoice.balance > 0
-                                                    ? 'text-red-600 dark:text-red-400'
-                                                    : 'text-emerald-600 dark:text-emerald-400'
-                                            "
-                                        >
-                                            <div>{{ formatCurrency(invoice.balance) }}</div>
-                                            <div
-                                                v-if="(invoice.bad_debt || 0) > 0"
-                                                class="text-[10px] text-amber-600 dark:text-amber-400 font-sans font-semibold mt-0.5"
-                                            >
-                                                {{ $t('payments.types.bad_debt') }}:
-                                                {{ formatCurrency(invoice.bad_debt) }}
-                                            </div>
-                                        </td>
-
-                                        <!-- الحالة -->
-                                        <td class="px-4 py-4 text-center align-middle">
-                                            <span
-                                                :class="statusClass(invoice.payment_status)"
-                                                class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-bold"
-                                            >
-                                                {{
-                                                    $t(`invoices.status.${invoice.payment_status}`)
-                                                }}
+                                    <!-- Amounts Summary -->
+                                    <div class="space-y-1.5 py-3 border-y border-border/60 text-xs">
+                                        <div class="flex justify-between items-center">
+                                            <span class="text-text-secondary">
+                                                {{ $t('invoices.subtotal') }}
                                             </span>
-                                        </td>
-
-                                        <!-- الإجراءات -->
-                                        <td class="px-4 py-4 text-end align-middle">
-                                            <div class="flex items-center justify-end gap-1">
-                                                <Tooltip :content="$t('common.view')">
-                                                    <Link
-                                                        :href="
-                                                            route('app.invoices.show', invoice.id)
-                                                        "
-                                                        class="p-2 rounded-lg text-gray-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-all"
-                                                    >
-                                                        <svg
-                                                            class="w-4 h-4"
-                                                            fill="none"
-                                                            stroke="currentColor"
-                                                            viewBox="0 0 24 24"
-                                                        >
-                                                            <path
-                                                                stroke-linecap="round"
-                                                                stroke-linejoin="round"
-                                                                stroke-width="2"
-                                                                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                                                            />
-                                                            <path
-                                                                stroke-linecap="round"
-                                                                stroke-linejoin="round"
-                                                                stroke-width="2"
-                                                                d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
-                                                            />
-                                                        </svg>
-                                                    </Link>
-                                                </Tooltip>
-                                                <Tooltip :content="$t('common.print')">
-                                                    <Link
-                                                        :href="
-                                                            route('app.invoices.print', invoice.id)
-                                                        "
-                                                        target="_blank"
-                                                        class="p-2 rounded-lg text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 transition-all"
-                                                    >
-                                                        <svg
-                                                            class="w-4 h-4"
-                                                            fill="none"
-                                                            stroke="currentColor"
-                                                            viewBox="0 0 24 24"
-                                                        >
-                                                            <path
-                                                                stroke-linecap="round"
-                                                                stroke-linejoin="round"
-                                                                stroke-width="2"
-                                                                d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"
-                                                            />
-                                                        </svg>
-                                                    </Link>
-                                                </Tooltip>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-
-                    <!-- Pagination -->
-                    <div
-                        v-if="invoices.links?.length > 3"
-                        class="px-4 py-3 border-t border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/30 flex items-center justify-between flex-wrap gap-3"
-                    >
-                        <span class="text-sm text-gray-500 dark:text-gray-400">
-                            {{ $t('common.showing') }} {{ toEnglish(invoices.from) }} -
-                            {{ toEnglish(invoices.to) }} {{ $t('common.of') }}
-                            {{ toEnglish(invoices.total) }}
-                        </span>
-                        <div class="flex gap-1">
-                            <Link
-                                v-for="link in invoices.links"
-                                :key="link.label"
-                                :href="link.url || '#'"
-                                :class="[
-                                    'px-3 py-1.5 rounded-lg text-sm font-medium transition-all',
-                                    link.active
-                                        ? 'bg-blue-600 text-white shadow-sm'
-                                        : link.url
-                                          ? 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600'
-                                          : 'bg-gray-50 dark:bg-gray-800 text-gray-300 dark:text-gray-600 cursor-not-allowed border border-gray-100 dark:border-gray-700',
-                                ]"
-                                v-safe-html="link.label"
-                            />
-                        </div>
-                    </div>
-                </div>
-
-                <!-- RETURNS TAB -->
-                <div v-show="activeTab === 'returns'">
-                    <!-- Empty State -->
-                    <AppEmptyState
-                        v-if="!returns?.data?.length"
-                        :title="$t('invoices.sales.no_returns')"
-                        :description="'لا توجد إشعارات دائنة أو مرتجعات مسجلة في هذا القسم حالياً.'"
-                    >
-                        <template #icon>
-                            <svg
-                                class="w-8 h-8 text-rose-500"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                            >
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    stroke-width="1.75"
-                                    d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"
-                                />
-                            </svg>
-                        </template>
-                    </AppEmptyState>
-
-                    <!-- Returns Grid View -->
-                    <div
-                        v-else-if="viewMode === 'grid'"
-                        class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 p-4"
-                    >
-                        <Link
-                            v-for="ret in returns.data"
-                            :key="ret.id"
-                            :href="route('app.invoices.show', ret.id)"
-                            class="group relative flex flex-col bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700/50 hover:border-rose-400 dark:hover:border-rose-500 hover:shadow-[0_20px_40px_-10px_rgba(244,63,94,0.2)] transition-all duration-300 cursor-pointer overflow-hidden"
-                        >
-                            <!-- Top gradient stripe -->
-                            <div class="h-1 w-full bg-gradient-to-r from-rose-500 to-amber-500" />
-
-                            <div class="p-5">
-                                <!-- Number + Status -->
-                                <div class="flex items-start justify-between mb-4">
-                                    <div>
-                                        <div class="flex items-center gap-1.5">
-                                            <span
-                                                class="text-xs font-black text-rose-600 dark:text-rose-400 tracking-wide font-mono"
-                                            >
-                                                #{{ ret.invoice_number }}
+                                            <span class="font-mono text-text-primary" dir="ltr">
+                                                {{ formatCurrency(invoice.total_excl_tax) }}
                                             </span>
                                         </div>
-                                        <p
-                                            class="mt-1 text-sm font-bold text-gray-900 dark:text-white truncate max-w-[140px]"
-                                        >
-                                            {{
-                                                ret.customer_name_snapshot ||
-                                                ret.customer?.name ||
-                                                '—'
-                                            }}
-                                        </p>
-                                    </div>
-                                    <span
-                                        :class="statusClass(ret.payment_status)"
-                                        class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-bold"
-                                    >
-                                        {{ $t(`invoices.status.${ret.payment_status}`) }}
-                                    </span>
-                                </div>
-
-                                <!-- Original Invoice Link -->
-                                <div
-                                    v-if="ret.original_invoice"
-                                    class="mb-3 p-2 rounded-xl bg-gray-50 dark:bg-gray-900/60 border border-gray-100 dark:border-gray-700/40 text-[11px] flex items-center justify-between"
-                                >
-                                    <span class="text-gray-400 text-[10px]">
-                                        {{ $t('invoices.original_invoice') }}:
-                                    </span>
-                                    <span
-                                        class="font-mono font-bold text-indigo-600 dark:text-indigo-400"
-                                    >
-                                        #{{ ret.original_invoice.invoice_number }}
-                                    </span>
-                                </div>
-
-                                <!-- Financials -->
-                                <div
-                                    class="space-y-2 pt-3 border-t border-gray-100 dark:border-gray-700"
-                                >
-                                    <div class="flex justify-between items-center text-xs">
-                                        <span class="text-gray-500 dark:text-gray-400">
-                                            {{ $t('invoices.total') }}
-                                        </span>
-                                        <span
-                                            class="font-bold text-rose-600 dark:text-rose-400 font-mono"
-                                            dir="ltr"
-                                        >
-                                            {{ formatCurrency(ret.total_incl_tax) }}
-                                        </span>
-                                    </div>
-                                    <div class="flex justify-between items-center text-xs">
-                                        <span class="text-gray-500 dark:text-gray-400">
-                                            {{ $t('invoices.balance') }}
-                                        </span>
-                                        <span
-                                            class="font-mono font-bold"
-                                            :class="
-                                                ret.balance > 0
-                                                    ? 'text-amber-600 dark:text-amber-400'
-                                                    : 'text-emerald-600 dark:text-emerald-400'
-                                            "
-                                            dir="ltr"
-                                        >
-                                            {{ formatCurrency(ret.balance) }}
-                                        </span>
+                                        <div class="flex justify-between items-center font-bold">
+                                            <span class="text-text-primary">
+                                                {{ $t('invoices.grand_total') }}
+                                            </span>
+                                            <span class="font-mono text-text-primary" dir="ltr">
+                                                {{ formatCurrency(invoice.total_incl_tax) }}
+                                            </span>
+                                        </div>
+                                        <div class="flex justify-between items-center">
+                                            <span class="text-text-secondary">
+                                                {{ $t('invoices.balance') }}
+                                            </span>
+                                            <span
+                                                class="font-mono font-bold"
+                                                :class="
+                                                    Number(invoice.balance) > 0
+                                                        ? 'text-danger'
+                                                        : 'text-success'
+                                                "
+                                                dir="ltr"
+                                            >
+                                                {{ formatCurrency(invoice.balance) }}
+                                            </span>
+                                        </div>
                                     </div>
                                 </div>
 
-                                <!-- Date -->
+                                <!-- Date & Link footer -->
                                 <div
-                                    class="mt-4 pt-3 border-t border-gray-100 dark:border-gray-700/50 flex items-center justify-between text-[11px] text-gray-400"
+                                    class="mt-4 pt-2 flex items-center justify-between text-xs text-text-muted"
                                 >
-                                    <span>{{ formatDate(ret.issue_date) }}</span>
+                                    <span>{{ formatDate(invoice.issue_date) }}</span>
                                     <span
-                                        class="text-blue-600 dark:text-blue-400 font-bold group-hover:translate-x-[-2px] transition-transform"
+                                        class="text-action-primary font-bold group-hover:translate-x-[-2px] transition-transform"
                                     >
                                         {{ $t('common.view') }} ←
                                     </span>
@@ -725,245 +287,214 @@
                         </Link>
                     </div>
 
-                    <!-- Returns Table View -->
-                    <div
-                        v-else
-                        class="w-full bg-white dark:bg-gray-800 rounded-b-2xl overflow-hidden shadow-sm"
-                    >
-                        <div class="w-full overflow-x-auto">
-                            <table
-                                class="w-full min-w-[800px] divide-y divide-gray-100 dark:divide-gray-700/50"
-                            >
-                                <thead>
-                                    <tr class="bg-gray-50/50 dark:bg-gray-900/80">
-                                        <th
-                                            class="px-4 py-4 text-center text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em] align-middle"
-                                        >
-                                            #
-                                        </th>
-                                        <th
-                                            class="px-4 py-4 text-center text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em] align-middle"
-                                        >
-                                            {{ $t('invoices.return_code') }}
-                                        </th>
-                                        <th
-                                            class="px-4 py-4 text-center text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em] align-middle"
-                                        >
-                                            {{ $t('invoices.original_invoice') }}
-                                        </th>
-                                        <th
-                                            class="px-4 py-4 text-center text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em] align-middle"
-                                        >
-                                            {{ $t('invoices.issue_date') }}
-                                        </th>
-                                        <th
-                                            class="px-4 py-4 text-center text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em] align-middle"
-                                        >
-                                            {{ $t('customers.customer') }}
-                                        </th>
-                                        <th
-                                            class="px-4 py-4 text-center text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em] align-middle"
-                                        >
-                                            {{ $t('invoices.subtotal') }}
-                                        </th>
-                                        <th
-                                            class="px-4 py-4 text-center text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em] align-middle"
-                                        >
-                                            {{ $t('invoices.tax') }}
-                                        </th>
-                                        <th
-                                            class="px-4 py-4 text-center text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em] align-middle"
-                                        >
-                                            {{ $t('invoices.credit_note.total_credit_note') }}
-                                        </th>
-                                        <th
-                                            class="px-4 py-4 text-center text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em] align-middle"
-                                        >
-                                            {{ $t('invoices.balance') }}
-                                        </th>
-                                        <th
-                                            class="px-4 py-4 text-center text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em] align-middle"
-                                        >
-                                            {{ $t('common.status') }}
-                                        </th>
-                                        <th
-                                            class="px-4 py-4 text-end text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em] align-middle text-center"
-                                        >
-                                            {{ $t('common.actions') }}
-                                        </th>
-                                    </tr>
-                                </thead>
-                                <tbody class="divide-y divide-gray-50 dark:divide-gray-700/30">
-                                    <tr
-                                        v-for="(ret, index) in returns.data"
-                                        :key="ret.id"
-                                        class="group hover:bg-rose-50/20 dark:hover:bg-rose-950/10 transition-all duration-200"
-                                    >
-                                        <td
-                                            class="px-4 py-4 text-center text-xs text-gray-400 font-mono align-middle"
-                                        >
-                                            {{ toEnglish(index + 1) }}
-                                        </td>
-                                        <td class="px-4 py-4 text-center align-middle">
-                                            <Link
-                                                :href="route('app.invoices.show', ret.id)"
-                                                class="font-bold text-rose-600 dark:text-rose-400 hover:underline font-mono"
-                                            >
-                                                #{{ ret.invoice_number }}
-                                            </Link>
-                                        </td>
-                                        <td class="px-4 py-4 text-center align-middle">
-                                            <Link
-                                                v-if="ret.original_invoice"
-                                                :href="
-                                                    route(
-                                                        'app.invoices.show',
-                                                        ret.original_invoice.id
-                                                    )
-                                                "
-                                                class="font-bold text-indigo-600 dark:text-indigo-400 hover:underline font-mono text-xs"
-                                            >
-                                                #{{ ret.original_invoice.invoice_number }}
-                                            </Link>
-                                            <span v-else class="text-gray-400">—</span>
-                                        </td>
-                                        <td
-                                            class="px-4 py-4 text-center text-sm text-gray-600 dark:text-gray-300 font-mono align-middle"
-                                        >
-                                            {{ formatDate(ret.issue_date) }}
-                                        </td>
-                                        <td class="px-4 py-4 text-center align-middle">
-                                            <p
-                                                class="font-medium text-gray-900 dark:text-white truncate max-w-[180px] mx-auto"
-                                            >
-                                                {{
-                                                    ret.customer_name_snapshot ||
-                                                    ret.customer?.name ||
-                                                    '—'
-                                                }}
-                                            </p>
-                                        </td>
-                                        <td
-                                            class="px-4 py-4 text-center text-sm font-bold text-gray-900 dark:text-white font-mono align-middle"
-                                            dir="ltr"
-                                        >
-                                            {{ formatCurrency(ret.total_excl_tax) }}
-                                        </td>
-                                        <td
-                                            class="px-4 py-4 text-center text-sm font-medium text-gray-500 dark:text-gray-400 font-mono align-middle"
-                                            dir="ltr"
-                                        >
-                                            {{ formatCurrency(ret.total_tax) }}
-                                        </td>
-                                        <td
-                                            class="px-4 py-4 text-center text-sm font-black text-rose-600 dark:text-rose-400 font-mono align-middle"
-                                            dir="ltr"
-                                        >
-                                            {{ formatCurrency(ret.total_incl_tax) }}
-                                        </td>
-                                        <td
-                                            class="px-4 py-4 text-center text-sm font-bold font-mono align-middle"
-                                            dir="ltr"
-                                            :class="
-                                                ret.balance > 0
-                                                    ? 'text-amber-600 dark:text-amber-400'
-                                                    : 'text-emerald-600 dark:text-emerald-400'
-                                            "
-                                        >
-                                            {{ formatCurrency(ret.balance) }}
-                                        </td>
-                                        <td class="px-4 py-4 text-center align-middle">
-                                            <span
-                                                :class="statusClass(ret.payment_status)"
-                                                class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-bold"
-                                            >
-                                                {{ $t(`invoices.status.${ret.payment_status}`) }}
-                                            </span>
-                                        </td>
-                                        <td class="px-4 py-4 text-end align-middle">
-                                            <div class="flex items-center justify-end gap-1">
-                                                <Tooltip :content="$t('common.view')">
-                                                    <Link
-                                                        :href="route('app.invoices.show', ret.id)"
-                                                        class="p-2 rounded-lg text-gray-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-all"
-                                                    >
-                                                        <svg
-                                                            class="w-4 h-4"
-                                                            fill="none"
-                                                            stroke="currentColor"
-                                                            viewBox="0 0 24 24"
-                                                        >
-                                                            <path
-                                                                stroke-linecap="round"
-                                                                stroke-linejoin="round"
-                                                                stroke-width="2"
-                                                                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                                                            />
-                                                            <path
-                                                                stroke-linecap="round"
-                                                                stroke-linejoin="round"
-                                                                stroke-width="2"
-                                                                d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
-                                                            />
-                                                        </svg>
-                                                    </Link>
-                                                </Tooltip>
-                                                <Tooltip :content="$t('common.print')">
-                                                    <Link
-                                                        :href="route('app.invoices.print', ret.id)"
-                                                        target="_blank"
-                                                        class="p-2 rounded-lg text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 transition-all"
-                                                    >
-                                                        <svg
-                                                            class="w-4 h-4"
-                                                            fill="none"
-                                                            stroke="currentColor"
-                                                            viewBox="0 0 24 24"
-                                                        >
-                                                            <path
-                                                                stroke-linecap="round"
-                                                                stroke-linejoin="round"
-                                                                stroke-width="2"
-                                                                d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"
-                                                            />
-                                                        </svg>
-                                                    </Link>
-                                                </Tooltip>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
+                    <!-- Pagination for Grid View -->
+                    <div v-if="activeData?.links?.length >= 3" class="mt-6">
+                        <AppPagination
+                            :links="activeData.links"
+                            :from="activeData.from"
+                            :to="activeData.to"
+                            :total="activeData.total"
+                        />
                     </div>
+                </div>
 
-                    <!-- Returns Pagination -->
-                    <div
-                        v-if="returns?.links?.length > 3"
-                        class="px-4 py-3 border-t border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/30 flex items-center justify-between flex-wrap gap-3"
+                <!-- LIST VIEW (DataTable) -->
+                <div v-else>
+                    <DataTable
+                        :columns="activeColumns"
+                        :data="activeData"
+                        :loading="isLoading"
+                        :sort-column="sortColumn"
+                        :sort-direction="sortDirection"
+                        @sort="toggleSort"
+                        :empty-title="
+                            activeTab === 'returns'
+                                ? $t('invoices.sales.no_returns')
+                                : $t('invoices.sales.title')
+                        "
+                        :empty-description="
+                            activeTab === 'returns'
+                                ? $t('common.no_records_found', 'لم يتم العثور على أي سجلات مطابقة')
+                                : $t('invoices.sales.empty_hint') ||
+                                  $t('common.no_records_found', 'لم يتم العثور على أي سجلات مطابقة')
+                        "
+                        :empty-action-text="activeTab === 'returns' ? '' : $t('nav.work_orders')"
+                        :empty-action-href="
+                            activeTab === 'returns' ? '' : route('work-orders.index')
+                        "
                     >
-                        <span class="text-sm text-gray-500 dark:text-gray-400">
-                            {{ $t('common.showing') }} {{ toEnglish(returns.from) }} -
-                            {{ toEnglish(returns.to) }} {{ $t('common.of') }}
-                            {{ toEnglish(returns.total) }}
-                        </span>
-                        <div class="flex gap-1">
+                        <!-- Index Column -->
+                        <template #cell-index="{ index }">
+                            <span class="text-xs text-text-muted font-mono">
+                                {{ toEnglish((activeData.from || 1) + index) }}
+                            </span>
+                        </template>
+
+                        <!-- Invoice Number Column -->
+                        <template #cell-invoice_number="{ item }">
                             <Link
-                                v-for="link in returns.links"
-                                :key="link.label"
-                                :href="link.url || '#'"
-                                :class="[
-                                    'px-3 py-1.5 rounded-lg text-sm font-medium transition-all',
-                                    link.active
-                                        ? 'bg-rose-600 text-white shadow-sm'
-                                        : link.url
-                                          ? 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600'
-                                          : 'bg-gray-50 dark:bg-gray-800 text-gray-300 dark:text-gray-600 cursor-not-allowed border border-gray-100 dark:border-gray-700',
-                                ]"
-                                v-safe-html="link.label"
-                            />
-                        </div>
-                    </div>
+                                :href="route('app.invoices.show', item.id)"
+                                class="font-bold text-action-primary hover:underline font-mono"
+                            >
+                                #{{ item.invoice_number }}
+                            </Link>
+                        </template>
+
+                        <!-- Original Invoice (for returns tab) -->
+                        <template #cell-original_invoice="{ item }">
+                            <Link
+                                v-if="item.original_invoice"
+                                :href="route('app.invoices.show', item.original_invoice.id)"
+                                class="text-xs text-action-primary hover:underline font-mono font-semibold"
+                            >
+                                #{{ item.original_invoice.invoice_number }}
+                            </Link>
+                            <span v-else class="text-text-muted text-xs">—</span>
+                        </template>
+
+                        <!-- Issue Date Column -->
+                        <template #cell-issue_date="{ item }">
+                            <span class="text-xs text-text-secondary font-mono">
+                                {{ formatDate(item.issue_date) }}
+                            </span>
+                        </template>
+
+                        <!-- Customer Column -->
+                        <template #cell-customer="{ item }">
+                            <p class="font-medium text-text-primary truncate max-w-[200px]">
+                                {{ item.customer_name_snapshot || item.customer?.name || '—' }}
+                            </p>
+                        </template>
+
+                        <!-- Gross Total (for invoices tab) -->
+                        <template #cell-gross_total="{ item }">
+                            <span
+                                class="text-sm font-semibold text-text-primary font-mono"
+                                dir="ltr"
+                            >
+                                {{ formatCurrency(getGrossTotal(item)) }}
+                            </span>
+                        </template>
+
+                        <!-- Discount (for invoices tab) -->
+                        <template #cell-discount="{ item }">
+                            <span class="text-sm font-medium text-danger font-mono" dir="ltr">
+                                {{ formatCurrency(getDiscount(item)) }}
+                            </span>
+                        </template>
+
+                        <!-- Subtotal Column -->
+                        <template #cell-total_excl_tax="{ item }">
+                            <span
+                                class="text-sm font-semibold text-text-primary font-mono"
+                                dir="ltr"
+                            >
+                                {{ formatCurrency(item.total_excl_tax) }}
+                            </span>
+                        </template>
+
+                        <!-- VAT Column -->
+                        <template #cell-total_tax="{ item }">
+                            <span
+                                class="text-sm font-medium text-text-secondary font-mono"
+                                dir="ltr"
+                            >
+                                {{ formatCurrency(item.total_tax) }}
+                            </span>
+                        </template>
+
+                        <!-- Grand Total Column -->
+                        <template #cell-total_incl_tax="{ item }">
+                            <span class="text-sm font-bold text-text-primary font-mono" dir="ltr">
+                                {{ formatCurrency(item.total_incl_tax) }}
+                            </span>
+                        </template>
+
+                        <!-- Balance Column -->
+                        <template #cell-balance="{ item }">
+                            <div class="font-mono text-end" dir="ltr">
+                                <span
+                                    :class="
+                                        Number(item.balance) > 0
+                                            ? 'text-danger font-bold'
+                                            : 'text-success font-semibold'
+                                    "
+                                >
+                                    {{ formatCurrency(item.balance) }}
+                                </span>
+                                <div
+                                    v-if="(item.bad_debt || 0) > 0"
+                                    class="text-[10px] text-warning font-sans font-semibold mt-0.5"
+                                >
+                                    {{ $t('payments.types.bad_debt') }}:
+                                    {{ formatCurrency(item.bad_debt) }}
+                                </div>
+                            </div>
+                        </template>
+
+                        <!-- Payment Status Column -->
+                        <template #cell-payment_status="{ item }">
+                            <span
+                                :class="statusClass(item.payment_status)"
+                                class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-semibold"
+                            >
+                                {{ $t(`invoices.status.${item.payment_status}`) }}
+                            </span>
+                        </template>
+
+                        <!-- Actions Column -->
+                        <template #cell-actions="{ item }">
+                            <div class="flex items-center justify-center gap-1">
+                                <Tooltip :content="$t('common.view')">
+                                    <Link
+                                        :href="route('app.invoices.show', item.id)"
+                                        class="p-2 rounded-lg text-text-muted hover:text-action-primary hover:bg-action-primary-soft transition-colors"
+                                    >
+                                        <svg
+                                            class="w-4 h-4"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            viewBox="0 0 24 24"
+                                        >
+                                            <path
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                stroke-width="2"
+                                                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                                            />
+                                            <path
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                stroke-width="2"
+                                                d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                                            />
+                                        </svg>
+                                    </Link>
+                                </Tooltip>
+                                <Tooltip :content="$t('common.print')">
+                                    <Link
+                                        :href="route('app.invoices.print', item.id)"
+                                        target="_blank"
+                                        class="p-2 rounded-lg text-text-muted hover:text-success hover:bg-success-soft transition-colors"
+                                    >
+                                        <svg
+                                            class="w-4 h-4"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            viewBox="0 0 24 24"
+                                        >
+                                            <path
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                stroke-width="2"
+                                                d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"
+                                            />
+                                        </svg>
+                                    </Link>
+                                </Tooltip>
+                            </div>
+                        </template>
+                    </DataTable>
                 </div>
             </div>
         </div>
@@ -972,29 +503,24 @@
 
 <script setup>
 import { ref, computed, watch } from 'vue';
-import { Link, router } from '@inertiajs/vue3';
+import { Link } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import PageHeader from '@/Components/PageHeader.vue';
+import AppTabs from '@/Components/Common/AppTabs.vue';
+import DataTable from '@/Components/Common/DataTable.vue';
+import AppPagination from '@/Components/Common/AppPagination.vue';
 import AppViewModeToggle from '@/Components/Common/AppViewModeToggle.vue';
 import AppEmptyState from '@/Components/Common/AppEmptyState.vue';
-import AppTableSkeleton from '@/Components/Common/AppTableSkeleton.vue';
 import BackButton from '@/Components/BackButton.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 import CustomDatePicker from '@/Components/CustomDatePicker.vue';
-import { useNumberFormat } from '@/Composables/useNumberFormat';
-import { debounce } from 'lodash-es';
-
 import Tooltip from '@/Components/Tooltip.vue';
+import { useNumberFormat } from '@/Composables/useNumberFormat';
+import { useServerTable } from '@/Composables/useServerTable';
 
 const { t } = useI18n();
 const { toEnglish } = useNumberFormat();
-
-const statusOptions = [
-    { value: 'unpaid', label: t('invoices.status.unpaid') },
-    { value: 'partial', label: t('invoices.status.partial') },
-    { value: 'paid', label: t('invoices.status.paid') },
-];
 
 const props = defineProps({
     invoices: { type: Object, default: () => ({}) },
@@ -1002,6 +528,21 @@ const props = defineProps({
     filters: { type: Object, default: () => ({}) },
 });
 
+// View mode state (persisted)
+const viewMode = ref(localStorage.getItem('salesInvoicesViewMode') || 'list');
+watch(viewMode, (newMode) => {
+    localStorage.setItem('salesInvoicesViewMode', newMode);
+});
+
+// Status options for dropdown filter
+const statusOptions = computed(() => [
+    { value: '', label: t('invoices.all_statuses') },
+    { value: 'unpaid', label: t('invoices.status.unpaid') },
+    { value: 'partial', label: t('invoices.status.partial') },
+    { value: 'paid', label: t('invoices.status.paid') },
+]);
+
+// Active Tab state
 const activeTab = ref(
     props.filters?.tab ||
         (typeof window !== 'undefined'
@@ -1009,75 +550,166 @@ const activeTab = ref(
             : null) ||
         'invoices'
 );
-const viewMode = ref(localStorage.getItem('salesInvoicesViewMode') || 'list');
 
+// Unified Tabs definition
 const tabs = computed(() => [
     {
-        key: 'invoices',
+        id: 'invoices',
         label: t('invoices.sales.tab_invoices'),
         count: props.invoices?.total || 0,
-        iconPath:
-            '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>',
     },
     {
-        key: 'returns',
+        id: 'returns',
         label: t('invoices.sales.tab_returns'),
         count: props.returns?.total || 0,
-        iconPath:
-            '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"/>',
     },
 ]);
 
-const switchTab = (tabKey) => {
-    activeTab.value = tabKey;
-    if (typeof window !== 'undefined') {
-        const url = new URL(window.location.href);
-        if (tabKey === 'invoices') {
-            url.searchParams.delete('tab');
-        } else {
-            url.searchParams.set('tab', tabKey);
-        }
-        window.history.replaceState({}, '', url.toString());
-    }
-};
-
-const localFilters = ref({
-    search: props.filters?.search || '',
-    payment_status: props.filters?.payment_status || '',
-    date_from: props.filters?.date_from || '',
-    date_to: props.filters?.date_to || '',
+// Server Table Composable
+const {
+    filters: tableFilters,
+    sortColumn,
+    sortDirection,
+    isLoading,
+    applyFilters,
+    toggleSort,
+    cancelDebouncedSearch,
+} = useServerTable({
+    routeUrl: '/app/invoices/sales',
+    initialFilters: {
+        tab: activeTab.value !== 'invoices' ? activeTab.value : '',
+        search: props.filters?.search || '',
+        payment_status: props.filters?.payment_status || '',
+        date_from: props.filters?.date_from || '',
+        date_to: props.filters?.date_to || '',
+    },
+    initialSort: {
+        column: props.filters?.sort || '',
+        direction: props.filters?.direction || 'desc',
+    },
+    debounceMs: 350,
 });
 
-const applyFilters = () => {
-    router.get(
-        route('app.invoices.sales.index'),
-        {
-            tab: activeTab.value !== 'invoices' ? activeTab.value : undefined,
-            search: localFilters.value.search || undefined,
-            payment_status: localFilters.value.payment_status || undefined,
-            date_from: localFilters.value.date_from || undefined,
-            date_to: localFilters.value.date_to || undefined,
-        },
-        { preserveState: true, preserveScroll: true, replace: true }
-    );
-};
-
-const debouncedApplyFilters = debounce(applyFilters, 400);
-
+// Synchronize props.filters with tableFilters when Inertia updates
 watch(
-    localFilters,
-    () => {
-        debouncedApplyFilters();
+    () => props.filters,
+    (newFilters) => {
+        if (newFilters) {
+            if (newFilters.tab !== undefined && newFilters.tab !== tableFilters.tab) {
+                tableFilters.tab = newFilters.tab || '';
+                activeTab.value = newFilters.tab || 'invoices';
+            }
+            if (newFilters.search !== undefined && newFilters.search !== tableFilters.search) {
+                tableFilters.search = newFilters.search || '';
+            }
+            if (
+                newFilters.payment_status !== undefined &&
+                newFilters.payment_status !== tableFilters.payment_status
+            ) {
+                tableFilters.payment_status = newFilters.payment_status || '';
+            }
+            if (
+                newFilters.date_from !== undefined &&
+                newFilters.date_from !== tableFilters.date_from
+            ) {
+                tableFilters.date_from = newFilters.date_from || '';
+            }
+            if (newFilters.date_to !== undefined && newFilters.date_to !== tableFilters.date_to) {
+                tableFilters.date_to = newFilters.date_to || '';
+            }
+            if (newFilters.sort !== undefined && newFilters.sort !== sortColumn.value) {
+                sortColumn.value = newFilters.sort || '';
+            }
+            if (
+                newFilters.direction !== undefined &&
+                newFilters.direction !== sortDirection.value
+            ) {
+                sortDirection.value = newFilters.direction || 'desc';
+            }
+        }
     },
     { deep: true }
 );
 
-// Persist view mode
-const setView = (mode) => {
-    viewMode.value = mode;
-    localStorage.setItem('salesInvoicesViewMode', mode);
+// Tab Change Handler
+const onTabChange = (tabId) => {
+    cancelDebouncedSearch?.();
+    activeTab.value = tabId;
+    tableFilters.tab = tabId !== 'invoices' ? tabId : '';
+    applyFilters();
 };
 
+// Reset Filters
+const hasActiveFilters = computed(() => {
+    return Boolean(
+        tableFilters.search ||
+        tableFilters.payment_status ||
+        tableFilters.date_from ||
+        tableFilters.date_to ||
+        sortColumn.value
+    );
+});
+
+const resetAllFilters = () => {
+    cancelDebouncedSearch?.();
+    tableFilters.search = '';
+    tableFilters.payment_status = '';
+    tableFilters.date_from = '';
+    tableFilters.date_to = '';
+    sortColumn.value = '';
+    sortDirection.value = 'desc';
+    applyFilters();
+};
+
+// Active Data and Rows
+const activeData = computed(() => (activeTab.value === 'returns' ? props.returns : props.invoices));
+const activeRows = computed(() => activeData.value?.data || []);
+
+// Columns Definitions
+const invoiceColumns = computed(() => [
+    { key: 'index', label: '#', align: 'center', width: 'w-12', sortable: false },
+    { key: 'invoice_number', label: t('invoices.invoice_number'), align: 'center', sortable: true },
+    { key: 'issue_date', label: t('invoices.issue_date'), align: 'center', sortable: true },
+    { key: 'customer', label: t('common.customer'), align: 'start', sortable: false },
+    { key: 'gross_total', label: t('invoices.gross_total'), align: 'end', sortable: false },
+    { key: 'discount', label: t('invoices.discount'), align: 'end', sortable: false },
+    { key: 'total_excl_tax', label: t('invoices.subtotal'), align: 'end', sortable: true },
+    { key: 'total_tax', label: t('common.vat'), align: 'end', sortable: false },
+    { key: 'total_incl_tax', label: t('invoices.grand_total'), align: 'end', sortable: true },
+    { key: 'balance', label: t('invoices.balance'), align: 'end', sortable: true },
+    { key: 'payment_status', label: t('common.status'), align: 'center', sortable: false },
+    { key: 'actions', label: t('common.actions'), align: 'center', width: 'w-24', sortable: false },
+]);
+
+const returnColumns = computed(() => [
+    { key: 'index', label: '#', align: 'center', width: 'w-12', sortable: false },
+    { key: 'invoice_number', label: t('invoices.return_code'), align: 'center', sortable: true },
+    {
+        key: 'original_invoice',
+        label: t('invoices.original_invoice'),
+        align: 'center',
+        sortable: false,
+    },
+    { key: 'issue_date', label: t('invoices.issue_date'), align: 'center', sortable: true },
+    { key: 'customer', label: t('customers.customer'), align: 'start', sortable: false },
+    { key: 'total_excl_tax', label: t('invoices.subtotal'), align: 'end', sortable: true },
+    { key: 'total_tax', label: t('invoices.tax'), align: 'end', sortable: false },
+    {
+        key: 'total_incl_tax',
+        label: t('invoices.credit_note.total_credit_note'),
+        align: 'end',
+        sortable: true,
+    },
+    { key: 'balance', label: t('invoices.balance'), align: 'end', sortable: true },
+    { key: 'payment_status', label: t('common.status'), align: 'center', sortable: false },
+    { key: 'actions', label: t('common.actions'), align: 'center', width: 'w-24', sortable: false },
+]);
+
+const activeColumns = computed(() =>
+    activeTab.value === 'returns' ? returnColumns.value : invoiceColumns.value
+);
+
+// Formatting Helpers
 const formatDate = (date) => {
     if (!date) return '—';
     return new Date(date).toLocaleDateString('en-GB', { numberingSystem: 'latn' });
@@ -1109,19 +741,19 @@ const getGrossTotal = (invoice) => {
 
 const statusClass = (status) => {
     const map = {
-        paid: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400',
-        partial: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400',
-        unpaid: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
+        paid: 'bg-success-soft text-success border border-success/20',
+        partial: 'bg-warning-soft text-warning border border-warning/20',
+        unpaid: 'bg-danger-soft text-danger border border-danger/20',
     };
-    return map[status] || 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300';
+    return map[status] || 'bg-surface-muted text-text-secondary border border-border';
 };
 
 const stripeClass = (status) => {
     const map = {
-        paid: 'bg-emerald-500',
-        partial: 'bg-amber-400',
-        unpaid: 'bg-red-500',
+        paid: 'bg-success',
+        partial: 'bg-warning',
+        unpaid: 'bg-danger',
     };
-    return map[status] || 'bg-gray-200 dark:bg-gray-700';
+    return map[status] || 'bg-border';
 };
 </script>

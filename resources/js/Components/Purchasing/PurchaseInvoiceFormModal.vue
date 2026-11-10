@@ -58,13 +58,12 @@
             >
                 <div class="grid grid-cols-1 md:grid-cols-12 gap-4">
                     <!-- Warehouse (Span 6) -->
-                    <div class="md:col-span-6">
-                        <label
-                            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5"
-                        >
-                            {{ $t('inventory.warehouses.title') }}
-                            <span class="text-red-500">*</span>
-                        </label>
+                    <FormField
+                        class="md:col-span-6"
+                        :label="$t('inventory.warehouses.title')"
+                        :error="form.errors.warehouse_id"
+                        required
+                    >
                         <SearchableSelect
                             v-model="form.warehouse_id"
                             :options="warehouses"
@@ -73,41 +72,35 @@
                             :placeholder="$t('inventory.warehouses.select')"
                             required
                         />
-                        <div v-if="form.errors.warehouse_id" class="text-red-500 text-xs mt-1">
-                            {{ form.errors.warehouse_id }}
-                        </div>
-                    </div>
+                    </FormField>
 
                     <!-- Supplier (Span 6) -->
-                    <div class="md:col-span-6">
-                        <div class="flex items-center justify-between mb-1.5">
-                            <label
-                                class="block text-sm font-medium text-gray-700 dark:text-gray-300"
-                            >
-                                {{ $t('purchasing.orders.supplier') }}
-                                <span class="text-red-500">*</span>
-                            </label>
-                            <button
-                                type="button"
-                                @click="showSupplierModal = true"
-                                class="text-xs text-blue-600 hover:text-blue-700 font-bold flex items-center gap-1 transition-colors"
-                            >
-                                <svg
-                                    class="w-4 h-4"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
+                    <FormField class="md:col-span-6" :error="form.errors.supplier_id" required>
+                        <template #label>
+                            <div class="flex items-center justify-between w-full">
+                                <span>{{ $t('purchasing.orders.supplier') }}</span>
+                                <button
+                                    type="button"
+                                    @click="showSupplierModal = true"
+                                    class="text-xs text-action-primary hover:underline font-bold flex items-center gap-1 transition-colors"
                                 >
-                                    <path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        stroke-width="2"
-                                        d="M12 4v16m8-8H4"
-                                    />
-                                </svg>
-                                {{ $t('purchasing.suppliers.add') }}
-                            </button>
-                        </div>
+                                    <svg
+                                        class="w-4 h-4"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M12 4v16m8-8H4"
+                                        />
+                                    </svg>
+                                    {{ $t('purchasing.suppliers.add') }}
+                                </button>
+                            </div>
+                        </template>
                         <SearchableSelect
                             v-model="form.supplier_id"
                             :options="allSuppliers"
@@ -117,54 +110,52 @@
                             class="w-full"
                             required
                         />
-                        <div v-if="form.errors.supplier_id" class="text-red-500 text-xs mt-1">
-                            {{ form.errors.supplier_id }}
-                        </div>
-                    </div>
+                    </FormField>
 
                     <!-- Date (Span 3) -->
-                    <div class="md:col-span-3">
-                        <label
-                            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5"
-                        >
-                            {{ $t('invoices.issue_date') }}
-                            <span class="text-red-500">*</span>
-                        </label>
+                    <FormField
+                        class="md:col-span-3"
+                        :label="$t('invoices.issue_date')"
+                        :error="form.errors.issue_date"
+                        required
+                    >
                         <CustomDatePicker
                             v-model="form.issue_date"
                             :placeholder="$t('invoices.issue_date')"
                         />
-                    </div>
+                    </FormField>
 
                     <!-- Due Date (Span 3) -->
-                    <div class="md:col-span-3">
-                        <label
-                            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5"
-                        >
-                            {{ $t('purchasing.orders.due_date') }}
-                        </label>
+                    <FormField
+                        class="md:col-span-3"
+                        :label="$t('purchasing.orders.due_date')"
+                        :error="form.errors.due_date"
+                    >
                         <CustomDatePicker
                             v-model="form.due_date"
                             :placeholder="$t('purchasing.orders.due_date')"
                         />
-                    </div>
+                    </FormField>
 
                     <!-- Supplier Invoice Number (Span 6) -->
-                    <div class="md:col-span-6">
-                        <label
-                            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5"
-                        >
-                            {{ $t('invoices.purchases.invoice_number') }}
-                            <span class="text-red-500">*</span>
-                        </label>
-                        <input
+                    <FormField
+                        v-slot="field"
+                        class="md:col-span-6"
+                        :label="$t('invoices.purchases.invoice_number')"
+                        :error="form.errors.invoice_number"
+                        required
+                    >
+                        <AppInput
+                            :id="field.id"
+                            :aria-describedby="field.describedBy"
+                            :invalid="field.hasError"
                             type="text"
                             v-model="form.invoice_number"
                             required
                             :placeholder="$t('invoices.purchases.invoice_number_placeholder')"
-                            class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                            class="w-full"
                         />
-                    </div>
+                    </FormField>
                 </div>
             </div>
 
@@ -613,16 +604,7 @@
                             </p>
                         </div>
                     </div>
-                    <label class="relative inline-flex items-center cursor-pointer">
-                        <input
-                            type="checkbox"
-                            v-model="form.create_credit_invoice"
-                            class="sr-only peer"
-                        />
-                        <div
-                            class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"
-                        ></div>
-                    </label>
+                    <AppToggle v-model="form.create_credit_invoice" color="blue" />
                 </div>
 
                 <!-- Due Date (Shown when credit invoice is enabled) -->
@@ -750,6 +732,9 @@ import { useI18n } from 'vue-i18n';
 import BaseModal from '@/Components/BaseModal.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 import CustomDatePicker from '@/Components/CustomDatePicker.vue';
+import AppToggle from '@/Components/Common/AppToggle.vue';
+import FormField from '@/Components/Common/FormField.vue';
+import AppInput from '@/Components/App/AppInput.vue';
 import Tooltip from '@/Components/Tooltip.vue';
 import PurchaseOrderItemModal from './PurchaseOrderItemModal.vue';
 import SupplierCreateModal from '@/Pages/Purchasing/Suppliers/CreateModal.vue';

@@ -1,0 +1,43 @@
+
+   PASS  Tests\Feature\VehicleBalanceNPlusOneTest
+  ✓ the endpoint reports exactly the same balance as the per row calcul… 5.70s  
+  ✓ a customer without invoices has a zero balance                       0.41s  
+  ✓ the query count does not grow with the number of vehicles            1.13s  
+  ✓ the vehicle search endpoint reports the same balance                 0.51s  
+
+   PASS  Tests\Feature\StockActivitiesReportTest
+  ✓ guest is redirected to login                                         0.06s  
+  ✓ authenticated user can view stock activities report                  0.47s  
+  ✓ stock activities report calculates kpis accurately                   0.39s  
+  ✓ stock activities report filters by move type                         0.44s  
+  ✓ stock activities report groups data                                  0.52s  
+  ✓ stock activities report handles credit note polymorphic reference c… 0.43s  
+  ✓ stock activities report exports csv successfully                     0.37s  
+  ✓ unknown polymorphic reference is safe to display                     0.03s  
+
+   PASS  Tests\Feature\WorkOrderCreditNoteTest
+  ✓ summary returns refundable services and parts for completed invoice… 0.44s  
+  ✓ cannot create credit note if work order not done                     0.57s  
+  ✓ can create credit note for service with automatic debt offset        0.51s  
+  ✓ can create credit note for part with restock and payment refund      0.43s  
+  ✓ cannot exceed remaining refundable quantities                        0.43s  
+  ✓ tenant isolation prevents unauthorized access                        0.79s  
+  ✓ credit note on tax exempt invoice calculates zero tax                0.43s  
+  ✓ can create multiple consecutive credit notes for same work order     0.84s  
+  ✓ deferred refund creates unpaid credit note without cash payment      0.64s  
+  ✓ can get summary and create credit note directly via invoice route    0.52s  
+  ✓ can record refund payment against unpaid credit note                 0.52s  
+  ✓ cannot refund more than net refund due during credit note creation   1.02s  
+
+   PASS  Tests\Feature\DirectSalesReturnTest
+  ✓ can get summary and create return credit note for direct sales invo… 3.70s  
+  ✓ direct sales return with debt offset and deferred credit note        1.21s  
+
+   PASS  Tests\Feature\DashboardPrivacyAndRoleAdaptiveTest
+  ✓ super admin receives full financial metrics and permissions          5.99s  
+  ✓ technician does not receive revenue or invoice data                  5.68s  
+  ✓ receptionist does not receive revenue and receives today appointmen… 0.91s  
+
+  Tests:    29 passed (280 assertions)
+  Duration: 35.21s
+

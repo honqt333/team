@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Exports\AgingReportExport;
 use App\Exports\BankTransferReceiptsExport;
 use App\Exports\TenantsReportExport;
+use App\Http\Controllers\Api\WorkOrderSuggestionController;
 use App\Http\Controllers\App\AppointmentController;
 use App\Http\Controllers\App\AppointmentMessageDeliveryController;
 use App\Http\Controllers\App\BillingController;
@@ -44,6 +45,7 @@ use App\Http\Controllers\App\InventorySettingsController;
 use App\Http\Controllers\App\InventoryTransfersController;
 use App\Http\Controllers\App\InvoicesController;
 use App\Http\Controllers\App\NotificationController;
+use App\Http\Controllers\App\NotificationSettingsController;
 use App\Http\Controllers\App\PartsController;
 use App\Http\Controllers\App\PaymentsController;
 use App\Http\Controllers\App\PrintSettings\Signatures\DestroySignatureController;
@@ -120,6 +122,7 @@ use App\Http\Controllers\System\CompanySettingsController;
 use App\Http\Controllers\System\ContactMessageController;
 use App\Http\Controllers\System\DeveloperController;
 use App\Http\Controllers\System\DunningController;
+use App\Http\Controllers\System\ErrorLogController;
 use App\Http\Controllers\System\FeedbackManagementController;
 use App\Http\Controllers\System\GeneralSettingsController;
 use App\Http\Controllers\System\HelpSettingsController;
@@ -141,6 +144,7 @@ use App\Http\Controllers\System\WebsiteSettingsController;
 use App\Http\Controllers\System\WhatsappCreditsController;
 use App\Http\Middleware\EnsureTenantActive;
 use App\Http\Middleware\EnsureTwoFactorEnabled;
+use App\Http\Middleware\TrackAiUsage;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use Maatwebsite\Excel\Facades\Excel;
@@ -458,6 +462,9 @@ Route::prefix('app')->middleware(['auth', 'verified', 'tenant.active', 'center.c
         ->name('communications.appointment-messages.retry');
     Route::get('/work-orders', [WorkOrderController::class, 'index'])->name('work-orders.index');
     Route::post('/work-orders', [WorkOrderController::class, 'store'])->name('work-orders.store');
+    Route::post('/work-orders/{workOrder}/suggestions', [WorkOrderSuggestionController::class, 'suggest'])
+        ->middleware([TrackAiUsage::class, 'throttle:30,1'])
+        ->name('work-orders.suggestions');
     Route::get('/work-orders/{workOrder}', [WorkOrderController::class, 'show'])->name('work-orders.show');
     Route::put('/work-orders/{workOrder}', [WorkOrderController::class, 'update'])->name('work-orders.update');
     Route::delete('/work-orders/{workOrder}', [WorkOrderController::class, 'destroy'])->name('work-orders.destroy');
@@ -622,6 +629,13 @@ Route::prefix('app')->middleware(['auth', 'verified', 'tenant.active', 'center.c
         ->names('settings.company.transactions');
     Route::post('/settings/company/transactions/{transaction}/approve', [CompanyTransactionController::class, 'approve'])->name('settings.company.transactions.approve');
 
+    // Notification Settings
+    Route::prefix('settings/notifications')->name('settings.notifications.')->group(function () {
+        Route::get('/', [NotificationSettingsController::class, 'index'])->name('index');
+        Route::put('/', [NotificationSettingsController::class, 'update'])->name('update');
+        Route::post('/test', [NotificationSettingsController::class, 'sendTest'])->name('test');
+    });
+
     // ZATCA Phase 2 Self-Onboarding
     Route::prefix('settings/zatca')->name('settings.zatca.')->group(function () {
         Route::get('/', [ZatcaOnboardingController::class, 'index'])->name('index');
@@ -640,6 +654,7 @@ Route::prefix('app')->middleware(['auth', 'verified', 'tenant.active', 'center.c
     // Uses payment settings configured by system admin (system/settings/payment)
     // ─────────────────────────────────────────────────────────────────────
     Route::prefix('settings/billing')->name('app.billing.')->group(function () {
+        Route::get('/receipts/{receipt}/download', [BillingController::class, 'downloadReceipt'])->name('receipts.download');
         Route::get('/', [BillingController::class, 'index'])->name('index');
         Route::post('/calculate', [CompanySubscriptionController::class, 'calculatePrice'])->name('calculate');
         Route::post('/validate-promo', [CompanySubscriptionController::class, 'validatePromo'])->name('validate-promo');
@@ -984,6 +999,7 @@ Route::prefix('app')->middleware(['auth', 'verified', 'tenant.active', 'center.c
         Route::put('/payroll/{payrollRun}/regenerate', [PayrollController::class, 'regenerate'])->name('payroll.regenerate');
         Route::put('/payroll/{payrollRun}/mark-paid', [PayrollController::class, 'markPaid'])->name('payroll.mark-paid');
         Route::delete('/payroll/{payrollRun}/items/{payrollItem}', [PayrollController::class, 'destroyItem'])->name('payroll.items.destroy');
+        Route::put('/payroll/{payrollRun}/items/{payrollItem}', [PayrollController::class, 'updateItem'])->name('payroll.items.update');
         Route::get('/payroll/{payrollRun}/print', [PayrollController::class, 'print'])->name('payroll.print');
 
         // Employee Payroll
@@ -1208,6 +1224,8 @@ Route::prefix('system')->middleware(['auth:web,admin', 'system.admin'])->group(f
             'aging-'.now()->format('Y-m-d').'.xlsx'
         );
     })->name('system.reports.aging')->middleware('system.permission:system.invoices.view');
+
+    Route::get('/error-log', [ErrorLogController::class, 'index'])->name('system.error-log.index')->middleware('system.permission:system.developer.access');
 
     // Developer Center
     Route::get('/developer', [DeveloperController::class, 'index'])->name('system.developer.index')->middleware('system.permission:system.developer.access');

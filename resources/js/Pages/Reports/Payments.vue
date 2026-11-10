@@ -1,6 +1,6 @@
 <template>
     <AppLayout>
-        <div class="space-y-6">
+        <PrintEngine document-type="payments" class="space-y-6">
             <!-- Screen Only Header Section (AUDIT_STANDARDS.md compliant) -->
             <PageHeader
                 :title="$t('reports.payments_report.title')"
@@ -32,26 +32,11 @@
 
                 <template #actions>
                     <div class="flex items-center gap-2.5 shrink-0">
-                        <button
-                            type="button"
-                            @click="handlePrint"
-                            class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 text-xs font-bold transition-all shadow-sm"
-                        >
-                            <svg
-                                class="w-4 h-4 text-gray-500"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                            >
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    stroke-width="2"
-                                    d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"
-                                />
-                            </svg>
-                            <span>{{ $t('reports.payments_report.print_report') }}</span>
-                        </button>
+                        <AppPrintButton
+                            class="print:hidden"
+                            :label="$t('reports.payments_report.print_report')"
+                            @click="printDocument()"
+                        />
 
                         <a
                             :href="exportUrl"
@@ -529,46 +514,17 @@
                 </div>
 
                 <!-- Voucher Type Filter Radios -->
-                <div
-                    class="flex items-center gap-4 text-xs pt-2 border-t border-gray-100 dark:border-gray-750"
-                >
-                    <label class="flex items-center gap-1.5 cursor-pointer">
-                        <input
-                            type="radio"
-                            v-model="filterForm.type"
-                            value="all"
-                            @change="applyFilters"
-                            class="text-indigo-600 focus:ring-indigo-500"
-                        />
-                        <span class="text-gray-700 dark:text-gray-300 font-medium">
-                            {{ $t('reports.payments_report.all_types') }}
-                        </span>
-                    </label>
-                    <label class="flex items-center gap-1.5 cursor-pointer">
-                        <input
-                            type="radio"
-                            v-model="filterForm.type"
-                            value="payment"
-                            @change="applyFilters"
-                            class="text-emerald-600 focus:ring-emerald-500"
-                        />
-                        <span class="text-emerald-700 dark:text-emerald-400 font-bold">
-                            {{ $t('reports.payments_report.receipts') }}
-                        </span>
-                    </label>
-                    <label class="flex items-center gap-1.5 cursor-pointer">
-                        <input
-                            type="radio"
-                            v-model="filterForm.type"
-                            value="refund"
-                            @change="applyFilters"
-                            class="text-rose-600 focus:ring-rose-500"
-                        />
-                        <span class="text-rose-700 dark:text-rose-400 font-bold">
-                            {{ $t('reports.payments_report.refunds') }}
-                        </span>
-                    </label>
-                </div>
+                <RadioGroup
+                    v-model="filterForm.type"
+                    direction="horizontal"
+                    class="pt-2 border-t border-border"
+                    :options="[
+                        { value: 'all', label: $t('reports.payments_report.all_types') },
+                        { value: 'payment', label: $t('reports.payments_report.receipts') },
+                        { value: 'refund', label: $t('reports.payments_report.refunds') },
+                    ]"
+                    @change="applyFilters"
+                />
             </div>
 
             <!-- Table of Payments (Screen + Print) -->
@@ -637,7 +593,7 @@
                                     <span
                                         class="inline-flex items-center px-2 py-0.5 rounded-lg text-[11px] font-semibold bg-gray-100 dark:bg-gray-700/60 text-gray-800 dark:text-gray-200"
                                     >
-                                        {{ payment.center?.name || 'المركز الرئيسي' }}
+                                        {{ payment.center?.name || $t('common.main_center') }}
                                     </span>
                                 </td>
 
@@ -829,11 +785,15 @@
 
             <!-- AUDIT_STANDARDS.md Section 5: Standard Print Footer -->
             <StandardReportFooter class="hidden print:block pt-4 mt-6 border-t border-gray-300" />
-        </div>
+        </PrintEngine>
     </AppLayout>
 </template>
 
 <script setup>
+import PrintEngine from '@/Components/Print/PrintEngine.vue';
+import AppPrintButton from '@/Components/Common/AppPrintButton.vue';
+import { usePrint } from '@/Composables/usePrint';
+import RadioGroup from '@/Components/Common/RadioGroup.vue';
 import { reactive, computed } from 'vue';
 import { router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
@@ -1048,9 +1008,7 @@ const resetFilters = () => {
     applyFilters();
 };
 
-const handlePrint = () => {
-    window.print();
-};
+const { printDocument } = usePrint();
 
 // AUDIT_STANDARDS.md Section 3: All numbers & prices formatted in English digits (0-9)
 const formatMoney = (val) => {

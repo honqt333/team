@@ -313,4 +313,11 @@ class StockActivitiesReportTest extends TestCase
         $this->assertTrue($response->headers->contains('content-type', 'text/csv; charset=UTF-8'));
         $this->assertStringContainsString('attachment;', (string) $response->headers->get('content-disposition'));
     }
+
+    public function test_unknown_polymorphic_reference_is_safe_to_display(): void
+    {
+        $move = new InventoryMove(['reference_type' => 'UnknownHistoricalReference', 'reference_id' => 123]);
+        $this->assertNull($move->resolveReference());
+        $this->assertNull($move->work_order);
+    }
 }

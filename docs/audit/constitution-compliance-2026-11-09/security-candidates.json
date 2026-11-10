@@ -1,0 +1,527 @@
+{
+  "models_without_direct_scope_or_annotation": [],
+  "sensitive_methods_without_direct_auth_marker": [
+    {
+      "path": "app/Http/Controllers/ProfileController.php",
+      "line": 26,
+      "method": "update",
+      "status": "requires-route-request-context"
+    },
+    {
+      "path": "app/Http/Controllers/ProfileController.php",
+      "line": 42,
+      "method": "destroy",
+      "status": "requires-route-request-context"
+    },
+    {
+      "path": "app/Http/Controllers/App/VehicleConditionItemController.php",
+      "line": 48,
+      "method": "store",
+      "status": "requires-route-request-context"
+    },
+    {
+      "path": "app/Http/Controllers/App/VehicleConditionItemController.php",
+      "line": 68,
+      "method": "update",
+      "status": "requires-route-request-context"
+    },
+    {
+      "path": "app/Http/Controllers/App/VehicleConditionItemController.php",
+      "line": 90,
+      "method": "destroy",
+      "status": "requires-route-request-context"
+    },
+    {
+      "path": "app/Http/Controllers/App/VehicleConditionItemController.php",
+      "line": 104,
+      "method": "toggleActive",
+      "status": "requires-route-request-context"
+    },
+    {
+      "path": "app/Http/Controllers/App/CompanyProfileController.php",
+      "line": 317,
+      "method": "update",
+      "status": "requires-route-request-context"
+    },
+    {
+      "path": "app/Http/Controllers/App/FeedbackController.php",
+      "line": 184,
+      "method": "destroy",
+      "status": "requires-route-request-context"
+    },
+    {
+      "path": "app/Http/Controllers/App/SystemSettingsController.php",
+      "line": 114,
+      "method": "update",
+      "status": "requires-route-request-context"
+    },
+    {
+      "path": "app/Http/Controllers/App/CompanySubscriptionController.php",
+      "line": 545,
+      "method": "cancel",
+      "status": "requires-route-request-context"
+    },
+    {
+      "path": "app/Http/Controllers/App/IncomeCategoryController.php",
+      "line": 48,
+      "method": "store",
+      "status": "requires-route-request-context"
+    },
+    {
+      "path": "app/Http/Controllers/App/IncomeCategoryController.php",
+      "line": 67,
+      "method": "update",
+      "status": "requires-route-request-context"
+    },
+    {
+      "path": "app/Http/Controllers/App/IncomeCategoryController.php",
+      "line": 85,
+      "method": "destroy",
+      "status": "requires-route-request-context"
+    },
+    {
+      "path": "app/Http/Controllers/App/IncomeCategoryController.php",
+      "line": 99,
+      "method": "toggleActive",
+      "status": "requires-route-request-context"
+    },
+    {
+      "path": "app/Http/Controllers/App/ProfileController.php",
+      "line": 125,
+      "method": "update",
+      "status": "requires-route-request-context"
+    },
+    {
+      "path": "app/Http/Controllers/App/VehicleConditionCategoryController.php",
+      "line": 15,
+      "method": "store",
+      "status": "requires-route-request-context"
+    },
+    {
+      "path": "app/Http/Controllers/App/VehicleConditionCategoryController.php",
+      "line": 31,
+      "method": "update",
+      "status": "requires-route-request-context"
+    },
+    {
+      "path": "app/Http/Controllers/App/VehicleConditionCategoryController.php",
+      "line": 49,
+      "method": "destroy",
+      "status": "requires-route-request-context"
+    },
+    {
+      "path": "app/Http/Controllers/App/VehicleConditionCategoryController.php",
+      "line": 64,
+      "method": "toggleActive",
+      "status": "requires-route-request-context"
+    },
+    {
+      "path": "app/Http/Controllers/App/VehicleModelController.php",
+      "line": 51,
+      "method": "store",
+      "status": "requires-route-request-context"
+    },
+    {
+      "path": "app/Http/Controllers/App/VehicleModelController.php",
+      "line": 72,
+      "method": "update",
+      "status": "requires-route-request-context"
+    },
+    {
+      "path": "app/Http/Controllers/App/VehicleModelController.php",
+      "line": 95,
+      "method": "destroy",
+      "status": "requires-route-request-context"
+    },
+    {
+      "path": "app/Http/Controllers/App/VehicleModelController.php",
+      "line": 110,
+      "method": "toggleActive",
+      "status": "requires-route-request-context"
+    },
+    {
+      "path": "app/Http/Controllers/App/WorkOrderSignatureController.php",
+      "line": 19,
+      "method": "store",
+      "status": "requires-route-request-context"
+    },
+    {
+      "path": "app/Http/Controllers/App/VehicleColorController.php",
+      "line": 44,
+      "method": "store",
+      "status": "requires-route-request-context"
+    },
+    {
+      "path": "app/Http/Controllers/App/VehicleColorController.php",
+      "line": 65,
+      "method": "update",
+      "status": "requires-route-request-context"
+    },
+    {
+      "path": "app/Http/Controllers/App/VehicleColorController.php",
+      "line": 88,
+      "method": "destroy",
+      "status": "requires-route-request-context"
+    },
+    {
+      "path": "app/Http/Controllers/App/VehicleColorController.php",
+      "line": 103,
+      "method": "toggleActive",
+      "status": "requires-route-request-context"
+    },
+    {
+      "path": "app/Http/Controllers/App/VehicleMakeController.php",
+      "line": 45,
+      "method": "store",
+      "status": "requires-route-request-context"
+    },
+    {
+      "path": "app/Http/Controllers/App/VehicleMakeController.php",
+      "line": 70,
+      "method": "update",
+      "status": "requires-route-request-context"
+    },
+    {
+      "path": "app/Http/Controllers/App/VehicleMakeController.php",
+      "line": 100,
+      "method": "destroy",
+      "status": "requires-route-request-context"
+    },
+    {
+      "path": "app/Http/Controllers/App/VehicleMakeController.php",
+      "line": 115,
+      "method": "toggleActive",
+      "status": "requires-route-request-context"
+    },
+    {
+      "path": "app/Http/Controllers/Auth/NewPasswordController.php",
+      "line": 37,
+      "method": "store",
+      "status": "requires-route-request-context"
+    },
+    {
+      "path": "app/Http/Controllers/Auth/PasswordResetLinkController.php",
+      "line": 32,
+      "method": "store",
+      "status": "requires-route-request-context"
+    },
+    {
+      "path": "app/Http/Controllers/Auth/PasswordController.php",
+      "line": 18,
+      "method": "update",
+      "status": "requires-route-request-context"
+    },
+    {
+      "path": "app/Http/Controllers/Auth/EmailVerificationNotificationController.php",
+      "line": 16,
+      "method": "store",
+      "status": "requires-route-request-context"
+    },
+    {
+      "path": "app/Http/Controllers/Auth/SetPasswordController.php",
+      "line": 44,
+      "method": "store",
+      "status": "requires-route-request-context"
+    },
+    {
+      "path": "app/Http/Controllers/Auth/AuthenticatedSessionController.php",
+      "line": 49,
+      "method": "store",
+      "status": "requires-route-request-context"
+    },
+    {
+      "path": "app/Http/Controllers/Auth/AuthenticatedSessionController.php",
+      "line": 128,
+      "method": "destroy",
+      "status": "requires-route-request-context"
+    },
+    {
+      "path": "app/Http/Controllers/Auth/RegisteredUserController.php",
+      "line": 51,
+      "method": "store",
+      "status": "requires-route-request-context"
+    },
+    {
+      "path": "app/Http/Controllers/Auth/ConfirmablePasswordController.php",
+      "line": 28,
+      "method": "store",
+      "status": "requires-route-request-context"
+    },
+    {
+      "path": "app/Http/Controllers/System/BankTransferReceiptsController.php",
+      "line": 160,
+      "method": "approve",
+      "status": "requires-route-request-context"
+    },
+    {
+      "path": "app/Http/Controllers/System/BankTransferReceiptsController.php",
+      "line": 372,
+      "method": "reject",
+      "status": "requires-route-request-context"
+    },
+    {
+      "path": "app/Http/Controllers/System/AdminUsersController.php",
+      "line": 97,
+      "method": "store",
+      "status": "requires-route-request-context"
+    },
+    {
+      "path": "app/Http/Controllers/System/AdminUsersController.php",
+      "line": 151,
+      "method": "update",
+      "status": "requires-route-request-context"
+    },
+    {
+      "path": "app/Http/Controllers/System/AdminUsersController.php",
+      "line": 188,
+      "method": "destroy",
+      "status": "requires-route-request-context"
+    },
+    {
+      "path": "app/Http/Controllers/System/HelpSettingsController.php",
+      "line": 333,
+      "method": "update",
+      "status": "requires-route-request-context"
+    },
+    {
+      "path": "app/Http/Controllers/System/TenantsController.php",
+      "line": 322,
+      "method": "destroy",
+      "status": "requires-route-request-context"
+    },
+    {
+      "path": "app/Http/Controllers/System/CompanySettingsController.php",
+      "line": 63,
+      "method": "update",
+      "status": "requires-route-request-context"
+    },
+    {
+      "path": "app/Http/Controllers/System/PlansController.php",
+      "line": 59,
+      "method": "store",
+      "status": "requires-route-request-context"
+    },
+    {
+      "path": "app/Http/Controllers/System/PlansController.php",
+      "line": 111,
+      "method": "update",
+      "status": "requires-route-request-context"
+    },
+    {
+      "path": "app/Http/Controllers/System/PlansController.php",
+      "line": 152,
+      "method": "destroy",
+      "status": "requires-route-request-context"
+    },
+    {
+      "path": "app/Http/Controllers/System/PaymentSettingsController.php",
+      "line": 68,
+      "method": "update",
+      "status": "requires-route-request-context"
+    },
+    {
+      "path": "app/Http/Controllers/System/WebsiteSettingsController.php",
+      "line": 324,
+      "method": "update",
+      "status": "requires-route-request-context"
+    },
+    {
+      "path": "app/Http/Controllers/System/ProfileController.php",
+      "line": 80,
+      "method": "update",
+      "status": "requires-route-request-context"
+    },
+    {
+      "path": "app/Http/Controllers/System/IntegrationsController.php",
+      "line": 109,
+      "method": "store",
+      "status": "requires-route-request-context"
+    },
+    {
+      "path": "app/Http/Controllers/System/IntegrationsController.php",
+      "line": 141,
+      "method": "update",
+      "status": "requires-route-request-context"
+    },
+    {
+      "path": "app/Http/Controllers/System/IntegrationsController.php",
+      "line": 266,
+      "method": "destroy",
+      "status": "requires-route-request-context"
+    },
+    {
+      "path": "app/Http/Controllers/System/GeneralSettingsController.php",
+      "line": 52,
+      "method": "update",
+      "status": "requires-route-request-context"
+    },
+    {
+      "path": "app/Http/Controllers/System/CommunicationTemplatesController.php",
+      "line": 28,
+      "method": "update",
+      "status": "requires-route-request-context"
+    },
+    {
+      "path": "app/Http/Controllers/System/BackupController.php",
+      "line": 65,
+      "method": "store",
+      "status": "requires-route-request-context"
+    },
+    {
+      "path": "app/Http/Controllers/System/BackupController.php",
+      "line": 133,
+      "method": "destroy",
+      "status": "requires-route-request-context"
+    },
+    {
+      "path": "app/Http/Controllers/System/SubscriptionInvoicesController.php",
+      "line": 105,
+      "method": "send",
+      "status": "requires-route-request-context"
+    },
+    {
+      "path": "app/Http/Controllers/System/SubscriptionInvoicesController.php",
+      "line": 133,
+      "method": "markPaid",
+      "status": "requires-route-request-context"
+    },
+    {
+      "path": "app/Http/Controllers/System/SubscriptionInvoicesController.php",
+      "line": 188,
+      "method": "cancel",
+      "status": "requires-route-request-context"
+    },
+    {
+      "path": "app/Http/Controllers/System/PromoCodesController.php",
+      "line": 64,
+      "method": "store",
+      "status": "requires-route-request-context"
+    },
+    {
+      "path": "app/Http/Controllers/System/PromoCodesController.php",
+      "line": 113,
+      "method": "update",
+      "status": "requires-route-request-context"
+    },
+    {
+      "path": "app/Http/Controllers/System/PromoCodesController.php",
+      "line": 150,
+      "method": "destroy",
+      "status": "requires-route-request-context"
+    },
+    {
+      "path": "app/Http/Controllers/System/SubscriptionsController.php",
+      "line": 106,
+      "method": "store",
+      "status": "requires-route-request-context"
+    },
+    {
+      "path": "app/Http/Controllers/System/SubscriptionsController.php",
+      "line": 179,
+      "method": "cancel",
+      "status": "requires-route-request-context"
+    },
+    {
+      "path": "app/Http/Controllers/System/AnnouncementsController.php",
+      "line": 63,
+      "method": "store",
+      "status": "requires-route-request-context"
+    },
+    {
+      "path": "app/Http/Controllers/System/AnnouncementsController.php",
+      "line": 166,
+      "method": "destroy",
+      "status": "requires-route-request-context"
+    },
+    {
+      "path": "app/Http/Controllers/System/FeedbackManagementController.php",
+      "line": 114,
+      "method": "destroy",
+      "status": "requires-route-request-context"
+    },
+    {
+      "path": "app/Http/Controllers/System/ContactMessageController.php",
+      "line": 48,
+      "method": "destroy",
+      "status": "requires-route-request-context"
+    },
+    {
+      "path": "app/Http/Controllers/Public/CustomerPortalAppointmentController.php",
+      "line": 219,
+      "method": "store",
+      "status": "requires-route-request-context"
+    },
+    {
+      "path": "app/Http/Controllers/Public/PublicQuoteController.php",
+      "line": 136,
+      "method": "approve",
+      "status": "requires-route-request-context"
+    },
+    {
+      "path": "app/Http/Controllers/Public/PublicQuoteController.php",
+      "line": 198,
+      "method": "reject",
+      "status": "requires-route-request-context"
+    },
+    {
+      "path": "app/Http/Controllers/Public/CustomerPortalAppointmentActionsController.php",
+      "line": 241,
+      "method": "cancel",
+      "status": "requires-route-request-context"
+    },
+    {
+      "path": "app/Http/Controllers/App/HR/ShiftController.php",
+      "line": 15,
+      "method": "store",
+      "status": "requires-route-request-context"
+    },
+    {
+      "path": "app/Http/Controllers/App/HR/ShiftController.php",
+      "line": 36,
+      "method": "update",
+      "status": "requires-route-request-context"
+    },
+    {
+      "path": "app/Http/Controllers/App/HR/ShiftController.php",
+      "line": 58,
+      "method": "destroy",
+      "status": "requires-route-request-context"
+    },
+    {
+      "path": "app/Http/Controllers/App/HR/LeaveController.php",
+      "line": 15,
+      "method": "store",
+      "status": "requires-route-request-context"
+    },
+    {
+      "path": "app/Http/Controllers/App/HR/LeaveController.php",
+      "line": 43,
+      "method": "update",
+      "status": "requires-route-request-context"
+    },
+    {
+      "path": "app/Http/Controllers/App/HR/LeaveController.php",
+      "line": 67,
+      "method": "destroy",
+      "status": "requires-route-request-context"
+    },
+    {
+      "path": "app/Http/Controllers/App/HR/BiometricDeviceController.php",
+      "line": 14,
+      "method": "store",
+      "status": "requires-route-request-context"
+    },
+    {
+      "path": "app/Http/Controllers/App/HR/BiometricDeviceController.php",
+      "line": 37,
+      "method": "update",
+      "status": "requires-route-request-context"
+    },
+    {
+      "path": "app/Http/Controllers/App/HR/BiometricDeviceController.php",
+      "line": 57,
+      "method": "destroy",
+      "status": "requires-route-request-context"
+    }
+  ]
+}
