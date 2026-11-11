@@ -37,6 +37,7 @@ use App\Models\WorkOrderInspection;
 use App\Models\WorkOrderItem;
 use App\Observers\CenterObserver;
 use App\Observers\EmployeeObserver;
+use App\Observers\InvoiceObserver;
 use App\Observers\PaymentObserver;
 use App\Observers\WorkOrderItemObserver;
 use App\Observers\WorkOrderObserver;
@@ -250,6 +251,17 @@ class AppServiceProvider extends ServiceProvider
         WorkOrder::observe(WorkOrderObserver::class);
         WorkOrderItem::observe(WorkOrderItemObserver::class);
         Payment::observe(PaymentObserver::class);
+
+        // Invoice immutability.
+        //
+        // Once an invoice is issued it carries a ZATCA invoice number and
+        // an ICV that is part of the tenant's hash chain, so its amounts,
+        // its tax and the identity of both parties must never change
+        // afterwards. The observer is registered HERE — in the application
+        // bootstrap — so the guarantee holds in production and in every
+        // test. Registering it inside a test would only prove that the
+        // guard works when somebody remembered to switch it on.
+        Invoice::observe(InvoiceObserver::class);
 
         // Super Admin Bypass
         //

@@ -100,6 +100,8 @@ class SubscriptionInvoiceService
             'notes' => $notes,
         ]);
 
+        $this->invalidatePdf($invoice);
+
         return $invoice;
     }
 
@@ -133,7 +135,7 @@ class SubscriptionInvoiceService
             'invoice' => $invoice,
             'tenant' => $invoice->tenant,
             'subscription' => $invoice->subscription,
-            'plan' => $invoice->subscription->plan,
+            'plan' => $invoice->subscription?->plan,
             'company' => $companyInfo,
             'vat_rate' => $vatRate,
         ])->render();
@@ -247,6 +249,28 @@ class SubscriptionInvoiceService
     }
 
     /**
+     * Delete cached PDF so the next preview/download reflects updated status or metadata.
+     */
+    public function invalidatePdf(SubscriptionInvoice $invoice): void
+    {
+        $filename = "invoices/subscription/{$invoice->invoice_number}.pdf";
+
+        if (Storage::disk('local')->exists($filename)) {
+            Storage::disk('local')->delete($filename);
+        }
+    }
+
+    /**
+     * Invalidate any cached PDF and immediately regenerate it from latest invoice data.
+     */
+    public function refreshPdf(SubscriptionInvoice $invoice): string
+    {
+        $this->invalidatePdf($invoice);
+
+        return $this->generatePdf($invoice->fresh(['subscription.plan', 'tenant']));
+    }
+
+    /**
      * Get PDF URL for invoice.
      */
     public function getPdfUrl(SubscriptionInvoice $invoice): string
@@ -257,6 +281,10 @@ class SubscriptionInvoiceService
             $this->generatePdf($invoice);
         }
 
-        return route('system.invoices.download', ['invoice' => $invoice->id, 'inline' => 1]);
+        return route('system.invoices.download', [
+            'invoice' => $invoice->id,
+            'inline' => 1,
+            'v' => $invoice->updated_at?->timestamp ?? time(),
+        ], false);
     }
 }

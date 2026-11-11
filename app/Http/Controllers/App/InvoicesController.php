@@ -54,8 +54,15 @@ class InvoicesController extends Controller
             'lines',
             'payments.receivedBy',
             'center',
+            'tenant.taxSettings',
             'companyTransaction',
         ]);
+
+        if ($invoice->status !== 'draft' && $invoice->tax_enabled_snapshot && empty($invoice->zatca_qr_tlv)) {
+            $invoice->update([
+                'zatca_qr_tlv' => $this->invoiceService->generateZatcaQr($invoice),
+            ]);
+        }
 
         return Inertia::render('Invoices/Show', [
             'invoice' => $invoice,
@@ -336,10 +343,17 @@ class InvoicesController extends Controller
             'workOrder.vehicle.model',
             'lines',
             'payments',
-            'center',
+            'center.address',
+            'tenant.address',
             'tenant.taxSettings',
             'companyTransaction',
         ]);
+
+        if ($invoice->status !== 'draft' && $invoice->tax_enabled_snapshot && empty($invoice->zatca_qr_tlv)) {
+            $invoice->update([
+                'zatca_qr_tlv' => $this->invoiceService->generateZatcaQr($invoice),
+            ]);
+        }
 
         $template = InvoiceTemplate::getDefault($invoice->tenant_id, 'tax_invoice');
 

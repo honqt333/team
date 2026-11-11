@@ -74,7 +74,7 @@ class PromoCodesController extends Controller
             'starts_at' => 'nullable|date',
             'expires_at' => 'nullable|date|after:starts_at',
             'plan_id' => 'nullable|exists:plans,id',
-            'billing_cycle' => 'required|in:any,monthly,yearly',
+            'billing_cycle' => 'required|in:any,yearly',
             'first_subscription_only' => 'boolean',
             'is_active' => 'boolean',
         ]);
@@ -123,7 +123,7 @@ class PromoCodesController extends Controller
             'starts_at' => 'nullable|date',
             'expires_at' => 'nullable|date|after:starts_at',
             'plan_id' => 'nullable|exists:plans,id',
-            'billing_cycle' => 'required|in:any,monthly,yearly',
+            'billing_cycle' => 'required|in:any,yearly',
             'first_subscription_only' => 'boolean',
             'is_active' => 'boolean',
         ]);

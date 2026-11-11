@@ -347,6 +347,9 @@ import { ref } from 'vue';
 import { Link, router } from '@inertiajs/vue3';
 import SystemLayout from '@/Layouts/SystemLayout.vue';
 import PageHeader from '@/Components/PageHeader.vue';
+import { useConfirm } from '@/Composables/useConfirm';
+
+const { confirm } = useConfirm();
 
 const props = defineProps({
     subscription: Object,
@@ -364,8 +367,12 @@ const getStatusClass = (status) => {
     const classes = {
         active: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400',
         trial: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400',
+        trialing: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400',
+        pending: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
+        pending_payment: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400',
         cancelled: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
         expired: 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400',
+        failed: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
     };
     return classes[status] || classes.expired;
 };
@@ -374,20 +381,40 @@ const getStatusLabel = (status) => {
     const labels = {
         active: t('system.subscriptions.stats.active'),
         trial: t('system.subscriptions.stats.trial'),
+        trialing: t('system.subscriptions.stats.trial'),
+        pending: t('system.subscriptions.pending'),
+        pending_payment: t('system.subscriptions.pending_payment'),
         cancelled: t('system.subscriptions.stats.cancelled'),
         expired: t('system.subscriptions.stats.expired'),
+        failed: t('system.status.failed'),
     };
     return labels[status] || status;
 };
 
-const cancelSubscription = () => {
-    if (confirm(t('system.subscriptions.do_you_want_to_cancel_this_subscription'))) {
+const cancelSubscription = async () => {
+    const ok = await confirm({
+        title: t('system.subscriptions.cancel_subscription'),
+        message: t('system.subscriptions.confirm_cancel_message'),
+        confirmText: t('system.subscriptions.cancel_subscription'),
+        cancelText: t('common.cancel'),
+        type: 'danger',
+    });
+    if (ok) {
         router.post(`/system/subscriptions/${props.subscription.id}/cancel`);
     }
 };
 
-const activateSubscription = () => {
-    router.post(`/system/subscriptions/${props.subscription.id}/activate`);
+const activateSubscription = async () => {
+    const ok = await confirm({
+        title: t('system.subscriptions.activate_subscription'),
+        message: t('system.subscriptions.confirm_activate_message'),
+        confirmText: t('system.subscriptions.activate_subscription'),
+        cancelText: t('common.cancel'),
+        type: 'success',
+    });
+    if (ok) {
+        router.post(`/system/subscriptions/${props.subscription.id}/activate`);
+    }
 };
 
 const extendSubscription = () => {

@@ -2,6 +2,7 @@ import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useNumberFormat } from '@/Composables/useNumberFormat';
 import { useFormatters } from '@/Composables/useFormatters';
+import { buildPrintSignatures as buildPrintSignaturesUtil } from '@/Utils/printSignatures';
 
 /**
  * Trigger browser print safely with optional document title.
@@ -18,6 +19,103 @@ export function printDocument(options = {}) {
             document.title = originalTitle;
         }, 1000);
     }
+}
+
+/**
+ * Resolve document-level print settings from tenant.print_settings with safe defaults.
+ */
+export function resolveDocumentSettings({
+    tenantSettings = null,
+    documentType = 'invoice',
+    defaults = {},
+    customerSignatureUrl = null,
+    legacyTerms = null,
+} = {}) {
+    const docs = tenantSettings?.documents || {};
+    let docSettings = {};
+
+    if (documentType === 'quotation' || documentType === 'quote') {
+        const quotationDoc = docs.quotation;
+        const quoteDoc = docs.quote;
+        docSettings =
+            quotationDoc && Object.keys(quotationDoc).length > 0
+                ? quotationDoc
+                : quoteDoc && Object.keys(quoteDoc).length > 0
+                  ? quoteDoc
+                  : {};
+    } else if (documentType === 'credit_note' || documentType === 'parts_invoice') {
+        docSettings =
+            docs[documentType] && Object.keys(docs[documentType]).length > 0
+                ? docs[documentType]
+                : docs.invoice || {};
+    } else {
+        docSettings = docs[documentType] || {};
+    }
+
+    const baseSignatures =
+        docSettings.signatures && docSettings.signatures.length > 0
+            ? docSettings.signatures
+            : defaults.signatures || [];
+
+    const signatures = buildPrintSignaturesUtil(
+        { ...docSettings, signatures: baseSignatures },
+        customerSignatureUrl
+    );
+
+    const terms = Array.isArray(docSettings.terms)
+        ? docSettings.terms
+        : defaults.terms !== undefined
+          ? defaults.terms
+          : legacyTerms
+            ? [legacyTerms]
+            : [];
+
+    return {
+        template: docSettings.template ?? defaults.template ?? null,
+        title_ar: docSettings.title_ar || defaults.title_ar || '',
+        title_en: docSettings.title_en || defaults.title_en || '',
+        terms,
+        print_terms:
+            docSettings.print_terms !== undefined
+                ? docSettings.print_terms !== false
+                : (defaults.print_terms ?? true),
+        terms_first_page: Boolean(
+            docSettings.terms_first_page ?? defaults.terms_first_page ?? false
+        ),
+        show_stamp:
+            docSettings.show_stamp !== undefined
+                ? docSettings.show_stamp !== false
+                : (defaults.show_stamp ?? true),
+        show_qr_code:
+            docSettings.show_qr_code !== undefined
+                ? docSettings.show_qr_code !== false
+                : (defaults.show_qr_code ?? true),
+        show_iban:
+            docSettings.show_iban !== undefined
+                ? Boolean(docSettings.show_iban)
+                : Boolean(defaults.show_iban ?? false),
+        show_customer_address:
+            docSettings.show_customer_address !== undefined
+                ? docSettings.show_customer_address !== false
+                : (defaults.show_customer_address ?? true),
+        signatures,
+    };
+}
+
+/**
+ * Resolve global visual print settings from tenant.print_settings.
+ */
+export function resolveVisualSettings({ tenantSettings = null, center = {}, overrides = {} } = {}) {
+    const vis = tenantSettings?.visual || {};
+    return {
+        active_template: overrides.active_template ?? (vis.active_template || 'TemplateDefaultA4'),
+        show_logo: overrides.show_logo ?? vis.show_logo !== false,
+        show_stamp: overrides.show_stamp ?? vis.show_stamp !== false,
+        show_qr_code: overrides.show_qr_code ?? vis.show_qr_code !== false,
+        primary_color: overrides.primary_color ?? (vis.primary_color || '#fbbf24'),
+        footer_text: overrides.footer_text ?? vis.footer_text ?? tenantSettings?.footer_text ?? '',
+        stamp_url: overrides.stamp_url ?? (center?.stamp_url || vis.stamp_url || ''),
+    };
 }
 
 /**
@@ -313,65 +411,13 @@ export function usePrint() {
     /**
      * Build signature list from docSettings
      */
-    const buildPrintSignatures = (docSettings, customerSignatureUrl) => {
-        const saved = docSettings?.signatures;
-        const separator = (s1, s2) => `${s1} ${s2}`.trim();
-        const isCustomerSig = (sig) => {
-            const text = separator(sig?.name_ar, separator(sig?.name_en, sig?.name || ''));
-            return (
-                text.includes('عميل') ||
-                text.includes('العميل') ||
-                text.includes('زبون') ||
-                text.includes('customer') ||
-                text.includes('client')
-            );
-        };
-
-        const list =
-            saved && saved.length > 0
-                ? saved.map((signature) => {
-                      if (isCustomerSig(signature)) {
-                          return { ...signature, url: customerSignatureUrl || signature.url };
-                      }
-                      return signature;
-                  })
-                : [
-                      {
-                          name_ar: 'توقيع المستشار الفني',
-                          name_en: 'Service Advisor Signature',
-                          show: true,
-                      },
-                      {
-                          name_ar: 'توقيع العميل للاعتماد',
-                          name_en: 'Customer Signature',
-                          url: customerSignatureUrl,
-                          show: true,
-                      },
-                  ];
-
-        if (customerSignatureUrl) {
-            const existing = list.some((s) => isCustomerSig(s) && s.url);
-            if (!existing) {
-                list.push({
-                    name_ar: 'توقيع العميل للاعتماد',
-                    name_en: 'Customer Signature',
-                    url: customerSignatureUrl,
-                    show: true,
-                });
-            }
-        }
-
-        return list;
-    };
+    const buildPrintSignatures = buildPrintSignaturesUtil;
 
     /**
      * Parse all composable functions
      */
     function parseSignatures(docSettings, customerSignatureUrl = '') {
-        import('@/Utils/printSignatures').then(({ buildPrintSignatures }) => {
-            return buildPrintSignatures(docSettings, customerSignatureUrl);
-        });
-        return buildPrintSignatures(docSettings, customerSignatureUrl);
+        return buildPrintSignaturesUtil(docSettings, customerSignatureUrl);
     }
 
     function print() {

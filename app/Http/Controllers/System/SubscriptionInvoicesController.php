@@ -6,8 +6,10 @@ namespace App\Http\Controllers\System;
 
 use App\Http\Controllers\Controller;
 use App\Mail\SubscriptionInvoiceMail;
+use App\Models\AdminUser;
 use App\Models\BankTransferReceipt;
 use App\Models\Billing\SubscriptionInvoice;
+use App\Models\Billing\SubscriptionPayment;
 use App\Services\Billing\SubscriptionLifecycleService;
 use App\Services\Invoice\SubscriptionInvoiceService;
 use Illuminate\Http\Request;
@@ -15,6 +17,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use Inertia\Inertia;
 use Inertia\Response;
+use Throwable;
 
 class SubscriptionInvoicesController extends Controller
 {
@@ -38,15 +41,25 @@ class SubscriptionInvoicesController extends Controller
         $query = SubscriptionInvoice::with(['tenant', 'subscription.plan']);
 
         // Filters
+        $today = now()->startOfDay();
+
         if ($request->status) {
-            $query->where('status', $request->status);
+            if ($request->status === 'overdue') {
+                $query->where('status', 'pending')
+                    ->where('due_at', '<', $today);
+            } else {
+                $query->where('status', $request->status);
+            }
         }
 
         if ($request->search) {
             $search = $request->search;
             $query->where(function ($q) use ($search) {
                 $q->where('invoice_number', 'like', "%{$search}%")
-                    ->orWhereHas('tenant', fn ($q) => $q->where('trade_name', 'like', "%{$search}%"));
+                    ->orWhereHas('tenant', function ($tq) use ($search) {
+                        $tq->where('trade_name', 'like', "%{$search}%")
+                            ->orWhere('name', 'like', "%{$search}%");
+                    });
             });
         }
 
@@ -59,8 +72,6 @@ class SubscriptionInvoicesController extends Controller
         // to due_at, so the overdue filter was previously a silent no-op
         // (column didn't exist in SQLite, no error in MySQL but 0 rows
         // matched because the column literally wasn't there).
-        $today = now()->startOfDay();
-
         $stats = [
             'total' => SubscriptionInvoice::count(),
             'pending' => SubscriptionInvoice::where('status', 'pending')->count(),
@@ -83,7 +94,11 @@ class SubscriptionInvoicesController extends Controller
      */
     public function show(SubscriptionInvoice $invoice): Response
     {
-        $invoice->load(['tenant', 'subscription.plan']);
+        $invoice->load([
+            'tenant',
+            'subscription.plan',
+            'payments' => fn ($q) => $q->latest('id'),
+        ]);
 
         return Inertia::render('System/Invoices/Show', [
             'invoice' => $invoice,
@@ -99,7 +114,11 @@ class SubscriptionInvoicesController extends Controller
         $pdfPath = $this->invoiceService->getPdfPath($invoice);
 
         if ($request->boolean('inline')) {
-            return response()->file($pdfPath, ['Cache-Control' => 'private, no-store']);
+            return response()->file($pdfPath, [
+                'Content-Type' => 'application/pdf',
+                'Content-Disposition' => "inline; filename=\"{$invoice->invoice_number}.pdf\"",
+                'Cache-Control' => 'private, no-store',
+            ]);
         }
 
         return response()->download($pdfPath, "{$invoice->invoice_number}.pdf");
@@ -112,7 +131,7 @@ class SubscriptionInvoicesController extends Controller
     {
         $invoice->load(['tenant', 'subscription.plan']);
 
-        $email = $invoice->tenant->email;
+        $email = $invoice->tenant?->email;
 
         if (! $email) {
             return back()->with('error', __('messages.system.tenants.no_email'));
@@ -128,43 +147,97 @@ class SubscriptionInvoicesController extends Controller
      */
     public function regeneratePdf(SubscriptionInvoice $invoice)
     {
-        $this->invoiceService->generatePdf($invoice);
+        $this->invoiceService->refreshPdf($invoice);
 
         return back()->with('success', __('messages.system.invoices.pdf_regenerated'));
     }
 
     /**
-     * Mark as paid manually.
+     * Mark as paid manually (cash at office, POS, bank transfer, or manual settlement).
      */
     public function markPaid(Request $request, SubscriptionInvoice $invoice)
     {
         $validated = $request->validate([
+            'payment_method' => 'nullable|in:cash,bank_transfer,pos,manual',
             'reference' => 'nullable|string|max:255',
+            'paid_amount' => 'nullable|numeric|min:0.01',
             'notes' => 'nullable|string',
         ]);
 
-        // Identify the acting admin for the audit trail. The invoice
-        // table no longer has a `marked_by` column, so the actor is
-        // folded into the invoice notes by the service. We record both
-        // the table and the id: the /system panel is reachable through
-        // two different guards (an AdminUser on 'admin', or a tenant
-        // User flagged `is_system_admin` on 'web'), and a bare id would
-        // be ambiguous between the two id spaces.
+        if ($invoice->status === 'paid') {
+            return back()->with('success', __('messages.system.invoices.paid'));
+        }
+
         $actor = $request->user();
         $markedBy = $actor
             ? $actor::class.'#'.$actor->id
             : 'unknown';
 
-        $this->invoiceService->markAsPaid(
-            $invoice,
-            'manual',
-            $validated['reference'] ?? 'MANUAL-'.time(),
-            ['notes' => $validated['notes'] ?? null, 'marked_by' => $markedBy]
-        );
+        $method = $validated['payment_method'] ?? 'manual';
+        $reference = ! empty($validated['reference']) ? $validated['reference'] : strtoupper($method).'-'.time();
+        $paidAmount = isset($validated['paid_amount'])
+            ? (float) $validated['paid_amount']
+            : (float) $invoice->total;
 
-        // Activate subscription if pending or inactive
-        if ($invoice->subscription && $invoice->subscription->status !== 'active') {
-            $this->lifecycle->activateSubscription($invoice->subscription);
+        DB::transaction(function () use ($invoice, $method, $reference, $paidAmount, $validated, $markedBy) {
+            $this->invoiceService->markAsPaid(
+                $invoice,
+                $method,
+                $reference,
+                ['notes' => $validated['notes'] ?? null, 'marked_by' => $markedBy]
+            );
+
+            // Record an actual SubscriptionPayment row so analytics, receipt/payment
+            // history, and subscription resume checks recognize the settlement.
+            $existingPendingPayment = $invoice->payments()
+                ->whereIn('status', ['pending', 'pending_payment', 'initiated'])
+                ->latest('id')
+                ->first();
+
+            if ($existingPendingPayment) {
+                $existingPendingPayment->update([
+                    'amount' => $paidAmount,
+                    'gateway' => $method,
+                    'payment_method' => $method,
+                    'gateway_ref' => $reference,
+                    'status' => 'paid',
+                    'paid_at' => now(),
+                    'failure_reason' => null,
+                    'gateway_response' => [
+                        'recorded_by' => $markedBy,
+                        'notes' => $validated['notes'] ?? null,
+                    ],
+                ]);
+            } else {
+                SubscriptionPayment::create([
+                    'tenant_id' => $invoice->tenant_id,
+                    'subscription_id' => $invoice->subscription_id,
+                    'subscription_invoice_id' => $invoice->id,
+                    'amount' => $paidAmount,
+                    'currency' => 'SAR',
+                    'gateway' => $method,
+                    'payment_method' => $method,
+                    'gateway_ref' => $reference,
+                    'status' => 'paid',
+                    'paid_at' => now(),
+                    'gateway_response' => [
+                        'recorded_by' => $markedBy,
+                        'notes' => $validated['notes'] ?? null,
+                    ],
+                ]);
+            }
+
+            // Activate subscription if pending or inactive
+            if ($invoice->subscription && $invoice->subscription->status !== 'active') {
+                $this->lifecycle->activateSubscription($invoice->subscription);
+            }
+        });
+
+        try {
+            $this->invoiceService->refreshPdf($invoice);
+        } catch (Throwable) {
+            // Paid transaction is already committed; invalidate stale PDF so next view regenerates.
+            $this->invoiceService->invalidatePdf($invoice);
         }
 
         return back()->with('success', __('messages.system.invoices.paid'));
@@ -190,14 +263,23 @@ class SubscriptionInvoicesController extends Controller
      * payment, receipt under review" even though the admin had
      * clearly cancelled the whole thing.
      */
-    public function cancel(SubscriptionInvoice $invoice)
+    public function cancel(Request $request, SubscriptionInvoice $invoice)
     {
         if ($invoice->status === 'paid') {
             return back()->with('error', __('messages.system.invoices.cannot_cancel_paid'));
         }
 
-        DB::transaction(function () use ($invoice) {
+        $actor = $request->user();
+        $reviewerAdminId = $actor instanceof AdminUser ? $actor->id : null;
+        $actorNote = $actor ? ($actor->name ?? 'admin').' ('.$actor::class.'#'.$actor->id.')' : 'admin';
+
+        DB::transaction(function () use ($invoice, $reviewerAdminId, $actorNote) {
             $invoice->update(['status' => 'cancelled']);
+
+            // Cancel payments linked directly to this invoice
+            SubscriptionPayment::where('subscription_invoice_id', $invoice->id)
+                ->whereIn('status', ['pending', 'pending_payment', 'initiated'])
+                ->update(['status' => 'cancelled']);
 
             // Cancel the parent subscription (if it has no other open
             // invoices). If it has another open invoice, leave the
@@ -217,20 +299,14 @@ class SubscriptionInvoicesController extends Controller
                         'cancelled_at' => now(),
                     ]);
 
-                    // Cancel payments on this invoice
-                    $subscription->payments()
-                        ->where('subscription_invoice_id', $invoice->id)
-                        ->whereIn('status', ['pending', 'pending_payment'])
-                        ->update(['status' => 'cancelled']);
-
                     // Supersede pending bank transfer receipts
                     BankTransferReceipt::where('subscription_id', $subscription->id)
                         ->where('status', 'pending')
                         ->update([
                             'status' => 'superseded',
-                            'reviewed_by' => auth('admin')->id(),
+                            'reviewed_by' => $reviewerAdminId,
                             'reviewed_at' => now(),
-                            'review_notes' => 'Invoice #'.$invoice->invoice_number.' cancelled by admin — receipt superseded.',
+                            'review_notes' => 'Invoice #'.$invoice->invoice_number.' cancelled by '.$actorNote.' — receipt superseded.',
                         ]);
 
                     // NOTE: We deliberately do NOT change tenant.status
@@ -242,6 +318,12 @@ class SubscriptionInvoicesController extends Controller
                 }
             }
         });
+
+        try {
+            $this->invoiceService->refreshPdf($invoice);
+        } catch (Throwable) {
+            $this->invoiceService->invalidatePdf($invoice);
+        }
 
         return back()->with('success', __('messages.system.invoices.cancelled'));
     }

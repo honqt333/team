@@ -833,7 +833,7 @@
                                     :options="categoryFormOptions"
                                     option-label="label"
                                     option-value="value"
-                                    :placeholder="$t('system.help.select_the_section...')"
+                                    :placeholder="$t('system.help.select_the_section')"
                                     :compact="true"
                                 />
                             </div>
@@ -980,11 +980,7 @@
                                 @paste="onVideoUrlPaste"
                                 type="url"
                                 dir="ltr"
-                                :placeholder="
-                                    $t(
-                                        'system.help.httpswww.youtube.comwatchv..._or_httpsyoutu.be..'
-                                    )
-                                "
+                                :placeholder="$t('system.help.video_url_example')"
                                 class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm font-mono"
                             />
                             <p
@@ -1109,7 +1105,7 @@
                                     :options="categoryFormOptions"
                                     option-label="label"
                                     option-value="value"
-                                    :placeholder="$t('system.help.select_the_section...')"
+                                    :placeholder="$t('system.help.select_the_section')"
                                 />
                             </div>
 
@@ -1155,9 +1151,7 @@
                             <input
                                 v-model="topicModal.form.summary"
                                 type="text"
-                                :placeholder="
-                                    $t('system.help.a_short_description_of_this_guide...')
-                                "
+                                :placeholder="$t('system.help.a_short_description_of_this_guide')"
                                 class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
                             />
                         </div>
@@ -1192,7 +1186,7 @@
                                     <input
                                         v-model="topicModal.form.steps[sIdx]"
                                         type="text"
-                                        :placeholder="$t('system.help.write_the_step_here...')"
+                                        :placeholder="$t('system.help.write_the_step_here')"
                                         class="flex-1 px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-xs"
                                     />
                                     <button
@@ -1397,7 +1391,7 @@
                             <input
                                 v-model="faqModal.form.q"
                                 type="text"
-                                :placeholder="$t('system.help.write_the_question_here...')"
+                                :placeholder="$t('system.help.write_the_question_here')"
                                 class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
                             />
                         </div>
@@ -1411,7 +1405,7 @@
                             <textarea
                                 v-model="faqModal.form.a"
                                 rows="4"
-                                :placeholder="$t('system.help.write_the_detailed_answer_here...')"
+                                :placeholder="$t('system.help.write_the_detailed_answer_here')"
                                 class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
                             ></textarea>
                         </div>

@@ -126,7 +126,7 @@
                             v-model.number="local.extendDays"
                             type="number"
                             min="1"
-                            max="365"
+                            max="90"
                             class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                             dir="ltr"
                         />
@@ -408,6 +408,73 @@
                             </div>
                         </div>
 
+                        <!-- Settlement & Manual Payment (for paid plans) -->
+                        <div
+                            v-if="selectedPlanObj && selectedPlanObj.slug !== 'trial'"
+                            class="space-y-3 pt-2 border-t border-gray-100 dark:border-gray-700"
+                        >
+                            <SearchableSelect
+                                v-model="local.settlementType"
+                                :options="settlementOptions"
+                                option-label="label"
+                                option-value="value"
+                                :label="$t('system.subscriptions.settlement_type')"
+                            />
+
+                            <div
+                                v-if="local.settlementType === 'paid_now'"
+                                class="grid grid-cols-1 sm:grid-cols-2 gap-3"
+                            >
+                                <SearchableSelect
+                                    v-model="local.paymentMethod"
+                                    :options="paymentMethodOptions"
+                                    option-label="label"
+                                    option-value="value"
+                                    :label="$t('system.subscriptions.payment_method')"
+                                />
+                                <div>
+                                    <label
+                                        class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                                    >
+                                        {{ $t('system.subscriptions.paid_amount') }}
+                                    </label>
+                                    <input
+                                        v-model.number="local.paidAmount"
+                                        type="number"
+                                        min="0"
+                                        step="0.01"
+                                        dir="ltr"
+                                        class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
+                                    />
+                                </div>
+                                <div class="sm:col-span-2">
+                                    <label
+                                        class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                                    >
+                                        {{ $t('system.subscriptions.payment_reference') }}
+                                    </label>
+                                    <input
+                                        v-model="local.paymentReference"
+                                        type="text"
+                                        class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
+                                    />
+                                </div>
+                            </div>
+
+                            <div v-if="local.settlementType !== 'complimentary'">
+                                <label
+                                    class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                                >
+                                    {{ $t('system.subscriptions.payment_notes') }}
+                                </label>
+                                <textarea
+                                    v-model="local.paymentNotes"
+                                    rows="2"
+                                    class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
+                                ></textarea>
+                            </div>
+                        </div>
+
                         <!-- Notice -->
                         <p
                             class="text-xs text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 p-2.5 rounded-lg border border-amber-200 dark:border-amber-800"
@@ -481,9 +548,27 @@ const local = reactive({
     deleteConfirmation: '',
     assignPlanId: '',
     assignBillingCycle: 'yearly',
+    settlementType: 'paid_now',
+    paymentMethod: 'cash',
+    paidAmount: 0,
+    paymentReference: '',
+    paymentNotes: '',
     assignError: '',
     isSubmitting: false,
 });
+
+const settlementOptions = computed(() => [
+    { value: 'paid_now', label: t('system.subscriptions.settlement_paid_now') },
+    { value: 'pending_invoice', label: t('system.subscriptions.settlement_pending_invoice') },
+    { value: 'complimentary', label: t('system.subscriptions.settlement_complimentary') },
+]);
+
+const paymentMethodOptions = computed(() => [
+    { value: 'cash', label: t('system.invoices.methods.cash') },
+    { value: 'pos', label: t('system.invoices.methods.pos') },
+    { value: 'bank_transfer', label: t('system.invoices.methods.bank_transfer') },
+    { value: 'manual', label: t('system.invoices.methods.manual') },
+]);
 
 const planOptions = computed(() =>
     (props.plans || []).map((p) => {
@@ -503,14 +588,26 @@ const selectedPlanObj = computed(() => {
     return (props.plans || []).find((p) => p.id === Number(local.assignPlanId));
 });
 
+watch(selectedPlanObj, (plan) => {
+    if (plan) {
+        local.paidAmount = Number(plan.price_yearly || 0);
+    }
+});
+
 // Reset scratch inputs when a modal closes so reopening starts fresh.
 watch(
     () => props.modals.assignPlan,
     (open) => {
         if (open) {
             const firstPaidPlan = (props.plans || []).find((p) => p.slug !== 'trial');
-            local.assignPlanId = firstPaidPlan?.id || props.plans[0]?.id || '';
+            const initialPlan = firstPaidPlan || props.plans[0];
+            local.assignPlanId = initialPlan?.id || '';
             local.assignBillingCycle = 'yearly';
+            local.settlementType = 'paid_now';
+            local.paymentMethod = 'cash';
+            local.paidAmount = Number(initialPlan?.price_yearly || 0);
+            local.paymentReference = '';
+            local.paymentNotes = '';
             local.assignError = '';
             local.isSubmitting = false;
         }
@@ -539,12 +636,28 @@ const submitAssignPlan = () => {
     if (!local.assignPlanId) return;
     local.isSubmitting = true;
     local.assignError = '';
+    const isTrialPlan = selectedPlanObj.value?.slug === 'trial';
     router.post(
         '/system/subscriptions',
         {
             tenant_id: props.tenant.id,
             plan_id: local.assignPlanId,
             billing_cycle: local.assignBillingCycle,
+            settlement_type: isTrialPlan ? 'complimentary' : local.settlementType,
+            payment_method:
+                !isTrialPlan && local.settlementType === 'paid_now'
+                    ? local.paymentMethod
+                    : undefined,
+            paid_amount:
+                !isTrialPlan && local.settlementType === 'paid_now' ? local.paidAmount : undefined,
+            payment_reference:
+                !isTrialPlan && local.settlementType === 'paid_now'
+                    ? local.paymentReference || undefined
+                    : undefined,
+            payment_notes:
+                !isTrialPlan && local.settlementType !== 'complimentary'
+                    ? local.paymentNotes || undefined
+                    : undefined,
         },
         {
             preserveScroll: true,

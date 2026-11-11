@@ -67,6 +67,7 @@
                     option-value="value"
                     :placeholder="$t('system.invoices.all_statuses')"
                     compact
+                    @update:model-value="applyFilters"
                 />
             </div>
 
@@ -122,7 +123,11 @@
                             </td>
                             <td class="px-4 py-3 align-middle">
                                 <span class="text-gray-900 dark:text-white">
-                                    {{ invoice.tenant?.trade_name || $t('common.na') }}
+                                    {{
+                                        invoice.tenant?.trade_name ||
+                                        invoice.tenant?.name ||
+                                        $t('common.na')
+                                    }}
                                 </span>
                             </td>
                             <td class="px-4 py-3 align-middle">
@@ -198,30 +203,22 @@
             </div>
 
             <!-- Pagination -->
-            <div v-if="invoices.last_page > 1" class="flex justify-center gap-2">
-                <Link
-                    v-for="page in invoices.last_page"
-                    :key="page"
-                    :href="`/system/invoices?page=${page}`"
-                    :class="[
-                        'px-3 py-1 rounded text-sm',
-                        page === invoices.current_page
-                            ? 'bg-action-primary text-white'
-                            : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300',
-                    ]"
-                >
-                    {{ page }}
-                </Link>
-            </div>
+            <AppPagination
+                :links="invoices.links || []"
+                :from="invoices.from"
+                :to="invoices.to"
+                :total="invoices.total"
+            />
         </div>
     </SystemLayout>
 </template>
 
 <script setup>
 import DataTable from '@/Components/Common/DataTable.vue';
+import AppPagination from '@/Components/Common/AppPagination.vue';
 import { ref, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { Link, router } from '@inertiajs/vue3';
+import { router } from '@inertiajs/vue3';
 import SystemLayout from '@/Layouts/SystemLayout.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 import PageHeader from '@/Components/PageHeader.vue';
@@ -231,8 +228,11 @@ const { t } = useI18n();
 const { toEnglish } = useNumberFormat();
 
 const statusOptions = computed(() => [
+    { value: '', label: t('system.invoices.all_statuses') },
     { value: 'pending', label: t('system.invoices.status.pending') },
+    { value: 'overdue', label: t('system.invoices.status.overdue') },
     { value: 'paid', label: t('system.invoices.status.paid') },
+    { value: 'failed', label: t('system.invoices.status.failed') },
     { value: 'cancelled', label: t('system.invoices.status.cancelled') },
 ]);
 
@@ -285,7 +285,7 @@ const applyFilters = () => {
             search: search.value || undefined,
             status: status.value || undefined,
         },
-        { preserveState: true }
+        { preserveState: true, replace: true }
     );
 };
 
@@ -302,7 +302,10 @@ const formatDate = (date) => {
 };
 
 const isOverdue = (invoice) => {
-    return invoice.status === 'pending' && new Date(invoice.due_at) < new Date();
+    if (invoice.status !== 'pending' || !invoice.due_at) return false;
+    const startOfToday = new Date();
+    startOfToday.setHours(0, 0, 0, 0);
+    return new Date(invoice.due_at) < startOfToday;
 };
 
 const getStatusClass = (status) => {

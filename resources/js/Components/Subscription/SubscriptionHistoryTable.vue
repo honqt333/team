@@ -2,8 +2,10 @@
 import { ref, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { router } from '@inertiajs/vue3';
+import { useConfirm } from '@/Composables/useConfirm';
 
 const { t } = useI18n();
+const { confirm } = useConfirm();
 
 const props = defineProps({
     subscriptions: { type: Array, default: () => [] },
@@ -15,7 +17,6 @@ const emit = defineEmits(['refresh']);
 
 const locale = computed(() => document.documentElement.lang || 'ar');
 const processing = ref(null);
-const confirmCancel = ref(null);
 
 // Status badge styling. Every terminal status (cancelled, expired,
 // refunded, failed) AND the in-flight statuses (pending, pending_payment)
@@ -95,64 +96,57 @@ const formatCurrency = (amount) => {
 };
 
 async function cancel(sub) {
+    const ok = await confirm({
+        title: t('system.company_subscription.history.confirm_modal.title'),
+        message: t('system.company_subscription.history.confirm_modal.body'),
+        confirmText: t('system.company_subscription.history.confirm_modal.yes_cancel'),
+        cancelText: t('system.company_subscription.history.confirm_modal.go_back'),
+        type: 'danger',
+    });
+    if (!ok) return;
+
     processing.value = sub.id;
-    try {
-        await fetch(`/app/settings/billing/cancel/${sub.id}`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content,
-                Accept: 'application/json',
-                'X-Requested-With': 'XMLHttpRequest',
+    router.post(
+        `/app/settings/billing/cancel/${sub.id}`,
+        {},
+        {
+            preserveScroll: true,
+            onFinish: () => {
+                processing.value = null;
+                emit('refresh');
             },
-        });
-        confirmCancel.value = null;
-        emit('refresh');
-    } catch (e) {
-        // silent
-    } finally {
-        processing.value = null;
-    }
+        }
+    );
 }
 
-async function resume(sub) {
+function resume(sub) {
     processing.value = sub.id;
-    try {
-        await fetch(`/app/settings/billing/resume/${sub.id}`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content,
-                Accept: 'application/json',
-                'X-Requested-With': 'XMLHttpRequest',
+    router.post(
+        `/app/settings/billing/resume/${sub.id}`,
+        {},
+        {
+            preserveScroll: true,
+            onFinish: () => {
+                processing.value = null;
+                emit('refresh');
             },
-        });
-        emit('refresh');
-    } catch (e) {
-        // silent
-    } finally {
-        processing.value = null;
-    }
+        }
+    );
 }
 
-async function toggleAutoRenew(sub) {
+function toggleAutoRenew(sub) {
     processing.value = sub.id;
-    try {
-        await fetch(`/app/settings/billing/auto-renew/${sub.id}`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content,
-                Accept: 'application/json',
-                'X-Requested-With': 'XMLHttpRequest',
+    router.post(
+        `/app/settings/billing/auto-renew/${sub.id}`,
+        {},
+        {
+            preserveScroll: true,
+            onFinish: () => {
+                processing.value = null;
+                emit('refresh');
             },
-        });
-        emit('refresh');
-    } catch (e) {
-        // silent
-    } finally {
-        processing.value = null;
-    }
+        }
+    );
 }
 
 // Defensive: a single history row is short — a single line. Use
@@ -313,7 +307,7 @@ const tableClass = 'whitespace-nowrap';
                                             ['active', 'trialing', 'trial'].includes(sub.status)
                                         "
                                         type="button"
-                                        @click="confirmCancel = sub"
+                                        @click="cancel(sub)"
                                         :disabled="processing === sub.id"
                                         class="rounded p-1.5 text-rose-600 hover:bg-rose-50 disabled:opacity-50 dark:hover:bg-rose-900/30"
                                         :title="
@@ -373,52 +367,5 @@ const tableClass = 'whitespace-nowrap';
                 </table>
             </div>
         </div>
-
-        <!-- Cancel confirmation modal -->
-        <Teleport to="body">
-            <div
-                v-if="confirmCancel"
-                class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
-                @click.self="confirmCancel = null"
-            >
-                <div class="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl dark:bg-slate-800">
-                    <div
-                        class="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-full bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-300"
-                    >
-                        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-                            />
-                        </svg>
-                    </div>
-                    <h3 class="text-lg font-bold text-slate-900 dark:text-white">
-                        {{ t('system.company_subscription.history.confirm_modal.title') }}
-                    </h3>
-                    <p class="mt-2 text-sm text-slate-600 dark:text-slate-400">
-                        {{ t('system.company_subscription.history.confirm_modal.body') }}
-                    </p>
-                    <div class="mt-6 flex justify-end gap-2">
-                        <button
-                            type="button"
-                            @click="confirmCancel = null"
-                            class="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-300"
-                        >
-                            {{ t('system.company_subscription.history.confirm_modal.go_back') }}
-                        </button>
-                        <button
-                            type="button"
-                            @click="cancel(confirmCancel)"
-                            :disabled="processing === confirmCancel.id"
-                            class="rounded-lg bg-rose-600 px-4 py-2 text-sm font-semibold text-white hover:bg-rose-700 disabled:opacity-50"
-                        >
-                            {{ t('system.company_subscription.history.confirm_modal.yes_cancel') }}
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </Teleport>
     </div>
 </template>

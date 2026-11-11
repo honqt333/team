@@ -51,16 +51,11 @@ class Plan extends Model
     }
 
     /**
-     * Get yearly discount percentage
+     * Get yearly discount percentage (annual-only pricing returns 0).
      */
     public function getYearlyDiscountAttribute(): float
     {
-        if ($this->price_monthly == 0) {
-            return 0;
-        }
-        $yearlyIfMonthly = $this->price_monthly * 12;
-
-        return round((($yearlyIfMonthly - $this->price_yearly) / $yearlyIfMonthly) * 100);
+        return 0.0;
     }
 
     /**

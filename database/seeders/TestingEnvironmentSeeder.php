@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Database\Seeders;
 
-use App\Models\AdminUser;
 use App\Models\Billing\Plan;
 use App\Models\Billing\Subscription;
 use App\Models\Center;
@@ -27,12 +26,14 @@ use App\Models\VehicleMake;
 use App\Models\Warehouse;
 use App\Models\WorkOrder;
 use App\Models\WorkOrderItem;
+use App\Services\InvoiceService;
+use App\Services\PaymentService;
 use App\Services\TenantSetupService;
 use App\Support\Permissions;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Schema;
+use LogicException;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\PermissionRegistrar;
 
@@ -43,174 +44,51 @@ class TestingEnvironmentSeeder extends Seeder
      */
     public function run(): void
     {
-        $this->command->info('🧹 Starting clean-up of existing tenant and operational data...');
-        $this->cleanupTenantData();
-
-        $this->command->info('🏢 Seeding test tenants (all subscription states)...');
-        $tenants = $this->seedTenants();
-
-        $activeTenant = $tenants['active'];
-        $activeCenter = $activeTenant->centers()->first();
-
-        $this->command->info('👥 Seeding diverse customer profiles and vehicles...');
-        $this->seedCustomersAndVehicles($activeTenant, $activeCenter);
-
-        $this->command->info('🧪 Seeding 1000 trial customers for load testing...');
-        $this->seedTrialCustomers($activeTenant, $activeCenter);
-
-        $this->command->info('👔 Seeding employees and role-based staff members...');
-        $this->seedEmployeesAndStaff($activeTenant, $activeCenter);
-
-        $this->command->info('🚚 Seeding verified suppliers...');
-        $this->seedSuppliers($activeTenant, $activeCenter);
-
-        $this->command->info('⚙️ Seeding departments and services (flexible & fixed pricing)...');
-        $this->seedDepartmentsAndServices($activeTenant, $activeCenter);
-
-        $this->command->info('📦 Seeding spare parts, warehouses, and starting inventory balances...');
-        $this->seedInventoryAndParts($activeTenant, $activeCenter);
-
-        $this->command->info('🔧 Seeding work orders with technician assignments...');
-        $this->seedWorkOrdersWithTechnicians($activeTenant, $activeCenter);
-
-        $this->command->info('✅ System successfully initialized and seeded for comprehensive testing!');
-    }
-
-    /**
-     * Safely purge tenant, customer, financial, and inventory data while preserving
-     * platform lookup tables (makes, models, plans, admin users).
-     */
-    private function cleanupTenantData(): void
-    {
-        DB::statement('SET FOREIGN_KEY_CHECKS=0');
-
-        $tablesToTruncate = [
-            'work_order_activities',
-            'work_order_attachments',
-            'work_order_damage_marks',
-            'work_order_departments',
-            'work_order_inspections',
-            'work_order_item_notes',
-            'work_order_item_parts',
-            'work_order_item_technician',
-            'work_order_item_quality_checks',
-            'work_order_labor_entries',
-            'work_order_items',
-            'work_order_photos',
-            'work_orders',
-            'quote_lines',
-            'quote_parts',
-            'quote_departments',
-            'quotes',
-            'invoice_lines',
-            'invoices',
-            'payments',
-            'inventory_transfer_items',
-            'inventory_transfers',
-            'inventory_moves',
-            'inventory_balances',
-            'parts',
-            'inventory_categories',
-            'inventory_units',
-            'warehouses',
-            'grn_items',
-            'goods_received_notes',
-            'purchase_return_invoice_lines',
-            'purchase_return_invoices',
-            'purchase_invoice_lines',
-            'purchase_invoices',
-            'purchase_order_items',
-            'purchase_orders',
-            'suppliers',
-            'services',
-            'departments',
-            'vehicle_mileage_logs',
-            'vehicles',
-            'customers',
-            'appointments',
-            'appointment_activities',
-            'appointment_message_deliveries',
-            'service_bays',
-            'hr_employees',
-            'hr_attendance',
-            'hr_attendances',
-            'hr_leaves',
-            'hr_payroll_runs',
-            'hr_payroll_items',
-            'hr_employee_contracts',
-            'hr_employee_documents',
-            'hr_employee_allowances',
-            'hr_employee_deductions',
-            'company_transactions',
-            'income_categories',
-            'internal_notifications',
-            'tenant_tax_settings',
-            'tenant_zatca_settings',
-            'tenant_addresses',
-            'tenant_integrations',
-            'tenant_sms_balances',
-            'tenant_whatsapp_balances',
-            'tenant_announcement_reads',
-            'tenant_websites',
-            'customer_portal_otps',
-            'center_addresses',
-            'center_working_hours',
-            'center_sequences',
-            'center_user',
-            'centers',
-            'subscriptions',
-            'subscription_invoices',
-            'subscription_payments',
-            'bank_transfer_receipts',
-            'dunning_logs',
-            'dunning_opt_outs',
-            'users',
-            'tenants',
-            'model_has_roles',
-            'role_has_permissions',
-            'model_has_permissions',
-            'roles',
-        ];
-
-        foreach ($tablesToTruncate as $tableName) {
-            if (Schema::hasTable($tableName)) {
-                DB::table($tableName)->truncate();
-            }
+        if (! app()->environment('local', 'testing')) {
+            throw new LogicException('Demo data can only be seeded in local or testing environments.');
         }
 
-        DB::statement('SET FOREIGN_KEY_CHECKS=1');
+        $registrar = app(PermissionRegistrar::class);
+        $previousTeam = $registrar->getPermissionsTeamId();
 
-        app(PermissionRegistrar::class)->forgetCachedPermissions();
+        try {
+            DB::transaction(function (): void {
+                foreach (Permissions::all() as $permission) {
+                    Permission::firstOrCreate(['name' => $permission, 'guard_name' => 'web']);
+                }
 
-        // Ensure global permissions exist
-        foreach (Permissions::all() as $permission) {
-            Permission::firstOrCreate(['name' => $permission, 'guard_name' => 'web']);
+                if (! Tenant::where('slug', 'active-workshop')->exists()) {
+                    $this->seedActiveWorkshop(Plan::where('slug', 'pro')->firstOrFail());
+                }
+
+                if (! Tenant::where('slug', 'new-workshop')->exists()) {
+                    $this->seedNewWorkshop(Plan::where('slug', 'trial')->firstOrFail());
+                }
+
+                if (! Tenant::where('slug', 'expiring-workshop')->exists()) {
+                    $this->seedExpiringWorkshop(Plan::where('slug', 'basic')->firstOrFail());
+                }
+
+                if (! Tenant::where('slug', 'expired-workshop')->exists()) {
+                    $this->seedExpiredWorkshop(Plan::where('slug', 'basic')->firstOrFail());
+                }
+                app(TenantScenariosSeeder::class)->seedAdditionalLifecycleCases();
+            });
+        } finally {
+            $registrar->setPermissionsTeamId($previousTeam);
+            $registrar->forgetCachedPermissions();
         }
     }
 
-    /**
-     * Seed 4 distinct tenants covering all subscription lifecycles.
-     *
-     * @return array<string, Tenant>
-     */
-    private function seedTenants(): array
+    private function seedActiveWorkshop(Plan $plan): void
     {
-        $setupService = app(TenantSetupService::class);
-
-        $proPlan = Plan::where('slug', 'pro')->first() ?? Plan::first();
-        $basicPlan = Plan::where('slug', 'basic')->first() ?? Plan::first();
-        $trialPlan = Plan::where('slug', 'trial')->first() ?? Plan::first();
-
-        // -------------------------------------------------------------
-        // 1. المستأجر الرئيسي والمفعل (Active Subscriber)
-        // -------------------------------------------------------------
-        $activeTenant = Tenant::create([
+        $tenant = Tenant::create([
             'name' => 'مركز الخدمة المتقدمة',
             'slug' => 'active-workshop',
             'legal_name' => 'شركة الخدمة المتقدمة لصيانة السيارات',
             'trade_name' => 'Advanced Service Center',
             'phone' => '+966501112233',
-            'email' => 'admin@khidmh.pro',
+            'email' => 'manager.active@example.test',
             'status' => 'active',
             'vat_number' => '300199988800003',
             'cr_number' => '1010887766',
@@ -222,8 +100,8 @@ class TestingEnvironmentSeeder extends Seeder
             'invoice_title' => 'فاتورة ضريبية',
         ]);
 
-        $activeCenter = Center::create([
-            'tenant_id' => $activeTenant->id,
+        $center = Center::create([
+            'tenant_id' => $tenant->id,
             'name' => 'المركز الرئيسي - الرياض',
             'slug' => 'active-main-branch',
             'is_main' => true,
@@ -233,31 +111,38 @@ class TestingEnvironmentSeeder extends Seeder
         ]);
 
         Subscription::create([
-            'tenant_id' => $activeTenant->id,
-            'plan_id' => $proPlan->id,
+            'tenant_id' => $tenant->id,
+            'plan_id' => $plan->id,
             'status' => 'active',
             'billing_cycle' => 'yearly',
             'starts_at' => now()->subMonth(),
             'ends_at' => now()->addMonths(11),
             'trial_ends_at' => null,
-            'price' => $proPlan->price_monthly * 10,
+            'price' => $plan->price_monthly * 10,
             'auto_renew' => true,
             'payment_method' => 'card',
         ]);
 
         $this->setupTenantRolesAndUser(
-            $activeTenant,
-            $activeCenter,
-            'admin@khidmh.pro',
-            'مدير النظام (System Admin)',
-            '11223344',
-            true
+            $tenant,
+            $center,
+            'manager.active@example.test',
+            'مدير الورشة',
+            '11223344'
         );
 
-        // -------------------------------------------------------------
-        // 2. مستأجر جديد في التجربة (New Tenant / Trial)
-        // -------------------------------------------------------------
-        $newTenant = Tenant::create([
+        $this->seedCustomersAndVehicles($tenant, $center);
+        $this->seedTrialCustomers($tenant, $center);
+        $this->seedEmployeesAndStaff($tenant, $center);
+        $this->seedSuppliers($tenant, $center);
+        $this->seedDepartmentsAndServices($tenant, $center);
+        $this->seedInventoryAndParts($tenant, $center);
+        $this->seedWorkOrdersWithTechnicians($tenant, $center);
+    }
+
+    private function seedNewWorkshop(Plan $plan): void
+    {
+        $tenant = Tenant::create([
             'name' => 'مركز الانطلاقة الجديدة (New Tenant)',
             'slug' => 'new-workshop',
             'legal_name' => 'ورشة الانطلاقة السريعة',
@@ -268,8 +153,8 @@ class TestingEnvironmentSeeder extends Seeder
             'trial_ends_at' => now()->addDays(14),
         ]);
 
-        $newCenter = Center::create([
-            'tenant_id' => $newTenant->id,
+        $center = Center::create([
+            'tenant_id' => $tenant->id,
             'name' => 'الفرع الرئيسي',
             'slug' => 'new-main-branch',
             'is_main' => true,
@@ -277,8 +162,8 @@ class TestingEnvironmentSeeder extends Seeder
         ]);
 
         Subscription::create([
-            'tenant_id' => $newTenant->id,
-            'plan_id' => $trialPlan->id,
+            'tenant_id' => $tenant->id,
+            'plan_id' => $plan->id,
             'status' => 'trialing',
             'billing_cycle' => 'yearly',
             'starts_at' => now(),
@@ -289,17 +174,17 @@ class TestingEnvironmentSeeder extends Seeder
         ]);
 
         $this->setupTenantRolesAndUser(
-            $newTenant,
-            $newCenter,
+            $tenant,
+            $center,
             'new@carag.test',
             'مدير الورشة الجديدة',
             '11223344'
         );
+    }
 
-        // -------------------------------------------------------------
-        // 3. مستأجر على وشك الانتهاء (Expiring Soon - 3 days left)
-        // -------------------------------------------------------------
-        $expiringTenant = Tenant::create([
+    private function seedExpiringWorkshop(Plan $plan): void
+    {
+        $tenant = Tenant::create([
             'name' => 'مركز الأفق للصيانة (Expiring Soon)',
             'slug' => 'expiring-workshop',
             'legal_name' => 'مركز الأفق المتميز',
@@ -310,8 +195,8 @@ class TestingEnvironmentSeeder extends Seeder
             'trial_ends_at' => now()->addDays(3),
         ]);
 
-        $expiringCenter = Center::create([
-            'tenant_id' => $expiringTenant->id,
+        $center = Center::create([
+            'tenant_id' => $tenant->id,
             'name' => 'الفرع الرئيسي',
             'slug' => 'expiring-main-branch',
             'is_main' => true,
@@ -319,29 +204,29 @@ class TestingEnvironmentSeeder extends Seeder
         ]);
 
         Subscription::create([
-            'tenant_id' => $expiringTenant->id,
-            'plan_id' => $basicPlan->id,
+            'tenant_id' => $tenant->id,
+            'plan_id' => $plan->id,
             'status' => 'active',
             'billing_cycle' => 'yearly',
             'starts_at' => now()->subDays(362),
             'ends_at' => now()->addDays(3),
             'trial_ends_at' => null,
-            'price' => $basicPlan->price_yearly,
+            'price' => $plan->price_yearly,
             'auto_renew' => false,
         ]);
 
         $this->setupTenantRolesAndUser(
-            $expiringTenant,
-            $expiringCenter,
+            $tenant,
+            $center,
             'expiring@carag.test',
             'مدير ورشة الأفق',
             '11223344'
         );
+    }
 
-        // -------------------------------------------------------------
-        // 4. مستأجر منتهي الاشتراك (Expired / Readonly)
-        // -------------------------------------------------------------
-        $expiredTenant = Tenant::create([
+    private function seedExpiredWorkshop(Plan $plan): void
+    {
+        $tenant = Tenant::create([
             'name' => 'مركز الدقة القديم (Expired Tenant)',
             'slug' => 'expired-workshop',
             'legal_name' => 'ورشة الدقة القديمة',
@@ -352,8 +237,8 @@ class TestingEnvironmentSeeder extends Seeder
             'suspension_reason' => 'subscription_expired',
         ]);
 
-        $expiredCenter = Center::create([
-            'tenant_id' => $expiredTenant->id,
+        $center = Center::create([
+            'tenant_id' => $tenant->id,
             'name' => 'الفرع القديم',
             'slug' => 'expired-main-branch',
             'is_main' => true,
@@ -361,39 +246,33 @@ class TestingEnvironmentSeeder extends Seeder
         ]);
 
         Subscription::create([
-            'tenant_id' => $expiredTenant->id,
-            'plan_id' => $basicPlan->id,
+            'tenant_id' => $tenant->id,
+            'plan_id' => $plan->id,
             'status' => 'expired',
             'billing_cycle' => 'yearly',
             'starts_at' => now()->subDays(390),
             'ends_at' => now()->subDays(25),
             'trial_ends_at' => null,
-            'price' => $basicPlan->price_yearly,
+            'price' => $plan->price_yearly,
             'auto_renew' => false,
         ]);
 
         $this->setupTenantRolesAndUser(
-            $expiredTenant,
-            $expiredCenter,
+            $tenant,
+            $center,
             'expired@carag.test',
             'مدير الورشة المنتهية',
             '11223344'
         );
-
-        return [
-            'active' => $activeTenant,
-            'new' => $newTenant,
-            'expiring' => $expiringTenant,
-            'expired' => $expiredTenant,
-        ];
     }
 
     /**
      * Helper to seed roles, lookups, and admin user for a tenant.
      */
-    private function setupTenantRolesAndUser(Tenant $tenant, Center $center, string $email, string $name, string $password, bool $isSystemAdmin = false): User
+    private function setupTenantRolesAndUser(Tenant $tenant, Center $center, string $email, string $name, string $password): User
     {
         $setupService = app(TenantSetupService::class);
+        app(PermissionRegistrar::class)->setPermissionsTeamId($tenant->id);
         $setupService->seedRolesForTenant($tenant->id);
         $setupService->seedDefaultsForTenant($tenant->id);
 
@@ -405,7 +284,6 @@ class TestingEnvironmentSeeder extends Seeder
             'password' => Hash::make($password),
             'email_verified_at' => now(),
             'is_active' => true,
-            'is_system_admin' => $isSystemAdmin,
         ]);
 
         $user->centers()->attach($center->id, ['tenant_id' => $tenant->id]);
@@ -415,19 +293,6 @@ class TestingEnvironmentSeeder extends Seeder
 
         if ($superAdmin) {
             $user->assignRole($superAdmin);
-        }
-
-        if ($isSystemAdmin) {
-            AdminUser::updateOrCreate(
-                ['email' => $email],
-                [
-                    'name' => $name,
-                    'password' => Hash::make($password),
-                    'role' => 'super_admin',
-                    'is_active' => true,
-                    'permissions' => [],
-                ]
-            );
         }
 
         return $user;
@@ -640,8 +505,8 @@ class TestingEnvironmentSeeder extends Seeder
         $now = now();
 
         for ($i = 1; $i <= 1000; $i++) {
-            $city = $cityKeys[array_rand($cityKeys)];
-            $district = $cities[$city][array_rand($cities[$city])];
+            $city = $cityKeys[($i - 1) % count($cityKeys)];
+            $district = $cities[$city][($i - 1) % count($cities[$city])];
             $type = $i % 10 === 0 ? Customer::TYPE_COMPANY : Customer::TYPE_INDIVIDUAL;
 
             $batch[] = [
@@ -1583,10 +1448,10 @@ class TestingEnvironmentSeeder extends Seeder
             'customer_id' => $customer->id,
         ]);
 
-        $services = Service::where('tenant_id', $tenant->id)->where('is_active', true)->get();
+        $services = Service::where('tenant_id', $tenant->id)->where('is_active', true)->orderBy('id')->get();
         $technicians = User::whereHas('roles', function ($q) {
             $q->where('name', 'technician');
-        })->where('tenant_id', $tenant->id)->get();
+        })->where('tenant_id', $tenant->id)->orderBy('id')->get();
 
         if ($technicians->isEmpty() || $services->isEmpty()) {
             return;
@@ -1599,14 +1464,14 @@ class TestingEnvironmentSeeder extends Seeder
                 'center_id' => $center->id,
                 'customer_id' => $customer->id,
                 'vehicle_id' => $vehicle->id,
-                'status' => collect(['open', 'in_progress', 'on_hold', 'ready_for_qc'])->random(),
+                'status' => ['done', 'in_progress', 'on_hold', 'ready_for_qc', 'open'][$i],
             ]);
 
             // Create 2-3 items per work order
-            $itemCount = rand(2, 3);
+            $itemCount = 2 + ($i % 2);
 
             for ($j = 0; $j < $itemCount; $j++) {
-                $service = $services->random();
+                $service = $services[($i + $j) % $services->count()];
                 $unitPrice = (float) ($service->default_price ?? 100);
                 $minPrice = (float) ($service->min_price ?? 0);
 
@@ -1634,11 +1499,21 @@ class TestingEnvironmentSeeder extends Seeder
                 ]);
 
                 // Assign random technician to this item
-                $tech = $technicians->random();
+                $tech = $technicians[($i + $j) % $technicians->count()];
                 $item->technicians()->attach($tech->id, [
-                    'assigned_at' => now()->subDays(rand(0, 5)),
+                    'assigned_at' => now()->subDays($i),
                     'notes' => 'مُسند عبر Seeder للاختبار',
                     'share' => 100,
+                ]);
+            }
+
+            if ($i === 0) {
+                $invoices = app(InvoiceService::class);
+                $invoice = $invoices->issueInvoice($invoices->createFromWorkOrder($workOrder, $tech));
+                app(PaymentService::class)->recordPayment($invoice, [
+                    'amount' => $invoice->balance,
+                    'payment_method' => 'cash',
+                    'received_by' => $tech->id,
                 ]);
             }
         }

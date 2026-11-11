@@ -9,11 +9,10 @@ use App\Models\CenterSequence;
 use App\Models\Customer;
 use App\Models\Invoice;
 use App\Models\Tenant;
-use App\Observers\InvoiceObserver;
 use App\Services\InvoiceService;
 use App\Services\Optimization\TaxCalculator;
-use Exception;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Validation\ValidationException;
 use Tests\TestCase;
 
 class InvoicingSecurityTest extends TestCase
@@ -23,8 +22,12 @@ class InvoicingSecurityTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        // Register observer manually for test if not in ServiceProvider yet
-        Invoice::observe(InvoiceObserver::class);
+
+        // NOTE: the observer is registered by the application itself in
+        // AppServiceProvider::boot(). It used to be registered here, which
+        // meant this test proved the guard works only when a test
+        // remembered to switch it on — and stayed green while production
+        // had no guard at all. Do not re-register it here.
     }
 
     /** @test */
@@ -45,19 +48,29 @@ class InvoicingSecurityTest extends TestCase
         ]);
 
         // 1. Try to Update
+        //
+        // The refusal is a ValidationException so that a JSON request
+        // gets a 422 with an errors bag and an Inertia request gets the
+        // usual validation errors in the session. The error is keyed by
+        // the field that was protected.
         try {
             $invoice->update(['total_tax' => 999]);
             $this->fail('Should not allow update on valid invoice');
-        } catch (Exception $e) {
-            $this->assertStringContainsString('Cannot edit invoice', $e->getMessage());
+        } catch (ValidationException $e) {
+            $this->assertArrayHasKey('total_tax', $e->errors());
+            $this->assertStringContainsString(
+                'total_tax',
+                $e->errors()['total_tax'][0],
+                'The refusal must name the protected field.'
+            );
         }
 
         // 2. Try to Delete
         try {
             $invoice->delete();
             $this->fail('Should not allow delete on valid invoice');
-        } catch (Exception $e) {
-            $this->assertStringContainsString('Cannot delete invoice', $e->getMessage());
+        } catch (ValidationException $e) {
+            $this->assertArrayHasKey('invoice', $e->errors());
         }
     }
 

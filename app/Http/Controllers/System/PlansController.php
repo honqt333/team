@@ -64,7 +64,6 @@ class PlansController extends Controller
             'slug' => 'required|string|max:255|unique:plans',
             'description_ar' => 'nullable|string',
             'description_en' => 'nullable|string',
-            'price_monthly' => 'nullable|numeric|min:0',
             'price_yearly' => 'required|numeric|min:0',
             'trial_days' => 'required|integer|min:0',
             'features_ar' => 'nullable|array',
@@ -75,7 +74,8 @@ class PlansController extends Controller
             'sort_order' => 'integer',
         ]);
 
-        $validated['price_monthly'] = $validated['price_monthly'] ?? round(((float) $validated['price_yearly']) / 12, 2);
+        // Yearly-only billing model: keep price_monthly at 0 for DB compatibility
+        $validated['price_monthly'] = 0;
         $validated['name'] = $validated['name_ar'];
         $validated['features'] = [
             'ar' => array_values(array_filter($request->input('features_ar', []))),
@@ -116,7 +116,6 @@ class PlansController extends Controller
             'slug' => 'required|string|max:255|unique:plans,slug,'.$plan->id,
             'description_ar' => 'nullable|string',
             'description_en' => 'nullable|string',
-            'price_monthly' => 'nullable|numeric|min:0',
             'price_yearly' => 'required|numeric|min:0',
             'trial_days' => 'required|integer|min:0',
             'features_ar' => 'nullable|array',
@@ -127,7 +126,8 @@ class PlansController extends Controller
             'sort_order' => 'integer',
         ]);
 
-        $validated['price_monthly'] = $validated['price_monthly'] ?? round(((float) $validated['price_yearly']) / 12, 2);
+        // Yearly-only billing model: keep price_monthly at 0 for DB compatibility
+        $validated['price_monthly'] = 0;
         $validated['name'] = $validated['name_ar'];
         $validated['features'] = [
             'ar' => array_values(array_filter($request->input('features_ar', []))),

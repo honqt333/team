@@ -304,6 +304,7 @@ class SubscriptionLifecycleService
                 'status' => 'active',
                 'starts_at' => $dates['starts_at'],
                 'ends_at' => $dates['ends_at'],
+                'cancelled_at' => null,
             ]);
 
             if ($tenant) {
@@ -316,6 +317,178 @@ class SubscriptionLifecycleService
             }
 
             return $subscription->fresh();
+        });
+    }
+
+    /**
+     * Atomically extend a subscription by N days.
+     * If already expired (or null ends_at), starts from now() so the extension takes effect immediately.
+     * Restores active/trialing state on both subscription and tenant and clears suspension fields.
+     */
+    public function extendSubscription(Subscription $subscription, int $days): Subscription
+    {
+        return DB::transaction(function () use ($subscription, $days) {
+            $subscription->loadMissing(['tenant', 'plan']);
+            $now = Carbon::now();
+
+            $currentEnd = $subscription->ends_at ? Carbon::parse($subscription->ends_at) : null;
+            $baseEnd = ($currentEnd && $currentEnd->isFuture()) ? $currentEnd->copy() : $now->copy();
+            $newEndsAt = $baseEnd->addDays($days);
+
+            $isTrial = in_array($subscription->status, ['trial', 'trialing'], true)
+                || $subscription->plan?->slug === 'trial';
+
+            if (! $isTrial) {
+                Subscription::where('tenant_id', $subscription->tenant_id)
+                    ->where('id', '!=', $subscription->id)
+                    ->whereIn('status', ['active', 'trial', 'trialing'])
+                    ->update(['status' => 'expired']);
+            }
+
+            $subUpdates = [
+                'status' => $isTrial ? 'trialing' : 'active',
+                'ends_at' => $newEndsAt,
+                'cancelled_at' => null,
+            ];
+
+            if ($isTrial) {
+                $subUpdates['trial_ends_at'] = $newEndsAt;
+            }
+
+            $subscription->update($subUpdates);
+
+            if ($subscription->tenant) {
+                $tenantUpdates = [
+                    'status' => $isTrial ? 'trial' : 'active',
+                    'suspended_at' => null,
+                    'auto_suspended_at' => null,
+                    'suspension_reason' => null,
+                ];
+
+                if ($isTrial) {
+                    $tenantUpdates['trial_ends_at'] = $newEndsAt;
+                }
+
+                $subscription->tenant->update($tenantUpdates);
+            }
+
+            return $subscription->fresh();
+        });
+    }
+
+    /**
+     * Atomically extend (or adjust) a tenant's trial period without touching historical paid subscriptions.
+     */
+    public function extendTenantTrial(Tenant $tenant, int $days): Tenant
+    {
+        return DB::transaction(function () use ($tenant, $days) {
+            $now = Carbon::now();
+            $currentEnd = $tenant->trial_ends_at ? Carbon::parse($tenant->trial_ends_at) : null;
+
+            if ($days >= 0) {
+                $base = ($currentEnd && $currentEnd->isFuture()) ? $currentEnd->copy() : $now->copy();
+            } else {
+                $base = $currentEnd ? $currentEnd->copy() : $now->copy();
+            }
+
+            $newEndDate = $base->addDays($days);
+            $isFuture = $newEndDate->isAfter($now);
+
+            $trialSub = $tenant->subscriptions()
+                ->where(function ($q) {
+                    $q->whereIn('status', ['trial', 'trialing'])
+                        ->orWhereHas('plan', fn ($pq) => $pq->where('slug', 'trial'));
+                })
+                ->latest('id')
+                ->first();
+
+            if ($trialSub) {
+                $trialSub->update([
+                    'status' => $isFuture ? 'trialing' : 'expired',
+                    'ends_at' => $newEndDate,
+                    'trial_ends_at' => $newEndDate,
+                ]);
+            }
+
+            $tenantUpdates = [
+                'trial_ends_at' => $newEndDate,
+                'status' => $isFuture ? 'trial' : 'expired',
+            ];
+
+            if ($isFuture) {
+                $tenantUpdates['suspended_at'] = null;
+                $tenantUpdates['auto_suspended_at'] = null;
+                $tenantUpdates['suspension_reason'] = null;
+            }
+
+            $tenant->update($tenantUpdates);
+
+            return $tenant->fresh();
+        });
+    }
+
+    /**
+     * Lift suspension and restore the tenant's real status from its subscription/trial state.
+     */
+    public function reactivateTenant(Tenant $tenant): Tenant
+    {
+        return DB::transaction(function () use ($tenant) {
+            $now = Carbon::now();
+
+            $hasActivePaid = $tenant->subscriptions()
+                ->where('status', 'active')
+                ->where(function ($q) use ($now) {
+                    $q->whereNull('ends_at')->orWhere('ends_at', '>', $now);
+                })
+                ->exists();
+
+            $hasActiveTrialSub = $tenant->subscriptions()
+                ->whereIn('status', ['trial', 'trialing'])
+                ->where(function ($q) use ($now) {
+                    $q->where('trial_ends_at', '>', $now)
+                        ->orWhere(function ($sq) use ($now) {
+                            $sq->whereNull('trial_ends_at')->where('ends_at', '>', $now);
+                        });
+                })
+                ->exists();
+
+            $hasFutureTrial = $hasActiveTrialSub
+                || ($tenant->trial_ends_at && Carbon::parse($tenant->trial_ends_at)->isAfter($now));
+
+            $tenantUpdates = [
+                'suspended_at' => null,
+                'auto_suspended_at' => null,
+                'suspension_reason' => null,
+            ];
+
+            if ($hasActivePaid) {
+                $tenantUpdates['status'] = 'active';
+            } elseif ($hasFutureTrial) {
+                $tenantUpdates['status'] = 'trial';
+            } else {
+                // Temporarily unset suspension so resolveTenantState can detect grace period
+                $tenant->forceFill($tenantUpdates + ['status' => 'active']);
+                $resolved = $this->resolveTenantState($tenant);
+
+                if ($resolved['state'] === self::STATE_GRACE_PERIOD) {
+                    $tenantUpdates['status'] = 'active';
+                } elseif (! $tenant->subscriptions()->exists() && ! $tenant->trial_ends_at) {
+                    // Fresh tenant with no trial date configured yet
+                    $tenantUpdates['status'] = 'trial';
+                    $tenantUpdates['trial_ends_at'] = $now->copy()->addDays($this->getDefaultTrialDays());
+                } else {
+                    $tenantUpdates['status'] = 'expired';
+                }
+            }
+
+            $tenant->forceFill($tenantUpdates)->save();
+
+            // Verify all unverified users' emails of this tenant upon activation
+            $tenant->users()->whereNull('email_verified_at')->update([
+                'email_verified_at' => $now,
+            ]);
+
+            return $tenant->fresh();
         });
     }
 

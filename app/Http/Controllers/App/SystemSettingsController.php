@@ -6,6 +6,8 @@ namespace App\Http\Controllers\App;
 
 use App\Http\Controllers\Controller;
 use App\Models\VehicleMake;
+use App\Services\Storage\TenantAttachmentsService;
+use App\Support\Permissions;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -16,13 +18,54 @@ class SystemSettingsController extends Controller
     /**
      * Display the system settings page with side panel navigation.
      */
-    public function index(Request $request): Response
+    public function index(Request $request, TenantAttachmentsService $attachmentsService): Response
     {
+        $activeSection = (string) $request->query('section', 'makes');
+
+        if ($activeSection === 'storage') {
+            return $this->storage($request, $attachmentsService);
+        }
+
         $makes = VehicleMake::ordered()->get();
 
         return Inertia::render('Settings/System/Index', [
             'makes' => $makes,
-            'activeSection' => $request->query('section', 'makes'),
+            'activeSection' => $activeSection,
+            'storage_usage' => null,
+        ]);
+    }
+
+    /**
+     * Display the cloud storage allocation & usage section inside system settings.
+     */
+    public function storage(Request $request, TenantAttachmentsService $attachmentsService): Response
+    {
+        $user = $request->user();
+        $canViewAttachments = (bool) $user?->can(Permissions::ATTACHMENTS_VIEW);
+        $filters = $request->only(['source', 'search']);
+
+        $attachmentsPayload = $canViewAttachments && $user !== null
+            ? $attachmentsService->paginateForUser(
+                user: $user,
+                filters: $filters,
+                perPage: 15,
+                page: max(1, (int) $request->query('page', 1)),
+                path: route('settings.storage')
+            )
+            : null;
+
+        return Inertia::render('Settings/System/Index', [
+            'makes' => [],
+            'activeSection' => 'storage',
+            'storage_usage' => $user?->tenant?->storage_usage,
+            'attachments' => $attachmentsPayload ? $attachmentsPayload['items']->toArray() : null,
+            'attachmentSummary' => $attachmentsPayload ? $attachmentsPayload['summary'] : null,
+            'attachmentFilters' => [
+                'source' => (string) ($filters['source'] ?? ''),
+                'search' => (string) ($filters['search'] ?? ''),
+            ],
+            'canViewAttachments' => $canViewAttachments,
+            'canDeleteAttachments' => (bool) $user?->can(Permissions::ATTACHMENTS_DELETE),
         ]);
     }
 

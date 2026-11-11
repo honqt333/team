@@ -15,6 +15,10 @@
                 badgeBorder="border-amber-100/50 dark:border-amber-800/30"
                 badgeDot="bg-amber-500"
             >
+                <template #back>
+                    <BackButton :href="route('settings.integrations')" />
+                </template>
+
                 <template #icon>
                     <svg
                         class="w-8 h-8 text-white"
@@ -726,6 +730,7 @@ import { Head, router, useForm } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import PageHeader from '@/Components/PageHeader.vue';
+import BackButton from '@/Components/BackButton.vue';
 import AppTabs from '@/Components/Common/AppTabs.vue';
 import AppToggle from '@/Components/Common/AppToggle.vue';
 

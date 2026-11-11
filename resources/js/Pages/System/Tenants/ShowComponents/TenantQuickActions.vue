@@ -41,9 +41,15 @@
             {{ $t('system.tenants.actions.suspend') }}
         </button>
 
-        <!-- Activate (super_admin only) -->
+        <!-- Activate (super_admin only — hidden if Lift Auto Suspend is already visible) -->
         <button
-            v-if="tenant.status !== 'active'"
+            v-if="
+                tenant.status !== 'active' &&
+                !(
+                    tenant.auto_suspended_at &&
+                    tenant.suspension_reason === 'auto_suspend_dunning_tier_4'
+                )
+            "
             @click="$emit('activate')"
             class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-sm font-medium transition-colors"
         >
@@ -74,9 +80,9 @@
             </span>
         </button>
 
-        <!-- Extend trial (super_admin only, trial tenants only) -->
+        <!-- Extend trial (super_admin only — available for trial or expired tenants) -->
         <button
-            v-if="tenant.status === 'trial'"
+            v-if="['trial', 'expired'].includes(tenant.status)"
             @click="$emit('extend-trial')"
             class="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-lg text-sm font-medium transition-colors"
         >
@@ -175,6 +181,7 @@ defineProps({
 
 defineEmits([
     'impersonate',
+    'assign-plan',
     'suspend',
     'activate',
     'extend-trial',

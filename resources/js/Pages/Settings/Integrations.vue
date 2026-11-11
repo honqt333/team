@@ -8,7 +8,7 @@
                 :title="$t('settings.integrations.title')"
                 :subtitle="$t('settings.integrations.hub_subtitle')"
                 gradientFrom="from-action-primary"
-                gradientTo="to-purple-700"
+                gradientTo="to-action-primary-hover"
                 glowFrom="from-action-primary"
                 badgeBg="bg-selection-bg"
                 badgeText="text-action-primary"
@@ -334,7 +334,67 @@
                     </div>
                 </Link>
 
-                <!-- 6. إشعارات الواتساب والرسائل (قريباً) -->
+                <!-- 6. إعدادات الإشعارات والتنبيهات -->
+                <Link
+                    :href="route('settings.notifications.index')"
+                    class="group relative bg-white dark:bg-gray-800 rounded-2xl p-6 border border-gray-200 dark:border-gray-700 hover:border-amber-400 dark:hover:border-amber-500 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between"
+                >
+                    <div>
+                        <div class="flex items-center justify-between mb-4">
+                            <div
+                                class="w-14 h-14 rounded-2xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center shadow-lg shadow-amber-500/25 group-hover:scale-110 transition-transform duration-300"
+                            >
+                                <svg
+                                    class="w-7 h-7 text-white"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2"
+                                        d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
+                                    />
+                                </svg>
+                            </div>
+                            <span
+                                class="px-3 py-1 rounded-full text-xs font-bold bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800"
+                            >
+                                {{ $t('settings.integrations.badges.active') }}
+                            </span>
+                        </div>
+                        <h3
+                            class="text-lg font-bold text-gray-900 dark:text-white group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors"
+                        >
+                            {{ $t('settings.integrations.notifications_title') }}
+                        </h3>
+                        <p class="text-sm text-gray-500 dark:text-gray-400 mt-2 line-clamp-3">
+                            {{ $t('settings.integrations.notifications_desc') }}
+                        </p>
+                    </div>
+
+                    <div
+                        class="mt-6 pt-4 border-t border-gray-100 dark:border-gray-700/50 flex items-center justify-between text-xs font-semibold text-amber-600 dark:text-amber-400"
+                    >
+                        <span>{{ $t('settings.integrations.manage_notifications') }}</span>
+                        <svg
+                            class="w-4 h-4 rtl:rotate-180 group-hover:translate-x-1 rtl:group-hover:-translate-x-1 transition-transform"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M9 5l7 7-7 7"
+                            />
+                        </svg>
+                    </div>
+                </Link>
+
+                <!-- 7. إشعارات الواتساب والرسائل (قريباً) -->
                 <div
                     class="relative bg-white/60 dark:bg-gray-800/60 rounded-2xl p-6 border border-gray-200/80 dark:border-gray-700/80 flex flex-col justify-between opacity-85"
                 >

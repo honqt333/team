@@ -7,7 +7,7 @@
             <PageHeader
                 :title="$t('system_settings.title')"
                 :subtitle="currentSectionTitle"
-                :total-count="toEnglish(currentTotalCount)"
+                :total-count="isManagedSection ? toEnglish(currentTotalCount) : undefined"
             >
                 <template #back>
                     <BackButton href="/app/settings" />
@@ -111,11 +111,27 @@
                                 />
                             </svg>
                         </template>
+                        <template #icon-storage>
+                            <svg
+                                class="w-4 h-4"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4"
+                                />
+                            </svg>
+                        </template>
                     </AppTabs>
                 </template>
 
                 <template #actions>
                     <button
+                        v-if="isManagedSection"
                         type="button"
                         @click="openAddModal"
                         class="inline-flex items-center gap-2 px-5 py-2.5 bg-action-primary hover:bg-action-primary-hover text-white font-bold rounded-xl shadow-xs transition-colors cursor-pointer"
@@ -356,6 +372,19 @@
                     <span v-else class="text-xs text-content-muted">—</span>
                 </template>
             </DataTable>
+
+            <div v-else-if="activeSection === 'storage'" class="space-y-6">
+                <StorageUsageSection :storage-usage="storage_usage" />
+                <AttachmentsManagerSection
+                    :attachments="attachments"
+                    :summary="attachmentSummary"
+                    :filters="attachmentFilters"
+                    :can-view="canViewAttachments"
+                    :can-delete="canDeleteAttachments"
+                    route-name="settings.storage"
+                    :show-full-page-link="true"
+                />
+            </div>
         </div>
 
         <!-- Modals -->
@@ -413,6 +442,8 @@ import ModelFormModal from './Modals/ModelFormModal.vue';
 import ColorFormModal from './Modals/ColorFormModal.vue';
 import ConditionItemFormModal from './Modals/ConditionItemFormModal.vue';
 import IncomeCategoryFormModal from './Modals/IncomeCategoryFormModal.vue';
+import StorageUsageSection from './Sections/StorageUsageSection.vue';
+import AttachmentsManagerSection from './Sections/AttachmentsManagerSection.vue';
 import { useToast } from '@/Composables/useToast';
 import { useConfirm } from '@/Composables/useConfirm';
 import { useLocalized } from '@/Composables/useLocalized';
@@ -425,6 +456,7 @@ const { getName } = useLocalized();
 const { toEnglish } = useNumberFormat();
 
 const MANAGED_SECTIONS = ['makes', 'models', 'colors', 'condition-items', 'income-categories'];
+const ALL_SECTIONS = [...MANAGED_SECTIONS, 'storage'];
 
 const props = defineProps({
     makes: [Object, Array],
@@ -432,6 +464,30 @@ const props = defineProps({
     colors: Object,
     condition_items: Object,
     income_categories: Object,
+    storage_usage: {
+        type: Object,
+        default: null,
+    },
+    attachments: {
+        type: Object,
+        default: null,
+    },
+    attachmentSummary: {
+        type: Object,
+        default: null,
+    },
+    attachmentFilters: {
+        type: Object,
+        default: () => ({ source: '', search: '' }),
+    },
+    canViewAttachments: {
+        type: Boolean,
+        default: false,
+    },
+    canDeleteAttachments: {
+        type: Boolean,
+        default: false,
+    },
     settings: Object,
     global_sms_enabled: Boolean,
     activeSection: {
@@ -467,7 +523,7 @@ const editingIncomeCategory = ref(null);
 
 // Navigation Tabs
 const sectionTabs = computed(() =>
-    MANAGED_SECTIONS.map((id) => ({
+    ALL_SECTIONS.map((id) => ({
         id,
         label: t(`system_settings.sections.${id.replace('-', '_')}`),
     }))
@@ -498,6 +554,7 @@ const currentSectionTitle = computed(() => {
     if (section === 'general') return t('permissions_modules.settings_general');
     if (section === 'condition-items') return t('system_settings.sections.condition_items');
     if (section === 'income-categories') return t('system_settings.income_categories.subtitle');
+    if (section === 'storage') return t('system_settings.storage.subtitle');
     return t(`system_settings.${section}.subtitle`) || t(`system_settings.sections.${section}`);
 });
 

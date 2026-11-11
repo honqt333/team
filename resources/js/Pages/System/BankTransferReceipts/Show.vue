@@ -715,7 +715,7 @@ const amountState = computed(() => {
                         :placeholder="
                             locale === 'ar'
                                 ? $t(
-                                      'system.bank_transfer_receipts.e.g._amount_mismatch_receipt_unclear...'
+                                      'system.bank_transfer_receipts.examples._amount_mismatch_receipt_unclear'
                                   )
                                 : 'e.g. Amount mismatch, receipt unclear...'
                         "
@@ -933,7 +933,7 @@ const amountState = computed(() => {
                         :placeholder="
                             locale === 'ar'
                                 ? $t(
-                                      'system.bank_transfer_receipts.e.g._confirmed_full_amount_received_from_tenant.'
+                                      'system.bank_transfer_receipts.examples._confirmed_full_amount_received_from_tenant'
                                   )
                                 : 'e.g. Confirmed full amount received from tenant...'
                         "

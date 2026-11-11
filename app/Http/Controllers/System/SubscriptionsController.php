@@ -8,10 +8,14 @@ use App\Http\Controllers\Controller;
 use App\Models\BankTransferReceipt;
 use App\Models\Billing\Plan;
 use App\Models\Billing\Subscription;
+use App\Models\Billing\SubscriptionInvoice;
+use App\Models\Billing\SubscriptionPayment;
+use App\Models\PaymentSettings;
 use App\Models\Tenant;
 use App\Services\Billing\SubscriptionLifecycleService;
 use App\Services\System\SystemAuditService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -59,7 +63,7 @@ class SubscriptionsController extends Controller
 
         return Inertia::render('System/Subscriptions/Index', [
             'subscriptions' => $subscriptions,
-            'plans' => Plan::where('is_active', true)->get(['id', 'name_ar', 'name_en', 'price_monthly', 'price_yearly', 'trial_days']),
+            'plans' => Plan::where('is_active', true)->get(['id', 'name_ar', 'name_en', 'slug', 'price_yearly', 'trial_days']),
             'filters' => $request->only(['search', 'status', 'plan_id']),
             'stats' => [
                 'total' => Subscription::count(),
@@ -84,7 +88,7 @@ class SubscriptionsController extends Controller
         return Inertia::render('System/Subscriptions/Create', [
             'plans' => Plan::where('is_active', true)
                 ->orderBy('sort_order')
-                ->get(['id', 'name_ar', 'name_en', 'slug', 'price_monthly', 'price_yearly', 'trial_days', 'is_featured']),
+                ->get(['id', 'name_ar', 'name_en', 'slug', 'price_yearly', 'trial_days', 'is_featured']),
             'tenants' => Tenant::orderBy('trade_name')
                 ->get(['id', 'name', 'trade_name', 'status']),
             'eligibleTenants' => Tenant::orderBy('trade_name')
@@ -112,66 +116,190 @@ class SubscriptionsController extends Controller
         $validated = $request->validate([
             'tenant_id' => 'required|exists:tenants,id',
             'plan_id' => 'required|exists:plans,id',
-            'billing_cycle' => 'nullable|in:monthly,yearly',
+            'billing_cycle' => 'nullable|in:yearly',
             'promo_code' => 'nullable|string|exists:promo_codes,code',
+            'settlement_type' => 'nullable|in:paid_now,pending_invoice,complimentary',
+            'payment_method' => 'nullable|in:cash,bank_transfer,pos,manual',
+            'paid_amount' => 'nullable|numeric|min:0',
+            'payment_reference' => 'nullable|string|max:255',
+            'payment_notes' => 'nullable|string|max:1000',
         ]);
 
         $tenant = Tenant::findOrFail($validated['tenant_id']);
         $plan = Plan::findOrFail($validated['plan_id']);
-        $billingCycle = $validated['billing_cycle'] ?? 'yearly';
-        $price = $billingCycle === 'monthly'
-            ? (float) $plan->price_monthly
-            : (float) $plan->price_yearly;
+        $billingCycle = 'yearly';
+        $price = (float) $plan->price_yearly;
 
-        // Calculate dates & determine if this is a trial plan
-        $startDate = now();
-        $status = 'active';
-        $trialEndsAt = null;
+        $isTrial = $plan->slug === 'trial' || ($plan->trial_days > 0 && $price == 0.0);
+        $settlementType = $validated['settlement_type'] ?? 'standard';
+        $paymentMethod = $validated['payment_method'] ?? 'cash';
 
-        if ($plan->slug === 'trial' || ($plan->trial_days > 0 && $price == 0.0)) {
-            $status = 'trialing';
-            $trialDays = $plan->trial_days ?: $this->lifecycle->getDefaultTrialDays();
-            $trialEndsAt = $startDate->copy()->addDays($trialDays);
-            $endDate = $trialEndsAt;
-        } else {
+        $subscription = DB::transaction(function () use ($request, $validated, $tenant, $plan, $billingCycle, $price, $isTrial, $settlementType, $paymentMethod) {
+            $startDate = now();
+
+            if ($isTrial) {
+                $trialDays = $plan->trial_days ?: $this->lifecycle->getDefaultTrialDays();
+                $trialEndsAt = $startDate->copy()->addDays($trialDays);
+
+                Subscription::where('tenant_id', $validated['tenant_id'])
+                    ->whereIn('status', ['active', 'trial', 'trialing'])
+                    ->update(['status' => 'expired']);
+
+                $subscription = Subscription::create([
+                    'tenant_id' => $validated['tenant_id'],
+                    'plan_id' => $validated['plan_id'],
+                    'status' => 'trialing',
+                    'billing_cycle' => $billingCycle,
+                    'starts_at' => $startDate,
+                    'ends_at' => $trialEndsAt,
+                    'trial_ends_at' => $trialEndsAt,
+                    'price' => 0.0,
+                    'auto_renew' => false,
+                    'promo_code' => $validated['promo_code'] ?? null,
+                ]);
+
+                $subscription->tenant->update([
+                    'status' => 'trial',
+                    'trial_ends_at' => $trialEndsAt,
+                    'suspended_at' => null,
+                    'auto_suspended_at' => null,
+                    'suspension_reason' => null,
+                ]);
+
+                return $subscription;
+            }
+
             $dates = $this->lifecycle->calculateRenewalDates($tenant, $billingCycle);
-            $startDate = $dates['starts_at'];
-            $endDate = $dates['ends_at'];
-        }
 
-        // Cancel/expire any existing active/trial/trialing subscriptions for this tenant
-        Subscription::where('tenant_id', $validated['tenant_id'])
-            ->whereIn('status', ['active', 'trial', 'trialing'])
-            ->update([
-                'status' => 'expired',
+            if ($settlementType === 'pending_invoice') {
+                // Pending payment: do not cancel existing active sub yet or activate tenant until invoice is paid
+                $subscription = Subscription::create([
+                    'tenant_id' => $validated['tenant_id'],
+                    'plan_id' => $validated['plan_id'],
+                    'status' => 'pending_payment',
+                    'billing_cycle' => $billingCycle,
+                    'starts_at' => $dates['starts_at'],
+                    'ends_at' => $dates['ends_at'],
+                    'trial_ends_at' => null,
+                    'price' => $price,
+                    'payment_method' => $paymentMethod,
+                    'auto_renew' => true,
+                    'promo_code' => $validated['promo_code'] ?? null,
+                ]);
+
+                $paymentSettings = PaymentSettings::first();
+                $vatCalc = $paymentSettings?->calculateVat($price) ?? ['exclusive' => $price, 'vat' => 0, 'total' => $price];
+
+                SubscriptionInvoice::create([
+                    'subscription_id' => $subscription->id,
+                    'tenant_id' => $tenant->id,
+                    'invoice_number' => SubscriptionInvoice::generateNumber(),
+                    'subtotal' => $vatCalc['exclusive'],
+                    'vat' => $vatCalc['vat'],
+                    'discount' => 0,
+                    'total' => $vatCalc['total'],
+                    'status' => 'pending',
+                    'issued_at' => now(),
+                    'due_at' => now()->addDays(7),
+                    'notes' => $validated['payment_notes'] ?? null,
+                ]);
+
+                return $subscription;
+            }
+
+            // paid_now or complimentary -> activate immediately and expire prior active/trial subs
+            Subscription::where('tenant_id', $validated['tenant_id'])
+                ->whereIn('status', ['active', 'trial', 'trialing'])
+                ->update(['status' => 'expired']);
+
+            $subscription = Subscription::create([
+                'tenant_id' => $validated['tenant_id'],
+                'plan_id' => $validated['plan_id'],
+                'status' => 'active',
+                'billing_cycle' => $billingCycle,
+                'starts_at' => $dates['starts_at'],
+                'ends_at' => $dates['ends_at'],
+                'trial_ends_at' => null,
+                'price' => $settlementType === 'complimentary' ? 0.0 : $price,
+                'payment_method' => match ($settlementType) {
+                    'paid_now' => $paymentMethod,
+                    'complimentary' => 'complimentary',
+                    default => null,
+                },
+                'auto_renew' => true,
+                'promo_code' => $validated['promo_code'] ?? null,
             ]);
 
-        $subscription = Subscription::create([
-            'tenant_id' => $validated['tenant_id'],
-            'plan_id' => $validated['plan_id'],
-            'status' => $status,
-            'billing_cycle' => $billingCycle,
-            'starts_at' => $startDate,
-            'ends_at' => $endDate,
-            'trial_ends_at' => $trialEndsAt,
-            'price' => $price,
-            'auto_renew' => true,
-            'promo_code' => $validated['promo_code'] ?? null,
-        ]);
+            $subscription->tenant->update([
+                'status' => 'active',
+                'trial_ends_at' => null,
+                'suspended_at' => null,
+                'auto_suspended_at' => null,
+                'suspension_reason' => null,
+            ]);
 
-        // Update tenant status
-        $subscription->tenant->update([
-            'status' => in_array($status, ['trial', 'trialing']) ? 'trial' : 'active',
-            'trial_ends_at' => $trialEndsAt,
-            'suspended_at' => null,
-            'auto_suspended_at' => null,
-            'suspension_reason' => null,
-        ]);
+            if ($settlementType === 'paid_now') {
+                $paymentSettings = PaymentSettings::first();
+                $vatCalc = $paymentSettings?->calculateVat($price) ?? ['exclusive' => $price, 'vat' => 0, 'total' => $price];
+                $collectedAmount = isset($validated['paid_amount']) && (float) $validated['paid_amount'] > 0
+                    ? (float) $validated['paid_amount']
+                    : (float) $vatCalc['total'];
+                $ref = ! empty($validated['payment_reference'])
+                    ? $validated['payment_reference']
+                    : strtoupper($paymentMethod).'-'.time();
+                $actor = $request->user();
+                $recordedBy = $actor ? $actor::class.'#'.$actor->id : 'unknown';
 
-        if ($request->wantsJson() || $request->header('X-Inertia')) {
-            if (str_contains(url()->previous(), '/system/tenants/')) {
-                return back()->with('success', __('messages.system.subscriptions.linked_to_tenant'));
+                $paymentNotes = $validated['payment_notes'] ?? null;
+
+                $invoice = SubscriptionInvoice::create([
+                    'subscription_id' => $subscription->id,
+                    'tenant_id' => $tenant->id,
+                    'invoice_number' => SubscriptionInvoice::generateNumber(),
+                    'subtotal' => $vatCalc['exclusive'],
+                    'vat' => $vatCalc['vat'],
+                    'discount' => 0,
+                    'total' => $collectedAmount,
+                    'status' => 'paid',
+                    'issued_at' => now(),
+                    'due_at' => now(),
+                    'paid_at' => now(),
+                    'notes' => trim(($paymentNotes ? $paymentNotes."\n" : '')."[Manual {$paymentMethod}] ref={$ref}, recorded_by={$recordedBy}"),
+                ]);
+
+                SubscriptionPayment::create([
+                    'tenant_id' => $tenant->id,
+                    'subscription_id' => $subscription->id,
+                    'subscription_invoice_id' => $invoice->id,
+                    'amount' => $collectedAmount,
+                    'currency' => 'SAR',
+                    'gateway' => $paymentMethod,
+                    'payment_method' => $paymentMethod,
+                    'gateway_ref' => $ref,
+                    'status' => 'paid',
+                    'paid_at' => now(),
+                    'gateway_response' => [
+                        'recorded_by' => $recordedBy,
+                        'notes' => $validated['payment_notes'] ?? null,
+                    ],
+                ]);
             }
+
+            return $subscription;
+        });
+
+        $this->audit->log('subscription_create', Subscription::class, $subscription->id, [
+            'tenant_id' => $subscription->tenant_id,
+            'plan_id' => $subscription->plan_id,
+            'status' => $subscription->status,
+            'billing_cycle' => $billingCycle,
+            'settlement_type' => $settlementType,
+            'payment_method' => $settlementType === 'paid_now' ? $paymentMethod : null,
+            'price' => $subscription->price,
+        ], $request);
+
+        if (str_contains((string) url()->previous(), '/system/tenants/') || str_contains((string) $request->headers->get('referer', ''), '/system/tenants/')) {
+            return back()->with('success', __('messages.system.subscriptions.linked_to_tenant'));
         }
 
         return redirect()->route('system.subscriptions.index')
@@ -241,35 +369,23 @@ class SubscriptionsController extends Controller
     }
 
     /**
-     * Activate subscription.
+     * Activate subscription via the unified lifecycle service.
      */
     public function activate(Request $request, Subscription $subscription)
     {
-        $subscription->update([
-            'status' => 'active',
-            'cancelled_at' => null,
-        ]);
+        $activated = $this->lifecycle->activateSubscription($subscription);
 
-        $subscription->tenant->update(['status' => 'active']);
-
-        $this->audit->log('subscription_activate', Subscription::class, $subscription->id, [
-            'tenant_id' => $subscription->tenant_id,
-            'plan_id' => $subscription->plan_id,
+        $this->audit->log('subscription_activate', Subscription::class, $activated->id, [
+            'tenant_id' => $activated->tenant_id,
+            'plan_id' => $activated->plan_id,
+            'ends_at' => $activated->ends_at?->toDateString(),
         ], $request);
 
         return back()->with('success', __('messages.system.subscriptions.activated'));
     }
 
     /**
-     * Extend subscription.
-     *
-     * Extending a cancelled subscription used to silently re-activate
-     * it (line removed: the controller was treating 'cancelled' as
-     * "should be re-activated when extended" which is wrong — a
-     * cancelled sub is intentionally off). Now we just bump the
-     * ends_at and leave the status as-is. If the admin wants to
-     * re-activate a cancelled sub, that's a separate explicit action
-     * (the activate() endpoint below).
+     * Extend subscription via the unified lifecycle service.
      */
     public function extend(Request $request, Subscription $subscription)
     {
@@ -277,26 +393,13 @@ class SubscriptionsController extends Controller
             'days' => 'required|integer|min:1|max:365',
         ]);
 
-        $subscription->update([
-            'ends_at' => $subscription->ends_at->addDays($validated['days']),
-            // status intentionally not touched
-        ]);
+        $extended = $this->lifecycle->extendSubscription($subscription, (int) $validated['days']);
 
-        // Sync tenant status — if the sub is currently active/trialing
-        // the tenant is too; cancelled/expired doesn't touch the tenant.
-        $newStatus = $subscription->fresh()->status;
-        $tenantStatus = ($newStatus === 'trialing') ? 'trial' : 'active';
-        $tenantUpdate = ['status' => $tenantStatus];
-
-        if ($newStatus === 'trialing') {
-            $tenantUpdate['trial_ends_at'] = $subscription->ends_at;
-        }
-        $subscription->tenant->update($tenantUpdate);
-
-        $this->audit->log('subscription_extend', Subscription::class, $subscription->id, [
-            'tenant_id' => $subscription->tenant_id,
+        $this->audit->log('subscription_extend', Subscription::class, $extended->id, [
+            'tenant_id' => $extended->tenant_id,
             'days' => $validated['days'],
-            'ends_at' => $subscription->ends_at?->toDateString(),
+            'status' => $extended->status,
+            'ends_at' => $extended->ends_at?->toDateString(),
         ], $request);
 
         return back()->with('success', __('messages.system.subscriptions.extended', ['days' => $validated['days']]));

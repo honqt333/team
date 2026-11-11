@@ -14,7 +14,7 @@
             <!-- Optional Center Note or Summary -->
             <div class="text-center font-mono text-[9px] text-gray-400">
                 <slot name="center-note">
-                    <span>{{ systemName }}</span>
+                    <span>{{ footerText || systemName }}</span>
                 </slot>
             </div>
 
@@ -52,6 +52,10 @@ const userName = computed(() => {
 
 const systemName = computed(() => {
     return page.props.tenant?.name || 'Khidmah Pro';
+});
+
+const footerText = computed(() => {
+    return page.props.tenant?.print_settings?.visual?.footer_text || '';
 });
 
 const printTimestamp = computed(() => {

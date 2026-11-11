@@ -10,6 +10,13 @@ const { locale } = useI18n();
 const isRTL = computed(() => locale.value === 'ar');
 const page = usePage();
 
+// The platform name is supplied by the server (HandleInertiaRequests
+// shares `app_name` from config('app.name_ar') / config('app.name')),
+// so a rebrand does not require touching this page.
+const appName = computed(() => {
+    return page.props.app_name || '';
+});
+
 const form = useForm({
     company_name: '',
     first_name: '',
@@ -572,8 +579,8 @@ const submit = () => {
                             <p class="mb-4">
                                 {{
                                     isRTL
-                                        ? 'مرحباً بك في خدمة برو. باستخدامك لهذه الخدمة، فإنك توافق على الالتزام بهذه الشروط والأحكام.'
-                                        : 'Welcome to Khidmh Pro. By using this service, you agree to be bound by these terms and conditions.'
+                                        ? `مرحباً بك في ${appName}. باستخدامك لهذه الخدمة، فإنك توافق على الالتزام بهذه الشروط والأحكام.`
+                                        : `Welcome to ${appName}. By using this service, you agree to be bound by these terms and conditions.`
                                 }}
                             </p>
                             <p class="mb-4">

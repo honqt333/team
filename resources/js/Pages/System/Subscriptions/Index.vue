@@ -471,6 +471,63 @@
                                     </span>
                                 </div>
 
+                                <!-- Settlement & Manual Payment (paid plans) -->
+                                <div
+                                    v-if="
+                                        selectedPlan &&
+                                        selectedPlan.slug !== 'trial' &&
+                                        Number(selectedPlan.price_yearly) > 0
+                                    "
+                                    class="space-y-3 pt-2 border-t border-gray-200 dark:border-gray-700"
+                                >
+                                    <SearchableSelect
+                                        v-model="form.settlement_type"
+                                        :options="settlementOptions"
+                                        option-label="label"
+                                        option-value="value"
+                                        :label="$t('system.subscriptions.settlement_type')"
+                                    />
+                                    <div
+                                        v-if="form.settlement_type === 'paid_now'"
+                                        class="grid grid-cols-1 sm:grid-cols-2 gap-3"
+                                    >
+                                        <SearchableSelect
+                                            v-model="form.payment_method"
+                                            :options="paymentMethodOptions"
+                                            option-label="label"
+                                            option-value="value"
+                                            :label="$t('system.subscriptions.payment_method')"
+                                        />
+                                        <div>
+                                            <label
+                                                class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                                            >
+                                                {{ $t('system.subscriptions.paid_amount') }}
+                                            </label>
+                                            <input
+                                                v-model.number="form.paid_amount"
+                                                type="number"
+                                                min="0"
+                                                step="0.01"
+                                                dir="ltr"
+                                                class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
+                                            />
+                                        </div>
+                                        <div class="sm:col-span-2">
+                                            <label
+                                                class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                                            >
+                                                {{ $t('system.subscriptions.payment_reference') }}
+                                            </label>
+                                            <input
+                                                v-model="form.payment_reference"
+                                                type="text"
+                                                class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
+
                                 <!-- Promo Code -->
                                 <div>
                                     <label
@@ -529,7 +586,7 @@
 
 <script setup>
 import DataTable from '@/Components/Common/DataTable.vue';
-import { ref, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { Link, router, useForm } from '@inertiajs/vue3';
 import SystemLayout from '@/Layouts/SystemLayout.vue';
@@ -544,6 +601,7 @@ const statusFilterOptions = computed(() => [
     { value: 'all', label: t('system.subscriptions.all_statuses') },
     { value: 'active', label: t('system.status.active') },
     { value: 'trial', label: t('system.status.trial') },
+    { value: 'pending_payment', label: t('system.subscriptions.pending_payment') },
     { value: 'cancelled', label: t('system.status.cancelled') },
     { value: 'expired', label: t('system.status.expired') },
 ]);
@@ -633,11 +691,31 @@ const form = useForm({
     plan_id: '',
     billing_cycle: 'yearly',
     promo_code: '',
+    settlement_type: 'paid_now',
+    payment_method: 'cash',
+    paid_amount: 0,
+    payment_reference: '',
 });
+
+const settlementOptions = computed(() => [
+    { value: 'paid_now', label: t('system.subscriptions.settlement_paid_now') },
+    { value: 'pending_invoice', label: t('system.subscriptions.settlement_pending_invoice') },
+    { value: 'complimentary', label: t('system.subscriptions.settlement_complimentary') },
+]);
+
+const paymentMethodOptions = computed(() => [
+    { value: 'cash', label: t('system.invoices.methods.cash') },
+    { value: 'pos', label: t('system.invoices.methods.pos') },
+    { value: 'bank_transfer', label: t('system.invoices.methods.bank_transfer') },
+    { value: 'manual', label: t('system.invoices.methods.manual') },
+]);
 
 const openModal = () => {
     form.reset();
     form.billing_cycle = 'yearly';
+    form.settlement_type = 'paid_now';
+    form.payment_method = 'cash';
+    form.paid_amount = 0;
     tenantSearch.value = '';
     showTenantDropdown.value = false;
     showModal.value = true;
@@ -675,6 +753,12 @@ const selectedPlan = computed(() => {
     return props.plans.find((p) => p.id === form.plan_id);
 });
 
+watch(selectedPlan, (plan) => {
+    if (plan) {
+        form.paid_amount = Number(plan.price_yearly || 0);
+    }
+});
+
 const submit = () => {
     form.post('/system/subscriptions', {
         onSuccess: () => closeModal(),
@@ -706,6 +790,7 @@ const getStatusClass = (status) => {
         cancelled: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
         expired: 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400',
         pending: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
+        pending_payment: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400',
     };
     return classes[status] || classes.expired;
 };
@@ -718,6 +803,7 @@ const getStatusLabel = (status) => {
         cancelled: t('system.status.cancelled'),
         expired: t('system.status.expired'),
         pending: t('system.status.pending'),
+        pending_payment: t('system.subscriptions.pending_payment'),
     };
     return labels[status] || status || t('common.na');
 };

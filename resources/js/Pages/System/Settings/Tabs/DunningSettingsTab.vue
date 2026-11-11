@@ -228,7 +228,7 @@
                     {{
                         processing
                             ? isAr
-                                ? $t('system.settings.saving...')
+                                ? $t('system.settings.saving')
                                 : 'Saving...'
                             : isAr
                               ? $t('system.settings.save')

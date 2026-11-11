@@ -196,6 +196,36 @@
                             {{ formatDate(sub.ends_at) }}
                         </div>
                     </div>
+                    <div
+                        class="mt-3 pt-3 border-t border-gray-100 dark:border-gray-700/60 flex flex-wrap items-center gap-2"
+                    >
+                        <Link
+                            :href="`/system/subscriptions/${sub.id}`"
+                            class="px-3 py-1 text-xs font-medium rounded-lg border border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                        >
+                            {{ $t('system.actions.view') }}
+                        </Link>
+                        <button
+                            v-if="
+                                ['cancelled', 'expired', 'pending', 'pending_payment'].includes(
+                                    sub.status
+                                )
+                            "
+                            type="button"
+                            @click="activateSub(sub)"
+                            class="px-3 py-1 text-xs font-medium rounded-lg bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 transition-colors"
+                        >
+                            {{ $t('system.subscriptions.activate_subscription') }}
+                        </button>
+                        <button
+                            v-if="['active', 'trial', 'trialing'].includes(sub.status)"
+                            type="button"
+                            @click="cancelSub(sub)"
+                            class="px-3 py-1 text-xs font-medium rounded-lg bg-rose-50 dark:bg-rose-900/20 text-rose-700 dark:text-rose-300 hover:bg-rose-100 dark:hover:bg-rose-900/40 transition-colors"
+                        >
+                            {{ $t('system.subscriptions.cancel_subscription') }}
+                        </button>
+                    </div>
                 </div>
             </div>
 
@@ -336,6 +366,8 @@
 <script setup>
 import { computed, ref, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { Link, router } from '@inertiajs/vue3';
+import { useConfirm } from '@/Composables/useConfirm';
 
 const props = defineProps({
     tenant: { type: Object, required: true },
@@ -367,7 +399,34 @@ onMounted(async () => {
 defineEmits(['security', 'assign-plan']);
 
 const { t, locale } = useI18n();
+const { confirm } = useConfirm();
 const active = ref('overview');
+
+async function activateSub(sub) {
+    const ok = await confirm({
+        title: t('system.subscriptions.activate_subscription'),
+        message: t('system.subscriptions.confirm_activate_message'),
+        confirmText: t('system.subscriptions.activate_subscription'),
+        cancelText: t('common.cancel'),
+        type: 'success',
+    });
+    if (ok) {
+        router.post(`/system/subscriptions/${sub.id}/activate`, {}, { preserveScroll: true });
+    }
+}
+
+async function cancelSub(sub) {
+    const ok = await confirm({
+        title: t('system.subscriptions.cancel_subscription'),
+        message: t('system.subscriptions.confirm_cancel_message'),
+        confirmText: t('system.subscriptions.cancel_subscription'),
+        cancelText: t('common.cancel'),
+        type: 'danger',
+    });
+    if (ok) {
+        router.post(`/system/subscriptions/${sub.id}/cancel`, {}, { preserveScroll: true });
+    }
+}
 
 // Tabs config — count-driven badges so the admin sees at a glance how
 // many subscriptions/invoices/etc. are on the tenant without clicking.

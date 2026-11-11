@@ -312,16 +312,19 @@ class BankTransferReceiptsController extends Controller
                 $receipt->payment->update($paymentUpdates);
             }
 
-            // Activate subscription (recalculates duration if expired or carries active remaining days)
-            if ($receipt->subscription) {
-                $this->lifecycle->activateSubscription($receipt->subscription);
-            } elseif ($receipt->tenant) {
-                $receipt->tenant->update([
-                    'status' => 'active',
-                    'suspended_at' => null,
-                    'auto_suspended_at' => null,
-                    'suspension_reason' => null,
-                ]);
+            // Activate subscription ONLY when the approved amount covers the full expected invoice total.
+            // Partial approvals leave the invoice open in pending_payment until the balance is settled.
+            if (! $isShortVsExpected) {
+                if ($receipt->subscription) {
+                    $this->lifecycle->activateSubscription($receipt->subscription);
+                } elseif ($receipt->tenant) {
+                    $receipt->tenant->update([
+                        'status' => 'active',
+                        'suspended_at' => null,
+                        'auto_suspended_at' => null,
+                        'suspension_reason' => null,
+                    ]);
+                }
             }
 
             // Mark invoice as paid ONLY if the approved amount covers
@@ -344,7 +347,7 @@ class BankTransferReceiptsController extends Controller
 
         $message = $approvedAmount < $actual - 0.01
             ? __('messages.system.receipts.partial_approved', ['amount' => number_format($approvedAmount, 2)])
-            : 'تم الموافقة على الإيصال وتفعيل الاشتراك';
+            : __('messages.system.receipts.approved');
 
         // Audit the decision. A payment approval is a financial event —
         // it activates a subscription and can activate a tenant — so

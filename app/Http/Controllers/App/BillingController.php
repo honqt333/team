@@ -153,7 +153,7 @@ class BillingController extends Controller
 
         // Plans
         $plans = Plan::where('is_active', true)
-            ->orderBy('price_monthly', 'asc')
+            ->orderBy('price_yearly', 'asc')
             ->get()
             ->map(function ($plan) {
                 $plan->features_ar = $plan->features_ar ?? [];
@@ -265,7 +265,6 @@ class BillingController extends Controller
         return Inertia::render('Settings/Billing/Index', [
             'current_subscription' => $currentSubscription,
             'subscription_lifecycle' => $lifecyclePayload,
-            'storage_usage' => $tenant->storage_usage,
             'available_plans' => $plans,
             'subscription_history' => $subscriptionHistory,
             'recent_payments' => $recentPayments,

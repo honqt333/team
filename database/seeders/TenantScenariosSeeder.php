@@ -68,6 +68,24 @@ class TenantScenariosSeeder extends Seeder
         $this->command->info('   Default password for all scenario users: "password".');
     }
 
+    /** Lifecycle cases not covered by the four operational workshop fixtures. */
+    public function seedAdditionalLifecycleCases(): void
+    {
+        if (! Tenant::where('slug', 'new-tenant')->exists()) {
+            $this->seedNewTenant();
+        }
+
+        $trial = Plan::where('slug', 'trial')->firstOrFail();
+
+        if (! Tenant::where('slug', 'trial-just-ended')->exists()) {
+            $this->seedTrialJustEnded($trial);
+        }
+
+        if (! Tenant::where('slug', 'trial-ending-soon')->exists()) {
+            $this->seedTrialEndingSoon($trial);
+        }
+    }
+
     /**
      * Scenario 1 — brand-new tenant, no subscription yet.
      * Tenant is active but the billing panel should show
@@ -280,7 +298,7 @@ class TenantScenariosSeeder extends Seeder
     private function createAdminUser(Tenant $tenant, Center $center, string $email, string $name): User
     {
         $user = User::firstOrCreate(
-            ['email' => $email],
+            ['email' => $email, 'tenant_id' => $tenant->id],
             [
                 'name' => $name,
                 'tenant_id' => $tenant->id,

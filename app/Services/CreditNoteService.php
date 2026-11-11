@@ -363,6 +363,7 @@ class CreditNoteService
             $totalReturnTax,
             $data,
             $user,
+            $taxEnabled,
             $taxRate
         ) {
             $tenantId = $workOrder->tenant_id;
@@ -404,7 +405,7 @@ class CreditNoteService
                 'seller_name_en_snapshot' => $originalInvoice->seller_name_en_snapshot,
                 'seller_vat_snapshot' => $originalInvoice->seller_vat_snapshot,
                 'seller_cr_snapshot' => $originalInvoice->seller_cr_snapshot,
-                'tax_enabled_snapshot' => $originalInvoice->tax_enabled_snapshot,
+                'tax_enabled_snapshot' => $taxEnabled,
                 'pricing_mode_snapshot' => $originalInvoice->pricing_mode_snapshot,
                 'tax_rate_snapshot' => $taxRate,
                 'currency_code' => $originalInvoice->currency_code ?? 'SAR',
@@ -415,9 +416,11 @@ class CreditNoteService
                 'total_paid' => round($totalReturnIncl, 2),
             ]);
 
-            // Generate ZATCA QR Code
-            $creditNote->zatca_qr_tlv = $this->invoiceService->generateZatcaQr($creditNote);
-            $creditNote->saveQuietly();
+            // Generate ZATCA QR Code strictly when VAT is enabled on the credit note
+            if ($creditNote->tax_enabled_snapshot) {
+                $creditNote->zatca_qr_tlv = $this->invoiceService->generateZatcaQr($creditNote);
+                $creditNote->saveQuietly();
+            }
 
             // Insert invoice lines
             foreach ($linesToCreate as $line) {
@@ -829,6 +832,7 @@ class CreditNoteService
             $totalReturnTax,
             $data,
             $user,
+            $taxEnabled,
             $taxRate
         ) {
             $tenantId = $invoice->tenant_id;
@@ -870,7 +874,7 @@ class CreditNoteService
                 'seller_name_en_snapshot' => $invoice->seller_name_en_snapshot,
                 'seller_vat_snapshot' => $invoice->seller_vat_snapshot,
                 'seller_cr_snapshot' => $invoice->seller_cr_snapshot,
-                'tax_enabled_snapshot' => $invoice->tax_enabled_snapshot,
+                'tax_enabled_snapshot' => $taxEnabled,
                 'pricing_mode_snapshot' => $invoice->pricing_mode_snapshot,
                 'tax_rate_snapshot' => $taxRate,
                 'currency_code' => $invoice->currency_code ?? 'SAR',
@@ -881,9 +885,11 @@ class CreditNoteService
                 'total_paid' => round($totalReturnIncl, 2),
             ]);
 
-            // Generate ZATCA QR Code
-            $creditNote->zatca_qr_tlv = $this->invoiceService->generateZatcaQr($creditNote);
-            $creditNote->saveQuietly();
+            // Generate ZATCA QR Code strictly when VAT is enabled on the credit note
+            if ($creditNote->tax_enabled_snapshot) {
+                $creditNote->zatca_qr_tlv = $this->invoiceService->generateZatcaQr($creditNote);
+                $creditNote->saveQuietly();
+            }
 
             // Insert invoice lines
             foreach ($linesToCreate as $line) {

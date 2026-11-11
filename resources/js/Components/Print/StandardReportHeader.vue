@@ -24,7 +24,10 @@
 
             <!-- Column 2: Logo (Absolute Center) & Report Title -->
             <div class="text-center flex flex-col items-center justify-center">
-                <div v-if="logoUrl" class="w-20 h-20 mb-1 flex items-center justify-center">
+                <div
+                    v-if="showLogo && logoUrl"
+                    class="w-20 h-20 mb-1 flex items-center justify-center"
+                >
                     <img
                         :src="logoUrl"
                         :alt="companyName"
@@ -134,6 +137,10 @@ const taxNumber = computed(() => {
 
 const crNumber = computed(() => {
     return tenant.value.cr_number || null;
+});
+
+const showLogo = computed(() => {
+    return page?.props?.tenant?.print_settings?.visual?.show_logo !== false;
 });
 
 const logoUrl = computed(() => {

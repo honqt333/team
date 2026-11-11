@@ -69,9 +69,13 @@ class BranchesController extends Controller
         $user = auth()->user();
         $tenant = $user->tenant;
 
-        // Check subscription limits for centers/branches
+        // Check subscription limits for centers/branches using the valid current subscription
         $activeSubscription = $tenant->subscriptions()
             ->whereIn('status', ['active', 'trial', 'trialing'])
+            ->where(function ($q) {
+                $q->whereNull('ends_at')->orWhere('ends_at', '>', now());
+            })
+            ->orderByDesc('ends_at')
             ->with('plan')
             ->first();
 
@@ -79,7 +83,7 @@ class BranchesController extends Controller
         $maxCenters = intval($limits['max_centers'] ?? $limits['centers'] ?? 1);
         $currentCentersCount = $tenant->centers()->count();
 
-        if ($currentCentersCount >= $maxCenters) {
+        if ($maxCenters < 999 && $currentCentersCount >= $maxCenters) {
             return back()->with('error', __('company_profile.branches.max_limit_reached', ['max' => $maxCenters]));
         }
 

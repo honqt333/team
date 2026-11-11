@@ -222,7 +222,7 @@
 
             <!-- PrintEngine Document Sheet -->
             <div
-                class="print-sheet-wrapper print-container w-full overflow-x-auto bg-white dark:bg-gray-800 rounded-3xl border border-gray-200 dark:border-gray-700 shadow-sm p-4 flex justify-start md:justify-center min-w-0 print:border-none print:shadow-none print:p-0"
+                class="print-sheet-wrapper print-container w-full overflow-x-auto bg-white dark:bg-gray-800 rounded-3xl border border-gray-200 dark:border-gray-700 shadow-sm p-4 flex justify-start md:justify-center print:block min-w-0 print:border-none print:shadow-none print:p-0"
             >
                 <div
                     class="print-sheet-content inline-block shrink-0 min-w-[210mm] print:min-w-0 print:w-full"
@@ -506,13 +506,16 @@
 
 <script setup>
 import AppPrintButton from '@/Components/Common/AppPrintButton.vue';
-import { printDocument } from '@/Composables/usePrint';
+import {
+    printDocument,
+    resolveDocumentSettings,
+    resolveVisualSettings,
+} from '@/Composables/usePrint';
 import { ref, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { router, usePage } from '@inertiajs/vue3';
 import PrintEngine from '@/Components/Print/PrintEngine.vue';
 import SignaturePad from '@/Components/Common/SignaturePad.vue';
-import { buildPrintSignatures } from '@/Utils/printSignatures';
 
 const props = defineProps({
     quote: Object,
@@ -683,34 +686,28 @@ function localeName(center, tenant) {
 
 const documentSettings = computed(() => {
     const tenantSettings = props.quote.tenant?.print_settings || page.props?.tenant?.print_settings;
-    const docSettings =
-        tenantSettings?.documents?.['quote'] || tenantSettings?.documents?.['quotation'] || {};
-    return {
-        title_ar: docSettings.title_ar || t('quotes.quotation_or_estimate'),
-        title_en: docSettings.title_en || 'Price Quotation / Assessment',
-        terms:
-            docSettings.terms ||
-            (props.quote.tenant?.quote_terms ? [props.quote.tenant.quote_terms] : []),
-        print_terms: docSettings.print_terms !== false,
-        show_stamp: docSettings.show_stamp !== false,
-        show_customer_address: docSettings.show_customer_address !== false,
-        signatures: buildPrintSignatures(docSettings, props.quote.signature_url),
-    };
+    return resolveDocumentSettings({
+        tenantSettings,
+        documentType: 'quotation',
+        customerSignatureUrl: props.quote.signature_url,
+        legacyTerms: props.quote.tenant?.quote_terms,
+        defaults: {
+            title_ar: t('quotes.quotation_or_estimate'),
+            title_en: 'Price Quotation / Assessment',
+        },
+    });
 });
 
 const visualSettings = computed(() => {
     const tenantSettings = props.quote.tenant?.print_settings || page.props?.tenant?.print_settings;
-    const vis = tenantSettings?.visual || {};
     const center = props.quote.center || {};
-    return {
-        active_template: vis.active_template || 'TemplateDefaultA4',
-        show_logo: vis.show_logo !== false,
-        show_stamp: vis.show_stamp !== false,
-        show_qr_code: vis.show_qr_code !== false,
-        primary_color: vis.primary_color || '#3b82f6',
-        footer_text: vis.footer_text || props.quote.tenant?.print_settings?.footer_text || '',
-        stamp_url: center.stamp_url || vis.stamp_url || '',
-    };
+    return resolveVisualSettings({
+        tenantSettings,
+        center,
+        overrides: {
+            primary_color: tenantSettings?.visual?.primary_color || '#3b82f6',
+        },
+    });
 });
 
 // Actions
@@ -758,7 +755,7 @@ function handleReject() {
 @media print {
     @page {
         size: A4;
-        margin: 0.5cm 1cm;
+        margin: 15mm 10mm 12mm 10mm;
     }
     html,
     body,

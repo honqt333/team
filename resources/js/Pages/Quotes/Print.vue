@@ -14,8 +14,7 @@ import { computed, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { usePage, router } from '@inertiajs/vue3';
 import PrintLayout from '@/Components/Print/PrintLayout.vue';
-import { buildPrintSignatures } from '@/Utils/printSignatures';
-import { usePrint } from '@/Composables/usePrint';
+import { usePrint, resolveDocumentSettings, resolveVisualSettings } from '@/Composables/usePrint';
 
 const props = defineProps({
     quote: Object,
@@ -181,35 +180,29 @@ const mappedCenterData = computed(() => {
 });
 
 const documentSettings = computed(() => {
-    const tenantSettings = page.props?.tenant?.print_settings;
-    const docSettings =
-        tenantSettings?.documents?.['quote'] || tenantSettings?.documents?.['quotation'] || {};
-    return {
-        title_ar: docSettings.title_ar || t('quotes.quotation_or_estimate'),
-        title_en: docSettings.title_en || 'Price Quotation / Assessment',
-        terms:
-            docSettings.terms ||
-            (page.props?.tenant?.invoice_terms ? [page.props.tenant.invoice_terms] : []),
-        print_terms: docSettings.print_terms !== false,
-        show_stamp: docSettings.show_stamp !== false,
-        show_customer_address: docSettings.show_customer_address !== false,
-        signatures: buildPrintSignatures(docSettings, props.quote.signature_url),
-    };
+    const tenantSettings = props.quote.tenant?.print_settings || page.props?.tenant?.print_settings;
+    return resolveDocumentSettings({
+        tenantSettings,
+        documentType: 'quotation',
+        customerSignatureUrl: props.quote.signature_url,
+        legacyTerms: props.quote.tenant?.quote_terms || page.props?.tenant?.quote_terms,
+        defaults: {
+            title_ar: t('quotes.quotation_or_estimate'),
+            title_en: 'Price Quotation / Assessment',
+        },
+    });
 });
 
 const visualSettings = computed(() => {
-    const tenantSettings = page.props?.tenant?.print_settings;
-    const vis = tenantSettings?.visual || {};
+    const tenantSettings = props.quote.tenant?.print_settings || page.props?.tenant?.print_settings;
     const center = props.quote.center || {};
-    return {
-        active_template: vis.active_template || 'TemplateDefaultA4',
-        show_logo: vis.show_logo !== false,
-        show_stamp: vis.show_stamp !== false,
-        show_qr_code: vis.show_qr_code !== false,
-        primary_color: vis.primary_color || '#3b82f6',
-        footer_text: vis.footer_text || props.quote.tenant?.print_settings?.footer_text || '',
-        stamp_url: center.stamp_url || vis.stamp_url || '',
-    };
+    return resolveVisualSettings({
+        tenantSettings,
+        center,
+        overrides: {
+            primary_color: tenantSettings?.visual?.primary_color || '#3b82f6',
+        },
+    });
 });
 </script>
 
@@ -217,7 +210,7 @@ const visualSettings = computed(() => {
 @media print {
     @page {
         size: A4;
-        margin: 0 1cm;
+        margin: 15mm 10mm 12mm 10mm;
     }
     body {
         -webkit-print-color-adjust: exact;

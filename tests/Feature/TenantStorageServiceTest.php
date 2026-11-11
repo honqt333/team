@@ -128,7 +128,7 @@ class TenantStorageServiceTest extends TestCase
         $this->assertFalse($summary['is_exceeded']);
     }
 
-    public function test_tenant_storage_usage_accessor_and_billing_page_integration(): void
+    public function test_tenant_storage_usage_accessor_and_system_settings_integration(): void
     {
         $summary = $this->tenant->storage_usage;
 
@@ -137,13 +137,30 @@ class TenantStorageServiceTest extends TestCase
         $this->assertArrayHasKey('allocated_gb', $summary);
         $this->assertArrayHasKey('usage_percentage', $summary);
 
-        $response = $this->actingAs($this->user)
-            ->get(route('app.billing.index'));
+        $this->actingAs($this->user)
+            ->get(route('settings.system', ['section' => 'storage']))
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page
+                ->component('Settings/System/Index')
+                ->where('activeSection', 'storage')
+                ->has('storage_usage')
+            );
 
-        $response->assertOk();
-        $response->assertInertia(fn ($page) => $page
-            ->component('Settings/Billing/Index')
-            ->has('storage_usage')
-        );
+        $this->actingAs($this->user)
+            ->get(route('settings.storage'))
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page
+                ->component('Settings/System/Index')
+                ->where('activeSection', 'storage')
+                ->has('storage_usage')
+            );
+
+        $this->actingAs($this->user)
+            ->get(route('app.billing.index'))
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page
+                ->component('Settings/Billing/Index')
+                ->missing('storage_usage')
+            );
     }
 }

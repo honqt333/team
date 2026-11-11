@@ -50,6 +50,11 @@ class NotificationSettingsTest extends TestCase
 
     public function test_notification_settings_page_can_be_rendered(): void
     {
+        $this->actingAs($this->user)
+            ->get(route('settings.integrations'))
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page->component('Settings/Integrations'));
+
         $response = $this->actingAs($this->user)
             ->get(route('settings.notifications.index'));
 

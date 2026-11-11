@@ -13,6 +13,7 @@ use App\Models\Tenant;
 use App\Services\Invoice\SubscriptionInvoiceService;
 use Carbon\Carbon;
 use Exception;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 
@@ -55,19 +56,41 @@ class SubscriptionRenewalService
     }
 
     /**
-     * Auto-renew subscriptions that are due today.
+     * Issue renewal invoices for due auto-renew subscriptions without granting free validity before payment.
      */
     protected function processAutoRenewals(array &$results): void
     {
         $subscriptions = Subscription::where('status', 'active')
             ->where('auto_renew', true)
+            ->whereNotNull('ends_at')
             ->whereDate('ends_at', '<=', now())
             ->with(['tenant', 'plan'])
             ->get();
 
         foreach ($subscriptions as $subscription) {
             try {
-                $this->renewSubscription($subscription);
+                // Skip if there is already an open invoice for this subscription
+                $hasOpenInvoice = $subscription->invoices()
+                    ->whereIn('status', ['pending', 'pending_payment', 'overdue'])
+                    ->exists();
+
+                if ($hasOpenInvoice) {
+                    continue;
+                }
+
+                $invoice = $this->invoiceService->createForSubscription($subscription);
+
+                if ($subscription->tenant?->email) {
+                    try {
+                        Mail::to($subscription->tenant->email)->send(new SubscriptionInvoiceMail($invoice));
+                    } catch (Exception $e) {
+                        Log::warning('Failed to send renewal invoice email', [
+                            'subscription_id' => $subscription->id,
+                            'error' => $e->getMessage(),
+                        ]);
+                    }
+                }
+
                 $results['renewed']++;
             } catch (Exception $e) {
                 Log::error('Subscription renewal failed', [
@@ -83,47 +106,46 @@ class SubscriptionRenewalService
     }
 
     /**
-     * Renew a single subscription.
+     * Renew a single subscription atomically after payment/confirmation.
      */
     public function renewSubscription(Subscription $subscription): SubscriptionInvoice
     {
-        // Preserve remaining time if active, otherwise start from current activation date
-        $dates = $this->lifecycle->calculateRenewalDates(
-            $subscription->tenant,
-            $subscription->billing_cycle ?: 'yearly'
-        );
-        $startsAt = $dates['starts_at'];
-        $endsAt = $dates['ends_at'];
+        return DB::transaction(function () use ($subscription) {
+            $dates = $this->lifecycle->calculateRenewalDates(
+                $subscription->tenant,
+                $subscription->billing_cycle ?: 'yearly',
+                $subscription->id
+            );
+            $startsAt = $dates['starts_at'];
+            $endsAt = $dates['ends_at'];
 
-        // Update subscription dates & reactivate
-        $subscription->update([
-            'status' => 'active',
-            'starts_at' => $startsAt,
-            'ends_at' => $endsAt,
-        ]);
+            $subscription->update([
+                'status' => 'active',
+                'starts_at' => $startsAt,
+                'ends_at' => $endsAt,
+            ]);
 
-        // Create new invoice
-        $invoice = $this->invoiceService->createForSubscription($subscription);
+            $invoice = $this->invoiceService->createForSubscription($subscription);
 
-        // Send invoice email
-        if ($subscription->tenant->email) {
-            try {
-                Mail::to($subscription->tenant->email)->send(new SubscriptionInvoiceMail($invoice));
-            } catch (Exception $e) {
-                Log::warning('Failed to send renewal invoice email', [
-                    'subscription_id' => $subscription->id,
-                    'error' => $e->getMessage(),
-                ]);
+            if ($subscription->tenant?->email) {
+                try {
+                    Mail::to($subscription->tenant->email)->send(new SubscriptionInvoiceMail($invoice));
+                } catch (Exception $e) {
+                    Log::warning('Failed to send renewal invoice email', [
+                        'subscription_id' => $subscription->id,
+                        'error' => $e->getMessage(),
+                    ]);
+                }
             }
-        }
 
-        Log::info('Subscription renewed', [
-            'subscription_id' => $subscription->id,
-            'tenant' => $subscription->tenant->trade_name,
-            'ends_at' => $endsAt->toDateString(),
-        ]);
+            Log::info('Subscription renewed', [
+                'subscription_id' => $subscription->id,
+                'tenant' => $subscription->tenant?->trade_name,
+                'ends_at' => $endsAt->toDateString(),
+            ]);
 
-        return $invoice;
+            return $invoice;
+        });
     }
 
     /**
@@ -169,9 +191,8 @@ class SubscriptionRenewalService
         $gracePeriod = $this->lifecycle->getGracePeriodDays();
         $expireDate = now()->subDays($gracePeriod);
 
-        // 1. Expire active paid subscriptions whose grace period has elapsed
+        // 1. Expire active paid subscriptions whose grace period has elapsed (regardless of auto_renew if unpaid)
         $subscriptions = Subscription::where('status', 'active')
-            ->where('auto_renew', false)
             ->whereNotNull('ends_at')
             ->where('ends_at', '<', $expireDate)
             ->with(['tenant', 'plan'])

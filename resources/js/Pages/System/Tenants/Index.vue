@@ -193,14 +193,23 @@
                                                 :class="
                                                     tenant.latest_subscription.status === 'active'
                                                         ? 'text-emerald-600 dark:text-emerald-400'
-                                                        : ['trial', 'trialing'].includes(
+                                                        : [
+                                                                'trial',
+                                                                'trialing',
+                                                                'pending',
+                                                                'pending_payment',
+                                                            ].includes(
                                                                 tenant.latest_subscription.status
                                                             )
                                                           ? 'text-amber-600 dark:text-amber-400'
-                                                          : 'text-gray-500'
+                                                          : 'text-rose-500 dark:text-rose-400'
                                                 "
                                             >
-                                                {{ $t('system.status.active') }}
+                                                {{
+                                                    getSubscriptionStatusLabel(
+                                                        tenant.latest_subscription.status
+                                                    )
+                                                }}
                                             </span>
                                         </div>
                                     </div>
@@ -415,11 +424,16 @@ const getStatusClass = (status) => {
 };
 
 const getStatusLabel = (status) => {
-    // Use i18n for the standard statuses; fall back to the raw value.
-    const known = ['active', 'trial', 'suspended'];
+    const known = ['active', 'trial', 'suspended', 'expired', 'cancelled', 'pending'];
     if (known.includes(status)) {
         return t(`system.status.${status}`);
     }
     return status || t('common.na');
+};
+
+const getSubscriptionStatusLabel = (status) => {
+    if (status === 'trialing') return t('system.status.trial');
+    if (status === 'pending_payment') return t('system.subscriptions.pending_payment');
+    return getStatusLabel(status);
 };
 </script>

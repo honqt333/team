@@ -27,10 +27,6 @@ class DatabaseSeeder extends Seeder
 
         // Technical data and communication templates are seeded by InitialSystemSeeder.
 
-        // 5. Create Test Data (Optional, but useful for now)
-        $this->call(TestDataSeeder::class);
-
-        // 6. Keep Nationalities
         $this->call(NationalitiesSeeder::class);
     }
 }

@@ -28,6 +28,9 @@ return [
         'password_min' => 'The password must be at least 8 characters',
         'title' => 'Admin User',
     ],
+    'users' => [
+        'max_limit_reached' => 'You have reached the maximum limit of users for your current plan (:max). Please upgrade to add more.',
+    ],
     'branches' => [
         'active' => 'Active',
         'active_help' => 'Active Help',
@@ -217,6 +220,7 @@ return [
     // Subscription management (self-service)
     'subscription' => [
         'already_pending' => 'You already have a pending subscription request for ":plan". Please complete the current payment or wait a moment.',
+        'auto_renew_cancelled' => 'Auto-renewal has been cancelled. Your subscription remains active until the end of the paid period.',
         'bank_transfer_pending' => 'Your bank transfer subscription request has been received. Your subscription will be activated once the transfer is verified.',
         'bank_transfer_setup_ready' => 'Transfer details are ready. Transfer the amount, then upload the receipt to activate your subscription.',
         'cancelled' => 'Your subscription has been cancelled',

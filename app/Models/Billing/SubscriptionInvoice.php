@@ -129,8 +129,24 @@ class SubscriptionInvoice extends Model
     public static function generateNumber(): string
     {
         $year = date('Y');
-        $count = self::whereYear('created_at', $year)->count() + 1;
+        $prefix = "INV-{$year}-";
 
-        return "INV-{$year}-".str_pad((string) $count, 6, '0', STR_PAD_LEFT);
+        $latestNumber = self::withoutGlobalScopes()
+            ->where('invoice_number', 'like', "{$prefix}%")
+            ->orderByDesc('invoice_number')
+            ->value('invoice_number');
+
+        $nextSeq = $latestNumber
+            ? ((int) substr((string) $latestNumber, strlen($prefix))) + 1
+            : 1;
+
+        $candidate = $prefix.str_pad((string) $nextSeq, 6, '0', STR_PAD_LEFT);
+
+        while (self::withoutGlobalScopes()->where('invoice_number', $candidate)->exists()) {
+            $nextSeq++;
+            $candidate = $prefix.str_pad((string) $nextSeq, 6, '0', STR_PAD_LEFT);
+        }
+
+        return $candidate;
     }
 }

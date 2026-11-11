@@ -87,7 +87,7 @@ class InvoiceCenterScopeTest extends TestCase
         return $user;
     }
 
-    private function invoiceIn(Center $center): Invoice
+    private function invoiceIn(Center $center, string $status = 'valid'): Invoice
     {
         return Invoice::create([
             'tenant_id' => $this->tenant->id,
@@ -97,7 +97,7 @@ class InvoiceCenterScopeTest extends TestCase
             'issue_date' => now(),
             'supply_date' => now()->toDateString(),
             'type' => 'invoice',
-            'status' => 'valid',
+            'status' => $status,
             'payment_status' => 'unpaid',
             'total_excl_tax' => 100,
             'total_tax' => 15,
@@ -147,8 +147,11 @@ class InvoiceCenterScopeTest extends TestCase
 
     public function test_the_update_and_delete_abilities_are_also_centre_scoped(): void
     {
-        $invoice = $this->invoiceIn($this->centerB);
-        $invoice->update(['status' => 'draft']);
+        // The invoice is created as a DRAFT directly. `InvoicePolicy::update()`
+        // and `::delete()` both require `status === 'draft'`, and the
+        // immutability guard refuses to rewind an issued document — so
+        // a draft has to be created, not transitioned into.
+        $invoice = $this->invoiceIn($this->centerB, 'draft');
 
         $user = $this->userIn($this->centerA, [Permissions::INVOICES_CREATE]);
 

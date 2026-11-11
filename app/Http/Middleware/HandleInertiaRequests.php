@@ -133,6 +133,7 @@ class HandleInertiaRequests extends Middleware
                 'email' => $tenant->email,
                 'cr_number' => $tenant->cr_number,
                 'vat_number' => $tenant->taxSettings?->tax_number ?? $tenant->vat_number ?? '',
+                'iban' => $tenant->iban,
                 'logo_url' => $tenant->logo_path ? Storage::url($tenant->logo_path) : asset('images/brand/logo-256.png'),
                 'dunning_opted_out' => (bool) $tenant->dunning_opted_out,
                 'dunning_language' => $tenant->dunning_language,
@@ -174,6 +175,10 @@ class HandleInertiaRequests extends Middleware
                 'type' => $user->currentCenter->center_type,
                 'phone' => $user->currentCenter->phone,
                 'email' => $user->currentCenter->email,
+                'vat_number' => $user->currentCenter->vat_number,
+                'logo_invoice_url' => $user->currentCenter->logo_invoice_url,
+                'logo_light_url' => $user->currentCenter->logo_light_url,
+                'stamp_url' => $user->currentCenter->stamp_url,
             ] : null,
             // Impersonation state
             'impersonating' => $request->session()->has('impersonating_from'),

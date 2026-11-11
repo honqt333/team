@@ -233,7 +233,21 @@ class InvoiceIssuerIdentityPdfTest extends TestCase
 
     public function test_legacy_named_issuer_keeps_missing_registration_numbers_on_reprint(): void
     {
-        $this->alphaInvoice->update(['seller_vat_snapshot' => null, 'seller_cr_snapshot' => null]);
+        // A LEGACY invoice is one that was issued before the issuer
+        // identity snapshot columns existed, so it never had the values.
+        // The `Invoice` model documents this explicitly
+        // (`app/Models/Invoice.php:116-123`): null is reserved for legacy
+        // rows whose issuer identity was never captured.
+        //
+        // Such a row is therefore reproduced by a DIRECT write — the way
+        // the original data predating the columns would look. Writing it
+        // through the model would mean *changing* an issued document,
+        // which the immutability guard correctly refuses.
+        DB::table('invoices')->where('id', $this->alphaInvoice->id)->update([
+            'seller_vat_snapshot' => null,
+            'seller_cr_snapshot' => null,
+        ]);
+
         $this->alphaTenant->update(['vat_number' => '355555555555553', 'cr_number' => '3030303030']);
 
         $text = $this->extractPdfText($this->generateTenantPdf($this->alphaInvoice->fresh()));
@@ -241,7 +255,15 @@ class InvoiceIssuerIdentityPdfTest extends TestCase
         $this->assertStringNotContainsString('355555555555553', $text);
         $this->assertStringNotContainsString('3030303030', $text);
 
-        $this->platformInvoice->update(['seller_vat_snapshot' => null, 'seller_cr_snapshot' => null]);
+        // The platform document is a SubscriptionInvoice — a different
+        // model on a different table, and it carries its own `pending`
+        // status enum. The legacy-row write therefore targets
+        // `subscription_invoices`, not `invoices`.
+        DB::table('subscription_invoices')->where('id', $this->platformInvoice->id)->update([
+            'seller_vat_snapshot' => null,
+            'seller_cr_snapshot' => null,
+        ]);
+
         $text = $this->extractPdfText(app(SubscriptionInvoiceService::class)->generatePdf($this->platformInvoice->fresh()));
         $this->assertStringContainsString('Khidmh Platform FZE', $text);
         $this->assertStringNotContainsString('399999999999993', $text);

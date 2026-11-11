@@ -9,6 +9,7 @@ use App\Http\Requests\App\Users\StoreUserRequest;
 use App\Http\Requests\App\Users\UpdateUserRequest;
 use App\Models\Center;
 use App\Models\Role;
+use App\Models\Tenant;
 use App\Models\User;
 use App\Support\TenancyContext;
 use Illuminate\Http\Request;
@@ -59,10 +60,17 @@ class UserController extends Controller
     {
         $this->authorize('create', User::class);
 
-        return DB::transaction(function () use ($request) {
+        $tenantId = TenancyContext::tenantId();
+
+        if ($request->boolean('is_active', true)) {
+            if ($limitError = $this->checkUserPlanLimit($tenantId)) {
+                return back()->with('error', $limitError);
+            }
+        }
+
+        return DB::transaction(function () use ($request, $tenantId) {
 
             $validated = $request->validated();
-            $tenantId = TenancyContext::tenantId();
 
             $user = User::create([
                 'tenant_id' => $tenantId,
@@ -96,6 +104,14 @@ class UserController extends Controller
     public function update(UpdateUserRequest $request, User $user)
     {
         $this->authorize('update', $user);
+
+        $tenantId = TenancyContext::tenantId();
+
+        if ($request->has('is_active') && $request->boolean('is_active') && ! $user->is_active) {
+            if ($limitError = $this->checkUserPlanLimit($tenantId)) {
+                return back()->with('error', $limitError);
+            }
+        }
 
         return DB::transaction(function () use ($request, $user) {
 
@@ -160,12 +176,71 @@ class UserController extends Controller
             return back()->with('error', __('messages.cannot_deactivate_self'));
         }
 
+        if (! $user->is_active) {
+            if ($limitError = $this->checkUserPlanLimit(TenancyContext::tenantId())) {
+                return back()->with('error', $limitError);
+            }
+        }
+
         $user->is_active = ! $user->is_active;
         $user->save();
 
         $user->logActivity('user.updated');
 
         return back()->with('success', __('messages.updated_successfully'));
+    }
+
+    /**
+     * Check whether the tenant's active subscription allows adding/activating another user.
+     */
+    private function checkUserPlanLimit(?int $tenantId): ?string
+    {
+        if (! $tenantId) {
+            return null;
+        }
+
+        $tenant = Tenant::find($tenantId);
+
+        if (! $tenant) {
+            return null;
+        }
+
+        $activeSubscription = $tenant->subscriptions()
+            ->whereIn('status', ['active', 'trial', 'trialing'])
+            ->where(function ($q) {
+                $q->whereNull('ends_at')->orWhere('ends_at', '>', now());
+            })
+            ->orderByDesc('ends_at')
+            ->with('plan')
+            ->first();
+
+        $limits = $activeSubscription?->plan?->limits;
+
+        if (! is_array($limits)) {
+            return null;
+        }
+
+        $rawMax = $limits['max_users'] ?? $limits['users'] ?? null;
+
+        if ($rawMax === null) {
+            return null;
+        }
+
+        $maxUsers = (int) $rawMax;
+
+        if ($maxUsers <= 0 || $maxUsers >= 999) {
+            return null;
+        }
+
+        $activeUsersCount = User::where('tenant_id', $tenantId)
+            ->where('is_active', true)
+            ->count();
+
+        if ($activeUsersCount >= $maxUsers) {
+            return __('company_profile.users.max_limit_reached', ['max' => $maxUsers]);
+        }
+
+        return null;
     }
 
     /**

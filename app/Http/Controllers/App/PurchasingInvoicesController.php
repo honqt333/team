@@ -19,6 +19,7 @@ use App\Models\VehicleMake;
 use App\Models\VehicleModel;
 use App\Models\Warehouse;
 use App\Services\Inventory\InventoryService;
+use App\Services\InvoiceService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
@@ -27,7 +28,8 @@ use Inertia\Inertia;
 class PurchasingInvoicesController extends Controller
 {
     public function __construct(
-        protected InventoryService $inventoryService
+        protected InventoryService $inventoryService,
+        protected InvoiceService $invoiceService
     ) {}
 
     /**
@@ -261,6 +263,12 @@ class PurchasingInvoicesController extends Controller
                 'total_taxable_amount' => $totalExclTax,
                 'total_paid' => 0,
             ]);
+
+            if ($taxEnabled) {
+                $invoice->update([
+                    'zatca_qr_tlv' => $this->invoiceService->generateZatcaQr($invoice),
+                ]);
+            }
 
             // Create Invoice Lines and Issue from Inventory
             foreach ($validated['items'] as $item) {

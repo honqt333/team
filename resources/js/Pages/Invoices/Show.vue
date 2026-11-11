@@ -243,7 +243,11 @@
 
                                 <!-- QR Code block for ZATCA E-Invoice -->
                                 <div
-                                    v-if="invoice.tax_enabled_snapshot && invoice.zatca_qr_tlv"
+                                    v-if="
+                                        invoice.tax_enabled_snapshot &&
+                                        isVatEnabled &&
+                                        invoice.zatca_qr_tlv
+                                    "
                                     class="shrink-0 p-1.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-sm"
                                 >
                                     <img
@@ -1236,6 +1240,7 @@ const { confirm } = useConfirm();
 const { toEnglish, formatCurrency } = useNumberFormat();
 
 const page = usePage();
+const isVatEnabled = computed(() => page?.props?.tenant?.tax_settings?.vat_enabled ?? true);
 
 const isCreditNote = computed(() => {
     const type = props.invoice?.type;

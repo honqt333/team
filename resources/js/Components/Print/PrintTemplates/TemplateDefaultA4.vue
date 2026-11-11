@@ -1,6 +1,6 @@
 <template>
     <div
-        class="bg-white w-[210mm] min-h-[297mm] p-[10mm] shadow-lg print:shadow-none print:m-0 print:p-0 print:w-full print:min-h-0 relative flex flex-col"
+        class="bg-white w-[210mm] min-h-[297mm] p-[10mm] shadow-lg print:shadow-none print:m-0 print:p-0 print:w-full print:min-h-0 print:block relative flex flex-col"
         :dir="isRtl ? 'rtl' : 'ltr'"
     >
         <!-- Header: Logo & Center Info -->
@@ -56,7 +56,7 @@
 
             <div class="w-1/3 flex flex-col" :class="isRtl ? 'items-end' : 'items-start'">
                 <div
-                    v-if="documentSettings.show_qr_code"
+                    v-if="showQrCode"
                     class="w-20 h-20 bg-gray-100 border border-gray-300 p-1 mb-2"
                 >
                     <img
@@ -273,6 +273,32 @@
                     </p>
                 </div>
             </div>
+        </div>
+
+        <!-- Terms & Conditions on First Page (when terms_first_page is enabled) -->
+        <div
+            v-if="
+                documentSettings.print_terms &&
+                documentSettings.terms_first_page &&
+                (documentSettings.terms?.length > 0 || (previewMode && dummyTerms.length > 0))
+            "
+            class="mb-6 p-3 rounded-lg border border-gray-200 bg-gray-50/50"
+        >
+            <h4 class="text-xs font-bold text-gray-700 mb-1.5">
+                {{ $t('work_orders.print_view.terms_conditions') }}:
+            </h4>
+            <ol
+                class="list-decimal list-inside text-[11px] text-gray-600 space-y-1 leading-normal pr-2"
+            >
+                <li
+                    v-for="(term, idx) in documentSettings.terms?.length > 0
+                        ? documentSettings.terms
+                        : dummyTerms"
+                    :key="'fp-' + idx"
+                >
+                    {{ isRtl ? term.text_ar || term : term.text_en || term.text_ar || term }}
+                </li>
+            </ol>
         </div>
 
         <!-- Document Content Body -->
@@ -1169,6 +1195,7 @@
                 <div
                     v-if="
                         documentSettings.print_terms &&
+                        !documentSettings.terms_first_page &&
                         (documentSettings.terms?.length > 0 ||
                             (previewMode && dummyTerms.length > 0))
                     "
@@ -1298,6 +1325,7 @@
         <div
             v-else-if="
                 documentSettings.print_terms &&
+                !documentSettings.terms_first_page &&
                 (documentSettings.terms?.length > 0 || (previewMode && dummyTerms.length > 0))
             "
             class="mb-12"
@@ -1328,7 +1356,7 @@
                 <!-- Official Stamp positioned absolutely over signatures grid -->
                 <div
                     v-if="
-                        documentSettings.show_stamp &&
+                        showStamp &&
                         (previewMode || centerData.stamp_url || visualSettings.stamp_url)
                     "
                     class="absolute inset-0 flex items-center justify-center opacity-80 pointer-events-none -rotate-12 z-10 select-none"
@@ -1357,7 +1385,7 @@
                             text-anchor="middle"
                             font-family="sans-serif"
                         >
-                            خدمة برو
+                            {{ visualSettings.footer_text || $t('common.app_name') }}
                         </text>
                         <text
                             x="50"
@@ -1463,6 +1491,7 @@ import SaudiPlateDisplay from '@/Components/Vehicles/SaudiPlateDisplay.vue';
 import { usePrint } from '@/Composables/usePrint';
 import { usePrintTotals } from '@/Composables/usePrintTotals';
 
+const page = usePage();
 const { locale } = useI18n();
 const isRtl = computed(() => locale.value === 'ar');
 
@@ -1507,8 +1536,7 @@ const showExclusive = computed(() => {
     if (props.data.pricing_mode_snapshot !== 'inclusive') {
         return true;
     }
-    const page = usePage();
-    const taxSettings = page.props?.tenant?.tax_settings;
+    const taxSettings = page?.props?.tenant?.tax_settings;
     return taxSettings?.show_amount_before_vat ?? true;
 });
 
@@ -1560,7 +1588,26 @@ const getPartsFooterColspan = computed(() => {
 });
 
 const primaryColor = computed(() => props.visualSettings.primary_color || '#1e293b');
-const isModern = computed(() => props.visualSettings.active_template === 'TemplateModernA4');
+const effectiveTemplate = computed(
+    () =>
+        props.documentSettings?.template ||
+        props.visualSettings?.active_template ||
+        'TemplateDefaultA4'
+);
+const isModern = computed(() => effectiveTemplate.value === 'TemplateModernA4');
+const qrDocumentTypes = ['invoice', 'parts_invoice', 'credit_note'];
+const showQrCode = computed(() => {
+    if (!printHelpers.isTaxEnabled(props.data)) {
+        return false;
+    }
+    if (props.data?.qr_code_url) {
+        return true;
+    }
+    return props.previewMode && qrDocumentTypes.includes(props.documentType);
+});
+const showStamp = computed(
+    () => (props.documentSettings?.show_stamp ?? props.visualSettings?.show_stamp ?? true) !== false
+);
 
 const damageMarks = computed(() => props.data.damage_marks || []);
 

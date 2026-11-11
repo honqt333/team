@@ -126,7 +126,7 @@
                 <input
                     type="text"
                     v-model="search"
-                    :placeholder="$t('system.credits.search_by_tenant_name...')"
+                    :placeholder="$t('system.credits.search_by_tenant_name')"
                     class="w-full md:w-80 rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                     @keyup.enter="applySearch"
                 />

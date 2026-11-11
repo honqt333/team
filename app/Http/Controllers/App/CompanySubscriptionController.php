@@ -57,12 +57,12 @@ class CompanySubscriptionController extends Controller
     {
         $validated = $request->validate([
             'plan_id' => 'required|exists:plans,id',
-            'billing_cycle' => 'nullable|in:monthly,yearly',
+            'billing_cycle' => 'nullable|in:yearly',
             'promo_code' => 'nullable|string',
         ]);
 
         $plan = Plan::findOrFail($validated['plan_id']);
-        $billingCycle = $validated['billing_cycle'] ?? 'yearly';
+        $billingCycle = 'yearly';
         $basePrice = (float) $plan->price_yearly;
 
         $discount = 0;
@@ -144,7 +144,7 @@ class CompanySubscriptionController extends Controller
     {
         $validated = $request->validate([
             'plan_id' => 'required|exists:plans,id',
-            'billing_cycle' => 'nullable|in:monthly,yearly',
+            'billing_cycle' => 'nullable|in:yearly',
             'gateway' => 'required|in:moyasar,tap,tabby,tamara,bank_transfer,paytabs',
             'promo_code' => 'nullable|string',
         ]);
@@ -537,30 +537,49 @@ class CompanySubscriptionController extends Controller
 
     /**
      * Cancel current subscription.
+     *
+     * For paid active subscriptions that still have remaining days, we cancel
+     * auto-renewal cleanly so the tenant keeps using what they already paid for
+     * until `ends_at`. Only expired/trial/unpaid subscriptions are terminated immediately.
      */
     public function cancel(Request $request, Subscription $subscription)
     {
-        // Verify the subscription belongs to this tenant
         if ($subscription->tenant_id !== auth()->user()->tenant_id) {
             abort(403);
         }
 
-        $validated = $request->validate([
+        $request->validate([
             'reason' => 'nullable|string|max:500',
         ]);
+
+        $isPaidActiveWithRemaining = $subscription->status === 'active'
+            && $subscription->ends_at
+            && $subscription->ends_at->isFuture();
+
+        if ($isPaidActiveWithRemaining) {
+            $subscription->update([
+                'auto_renew' => false,
+                'cancelled_at' => now(),
+            ]);
+
+            return back()->with('success', __('company_profile.subscription.auto_renew_cancelled'));
+        }
 
         $subscription->update([
             'status' => 'cancelled',
             'cancelled_at' => now(),
+            'auto_renew' => false,
         ]);
 
-        // If no other active subscription, suspend tenant
         $hasActive = Subscription::where('tenant_id', $subscription->tenant_id)
-            ->whereIn('status', ['active', 'trialing'])
+            ->whereIn('status', ['active', 'trial', 'trialing'])
+            ->where(function ($q) {
+                $q->whereNull('ends_at')->orWhere('ends_at', '>', now());
+            })
             ->exists();
 
         if (! $hasActive) {
-            $subscription->tenant->update(['status' => 'suspended']);
+            $subscription->tenant->update(['status' => 'expired']);
         }
 
         return back()->with('success', __('company_profile.subscription.cancelled'));
@@ -575,15 +594,18 @@ class CompanySubscriptionController extends Controller
             abort(403);
         }
 
+        $nextAutoRenew = ! $subscription->auto_renew;
+
         $subscription->update([
-            'auto_renew' => ! $subscription->auto_renew,
+            'auto_renew' => $nextAutoRenew,
+            'cancelled_at' => $nextAutoRenew ? null : $subscription->cancelled_at,
         ]);
 
         return back()->with('success', __('common.saved_success'));
     }
 
     /**
-     * Resume a cancelled subscription (within grace period).
+     * Resume a cancelled subscription (either cancelled status or scheduled cancellation at period end).
      */
     public function resume(Request $request, Subscription $subscription)
     {
@@ -591,13 +613,24 @@ class CompanySubscriptionController extends Controller
             abort(403);
         }
 
+        // Case 1: Active subscription with scheduled cancellation (`cancelled_at` set)
+        if ($subscription->status === 'active' && $subscription->cancelled_at !== null) {
+            $subscription->update([
+                'cancelled_at' => null,
+                'auto_renew' => true,
+            ]);
+
+            return back()->with('success', __('company_profile.subscription.resumed'));
+        }
+
         if ($subscription->status !== 'cancelled') {
             return back()->with('error', __('company_profile.subscription.resume_invalid'));
         }
 
-        // Must have paid or approved receipt, and ends_at in future
+        // Must have paid or approved receipt (or paid invoice), and ends_at in future
         $hasPaid = $subscription->payments()->where('status', 'paid')->exists()
-            || $subscription->receipts()->where('status', 'approved')->exists();
+            || $subscription->receipts()->where('status', 'approved')->exists()
+            || $subscription->invoices()->where('status', 'paid')->exists();
 
         if (! $hasPaid || ($subscription->ends_at && $subscription->ends_at->isPast())) {
             return back()->with('error', __('company_profile.subscription.resume_invalid'));
@@ -606,9 +639,15 @@ class CompanySubscriptionController extends Controller
         $subscription->update([
             'status' => 'active',
             'cancelled_at' => null,
+            'auto_renew' => true,
         ]);
 
-        $subscription->tenant->update(['status' => 'active']);
+        $subscription->tenant->update([
+            'status' => 'active',
+            'suspended_at' => null,
+            'auto_suspended_at' => null,
+            'suspension_reason' => null,
+        ]);
 
         return back()->with('success', __('company_profile.subscription.resumed'));
     }
@@ -710,7 +749,7 @@ class CompanySubscriptionController extends Controller
 
         $validated = $request->validate([
             'plan_id' => 'required|exists:plans,id',
-            'billing_cycle' => 'nullable|in:monthly,yearly',
+            'billing_cycle' => 'nullable|in:yearly',
             'promo_code' => 'nullable|string|max:50',
             'transfer_amount' => 'required|numeric|min:0.01',
             // The reference is unique per tenant for PENDING receipts.

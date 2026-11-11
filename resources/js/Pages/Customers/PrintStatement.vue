@@ -196,7 +196,7 @@ const formatMoney = (val) => {
 <style>
 @page {
     size: A4 portrait;
-    margin: 10mm;
+    margin: 15mm 10mm 12mm 10mm;
 }
 
 @media print {

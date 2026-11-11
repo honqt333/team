@@ -1,7 +1,7 @@
 <template>
     <div
-        class="print-container bg-white min-h-screen p-8 print:p-0 print:m-0 flex flex-col items-center"
-        :class="isRtl ? 'rtl' : 'ltr'"
+        class="print-container bg-white min-h-screen p-8 print:p-0 print:m-0 flex flex-col items-center print:block"
+        :class="[isRtl ? 'rtl' : 'ltr', isThermalTemplate ? 'print-thermal' : 'print-a4']"
         :dir="isRtl ? 'rtl' : 'ltr'"
     >
         <!-- Floating Controls Bar (Hidden during print) -->
@@ -31,9 +31,13 @@
 </template>
 
 <script setup>
-import { printDocument } from '@/Composables/usePrint';
+import {
+    printDocument,
+    resolveDocumentSettings,
+    resolveVisualSettings,
+} from '@/Composables/usePrint';
 
-import { computed, onMounted, onBeforeUnmount } from 'vue';
+import { computed, onMounted, onBeforeUnmount, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { usePage, router } from '@inertiajs/vue3';
 import PrintEngine from '@/Components/Print/PrintEngine.vue';
@@ -109,8 +113,8 @@ const resolvedCenterData = computed(() => {
         return props.centerData;
     }
 
-    const center = props.data?.center || page.props.currentCenter || {};
-    const tenant = page.props.tenant || {};
+    const center = props.data?.center || page?.props?.center || page?.props?.currentCenter || {};
+    const tenant = page?.props?.tenant || {};
 
     return {
         name: isRtl.value
@@ -132,15 +136,10 @@ const resolvedVisualSettings = computed(() => {
         return props.visualSettings;
     }
 
-    const tenantVisual = page.props.tenant?.print_settings?.visual || {};
-    return {
-        active_template: tenantVisual.active_template || 'TemplateDefaultA4',
-        show_logo: tenantVisual.show_logo !== false,
-        show_stamp: tenantVisual.show_stamp !== false,
-        show_qr_code: tenantVisual.show_qr_code !== false,
-        primary_color: tenantVisual.primary_color || '#3b82f6',
-        footer_text: tenantVisual.footer_text || '',
-    };
+    return resolveVisualSettings({
+        tenantSettings: page?.props?.tenant?.print_settings,
+        center: props.data?.center || page?.props?.center || {},
+    });
 });
 
 // Resolve Document-specific Settings
@@ -150,9 +149,42 @@ const resolvedDocumentSettings = computed(() => {
     }
 
     const docType = props.documentType === 'quote' ? 'quotation' : props.documentType;
-    const tenantDocs = page.props.tenant?.print_settings?.documents || {};
-    return tenantDocs[docType] || {};
+    return resolveDocumentSettings({
+        tenantSettings: page?.props?.tenant?.print_settings,
+        documentType: docType,
+        customerSignatureUrl:
+            props.data?.signature_url ||
+            props.data?.customer_signature ||
+            props.data?.reception_signature ||
+            props.data?.delivery_signature ||
+            null,
+    });
 });
+
+const effectiveTemplateName = computed(
+    () =>
+        resolvedDocumentSettings.value?.template ||
+        resolvedVisualSettings.value?.active_template ||
+        'TemplateDefaultA4'
+);
+
+const isThermalTemplate = computed(() =>
+    ['TemplateThermal80', 'TemplateSleekThermal'].includes(effectiveTemplateName.value)
+);
+
+// Sync dynamic @page size and margin so A4 gets proper top/side margins and Thermal80 gets 80mm roll margins
+let dynamicPageStyleEl = null;
+function applyDynamicPageStyle() {
+    if (typeof document === 'undefined' || props.previewMode) return;
+    if (!dynamicPageStyleEl) {
+        dynamicPageStyleEl = document.createElement('style');
+        dynamicPageStyleEl.setAttribute('data-print-layout-page', 'true');
+        document.head.appendChild(dynamicPageStyleEl);
+    }
+    dynamicPageStyleEl.textContent = isThermalTemplate.value
+        ? '@media print { @page { size: 80mm auto; margin: 4mm 3mm; } body { -webkit-print-color-adjust: exact; print-color-adjust: exact; background: white !important; } }'
+        : '@media print { @page { size: A4; margin: 15mm 10mm 12mm 10mm; } body { -webkit-print-color-adjust: exact; print-color-adjust: exact; background: white !important; } }';
+}
 
 // Actions
 function handlePrint() {
@@ -189,9 +221,18 @@ function handleKeyDown(event) {
 
 onMounted(() => {
     window.addEventListener('keydown', handleKeyDown);
+    applyDynamicPageStyle();
+});
+
+watch(isThermalTemplate, () => {
+    applyDynamicPageStyle();
 });
 
 onBeforeUnmount(() => {
     window.removeEventListener('keydown', handleKeyDown);
+    if (dynamicPageStyleEl && dynamicPageStyleEl.parentNode) {
+        dynamicPageStyleEl.parentNode.removeChild(dynamicPageStyleEl);
+        dynamicPageStyleEl = null;
+    }
 });
 </script>

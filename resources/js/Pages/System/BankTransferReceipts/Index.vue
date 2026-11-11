@@ -235,7 +235,7 @@ function getAmountBadge(receipt) {
                         type="search"
                         :placeholder="
                             locale === 'ar'
-                                ? $t('system.bank_transfer_receipts.search_by_tenant_name...')
+                                ? $t('system.bank_transfer_receipts.search_by_tenant_name')
                                 : 'Search by tenant name...'
                         "
                         @keyup.enter="applyFilters"

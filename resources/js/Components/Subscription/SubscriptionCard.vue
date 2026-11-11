@@ -1,8 +1,13 @@
 <script setup>
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { router } from '@inertiajs/vue3';
+import AppToggle from '@/Components/Common/AppToggle.vue';
+import { useConfirm } from '@/Composables/useConfirm';
 
 const { t } = useI18n();
+const { confirm } = useConfirm();
+const processing = ref(false);
 
 const props = defineProps({
     subscription: { type: Object, default: null },
@@ -119,6 +124,73 @@ const canRenew = computed(() => {
     }
     return false;
 });
+
+const isRealSubscription = computed(() => {
+    return (
+        props.subscription && props.subscription.id && props.subscription.kind !== 'virtual_trial'
+    );
+});
+
+const isScheduledCancel = computed(() => {
+    return (
+        isRealSubscription.value &&
+        props.subscription.status === 'active' &&
+        Boolean(props.subscription.cancelled_at)
+    );
+});
+
+function toggleAutoRenew() {
+    if (!isRealSubscription.value || processing.value) return;
+    processing.value = true;
+    router.post(
+        `/app/settings/billing/auto-renew/${props.subscription.id}`,
+        {},
+        {
+            preserveScroll: true,
+            onFinish: () => {
+                processing.value = false;
+            },
+        }
+    );
+}
+
+async function cancelCurrentSubscription() {
+    if (!isRealSubscription.value || processing.value) return;
+    const ok = await confirm({
+        title: t('system.company_subscription.history.confirm_modal.title'),
+        message: t('system.company_subscription.history.confirm_modal.body'),
+        confirmText: t('system.company_subscription.history.confirm_modal.yes_cancel'),
+        cancelText: t('system.company_subscription.history.confirm_modal.go_back'),
+        type: 'danger',
+    });
+    if (!ok) return;
+    processing.value = true;
+    router.post(
+        `/app/settings/billing/cancel/${props.subscription.id}`,
+        {},
+        {
+            preserveScroll: true,
+            onFinish: () => {
+                processing.value = false;
+            },
+        }
+    );
+}
+
+function resumeCurrentSubscription() {
+    if (!isRealSubscription.value || processing.value) return;
+    processing.value = true;
+    router.post(
+        `/app/settings/billing/resume/${props.subscription.id}`,
+        {},
+        {
+            preserveScroll: true,
+            onFinish: () => {
+                processing.value = false;
+            },
+        }
+    );
+}
 </script>
 
 <template>
@@ -235,32 +307,62 @@ const canRenew = computed(() => {
             </button>
         </div>
 
-        <!-- Auto-renew status -->
+        <!-- Scheduled cancellation notice -->
         <div
-            v-if="subscription.status === 'active'"
-            class="relative mt-4 flex items-center gap-2 border-t border-slate-200/50 pt-3 text-xs text-slate-600 dark:border-slate-700/50 dark:text-slate-400"
+            v-if="isScheduledCancel"
+            class="relative mt-4 flex flex-col sm:flex-row sm:items-center justify-between gap-2 rounded-xl border border-amber-200 bg-amber-50/80 p-3 text-xs text-amber-800 dark:border-amber-800/50 dark:bg-amber-900/20 dark:text-amber-300"
         >
-            <svg
-                class="h-3.5 w-3.5"
-                :class="subscription.auto_renew ? 'text-emerald-500' : 'text-slate-400'"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
+            <span>{{ t('system.company_subscription.card.scheduled_cancel_notice') }}</span>
+            <button
+                type="button"
+                @click="resumeCurrentSubscription"
+                :disabled="processing"
+                class="flex-shrink-0 px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-semibold transition-colors disabled:opacity-50"
             >
-                <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                {{ t('system.company_subscription.card.resume_subscription') }}
+            </button>
+        </div>
+
+        <!-- Auto-renew toggle & cancel / resume actions -->
+        <div
+            v-if="isRealSubscription && ['active', 'cancelled'].includes(subscription.status)"
+            class="relative mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-slate-200/50 pt-3 text-xs text-slate-600 dark:border-slate-700/50 dark:text-slate-400"
+        >
+            <div v-if="subscription.status === 'active'" class="flex items-center gap-2">
+                <AppToggle
+                    :model-value="Boolean(subscription.auto_renew)"
+                    :disabled="processing"
+                    :label="
+                        subscription.auto_renew
+                            ? t('system.company_subscription.card.auto_renew_enabled')
+                            : t('system.company_subscription.card.auto_renew_disabled')
+                    "
+                    size="sm"
+                    color="success"
+                    @update:model-value="toggleAutoRenew"
                 />
-            </svg>
-            <span>
-                {{
-                    subscription.auto_renew
-                        ? t('system.company_subscription.card.auto_renew_enabled')
-                        : t('system.company_subscription.card.auto_renew_disabled')
-                }}
-            </span>
+            </div>
+
+            <div class="flex items-center gap-2 ms-auto">
+                <button
+                    v-if="subscription.status === 'active' && !isScheduledCancel"
+                    type="button"
+                    @click="cancelCurrentSubscription"
+                    :disabled="processing"
+                    class="px-3 py-1.5 rounded-lg text-rose-600 hover:bg-rose-50 dark:text-rose-400 dark:hover:bg-rose-900/20 font-medium transition-colors disabled:opacity-50"
+                >
+                    {{ t('system.company_subscription.card.cancel_subscription') }}
+                </button>
+                <button
+                    v-if="subscription.status === 'cancelled'"
+                    type="button"
+                    @click="resumeCurrentSubscription"
+                    :disabled="processing"
+                    class="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-semibold transition-colors disabled:opacity-50"
+                >
+                    {{ t('system.company_subscription.history.actions.resume_subscription') }}
+                </button>
+            </div>
         </div>
     </div>
 </template>

@@ -11,6 +11,7 @@ use App\Models\Center;
 use App\Models\Tenant;
 use App\Models\User;
 use App\Services\Billing\PromoCodeValidator;
+use App\Services\Billing\SubscriptionLifecycleService;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -101,9 +102,11 @@ class RegisteredUserController extends Controller
             $extraTrialDays = (int) $promoCheck->promo->discount_value;
         }
 
-        $trialDays = 14 + $extraTrialDays;
+        $trialPlan = Plan::where('slug', 'trial')->first();
+        $baseTrialDays = (int) ($trialPlan?->trial_days ?: app(SubscriptionLifecycleService::class)->getDefaultTrialDays());
+        $trialDays = $baseTrialDays + $extraTrialDays;
 
-        $user = DB::transaction(function () use ($request, $promoCheck, $extraTrialDays, $trialDays) {
+        $user = DB::transaction(function () use ($request, $promoCheck, $extraTrialDays, $trialDays, $trialPlan) {
             $ownerName = $request->first_name.' '.$request->last_name;
             $phone = '+966'.ltrim($request->phone, '0');
 
@@ -123,8 +126,6 @@ class RegisteredUserController extends Controller
             ]);
 
             // Create default trial subscription in database using the Trial Plan
-            $trialPlan = Plan::where('slug', 'trial')->first();
-
             if ($trialPlan) {
                 $subscription = Subscription::create([
                     'tenant_id' => $tenant->id,

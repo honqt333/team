@@ -87,6 +87,14 @@ class SystemSettingsIndexCrudTest extends TestCase
                 ->where('activeSection', 'condition-items')
                 ->has('condition_items')
             );
+
+        $this->get(route('settings.storage'))
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->component('Settings/System/Index')
+                ->where('activeSection', 'storage')
+                ->has('storage_usage')
+            );
     }
 
     public function test_user_can_create_toggle_and_delete_center_make(): void

@@ -60,9 +60,10 @@
 </template>
 
 <script setup>
-import { reactive, ref } from 'vue';
+import { reactive } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { router, useForm } from '@inertiajs/vue3';
+import { useConfirm } from '@/Composables/useConfirm';
 import SystemLayout from '@/Layouts/SystemLayout.vue';
 import TenantHeader from './ShowComponents/TenantHeader.vue';
 import TenantHealthScore from './ShowComponents/TenantHealthScore.vue';
@@ -72,6 +73,7 @@ import TenantTabs from './ShowComponents/TenantTabs.vue';
 import TenantModals from './ShowComponents/TenantModals.vue';
 
 const { t } = useI18n();
+const { confirm } = useConfirm();
 
 const props = defineProps({
     tenant: { type: Object, required: true },
@@ -120,8 +122,17 @@ const suspendTenant = (reason) => {
     );
 };
 
-const activateTenant = () => {
-    router.post(`/system/tenants/${props.tenant.id}/activate`);
+const activateTenant = async () => {
+    const ok = await confirm({
+        title: t('system.tenants.actions.confirm_activate_title'),
+        message: t('system.tenants.actions.confirm_activate_message'),
+        confirmText: t('system.tenants.actions.activate'),
+        cancelText: t('common.cancel'),
+        type: 'success',
+    });
+    if (ok) {
+        router.post(`/system/tenants/${props.tenant.id}/activate`);
+    }
 };
 
 const extendTrial = (days) => {
@@ -163,7 +174,16 @@ const clearDunningOptOut = () => {
 // Phase 7.7: lift an auto-suspension. The dunning system
 // applied this — admins need an explicit, audited way to undo
 // it without going through the manual activate flow.
-const liftAutoSuspend = () => {
-    router.post(`/system/tenants/${props.tenant.id}/lift-auto-suspend`);
+const liftAutoSuspend = async () => {
+    const ok = await confirm({
+        title: t('system.tenants.actions.lift_auto_suspend'),
+        message: t('system.tenants.actions.confirm_lift_auto_suspend_message'),
+        confirmText: t('system.tenants.actions.lift_auto_suspend'),
+        cancelText: t('common.cancel'),
+        type: 'warning',
+    });
+    if (ok) {
+        router.post(`/system/tenants/${props.tenant.id}/lift-auto-suspend`);
+    }
 };
 </script>

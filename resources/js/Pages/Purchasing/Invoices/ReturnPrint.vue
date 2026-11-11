@@ -10,7 +10,11 @@
 </template>
 
 <script setup>
-import { printDocument } from '@/Composables/usePrint';
+import {
+    printDocument,
+    resolveDocumentSettings,
+    resolveVisualSettings,
+} from '@/Composables/usePrint';
 import { computed, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { usePage, router } from '@inertiajs/vue3';
@@ -161,35 +165,42 @@ const mappedCenterData = computed(() => {
 });
 
 const documentSettings = computed(() => {
-    return {
-        title_ar: 'فاتورة مرتجع مشتريات',
-        title_en: 'Purchase Return Invoice',
-        terms: [],
-        print_terms: false,
-        show_stamp: false,
-        show_customer_address: true,
-        signatures: [
-            { name_ar: 'توقيع أمين المستودع', name_en: 'Storekeeper Signature' },
-            { name_ar: 'توقيع المدير المالي', name_en: 'Financial Manager Signature' },
-        ],
-    };
+    const tenantSettings =
+        props.returnInvoice.purchase_invoice?.tenant?.print_settings ||
+        page?.props?.tenant?.print_settings;
+    return resolveDocumentSettings({
+        tenantSettings,
+        documentType: 'purchase_return',
+        defaults: {
+            title_ar: 'فاتورة مرتجع مشتريات',
+            title_en: 'Purchase Return Invoice',
+            print_terms: false,
+            show_stamp: false,
+            show_qr_code: false,
+            signatures: [
+                { name_ar: 'توقيع أمين المستودع', name_en: 'Storekeeper Signature', show: true },
+                {
+                    name_ar: 'توقيع المدير المالي',
+                    name_en: 'Financial Manager Signature',
+                    show: true,
+                },
+            ],
+        },
+    });
 });
 
 const visualSettings = computed(() => {
-    const tenantSettings = page.props?.tenant?.print_settings;
-    const vis = tenantSettings?.visual || {};
-    return {
-        active_template: vis.active_template || 'TemplateDefaultA4',
-        show_logo: vis.show_logo !== false,
-        show_stamp: false,
-        show_qr_code: false,
-        primary_color: vis.primary_color || '#3b82f6',
-        footer_text:
-            vis.footer_text ||
-            props.returnInvoice.purchase_invoice?.tenant?.print_settings?.footer_text ||
-            '',
-        stamp_url: '',
-    };
+    const tenantSettings =
+        props.returnInvoice.purchase_invoice?.tenant?.print_settings ||
+        page?.props?.tenant?.print_settings;
+    const center = props.returnInvoice.purchase_invoice?.center || {};
+    return resolveVisualSettings({
+        tenantSettings,
+        center,
+        overrides: {
+            primary_color: tenantSettings?.visual?.primary_color || '#3b82f6',
+        },
+    });
 });
 </script>
 
@@ -197,7 +208,7 @@ const visualSettings = computed(() => {
 @media print {
     @page {
         size: A4;
-        margin: 0 1cm;
+        margin: 15mm 10mm 12mm 10mm;
     }
     body {
         -webkit-print-color-adjust: exact;

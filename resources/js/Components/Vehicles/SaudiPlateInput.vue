@@ -31,47 +31,77 @@
             <!-- Compact Plate Preview -->
             <div class="flex justify-center">
                 <div
-                    class="bg-white rounded border-2 border-gray-700 shadow flex overflow-hidden"
-                    style="width: 240px; height: 50px"
+                    class="bg-white rounded border-2 border-gray-700 shadow flex overflow-hidden shrink-0"
+                    style="min-width: 240px; height: 54px"
                 >
                     <!-- KSA Badge -->
                     <div
-                        class="w-10 bg-gradient-to-b from-gray-100 to-gray-200 border-e border-gray-700 flex flex-col items-center justify-center"
+                        class="w-10 shrink-0 bg-gradient-to-b from-gray-100 to-gray-200 border-e border-gray-700 flex flex-col items-center justify-center"
                     >
                         <svg class="w-4 h-4 text-green-700" viewBox="0 0 24 24" fill="currentColor">
                             <path
                                 d="M12 2L9 5h6l-3-3zm0 4c-1.1 0-2 .9-2 2v8h4V8c0-1.1-.9-2-2-2zm-4 12l-2 4h12l-2-4H8z"
                             />
                         </svg>
-                        <span class="text-[6px] font-bold text-gray-700">KSA</span>
+                        <span class="text-[6px] font-bold text-gray-700 leading-none mt-0.5">
+                            KSA
+                        </span>
                     </div>
                     <!-- Letters -->
                     <div
-                        class="flex-1 flex flex-col justify-center items-center border-e border-gray-400 px-1"
+                        class="flex-1 min-w-0 flex flex-col justify-center items-center border-e border-gray-400 px-1.5 gap-0.5"
                     >
-                        <span class="text-sm font-bold text-gray-800" dir="rtl">
-                            {{ displayLettersAr }}
-                        </span>
-                        <span class="text-[9px] text-gray-500" dir="ltr">
-                            {{ displayLettersEn }}
-                        </span>
+                        <div
+                            class="flex flex-row items-center justify-center gap-1.5 whitespace-nowrap"
+                            dir="rtl"
+                        >
+                            <span
+                                v-for="(ch, idx) in [
+                                    letter1 ? getLetterAr(letter1) : '-',
+                                    letter2 ? getLetterAr(letter2) : '-',
+                                    letter3 ? getLetterAr(letter3) : '-',
+                                ]"
+                                :key="'preview-ar-' + idx"
+                                class="text-sm font-bold text-gray-800 leading-[1.2] shrink-0 whitespace-nowrap"
+                            >
+                                {{ ch }}
+                            </span>
+                        </div>
+                        <div
+                            class="flex flex-row items-center justify-center gap-1.5 whitespace-nowrap"
+                            dir="ltr"
+                        >
+                            <span
+                                v-for="(ch, idx) in [
+                                    letter1 || '-',
+                                    letter2 || '-',
+                                    letter3 || '-',
+                                ]"
+                                :key="'preview-en-' + idx"
+                                class="text-[9px] text-gray-500 leading-none shrink-0 whitespace-nowrap"
+                            >
+                                {{ ch }}
+                            </span>
+                        </div>
                     </div>
                     <!-- Numbers -->
-                    <div class="flex-1 flex flex-col justify-center items-center px-1">
-                        <div class="flex flex-row gap-0.5" dir="ltr">
+                    <div
+                        class="flex-1 min-w-0 flex flex-col justify-center items-center px-1.5 gap-0.5"
+                    >
+                        <div class="flex flex-row gap-0.5 whitespace-nowrap" dir="ltr">
                             <span
                                 v-for="(char, i) in displayNumbersEn.split(' ')"
                                 :key="i"
-                                class="text-sm font-bold text-gray-800"
+                                class="text-sm font-bold text-gray-800 leading-[1.2] shrink-0"
                             >
                                 {{ char }}
                             </span>
                         </div>
-                        <div class="flex flex-row gap-0.5" dir="ltr">
+                        <div class="flex flex-row gap-0.5 whitespace-nowrap" dir="ltr">
                             <span
                                 v-for="(char, i) in displayNumbersEn.split(' ')"
                                 :key="i"
-                                class="text-[9px] text-gray-500"
+                                class="text-[9px] text-gray-500 leading-none shrink-0"
                             >
                                 {{ char }}
                             </span>

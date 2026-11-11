@@ -154,7 +154,7 @@ function formatAmount(amount) {
 @media print {
     @page {
         size: A4 landscape;
-        margin: 1cm;
+        margin: 15mm 10mm 12mm 10mm;
     }
 }
 </style>

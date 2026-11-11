@@ -32,8 +32,8 @@ class WorkOrderPrintController
             'vehicle.model',
             'damageMarks',
             'photos',
-            'center',
-            'tenant',
+            'center.address',
+            'tenant.address',
         ]);
 
         if ($workOrder->center) {
@@ -58,8 +58,8 @@ class WorkOrderPrintController
             'vehicle.model',
             'items.service.department',
             'items.technicians.employee.jobTitle',
-            'center',
-            'tenant',
+            'center.address',
+            'tenant.address',
         ]);
 
         // Filter out cancelled items
@@ -153,8 +153,8 @@ class WorkOrderPrintController
             'items.parts.warehouse',
             'parts.part',
             'parts.warehouse',
-            'center',
-            'tenant',
+            'center.address',
+            'tenant.address',
         ]);
 
         // Filter out cancelled items
@@ -225,8 +225,8 @@ class WorkOrderPrintController
             'customer',
             'vehicle.make',
             'vehicle.model',
-            'center',
-            'tenant',
+            'center.address',
+            'tenant.address',
         ]);
 
         $payments = $workOrder->payments()->with('receivedBy')->orderByDesc('payment_date')->get();

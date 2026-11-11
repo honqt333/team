@@ -346,6 +346,11 @@ class Permissions
 
     public const WEBSITE_MANAGE = 'settings.website.manage';
 
+    /** Cloud Storage & System Attachments Management */
+    public const ATTACHMENTS_VIEW = 'settings.attachments.view';
+
+    public const ATTACHMENTS_DELETE = 'settings.attachments.delete';
+
     // ========================================
     // SYSTEM PANEL (/system)
     //
@@ -503,6 +508,8 @@ class Permissions
                 self::CENTERS_MANAGE,
                 self::WEBSITE_VIEW,
                 self::WEBSITE_MANAGE,
+                self::ATTACHMENTS_VIEW,
+                self::ATTACHMENTS_DELETE,
             ],
             'crm_customers' => [
                 self::CUSTOMERS_VIEW,

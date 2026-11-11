@@ -156,7 +156,7 @@
                     <p v-else class="text-xs text-gray-500">
                         {{
                             isAr
-                                ? $t('system.communication.no_variables_defined_for_this_template.')
+                                ? $t('system.communication.no_variables_defined_for_this_template')
                                 : 'No variables defined for this template.'
                         }}
                     </p>

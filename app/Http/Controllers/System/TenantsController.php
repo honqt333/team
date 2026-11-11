@@ -17,6 +17,7 @@ use App\Models\User;
 use App\Models\Vehicle;
 use App\Models\WorkOrder;
 use App\Services\Backup\TenantBackupService;
+use App\Services\Billing\SubscriptionLifecycleService;
 use App\Services\Billing\TenantSuspensionService;
 use DB;
 use Illuminate\Http\Request;
@@ -170,7 +171,7 @@ class TenantsController extends Controller
             'bankTransferReceipts' => $bankTransferReceipts,
             'healthScore' => $healthScore,
             'activityLog' => $activityLog,
-            'plans' => Plan::where('is_active', true)->orderBy('sort_order')->get(['id', 'name_ar', 'name_en', 'price_monthly', 'price_yearly', 'trial_days']),
+            'plans' => Plan::where('is_active', true)->orderBy('sort_order')->get(['id', 'name_ar', 'name_en', 'slug', 'price_yearly', 'trial_days']),
         ]);
     }
 
@@ -268,20 +269,11 @@ class TenantsController extends Controller
     }
 
     /**
-     * Activate a tenant.
+     * Activate a tenant (clears suspension and restores true subscription/trial state).
      */
-    public function activate(Tenant $tenant)
+    public function activate(Tenant $tenant, SubscriptionLifecycleService $lifecycle)
     {
-        $tenant->update([
-            'status' => 'trial',
-            'suspended_at' => null,
-            'suspension_reason' => null,
-        ]);
-
-        // Verify all unverified users' emails of this tenant upon activation
-        $tenant->users()->whereNull('email_verified_at')->update([
-            'email_verified_at' => now(),
-        ]);
+        $lifecycle->reactivateTenant($tenant);
 
         return back()->with('success', __('messages.system.tenants.activated'));
     }
@@ -289,29 +281,13 @@ class TenantsController extends Controller
     /**
      * Extend trial period.
      */
-    public function extendTrial(Request $request, Tenant $tenant)
+    public function extendTrial(Request $request, Tenant $tenant, SubscriptionLifecycleService $lifecycle)
     {
         $request->validate([
             'days' => 'required|integer|min:-90|max:90',
         ]);
 
-        $newEndDate = $tenant->trial_ends_at
-            ? $tenant->trial_ends_at->addDays($request->days)
-            : now()->addDays($request->days);
-
-        $tenant->update([
-            'trial_ends_at' => $newEndDate,
-            'status' => 'trial',
-        ]);
-
-        // Sync with the database subscription
-        $tenant->subscriptions()
-            ->whereIn('status', ['trial', 'trialing', 'expired', 'suspended'])
-            ->update([
-                'status' => 'trialing',
-                'ends_at' => $newEndDate,
-                'trial_ends_at' => $newEndDate,
-            ]);
+        $lifecycle->extendTenantTrial($tenant, (int) $request->days);
 
         return back()->with('success', __('messages.system.tenants.trial_extended', ['days' => $request->days]));
     }

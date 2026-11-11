@@ -1,6 +1,6 @@
 <script setup>
 import { computed } from 'vue';
-import { Head, Link } from '@inertiajs/vue3';
+import { Head, Link, usePage } from '@inertiajs/vue3';
 
 const props = defineProps({
     page: {
@@ -13,8 +13,20 @@ const props = defineProps({
     },
 });
 
+const pageProps = usePage().props;
+
+// The direction follows the locale. The previous implementation forced
+// RTL with an `|| true`, which made the English branch unreachable and
+// rendered every public custom page right-to-left.
 const isRtl = computed(() => {
-    return document.documentElement.dir === 'rtl' || true;
+    return document.documentElement.dir === 'rtl';
+});
+
+// The platform name comes from the server (HandleInertiaRequests shares
+// `app_name` from config('app.name_ar') / config('app.name')), so a
+// rebrand does not require touching this component.
+const appName = computed(() => {
+    return pageProps.app_name || '';
 });
 
 const pageTitle = computed(() => {
@@ -30,9 +42,11 @@ const pageContent = computed(() => {
 });
 
 const siteTitle = computed(() => {
+    // The tenant's own title wins; otherwise fall back to the platform
+    // name, which the server supplies dynamically.
     return isRtl.value
-        ? props.settings.title_ar || 'خدمة برو'
-        : props.settings.title_en || 'Khidmh Pro';
+        ? props.settings.title_ar || appName.value
+        : props.settings.title_en || appName.value;
 });
 </script>
 

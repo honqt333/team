@@ -986,4 +986,10 @@ return [
         'financial_officer' => 'Financial Officer',
         'main_center' => 'Main Center',
     ],
+    'tax_periods_report' => [
+        'period_exists' => 'A tax period with these details already exists.',
+        'invalid_transactions' => 'The selected tax period contains invalid transactions.',
+        'legacy_branch_period' => 'This tax period belongs to a legacy branch and cannot be exported for ZATCA. Create a center-level period instead.',
+        'review_tenant_missing' => 'Could not review the tax periods: the tenant was not found.',
+    ],
 ];

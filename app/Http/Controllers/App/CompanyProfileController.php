@@ -212,7 +212,7 @@ class CompanyProfileController extends Controller
                 return $sub;
             }),
             'available_plans' => fn () => Plan::where('is_active', true)
-                ->orderBy('price_monthly', 'asc')
+                ->orderBy('price_yearly', 'asc')
                 ->get(),
             'enabled_gateways' => rescue(function () {
                 $paymentSettings = PaymentSettings::first() ?? new PaymentSettings;

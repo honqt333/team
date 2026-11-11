@@ -26,7 +26,22 @@ import AppSelect from '@/Components/App/AppSelect.vue';
 import AppTextarea from '@/Components/App/AppTextarea.vue';
 import AppCheckbox from '@/Components/App/AppCheckbox.vue';
 
-const appName = i18n.global.t('common.app_name') || import.meta.env.VITE_APP_NAME || 'Laravel';
+/**
+ * The application name.
+ *
+ * The AUTHORITATIVE source is the server: HandleInertiaRequests shares
+ * `app_name` from config('app.name_ar') / config('app.name'), so a
+ * deployment can rebrand without touching a line of the frontend.
+ *
+ * The locale files are only a fallback for the very first paint, before
+ * any Inertia page has been received. They are never the source of
+ * truth — the stock Laravel name is never used.
+ */
+const fallbackAppName = () => i18n.global.t('common.app_name');
+
+let serverAppName = null;
+
+const resolveAppName = () => serverAppName || fallbackAppName();
 
 // Apply initial theme on startup
 applyTheme(getInitialTheme());
@@ -123,9 +138,12 @@ function resolvePage(name) {
 }
 
 createInertiaApp({
-    title: (title) => `${title} - ${appName}`,
+    title: (title) => `${title} - ${resolveAppName()}`,
     resolve: resolvePage,
     setup({ el, App, props, plugin }) {
+        // The server is the source of truth for the application name.
+        serverAppName = props.initialPage?.props?.app_name || null;
+
         // Public pages can choose a locale independently from the authenticated
         // application. Sync vue-i18n before the first render so the portal never
         // shows an Arabic direction/toggle with English copy (or the reverse).

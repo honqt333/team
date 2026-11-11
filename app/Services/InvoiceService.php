@@ -282,6 +282,13 @@ class InvoiceService
                 // 'icv' => $icv, // Add column if needed in schema, currently storing in ZATCA payload
             ]);
 
+            // 4. Generate ZATCA Phase 1 QR TLV strictly when VAT is enabled on the invoice
+            if ($invoice->tax_enabled_snapshot) {
+                $invoice->update([
+                    'zatca_qr_tlv' => $this->generateZatcaQr($invoice),
+                ]);
+            }
+
             $invoice->logActivity('issued');
 
             // TODO: ZATCA Chaining logic (Prev Hash) would happen here.
@@ -363,13 +370,18 @@ class InvoiceService
      */
     public function generateZatcaQr(Invoice $invoice): string
     {
+        $invoice->loadMissing('tenant.taxSettings');
         $tenant = $invoice->tenant;
+
+        $sellerName = (string) ($invoice->seller_name_snapshot ?: ($tenant?->legal_name ?: ($tenant?->trade_name ?: ($tenant?->name ?? ''))));
+        $vatNumber = (string) ($invoice->seller_vat_snapshot ?: ($tenant?->taxSettings?->tax_number ?? $tenant?->vat_number ?? ''));
+        $timestamp = ($invoice->issue_date ?? $invoice->created_at ?? now())->toIso8601String();
 
         // TLV encoding for ZATCA
         $tlv = '';
-        $tlv .= $this->tlvEncode(1, $tenant->legal_name ?? $tenant->name); // Seller Name
-        $tlv .= $this->tlvEncode(2, $tenant->taxSettings?->tax_number ?? ''); // VAT Number
-        $tlv .= $this->tlvEncode(3, $invoice->issue_date->toIso8601String()); // Timestamp
+        $tlv .= $this->tlvEncode(1, $sellerName); // Seller Name
+        $tlv .= $this->tlvEncode(2, $vatNumber); // VAT Number
+        $tlv .= $this->tlvEncode(3, $timestamp); // Timestamp
         $tlv .= $this->tlvEncode(4, number_format((float) $invoice->total_incl_tax, 2, '.', '')); // Total with VAT
         $tlv .= $this->tlvEncode(5, number_format((float) $invoice->total_tax, 2, '.', '')); // VAT Amount
 

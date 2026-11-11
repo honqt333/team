@@ -176,6 +176,7 @@ export const pageManifest = {
     'Settings/Print/Signatures/Index': () => import('./Settings/Print/Signatures/Index.vue'),
     'Settings/Roles/Index': () => import('./Settings/Roles/Index.vue'),
     'Settings/Roles/RoleFormModal': () => import('./Settings/Roles/RoleFormModal.vue'),
+    'Settings/System/Attachments': () => import('./Settings/System/Attachments.vue'),
     'Settings/System/Index': () => import('./Settings/System/Index.vue'),
     'Settings/System/Modals/ColorFormModal': () =>
         import('./Settings/System/Modals/ColorFormModal.vue'),
@@ -187,6 +188,10 @@ export const pageManifest = {
         import('./Settings/System/Modals/MakeFormModal.vue'),
     'Settings/System/Modals/ModelFormModal': () =>
         import('./Settings/System/Modals/ModelFormModal.vue'),
+    'Settings/System/Sections/AttachmentsManagerSection': () =>
+        import('./Settings/System/Sections/AttachmentsManagerSection.vue'),
+    'Settings/System/Sections/StorageUsageSection': () =>
+        import('./Settings/System/Sections/StorageUsageSection.vue'),
     'Settings/Users/Index': () => import('./Settings/Users/Index.vue'),
     'Settings/Users/UserFormModal': () => import('./Settings/Users/UserFormModal.vue'),
     'Settings/Website': () => import('./Settings/Website.vue'),

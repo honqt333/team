@@ -22,11 +22,25 @@ class TenantFactory extends Factory
      */
     public function definition(): array
     {
+        // The slug is UNIQUE in the database, and Faker's company names
+        // come from a finite list — two factories in the same test run
+        // can produce the same name, which made the second insert fail
+        // with `UNIQUE constraint failed: tenants.slug`.
+        //
+        // The uniqueness has to be intrinsic to the FACTORY: a test
+        // should not have to know that the company names might repeat.
+        // A random suffix on the slug makes every tenant unique while
+        // leaving the human-readable name untouched.
         $name = fake()->company();
+        $slug = Str::slug($name);
+
+        if (Tenant::withTrashed()->where('slug', $slug)->exists()) {
+            $slug .= '-'.Str::lower(Str::random(6));
+        }
 
         return [
             'name' => $name,
-            'slug' => Str::slug($name),
+            'slug' => $slug,
             'status' => 'active',
         ];
     }

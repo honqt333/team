@@ -12,6 +12,7 @@ use App\Models\User;
 use App\Support\Permissions;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Inertia\Testing\AssertableInertia as Assert;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\PermissionRegistrar;
 use Tests\TestCase;
@@ -132,6 +133,38 @@ class BranchesIndexCrudTest extends TestCase
             'center_type' => 'branch',
             'manager_name' => 'أحمد علي',
         ]);
+    }
+
+    #[DataProvider('planLimitCases')]
+    public function test_branch_creation_reads_limits_from_the_eligible_plan(array $limits, bool $expired, bool $allowed): void
+    {
+        $plan = Plan::where('slug', 'pro')->firstOrFail();
+        $plan->update(['limits' => $limits]);
+        Subscription::create([
+            'tenant_id' => $this->tenant->id,
+            'plan_id' => $plan->id,
+            'status' => 'active',
+            'billing_cycle' => 'monthly',
+            'starts_at' => now()->subMonth(),
+            'ends_at' => $expired ? now()->subDay() : now()->addMonth(),
+            'price' => 100,
+        ]);
+
+        $this->actingAs($this->user)->post(route('settings.branches.store'), [
+            'name_en' => 'Plan limit test', 'center_type' => 'branch',
+        ])->assertRedirect()->assertSessionHas($allowed ? 'success' : 'error');
+        $this->assertSame($allowed ? 2 : 1, $this->tenant->centers()->count());
+    }
+
+    public static function planLimitCases(): array
+    {
+        return [
+            'canonical key takes precedence' => [['max_centers' => 1, 'centers' => 5], false, false],
+            'legacy key' => [['centers' => 2], false, true],
+            'unlimited plan' => [['max_centers' => 999], false, true],
+            'expired plan ignored' => [['max_centers' => 5], true, false],
+            'missing key' => [[], false, false],
+        ];
     }
 
     public function test_cannot_create_branch_beyond_plan_limit(): void

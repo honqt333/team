@@ -18,6 +18,11 @@
             src: url('file://{{ base_path("resources/fonts/IBMPlexSansArabic-Bold.ttf") }}') format('truetype');
         }
 
+        @page {
+            size: A4 portrait;
+            margin: 15mm 12mm 12mm 12mm;
+        }
+
         * {
             font-family: 'IBM Plex Sans Arabic', sans-serif;
             box-sizing: border-box;
@@ -25,7 +30,7 @@
 
         body {
             margin: 0;
-            padding: 40px;
+            padding: 0;
             font-size: 12px;
             color: #333;
             direction: rtl;

@@ -104,8 +104,8 @@
 | **الملفات** | `app/Models/Billing/Subscription.php:125,129` · `app/Services/Billing/SubscriptionLifecycleService.php:331` |
 | **الدليل** | `php -r "method_exists('Carbon\Carbon','floatDiffInDays')"` → `DOES NOT EXIST` |
 | **الأمر** | PHPStan (V-07) → `Call to an undefined method Illuminate\Support\Carbon::floatDiffInDays()` × 2، `Call to an undefined method Carbon\CarbonInterface::floatDiffInDays()` × 1 |
-| **الأثر الفعلي (مُقاس)** | accesssor `getDaysRemainingAttribute()` **غير مستدعى من أي كود إنتاجي** — تحققت بـ `grep -rn "->days_remaining" app/ resources/views/` → فارغ. ومسار `SubscriptionLifecycleService::ceilDaysRemaining()` ملفوف داخل `rescue()` في `app/Http/Middleware/HandleInertiaRequests.php:151-163`، فالفشل **صامت** ويتجاهَل حقل `days_remaining`. |
-| **التصنيف الدقيق** | **خطأ مُ|latent** — لا يتعطل اليوم، لكن أول استدعاء لـ accessor يُنهي الطلب بخطأ Fatal. أي استدعاء غير ملفوف = انهيار. |
+| **الأثر الفعلي (مُقاس)** | accesssor `getDaysRemainingAttribute()` **غير مستدعى من أي كود إنتاجي** — تحققت بـ `grep -rn "->days_remaining" app/ resources/views/` → فارغ. ومسار `SubscriptionLifecycleService::ceilDaysRemaining()` ملفوف داخل `rescue()` في `app/Http/Middleware/HandleInertiaRequests.php:151-163`. **مُصحَّح**: بما أن الاستدعاء **لا يرمي استثناء** (يُرجع `9.0`)، فإن `rescue()` لا يفشل ولا يُسقط الحقل — **لا يوجد فقدان حقل صامت**. أثره الوحيد هو `E_USER_DEPRECATED` اختياري. |
+| **التصنيف الدقيق** | ~~**خطأ مُ|latent** — لا يتعطل اليوم، لكن أول استدعاء لـ accessor يُنهي الطلب بخطأ Fatal. أي استدعاء غير ملفوف = انهيار.~~ **مُصحَّح (انظر `16_AUDIT_CORRECTIONS.md` §1)**: التصنيف السابق **خاطئ**. `floatDiffInDays` هو **alias مدعوم في Carbon** يمرّ عبر `__call` (`Date.php:2731` ← `callDiffAlias()` في `:2878-2908`). فحص `method_exists` يُرجع `false` (لا يوجد method معلَن — ولهذا يرصده PHPStan)، لكن **الاستدعاء ينجح ويُرجع `9.0`** ويُصدر `E_USER_DEPRECATED` (16384) فقط. لا Fatal ولا فقدان بيانات. الصواب: **deprecation notice**، شدة **منخفض**. |
 | **مستوى الثقة** | **Verified** |
 
 ### EV-03 — `en.json` يحتوي ترجمة آلية معطوبة لاسم المنظومة

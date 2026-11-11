@@ -76,6 +76,8 @@ return [
     'services_departments_view' => 'عرض الأقسام',
     'services_update' => 'تعديل خدمة',
     'services_view' => 'عرض الخدمات',
+    'settings_attachments_delete' => 'حذف مرفقات النظام',
+    'settings_attachments_view' => 'عرض وإدارة مرفقات النظام',
     'settings_centers_manage' => 'إدارة الفروع',
     'settings_centers_view' => 'عرض الفروع',
     'settings_company_manage' => 'إدارة ملف الشركة',

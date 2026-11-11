@@ -23,12 +23,11 @@ class CustomerFactory extends Factory
      */
     public function definition(): array
     {
-        $tenant = Tenant::factory()->create();
-        $center = Center::factory()->create(['tenant_id' => $tenant->id]);
-
         return [
-            'tenant_id' => $tenant->id,
-            'center_id' => $center->id,
+            'tenant_id' => Tenant::factory(),
+            'center_id' => fn (array $attributes) => Center::factory()->create([
+                'tenant_id' => $attributes['tenant_id'],
+            ])->id,
             'type' => 'individual',
             'name' => fake()->name(),
             'contact_name' => null,

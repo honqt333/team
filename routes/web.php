@@ -8,6 +8,7 @@ use App\Exports\TenantsReportExport;
 use App\Http\Controllers\Api\WorkOrderSuggestionController;
 use App\Http\Controllers\App\AppointmentController;
 use App\Http\Controllers\App\AppointmentMessageDeliveryController;
+use App\Http\Controllers\App\AttachmentManagementController;
 use App\Http\Controllers\App\BillingController;
 use App\Http\Controllers\App\BranchesController;
 use App\Http\Controllers\App\CenterSettingsController;
@@ -721,6 +722,10 @@ Route::prefix('app')->middleware(['auth', 'verified', 'tenant.active', 'center.c
 
     // System Settings
     Route::get('/settings/system', [SystemSettingsController::class, 'index'])->name('settings.system');
+    Route::get('/settings/storage', [SystemSettingsController::class, 'storage'])->name('settings.storage');
+    Route::get('/settings/attachments', [AttachmentManagementController::class, 'index'])->name('settings.attachments.index');
+    Route::get('/settings/attachments/{source}/{id}/download', [AttachmentManagementController::class, 'download'])->whereNumber('id')->name('settings.attachments.download');
+    Route::delete('/settings/attachments/{source}/{id}', [AttachmentManagementController::class, 'destroy'])->whereNumber('id')->name('settings.attachments.destroy');
     Route::get('/settings/print', [SystemSettingsController::class, 'printSettings'])->name('settings.print');
     Route::put('/settings/system', [SystemSettingsController::class, 'update'])->name('settings.system.update');
 

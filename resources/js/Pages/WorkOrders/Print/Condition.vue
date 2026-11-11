@@ -15,6 +15,7 @@ import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { usePage, router } from '@inertiajs/vue3';
 import PrintLayout from '@/Components/Print/PrintLayout.vue';
+import { resolveDocumentSettings, resolveVisualSettings } from '@/Composables/usePrint';
 
 const { t } = useI18n();
 
@@ -90,35 +91,29 @@ const mappedCenterData = computed(() => {
 });
 
 const documentSettings = computed(() => {
-    const tenantSettings = page.props.tenant?.print_settings;
-    const docSettings = tenantSettings?.documents?.['condition_report'] || {};
-    return {
-        title_ar: docSettings.title_ar || t('print.vehicle_report'),
-        title_en: docSettings.title_en || 'Vehicle Condition Report',
-        terms: docSettings.terms || [],
-        print_terms: docSettings.print_terms !== false,
-        show_stamp: docSettings.show_stamp !== false,
-        show_customer_address: docSettings.show_customer_address !== false,
-        signatures:
-            docSettings.signatures && docSettings.signatures.length > 0
-                ? docSettings.signatures
-                : [{ name_ar: 'توقيع المستلم' }, { name_ar: 'توقيع العميل' }],
-    };
+    const tenantSettings =
+        props.workOrder?.tenant?.print_settings || page?.props?.tenant?.print_settings;
+    return resolveDocumentSettings({
+        tenantSettings,
+        documentType: 'condition_report',
+        customerSignatureUrl:
+            props.workOrder?.reception_signature || props.workOrder?.delivery_signature || null,
+        defaults: {
+            title_ar: t('print.vehicle_report'),
+            title_en: 'Vehicle Condition Report',
+            signatures: [
+                { name_ar: 'توقيع المستلم', name_en: 'Recipient Signature', show: true },
+                { name_ar: 'توقيع العميل', name_en: 'Customer Signature', show: true },
+            ],
+        },
+    });
 });
 
 const visualSettings = computed(() => {
-    const tenantSettings = page.props.tenant?.print_settings;
-    const vis = tenantSettings?.visual || {};
-    const center = props.workOrder.center || {};
-    return {
-        active_template: vis.active_template || 'TemplateDefaultA4',
-        show_logo: vis.show_logo !== false,
-        show_stamp: vis.show_stamp !== false,
-        show_qr_code: vis.show_qr_code !== false,
-        primary_color: vis.primary_color || '#fbbf24',
-        footer_text: vis.footer_text || '',
-        stamp_url: center.stamp_url || vis.stamp_url || '',
-    };
+    const tenantSettings =
+        props.workOrder?.tenant?.print_settings || page?.props?.tenant?.print_settings;
+    const center = props.workOrder?.center || {};
+    return resolveVisualSettings({ tenantSettings, center });
 });
 </script>
 
@@ -126,7 +121,7 @@ const visualSettings = computed(() => {
 @media print {
     @page {
         size: A4;
-        margin: 1cm;
+        margin: 15mm 10mm 12mm 10mm;
     }
     body {
         -webkit-print-color-adjust: exact;

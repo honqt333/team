@@ -55,7 +55,10 @@ class TenantStorageService
             }
 
             // Check if unlimited
-            if ($plan->getLimit('users') >= 999 && $plan->getLimit('centers') >= 999) {
+            $maxUsers = $plan->getLimit('max_users', $plan->getLimit('users'));
+            $maxCenters = $plan->getLimit('max_centers', $plan->getLimit('centers'));
+
+            if ($maxUsers >= 999 && $maxCenters >= 999) {
                 return 999;
             }
         }

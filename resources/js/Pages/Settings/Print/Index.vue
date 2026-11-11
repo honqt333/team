@@ -726,7 +726,6 @@ const docOptions = {
     print_terms: 'columns.print_terms',
     terms_first_page: 'terms_on_first_page',
     show_stamp: 'enable_stamp',
-    show_qr_code: 'show_qr_code_label',
     show_iban: 'show_bank_iban',
     show_customer_address: 'show_customer_address',
 };
@@ -1004,6 +1003,7 @@ const dummyPrintData = computed(() => {
         fuel_level: 70,
         entry_date: new Date(),
         expected_end_date: new Date(Date.now() + 86400000 * 2),
+        tax_enabled_snapshot: Boolean(page.props.tenant?.tax_settings?.vat_enabled),
         customer: {
             name: ['purchase_invoice', 'purchase_return'].includes(docType)
                 ? t('print_settings.sample_supplier_name')

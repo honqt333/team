@@ -20,6 +20,7 @@ use App\Support\Permissions;
 use DomainException;
 use Exception;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Spatie\Permission\PermissionRegistrar;
 use Tests\TestCase;
 
@@ -38,12 +39,12 @@ class SecondBatchFinancialSafetyTest extends TestCase
         return $user;
     }
 
-    private function invoice(User $user, ?int $centerId = null, string $type = 'invoice'): Invoice
+    private function invoice(User $user, ?int $centerId = null, string $type = 'invoice', string $status = 'valid'): Invoice
     {
         return Invoice::factory()->create([
             'tenant_id' => $user->tenant_id, 'center_id' => $centerId ?? $user->current_center_id,
             'customer_id' => Customer::factory()->create(['tenant_id' => $user->tenant_id, 'center_id' => $centerId ?? $user->current_center_id])->id,
-            'work_order_id' => null, 'status' => 'valid', 'type' => $type,
+            'work_order_id' => null, 'status' => $status, 'type' => $type,
             'issue_date' => '2026-01-15', 'total_excl_tax' => 100, 'total_tax' => 15, 'total_incl_tax' => 115,
         ]);
     }
@@ -51,8 +52,11 @@ class SecondBatchFinancialSafetyTest extends TestCase
     public function test_stale_draft_cannot_change_issued_number_or_consume_another_sequence(): void
     {
         $user = $this->actor();
-        $invoice = $this->invoice($user);
-        $invoice->update(['status' => 'draft']);
+        // The document is created as a DRAFT — which is the only state
+        // `InvoicePolicy::update()` allows and the only state the
+        // immutability guard lets an invoice be moved to. An issued
+        // document is never rewound to `draft`.
+        $invoice = $this->invoice($user, null, 'invoice', 'draft');
         $stale = $invoice->fresh();
         $service = app(InvoiceService::class);
         $service->issueInvoice($invoice);
@@ -92,8 +96,14 @@ class SecondBatchFinancialSafetyTest extends TestCase
         $user = $this->actor();
         $this->invoice($user);
         $this->invoice($user, null, 'credit_note');
-        $this->invoice($user)->update(['status' => 'draft']);
-        $this->invoice($user)->delete();
+        // A DRAFT is created directly — an issued document is never
+        // rewound to `draft`, and the immutability guard refuses it.
+        $this->invoice($user, null, 'invoice', 'draft');
+        // The deletion goes through the query builder for the same
+        // reason: an issued document may not be deleted through the
+        // model (`InvoicePolicy::delete()` allows a `draft` only).
+        $deleted = $this->invoice($user);
+        DB::table('invoices')->where('id', $deleted->id)->update(['deleted_at' => now()]);
         $tx = app(TaxPeriodService::class)->collectTransactionsForPeriod($user->tenant_id, '2026-01-01', '2026-03-31');
         $this->assertCount(2, $tx);
         $this->assertEquals(0, array_sum(array_column($tx, 'vat_amount')));

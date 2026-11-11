@@ -848,66 +848,8 @@
                         </div>
                     </div>
 
-                    <!-- ZATCA Tab -->
+                    <!-- ZATCA Tab (Phase 2 Integration; Phase 1 QR is automatically tied to VAT activation) -->
                     <div v-if="activeTab === 'zatca'" class="space-y-6">
-                        <!-- Phase 1 -->
-                        <div class="p-6 rounded-xl border border-gray-200 dark:border-gray-700">
-                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                                {{ $t('company_profile.zatca.phase1_title') }}
-                            </h3>
-
-                            <div
-                                v-if="!props.vat?.vat_enabled"
-                                class="p-4 bg-amber-50 dark:bg-amber-900/20 rounded-lg border border-amber-200 dark:border-amber-800 mb-4"
-                            >
-                                <div class="flex items-start gap-3">
-                                    <svg
-                                        class="w-5 h-5 text-amber-500 mt-0.5"
-                                        fill="currentColor"
-                                        viewBox="0 0 20 20"
-                                    >
-                                        <path
-                                            fill-rule="evenodd"
-                                            d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
-                                            clip-rule="evenodd"
-                                        />
-                                    </svg>
-                                    <div>
-                                        <p class="font-medium text-amber-800 dark:text-amber-200">
-                                            {{ $t('company_profile.zatca.complete_vat_first') }}
-                                        </p>
-                                        <button
-                                            @click="activeTab = 'vat'"
-                                            class="text-sm text-amber-600 hover:text-amber-700 dark:text-amber-400 underline mt-1"
-                                        >
-                                            {{ $t('company_profile.zatca.open_vat') }}
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div
-                                class="flex items-center justify-between p-4 rounded-lg border border-gray-200 dark:border-gray-700"
-                                :class="{
-                                    'opacity-50 pointer-events-none': !props.vat?.vat_enabled,
-                                }"
-                            >
-                                <div>
-                                    <h4 class="font-medium text-gray-900 dark:text-white">
-                                        {{ $t('company_profile.zatca.qr_enabled') }}
-                                    </h4>
-                                    <p class="text-sm text-gray-500 dark:text-gray-400">
-                                        {{ $t('company_profile.zatca.qr_enabled_hint') }}
-                                    </p>
-                                </div>
-                                <AppToggle
-                                    v-model="form.zatca.qr_enabled"
-                                    :disabled="!props.vat?.vat_enabled"
-                                    color="success"
-                                />
-                            </div>
-                        </div>
-
                         <!-- Phase 2 Integration (Active State) -->
                         <div
                             v-if="props.zatca?.is_phase2_active"
@@ -1140,16 +1082,6 @@
                                     </svg>
                                 </Link>
                             </div>
-                        </div>
-
-                        <div class="flex justify-end pt-4">
-                            <button
-                                @click="saveSection('zatca')"
-                                :disabled="saving || !props.vat?.vat_enabled"
-                                class="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-lg transition-colors disabled:opacity-50"
-                            >
-                                {{ saving ? $t('common.loading') : $t('common.save') }}
-                            </button>
                         </div>
                     </div>
 
@@ -2659,7 +2591,6 @@ import CompanyProfileTab from '@/Components/Settings/Company/CompanyProfileTab.v
 import CompanyAdminUserTab from '@/Components/Settings/Company/CompanyAdminUserTab.vue';
 import CompanyBranchesTab from '@/Components/Settings/Company/CompanyBranchesTab.vue';
 import CompanyTransactionsTab from '@/Components/Settings/Company/CompanyTransactionsTab.vue';
-import CompanySubscriptionTab from '@/Components/Settings/Company/CompanySubscriptionTab.vue';
 import { useFormScrollToError } from '@/Composables/useFormScrollToError';
 import axios from 'axios';
 

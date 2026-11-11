@@ -90,20 +90,34 @@ class VehicleBalanceNPlusOneTest extends TestCase
         ]);
 
         // Paid in full -> contributes 0.
-        $this->makeInvoice($tenant, $center, $customer, total: 100.0, paid: 100.0, status: 'paid');
+        $this->makeInvoice($tenant, $center, $customer, total: 100.0, paid: 100.0);
 
         // Partially paid -> contributes total - paid.
-        $this->makeInvoice($tenant, $center, $customer, total: 300.0, paid: 100.0, status: 'partial');
+        $this->makeInvoice($tenant, $center, $customer, total: 300.0, paid: 100.0);
 
         // Unpaid -> contributes the full total.
-        $this->makeInvoice($tenant, $center, $customer, total: 250.0, paid: 0.0, status: 'pending');
+        //
+        // The invoice `status` is `valid` for every counted invoice. The
+        // balance query excludes ONLY `cancelled`
+        // (`whereNotIn('status', ['cancelled'])`), and the amount that
+        // counts is `total_incl_tax - total_paid` — so what makes an
+        // invoice "paid", "partial" or "unpaid" is `total_paid`, not the
+        // status. The payment states used to be written into the invoice
+        // `status` column, which is not what that column means: its
+        // enum is `draft|valid|reported|cancelled`.
+        $this->makeInvoice($tenant, $center, $customer, total: 250.0, paid: 0.0);
 
         // Cancelled -> must be excluded.
         $this->makeInvoice($tenant, $center, $customer, total: 999.0, paid: 0.0, status: 'cancelled');
 
         // Soft-deleted -> must be excluded.
-        $deleted = $this->makeInvoice($tenant, $center, $customer, total: 777.0, paid: 0.0, status: 'pending');
-        $deleted->delete();
+        //
+        // The soft delete goes through the query builder: an issued
+        // document may not be deleted through the model, because the
+        // invoice immutability guard refuses it and `InvoicePolicy::delete()`
+        // allows a `draft` only.
+        $deleted = $this->makeInvoice($tenant, $center, $customer, total: 777.0, paid: 0.0);
+        DB::table('invoices')->where('id', $deleted->id)->update(['deleted_at' => now()]);
 
         return $customer;
     }
@@ -114,7 +128,7 @@ class VehicleBalanceNPlusOneTest extends TestCase
         Customer $customer,
         float $total,
         float $paid,
-        string $status
+        string $status = 'valid'
     ): Invoice {
         return Invoice::create([
             'tenant_id' => $tenant->id,

@@ -4,7 +4,7 @@
         :class="
             previewMode
                 ? 'w-[80mm] shadow-xl border border-gray-200 rounded-lg scale-95 origin-top'
-                : 'w-full print:p-0 print:shadow-none print:border-none'
+                : 'w-[80mm] max-w-full mx-auto shadow-lg border border-gray-200 print:w-full print:p-0 print:shadow-none print:border-none'
         "
         :dir="isRtl ? 'rtl' : 'ltr'"
     >
@@ -29,7 +29,7 @@
                 class="text-sm font-bold text-gray-900 transition-all duration-300"
                 :style="{ color: isSleek ? primaryColor : '#111827' }"
             >
-                {{ centerData.name || 'مركز خدمة برو' }}
+                {{ centerData.name || $t('common.app_name') }}
             </h2>
             <p
                 v-if="printHelpers.isTaxEnabled(props.data) && centerData.tax_number"
@@ -54,12 +54,7 @@
                     "
                     :style="isSleek ? { backgroundColor: primaryColor } : {}"
                 >
-                    {{
-                        printHelpers.getDocTypeTitle(
-                            props.documentType,
-                            printHelpers.isTaxEnabled(props.data)
-                        )
-                    }}
+                    {{ getDocumentTitle() }}
                 </span>
                 <span class="font-bold" :style="{ color: primaryColor }">
                     #{{ data.code || 'WO-100293' }}
@@ -649,8 +644,7 @@
             <!-- Thermal Small Stamp -->
             <div
                 v-if="
-                    documentSettings.show_stamp &&
-                    (previewMode || centerData.stamp_url || visualSettings.stamp_url)
+                    showStamp && (previewMode || centerData.stamp_url || visualSettings.stamp_url)
                 "
                 class="absolute bottom-2 left-4 w-16 h-16 select-none pointer-events-none z-10 opacity-70 -rotate-12 transition-all"
             >
@@ -677,7 +671,7 @@
                         text-anchor="middle"
                         font-family="sans-serif"
                     >
-                        خدمة برو
+                        {{ visualSettings.footer_text || $t('common.app_name') }}
                     </text>
                     <text
                         x="50"
@@ -718,7 +712,7 @@
 
         <!-- ZATCA / Standard QR code for Thermal print -->
         <div
-            v-if="documentSettings.show_qr_code && data.qr_code_url"
+            v-if="showQrCode && data.qr_code_url"
             class="flex flex-col items-center justify-center mt-3 pt-3 border-t border-dashed border-gray-200"
         >
             <img
@@ -746,6 +740,7 @@ import SaudiPlateDisplay from '@/Components/Vehicles/SaudiPlateDisplay.vue';
 import { usePrint } from '@/Composables/usePrint';
 import { usePrintTotals } from '@/Composables/usePrintTotals';
 
+const page = usePage();
 const { t, locale } = useI18n();
 const isRtl = computed(() => locale.value === 'ar');
 
@@ -822,8 +817,7 @@ const showExclusive = computed(() => {
     if (props.data.pricing_mode_snapshot !== 'inclusive') {
         return true;
     }
-    const page = usePage();
-    const taxSettings = page.props?.tenant?.tax_settings;
+    const taxSettings = page?.props?.tenant?.tax_settings;
     return taxSettings?.show_amount_before_vat ?? true;
 });
 
@@ -846,7 +840,31 @@ const parts = computed(() => {
     return filteredItems.value.filter((item) => item.is_part);
 });
 
-const isSleek = computed(() => props.visualSettings.active_template === 'TemplateSleekThermal');
+const effectiveTemplate = computed(
+    () =>
+        props.documentSettings?.template ||
+        props.visualSettings?.active_template ||
+        'TemplateThermal80'
+);
+const isSleek = computed(() => effectiveTemplate.value === 'TemplateSleekThermal');
+const showQrCode = computed(
+    () => printHelpers.isTaxEnabled(props.data) && Boolean(props.data?.qr_code_url)
+);
+const showStamp = computed(
+    () => (props.documentSettings?.show_stamp ?? props.visualSettings?.show_stamp ?? true) !== false
+);
+
+function getDocumentTitle() {
+    const taxActive = printHelpers.isTaxEnabled(props.data);
+    let title = isRtl.value
+        ? props.documentSettings?.title_ar ||
+          printHelpers.getDocTypeTitle(props.documentType, taxActive)
+        : props.documentSettings?.title_en ||
+          printHelpers.getDocTypeTitle(props.documentType, taxActive);
+
+    title = String(title || '');
+    return printHelpers.cleanDocumentTitle(title, taxActive);
+}
 
 const damageMarks = computed(() => props.data.damage_marks || []);
 

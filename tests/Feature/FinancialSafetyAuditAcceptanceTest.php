@@ -122,18 +122,34 @@ class FinancialSafetyAuditAcceptanceTest extends TestCase
         $repDraft = $service->computeCenterFinancialStatement($tenant->id, $center->id, null, null, false);
         $this->assertEquals(0.0, $repDraft['invoicesSumNetAmount'], 'Draft sales invoice must NOT be counted in sales');
 
-        // Cancelled invoice
-        $draft->update(['status' => 'cancelled']);
+        // Cancelled invoice.
+        //
+        // A separate invoice is created in the `cancelled` state rather
+        // than transitioning the draft one. `InvoicePolicy::update()`
+        // only ever allows a `draft` to be updated, and the invoice
+        // immutability guard enforces the same contract in the model
+        // layer: an issued document is not rewound to another state.
+        // Creating the document in the state under test is also what
+        // production does — there is no "cancel then un-cancel" path.
+        $cancelled = $this->createInvoice($tenant, $center, $customer, 'cancelled');
         $repCancelled = $service->computeCenterFinancialStatement($tenant->id, $center->id, null, null, false);
         $this->assertEquals(0.0, $repCancelled['invoicesSumNetAmount'], 'Cancelled sales invoice must NOT be counted in sales');
 
         // Valid invoice is counted
-        $draft->update(['status' => 'valid']);
+        $valid = $this->createInvoice($tenant, $center, $customer, 'valid');
         $repValid = $service->computeCenterFinancialStatement($tenant->id, $center->id, null, null, false);
         $this->assertEquals(115.0, $repValid['invoicesSumNetAmount'], 'Valid sales invoice must be counted in sales');
 
-        // Soft-deleted invoice is excluded
-        $draft->delete();
+        // Soft-deleted invoice is excluded.
+        //
+        // The deletion is done through the query builder, because an
+        // issued document may not be deleted through the model — the
+        // guard refuses it, and `InvoicePolicy::delete()` allows a
+        // `draft` only. A soft-deleted *issued* document is a legacy
+        // data state, so it is reproduced the way it would have been
+        // produced: by a direct write.
+        DB::table('invoices')->where('id', $valid->id)->update(['deleted_at' => now()]);
+
         $repDeleted = $service->computeCenterFinancialStatement($tenant->id, $center->id, null, null, false);
         $this->assertEquals(0.0, $repDeleted['invoicesSumNetAmount'], 'Soft-deleted sales invoice must NOT be counted in sales');
     }
@@ -147,11 +163,13 @@ class FinancialSafetyAuditAcceptanceTest extends TestCase
         $repDraft = $service->computeCenterFinancialStatement($tenant->id, $center->id, null, null, false);
         $this->assertEquals(0.0, $repDraft['returnInvoicesSumNetAmount'], 'Draft credit note must NOT be counted in returns');
 
-        $creditNote->update(['status' => 'cancelled']);
+        // Created directly in the `cancelled` state — see the note on the
+        // sales-invoice test above.
+        $cancelledNote = $this->createInvoice($tenant, $center, $customer, 'cancelled', 'credit_note');
         $repCancelled = $service->computeCenterFinancialStatement($tenant->id, $center->id, null, null, false);
         $this->assertEquals(0.0, $repCancelled['returnInvoicesSumNetAmount'], 'Cancelled credit note must NOT be counted in returns');
 
-        $creditNote->update(['status' => 'valid']);
+        $validNote = $this->createInvoice($tenant, $center, $customer, 'valid', 'credit_note');
         $repValid = $service->computeCenterFinancialStatement($tenant->id, $center->id, null, null, false);
         $this->assertEquals(115.0, $repValid['returnInvoicesSumNetAmount'], 'Valid credit note must be counted in returns');
     }
@@ -409,9 +427,16 @@ class FinancialSafetyAuditAcceptanceTest extends TestCase
         $draftInvoice = $this->createInvoice($tenant, $center, $customer, 'draft');
         $txDraft = $this->createCompanyTx($tenant, $center, 'revenue', 'approved', $draftInvoice, null, true);
 
-        // 3. Valid invoice that is soft-deleted
+        // 3. Valid invoice that is soft-deleted.
+        //
+        // The soft delete goes through the query builder: an issued
+        // document may not be deleted through the model, because the
+        // invoice immutability guard refuses it and `InvoicePolicy::delete()`
+        // allows a `draft` only. A soft-deleted issued document is a
+        // legacy data state, so it is reproduced the way a migration or
+        // a backfill would have produced it — by a direct write.
         $deletedInvoice = $this->createInvoice($tenant, $center, $customer, 'valid');
-        $deletedInvoice->delete();
+        DB::table('invoices')->where('id', $deletedInvoice->id)->update(['deleted_at' => now()]);
         $txDeleted = $this->createCompanyTx($tenant, $center, 'revenue', 'approved', $deletedInvoice, null, true);
 
         // 4. Standalone independent company transaction (control)

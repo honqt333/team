@@ -23,6 +23,8 @@ class QuotePrintController extends Controller
 
         $quote->load([
             'center.address',
+            'tenant.address',
+            'tenant.taxSettings',
             'customer',
             'vehicle.make',
             'vehicle.customer',

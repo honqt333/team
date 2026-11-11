@@ -15,6 +15,7 @@ import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { usePage, router } from '@inertiajs/vue3';
 import PrintLayout from '@/Components/Print/PrintLayout.vue';
+import { resolveDocumentSettings, resolveVisualSettings } from '@/Composables/usePrint';
 
 const props = defineProps({
     invoice: Object,
@@ -92,13 +93,15 @@ const mappedData = computed(() => {
         tax_amount: Number(line.tax_amount || 0),
     }));
 
-    const qrUrl = props.invoice.zatca_qr_tlv
-        ? `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(props.invoice.zatca_qr_tlv)}`
-        : '';
-
     const tenant = props.invoice.tenant || page.props.tenant || {};
     const isVatEnabled =
         tenant.tax_settings?.vat_enabled ?? tenant.taxSettings?.vat_enabled ?? true;
+    const taxActive = Boolean(props.invoice.tax_enabled_snapshot && isVatEnabled);
+
+    const qrUrl =
+        taxActive && props.invoice.zatca_qr_tlv
+            ? `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(props.invoice.zatca_qr_tlv)}`
+            : '';
 
     return {
         code: props.invoice.invoice_number,
@@ -210,7 +213,9 @@ const mappedCenterData = computed(() => {
             (hasIssuer ? null : tenant.vat_number || center.vat_number),
         cr_number: props.invoice.seller_cr_snapshot ?? (hasIssuer ? null : tenant.cr_number),
         phone: tenant.phone || center.phone,
-        logo: tenant.logo_url || center.logo_invoice_url || center.logo_light_url || '',
+        logo: isCompany
+            ? tenant.logo_url || ''
+            : center.logo_invoice_url || center.logo_light_url || tenant.logo_url || '',
         iban: tenant.iban || '',
         address: formatAddress(tenant.address) || formatAddress(center.address) || '',
         stamp_url: isCompany ? '' : center.stamp_url || '',
@@ -218,66 +223,78 @@ const mappedCenterData = computed(() => {
 });
 
 const documentSettings = computed(() => {
-    const tenantSettings = page.props.tenant?.print_settings;
-    const docSettings = tenantSettings?.documents?.['invoice'] || {};
+    const tenantSettings =
+        props.invoice.tenant?.print_settings || page?.props?.tenant?.print_settings;
+    const isCreditNote = resolvedDocType.value === 'credit_note';
+    const isPartsInvoice = resolvedDocType.value === 'parts_invoice';
 
-    const defaultTitleAr = isTaxEnabled.value
-        ? props.labels?.document_title || 'فاتورة ضريبية مبسطة'
-        : 'فاتورة';
-    const defaultTitleEn = isTaxEnabled.value
-        ? props.labels?.document_title || 'Simplified Tax Invoice'
-        : 'Invoice';
+    const defaultTitleAr = isCreditNote
+        ? isTaxEnabled.value
+            ? 'إشعار دائن (فاتورة إرجاع)'
+            : 'إشعار دائن'
+        : isPartsInvoice
+          ? isTaxEnabled.value
+              ? 'فاتورة قطع غيار ضريبية'
+              : 'فاتورة قطع غيار'
+          : isTaxEnabled.value
+            ? props.labels?.document_title || 'فاتورة ضريبية مبسطة'
+            : 'فاتورة';
 
-    let titleAr = docSettings.title_ar || defaultTitleAr;
-    let titleEn = docSettings.title_en || defaultTitleEn;
+    const defaultTitleEn = isCreditNote
+        ? isTaxEnabled.value
+            ? 'Credit Note (Return Invoice)'
+            : 'Credit Note'
+        : isPartsInvoice
+          ? isTaxEnabled.value
+              ? 'Tax Parts Invoice'
+              : 'Parts Invoice'
+          : isTaxEnabled.value
+            ? props.labels?.document_title || 'Simplified Tax Invoice'
+            : 'Invoice';
+
+    const resolved = resolveDocumentSettings({
+        tenantSettings,
+        documentType: resolvedDocType.value,
+        legacyTerms: page?.props?.tenant?.invoice_terms,
+        defaults: {
+            title_ar: defaultTitleAr,
+            title_en: defaultTitleEn,
+            signatures: [
+                { name_ar: 'توقيع المدير', name_en: 'Manager Signature', show: true },
+                { name_ar: 'توقيع العميل', name_en: 'Customer Signature', show: true },
+            ],
+        },
+    });
 
     if (!isTaxEnabled.value) {
-        titleAr =
-            titleAr
+        resolved.title_ar =
+            resolved.title_ar
                 .replace(/فاتورة ضريبية مبسطة/g, 'فاتورة')
                 .replace(/فاتورة ضريبية/g, 'فاتورة')
                 .replace(/ضريبية/g, '')
-                .trim() || 'فاتورة';
-        titleEn =
-            titleEn
+                .trim() || defaultTitleAr;
+        resolved.title_en =
+            resolved.title_en
                 .replace(/Simplified Tax Invoice/gi, 'Invoice')
                 .replace(/Tax Invoice/gi, 'Invoice')
                 .replace(/Tax/gi, '')
-                .trim() || 'Invoice';
+                .trim() || defaultTitleEn;
     }
 
-    return {
-        title_ar: titleAr,
-        title_en: titleEn,
-        terms:
-            docSettings.terms ||
-            (page.props.tenant?.invoice_terms ? [page.props.tenant.invoice_terms] : []),
-        print_terms: docSettings.print_terms !== false,
-        show_stamp: docSettings.show_stamp !== false,
-        show_customer_address: docSettings.show_customer_address !== false,
-        signatures:
-            docSettings.signatures && docSettings.signatures.length > 0
-                ? docSettings.signatures
-                : [
-                      { name_ar: 'توقيع المدير', name_en: 'Manager Signature' },
-                      { name_ar: 'توقيع العميل', name_en: 'Customer Signature' },
-                  ],
-    };
+    return resolved;
 });
 
 const visualSettings = computed(() => {
-    const tenantSettings = page.props.tenant?.print_settings;
-    const vis = tenantSettings?.visual || {};
+    const tenantSettings =
+        props.invoice.tenant?.print_settings || page?.props?.tenant?.print_settings;
     const center = props.invoice.center || {};
-    return {
-        active_template: vis.active_template || 'TemplateDefaultA4',
-        show_logo: vis.show_logo !== false,
-        show_stamp: vis.show_stamp !== false,
-        show_qr_code: vis.show_qr_code !== false,
-        primary_color: vis.primary_color || '#3b82f6',
-        footer_text: vis.footer_text || props.invoice.tenant?.print_settings?.footer_text || '',
-        stamp_url: center.stamp_url || vis.stamp_url || '',
-    };
+    return resolveVisualSettings({
+        tenantSettings,
+        center,
+        overrides: {
+            primary_color: tenantSettings?.visual?.primary_color || '#3b82f6',
+        },
+    });
 });
 </script>
 
@@ -285,7 +302,7 @@ const visualSettings = computed(() => {
 @media print {
     @page {
         size: A4;
-        margin: 0 1cm;
+        margin: 15mm 10mm 12mm 10mm;
     }
     body {
         -webkit-print-color-adjust: exact;
