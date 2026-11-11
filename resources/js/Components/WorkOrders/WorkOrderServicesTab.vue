@@ -726,13 +726,11 @@ const PACKAGES_DEPT_KEY = 'packages';
 
 const { t, locale } = useI18n();
 const { getName } = useLocalized();
-const { formatCurrency } = useNumberFormat();
+const { formatCurrency, formatMoney } = useNumberFormat();
 const { formatDate } = useFormatters();
 
-// Local price formatter — same shape as the rest of the page so service
-// items render with the project's currency unit.
 function formatPrice(value) {
-    return formatCurrency(value) + ' ' + t('common.currency');
+    return formatMoney(value, props.workOrder?.currency_code);
 }
 
 const showDetailedWarranty = (item) => {

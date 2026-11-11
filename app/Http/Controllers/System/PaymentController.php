@@ -50,12 +50,14 @@ class PaymentController extends Controller
         $vatCalc = $paymentSettings->calculateVat((float) $subscription->price);
         $totalAmount = $vatCalc['total'];
 
+        $platformCurrency = PaymentSettings::getPlatformCurrency();
+
         // Create pending payment record
         $payment = SubscriptionPayment::create([
             'tenant_id' => $subscription->tenant_id,
             'subscription_id' => $subscription->id,
             'amount' => $totalAmount,
-            'currency' => 'SAR',
+            'currency' => $platformCurrency,
             'gateway' => $defaultGateway,
             'status' => 'pending',
         ]);
@@ -63,7 +65,8 @@ class PaymentController extends Controller
         // Get payment form data
         $formData = $this->paymentManager->initiate([
             'amount' => $totalAmount,
-            'currency' => 'SAR',
+            'currency' => $platformCurrency,
+            'country_code' => $subscription->tenant?->country,
             'description' => "اشتراك {$subscription->plan->name_ar} - {$subscription->tenant->trade_name}",
             'callback_url' => route('system.payment.callback', ['payment' => $payment->id]),
             'metadata' => [

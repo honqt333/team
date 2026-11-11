@@ -997,36 +997,13 @@
                 </div>
 
                 <!-- Pagination Footer -->
-                <div
-                    v-if="invoices?.links && invoices.links.length > 3"
-                    class="px-4 py-3 border-t border-gray-100 dark:border-gray-800 flex items-center justify-between text-xs print:hidden"
-                >
-                    <span class="text-gray-500">
-                        {{ $t('reports.purchase_invoices_report.showing') }}
-                        <span class="font-mono">{{ invoices.from || 0 }}</span>
-                        {{ $t('reports.purchase_invoices_report.to') }}
-                        <span class="font-mono">{{ invoices.to || 0 }}</span>
-                        {{ $t('reports.purchase_invoices_report.of') }}
-                        <span class="font-mono font-bold">{{ invoices.total }}</span>
-                        {{ $t('reports.purchase_invoices_report.record') }}
-                    </span>
-                    <div class="flex items-center gap-1">
-                        <component
-                            :is="link.url ? 'a' : 'span'"
-                            v-for="(link, lIdx) in invoices.links"
-                            :key="lIdx"
-                            :href="link.url"
-                            v-html="link.label"
-                            :class="[
-                                'px-3 py-1.5 rounded-xl transition-all text-xs font-mono font-bold',
-                                link.active
-                                    ? 'bg-action-primary hover:bg-action-primary-hover text-white shadow-sm'
-                                    : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-750',
-                                !link.url ? 'opacity-40 cursor-not-allowed' : '',
-                            ]"
-                        />
-                    </div>
-                </div>
+                <AppPagination
+                    class="print:hidden"
+                    :links="invoices?.links || []"
+                    :from="invoices?.from"
+                    :to="invoices?.to"
+                    :total="invoices?.total"
+                />
             </div>
 
             <!-- Standard Print Footer -->
@@ -1039,6 +1016,7 @@
 import PaymentStatusBadge from '@/Components/Common/PaymentStatusBadge.vue';
 import PrintEngine from '@/Components/Print/PrintEngine.vue';
 import DataTable from '@/Components/Common/DataTable.vue';
+import AppPagination from '@/Components/Common/AppPagination.vue';
 import AppPrintButton from '@/Components/Common/AppPrintButton.vue';
 import AppToggle from '@/Components/Common/AppToggle.vue';
 import { printDocument } from '@/Composables/usePrint';

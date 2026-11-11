@@ -345,7 +345,9 @@ const { t } = useI18n();
 import { computed } from 'vue';
 import { usePage } from '@inertiajs/vue3';
 import BaseModal from '@/Components/BaseModal.vue';
+import { useNumberFormat } from '@/Composables/useNumberFormat';
 
+const { formatMoney } = useNumberFormat();
 const page = usePage();
 
 const props = defineProps({
@@ -395,15 +397,7 @@ const companyInfo = computed(() => {
     };
 });
 
-const formatMoney = (val) => {
-    const num = Number(val) || 0;
-    return (
-        new Intl.NumberFormat('en-US', {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2,
-        }).format(num) + ' SAR'
-    );
-};
+// Currency formatting now uses tenant-aware formatMoney from useNumberFormat()
 
 const printDateFormatted = computed(() => {
     return new Date().toLocaleString('en-GB', {

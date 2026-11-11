@@ -12,6 +12,7 @@ use App\Models\WorkOrder;
 use App\Models\WorkOrderItem;
 use App\Models\WorkOrderItemPart;
 use App\Services\Optimization\TaxCalculator;
+use App\Support\CountryCurrencyRegistry;
 use Exception;
 use Illuminate\Support\Facades\DB;
 
@@ -79,7 +80,7 @@ class InvoiceService
                 'tax_enabled_snapshot' => $workOrder->tax_enabled_snapshot,
                 'pricing_mode_snapshot' => $workOrder->pricing_mode_snapshot,
                 'tax_rate_snapshot' => $workOrder->tax_rate_snapshot,
-                'currency_code' => $workOrder->currency_code,
+                'currency_code' => $workOrder->currency_code ?: CountryCurrencyRegistry::tenantCurrency($workOrder->tenant),
 
                 // Totals
                 'total_excl_tax' => $workOrder->total_excl_tax,
@@ -187,7 +188,8 @@ class InvoiceService
                 $unitPrice = (float) $part->unit_price;
                 $discountAmt = (float) ($part->discount ?? 0);
                 $taxEnabled = (bool) ($workOrder->tax_enabled_snapshot ?? false);
-                $taxRate = $taxEnabled ? (float) ($workOrder->tax_rate_snapshot ?? 15.00) : 0.0;
+                $defaultVat = CountryCurrencyRegistry::defaultVatRate(CountryCurrencyRegistry::tenantCountry($workOrder->tenant));
+                $taxRate = $taxEnabled ? (float) ($workOrder->tax_rate_snapshot ?? $defaultVat) : 0.0;
                 $isInclusive = ($workOrder->pricing_mode_snapshot ?? 'exclusive') === 'inclusive';
 
                 $net = max(0, ($qty * $unitPrice) - $discountAmt);
@@ -279,11 +281,12 @@ class InvoiceService
                 'status' => 'valid',
                 'invoice_number' => $invoiceNumber,
                 'issue_date' => now(),
+                'currency_code' => $invoice->currency_code ?: CountryCurrencyRegistry::tenantCurrency($tenant),
                 // 'icv' => $icv, // Add column if needed in schema, currently storing in ZATCA payload
             ]);
 
-            // 4. Generate ZATCA Phase 1 QR TLV strictly when VAT is enabled on the invoice
-            if ($invoice->tax_enabled_snapshot) {
+            // 4. Generate ZATCA Phase 1 QR TLV strictly when VAT is enabled and tenant country is SA
+            if ($invoice->tax_enabled_snapshot && CountryCurrencyRegistry::isZatcaApplicable($tenant?->country)) {
                 $invoice->update([
                     'zatca_qr_tlv' => $this->generateZatcaQr($invoice),
                 ]);

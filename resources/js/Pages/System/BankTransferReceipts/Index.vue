@@ -1,11 +1,13 @@
 <script setup>
 import DataTable from '@/Components/Common/DataTable.vue';
-import { ref, computed } from 'vue';
+import AppPagination from '@/Components/Common/AppPagination.vue';
+import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { Head, router, Link } from '@inertiajs/vue3';
+import { Head, Link } from '@inertiajs/vue3';
 import SystemLayout from '@/Layouts/SystemLayout.vue';
 import PageHeader from '@/Components/PageHeader.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
+import { useServerTable } from '@/Composables/useServerTable';
 
 const { t } = useI18n();
 
@@ -16,8 +18,14 @@ const props = defineProps({
 });
 
 const locale = computed(() => document.documentElement.lang || 'ar');
-const search = ref(props.filters.search || '');
-const status = ref(props.filters.status || 'pending');
+
+const { filters: tableFilters, applyFilters } = useServerTable({
+    routeUrl: '/system/bank-transfer-receipts',
+    initialFilters: {
+        search: props.filters.search || '',
+        status: props.filters.status || 'pending',
+    },
+});
 
 const statusColors = {
     pending: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300',
@@ -43,20 +51,6 @@ const statusOptions = computed(() => [
         label: t('system.bank_transfer_receipts.rejected_2'),
     },
 ]);
-
-function applyFilters() {
-    router.get(
-        '/system/bank-transfer-receipts',
-        {
-            search: search.value,
-            status: status.value,
-        },
-        {
-            preserveState: true,
-            preserveScroll: true,
-        }
-    );
-}
 
 function formatDate(dateStr) {
     if (!dateStr) return '—';
@@ -231,7 +225,7 @@ function getAmountBadge(receipt) {
             >
                 <div class="flex-1">
                     <input
-                        v-model="search"
+                        v-model="tableFilters.search"
                         type="search"
                         :placeholder="
                             locale === 'ar'
@@ -244,12 +238,12 @@ function getAmountBadge(receipt) {
                 </div>
                 <div class="w-full sm:w-52">
                     <SearchableSelect
-                        v-model="status"
+                        v-model="tableFilters.status"
                         :options="statusOptions"
                         option-label="label"
                         option-value="value"
                         :compact="true"
-                        @change="applyFilters"
+                        @update:model-value="applyFilters"
                     />
                 </div>
             </div>
@@ -450,21 +444,12 @@ function getAmountBadge(receipt) {
             </div>
 
             <!-- Pagination -->
-            <div v-if="receipts.links" class="flex flex-wrap items-center justify-center gap-1">
-                <Link
-                    v-for="link in receipts.links"
-                    :key="link.label"
-                    :href="link.url || '#'"
-                    :class="[
-                        'rounded border px-3 py-1 text-xs',
-                        link.active
-                            ? 'border-action-primary bg-action-primary text-white'
-                            : 'border-gray-200 bg-white text-gray-600 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300',
-                        !link.url && 'cursor-not-allowed opacity-50',
-                    ]"
-                    v-html="link.label"
-                />
-            </div>
+            <AppPagination
+                :links="receipts.links || []"
+                :from="receipts.from"
+                :to="receipts.to"
+                :total="receipts.total"
+            />
         </div>
     </SystemLayout>
 </template>

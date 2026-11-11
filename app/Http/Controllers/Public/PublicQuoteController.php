@@ -23,6 +23,7 @@ class PublicQuoteController extends Controller
     public function show(string $uuid): Response
     {
         $quote = Quote::withoutGlobalScopes()->whereNull('deleted_at')
+            ->whereHas('tenant')
             ->where('uuid', $uuid)
             ->with([
                 'center',
@@ -60,7 +61,9 @@ class PublicQuoteController extends Controller
                 'valid_until' => $quote->valid_until?->toDateString(),
                 'is_expired' => $quote->isExpired(),
                 'signature_url' => $quote->signature_url,
-                'can_be_actioned' => in_array($quote->status, [Quote::STATUS_DRAFT, Quote::STATUS_SENT]) && ! $quote->isExpired(),
+                'can_be_actioned' => in_array($quote->status, [Quote::STATUS_DRAFT, Quote::STATUS_SENT])
+                    && ! $quote->isExpired()
+                    && ($quote->lines->isNotEmpty() || $quote->parts->isNotEmpty() || (float) $quote->subtotal > 0 || (float) $quote->total > 0),
                 'center' => $quote->center ? [
                     'id' => $quote->center->id,
                     'name' => $quote->center->name,
@@ -96,8 +99,8 @@ class PublicQuoteController extends Controller
                 'vehicle' => $quote->vehicle ? [
                     'id' => $quote->vehicle->id,
                     'plate_number' => $quote->vehicle->plate_number,
-                    'make' => $quote->vehicle->make?->name,
-                    'model' => $quote->vehicle->model?->name,
+                    'make' => $quote->vehicle->display_make ?? $quote->vehicle->make?->name,
+                    'model' => $quote->vehicle->display_model ?? $quote->vehicle->model?->name,
                     'year' => $quote->vehicle->year,
                     'color' => $quote->vehicle->color,
                 ] : null,
@@ -138,6 +141,7 @@ class PublicQuoteController extends Controller
         return DB::transaction(function () use ($request, $uuid) {
 
             $quote = Quote::withoutGlobalScopes()->whereNull('deleted_at')->lockForUpdate()
+                ->whereHas('tenant')
                 ->where('uuid', $uuid)
                 ->firstOrFail();
 
@@ -147,6 +151,10 @@ class PublicQuoteController extends Controller
 
             if ($quote->isExpired()) {
                 return back()->with('error', __('quotes.public_expired'));
+            }
+
+            if ($this->isQuoteEmpty($quote)) {
+                return back()->with('error', __('quotes.empty_decision'));
             }
 
             $signaturePath = null;
@@ -204,6 +212,7 @@ class PublicQuoteController extends Controller
             ]);
 
             $quote = Quote::withoutGlobalScopes()->whereNull('deleted_at')->lockForUpdate()
+                ->whereHas('tenant')
                 ->where('uuid', $uuid)
                 ->firstOrFail();
 
@@ -213,6 +222,10 @@ class PublicQuoteController extends Controller
 
             if ($quote->isExpired()) {
                 return back()->with('error', __('quotes.public_expired'));
+            }
+
+            if ($this->isQuoteEmpty($quote)) {
+                return back()->with('error', __('quotes.empty_decision'));
             }
 
             $quote->update([
@@ -240,5 +253,13 @@ class PublicQuoteController extends Controller
             return redirect()->route('public.quotes.show', $quote->uuid)
                 ->with('success', __('quotes.public_rejected'));
         });
+    }
+
+    private function isQuoteEmpty(Quote $quote): bool
+    {
+        return (float) $quote->subtotal <= 0
+            && (float) $quote->total <= 0
+            && $quote->lines()->count() === 0
+            && $quote->parts()->count() === 0;
     }
 }

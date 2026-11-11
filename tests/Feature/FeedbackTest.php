@@ -198,8 +198,16 @@ class FeedbackTest extends TestCase
             'status' => 'pending',
         ]);
 
+        // The feedback list is part of the consolidated support hub:
+        // `/system/settings/feedbacks` redirects to
+        // `/system/support?tab=feedbacks` (routes/web.php:1399). The
+        // test therefore follows the redirect and asserts that the hub
+        // actually renders the feedbacks tab.
         $response = $this->actingAs($admin)->get('/system/settings/feedbacks');
-        $response->assertStatus(200);
+        $response->assertRedirect(route('system.support.index', ['tab' => 'feedbacks']));
+
+        $hub = $this->actingAs($admin)->get(route('system.support.index', ['tab' => 'feedbacks']));
+        $hub->assertStatus(200);
 
         // Admin replies
         $replyResponse = $this->actingAs($admin)->post("/system/settings/feedbacks/{$feedback->id}/reply", [

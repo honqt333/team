@@ -116,6 +116,14 @@ class PaymentSettings extends Model
     }
 
     /**
+     * Platform SaaS billing currency (independent of each tenant's operating currency).
+     */
+    public static function getPlatformCurrency(): string
+    {
+        return strtoupper((string) config('app.default_currency', 'SAR'));
+    }
+
+    /**
      * Get gateway config.
      */
     public function getGatewayConfig(string $gateway): ?array

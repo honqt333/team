@@ -13,12 +13,16 @@ use App\Models\Part;
 use App\Models\Payment;
 use App\Models\PurchaseInvoice;
 use App\Models\Supplier;
+use App\Models\Tenant;
+use App\Models\TenantTaxSetting;
 use App\Services\InvoiceService;
 use App\Services\PaymentService;
+use App\Support\CountryCurrencyRegistry;
 use Exception;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 
 /** @bypass-authorization-scanner - Protected at route middleware level (auth + center.context + EnsureTwoFactorEnabled) */
@@ -36,10 +40,32 @@ class CompanyTransactionController extends Controller
     {
         $this->authorize('create', CompanyTransaction::class);
 
-        if ($request->input('is_taxable') && ! $request->input('contact_id')) {
+        $transactionType = $request->input('transaction_type');
+        $contactType = $request->input('contact_type');
+        $contactId = $request->input('contact_id');
+
+        if ($request->boolean('is_taxable') && ! $contactId) {
             return redirect()->back()->withErrors([
                 'contact_id' => __('messages.company_transactions.contact_required_for_taxable'),
             ])->withInput();
+        }
+
+        if ($request->boolean('is_taxable') && $transactionType === 'expense') {
+            if ($contactType !== 'supplier' || ! $contactId) {
+                return redirect()->back()->withErrors([
+                    'contact_id' => __('messages.company_transactions.supplier_vat_required_for_taxable_expense'),
+                ])->withInput();
+            }
+
+            $supplier = Supplier::withoutGlobalScope('center_scoped')
+                ->where('tenant_id', $request->user()->tenant_id)
+                ->find($contactId);
+
+            if (! $supplier || empty(trim((string) $supplier->tax_number))) {
+                return redirect()->back()->withErrors([
+                    'contact_id' => __('messages.company_transactions.supplier_vat_required_for_taxable_expense'),
+                ])->withInput();
+            }
         }
 
         $validated = $request->validate([
@@ -48,15 +74,17 @@ class CompanyTransactionController extends Controller
             'transaction_type' => 'required|string|in:revenue,expense',
             'income_category_id' => ['required', Rule::exists('income_categories', 'id')->where('tenant_id', $request->user()->tenant_id)->whereNull('deleted_at')],
             'amount' => 'required|numeric|min:0',
-            'is_taxable' => 'boolean',
+            'gross_amount' => 'nullable|numeric|min:0',
+            'is_taxable' => 'nullable|boolean',
+            'is_vat_inclusive' => 'nullable|boolean',
             'tax_amount' => 'nullable|numeric|min:0',
-            // Derived server-side from amount + tax_amount; the value the
-            // client sends is ignored.
             'total_amount' => 'nullable|numeric|min:0',
             'contact_type' => 'nullable|required_with:contact_id|string|in:customer,supplier',
             'contact_id' => ['nullable', 'integer', Rule::exists($request->input('contact_type') === 'supplier' ? 'suppliers' : 'customers', 'id')->where('tenant_id', $request->user()->tenant_id)->whereNull('deleted_at')],
             'notes' => 'nullable|string',
             'center_id' => ['nullable', Rule::exists('centers', 'id')->where('tenant_id', $request->user()->tenant_id)->whereNull('deleted_at')],
+            'attachment' => 'nullable|file|mimes:jpg,jpeg,png,webp,pdf|max:5120',
+            'remove_attachment' => 'nullable|boolean',
         ]);
 
         $user = auth()->user();
@@ -65,13 +93,18 @@ class CompanyTransactionController extends Controller
         $validated['updated_by'] = $user->id;
         $validated['status'] = 'draft';
 
-        // The total is DERIVED, not taken from the request. The client
-        // used to send `total_amount` alongside `amount` and
-        // `tax_amount` without any consistency check, so a crafted
-        // request could store a total that matched neither — and
-        // approve() then issues the invoice and the payment with that
-        // figure.
-        $validated['total_amount'] = $this->computeTotal($validated);
+        $computed = $this->computeAmounts($request, (int) $user->tenant_id);
+        $validated['is_taxable'] = $computed['is_taxable'];
+        $validated['is_vat_inclusive'] = $computed['is_vat_inclusive'];
+        $validated['amount'] = $computed['amount'];
+        $validated['tax_amount'] = $computed['tax_amount'];
+        $validated['total_amount'] = $computed['total_amount'];
+
+        if ($request->hasFile('attachment')) {
+            $validated['attachment_path'] = $request->file('attachment')->store("company-transactions/{$user->tenant_id}", 'public');
+        }
+
+        unset($validated['gross_amount'], $validated['attachment'], $validated['remove_attachment']);
 
         CompanyTransaction::create($validated);
 
@@ -89,10 +122,32 @@ class CompanyTransactionController extends Controller
             return redirect()->back()->with('error', __('messages.company_transactions.cannot_edit_approved'));
         }
 
-        if ($request->input('is_taxable') && ! $request->input('contact_id')) {
+        $transactionType = $request->input('transaction_type');
+        $contactType = $request->input('contact_type');
+        $contactId = $request->input('contact_id');
+
+        if ($request->boolean('is_taxable') && ! $contactId) {
             return redirect()->back()->withErrors([
                 'contact_id' => __('messages.company_transactions.contact_required_for_taxable'),
             ])->withInput();
+        }
+
+        if ($request->boolean('is_taxable') && $transactionType === 'expense') {
+            if ($contactType !== 'supplier' || ! $contactId) {
+                return redirect()->back()->withErrors([
+                    'contact_id' => __('messages.company_transactions.supplier_vat_required_for_taxable_expense'),
+                ])->withInput();
+            }
+
+            $supplier = Supplier::withoutGlobalScope('center_scoped')
+                ->where('tenant_id', $request->user()->tenant_id)
+                ->find($contactId);
+
+            if (! $supplier || empty(trim((string) $supplier->tax_number))) {
+                return redirect()->back()->withErrors([
+                    'contact_id' => __('messages.company_transactions.supplier_vat_required_for_taxable_expense'),
+                ])->withInput();
+            }
         }
 
         $validated = $request->validate([
@@ -101,19 +156,41 @@ class CompanyTransactionController extends Controller
             'transaction_type' => 'required|string|in:revenue,expense',
             'income_category_id' => ['required', Rule::exists('income_categories', 'id')->where('tenant_id', $request->user()->tenant_id)->whereNull('deleted_at')],
             'amount' => 'required|numeric|min:0',
-            'is_taxable' => 'boolean',
+            'gross_amount' => 'nullable|numeric|min:0',
+            'is_taxable' => 'nullable|boolean',
+            'is_vat_inclusive' => 'nullable|boolean',
             'tax_amount' => 'nullable|numeric|min:0',
-            // Derived server-side from amount + tax_amount; the value the
-            // client sends is ignored.
             'total_amount' => 'nullable|numeric|min:0',
             'contact_type' => 'nullable|required_with:contact_id|string|in:customer,supplier',
             'contact_id' => ['nullable', 'integer', Rule::exists($request->input('contact_type') === 'supplier' ? 'suppliers' : 'customers', 'id')->where('tenant_id', $request->user()->tenant_id)->whereNull('deleted_at')],
             'notes' => 'nullable|string',
             'center_id' => ['nullable', Rule::exists('centers', 'id')->where('tenant_id', $request->user()->tenant_id)->whereNull('deleted_at')],
+            'attachment' => 'nullable|file|mimes:jpg,jpeg,png,webp,pdf|max:5120',
+            'remove_attachment' => 'nullable|boolean',
         ]);
 
         $validated['updated_by'] = auth()->id();
-        $validated['total_amount'] = $this->computeTotal($validated);
+
+        $computed = $this->computeAmounts($request, (int) $transaction->tenant_id);
+        $validated['is_taxable'] = $computed['is_taxable'];
+        $validated['is_vat_inclusive'] = $computed['is_vat_inclusive'];
+        $validated['amount'] = $computed['amount'];
+        $validated['tax_amount'] = $computed['tax_amount'];
+        $validated['total_amount'] = $computed['total_amount'];
+
+        if ($request->boolean('remove_attachment')) {
+            if ($transaction->attachment_path && Storage::disk('public')->exists($transaction->attachment_path)) {
+                Storage::disk('public')->delete($transaction->attachment_path);
+            }
+            $validated['attachment_path'] = null;
+        } elseif ($request->hasFile('attachment')) {
+            if ($transaction->attachment_path && Storage::disk('public')->exists($transaction->attachment_path)) {
+                Storage::disk('public')->delete($transaction->attachment_path);
+            }
+            $validated['attachment_path'] = $request->file('attachment')->store("company-transactions/{$request->user()->tenant_id}", 'public');
+        }
+
+        unset($validated['gross_amount'], $validated['attachment'], $validated['remove_attachment']);
 
         $transaction->update($validated);
 
@@ -139,7 +216,7 @@ class CompanyTransactionController extends Controller
     /**
      * Approve/Post the company transaction and generate invoice if taxable.
      */
-    public function approve(CompanyTransaction $transaction): RedirectResponse
+    public function approve(Request $request, CompanyTransaction $transaction): RedirectResponse
     {
         // Approving issues a real invoice and records a real payment.
         $this->authorize('approve', $transaction);
@@ -148,11 +225,32 @@ class CompanyTransactionController extends Controller
             return redirect()->back()->with('error', __('messages.company_transactions.already_approved'));
         }
 
+        $transactionDateStr = $transaction->transaction_date?->format('Y-m-d') ?? (string) $transaction->transaction_date;
+
+        $request->validate([
+            'approved_at' => [
+                'nullable',
+                'date',
+                'after_or_equal:'.$transactionDateStr,
+                'before_or_equal:today',
+            ],
+        ]);
+
+        $approvedAt = $request->filled('approved_at')
+            ? $request->date('approved_at')->format('Y-m-d')
+            : now()->toDateString();
+
+        $tenantId = (int) $transaction->tenant_id;
+
         try {
-            DB::transaction(function () use ($transaction) {
+            DB::transaction(function () use ($transaction, $tenantId, $approvedAt) {
                 $user = auth()->user();
 
                 if ($transaction->is_taxable) {
+                    $vatRate = (float) ($transaction->amount > 0 && $transaction->tax_amount > 0
+                        ? round(((float) $transaction->tax_amount / (float) $transaction->amount) * 100, 2)
+                        : (TenantTaxSetting::where('tenant_id', $tenantId)->value('vat_rate') ?? CountryCurrencyRegistry::defaultVatRate(Tenant::find($tenantId)?->country) ?? 15));
+
                     if ($transaction->transaction_type === 'revenue') {
                         // 1. Create Sales Invoice (Simplified type)
                         $customer = null;
@@ -197,9 +295,9 @@ class CompanyTransactionController extends Controller
                             'center_id' => $transaction->center_id,
                             'customer_id' => $customer?->id,
                             'invoice_number' => 'DRAFT-COMP-'.$transaction->id,
-                            'issue_date' => $transaction->transaction_date,
+                            'issue_date' => $approvedAt,
                             'supply_date' => $transaction->transaction_date,
-                            'due_date' => $transaction->transaction_date,
+                            'due_date' => $approvedAt,
                             'type' => 'invoice',
                             'subtype' => 'simplified',
                             'status' => 'draft',
@@ -210,10 +308,10 @@ class CompanyTransactionController extends Controller
                             'customer_vat_snapshot' => $customer?->tax_number,
                             'customer_address_snapshot' => $customerAddress,
 
-                            'tax_enabled_snapshot' => true,
+                            'tax_enabled_snapshot' => (float) $transaction->tax_amount > 0,
                             'pricing_mode_snapshot' => 'exclusive',
-                            'tax_rate_snapshot' => 15,
-                            'currency_code' => 'SAR',
+                            'tax_rate_snapshot' => $vatRate,
+                            'currency_code' => CountryCurrencyRegistry::tenantCurrency(Tenant::find($tenantId)),
 
                             'total_excl_tax' => $transaction->amount,
                             'total_tax' => $transaction->tax_amount,
@@ -232,7 +330,7 @@ class CompanyTransactionController extends Controller
                             'discount_amount' => 0,
                             'is_taxable' => true,
                             'tax_category_code' => 'S',
-                            'tax_rate_snapshot' => 15,
+                            'tax_rate_snapshot' => $vatRate,
                             'tax_amount' => $transaction->tax_amount,
                             'line_total_excl_tax' => $transaction->amount,
                             'line_total_incl_tax' => $transaction->total_amount,
@@ -297,8 +395,8 @@ class CompanyTransactionController extends Controller
                             'supplier_id' => $supplier?->id,
                             'invoice_number' => PurchaseInvoice::generateCode($transaction->tenant_id),
                             'code' => PurchaseInvoice::generateCode($transaction->tenant_id),
-                            'issue_date' => $transaction->transaction_date,
-                            'due_date' => $transaction->transaction_date,
+                            'issue_date' => $approvedAt,
+                            'due_date' => $approvedAt,
                             'status' => PurchaseInvoice::STATUS_OPEN,
                             'subtotal' => $transaction->amount,
                             'tax_amount' => $transaction->tax_amount,
@@ -313,7 +411,7 @@ class CompanyTransactionController extends Controller
                             'part_id' => $part->id,
                             'qty' => 1,
                             'unit_cost' => $transaction->amount,
-                            'tax_rate' => 15,
+                            'tax_rate' => $vatRate,
                             'tax_amount' => $transaction->tax_amount,
                             'total' => $transaction->total_amount,
                         ]);
@@ -334,6 +432,7 @@ class CompanyTransactionController extends Controller
 
                 $transaction->status = 'approved';
                 $transaction->approved_by = $user->id;
+                $transaction->approved_at = $approvedAt;
                 $transaction->save();
             });
 
@@ -344,18 +443,133 @@ class CompanyTransactionController extends Controller
     }
 
     /**
-     * The authoritative total for a company transaction.
-     *
-     * A transaction carries the net amount and the tax; the total is
-     * their sum. It is computed here so the stored figures cannot
-     * contradict each other, whatever the request body said.
+     * Upload an attachment directly to a draft transaction.
      */
-    private function computeTotal(array $validated): float
+    public function uploadAttachment(Request $request, CompanyTransaction $transaction): RedirectResponse
     {
-        $amount = (float) ($validated['amount'] ?? 0);
-        $tax = (float) ($validated['tax_amount'] ?? 0);
+        $this->authorize('update', $transaction);
 
-        return round($amount + $tax, 2);
+        if ($transaction->status !== 'draft') {
+            return redirect()->back()->with('error', __('messages.company_transactions.cannot_edit_approved'));
+        }
+
+        $request->validate([
+            'attachment' => 'required|file|mimes:jpg,jpeg,png,webp,pdf|max:5120',
+        ]);
+
+        if ($transaction->attachment_path && Storage::disk('public')->exists($transaction->attachment_path)) {
+            Storage::disk('public')->delete($transaction->attachment_path);
+        }
+
+        $path = $request->file('attachment')->store("company-transactions/{$request->user()->tenant_id}", 'public');
+        $transaction->update([
+            'attachment_path' => $path,
+            'updated_by' => auth()->id(),
+        ]);
+
+        return redirect()->back()->with('success', __('messages.company_transactions.attachment_uploaded'));
+    }
+
+    /**
+     * Delete an attachment from a draft transaction.
+     */
+    public function deleteAttachment(CompanyTransaction $transaction): RedirectResponse
+    {
+        $this->authorize('update', $transaction);
+
+        if ($transaction->status !== 'draft') {
+            return redirect()->back()->with('error', __('messages.company_transactions.cannot_edit_approved'));
+        }
+
+        if ($transaction->attachment_path && Storage::disk('public')->exists($transaction->attachment_path)) {
+            Storage::disk('public')->delete($transaction->attachment_path);
+        }
+
+        $transaction->update([
+            'attachment_path' => null,
+            'updated_by' => auth()->id(),
+        ]);
+
+        return redirect()->back()->with('success', __('messages.company_transactions.attachment_deleted'));
+    }
+
+    /**
+     * Compute authoritative net amount, tax amount, and total amount.
+     *
+     * Net (amount) represents the subtotal excluding tax.
+     * Tax amount represents VAT.
+     * Total amount represents the gross amount including tax.
+     */
+    private function computeAmounts(Request $request, int $tenantId): array
+    {
+        $rawAmount = (float) $request->input('amount', 0);
+        $grossInput = $request->filled('gross_amount') ? (float) $request->input('gross_amount') : null;
+        $rawTaxAmount = $request->filled('tax_amount') ? (float) $request->input('tax_amount') : null;
+        $rawTotalAmount = $request->filled('total_amount') ? (float) $request->input('total_amount') : null;
+
+        $hasExplicitTaxable = $request->has('is_taxable');
+        $isTaxable = $hasExplicitTaxable
+            ? $request->boolean('is_taxable')
+            : ($rawTaxAmount !== null && $rawTaxAmount > 0);
+
+        $isVatInclusive = $request->boolean('is_vat_inclusive');
+
+        if (! $isTaxable) {
+            $net = round($rawAmount, 2);
+
+            return [
+                'is_taxable' => false,
+                'is_vat_inclusive' => false,
+                'amount' => $net,
+                'tax_amount' => 0.00,
+                'total_amount' => $net,
+            ];
+        }
+
+        $vatRate = (float) (TenantTaxSetting::where('tenant_id', $tenantId)->value('vat_rate')
+            ?? CountryCurrencyRegistry::defaultVatRate(Tenant::find($tenantId)?->country)
+            ?? 15);
+
+        if ($isVatInclusive) {
+            // If frontend already provided pre-computed net and tax that cleanly add up to total
+            if ($rawTaxAmount !== null && $rawTotalAmount !== null && abs(($rawAmount + $rawTaxAmount) - $rawTotalAmount) < 0.05 && $rawTotalAmount > $rawAmount) {
+                $net = round($rawAmount, 2);
+                $tax = round($rawTaxAmount, 2);
+                $total = round($net + $tax, 2);
+            } else {
+                // The entered amount is inclusive of tax
+                $gross = $grossInput ?? $rawAmount;
+                $tax = round($gross - ($gross / (1 + ($vatRate / 100))), 2);
+                $net = round($gross - $tax, 2);
+                $total = round($gross, 2);
+            }
+
+            return [
+                'is_taxable' => true,
+                'is_vat_inclusive' => true,
+                'amount' => $net,
+                'tax_amount' => $tax,
+                'total_amount' => $total,
+            ];
+        }
+
+        // Exclusive
+        $net = round($rawAmount, 2);
+
+        if ($rawTaxAmount !== null) {
+            $tax = round($rawTaxAmount, 2);
+        } else {
+            $tax = round($net * ($vatRate / 100), 2);
+        }
+        $total = round($net + $tax, 2);
+
+        return [
+            'is_taxable' => true,
+            'is_vat_inclusive' => false,
+            'amount' => $net,
+            'tax_amount' => $tax,
+            'total_amount' => $total,
+        ];
     }
 
     /**
@@ -374,7 +588,7 @@ class CompanyTransactionController extends Controller
             $query->where('name', 'like', "%{$search}%")
                 ->orWhere('phone', 'like', "%{$search}%");
         })
-            ->select('id', 'name', 'phone')
+            ->select('id', 'name', 'phone', 'tax_number')
             ->limit(10)
             ->get()
             ->map(fn ($c) => [
@@ -382,6 +596,8 @@ class CompanyTransactionController extends Controller
                 'label' => "{$c->name} ({$c->phone}) - ".__('common.customer'),
                 'type' => 'customer',
                 'id' => $c->id,
+                'tax_number' => $c->tax_number,
+                'has_vat' => ! empty($c->tax_number),
             ]);
 
         // Same grouping fix as the customers above.
@@ -389,7 +605,7 @@ class CompanyTransactionController extends Controller
             $query->where('name', 'like', "%{$search}%")
                 ->orWhere('phone', 'like', "%{$search}%");
         })
-            ->select('id', 'name', 'phone')
+            ->select('id', 'name', 'phone', 'tax_number')
             ->limit(10)
             ->get()
             ->map(fn ($s) => [
@@ -397,6 +613,8 @@ class CompanyTransactionController extends Controller
                 'label' => "{$s->name} ({$s->phone}) - ".__('common.supplier'),
                 'type' => 'supplier',
                 'id' => $s->id,
+                'tax_number' => $s->tax_number,
+                'has_vat' => ! empty($s->tax_number),
             ]);
 
         return response()->json($customers->merge($suppliers));

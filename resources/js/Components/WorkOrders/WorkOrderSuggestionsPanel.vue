@@ -183,6 +183,7 @@
 <script setup>
 import { computed, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { useNumberFormat } from '@/Composables/useNumberFormat';
 import AppButton from '@/Components/App/AppButton.vue';
 import { useWorkOrderSuggestions } from '@/Composables/useWorkOrderSuggestions';
 
@@ -195,6 +196,7 @@ const props = defineProps({
 const emit = defineEmits(['add', 'error']);
 
 const { t } = useI18n();
+const { activeCurrencyCode, formatMoney } = useNumberFormat();
 
 const { suggestions, isLoading, error, meta, refresh } = useWorkOrderSuggestions({
     workOrder: () => props.workOrder,
@@ -216,16 +218,8 @@ watch(error, (msg) => {
 function formatPrice(suggestion) {
     const cents = Number(suggestion.estimated_unit_price_cents ?? 0);
     const amount = cents / 100;
-    const currency = suggestion.currency || 'SAR';
-    try {
-        return new Intl.NumberFormat(document.documentElement.lang || 'ar', {
-            style: 'currency',
-            currency,
-            maximumFractionDigits: 2,
-        }).format(amount);
-    } catch (_e) {
-        return `${amount.toFixed(2)} ${currency}`;
-    }
+    const currency = suggestion.currency || activeCurrencyCode.value;
+    return formatMoney(amount, currency);
 }
 
 // ─── Confidence pill ─────────────────────────────────────────────────

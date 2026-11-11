@@ -313,7 +313,7 @@
                                 class="w-full px-4 py-2.5 text-base border rounded-xl bg-gray-100 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 font-bold font-mono"
                                 dir="ltr"
                             >
-                                {{ formatPrice(balance) }} SAR
+                                {{ formatPrice(balance) }} {{ activeCurrencySymbol }}
                             </div>
                         </div>
 
@@ -407,6 +407,9 @@ import { router } from '@inertiajs/vue3';
 import PaymentFormModal from './PaymentFormModal.vue';
 import Modal from '@/Components/Modal.vue';
 import { useConfirm } from '@/Composables/useConfirm';
+import { useNumberFormat } from '@/Composables/useNumberFormat';
+
+const { activeCurrencySymbol } = useNumberFormat();
 
 const props = defineProps({
     workOrderId: { type: Number, required: true },

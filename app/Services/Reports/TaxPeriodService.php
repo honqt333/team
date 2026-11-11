@@ -11,6 +11,7 @@ use App\Models\PurchaseInvoice;
 use App\Models\PurchaseReturnInvoice;
 use App\Models\TaxPeriod;
 use App\Models\Tenant;
+use App\Support\CountryCurrencyRegistry;
 use Carbon\Carbon;
 use DomainException;
 use Illuminate\Database\Eloquent\Collection;
@@ -177,6 +178,8 @@ class TaxPeriodService
 
         $invoices = $invoicesQuery->get();
 
+        $defaultVatRate = CountryCurrencyRegistry::defaultVatRate(Tenant::find($tenantId)?->country);
+
         foreach ($invoices as $inv) {
             $type = $inv->type === InvoiceType::CREDIT_NOTE ? 'credit_note' : 'sales_invoice';
 
@@ -202,7 +205,7 @@ class TaxPeriodService
                 'is_income' => $isIncome,
                 'is_vat_inclusive' => true,
                 'subtotal' => $subtotal,
-                'vat_rate' => (float) ($inv->tax_rate_snapshot ?? 15.00),
+                'vat_rate' => (float) ($inv->tax_rate_snapshot ?? $defaultVatRate),
                 'vat_amount' => $vatAmount,
                 'total_amount' => $totalAmount,
                 'is_selected' => true,
@@ -245,7 +248,7 @@ class TaxPeriodService
                 'is_income' => false,
                 'is_vat_inclusive' => false,
                 'subtotal' => $subtotal,
-                'vat_rate' => 15.00,
+                'vat_rate' => $subtotal > 0 ? round(($vatAmount / $subtotal) * 100, 2) : $defaultVatRate,
                 'vat_amount' => $vatAmount,
                 'total_amount' => $totalAmount,
                 'is_selected' => true,
@@ -288,7 +291,7 @@ class TaxPeriodService
                 'is_income' => false,
                 'is_vat_inclusive' => false,
                 'subtotal' => $subtotal,
-                'vat_rate' => 15.00,
+                'vat_rate' => $subtotal > 0 ? round(($vatAmount / $subtotal) * 100, 2) : $defaultVatRate,
                 'vat_amount' => $vatAmount,
                 'total_amount' => $totalAmount,
                 'is_selected' => true,
@@ -335,7 +338,7 @@ class TaxPeriodService
                 'is_income' => $isIncome,
                 'is_vat_inclusive' => false,
                 'subtotal' => $subtotal,
-                'vat_rate' => 15.00,
+                'vat_rate' => $subtotal > 0 ? round(($vatAmount / $subtotal) * 100, 2) : $defaultVatRate,
                 'vat_amount' => $vatAmount,
                 'total_amount' => $totalAmount,
                 'is_selected' => true,

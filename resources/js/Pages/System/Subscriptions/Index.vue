@@ -95,7 +95,7 @@
                                 />
                             </svg>
                             <input
-                                v-model="search"
+                                v-model="tableFilters.search"
                                 type="text"
                                 :placeholder="$t('system.subscriptions.search_placeholder')"
                                 class="w-full px-4 py-2 pr-10 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-focus-ring focus:border-transparent"
@@ -104,20 +104,22 @@
                         </div>
                     </div>
                     <SearchableSelect
-                        v-model="statusFilter"
+                        v-model="tableFilters.status"
                         :options="statusFilterOptions"
                         option-label="label"
                         option-value="value"
                         :placeholder="$t('system.subscriptions.all_statuses')"
                         compact
+                        @update:model-value="applyFilters"
                     />
                     <SearchableSelect
-                        v-model="planFilter"
+                        v-model="tableFilters.plan_id"
                         :options="planFilterOptions"
                         option-label="label"
                         option-value="value"
                         :placeholder="$t('system.subscriptions.all_plans')"
                         compact
+                        @update:model-value="applyFilters"
                     />
                 </div>
             </div>
@@ -240,44 +242,19 @@
                 </div>
 
                 <!-- Empty State -->
-                <div v-if="!subscriptions.data?.length" class="px-6 py-16 text-center">
-                    <svg
-                        class="w-12 h-12 mx-auto text-gray-300 dark:text-gray-600"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                    >
-                        <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            stroke-width="1.5"
-                            d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
-                        />
-                    </svg>
-                    <p class="mt-4 text-sm font-medium text-gray-500 dark:text-gray-400">
-                        {{ $t('system.subscriptions.no_subscriptions') }}
-                    </p>
-                </div>
+                <AppEmptyState
+                    v-if="!subscriptions.data?.length"
+                    :title="$t('system.subscriptions.no_subscriptions')"
+                    class="rounded-none border-0"
+                />
 
                 <!-- Pagination -->
-                <div
-                    v-if="subscriptions.links?.length > 3"
-                    class="px-6 py-4 border-t border-gray-200 dark:border-gray-700 flex justify-center gap-2"
-                >
-                    <Link
-                        v-for="link in subscriptions.links"
-                        :key="link.label"
-                        :href="link.url || '#'"
-                        :class="[
-                            'px-3 py-1 rounded text-sm',
-                            link.active
-                                ? 'bg-action-primary text-white'
-                                : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700',
-                            !link.url && 'opacity-50 cursor-not-allowed',
-                        ]"
-                        v-safe-html="link.label"
-                    />
-                </div>
+                <AppPagination
+                    :links="subscriptions.links || []"
+                    :from="subscriptions.from"
+                    :to="subscriptions.to"
+                    :total="subscriptions.total"
+                />
             </div>
 
             <!-- Create Modal -->
@@ -588,11 +565,14 @@
 import DataTable from '@/Components/Common/DataTable.vue';
 import { ref, computed, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { Link, router, useForm } from '@inertiajs/vue3';
+import { Link, useForm } from '@inertiajs/vue3';
 import SystemLayout from '@/Layouts/SystemLayout.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 import PageHeader from '@/Components/PageHeader.vue';
+import AppEmptyState from '@/Components/Common/AppEmptyState.vue';
+import AppPagination from '@/Components/Common/AppPagination.vue';
 import { useNumberFormat } from '@/Composables/useNumberFormat';
+import { useServerTable } from '@/Composables/useServerTable';
 
 const { t } = useI18n();
 const { toEnglish } = useNumberFormat();
@@ -678,9 +658,14 @@ const statCards = computed(() => [
     },
 ]);
 
-const search = ref(props.filters?.search || '');
-const statusFilter = ref(props.filters?.status || 'all');
-const planFilter = ref(props.filters?.plan_id || '');
+const { filters: tableFilters, applyFilters } = useServerTable({
+    routeUrl: '/system/subscriptions',
+    initialFilters: {
+        search: props.filters?.search || '',
+        status: props.filters?.status || 'all',
+        plan_id: props.filters?.plan_id ? Number(props.filters.plan_id) : '',
+    },
+});
 
 // Modal Logic
 const showModal = ref(false);
@@ -763,18 +748,6 @@ const submit = () => {
     form.post('/system/subscriptions', {
         onSuccess: () => closeModal(),
     });
-};
-
-const applyFilters = () => {
-    router.get(
-        '/system/subscriptions',
-        {
-            search: search.value || undefined,
-            status: statusFilter.value !== 'all' ? statusFilter.value : undefined,
-            plan_id: planFilter.value || undefined,
-        },
-        { preserveState: true }
-    );
 };
 
 const formatDate = (date) => {

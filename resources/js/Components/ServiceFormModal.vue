@@ -496,7 +496,7 @@
                         <span
                             class="absolute end-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm font-medium"
                         >
-                            {{ $t('common.currency') }}
+                            {{ activeCurrencySymbol }}
                         </span>
                     </div>
                     <p v-if="form.errors.base_price" class="mt-1 text-xs text-red-600">
@@ -569,7 +569,7 @@
                             <span
                                 class="absolute end-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm"
                             >
-                                {{ $t('common.currency') }}
+                                {{ activeCurrencySymbol }}
                             </span>
                         </div>
                     </div>
@@ -596,7 +596,7 @@
                             }"
                         />
                         <span class="absolute end-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">
-                            {{ $t('common.currency') }}
+                            {{ activeCurrencySymbol }}
                         </span>
                     </div>
                     <p class="text-xs text-gray-400 dark:text-gray-500">
@@ -693,6 +693,7 @@
 import { ref, watch, computed, nextTick } from 'vue';
 import { useForm } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
+import { useNumberFormat } from '@/Composables/useNumberFormat';
 import BaseModal from '@/Components/BaseModal.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 import AppToggle from '@/Components/Common/AppToggle.vue';
@@ -710,6 +711,7 @@ const props = defineProps({
 
 const emit = defineEmits(['close', 'saved', 'open-new-definition']);
 const { t } = useI18n();
+const { activeCurrencySymbol } = useNumberFormat();
 const { scrollToError } = useFormScrollToError();
 
 // ─── Catalog filtering ────────────────────────────────────────────────────────
@@ -806,7 +808,7 @@ const minPriceValidationError = computed(() => {
     if (form.min_price > 0 && form.base_price > 0 && form.min_price > form.base_price)
         return t('pricing.errors.min_price_exceeds_base', {
             price: form.base_price,
-            currency: t('common.currency_sar'),
+            currency: activeCurrencySymbol.value,
         });
     return null;
 });

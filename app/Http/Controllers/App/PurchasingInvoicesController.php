@@ -20,6 +20,7 @@ use App\Models\VehicleModel;
 use App\Models\Warehouse;
 use App\Services\Inventory\InventoryService;
 use App\Services\InvoiceService;
+use App\Support\CountryCurrencyRegistry;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
@@ -202,9 +203,11 @@ class PurchasingInvoicesController extends Controller
 
             // Get tax settings for snapshots
             $taxSetting = TenantTaxSetting::where('tenant_id', $tenantId)->first();
+            $tenant = auth()->user()?->tenant;
             $taxEnabled = $taxSetting?->vat_enabled ?? true;
             $partsInclusive = $taxSetting?->parts_inclusive ?? false;
-            $taxRate = (float) ($taxSetting?->parts_vat_rate ?? $taxSetting?->vat_rate ?? 15);
+            $taxRate = (float) ($taxSetting?->parts_vat_rate ?? $taxSetting?->vat_rate ?? CountryCurrencyRegistry::defaultVatRate($tenant?->country));
+            $currencyCode = $taxSetting?->currency_code ?: CountryCurrencyRegistry::tenantCurrency($tenant);
             $pricingMode = $partsInclusive ? 'inclusive' : 'exclusive';
 
             // Calculate totals
@@ -255,6 +258,7 @@ class PurchasingInvoicesController extends Controller
                 'tax_enabled_snapshot' => $taxEnabled,
                 'pricing_mode_snapshot' => $pricingMode,
                 'tax_rate_snapshot' => $taxRate,
+                'currency_code' => $currencyCode,
 
                 // Totals
                 'total_excl_tax' => $totalExclTax,

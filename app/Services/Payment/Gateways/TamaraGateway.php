@@ -6,6 +6,7 @@ namespace App\Services\Payment\Gateways;
 
 use App\Models\PaymentSettings;
 use App\Services\Payment\Contracts\PaymentGatewayInterface;
+use App\Support\CountryCurrencyRegistry;
 use Exception;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -50,6 +51,11 @@ class TamaraGateway implements PaymentGatewayInterface
     public function initiate(array $data): array
     {
         try {
+            $currency = (string) ($data['currency'] ?? PaymentSettings::getPlatformCurrency());
+            $countryCode = strtoupper((string) ($data['country_code'] ?? CountryCurrencyRegistry::DEFAULT_COUNTRY));
+            $phoneFallback = (string) (CountryCurrencyRegistry::countryMeta($countryCode)['phone_example'] ?? '+966500000000');
+            $cityFallback = (string) ($data['city'] ?? ($countryCode === 'SA' ? 'Riyadh' : 'Dubai'));
+
             $response = Http::withHeaders([
                 'Authorization' => 'Bearer '.$this->config['api_token'],
                 'Content-Type' => 'application/json',
@@ -57,13 +63,13 @@ class TamaraGateway implements PaymentGatewayInterface
                 'order_reference_id' => $data['reference'] ?? uniqid('sub_'),
                 'total_amount' => [
                     'amount' => $data['amount'],
-                    'currency' => $data['currency'] ?? 'SAR',
+                    'currency' => $currency,
                 ],
                 'description' => $data['description'] ?? 'Subscription Payment',
-                'country_code' => 'SA',
+                'country_code' => $countryCode,
                 'payment_type' => 'PAY_BY_INSTALMENTS',
                 'instalments' => 3, // Tamara typically offers 3 installments
-                'locale' => 'ar_SA',
+                'locale' => $data['locale'] ?? 'ar_SA',
                 'items' => [
                     [
                         'reference_id' => $data['reference'] ?? uniqid('item_'),
@@ -72,29 +78,29 @@ class TamaraGateway implements PaymentGatewayInterface
                         'quantity' => 1,
                         'total_amount' => [
                             'amount' => $data['amount'],
-                            'currency' => $data['currency'] ?? 'SAR',
+                            'currency' => $currency,
                         ],
                     ],
                 ],
                 'consumer' => [
                     'first_name' => $data['customer_name'] ?? 'Customer',
                     'last_name' => '',
-                    'phone_number' => $data['customer_phone'] ?? '+966500000000',
+                    'phone_number' => $data['customer_phone'] ?? $phoneFallback,
                     'email' => $data['customer_email'] ?? 'customer@example.com',
                 ],
                 'billing_address' => [
                     'first_name' => $data['customer_name'] ?? 'Customer',
                     'last_name' => '',
-                    'phone_number' => $data['customer_phone'] ?? '+966500000000',
-                    'city' => 'Riyadh',
-                    'country_code' => 'SA',
+                    'phone_number' => $data['customer_phone'] ?? $phoneFallback,
+                    'city' => $cityFallback,
+                    'country_code' => $countryCode,
                 ],
                 'shipping_address' => [
                     'first_name' => $data['customer_name'] ?? 'Customer',
                     'last_name' => '',
-                    'phone_number' => $data['customer_phone'] ?? '+966500000000',
-                    'city' => 'Riyadh',
-                    'country_code' => 'SA',
+                    'phone_number' => $data['customer_phone'] ?? $phoneFallback,
+                    'city' => $cityFallback,
+                    'country_code' => $countryCode,
                 ],
                 'merchant_url' => [
                     'success' => $data['callback_url'] ?? url(config('payment.callback_url')),

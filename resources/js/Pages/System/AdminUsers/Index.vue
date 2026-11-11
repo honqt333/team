@@ -81,7 +81,7 @@
                         />
                     </svg>
                     <input
-                        v-model="search"
+                        v-model="tableFilters.search"
                         type="text"
                         :placeholder="$t('system.admin_users.search_placeholder')"
                         @keyup.enter="applyFilters"
@@ -89,12 +89,13 @@
                     />
                 </div>
                 <SearchableSelect
-                    v-model="role"
+                    v-model="tableFilters.role"
                     :options="roleOptions"
                     option-label="label"
                     option-value="value"
                     :placeholder="$t('system.admin_users.all_roles')"
                     compact
+                    @update:model-value="applyFilters"
                 />
             </div>
 
@@ -243,6 +244,12 @@
                         </tr>
                     </tbody>
                 </DataTable>
+                <AppPagination
+                    :links="admins.links || []"
+                    :from="admins.from"
+                    :to="admins.to"
+                    :total="admins.total"
+                />
             </div>
         </div>
 
@@ -474,6 +481,7 @@
 
 <script setup>
 import DataTable from '@/Components/Common/DataTable.vue';
+import AppPagination from '@/Components/Common/AppPagination.vue';
 import SelectableCard from '@/Components/Common/SelectableCard.vue';
 import AppToggle from '@/Components/Common/AppToggle.vue';
 import { ref, computed } from 'vue';
@@ -483,6 +491,8 @@ import SystemLayout from '@/Layouts/SystemLayout.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 import PageHeader from '@/Components/PageHeader.vue';
 import { useNumberFormat } from '@/Composables/useNumberFormat';
+import { useConfirm } from '@/Composables/useConfirm';
+import { useServerTable } from '@/Composables/useServerTable';
 
 const { t } = useI18n();
 const { toEnglish } = useNumberFormat();
@@ -530,8 +540,14 @@ const props = defineProps({
 const page = usePage();
 const isSuperAdmin = computed(() => !!page.props.auth?.is_super_admin);
 
-const search = ref(props.filters?.search || '');
-const role = ref(props.filters?.role || '');
+const { confirm } = useConfirm();
+const { filters: tableFilters, applyFilters } = useServerTable({
+    routeUrl: '/system/admin-users',
+    initialFilters: {
+        search: props.filters?.search || '',
+        role: props.filters?.role || '',
+    },
+});
 const showModal = ref(false);
 const editingAdmin = ref(null);
 
@@ -582,17 +598,6 @@ const submitForm = () => {
     }
 };
 
-const applyFilters = () => {
-    router.get(
-        '/system/admin-users',
-        {
-            search: search.value || undefined,
-            role: role.value || undefined,
-        },
-        { preserveState: true }
-    );
-};
-
 const formatDate = (date) => {
     if (!date) return t('common.na');
     return new Date(date).toLocaleString('ar-SA-u-nu-latn');
@@ -612,8 +617,15 @@ const getRoleClass = (role) =>
         support: 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300',
     })[role] || 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300';
 
-const deleteAdmin = (admin) => {
-    if (confirm(t('system.admin_users.confirm_delete', { name: admin.name }))) {
+const deleteAdmin = async (admin) => {
+    const ok = await confirm({
+        title: t('system.actions.delete'),
+        message: t('system.admin_users.confirm_delete', { name: admin.name }),
+        confirmText: t('system.actions.delete'),
+        cancelText: t('common.cancel'),
+        type: 'danger',
+    });
+    if (ok) {
         router.delete(`/system/admin-users/${admin.id}`);
     }
 };

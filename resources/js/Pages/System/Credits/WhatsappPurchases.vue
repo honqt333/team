@@ -145,7 +145,7 @@
                 <div class="flex flex-wrap gap-4">
                     <div class="flex-1 min-w-[200px]">
                         <input
-                            v-model="search"
+                            v-model="tableFilters.search"
                             type="text"
                             :placeholder="$t('system.credits.search_purchases')"
                             class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
@@ -153,12 +153,13 @@
                         />
                     </div>
                     <SearchableSelect
-                        v-model="status"
+                        v-model="tableFilters.status"
                         :options="statusOptions"
                         option-label="label"
                         option-value="value"
                         :placeholder="$t('system.common.all')"
                         compact
+                        @update:model-value="applyFilters"
                     />
                 </div>
             </div>
@@ -265,40 +266,12 @@
                 </div>
 
                 <!-- Pagination -->
-                <div
-                    v-if="purchases.links"
-                    class="px-4 py-3 border-t border-gray-200 dark:border-gray-700 flex items-center justify-between"
-                >
-                    <p class="text-sm text-gray-500 dark:text-gray-400">
-                        {{
-                            $t('pagination.showing_range', {
-                                from: purchases.from || 0,
-                                to: purchases.to || 0,
-                                total: purchases.total || 0,
-                            })
-                        }}
-                    </p>
-                    <div class="flex gap-1">
-                        <template v-for="link in purchases.links" :key="link.label">
-                            <a
-                                v-if="link.url"
-                                :href="link.url"
-                                :class="[
-                                    'px-3 py-1 rounded text-sm',
-                                    link.active
-                                        ? 'bg-emerald-600 text-white'
-                                        : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200',
-                                ]"
-                                v-html="link.label"
-                            />
-                            <span
-                                v-else
-                                class="px-3 py-1 rounded text-sm bg-gray-50 dark:bg-gray-800 text-gray-400"
-                                v-html="link.label"
-                            />
-                        </template>
-                    </div>
-                </div>
+                <AppPagination
+                    :links="purchases.links || []"
+                    :from="purchases.from"
+                    :to="purchases.to"
+                    :total="purchases.total"
+                />
             </div>
         </div>
     </SystemLayout>
@@ -306,13 +279,14 @@
 
 <script setup>
 import DataTable from '@/Components/Common/DataTable.vue';
-import { ref, watch } from 'vue';
+import AppPagination from '@/Components/Common/AppPagination.vue';
 import { useI18n } from 'vue-i18n';
-import { Head, Link, router } from '@inertiajs/vue3';
+import { Head, Link } from '@inertiajs/vue3';
 import SystemLayout from '@/Layouts/SystemLayout.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 import PageHeader from '@/Components/PageHeader.vue';
 import { useNumberFormat } from '@/Composables/useNumberFormat';
+import { useServerTable } from '@/Composables/useServerTable';
 
 const { toEnglish } = useNumberFormat();
 
@@ -332,27 +306,13 @@ const props = defineProps({
     filters: Object,
 });
 
-const search = ref(props.filters?.search || '');
-const status = ref(props.filters?.status || 'all');
-
-// Auto-apply filters when status changes; debounce search
-let searchTimeout = null;
-watch(search, () => {
-    clearTimeout(searchTimeout);
-    searchTimeout = setTimeout(applyFilters, 400);
+const { filters: tableFilters, applyFilters } = useServerTable({
+    routeUrl: '/system/whatsapp/purchases',
+    initialFilters: {
+        search: props.filters?.search || '',
+        status: props.filters?.status || 'all',
+    },
 });
-watch(status, () => applyFilters());
-
-const applyFilters = () => {
-    router.get(
-        '/system/whatsapp/purchases',
-        {
-            search: search.value || undefined,
-            status: status.value !== 'all' ? status.value : undefined,
-        },
-        { preserveState: true }
-    );
-};
 
 const formatCurrency = (amount) =>
     new Intl.NumberFormat('ar-SA-u-nu-latn', {

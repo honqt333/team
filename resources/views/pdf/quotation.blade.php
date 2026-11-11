@@ -343,6 +343,12 @@
                         <th style="width: 15%">المجموع</th>
                     </tr>
                 </thead>
+                @php
+                    $currencyCode = $quote->currency_code ?? \App\Support\CountryCurrencyRegistry::tenantCurrency($quote->tenant);
+                    $currencyDecimals = \App\Support\CountryCurrencyRegistry::decimalsFor($currencyCode);
+                    $visualSettings = $quote->tenant?->print_settings['visual'] ?? [];
+                    $currencySuffixHtml = \App\Support\CountryCurrencyRegistry::renderCurrencyHtml($currencyCode, $visualSettings, 'ar');
+                @endphp
                 <tbody>
                     @foreach ($lines as $line)
                         <tr>
@@ -352,11 +358,11 @@
                                     <br><span style="color: #666; font-size: 10px;">{{ $line->description }}</span>
                                 @endif
                             </td>
-                            <td>{{ number_format($line->unit_price, 2) }} ر.س</td>
+                            <td>{{ number_format($line->unit_price, $currencyDecimals) }} {!! $currencySuffixHtml !!}</td>
                             <td>{{ $line->qty ?? 1 }}</td>
-                            <td>{{ number_format($line->discount ?? 0, 2) }} ر.س</td>
-                            <td>{{ number_format($line->tax_amount ?? 0, 2) }} ر.س</td>
-                            <td>{{ number_format($line->line_total_incl_tax ?? ($line->unit_price * ($line->qty ?? 1) - ($line->discount ?? 0)), 2) }} ر.س</td>
+                            <td>{{ number_format($line->discount ?? 0, $currencyDecimals) }} {!! $currencySuffixHtml !!}</td>
+                            <td>{{ number_format($line->tax_amount ?? 0, $currencyDecimals) }} {!! $currencySuffixHtml !!}</td>
+                            <td>{{ number_format($line->line_total_incl_tax ?? ($line->unit_price * ($line->qty ?? 1) - ($line->discount ?? 0)), $currencyDecimals) }} {!! $currencySuffixHtml !!}</td>
                         </tr>
                     @endforeach
                 </tbody>
@@ -366,6 +372,12 @@
 
     <!-- Parts -->
     @if ($parts && $parts->count() > 0)
+        @php
+            $currencyCode ??= $quote->currency_code ?? \App\Support\CountryCurrencyRegistry::tenantCurrency($quote->tenant);
+            $currencyDecimals ??= \App\Support\CountryCurrencyRegistry::decimalsFor($currencyCode);
+            $visualSettings ??= $quote->tenant?->print_settings['visual'] ?? [];
+            $currencySuffixHtml ??= \App\Support\CountryCurrencyRegistry::renderCurrencyHtml($currencyCode, $visualSettings, 'ar');
+        @endphp
         <div class="details-section">
             <div class="section-title">قطع الغيار</div>
             <table class="items">
@@ -388,11 +400,11 @@
                                     <br><span style="color: #666; font-size: 10px;">{{ $part->description }}</span>
                                 @endif
                             </td>
-                            <td>{{ number_format($part->unit_price, 2) }} ر.س</td>
+                            <td>{{ number_format($part->unit_price, $currencyDecimals) }} {!! $currencySuffixHtml !!}</td>
                             <td>{{ $part->qty ?? 1 }}</td>
-                            <td>{{ number_format($part->discount ?? 0, 2) }} ر.س</td>
-                            <td>{{ number_format($part->tax_amount ?? 0, 2) }} ر.س</td>
-                            <td>{{ number_format($part->line_total_incl_tax ?? ($part->unit_price * ($part->qty ?? 1) - ($part->discount ?? 0)), 2) }} ر.س</td>
+                            <td>{{ number_format($part->discount ?? 0, $currencyDecimals) }} {!! $currencySuffixHtml !!}</td>
+                            <td>{{ number_format($part->tax_amount ?? 0, $currencyDecimals) }} {!! $currencySuffixHtml !!}</td>
+                            <td>{{ number_format($part->line_total_incl_tax ?? ($part->unit_price * ($part->qty ?? 1) - ($part->discount ?? 0)), $currencyDecimals) }} {!! $currencySuffixHtml !!}</td>
                         </tr>
                     @endforeach
                 </tbody>
@@ -400,25 +412,31 @@
         </div>
     @endif
 
+    @php
+        $currencyCode ??= $quote->currency_code ?? \App\Support\CountryCurrencyRegistry::tenantCurrency($quote->tenant);
+        $currencyDecimals ??= \App\Support\CountryCurrencyRegistry::decimalsFor($currencyCode);
+        $visualSettings ??= $quote->tenant?->print_settings['visual'] ?? [];
+        $currencySuffixHtml ??= \App\Support\CountryCurrencyRegistry::renderCurrencyHtml($currencyCode, $visualSettings, 'ar');
+    @endphp
     <!-- Totals -->
     <div class="totals">
         <div class="totals-row">
             <span class="totals-label">المجموع الفرعي&nbsp;&nbsp;&nbsp;</span>
-            <span class="totals-value">{{ number_format($quote->subtotal ?? 0, 2) }} ر.س</span>
+            <span class="totals-value">{{ number_format($quote->subtotal ?? 0, $currencyDecimals) }} {!! $currencySuffixHtml !!}</span>
         </div>
         @if ($quote->discount > 0)
             <div class="totals-row">
                 <span class="totals-label">الخصم&nbsp;&nbsp;&nbsp;</span>
-                <span class="totals-value" style="color: #16a34a;">- {{ number_format($quote->discount, 2) }} ر.س</span>
+                <span class="totals-value" style="color: #16a34a;">- {{ number_format($quote->discount, $currencyDecimals) }} {!! $currencySuffixHtml !!}</span>
             </div>
         @endif
         <div class="totals-row">
             <span class="totals-label">ضريبة القيمة المضافة&nbsp;&nbsp;&nbsp;</span>
-            <span class="totals-value">{{ number_format($quote->vat ?? 0, 2) }} ر.س</span>
+            <span class="totals-value">{{ number_format($quote->vat ?? 0, $currencyDecimals) }} {!! $currencySuffixHtml !!}</span>
         </div>
         <div class="totals-row total">
             <span class="totals-label">الإجمالي&nbsp;&nbsp;&nbsp;</span>
-            <span class="totals-value">{{ number_format($quote->total ?? 0, 2) }} ر.س</span>
+            <span class="totals-value">{{ number_format($quote->total ?? 0, $currencyDecimals) }} {!! $currencySuffixHtml !!}</span>
         </div>
     </div>
 

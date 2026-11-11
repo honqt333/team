@@ -515,6 +515,33 @@ class CustomerPortalOtpTest extends TestCase
         $this->assertNotNull($result->customer);
     }
 
+    public function test_issued_code_cannot_follow_a_number_to_another_customer(): void
+    {
+        $tenant = $this->publishedTenant();
+        $original = $this->customerIn($tenant);
+        $code = $this->captureCode(fn () => $this->makeService()->requestOtp($tenant, '0501234567'));
+
+        $original->update(['phone' => '+966501234568', 'whatsapp' => null]);
+        $this->customerIn($tenant);
+
+        $result = $this->makeService()->verify($tenant, '0501234567', $code);
+        $this->assertFalse($result->success);
+        $this->assertNull($result->customer);
+    }
+
+    public function test_shared_phone_and_whatsapp_prevent_verification_and_new_issuance(): void
+    {
+        $tenant = $this->publishedTenant();
+        $this->customerIn($tenant);
+        $code = $this->captureCode(fn () => $this->makeService()->requestOtp($tenant, '0501234567'));
+        $other = $this->customerIn($tenant, '+966501234568');
+        $other->update(['whatsapp' => '0501234567']);
+
+        $this->assertFalse($this->makeService()->verify($tenant, '0501234567', $code)->success);
+        $this->assertSame(OtpRequestResult::NO_CUSTOMER, $this->makeService()->requestOtp($tenant, '0501234567')->outcome);
+        $this->assertDatabaseCount('customer_portal_otps', 1);
+    }
+
     public function test_verify_rejects_wrong_code(): void
     {
         $tenant = $this->publishedTenant();
@@ -637,6 +664,26 @@ class CustomerPortalOtpTest extends TestCase
 
         $this->assertFalse($result->success);
         $this->assertSame(OtpVerificationResult::REASON_MALFORMED, $result->reason);
+    }
+
+    public function test_request_and_verify_otp_for_customer_with_whatsapp_only(): void
+    {
+        $tenant = $this->publishedTenant();
+        $customer = Customer::factory()->create([
+            'tenant_id' => $tenant->id,
+            'phone' => '',
+            'whatsapp' => '+966507778899',
+        ]);
+
+        $code = $this->captureCode(function () use ($tenant) {
+            $req = $this->makeService()->requestOtp($tenant, '0507778899');
+            $this->assertTrue($req->isIssued());
+        });
+
+        $verify = $this->makeService()->verify($tenant, '0507778899', $code);
+
+        $this->assertTrue($verify->success);
+        $this->assertSame($customer->id, $verify->customer?->id);
     }
 
     // ─────────────────────────────────────────────────────────────────

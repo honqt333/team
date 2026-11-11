@@ -754,36 +754,13 @@
                 </div>
 
                 <!-- Pagination Footer -->
-                <div
-                    v-if="payments.links && payments.links.length > 3"
-                    class="px-4 py-3 border-t border-gray-100 dark:border-gray-800 flex items-center justify-between text-xs print:hidden"
-                >
-                    <span class="text-gray-500">
-                        {{ $t('reports.payments_report.showing') }}
-                        <span class="font-mono">{{ payments.from || 0 }}</span>
-                        {{ $t('reports.payments_report.to') }}
-                        <span class="font-mono">{{ payments.to || 0 }}</span>
-                        {{ $t('reports.payments_report.of') }}
-                        <span class="font-mono font-bold">{{ payments.total }}</span>
-                        {{ $t('reports.payments_report.transaction') }}
-                    </span>
-                    <div class="flex items-center gap-1">
-                        <component
-                            :is="link.url ? 'a' : 'span'"
-                            v-for="(link, idx) in payments.links"
-                            :key="idx"
-                            :href="link.url"
-                            v-html="link.label"
-                            :class="[
-                                'px-3 py-1.5 rounded-xl transition-all text-xs font-mono font-bold',
-                                link.active
-                                    ? 'bg-action-primary hover:bg-action-primary-hover text-white shadow-sm'
-                                    : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-750',
-                                !link.url ? 'opacity-40 cursor-not-allowed' : '',
-                            ]"
-                        />
-                    </div>
-                </div>
+                <AppPagination
+                    class="print:hidden"
+                    :links="payments.links || []"
+                    :from="payments.from"
+                    :to="payments.to"
+                    :total="payments.total"
+                />
             </div>
 
             <!-- AUDIT_STANDARDS.md Section 5: Standard Print Footer -->
@@ -794,6 +771,7 @@
 
 <script setup>
 import DataTable from '@/Components/Common/DataTable.vue';
+import AppPagination from '@/Components/Common/AppPagination.vue';
 import PrintEngine from '@/Components/Print/PrintEngine.vue';
 import AppPrintButton from '@/Components/Common/AppPrintButton.vue';
 import { printDocument } from '@/Composables/usePrint';

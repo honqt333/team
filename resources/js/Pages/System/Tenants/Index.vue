@@ -52,18 +52,18 @@
                                 />
                             </svg>
                             <input
-                                v-model="search"
+                                v-model="tableFilters.search"
                                 type="text"
                                 :placeholder="$t('system.tenants.search_placeholder')"
                                 class="w-full px-4 py-2.5 pr-10 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-focus-ring focus:border-transparent transition-colors"
-                                @input="debouncedSearch"
+                                @keyup.enter="applyFilters"
                             />
                         </div>
                     </div>
 
                     <!-- Status Filter -->
                     <SearchableSelect
-                        v-model="statusFilter"
+                        v-model="tableFilters.status"
                         :options="statusOptions"
                         option-label="label"
                         option-value="value"
@@ -74,7 +74,7 @@
 
                     <!-- Plan Filter -->
                     <SearchableSelect
-                        v-model="planFilter"
+                        v-model="tableFilters.plan_id"
                         :options="planOptions"
                         option-label="label"
                         option-value="value"
@@ -294,56 +294,19 @@
                 </div>
 
                 <!-- Empty State -->
-                <div v-if="!tenants.data?.length" class="px-6 py-16 text-center">
-                    <svg
-                        class="w-12 h-12 mx-auto text-gray-300 dark:text-gray-600"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                    >
-                        <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            stroke-width="1.5"
-                            d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
-                        />
-                    </svg>
-                    <p class="mt-4 text-sm font-medium text-gray-500 dark:text-gray-400">
-                        {{ $t('system.tenants.no_tenants') }}
-                    </p>
-                </div>
+                <AppEmptyState
+                    v-if="!tenants.data?.length"
+                    :title="$t('system.tenants.no_tenants')"
+                    class="rounded-none border-0"
+                />
 
                 <!-- Pagination -->
-                <div
-                    v-if="tenants.data?.length"
-                    class="px-6 py-4 border-t border-gray-200 dark:border-gray-700 flex items-center justify-between"
-                >
-                    <p class="text-sm text-gray-500 dark:text-gray-400">
-                        {{
-                            $t('pagination.showing_range', {
-                                from: tenants.from,
-                                to: tenants.to,
-                                total: tenants.total,
-                            })
-                        }}
-                    </p>
-                    <div class="flex gap-2">
-                        <Link
-                            v-if="tenants.prev_page_url"
-                            :href="tenants.prev_page_url"
-                            class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600"
-                        >
-                            {{ $t('pagination.previous') }}
-                        </Link>
-                        <Link
-                            v-if="tenants.next_page_url"
-                            :href="tenants.next_page_url"
-                            class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600"
-                        >
-                            {{ $t('pagination.next') }}
-                        </Link>
-                    </div>
-                </div>
+                <AppPagination
+                    :links="tenants.links || []"
+                    :from="tenants.from"
+                    :to="tenants.to"
+                    :total="tenants.total"
+                />
             </div>
         </div>
     </SystemLayout>
@@ -351,12 +314,15 @@
 
 <script setup>
 import DataTable from '@/Components/Common/DataTable.vue';
-import { ref, computed } from 'vue';
+import AppEmptyState from '@/Components/Common/AppEmptyState.vue';
+import AppPagination from '@/Components/Common/AppPagination.vue';
+import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { Link, router } from '@inertiajs/vue3';
+import { Link } from '@inertiajs/vue3';
 import SystemLayout from '@/Layouts/SystemLayout.vue';
 import PageHeader from '@/Components/PageHeader.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
+import { useServerTable } from '@/Composables/useServerTable';
 
 const { t } = useI18n();
 
@@ -366,9 +332,14 @@ const props = defineProps({
     plans: { type: Array, default: () => [] },
 });
 
-const search = ref(props.filters?.search || '');
-const statusFilter = ref(props.filters?.status || '');
-const planFilter = ref(props.filters?.plan_id ? Number(props.filters.plan_id) : '');
+const { filters: tableFilters, applyFilters } = useServerTable({
+    routeUrl: '/system/tenants',
+    initialFilters: {
+        search: props.filters?.search || '',
+        status: props.filters?.status || '',
+        plan_id: props.filters?.plan_id ? Number(props.filters.plan_id) : '',
+    },
+});
 
 const statusOptions = computed(() => [
     { value: '', label: t('system.tenants.all_statuses') },
@@ -384,30 +355,6 @@ const planOptions = computed(() => [
         label: p.name_ar || p.name_en,
     })),
 ]);
-
-let searchTimeout = null;
-
-const debouncedSearch = () => {
-    clearTimeout(searchTimeout);
-    searchTimeout = setTimeout(() => {
-        applyFilters();
-    }, 300);
-};
-
-const applyFilters = () => {
-    router.get(
-        '/system/tenants',
-        {
-            search: search.value || undefined,
-            status: statusFilter.value || undefined,
-            plan_id: planFilter.value || undefined,
-        },
-        {
-            preserveState: true,
-            preserveScroll: true,
-        }
-    );
-};
 
 const formatDate = (date) => {
     if (!date) return t('common.na');

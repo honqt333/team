@@ -15,6 +15,7 @@ use App\Models\PurchaseInvoice;
 use App\Models\Supplier;
 use App\Models\Warehouse;
 use App\Services\PaymentService;
+use App\Support\CountryCurrencyRegistry;
 use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -390,9 +391,15 @@ class SuppliersController extends Controller
         }
 
         if ($amount > $supplierBalance + 0.009) {
+            $currencyLabel = CountryCurrencyRegistry::currencyLabel(
+                CountryCurrencyRegistry::tenantCurrency(auth()->user()?->tenant),
+                app()->getLocale()
+            );
+
             return back()->with('error', __('payments.errors.amount_exceeds_supplier_balance', [
                 'balance' => number_format($supplierBalance, 2),
-            ]) ?? ('المبلغ المدخل يتجاوز إجمالي الرصيد المستحق للمورد ('.number_format($supplierBalance, 2).' ر.س)'));
+                'currency' => $currencyLabel,
+            ]) ?? ('المبلغ المدخل يتجاوز إجمالي الرصيد المستحق للمورد ('.number_format($supplierBalance, 2).' '.$currencyLabel.')'));
         }
 
         $openInvoices = $supplier->purchaseInvoices()

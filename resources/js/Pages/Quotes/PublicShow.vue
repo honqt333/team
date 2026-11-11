@@ -516,6 +516,7 @@ import { useI18n } from 'vue-i18n';
 import { router, usePage } from '@inertiajs/vue3';
 import PrintEngine from '@/Components/Print/PrintEngine.vue';
 import SignaturePad from '@/Components/Common/SignaturePad.vue';
+import { useNumberFormat } from '@/Composables/useNumberFormat';
 
 const props = defineProps({
     quote: Object,
@@ -523,6 +524,7 @@ const props = defineProps({
 
 const page = usePage();
 const { t } = useI18n();
+const { formatMoney } = useNumberFormat();
 
 const showRejectModal = ref(false);
 const showApproveModal = ref(false);
@@ -533,13 +535,7 @@ const submitting = ref(false);
 const printPage = () => printDocument();
 
 function formatCurrency(val) {
-    const num = Number(val) || 0;
-    return (
-        new Intl.NumberFormat('en-US', {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2,
-        }).format(num) + ' SAR'
-    );
+    return formatMoney(val, props.quote?.currency_code);
 }
 
 // Center display name (Arabic first, then English)
@@ -677,7 +673,7 @@ const mappedCenterData = computed(() => {
 });
 
 function localeName(center, tenant) {
-    const isAr = page.props?.locale === 'ar' || true;
+    const isAr = (page.props?.locale || 'ar') === 'ar';
     if (isAr) {
         return center.name_ar || center.name || tenant.name;
     }

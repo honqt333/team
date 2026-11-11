@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Requests\App\Print;
 
+use App\Support\PrintDocumentRegistry;
 use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
@@ -227,20 +228,7 @@ class UploadSignatureRequest extends FormRequest
                 'nullable',
                 'string',
                 'max:50',
-                Rule::in([
-                    'invoice',
-                    'parts_invoice',
-                    'quote',
-                    'payments',
-                    'receipt_voucher',
-                    'payment_voucher',
-                    'bad_debts',
-                    'work_order',
-                    'condition_report',
-                    'return_invoice',
-                    'proforma_invoice',
-                    'purchase_invoice',
-                ]),
+                Rule::in(PrintDocumentRegistry::allowedSignatureDocumentTypes()),
             ],
         ];
     }

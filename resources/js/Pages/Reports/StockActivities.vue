@@ -960,36 +960,13 @@
                 </div>
 
                 <!-- Pagination (Screen Only) -->
-                <div
-                    v-if="moves?.links && moves.links.length > 3"
-                    class="px-4 py-3 border-t border-gray-100 dark:border-gray-800 flex items-center justify-between text-xs print:hidden"
-                >
-                    <span class="text-gray-500">
-                        عرض
-                        <span class="font-mono">{{ moves.from || 0 }}</span>
-                        إلى
-                        <span class="font-mono">{{ moves.to || 0 }}</span>
-                        من إجمالي
-                        <span class="font-mono font-bold">{{ moves.total }}</span>
-                        حركة
-                    </span>
-                    <div class="flex items-center gap-1">
-                        <component
-                            :is="link.url ? 'a' : 'span'"
-                            v-for="(link, lIdx) in moves.links"
-                            :key="lIdx"
-                            :href="link.url"
-                            v-html="link.label"
-                            :class="[
-                                'px-3 py-1.5 rounded-xl transition-all text-xs font-mono font-bold',
-                                link.active
-                                    ? 'bg-gradient-to-r from-amber-600 to-orange-600 text-white shadow-sm'
-                                    : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-750',
-                                !link.url ? 'opacity-40 cursor-not-allowed' : '',
-                            ]"
-                        />
-                    </div>
-                </div>
+                <AppPagination
+                    class="print:hidden"
+                    :links="moves?.links || []"
+                    :from="moves?.from"
+                    :to="moves?.to"
+                    :total="moves?.total"
+                />
             </div>
 
             <!-- Standard Official Print Footer -->
@@ -1003,8 +980,10 @@
 <script setup>
 import PrintEngine from '@/Components/Print/PrintEngine.vue';
 import DataTable from '@/Components/Common/DataTable.vue';
+import AppPagination from '@/Components/Common/AppPagination.vue';
 import AppPrintButton from '@/Components/Common/AppPrintButton.vue';
 import { printDocument } from '@/Composables/usePrint';
+import { useNumberFormat } from '@/Composables/useNumberFormat';
 import { ref, reactive, computed, watch } from 'vue';
 import { router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
@@ -1319,10 +1298,7 @@ const getMoveBadgeClasses = (type) => {
 };
 
 // Formatter Helpers
-const formatMoney = (val) => {
-    const num = Number(val || 0);
-    return `${num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ر.س`;
-};
+const { formatMoney } = useNumberFormat();
 
 const formatNumber = (val) => {
     const num = Number(val || 0);

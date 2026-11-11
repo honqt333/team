@@ -9,6 +9,7 @@ use App\Models\Customer;
 use App\Models\Department;
 use App\Models\Invoice;
 use App\Models\Payment;
+use App\Models\PurchaseInvoice;
 use App\Models\Quote;
 use App\Models\Tenant;
 use App\Models\Vehicle;
@@ -107,6 +108,11 @@ trait HasWorkOrderRelations
     public function parts(): HasMany
     {
         return $this->hasMany(WorkOrderItemPart::class);
+    }
+
+    public function purchaseInvoices(): HasMany
+    {
+        return $this->hasMany(PurchaseInvoice::class, 'work_order_id');
     }
 
     public function attachments(): HasMany

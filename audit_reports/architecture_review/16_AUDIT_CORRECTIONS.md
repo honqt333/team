@@ -67,7 +67,32 @@ value: 9.0
 | **Real issue** | A **deprecation notice**, and PHPStan cannot see the alias (it has no `@method` annotation for it), which is why the static analyser flags it. |
 | **Not a real issue** | Fatal error. Crash. Request failure. Data loss. |
 | **Correct severity** | **منخفض** — cosmetic / tooling. Not a runtime defect. |
-| **Correct fix** | `floatDiffInDays($to)` → `diffInDays($to, true)` — silences the notice **and** the PHPStan error, with identical numeric behaviour. |
+| **Correct fix** | `floatDiffInDays($to)` → `diffInDays($to)` — silences the notice **and** the PHPStan error. |
+
+### The fix that was applied (2026-11-11)
+
+Three call sites were changed:
+
+- `app/Models/Billing/Subscription.php:126,130`
+- `app/Services/Billing/SubscriptionLifecycleService.php:584`
+
+> **A trap worth recording:** the alias is **signed**. Carbon's
+> `diffInDays($to, true)` returns the **absolute** difference, so
+> `floatDiffInDays($to)` maps to `diffInDays($to)` — **not** to
+> `diffInDays($to, true)`. The first attempt used the absolute form and
+> changed the result for a negative interval (`-1.0` → `1.0`). The
+> behaviour was verified identical on six intervals, including the
+> negative and the fractional one, before the change was kept.
+
+```php
+// before
+return (int) ceil($from->floatDiffInDays($to));
+// after
+return (int) ceil($from->diffInDays($to));
+```
+
+`vendor/bin/phpstan analyse app/Models/Billing/Subscription.php app/Services/Billing/SubscriptionLifecycleService.php`
+⇒ **No errors** (was 3).
 
 ### Why the original claim was wrong
 

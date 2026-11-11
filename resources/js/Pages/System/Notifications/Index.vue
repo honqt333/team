@@ -95,21 +95,12 @@
             </div>
 
             <!-- Pagination -->
-            <div v-if="notifications.links" class="flex items-center justify-center gap-2">
-                <template v-for="link in notifications.links" :key="link.label">
-                    <a
-                        v-if="link.url"
-                        :href="link.url"
-                        class="rounded-md border border-gray-300 bg-white px-3 py-1.5 text-xs font-semibold text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200"
-                        v-html="link.label"
-                    />
-                    <span
-                        v-else
-                        class="rounded-md border border-gray-200 bg-gray-50 px-3 py-1.5 text-xs text-gray-400 dark:border-gray-700 dark:bg-gray-900"
-                        v-html="link.label"
-                    />
-                </template>
-            </div>
+            <AppPagination
+                :links="notifications.links || []"
+                :from="notifications.from"
+                :to="notifications.to"
+                :total="notifications.total"
+            />
         </div>
     </SystemLayout>
 </template>
@@ -122,6 +113,7 @@ import { computed, ref } from 'vue';
 import { Head, router } from '@inertiajs/vue3';
 import SystemLayout from '@/Layouts/SystemLayout.vue';
 import PageHeader from '@/Components/PageHeader.vue';
+import AppPagination from '@/Components/Common/AppPagination.vue';
 import { useNumberFormat } from '@/Composables/useNumberFormat';
 
 const { toEnglish } = useNumberFormat();

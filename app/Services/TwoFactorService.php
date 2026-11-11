@@ -13,6 +13,7 @@ use App\Models\Setting;
 use App\Models\User;
 use App\Services\Email\SmtpConfigService;
 use App\Services\Sms\AuthenticaService;
+use App\Support\PhoneNumber;
 use BaconQrCode\Renderer\Image\SvgImageBackEnd;
 use BaconQrCode\Renderer\ImageRenderer;
 use BaconQrCode\Renderer\RendererStyle\RendererStyle;
@@ -160,23 +161,9 @@ class TwoFactorService
         $service->sendOtp($formattedPhone);
     }
 
-    protected function formatPhoneNumber(string $phone): string
+    protected function formatPhoneNumber(string $phone, ?string $defaultCountry = null): string
     {
-        $phone = preg_replace('/[\s\-]/', '', $phone);
-
-        if (str_starts_with($phone, '0')) {
-            return '+966'.substr($phone, 1);
-        }
-
-        if (str_starts_with($phone, '5')) {
-            return '+966'.$phone;
-        }
-
-        if (! str_starts_with($phone, '+')) {
-            return '+966'.$phone;
-        }
-
-        return $phone;
+        return PhoneNumber::normalize($phone, $defaultCountry) ?? $phone;
     }
 
     /**

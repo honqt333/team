@@ -325,6 +325,163 @@
                     </p>
                 </div>
 
+                <!-- Row 3b: Vehicle Compatibilities -->
+                <div
+                    class="border border-gray-200 dark:border-gray-700 rounded-2xl p-4 bg-gray-50/40 dark:bg-gray-900/20 space-y-3"
+                >
+                    <div class="flex items-center justify-between gap-2">
+                        <h3
+                            class="text-sm font-bold text-gray-900 dark:text-white flex items-center gap-2"
+                        >
+                            <svg
+                                class="w-4 h-4 text-action-primary"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z"
+                                />
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0"
+                                />
+                            </svg>
+                            {{ $t('inventory.parts.compatibility.title') }}
+                        </h3>
+                        <button
+                            type="button"
+                            @click="addCompatibilityRow"
+                            class="px-3 py-1.5 bg-action-primary hover:bg-action-primary-hover text-white text-xs font-semibold rounded-lg flex items-center gap-1 transition-colors cursor-pointer"
+                        >
+                            <svg
+                                class="w-3.5 h-3.5"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2.5"
+                                    d="M12 4v16m8-8H4"
+                                />
+                            </svg>
+                            {{ $t('inventory.parts.compatibility.add_vehicle') }}
+                        </button>
+                    </div>
+
+                    <div v-if="form.compatibilities.length > 0" class="space-y-2.5">
+                        <div
+                            v-for="(compat, idx) in form.compatibilities"
+                            :key="idx"
+                            class="grid grid-cols-1 md:grid-cols-12 gap-2 items-end bg-white dark:bg-gray-800 p-3 rounded-xl border border-gray-200 dark:border-gray-700"
+                        >
+                            <div class="md:col-span-4">
+                                <label
+                                    class="block text-[11px] font-semibold text-gray-600 dark:text-gray-400 mb-1"
+                                >
+                                    {{ $t('inventory.parts.compatibility.make') }}
+                                    <span class="text-red-500">*</span>
+                                </label>
+                                <SearchableSelect
+                                    v-model="compat.vehicle_make_id"
+                                    :options="makeOptions"
+                                    option-label="label"
+                                    option-value="value"
+                                    :placeholder="$t('inventory.parts.compatibility.make')"
+                                    @update:modelValue="compat.vehicle_model_id = null"
+                                    compact
+                                />
+                            </div>
+
+                            <div class="md:col-span-4">
+                                <label
+                                    class="block text-[11px] font-semibold text-gray-600 dark:text-gray-400 mb-1"
+                                >
+                                    {{ $t('inventory.parts.compatibility.model') }}
+                                </label>
+                                <SearchableSelect
+                                    v-model="compat.vehicle_model_id"
+                                    :options="getModelOptionsForMake(compat.vehicle_make_id)"
+                                    option-label="label"
+                                    option-value="value"
+                                    :placeholder="$t('inventory.parts.compatibility.all_models')"
+                                    :disabled="!compat.vehicle_make_id"
+                                    compact
+                                />
+                            </div>
+
+                            <div class="md:col-span-2">
+                                <label
+                                    class="block text-[11px] font-semibold text-gray-600 dark:text-gray-400 mb-1"
+                                >
+                                    {{ $t('inventory.parts.compatibility.year_from') }}
+                                </label>
+                                <input
+                                    v-model="compat.year_from"
+                                    type="number"
+                                    min="1950"
+                                    max="2100"
+                                    dir="ltr"
+                                    lang="en"
+                                    placeholder="2015"
+                                    class="w-full px-2.5 py-2 text-xs rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white font-mono focus:ring-2 focus:ring-focus-ring"
+                                />
+                            </div>
+
+                            <div class="md:col-span-1">
+                                <label
+                                    class="block text-[11px] font-semibold text-gray-600 dark:text-gray-400 mb-1"
+                                >
+                                    {{ $t('inventory.parts.compatibility.year_to') }}
+                                </label>
+                                <input
+                                    v-model="compat.year_to"
+                                    type="number"
+                                    min="1950"
+                                    max="2100"
+                                    dir="ltr"
+                                    lang="en"
+                                    placeholder="2026"
+                                    class="w-full px-2 py-2 text-xs rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white font-mono focus:ring-2 focus:ring-focus-ring"
+                                />
+                            </div>
+
+                            <div class="md:col-span-1 flex justify-end">
+                                <button
+                                    type="button"
+                                    @click="removeCompatibilityRow(idx)"
+                                    class="p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors cursor-pointer"
+                                    :title="$t('common.delete')"
+                                >
+                                    <svg
+                                        class="w-4 h-4"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                                        />
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <p v-else class="text-xs text-gray-500 dark:text-gray-400 text-center py-2">
+                        {{ $t('inventory.parts.compatibility.empty') }}
+                    </p>
+                </div>
+
                 <!-- Row 4: Description -->
                 <div>
                     <label
@@ -642,6 +799,14 @@ const props = defineProps({
         type: Array,
         default: () => [],
     },
+    vehicleMakes: {
+        type: Array,
+        default: () => [],
+    },
+    vehicleModels: {
+        type: Array,
+        default: () => [],
+    },
 });
 
 const emit = defineEmits(['close']);
@@ -704,6 +869,39 @@ const categoryOptions = computed(() => {
     }));
 });
 
+const makeOptions = computed(() => {
+    return (props.vehicleMakes || []).map((make) => ({
+        value: make.id,
+        label: isAr.value ? make.name_ar || make.name_en : make.name_en || make.name_ar,
+    }));
+});
+
+const getModelOptionsForMake = (makeId) => {
+    const allOption = { value: null, label: t('inventory.parts.compatibility.all_models') };
+    if (!makeId) return [allOption];
+    const models = (props.vehicleModels || [])
+        .filter((m) => Number(m.make_id) === Number(makeId))
+        .map((m) => ({
+            value: m.id,
+            label: isAr.value ? m.name_ar || m.name_en : m.name_en || m.name_ar,
+        }));
+    return [allOption, ...models];
+};
+
+const addCompatibilityRow = () => {
+    form.compatibilities.push({
+        vehicle_make_id: '',
+        vehicle_model_id: null,
+        year_from: '',
+        year_to: '',
+        notes: '',
+    });
+};
+
+const removeCompatibilityRow = (index) => {
+    form.compatibilities.splice(index, 1);
+};
+
 const isDirty = ref(false);
 const initialFormData = ref(null);
 const isConfirming = ref(false);
@@ -727,10 +925,24 @@ const form = useForm({
     image: null,
     remove_image: false,
     warehouse_data: [],
+    compatibilities: [],
     _method: 'POST',
 });
 
 // Must be declared before the watch below (const arrow functions are NOT hoisted)
+const getInitialCompatibilities = () => {
+    if (props.part?.compatibilities && props.part.compatibilities.length > 0) {
+        return props.part.compatibilities.map((c) => ({
+            vehicle_make_id: c.vehicle_make_id,
+            vehicle_model_id: c.vehicle_model_id ?? null,
+            year_from: c.year_from || '',
+            year_to: c.year_to || '',
+            notes: c.notes || '',
+        }));
+    }
+    return [];
+};
+
 const getInitialWarehouseData = () => {
     if (props.part?.inventory_balances && props.part.inventory_balances.length > 0) {
         return props.part.inventory_balances.map((balance) => ({
@@ -770,6 +982,7 @@ watch(
             form.image = null;
             form.remove_image = false;
             form.warehouse_data = getInitialWarehouseData();
+            form.compatibilities = getInitialCompatibilities();
             imagePreview.value = part.image_url;
         } else {
             form.reset();
@@ -781,6 +994,7 @@ watch(
             form.image = null;
             form.remove_image = false;
             form.warehouse_data = getInitialWarehouseData();
+            form.compatibilities = [];
             imagePreview.value = null;
         }
     },
@@ -937,10 +1151,13 @@ async function handleClose() {
 }
 
 const submit = () => {
+    const cleanCompatibilities = (form.compatibilities || []).filter((c) => c.vehicle_make_id);
     // For file uploads, we use POST with _method spoofing if it's an update
     if (form.id) {
         form.transform((data) => ({
             ...data,
+            compatibilities: cleanCompatibilities,
+            sync_compatibilities: 1,
             purchase_conversion_factor: data.purchase_conversion_factor
                 ? Number(data.purchase_conversion_factor)
                 : 1,
@@ -953,6 +1170,7 @@ const submit = () => {
     } else {
         form.transform((data) => ({
             ...data,
+            compatibilities: cleanCompatibilities,
             purchase_conversion_factor: data.purchase_conversion_factor
                 ? Number(data.purchase_conversion_factor)
                 : 1,

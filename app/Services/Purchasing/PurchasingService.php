@@ -519,6 +519,7 @@ class PurchasingService
             if ($invoice) {
                 $invoice->update([
                     'notes' => $data['notes'] ?? null,
+                    'work_order_id' => $data['work_order_id'] ?? null,
                 ]);
             }
 

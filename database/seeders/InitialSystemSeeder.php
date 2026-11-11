@@ -10,6 +10,7 @@ use App\Models\User;
 use App\Services\TenantSetupService;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
+use LogicException;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\PermissionRegistrar;
 
@@ -23,6 +24,43 @@ class InitialSystemSeeder extends Seeder
     public function run(): void
     {
         $this->call(PermissionsSeeder::class);
+        $this->seedDefaultIdentity();
+
+        $this->call([
+            MetadataSeeder::class,
+            ServiceSeeder::class,
+            VehicleConditionSeeder::class,
+            VehicleMakeLogoSeeder::class,
+            CommunicationTemplateSeeder::class,
+        ]);
+
+        $this->command->info(__('messages.setup.complete'));
+        $this->command->info('📧 Email: admin@khidmh.pro');
+        $this->command->info('🔑 Password: [As requested]');
+    }
+
+    private function seedDefaultIdentity(): void
+    {
+        $existingAdmin = User::where('email', 'admin@khidmh.pro')->first();
+
+        if ($existingAdmin && $existingAdmin->tenant?->slug !== 'khidmh') {
+            // The established local workspace predates the standalone bootstrap tenant.
+            // Never attach its administrator to a newly created tenant or promote a
+            // different account solely because its email matches the bootstrap email.
+            if (app()->environment('local', 'testing')
+                && $existingAdmin->tenant?->slug === 'active-workshop'
+                && $existingAdmin->centers()
+                    ->wherePivot('tenant_id', $existingAdmin->tenant_id)
+                    ->where('centers.tenant_id', $existingAdmin->tenant_id)
+                    ->where('centers.slug', 'active-main-branch')
+                    ->where('centers.is_main', true)
+                    ->where('centers.is_active', true)
+                    ->exists()) {
+                return;
+            }
+
+            throw new LogicException('Default account ownership does not match the bootstrap tenant.');
+        }
 
         // 1. Create Main Tenant
         $tenant = Tenant::firstOrCreate(
@@ -39,7 +77,7 @@ class InitialSystemSeeder extends Seeder
         // even when other tenants already have a "main" slug.
         $centerSlug = "main-{$tenant->id}";
         $center = Center::firstOrCreate(
-            ['slug' => $centerSlug],
+            ['slug' => $centerSlug, 'tenant_id' => $tenant->id],
             [
                 'tenant_id' => $tenant->id,
                 'name' => __('messages.setup.main_center'),
@@ -86,17 +124,5 @@ class InitialSystemSeeder extends Seeder
                 $user->assignRole($superAdminRole);
             }
         }
-
-        $this->call([
-            MetadataSeeder::class,
-            ServiceSeeder::class,
-            VehicleConditionSeeder::class,
-            VehicleMakeLogoSeeder::class,
-            CommunicationTemplateSeeder::class,
-        ]);
-
-        $this->command->info(__('messages.setup.complete'));
-        $this->command->info('📧 Email: admin@khidmh.pro');
-        $this->command->info('🔑 Password: [As requested]');
     }
 }

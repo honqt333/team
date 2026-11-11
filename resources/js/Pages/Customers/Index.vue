@@ -821,12 +821,7 @@ function exportCustomers() {
 }
 
 // Formatting Helpers
-const formatCurrency = (amount) =>
-    new Intl.NumberFormat('en-GB', {
-        style: 'currency',
-        currency: 'SAR',
-        numberingSystem: 'latn',
-    }).format(amount || 0);
+const { formatMoney: formatCurrency } = useNumberFormat();
 
 function getWhatsAppNumber(customer) {
     if (!customer) return null;

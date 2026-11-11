@@ -9,6 +9,9 @@ use App\Models\InventoryBalance;
 use App\Models\InventoryCategory;
 use App\Models\InventoryUnit;
 use App\Models\Part;
+use App\Models\PartVehicleCompatibility;
+use App\Models\VehicleMake;
+use App\Models\VehicleModel;
 use App\Models\Warehouse;
 use App\Services\Inventory\InventoryService;
 use Illuminate\Http\Request;
@@ -33,7 +36,42 @@ class PartsController extends Controller
             ->when($request->input('status') === 'active', fn ($q) => $q->active())
             ->when($request->input('status') === 'inactive', fn ($q) => $q->where('is_active', false))
             ->when($request->input('category'), fn ($q, $catId) => $q->where('category_id', $catId))
-            ->with(['unit', 'category', 'inventoryBalances.warehouse.center'])
+            ->when(
+                $request->filled('vehicle_make_id') || $request->filled('vehicle_model_id') || $request->filled('manufacture_year'),
+                function ($q) use ($request) {
+                    $makeId = $request->input('vehicle_make_id');
+                    $modelId = $request->input('vehicle_model_id');
+                    $year = $request->filled('manufacture_year') ? (int) $request->input('manufacture_year') : null;
+
+                    $q->whereHas('compatibilities', function ($cq) use ($makeId, $modelId, $year) {
+                        if ($makeId) {
+                            $cq->where('vehicle_make_id', $makeId);
+                        }
+
+                        if ($modelId) {
+                            $cq->where(function ($mq) use ($modelId) {
+                                $mq->where('vehicle_model_id', $modelId)
+                                    ->orWhereNull('vehicle_model_id');
+                            });
+                        }
+
+                        if ($year) {
+                            $cq->where(function ($yq) use ($year) {
+                                $yq->whereNull('year_from')->orWhere('year_from', '<=', $year);
+                            })->where(function ($yq) use ($year) {
+                                $yq->whereNull('year_to')->orWhere('year_to', '>=', $year);
+                            });
+                        }
+                    });
+                }
+            )
+            ->with([
+                'unit',
+                'category',
+                'inventoryBalances.warehouse.center',
+                'compatibilities.make:id,name_ar,name_en,logo_path',
+                'compatibilities.model:id,make_id,name_ar,name_en',
+            ])
             ->withSum('inventoryBalances', 'qty_on_hand');
 
         $sortableColumns = [
@@ -78,7 +116,9 @@ class PartsController extends Controller
             'categories' => $categories,
             'units' => $units,
             'warehouses' => $warehouses,
-            'filters' => $request->only(['search', 'status', 'category', 'sort', 'direction']),
+            'vehicleMakes' => VehicleMake::where('is_active', true)->orderBy('sort_order')->orderBy('name_ar')->get(['id', 'name_ar', 'name_en', 'logo_path']),
+            'vehicleModels' => VehicleModel::where('is_active', true)->orderBy('sort_order')->orderBy('name_ar')->get(['id', 'make_id', 'name_ar', 'name_en']),
+            'filters' => $request->only(['search', 'status', 'category', 'vehicle_make_id', 'vehicle_model_id', 'manufacture_year', 'sort', 'direction']),
         ]);
     }
 
@@ -88,20 +128,19 @@ class PartsController extends Controller
         abort(404);
     }
 
-    public function store(Request $request)
+    /**
+     * Shared validation rules for storing and updating a spare part.
+     */
+    protected function partValidationRules(int $tenantId, ?int $ignorePartId = null): array
     {
-        $this->authorize('create', Part::class);
+        $skuUniqueRule = Rule::unique('parts')->where('tenant_id', $tenantId);
 
-        $tenantId = auth()->user()->tenant_id;
-        $userId = auth()->id();
+        if ($ignorePartId !== null) {
+            $skuUniqueRule->ignore($ignorePartId);
+        }
 
-        $validated = $request->validate([
-            'sku' => [
-                'required',
-                'string',
-                'max:50',
-                Rule::unique('parts')->where('tenant_id', $tenantId),
-            ],
+        return [
+            'sku' => ['required', 'string', 'max:50', $skuUniqueRule],
             'barcode' => 'nullable|string|max:50',
             'name_ar' => 'required|string|max:255',
             'name_en' => 'required|string|max:255',
@@ -125,7 +164,24 @@ class PartsController extends Controller
             'warehouse_data.*.storage_location' => 'nullable|string|max:50',
             'warehouse_data.*.allow_price_change' => 'nullable|boolean',
             'warehouse_data.*.is_active' => 'nullable|boolean',
-        ]);
+            'sync_compatibilities' => 'nullable|boolean',
+            'compatibilities' => 'nullable|array',
+            'compatibilities.*.vehicle_make_id' => 'required_with:compatibilities|exists:vehicle_makes,id',
+            'compatibilities.*.vehicle_model_id' => 'nullable|exists:vehicle_models,id',
+            'compatibilities.*.year_from' => 'nullable|integer|min:1950|max:2100',
+            'compatibilities.*.year_to' => 'nullable|integer|min:1950|max:2100',
+            'compatibilities.*.notes' => 'nullable|string|max:255',
+        ];
+    }
+
+    public function store(Request $request)
+    {
+        $this->authorize('create', Part::class);
+
+        $tenantId = auth()->user()->tenant_id;
+        $userId = auth()->id();
+
+        $validated = $request->validate($this->partValidationRules($tenantId));
 
         if ($request->hasFile('image')) {
             $validated['image_path'] = $request->file('image')->store('parts', 'public');
@@ -133,9 +189,10 @@ class PartsController extends Controller
 
         $validated['tenant_id'] = $tenantId;
 
-        // Extract warehouse_data before creating the part (not a DB column)
+        // Extract nested arrays before creating the part (not DB columns)
         $warehouseData = $validated['warehouse_data'] ?? [];
-        unset($validated['warehouse_data']);
+        $compatibilities = $validated['compatibilities'] ?? [];
+        unset($validated['warehouse_data'], $validated['compatibilities'], $validated['sync_compatibilities']);
 
         if (empty($validated['purchase_conversion_factor']) || (float) $validated['purchase_conversion_factor'] <= 0) {
             $validated['purchase_conversion_factor'] = 1.0;
@@ -144,9 +201,13 @@ class PartsController extends Controller
         // Create part
         $part = Part::create($validated);
 
-        // Handle warehouse stock entries
+        // Handle warehouse stock entries & vehicle compatibilities
         if (! empty($warehouseData)) {
             $this->syncWarehouseBalances($part, $warehouseData, $userId);
+        }
+
+        if (! empty($compatibilities)) {
+            $this->syncVehicleCompatibilities($part, $compatibilities, $tenantId);
         }
 
         return redirect()->route('app.inventory.parts.index')
@@ -163,39 +224,10 @@ class PartsController extends Controller
     {
         $this->authorize('update', $part);
 
+        $tenantId = auth()->user()->tenant_id;
         $userId = auth()->id();
 
-        $validated = $request->validate([
-            'sku' => [
-                'required',
-                'string',
-                'max:50',
-                Rule::unique('parts')->where('tenant_id', auth()->user()->tenant_id)->ignore($part->id),
-            ],
-            'barcode' => 'nullable|string|max:50',
-            'name_ar' => 'required|string|max:255',
-            'name_en' => 'required|string|max:255',
-            'unit_id' => 'required|exists:inventory_units,id',
-            'purchase_unit_id' => 'nullable|exists:inventory_units,id',
-            'purchase_conversion_factor' => 'nullable|numeric|min:0.0001',
-            'category_id' => 'nullable|exists:inventory_categories,id',
-            'description' => 'nullable|string|max:1000',
-            'image' => 'nullable|image|max:2048',
-            'default_sale_price' => 'nullable|numeric|min:0',
-            'min_sale_price' => 'nullable|numeric|min:0',
-            'min_qty' => 'nullable|numeric|min:0',
-            'reorder_qty' => 'nullable|numeric|min:0',
-            'warehouse_data' => 'nullable|array',
-            'warehouse_data.*.warehouse_id' => 'required_with:warehouse_data|exists:warehouses,id',
-            'warehouse_data.*.cost_price' => 'nullable|numeric|min:0',
-            'warehouse_data.*.sale_price' => 'nullable|numeric|min:0',
-            'warehouse_data.*.min_sale_price' => 'nullable|numeric|min:0',
-            'warehouse_data.*.initial_stock' => 'nullable|numeric|min:0',
-            'warehouse_data.*.min_stock' => 'nullable|numeric|min:0',
-            'warehouse_data.*.storage_location' => 'nullable|string|max:50',
-            'warehouse_data.*.allow_price_change' => 'nullable|boolean',
-            'warehouse_data.*.is_active' => 'nullable|boolean',
-        ]);
+        $validated = $request->validate($this->partValidationRules($tenantId, $part->id));
 
         if ($request->hasFile('image')) {
             if ($part->image_path) {
@@ -209,13 +241,17 @@ class PartsController extends Controller
             $validated['image_path'] = null;
         }
 
-        // Extract warehouse_data before updating the part (not a DB column)
+        // Extract nested arrays before updating the part (not DB columns)
         $warehouseData = null;
 
         if (array_key_exists('warehouse_data', $validated)) {
             $warehouseData = $validated['warehouse_data'] ?? [];
             unset($validated['warehouse_data']);
         }
+
+        $shouldSyncCompat = array_key_exists('compatibilities', $validated) || $request->boolean('sync_compatibilities');
+        $compatibilities = $validated['compatibilities'] ?? [];
+        unset($validated['compatibilities'], $validated['sync_compatibilities']);
 
         if (array_key_exists('purchase_conversion_factor', $validated)) {
             $validated['purchase_conversion_factor'] = (! empty($validated['purchase_conversion_factor']) && (float) $validated['purchase_conversion_factor'] > 0)
@@ -226,9 +262,13 @@ class PartsController extends Controller
         // Update part
         $part->update($validated);
 
-        // Handle warehouse stock entries
+        // Handle warehouse stock entries & vehicle compatibilities
         if ($warehouseData !== null) {
             $this->syncWarehouseBalances($part, $warehouseData, $userId);
+        }
+
+        if ($shouldSyncCompat) {
+            $this->syncVehicleCompatibilities($part, $compatibilities, $tenantId);
         }
 
         return redirect()->route('app.inventory.parts.index')
@@ -250,7 +290,13 @@ class PartsController extends Controller
     {
         $this->authorize('view', $part);
 
-        $part->load(['unit', 'category', 'inventoryBalances.warehouse.center']);
+        $part->load([
+            'unit',
+            'category',
+            'inventoryBalances.warehouse.center',
+            'compatibilities.make:id,name_ar,name_en,logo_path',
+            'compatibilities.model:id,make_id,name_ar,name_en',
+        ]);
         $tenantId = auth()->user()->tenant_id;
 
         $balances = $part->inventoryBalances()
@@ -268,6 +314,8 @@ class PartsController extends Controller
             'moves' => $moves,
             'units' => InventoryUnit::where('tenant_id', $tenantId)->where('is_active', true)->get(),
             'categories' => InventoryCategory::where('tenant_id', $tenantId)->where('is_active', true)->get(),
+            'vehicleMakes' => VehicleMake::where('is_active', true)->orderBy('sort_order')->orderBy('name_ar')->get(['id', 'name_ar', 'name_en', 'logo_path']),
+            'vehicleModels' => VehicleModel::where('is_active', true)->orderBy('sort_order')->orderBy('name_ar')->get(['id', 'make_id', 'name_ar', 'name_en']),
             'warehouses' => Warehouse::whereHas('center', fn ($q) => $q->where('tenant_id', $tenantId))
                 ->where('is_active', true)
                 ->with('center')
@@ -281,6 +329,47 @@ class PartsController extends Controller
                     'is_default' => $w->is_default,
                 ]),
         ]);
+    }
+
+    /**
+     * Sync compatible vehicle makes/models/years for a spare part.
+     */
+    protected function syncVehicleCompatibilities(Part $part, array $compatibilities, int $tenantId): void
+    {
+        $part->compatibilities()->delete();
+
+        $seen = [];
+
+        foreach ($compatibilities as $row) {
+            if (empty($row['vehicle_make_id'])) {
+                continue;
+            }
+            $makeId = (int) $row['vehicle_make_id'];
+            $modelId = ! empty($row['vehicle_model_id']) ? (int) $row['vehicle_model_id'] : null;
+            $yearFrom = ! empty($row['year_from']) ? (int) $row['year_from'] : null;
+            $yearTo = ! empty($row['year_to']) ? (int) $row['year_to'] : null;
+
+            if ($yearFrom && $yearTo && $yearFrom > $yearTo) {
+                [$yearFrom, $yearTo] = [$yearTo, $yearFrom];
+            }
+
+            $dedupeKey = "{$makeId}-".($modelId ?? 'all').'-'.($yearFrom ?? '').'-'.($yearTo ?? '');
+
+            if (isset($seen[$dedupeKey])) {
+                continue;
+            }
+            $seen[$dedupeKey] = true;
+
+            PartVehicleCompatibility::create([
+                'tenant_id' => $tenantId,
+                'part_id' => $part->id,
+                'vehicle_make_id' => $makeId,
+                'vehicle_model_id' => $modelId,
+                'year_from' => $yearFrom,
+                'year_to' => $yearTo,
+                'notes' => $row['notes'] ?? null,
+            ]);
+        }
     }
 
     /**

@@ -87,6 +87,10 @@ return [
 
     'faker_locale' => env('APP_FAKER_LOCALE', 'en_US'),
 
+    'default_country' => env('APP_DEFAULT_COUNTRY', 'SA'),
+
+    'default_currency' => env('APP_DEFAULT_CURRENCY', 'SAR'),
+
     /*
     |--------------------------------------------------------------------------
     | Encryption Key

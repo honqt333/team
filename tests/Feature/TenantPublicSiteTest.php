@@ -246,10 +246,14 @@ class TenantPublicSiteTest extends TestCase
             'secondary_color' => '<script>',
         ]);
 
+        // The fallback is the theme default declared by
+        // `TenantWebsite::getEffectivePrimaryColorAttribute()`
+        // (app/Models/TenantWebsite.php:141) — `#2563eb`, the same value
+        // the settings controller and the seeder use.
         $this->get('/bad-color')
             ->assertOk()
             ->assertInertia(fn ($page) => $page
-                ->where('site.primary_color', '#4f46e5') // default
+                ->where('site.primary_color', '#2563eb') // default
                 ->where('site.secondary_color', '#0ea5e9') // default
             );
     }

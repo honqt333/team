@@ -16,6 +16,7 @@ use App\Models\Service;
 use App\Models\VehicleColor;
 use App\Models\VehicleMake;
 use App\Models\VehicleModel;
+use App\Support\PhoneNumber;
 use App\Support\TenancyContext;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
@@ -282,36 +283,7 @@ class CustomerController
             return response()->json(['exists' => false]);
         }
 
-        // Normalize phone number
-        $arabic = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
-        $persian = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
-        $english = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
-
-        $phone = str_replace($arabic, $english, $phone);
-        $phone = str_replace($persian, $english, $phone);
-
-        // Remove all non-numeric characters (except +)
-        $phone = preg_replace('/[^\d+]/', '', $phone);
-
-        // If it starts with 00966, convert to +966
-        if (str_starts_with($phone, '00966')) {
-            $phone = '+966'.substr($phone, 5);
-        }
-
-        // If it starts with 05, convert to +9665
-        if (str_starts_with($phone, '05') && strlen($phone) === 10) {
-            $phone = '+966'.substr($phone, 1);
-        }
-
-        // If it starts with 5, convert to +9665
-        if (str_starts_with($phone, '5') && strlen($phone) === 9) {
-            $phone = '+966'.$phone;
-        }
-
-        // If it starts with 966 and doesn't start with +, add +
-        if (str_starts_with($phone, '966') && ! str_starts_with($phone, '+')) {
-            $phone = '+'.$phone;
-        }
+        $phone = PhoneNumber::normalize($phone, TenancyContext::user()?->tenant?->country) ?? $phone;
 
         // Find customer under same tenant
         $customer = Customer::withoutGlobalScope('center_scoped')

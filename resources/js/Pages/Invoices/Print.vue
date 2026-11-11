@@ -129,6 +129,7 @@ const mappedData = computed(() => {
             color: props.invoice.work_order?.vehicle?.color,
         },
         tax_enabled_snapshot: props.invoice.tax_enabled_snapshot && isVatEnabled,
+        currency_code: props.invoice.currency_code,
         pricing_mode_snapshot:
             props.invoice.pricing_mode_snapshot || props.invoice.work_order?.pricing_mode_snapshot,
         total_excl_tax: Number(props.invoice.total_excl_tax || 0),

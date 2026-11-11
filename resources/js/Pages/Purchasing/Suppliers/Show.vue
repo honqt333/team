@@ -1851,6 +1851,7 @@ import { printDocument } from '@/Composables/usePrint';
 import { ref, computed, watch, h } from 'vue';
 import { Link, router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
+import { useNumberFormat } from '@/Composables/useNumberFormat';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import CreateModal from './CreateModal.vue';
 import ConfirmModal from '@/Components/ConfirmModal.vue';
@@ -1877,6 +1878,7 @@ const props = defineProps({
 });
 
 const { t, locale } = useI18n();
+const { formatMoney } = useNumberFormat();
 const { confirm } = useConfirm();
 const { can, isAnyAdmin } = usePermission();
 
@@ -2168,11 +2170,7 @@ const tabs = computed(() => [
 function formatCurrency(value) {
     if (!value && value !== 0) return '';
     const val = Math.abs(value) < 0.01 ? 0 : value;
-    return new Intl.NumberFormat('en-US', {
-        style: 'currency',
-        currency: 'SAR',
-        minimumFractionDigits: 0,
-    }).format(val);
+    return formatMoney(val);
 }
 
 function formatDate(dateString) {

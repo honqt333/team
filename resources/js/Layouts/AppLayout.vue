@@ -3502,6 +3502,59 @@
                 </nav>
             </aside>
         </Transition>
+
+        <!-- Floating Quick Create SpeedDial (Hidden on Print) -->
+        <div
+            v-if="quickCreateItems.length > 0"
+            class="fixed bottom-6 end-6 z-40 print:hidden quick-speeddial-root"
+        >
+            <Transition name="dropdown">
+                <div
+                    v-if="quickSpeedDialOpen"
+                    class="mb-3 flex flex-col gap-2 min-w-[200px] rounded-2xl border border-border-subtle bg-surface/95 dark:bg-gray-800/95 backdrop-blur-md p-2 shadow-2xl"
+                >
+                    <Link
+                        v-for="qItem in quickCreateItems"
+                        :key="qItem.href"
+                        :href="qItem.href"
+                        @click="quickSpeedDialOpen = false"
+                        class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-bold text-text-primary hover:bg-action-primary-soft hover:text-action-primary transition-colors"
+                    >
+                        <span
+                            class="w-6 h-6 rounded-lg bg-action-primary/10 text-action-primary flex items-center justify-center text-xs font-black"
+                        >
+                            +
+                        </span>
+                        <span>{{ qItem.label }}</span>
+                    </Link>
+                </div>
+            </Transition>
+
+            <button
+                type="button"
+                @click="quickSpeedDialOpen = !quickSpeedDialOpen"
+                :aria-expanded="quickSpeedDialOpen"
+                :title="$t('dashboard.quick_create')"
+                class="flex h-12 w-12 items-center justify-center rounded-2xl bg-action-primary hover:bg-action-primary-hover text-white shadow-xl shadow-focus-ring-soft transition-all active:scale-95 cursor-pointer"
+            >
+                <svg
+                    :class="[
+                        'h-6 w-6 transition-transform duration-200',
+                        { 'rotate-45': quickSpeedDialOpen },
+                    ]"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                >
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2.5"
+                        d="M12 4v16m8-8H4"
+                    />
+                </svg>
+            </button>
+        </div>
     </div>
 </template>
 
@@ -3523,7 +3576,7 @@ const props = defineProps({
     hideSidebar: { type: Boolean, default: false },
 });
 
-const { locale } = useI18n();
+const { locale, t } = useI18n();
 const page = usePage();
 const { can, hasRole, isAnyAdmin } = usePermission();
 const { success: toastSuccess, error: toastError } = useToast();
@@ -3555,6 +3608,30 @@ watch(
 const mobileMenuOpen = ref(false);
 const userMenuOpen = ref(false);
 const centerMenuOpen = ref(false);
+const quickSpeedDialOpen = ref(false);
+
+const quickCreateItems = computed(() => {
+    const items = [];
+    if (can('crm.work_orders.create') || isAnyAdmin()) {
+        items.push({ label: t('dashboard.new_work_order'), href: '/app/work-orders/create' });
+    }
+    if (can('quotes.create') || isAnyAdmin()) {
+        items.push({ label: t('dashboard.new_quote'), href: '/app/quotes' });
+    }
+    if (can('crm.appointments.manage') || isAnyAdmin()) {
+        items.push({ label: t('dashboard.new_appointment'), href: '/app/appointments' });
+    }
+    if (can('crm.customers.create') || isAnyAdmin()) {
+        items.push({ label: t('dashboard.new_customer'), href: '/app/customers' });
+    }
+    if (can('crm.vehicles.create') || isAnyAdmin()) {
+        items.push({ label: t('dashboard.new_vehicle'), href: '/app/vehicles' });
+    }
+    if (can('purchasing.invoices.create') || isAnyAdmin()) {
+        items.push({ label: t('dashboard.new_purchase_invoice'), href: '/app/invoices/purchases' });
+    }
+    return items;
+});
 const { isDark, toggle: toggleThemeHandler } = useTheme();
 const currentLocale = ref('ar');
 
@@ -3673,6 +3750,9 @@ function handleClickOutside(event) {
     if (openTopNavDropdown.value && !event.target.closest('.topnav-dropdown')) {
         openTopNavDropdown.value = null;
     }
+    if (quickSpeedDialOpen.value && !event.target.closest('.quick-speeddial-root')) {
+        quickSpeedDialOpen.value = false;
+    }
 }
 
 function handleKeyDown(event) {
@@ -3680,6 +3760,7 @@ function handleKeyDown(event) {
         userMenuOpen.value = false;
         centerMenuOpen.value = false;
         openTopNavDropdown.value = null;
+        quickSpeedDialOpen.value = false;
     }
 }
 

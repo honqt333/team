@@ -117,8 +117,16 @@
 
                 <!-- Printable Statements per branch -->
                 <div v-for="item in result" :key="'print-' + item.shop.id" class="mb-8">
-                    <h3 class="font-bold text-sm text-gray-800 border-b pb-1 mb-2">
-                        {{ item.shop.name }}
+                    <h3
+                        class="font-bold text-sm text-gray-800 border-b pb-1 mb-2 flex items-center justify-between"
+                    >
+                        <span>{{ item.shop.name }}</span>
+                        <span
+                            v-if="item.is_administration || item.shop.is_administration"
+                            class="text-[10px] font-semibold text-gray-500"
+                        >
+                            ({{ administrationLabel }})
+                        </span>
                     </h3>
                     <DataTable
                         structured
@@ -935,11 +943,36 @@
                                 class="text-base font-black text-gray-900 dark:text-white flex items-center gap-2"
                             >
                                 <span
-                                    class="w-6 h-6 rounded-lg bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 inline-flex items-center justify-center text-xs font-black"
+                                    class="w-6 h-6 rounded-lg text-xs font-black inline-flex items-center justify-center shrink-0"
+                                    :class="
+                                        item.is_administration || item.shop.is_administration
+                                            ? 'bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300 ring-1 ring-indigo-500/20'
+                                            : 'bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300'
+                                    "
                                 >
-                                    {{ bIndex + 1 }}
+                                    <svg
+                                        v-if="item.is_administration || item.shop.is_administration"
+                                        class="w-3.5 h-3.5"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
+                                        />
+                                    </svg>
+                                    <span v-else>{{ bIndex + 1 }}</span>
                                 </span>
                                 <span>{{ item.shop.name }}</span>
+                                <span
+                                    v-if="item.is_administration || item.shop.is_administration"
+                                    class="ms-2 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-indigo-50 text-indigo-700 dark:bg-indigo-950/50 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800"
+                                >
+                                    {{ administrationLabel }}
+                                </span>
                             </h2>
                             <div
                                 class="mt-1 flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400 flex-wrap"
@@ -982,7 +1015,19 @@
                         <!-- Mini Branch Profit Pill -->
                         <div class="flex items-center gap-2">
                             <span class="text-xs font-medium text-gray-500 dark:text-gray-400">
-                                {{ $t('reports.financial_summary_report.operating_profit') }}:
+                                {{
+                                    (item.is_administration || item.shop.is_administration) &&
+                                    item.shopFinancialSummary.profit < 0
+                                        ? $t(
+                                              'reports.financial_summary_report.administration_cost'
+                                          ) !==
+                                          'reports.financial_summary_report.administration_cost'
+                                            ? $t(
+                                                  'reports.financial_summary_report.administration_cost'
+                                              )
+                                            : 'صافي تكلفة الإدارة'
+                                        : $t('reports.financial_summary_report.operating_profit')
+                                }}:
                             </span>
                             <span
                                 class="px-3 py-1 rounded-full text-xs font-black"
@@ -2068,9 +2113,19 @@ const selectPreset = (presetId) => {
     }
 };
 
+const administrationLabel = computed(() => {
+    const key = 'reports.financial_summary_report.administration';
+    const translated = t(key);
+    if (translated && translated !== key) {
+        return translated;
+    }
+    return t('common.management') || 'الإدارة العامة';
+});
+
 // Center Options
 const centerOptions = computed(() => [
     { value: 'all', label: t('reports.financial_summary_report.all_centers') },
+    { value: 'admin', label: administrationLabel.value },
     ...props.centers.map((c) => ({
         value: c.id,
         label: c.name,
@@ -2080,6 +2135,9 @@ const centerOptions = computed(() => [
 const selectedCenterName = computed(() => {
     if (selectedCenter.value === 'all') {
         return t('reports.financial_summary_report.all_centers');
+    }
+    if (selectedCenter.value === 'admin' || selectedCenter.value === '0') {
+        return administrationLabel.value;
     }
     const found = props.centers.find((c) => String(c.id) === String(selectedCenter.value));
     return found ? found.name : '';
@@ -2109,7 +2167,7 @@ const applyFilters = () => {
             range: currentRange.value,
             start_date: currentRange.value === 'custom' ? customStartDate.value : null,
             end_date: currentRange.value === 'custom' ? customEndDate.value : null,
-            center_id: selectedCenter.value !== 'all' ? selectedCenter.value : null,
+            center_id: selectedCenter.value !== 'all' ? selectedCenter.value : 'all',
             store_sales_only: storeSalesOnlyInput.value ? 1 : null,
         },
         {

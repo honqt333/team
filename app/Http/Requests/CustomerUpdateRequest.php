@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Http\Requests;
 
+use App\Support\CountryCurrencyRegistry;
+use App\Support\PhoneNumber;
 use App\Support\TenancyContext;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
@@ -24,63 +26,19 @@ class CustomerUpdateRequest extends FormRequest
      */
     protected function prepareForValidation(): void
     {
-        $phone = $this->phone;
-        $whatsapp = $this->whatsapp;
+        $country = TenancyContext::user()?->tenant?->country;
 
-        if ($phone) {
+        if ($this->phone) {
             $this->merge([
-                'phone' => $this->normalizePhoneNumber($phone),
+                'phone' => PhoneNumber::normalize($this->phone, $country),
             ]);
         }
 
-        if ($whatsapp) {
+        if ($this->whatsapp) {
             $this->merge([
-                'whatsapp' => $this->normalizePhoneNumber($whatsapp),
+                'whatsapp' => PhoneNumber::normalize($this->whatsapp, $country),
             ]);
         }
-    }
-
-    /**
-     * Normalize a phone number to standard format (+9665xxxxxxxx).
-     */
-    private function normalizePhoneNumber(?string $number): ?string
-    {
-        if (! $number) {
-            return null;
-        }
-
-        // Convert Arabic/Persian digits to English
-        $arabic = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
-        $persian = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
-        $english = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
-
-        $number = str_replace($arabic, $english, $number);
-        $number = str_replace($persian, $english, $number);
-
-        // Remove all non-numeric characters (except +)
-        $number = preg_replace('/[^\d+]/', '', $number);
-
-        // If it starts with 00966, convert to +966
-        if (str_starts_with($number, '00966')) {
-            $number = '+966'.substr($number, 5);
-        }
-
-        // If it starts with 05, convert to +9665
-        if (str_starts_with($number, '05') && strlen($number) === 10) {
-            $number = '+966'.substr($number, 1);
-        }
-
-        // If it starts with 5, convert to +9665
-        if (str_starts_with($number, '5') && strlen($number) === 9) {
-            $number = '+966'.$number;
-        }
-
-        // If it starts with 966 and doesn't start with +, add +
-        if (str_starts_with($number, '966') && ! str_starts_with($number, '+')) {
-            $number = '+'.$number;
-        }
-
-        return $number;
     }
 
     /**
@@ -93,6 +51,10 @@ class CustomerUpdateRequest extends FormRequest
         $tenantId = TenancyContext::tenantId();
         $centerId = TenancyContext::centerId();
         $customerId = $this->route('customer')?->id;
+        $tenantCountry = PhoneNumber::resolveCountry(TenancyContext::user()?->tenant?->country);
+        $taxRule = CountryCurrencyRegistry::isZatcaApplicable($tenantCountry)
+            ? ['nullable', 'string', 'regex:/^\d{15}$/']
+            : ['nullable', 'string', 'max:50'];
 
         return [
             'type' => ['sometimes', 'string', Rule::in(['individual', 'company', 'government'])],
@@ -111,14 +73,15 @@ class CustomerUpdateRequest extends FormRequest
                 'sometimes',
                 'string',
                 'max:30',
+                'regex:/^\+[1-9]\d{6,14}$/',
                 Rule::unique('customers')
                     ->ignore($customerId)
                     ->where(fn ($q) => $q->where('tenant_id', $tenantId)->where('center_id', $centerId)),
             ],
-            'whatsapp' => ['nullable', 'string', 'max:30'],
+            'whatsapp' => ['nullable', 'string', 'max:30', 'regex:/^\+[1-9]\d{6,14}$/'],
             'email' => ['nullable', 'string', 'email:rfc', 'max:255'],
             'notes' => ['nullable', 'string'],
-            'tax_number' => ['nullable', 'string', 'regex:/^\d{15}$/'],
+            'tax_number' => $taxRule,
             'address_line' => ['nullable', 'string', 'max:500'],
             'building_number' => ['nullable', 'string', 'max:50'],
             'postal_code' => ['nullable', 'string', 'max:20'],

@@ -326,4 +326,46 @@ class QuoteParityFeaturesTest extends TestCase
         Storage::disk('public')->assertExists($quote->signature_path);
         $this->assertNotNull($quote->signature_url);
     }
+
+    public function test_public_quote_rejects_empty_quote_and_soft_deleted_tenant(): void
+    {
+        $emptyQuote = Quote::create([
+            'tenant_id' => $this->tenant->id,
+            'center_id' => $this->center->id,
+            'created_by' => $this->user->id,
+            'code' => 'QT-EMPTY-001',
+            'customer_id' => $this->customer->id,
+            'vehicle_id' => $this->vehicle->id,
+            'status' => Quote::STATUS_SENT,
+            'valid_until' => now()->addDays(5)->format('Y-m-d'),
+            'subtotal' => 0,
+            'total' => 0,
+        ]);
+
+        $this->get("/view/quote/{$emptyQuote->uuid}")
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page
+                ->component('Quotes/PublicShow')
+                ->where('quote.can_be_actioned', false)
+            );
+
+        $this->post("/view/quote/{$emptyQuote->uuid}/approve")
+            ->assertSessionHas('error', __('quotes.empty_decision'));
+
+        $this->post("/view/quote/{$emptyQuote->uuid}/reject", [
+            'rejection_reason' => 'Empty quote test',
+        ])->assertSessionHas('error', __('quotes.empty_decision'));
+
+        $emptyQuote->refresh();
+        $this->assertSame(Quote::STATUS_SENT, $emptyQuote->status);
+
+        // Soft-deleting the tenant makes the public quote link return 404
+        $this->tenant->delete();
+
+        $this->get("/view/quote/{$emptyQuote->uuid}")
+            ->assertNotFound();
+
+        $this->post("/view/quote/{$emptyQuote->uuid}/approve")
+            ->assertNotFound();
+    }
 }

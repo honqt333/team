@@ -49,7 +49,7 @@
                     <span
                         class="absolute end-3 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400 text-sm"
                     >
-                        {{ $t('common.currency_sar') }}
+                        {{ activeCurrencySymbol }}
                     </span>
                 </div>
                 <p
@@ -125,7 +125,7 @@
                             {{
                                 form.default_discount_type === 'percentage'
                                     ? '%'
-                                    : $t('common.currency')
+                                    : activeCurrencySymbol
                             }}
                         </span>
                     </div>
@@ -154,7 +154,7 @@
                     <span
                         class="absolute end-3 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400 text-sm"
                     >
-                        {{ $t('common.currency_sar') }}
+                        {{ activeCurrencySymbol }}
                     </span>
                 </div>
                 <p v-if="minPriceValidationError" class="text-sm text-red-600 dark:text-red-400">
@@ -194,8 +194,10 @@ import { ref, computed, watch, nextTick } from 'vue';
 import { useForm } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import BaseModal from '@/Components/BaseModal.vue';
+import { useNumberFormat } from '@/Composables/useNumberFormat';
 
 const { t } = useI18n();
+const { activeCurrencySymbol } = useNumberFormat();
 
 const props = defineProps({
     show: {
@@ -234,7 +236,7 @@ const minPriceValidationError = computed(() => {
     if (form.min_price > 0 && form.base_price > 0 && form.min_price > form.base_price) {
         return t('pricing.errors.min_price_exceeds_base', {
             price: form.base_price,
-            currency: t('common.currency_sar'),
+            currency: activeCurrencySymbol.value,
         });
     }
     return null;

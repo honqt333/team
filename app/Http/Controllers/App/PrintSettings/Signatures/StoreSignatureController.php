@@ -8,6 +8,7 @@ use App\Http\Controllers\App\PrintSettings\Concerns\HandlesSignatureStorage;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\App\Print\UploadSignatureRequest;
 use App\Models\Tenant;
+use App\Support\PrintDocumentRegistry;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Symfony\Component\HttpFoundation\Response;
@@ -103,7 +104,10 @@ class StoreSignatureController extends Controller
             'mime_type' => $file->getMimeType(),
         ];
 
-        $documentType = $request->input('document_type');
+        $rawDocumentType = $request->input('document_type');
+        $documentType = is_string($rawDocumentType)
+            ? PrintDocumentRegistry::normalizeKey($rawDocumentType)
+            : null;
 
         if ($documentType) {
             $signaturePayload['document_type'] = $documentType;

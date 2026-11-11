@@ -35,11 +35,12 @@
                         {{ isAr ? $t('common.status') : 'Status' }}
                     </label>
                     <SearchableSelect
-                        v-model="filters.status"
+                        v-model="tableFilters.status"
                         :options="statusOptions"
                         option-label="label"
                         option-value="value"
                         :compact="true"
+                        @update:model-value="applyFilters"
                     />
                 </div>
                 <div class="flex-1 min-w-[150px]">
@@ -47,11 +48,12 @@
                         {{ isAr ? $t('system.settings.tier') : 'Tier' }}
                     </label>
                     <SearchableSelect
-                        v-model="filters.tier"
+                        v-model="tableFilters.tier"
                         :options="tierOptions"
                         option-label="label"
                         option-value="value"
                         :compact="true"
+                        @update:model-value="applyFilters"
                     />
                 </div>
                 <button
@@ -147,30 +149,12 @@
                 </DataTable>
 
                 <!-- Pagination -->
-                <div
-                    v-if="logs.last_page > 1"
-                    class="flex items-center justify-between border-t border-gray-200 px-4 py-3 dark:border-gray-700"
-                >
-                    <div class="text-sm text-gray-700 dark:text-gray-300">
-                        {{ isAr ? $t('system.settings.page') : 'Page' }} {{ logs.current_page }} /
-                        {{ logs.last_page }}
-                    </div>
-                    <div class="flex gap-2">
-                        <Link
-                            v-for="link in logs.links"
-                            :key="link.label"
-                            :href="link.url || '#'"
-                            :class="[
-                                'rounded-md px-3 py-1 text-sm',
-                                link.active
-                                    ? 'bg-amber-600 text-white'
-                                    : 'bg-white text-gray-700 hover:bg-gray-50 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600',
-                                !link.url && 'pointer-events-none opacity-50',
-                            ]"
-                            v-html="link.label"
-                        />
-                    </div>
-                </div>
+                <AppPagination
+                    :links="logs.links || []"
+                    :from="logs.from"
+                    :to="logs.to"
+                    :total="logs.total"
+                />
             </div>
         </div>
     </SystemLayout>
@@ -178,15 +162,17 @@
 
 <script setup>
 import DataTable from '@/Components/Common/DataTable.vue';
+import AppPagination from '@/Components/Common/AppPagination.vue';
 import { useI18n } from 'vue-i18n';
 const { t } = useI18n();
 
-import { computed, ref } from 'vue';
-import { Head, Link, router } from '@inertiajs/vue3';
+import { computed } from 'vue';
+import { Head, Link } from '@inertiajs/vue3';
 import SystemLayout from '@/Layouts/SystemLayout.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 import PageHeader from '@/Components/PageHeader.vue';
 import { useNumberFormat } from '@/Composables/useNumberFormat';
+import { useServerTable } from '@/Composables/useServerTable';
 
 const { toEnglish } = useNumberFormat();
 
@@ -198,9 +184,12 @@ const props = defineProps({
 
 const isAr = computed(() => (document?.documentElement?.lang || 'ar') === 'ar');
 
-const filters = ref({
-    status: props.filters.status || '',
-    tier: props.filters.tier || '',
+const { filters: tableFilters, applyFilters } = useServerTable({
+    routeUrl: '/system/billing/dunning-log',
+    initialFilters: {
+        status: props.filters.status || '',
+        tier: props.filters.tier || '',
+    },
 });
 
 const statusOptions = computed(() => [
@@ -221,13 +210,6 @@ const tierOptions = computed(() => {
     }
     return opts;
 });
-
-function applyFilters() {
-    router.get('/system/billing/dunning-log', {
-        status: filters.value.status || undefined,
-        tier: filters.value.tier || undefined,
-    });
-}
 
 function formatDate(d) {
     if (!d) return '—';

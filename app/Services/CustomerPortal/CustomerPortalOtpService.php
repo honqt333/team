@@ -117,7 +117,7 @@ class CustomerPortalOtpService
         ?string $ip = null,
         ?string $userAgent = null,
     ): OtpRequestResult {
-        $phone = PhoneNumber::normalize($phoneInput);
+        $phone = PhoneNumber::normalize($phoneInput, $tenant->country);
 
         if ($phone === null) {
             // Even malformed input consumes a rate slot so
@@ -195,7 +195,7 @@ class CustomerPortalOtpService
             // the lock, abort. The unlocked find was
             // good enough for the rate limit / phone
             // bucket; the lock is the source of truth.
-            if ($locked === null) {
+            if ($locked === null || ! $this->matchesPhone($locked, $phone, $tenant)) {
                 $throttled = 'gone';
 
                 return;
@@ -332,7 +332,7 @@ class CustomerPortalOtpService
         string $phoneInput,
         string $code,
     ): OtpVerificationResult {
-        $phone = PhoneNumber::normalize($phoneInput);
+        $phone = PhoneNumber::normalize($phoneInput, $tenant->country);
 
         if ($phone === null) {
             return OtpVerificationResult::failed(OtpVerificationResult::REASON_MALFORMED);
@@ -363,7 +363,7 @@ class CustomerPortalOtpService
 
         $otp = $this->latestUsableOtp($tenant, $phone);
 
-        if ($otp === null) {
+        if ($otp === null || (string) $otp->customer_id !== (string) $customer->id) {
             return OtpVerificationResult::failed(OtpVerificationResult::REASON_NO_ACTIVE_OTP);
         }
 
@@ -488,45 +488,31 @@ class CustomerPortalOtpService
      */
     private function findCustomer(Tenant $tenant, string $normalizedPhone): ?Customer
     {
-        $digitsOnly = PhoneNumber::lookupKey($normalizedPhone);
-
-        if ($digitsOnly === null) {
-            return null;
-        }
-
-        // We pull a small candidate set and then compare
-        // with normalize() in PHP. The candidates filter
-        // is `phone LIKE %digits%` which is a poor index
-        // match in production but a fine placeholder for
-        // a per-tenant scale. A real deployment would
-        // add a stored lookup column or a hash column.
-        $candidates = Customer::query()
+        $match = null;
+        $customers = Customer::query()
             ->where('tenant_id', $tenant->id)
-            ->whereNotNull('phone')
-            // The successful verification result is
-            // later used to mint the portal session.
-            // Keep tenant_id on this intentionally
-            // narrow projection; omitting it leaves
-            // the session tenant_id null, and the
-            // next dashboard request correctly
-            // rejects that incomplete session.
-            ->get(['id', 'tenant_id', 'phone', 'whatsapp']);
+            ->where(function (Builder $q) {
+                $q->whereNotNull('phone')->orWhereNotNull('whatsapp');
+            })
+            ->select(['id', 'tenant_id', 'phone', 'whatsapp'])
+            ->lazyById();
 
-        foreach ($candidates as $candidate) {
-            foreach (['phone', 'whatsapp'] as $field) {
-                $stored = $candidate->{$field};
-
-                if (! $stored) {
-                    continue;
+        foreach ($customers as $customer) {
+            if ($this->matchesPhone($customer, $normalizedPhone, $tenant)) {
+                if ($match !== null) {
+                    return null;
                 }
-
-                if (PhoneNumber::lookupKey($stored) === $digitsOnly) {
-                    return $candidate;
-                }
+                $match = $customer;
             }
         }
 
-        return null;
+        return $match;
+    }
+
+    private function matchesPhone(Customer $customer, string $normalizedPhone, Tenant $tenant): bool
+    {
+        return PhoneNumber::normalize($customer->phone, $tenant->country) === $normalizedPhone
+            || PhoneNumber::normalize($customer->whatsapp, $tenant->country) === $normalizedPhone;
     }
 
     /**

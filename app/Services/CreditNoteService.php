@@ -15,6 +15,7 @@ use App\Models\WorkOrder;
 use App\Models\WorkOrderItem;
 use App\Models\WorkOrderItemPart;
 use App\Services\Inventory\InventoryService;
+use App\Support\CountryCurrencyRegistry;
 use Exception;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -43,7 +44,8 @@ class CreditNoteService
         if (! $taxEnabled && ((float) $originalInvoice->total_tax > 0.001 || (bool) ($workOrder->tax_enabled_snapshot ?? false))) {
             $taxEnabled = true;
         }
-        $taxRate = $taxEnabled ? (float) ($originalInvoice->tax_rate_snapshot ?: $workOrder->tax_rate_snapshot ?: 15.00) : 0.0;
+        $defaultVat = CountryCurrencyRegistry::defaultVatRate(CountryCurrencyRegistry::tenantCountry($workOrder->tenant));
+        $taxRate = $taxEnabled ? (float) ($originalInvoice->tax_rate_snapshot ?? $workOrder->tax_rate_snapshot ?? $defaultVat) : 0.0;
         $pricingMode = $originalInvoice->pricing_mode_snapshot ?? $workOrder->pricing_mode_snapshot ?? 'exclusive';
 
         // Existing credit notes for this invoice or work order
@@ -221,7 +223,8 @@ class CreditNoteService
             $taxEnabled = true;
         }
         $pricingMode = $originalInvoice->pricing_mode_snapshot ?? $workOrder->pricing_mode_snapshot ?? 'exclusive';
-        $taxRate = $taxEnabled ? (float) ($originalInvoice->tax_rate_snapshot ?: $workOrder->tax_rate_snapshot ?: 15.00) : 0.0;
+        $defaultVat = CountryCurrencyRegistry::defaultVatRate(CountryCurrencyRegistry::tenantCountry($workOrder->tenant));
+        $taxRate = $taxEnabled ? (float) ($originalInvoice->tax_rate_snapshot ?? $workOrder->tax_rate_snapshot ?? $defaultVat) : 0.0;
 
         $linesToCreate = [];
         $totalReturnIncl = 0.0;
@@ -408,7 +411,7 @@ class CreditNoteService
                 'tax_enabled_snapshot' => $taxEnabled,
                 'pricing_mode_snapshot' => $originalInvoice->pricing_mode_snapshot,
                 'tax_rate_snapshot' => $taxRate,
-                'currency_code' => $originalInvoice->currency_code ?? 'SAR',
+                'currency_code' => $originalInvoice->currency_code ?: CountryCurrencyRegistry::tenantCurrency(Tenant::find($tenantId)),
                 'total_excl_tax' => round($totalReturnExcl, 2),
                 'total_tax' => round($totalReturnTax, 2),
                 'total_incl_tax' => round($totalReturnIncl, 2),
@@ -416,8 +419,10 @@ class CreditNoteService
                 'total_paid' => round($totalReturnIncl, 2),
             ]);
 
-            // Generate ZATCA QR Code strictly when VAT is enabled on the credit note
-            if ($creditNote->tax_enabled_snapshot) {
+            // Generate ZATCA QR Code strictly when VAT is enabled and tenant country is SA
+            $tenant = Tenant::find($tenantId);
+
+            if ($creditNote->tax_enabled_snapshot && CountryCurrencyRegistry::isZatcaApplicable($tenant?->country)) {
                 $creditNote->zatca_qr_tlv = $this->invoiceService->generateZatcaQr($creditNote);
                 $creditNote->saveQuietly();
             }
@@ -704,7 +709,8 @@ class CreditNoteService
             $taxEnabled = true;
         }
         $pricingMode = $invoice->pricing_mode_snapshot ?? 'exclusive';
-        $taxRate = $taxEnabled ? (float) ($invoice->tax_rate_snapshot ?: 15.00) : 0.0;
+        $defaultVat = CountryCurrencyRegistry::defaultVatRate(CountryCurrencyRegistry::tenantCountry($invoice->tenant));
+        $taxRate = $taxEnabled ? (float) ($invoice->tax_rate_snapshot ?? $defaultVat) : 0.0;
 
         $linesToCreate = [];
         $totalReturnIncl = 0.0;
@@ -877,7 +883,7 @@ class CreditNoteService
                 'tax_enabled_snapshot' => $taxEnabled,
                 'pricing_mode_snapshot' => $invoice->pricing_mode_snapshot,
                 'tax_rate_snapshot' => $taxRate,
-                'currency_code' => $invoice->currency_code ?? 'SAR',
+                'currency_code' => $invoice->currency_code ?: CountryCurrencyRegistry::tenantCurrency(Tenant::find($tenantId)),
                 'total_excl_tax' => round($totalReturnExcl, 2),
                 'total_tax' => round($totalReturnTax, 2),
                 'total_incl_tax' => round($totalReturnIncl, 2),
@@ -885,8 +891,10 @@ class CreditNoteService
                 'total_paid' => round($totalReturnIncl, 2),
             ]);
 
-            // Generate ZATCA QR Code strictly when VAT is enabled on the credit note
-            if ($creditNote->tax_enabled_snapshot) {
+            // Generate ZATCA QR Code strictly when VAT is enabled and tenant country is SA
+            $tenant = Tenant::find($tenantId);
+
+            if ($creditNote->tax_enabled_snapshot && CountryCurrencyRegistry::isZatcaApplicable($tenant?->country)) {
                 $creditNote->zatca_qr_tlv = $this->invoiceService->generateZatcaQr($creditNote);
                 $creditNote->saveQuietly();
             }

@@ -12,6 +12,7 @@ use App\Models\Setting;
 use App\Models\SystemAnnouncement;
 use App\Models\Tenant;
 use App\Models\User;
+use App\Support\CountryCurrencyRegistry;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Middleware;
@@ -134,6 +135,11 @@ class HandleInertiaRequests extends Middleware
                 'cr_number' => $tenant->cr_number,
                 'vat_number' => $tenant->taxSettings?->tax_number ?? $tenant->vat_number ?? '',
                 'iban' => $tenant->iban,
+                'country' => CountryCurrencyRegistry::tenantCountry($tenant),
+                'currency' => CountryCurrencyRegistry::tenantCurrency($tenant),
+                'currency_meta' => CountryCurrencyRegistry::currencyMeta(CountryCurrencyRegistry::tenantCurrency($tenant)),
+                'country_meta' => CountryCurrencyRegistry::countryMeta(CountryCurrencyRegistry::tenantCountry($tenant)),
+                'timezone' => $tenant->timezone ?? CountryCurrencyRegistry::countryMeta(CountryCurrencyRegistry::tenantCountry($tenant))['timezone'],
                 'logo_url' => $tenant->logo_path ? Storage::url($tenant->logo_path) : asset('images/brand/logo-256.png'),
                 'dunning_opted_out' => (bool) $tenant->dunning_opted_out,
                 'dunning_language' => $tenant->dunning_language,

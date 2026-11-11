@@ -1,5 +1,8 @@
 <template>
-    <div class="standard-report-header mb-6 pb-4 border-b-2 border-gray-900 text-xs">
+    <div
+        class="standard-report-header mb-6 pb-4 border-b-2 border-gray-900 text-xs"
+        :style="{ borderBottomColor: primaryColor }"
+    >
         <div class="grid grid-cols-3 items-center gap-4">
             <!-- Column 1: Company / Center Information (Right in RTL, Left in LTR) -->
             <div class="text-start space-y-1">
@@ -143,6 +146,10 @@ const showLogo = computed(() => {
     return page?.props?.tenant?.print_settings?.visual?.show_logo !== false;
 });
 
+const primaryColor = computed(() => {
+    return page?.props?.tenant?.print_settings?.visual?.primary_color || '#111827';
+});
+
 const logoUrl = computed(() => {
     if (center.value.logo_url) return center.value.logo_url;
     if (tenant.value.logo_url) return tenant.value.logo_url;
@@ -171,7 +178,8 @@ const currentTime = computed(() => {
 <style scoped>
 @media print {
     .standard-report-header {
-        border-bottom: 2px solid #111827 !important;
+        border-bottom-width: 2px;
+        border-bottom-style: solid;
     }
 }
 </style>

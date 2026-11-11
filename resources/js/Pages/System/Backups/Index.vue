@@ -64,29 +64,32 @@
                 <div class="flex flex-wrap gap-4">
                     <div class="flex-1 min-w-[200px]">
                         <SearchableSelect
-                            v-model="tenantFilter"
+                            v-model="tableFilters.tenant_id"
                             :options="tenantFilterOptions"
                             option-label="label"
                             option-value="value"
                             :placeholder="$t('system.backups.filter_tenant')"
                             compact
+                            @update:model-value="applyFilters"
                         />
                     </div>
                     <SearchableSelect
-                        v-model="statusFilter"
+                        v-model="tableFilters.status"
                         :options="statusFilterOptions"
                         option-label="label"
                         option-value="value"
                         :placeholder="$t('system.backups.filter_status')"
                         compact
+                        @update:model-value="applyFilters"
                     />
                     <SearchableSelect
-                        v-model="typeFilter"
+                        v-model="tableFilters.type"
                         :options="typeFilterOptions"
                         option-label="label"
                         option-value="value"
                         :placeholder="$t('system.backups.filter_type')"
                         compact
+                        @update:model-value="applyFilters"
                     />
                 </div>
             </div>
@@ -261,40 +264,12 @@
                 </div>
 
                 <!-- Pagination -->
-                <div
-                    v-if="backups.links"
-                    class="px-4 py-3 border-t border-gray-200 dark:border-gray-700 flex items-center justify-between"
-                >
-                    <p class="text-sm text-gray-500 dark:text-gray-400">
-                        {{
-                            $t('pagination.showing_range', {
-                                from: backups.from || 0,
-                                to: backups.to || 0,
-                                total: backups.total || 0,
-                            })
-                        }}
-                    </p>
-                    <div class="flex gap-1">
-                        <template v-for="link in backups.links" :key="link.label">
-                            <a
-                                v-if="link.url"
-                                :href="link.url"
-                                :class="[
-                                    'px-3 py-1 rounded text-sm',
-                                    link.active
-                                        ? 'bg-action-primary text-white'
-                                        : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200',
-                                ]"
-                                v-html="link.label"
-                            />
-                            <span
-                                v-else
-                                class="px-3 py-1 rounded text-sm bg-gray-50 dark:bg-gray-800 text-gray-400"
-                                v-html="link.label"
-                            />
-                        </template>
-                    </div>
-                </div>
+                <AppPagination
+                    :links="backups.links || []"
+                    :from="backups.from"
+                    :to="backups.to"
+                    :total="backups.total"
+                />
             </div>
         </div>
     </SystemLayout>
@@ -302,15 +277,19 @@
 
 <script setup>
 import DataTable from '@/Components/Common/DataTable.vue';
-import { ref, computed, watch } from 'vue';
+import AppPagination from '@/Components/Common/AppPagination.vue';
+import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { router } from '@inertiajs/vue3';
 import SystemLayout from '@/Layouts/SystemLayout.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 import PageHeader from '@/Components/PageHeader.vue';
 import { useNumberFormat } from '@/Composables/useNumberFormat';
+import { useConfirm } from '@/Composables/useConfirm';
+import { useServerTable } from '@/Composables/useServerTable';
 
 const { t } = useI18n();
+const { confirm } = useConfirm();
 const { toEnglish } = useNumberFormat();
 
 const props = defineProps({
@@ -320,9 +299,14 @@ const props = defineProps({
     filters: Object,
 });
 
-const tenantFilter = ref(props.filters?.tenant_id || '');
-const statusFilter = ref(props.filters?.status || 'all');
-const typeFilter = ref(props.filters?.type || 'all');
+const { filters: tableFilters, applyFilters } = useServerTable({
+    routeUrl: '/system/backups',
+    initialFilters: {
+        tenant_id: props.filters?.tenant_id ? Number(props.filters.tenant_id) : '',
+        status: props.filters?.status || 'all',
+        type: props.filters?.type || 'all',
+    },
+});
 
 const tenantFilterOptions = computed(() => [
     { value: '', label: t('system.backups.filter_all_tenants') },
@@ -387,25 +371,6 @@ const statCards = computed(() => [
     },
 ]);
 
-// Auto-apply filters; debounce tenant/status changes
-let filterTimeout = null;
-watch([tenantFilter, statusFilter, typeFilter], () => {
-    clearTimeout(filterTimeout);
-    filterTimeout = setTimeout(applyFilters, 200);
-});
-
-const applyFilters = () => {
-    router.get(
-        '/system/backups',
-        {
-            tenant_id: tenantFilter.value || undefined,
-            status: statusFilter.value !== 'all' ? statusFilter.value : undefined,
-            type: typeFilter.value !== 'all' ? typeFilter.value : undefined,
-        },
-        { preserveState: true }
-    );
-};
-
 const formatDate = (date) =>
     date ? new Date(date).toLocaleString('ar-SA-u-nu-latn') : t('common.na');
 
@@ -451,8 +416,15 @@ const getStatusLabel = (status) =>
         failed: t('system.backups.status.failed'),
     })[status] || status;
 
-const confirmDelete = (backup) => {
-    if (confirm(t('system.backups.confirm_delete', { name: backup.name }))) {
+const confirmDelete = async (backup) => {
+    const ok = await confirm({
+        title: t('system.actions.delete'),
+        message: t('system.backups.confirm_delete', { name: backup.name }),
+        confirmText: t('system.actions.delete'),
+        cancelText: t('common.cancel'),
+        type: 'danger',
+    });
+    if (ok) {
         router.delete(`/system/backups/${backup.id}`);
     }
 };

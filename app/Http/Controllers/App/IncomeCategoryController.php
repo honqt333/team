@@ -51,9 +51,11 @@ class IncomeCategoryController extends Controller
             'name_ar' => 'required|string|max:255',
             'name_en' => 'required|string|max:255',
             'transaction_type' => 'required|string|in:revenue,expense',
+            'is_taxable' => 'nullable|boolean',
             'is_active' => 'boolean',
         ]);
 
+        $validated['is_taxable'] = $request->boolean('is_taxable');
         $validated['updated_by'] = auth()->id();
 
         IncomeCategory::create($validated);
@@ -70,9 +72,11 @@ class IncomeCategoryController extends Controller
             'name_ar' => 'required|string|max:255',
             'name_en' => 'required|string|max:255',
             'transaction_type' => 'required|string|in:revenue,expense',
+            'is_taxable' => 'nullable|boolean',
             'is_active' => 'boolean',
         ]);
 
+        $validated['is_taxable'] = $request->boolean('is_taxable');
         $validated['updated_by'] = auth()->id();
         $incomeCategory->update($validated);
 

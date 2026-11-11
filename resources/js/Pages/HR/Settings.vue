@@ -510,7 +510,7 @@
                                             class="w-24 rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 text-center font-bold text-lg"
                                         />
                                         <span class="text-red-700 dark:text-red-300">
-                                            {{ $t('common.currency') }} / {{ $t('common.minute') }}
+                                            {{ activeCurrencySymbol }} / {{ $t('common.minute') }}
                                         </span>
                                     </div>
                                 </div>
@@ -564,7 +564,7 @@
                                                 attendanceSettingsForm.absence_deduction_type ===
                                                 'percentage'
                                                     ? '%'
-                                                    : $t('common.currency') +
+                                                    : activeCurrencySymbol +
                                                       ' / ' +
                                                       $t('common.day')
                                             }}
@@ -602,7 +602,7 @@
                                             class="w-24 rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 text-center font-bold text-lg"
                                         />
                                         <span class="text-emerald-700 dark:text-emerald-300">
-                                            {{ $t('common.currency') }} / {{ $t('common.hour') }}
+                                            {{ activeCurrencySymbol }} / {{ $t('common.hour') }}
                                         </span>
                                     </div>
                                     <div class="mt-3">
@@ -1037,6 +1037,7 @@ import RadioGroup from '@/Components/Common/RadioGroup.vue';
 import { ref, computed } from 'vue';
 import { Link, router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
+import { useNumberFormat } from '@/Composables/useNumberFormat';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import PageHeader from '@/Components/PageHeader.vue';
 import BackButton from '@/Components/BackButton.vue';
@@ -1052,6 +1053,7 @@ import { usePermission } from '@/Composables/usePermission';
 import { useFormScrollToError } from '@/Composables/useFormScrollToError';
 
 const { t } = useI18n();
+const { activeCurrencySymbol } = useNumberFormat();
 const { success } = useToast();
 const { confirm } = useConfirm();
 const { can, isAnyAdmin } = usePermission();

@@ -40,7 +40,15 @@ class FinancialReportsController extends Controller
         $range = (string) ($request->input('range') ?: 'this_month');
         $startDate = $request->input('start_date');
         $endDate = $request->input('end_date');
-        $centerFilter = $this->resolveCenterFilter($request, $centerId);
+        $requestedCenter = $request->input('center_id');
+
+        if ($requestedCenter === 'admin' || $requestedCenter === '0') {
+            $centerFilter = 'admin';
+        } elseif ($requestedCenter === 'all' || ! $request->filled('center_id')) {
+            $centerFilter = 'all';
+        } else {
+            $centerFilter = (string) $requestedCenter;
+        }
         $storeSalesOnly = $request->boolean('store_sales_only');
 
         [$from, $to] = $this->resolveDateRange($range, $startDate, $endDate);
@@ -52,6 +60,9 @@ class FinancialReportsController extends Controller
         if ($centerFilter !== 'all' && is_numeric($centerFilter)) {
             $targetCenters = $accessibleCenters->where('id', (int) $centerFilter);
         }
+
+        $includeAdmin = ($centerFilter === 'all' || $centerFilter === 'admin' || $centerFilter === '0');
+        $includeBranches = ($centerFilter !== 'admin' && $centerFilter !== '0');
 
         $results = [];
         $overall = [
@@ -141,66 +152,120 @@ class FinancialReportsController extends Controller
             'profit' => 0.0,
         ];
 
-        $targetCenters->load('address');
         $tenant = auth()->user()->tenant;
+        $adminName = __('messages.company_transactions.administration_center', [], app()->getLocale())
+            ?: (app()->getLocale() === 'ar' ? 'الإدارة العامة' : 'Administration');
 
-        foreach ($targetCenters as $c) {
-            $statement = $this->financialSummaryService->computeCenterFinancialStatement($tenantId, (int) $c->id, $from, $to, $storeSalesOnly);
-
-            $addr = $c->address;
-            $addressParts = [];
-
-            if ($addr) {
-                if (! empty($addr->city)) {
-                    $addressParts[] = $addr->city;
-                }
-
-                if (! empty($addr->district)) {
-                    $addressParts[] = 'حي '.$addr->district;
-                }
-
-                if (! empty($addr->street)) {
-                    $addressParts[] = 'شارع '.$addr->street;
-                }
-
-                if (! empty($addr->building_number)) {
-                    $addressParts[] = 'مبنى '.$addr->building_number;
-                }
-
-                if (! empty($addr->address_line)) {
-                    $addressParts[] = $addr->address_line;
-                }
-            }
-            $formattedAddress = implode('، ', $addressParts);
+        // 1. Administration statement (center_id = null)
+        if ($includeAdmin) {
+            $adminStatement = $this->financialSummaryService->computeCenterFinancialStatement(
+                $tenantId,
+                null,
+                $from,
+                $to,
+                $storeSalesOnly
+            );
 
             $results[] = [
+                'center_id' => null,
+                'center_name' => $adminName,
+                'is_administration' => true,
                 'shop' => [
-                    'id' => $c->id,
-                    'name' => $c->name,
-                    'address' => $formattedAddress,
-                    'address_details' => $addr ? [
-                        'city' => $addr->city,
-                        'district' => $addr->district,
-                        'street' => $addr->street,
-                        'building_number' => $addr->building_number,
-                        'postal_code' => $addr->postal_code,
-                    ] : null,
-                    'postalCode' => $addr->postal_code ?? '',
-                    'city' => $addr->city ?? '',
-                    'district' => $addr->district ?? '',
-                    'region' => $addr->city ?? '',
+                    'id' => 'admin',
+                    'center_id' => null,
+                    'name' => $adminName,
+                    'center_name' => $adminName,
+                    'address' => $tenant->address ?? '',
+                    'address_details' => null,
+                    'postalCode' => '',
+                    'city' => $tenant->city ?? '',
+                    'district' => '',
+                    'region' => '',
                     'country' => 'المملكة العربية السعودية',
-                    'isWorkShop' => true,
-                    'commercial_register' => $c->license_number ?: ($tenant->cr_number ?? ''),
-                    'vat_number' => $c->vat_number ?: ($tenant->vat_number ?? ''),
-                    'phone' => $c->phone ?: ($tenant->phone ?? ''),
+                    'isWorkShop' => false,
+                    'is_administration' => true,
+                    'commercial_register' => $tenant->cr_number ?? '',
+                    'vat_number' => $tenant->taxSettings->tax_number ?? $tenant->tax_number ?? $tenant->vat_number ?? '',
+                    'phone' => $tenant->phone ?? '',
                 ],
-                'shopFinancialSummary' => $statement,
+                'shopFinancialSummary' => $adminStatement,
             ];
 
             foreach ($overall as $key => $val) {
-                if (isset($statement[$key])) {
-                    $overall[$key] += (float) $statement[$key];
+                if (isset($adminStatement[$key])) {
+                    $overall[$key] += (float) $adminStatement[$key];
+                }
+            }
+        }
+
+        // 2. Physical branches statements
+        if ($includeBranches) {
+            $targetCenters->load('address');
+
+            foreach ($targetCenters as $c) {
+                $statement = $this->financialSummaryService->computeCenterFinancialStatement($tenantId, (int) $c->id, $from, $to, $storeSalesOnly);
+
+                $addr = $c->address;
+                $addressParts = [];
+
+                if ($addr) {
+                    if (! empty($addr->city)) {
+                        $addressParts[] = $addr->city;
+                    }
+
+                    if (! empty($addr->district)) {
+                        $addressParts[] = 'حي '.$addr->district;
+                    }
+
+                    if (! empty($addr->street)) {
+                        $addressParts[] = 'شارع '.$addr->street;
+                    }
+
+                    if (! empty($addr->building_number)) {
+                        $addressParts[] = 'مبنى '.$addr->building_number;
+                    }
+
+                    if (! empty($addr->address_line)) {
+                        $addressParts[] = $addr->address_line;
+                    }
+                }
+                $formattedAddress = implode('، ', $addressParts);
+
+                $results[] = [
+                    'center_id' => (int) $c->id,
+                    'center_name' => $c->name,
+                    'is_administration' => false,
+                    'shop' => [
+                        'id' => $c->id,
+                        'center_id' => (int) $c->id,
+                        'name' => $c->name,
+                        'center_name' => $c->name,
+                        'address' => $formattedAddress,
+                        'address_details' => $addr ? [
+                            'city' => $addr->city,
+                            'district' => $addr->district,
+                            'street' => $addr->street,
+                            'building_number' => $addr->building_number,
+                            'postal_code' => $addr->postal_code,
+                        ] : null,
+                        'postalCode' => $addr->postal_code ?? '',
+                        'city' => $addr->city ?? '',
+                        'district' => $addr->district ?? '',
+                        'region' => $addr->city ?? '',
+                        'country' => 'المملكة العربية السعودية',
+                        'isWorkShop' => true,
+                        'is_administration' => false,
+                        'commercial_register' => $c->license_number ?: ($tenant->cr_number ?? ''),
+                        'vat_number' => $c->vat_number ?: ($tenant->vat_number ?? ''),
+                        'phone' => $c->phone ?: ($tenant->phone ?? ''),
+                    ],
+                    'shopFinancialSummary' => $statement,
+                ];
+
+                foreach ($overall as $key => $val) {
+                    if (isset($statement[$key])) {
+                        $overall[$key] += (float) $statement[$key];
+                    }
                 }
             }
         }
@@ -234,7 +299,15 @@ class FinancialReportsController extends Controller
         $range = (string) ($request->input('range') ?: 'this_month');
         $startDate = $request->input('start_date');
         $endDate = $request->input('end_date');
-        $centerFilter = $this->resolveCenterFilter($request, $centerId);
+        $requestedCenter = $request->input('center_id');
+
+        if ($requestedCenter === 'admin' || $requestedCenter === '0') {
+            $centerFilter = 'admin';
+        } elseif ($requestedCenter === 'all' || ! $request->filled('center_id')) {
+            $centerFilter = 'all';
+        } else {
+            $centerFilter = (string) $requestedCenter;
+        }
         $storeSalesOnly = $request->boolean('store_sales_only');
 
         [$from, $to] = $this->resolveDateRange($range, $startDate, $endDate);
@@ -246,12 +319,15 @@ class FinancialReportsController extends Controller
             $targetCenters = $accessibleCenters->where('id', (int) $centerFilter);
         }
 
+        $includeAdmin = ($centerFilter === 'all' || $centerFilter === 'admin' || $centerFilter === '0');
+        $includeBranches = ($centerFilter !== 'admin' && $centerFilter !== '0');
+
         $headers = [
             'Content-Type' => 'text/csv; charset=UTF-8',
             'Content-Disposition' => 'attachment; filename="financial_summary_'.date('Y-m-d_His').'.csv"',
         ];
 
-        return response()->stream(function () use ($targetCenters, $tenantId, $from, $to, $storeSalesOnly) {
+        return response()->stream(function () use ($targetCenters, $tenantId, $from, $to, $storeSalesOnly, $includeAdmin, $includeBranches) {
             $handle = fopen('php://output', 'w');
             fprintf($handle, chr(0xEF).chr(0xBB).chr(0xBF));
 
@@ -266,10 +342,7 @@ class FinancialReportsController extends Controller
                 'الصافي شامل الضريبة',
             ]);
 
-            foreach ($targetCenters as $c) {
-                $st = $this->financialSummaryService->computeCenterFinancialStatement($tenantId, (int) $c->id, $from, $to, $storeSalesOnly);
-                $shopName = $c->name;
-
+            $writeStatementRows = function (string $shopName, array $st) use ($handle) {
                 $rows = [
                     ['فواتير المبيعات', 'الخدمات', $st['invoicesServicesSumGrossAmount'], $st['invoicesServicesSumDiscountAmount'], $st['invoicesServicesSumSubTotal'], $st['invoicesServicesSumVATAmount'], $st['invoicesServicesSumNetAmount']],
                     ['فواتير المبيعات', 'قطع الغيار', $st['invoicesSparePartsSumGrossAmount'], $st['invoicesSparePartsSumDiscountAmount'], $st['invoicesSparePartsSumSubTotal'], $st['invoicesSparePartsSumVATAmount'], $st['invoicesSparePartsSumNetAmount']],
@@ -311,6 +384,20 @@ class FinancialReportsController extends Controller
                         number_format((float) $row[5], 2, '.', ''),
                         number_format((float) $row[6], 2, '.', ''),
                     ]);
+                }
+            };
+
+            if ($includeAdmin) {
+                $adminStatement = $this->financialSummaryService->computeCenterFinancialStatement($tenantId, null, $from, $to, $storeSalesOnly);
+                $adminName = __('messages.company_transactions.administration_center', [], app()->getLocale())
+                    ?: (app()->getLocale() === 'ar' ? 'الإدارة العامة' : 'Administration');
+                $writeStatementRows($adminName, $adminStatement);
+            }
+
+            if ($includeBranches) {
+                foreach ($targetCenters as $c) {
+                    $st = $this->financialSummaryService->computeCenterFinancialStatement($tenantId, (int) $c->id, $from, $to, $storeSalesOnly);
+                    $writeStatementRows($c->name, $st);
                 }
             }
 

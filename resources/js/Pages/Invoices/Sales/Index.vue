@@ -520,7 +520,7 @@ import { useNumberFormat } from '@/Composables/useNumberFormat';
 import { useServerTable } from '@/Composables/useServerTable';
 
 const { t } = useI18n();
-const { toEnglish } = useNumberFormat();
+const { toEnglish, formatMoney: formatCurrency } = useNumberFormat();
 
 const props = defineProps({
     invoices: { type: Object, default: () => ({}) },
@@ -715,12 +715,7 @@ const formatDate = (date) => {
     return new Date(date).toLocaleDateString('en-GB', { numberingSystem: 'latn' });
 };
 
-const formatCurrency = (amount) =>
-    new Intl.NumberFormat('en-GB', {
-        style: 'currency',
-        currency: 'SAR',
-        numberingSystem: 'latn',
-    }).format(amount || 0);
+// formatCurrency provided by useNumberFormat()
 
 const getDiscount = (invoice) => {
     if (!invoice.work_order) return 0;

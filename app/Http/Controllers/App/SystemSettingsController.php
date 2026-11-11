@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Models\VehicleMake;
 use App\Services\Storage\TenantAttachmentsService;
 use App\Support\Permissions;
+use App\Support\PrintDocumentRegistry;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -76,53 +77,27 @@ class SystemSettingsController extends Controller
     {
         $tenant = auth()->user()->tenant;
         $printSettings = $tenant->print_settings ?? [];
-
-        // Comprehensive document types aligned with PrintService
-        $documentTypes = [
-            // App invoices
-            'invoice' => 'فاتورة',
-            'proforma_invoice' => 'فاتورة أولية',
-            'credit_note' => 'إشعار دائن',
-            'parts_invoice' => 'فاتورة قطع غيار',
-
-            // Quotes
-            'quotation' => 'عرض سعر',
-
-            // Work orders
-            'work_order' => 'كرت صيانة',
-            'condition_report' => 'تقرير حالة المركبة',
-            'payments' => 'سندات الدفع والمدفوعات',
-
-            // Receipts
-            'receipt' => 'سند قبض مالي',
-            'delivery_note' => 'سند تسليم',
-
-            // Purchasing
-            'purchase_invoice' => 'فاتورة مشتريات',
-            'purchase_return' => 'فاتورة مرتجع مشتريات',
-
-            // Billing
-            'subscription_invoice' => 'فاتورة اشتراك',
-
-            // HR
-            'payslip' => 'سند راتب',
-            'payroll' => 'كشف رواتب',
-            'attendance' => 'تقرير حضور',
-            'employee' => 'ملف موظف',
-
-            // Reports
-            'customers' => 'قائمة عملاء',
-            'vehicles' => 'قائمة مركبات',
-        ];
+        $storedDocs = is_array($printSettings['documents'] ?? null) ? $printSettings['documents'] : [];
+        $legacyAliases = PrintDocumentRegistry::legacyAliases();
 
         $documents = [];
 
-        foreach ($documentTypes as $key => $name) {
-            $existing = $printSettings['documents'][$key] ?? [];
+        foreach (PrintDocumentRegistry::all() as $key => $meta) {
+            $existing = $storedDocs[$key] ?? [];
+
+            if (empty($existing)) {
+                foreach ($legacyAliases as $alias => $target) {
+                    if ($target === $key && ! empty($storedDocs[$alias])) {
+                        $existing = $storedDocs[$alias];
+                        break;
+                    }
+                }
+            }
+
             $documents[$key] = [
-                'name' => $name,
-                'title_ar' => $existing['title_ar'] ?? ($existing['title'] ?? $name),
-                'title_en' => $existing['title_en'] ?? ($existing['title'] ?? $name),
+                'name' => $meta['name_ar'],
+                'title_ar' => $existing['title_ar'] ?? ($existing['title'] ?? $meta['name_ar']),
+                'title_en' => $existing['title_en'] ?? ($existing['title'] ?? $meta['name_en']),
                 'template' => $existing['template'] ?? null,
                 'terms' => is_array($existing['terms'] ?? null) ? array_values(array_filter($existing['terms'], fn ($t) => ! empty($t['text_ar']) || ! empty($t['text_en']))) : [],
                 'print_terms' => $existing['print_terms'] ?? true,
@@ -138,6 +113,7 @@ class SystemSettingsController extends Controller
         }
 
         return Inertia::render('Settings/Print/Index', [
+            'document_meta' => PrintDocumentRegistry::all(),
             'print_settings' => [
                 'documents' => $documents,
                 'visual' => array_merge([
@@ -146,6 +122,8 @@ class SystemSettingsController extends Controller
                     'primary_color' => '#fbbf24',
                     'footer_text' => '',
                     'stamp_url' => '',
+                    'show_currency_symbol' => true,
+                    'currency_display_style' => 'text',
                 ], $printSettings['visual'] ?? []),
             ],
         ]);
@@ -180,20 +158,29 @@ class SystemSettingsController extends Controller
                     'visual.show_logo' => 'nullable|boolean',
                     'visual.primary_color' => 'nullable|string|max:7',
                     'visual.footer_text' => 'nullable|string',
+                    'visual.show_currency_symbol' => 'nullable|boolean',
+                    'visual.currency_display_style' => 'nullable|in:symbol,text',
                 ]);
 
-                // Add timestamps and user info to changed documents
+                // Add timestamps and user info to changed documents; strip non-operational / phantom keys
                 $currentSettings = $tenant->print_settings ?? [];
-                $newDocuments = $validated['documents'];
+                $newDocuments = [];
 
-                foreach ($newDocuments as $key => $doc) {
-                    $oldDoc = $currentSettings['documents'][$key] ?? null;
+                foreach ($validated['documents'] as $rawKey => $doc) {
+                    $canonicalKey = PrintDocumentRegistry::normalizeKey((string) $rawKey);
 
-                    // Simplified check: if any boolean or string field changed
-                    if (json_encode($doc) !== json_encode($oldDoc)) {
-                        $newDocuments[$key]['updated_at'] = now()->format('Y-m-d H:i:s');
-                        $newDocuments[$key]['updated_by'] = auth()->user()->name;
+                    if ($canonicalKey === null || ! PrintDocumentRegistry::isSupported($canonicalKey) || ! is_array($doc)) {
+                        continue;
                     }
+
+                    $oldDoc = $currentSettings['documents'][$canonicalKey] ?? null;
+
+                    if (json_encode($doc) !== json_encode($oldDoc)) {
+                        $doc['updated_at'] = now()->format('Y-m-d H:i:s');
+                        $doc['updated_by'] = auth()->user()->name;
+                    }
+
+                    $newDocuments[$canonicalKey] = $doc;
                 }
 
                 $tenant->update([
@@ -212,6 +199,6 @@ class SystemSettingsController extends Controller
                 break;
         }
 
-        return back()->with('success', 'تم حفظ الإعدادات بنجاح');
+        return back()->with('success', __('messages.system.settings.saved_success'));
     }
 }

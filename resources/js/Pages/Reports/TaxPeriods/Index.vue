@@ -338,26 +338,13 @@
                 </div>
 
                 <!-- Pagination if multiple pages -->
-                <div
-                    v-if="taxPeriods.links && taxPeriods.links.length > 3"
-                    class="p-4 border-t border-gray-100 dark:border-gray-700 flex justify-center"
-                >
-                    <div class="flex flex-wrap gap-1">
-                        <Link
-                            v-for="(link, lIdx) in taxPeriods.links"
-                            :key="lIdx"
-                            :href="link.url || '#'"
-                            :class="[
-                                'px-3 py-1.5 text-xs font-medium rounded-lg transition-colors',
-                                link.active
-                                    ? 'bg-emerald-600 text-white'
-                                    : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600',
-                                !link.url ? 'opacity-40 cursor-not-allowed' : '',
-                            ]"
-                            v-html="link.label"
-                        />
-                    </div>
-                </div>
+                <AppPagination
+                    class="print:hidden"
+                    :links="taxPeriods.links || []"
+                    :from="taxPeriods.from"
+                    :to="taxPeriods.to"
+                    :total="taxPeriods.total"
+                />
             </div>
 
             <!-- Tax Period Selection Modal -->
@@ -553,13 +540,16 @@
 
 <script setup>
 import DataTable from '@/Components/Common/DataTable.vue';
+import AppPagination from '@/Components/Common/AppPagination.vue';
 import { ref, computed } from 'vue';
 import { Head, Link, router } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 import { useI18n } from 'vue-i18n';
+import { useNumberFormat } from '@/Composables/useNumberFormat';
 
 const { t } = useI18n();
+const { formatMoney } = useNumberFormat();
 
 const props = defineProps({
     taxPeriods: Object,
@@ -606,14 +596,7 @@ const resetFilters = () => {
     applyFilters();
 };
 
-const formatCurrency = (val) => {
-    const num = Number(val || 0);
-    return (
-        num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) +
-        ' ' +
-        t('common.currency')
-    );
-};
+const formatCurrency = (val) => formatMoney(val);
 
 const formatDate = (dateStr) => {
     if (!dateStr) return '';

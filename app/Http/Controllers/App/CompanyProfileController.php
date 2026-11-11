@@ -12,9 +12,11 @@ use App\Models\IncomeCategory;
 use App\Models\Invoice;
 use App\Models\PaymentSettings;
 use App\Models\PurchaseInvoice;
+use App\Models\TaxPeriod;
 use App\Models\Tenant;
 use App\Services\Payment\PaymentManager;
 use App\Services\Zatca\ZatcaOnboardingService;
+use App\Support\CountryCurrencyRegistry;
 use App\Support\Media\ImageType;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -37,6 +39,10 @@ class CompanyProfileController extends Controller
         // Get the admin user (first user created for this tenant, usually the owner)
         $adminUser = auth()->user();
 
+        $country = CountryCurrencyRegistry::tenantCountry($tenant);
+        $currency = CountryCurrencyRegistry::tenantCurrency($tenant);
+        $defaultVatRate = CountryCurrencyRegistry::defaultVatRate($country);
+
         return Inertia::render('Settings/Company/Index', [
             'profile' => [
                 'legal_name' => $tenant->legal_name,
@@ -47,8 +53,9 @@ class CompanyProfileController extends Controller
                 'cr_number' => $tenant->cr_number,
                 'iban' => $tenant->iban,
                 'logo_url' => $tenant->logo_path ? Storage::url($tenant->logo_path) : asset('images/brand/logo-256.png'),
-                'country' => $tenant->country ?? config('app.default_country', 'SA'),
-                'currency' => $tenant->currency ?? config('app.default_currency', 'SAR'),
+                'country' => $country,
+                'currency' => $currency,
+                'timezone' => $tenant->timezone ?? CountryCurrencyRegistry::countryMeta($country)['timezone'],
             ],
             'contact' => [
                 'phone' => $tenant->phone,
@@ -66,15 +73,15 @@ class CompanyProfileController extends Controller
             ] : null,
             'vat' => $tenant->taxSettings ? [
                 'vat_enabled' => $tenant->taxSettings->vat_enabled,
-                'services_vat_rate' => $tenant->taxSettings->services_vat_rate ?? 15,
-                'parts_vat_rate' => $tenant->taxSettings->parts_vat_rate ?? 15,
+                'services_vat_rate' => $tenant->taxSettings->services_vat_rate ?? $defaultVatRate,
+                'parts_vat_rate' => $tenant->taxSettings->parts_vat_rate ?? $defaultVatRate,
                 'services_inclusive' => $tenant->taxSettings->services_inclusive ?? false,
                 'parts_inclusive' => $tenant->taxSettings->parts_inclusive ?? false,
                 'show_amount_before_vat' => $tenant->taxSettings->show_amount_before_vat ?? true,
             ] : [
                 'vat_enabled' => false,
-                'services_vat_rate' => 15,
-                'parts_vat_rate' => 15,
+                'services_vat_rate' => $defaultVatRate,
+                'parts_vat_rate' => $defaultVatRate,
                 'services_inclusive' => false,
                 'parts_inclusive' => false,
                 'show_amount_before_vat' => true,
@@ -111,16 +118,27 @@ class CompanyProfileController extends Controller
                 'email' => $adminUser->email,
             ],
             'branches' => $tenant->centers()->select('id', 'name', 'slug', 'is_active', 'created_at')->get(),
-            'company_transactions' => fn () => CompanyTransaction::with(['incomeCategory', 'approvedBy', 'updatedBy'])
+            'company_transactions' => fn () => CompanyTransaction::with([
+                'incomeCategory',
+                'approvedBy:id,name',
+                'updatedBy:id,name',
+                'invoice:id,invoice_number',
+                'purchaseInvoice:id,invoice_number,code',
+            ])
                 ->whereNull('center_id')
                 ->latest('transaction_date')
                 ->get(),
+            'taxPeriods' => TaxPeriod::where('tenant_id', $tenant->id)
+                ->orderByDesc('start_date')
+                ->get(['id', 'name as period_name', 'name', 'start_date', 'end_date']),
+            'vatRate' => (float) ($tenant->taxSettings->vat_rate ?? $tenant->taxSettings->services_vat_rate ?? $defaultVatRate ?? 15),
             'income_categories' => fn () => IncomeCategory::active()
                 ->get()
                 ->map(fn ($cat) => [
                     'id' => $cat->id,
                     'name' => $cat->name,
                     'transaction_type' => $cat->transaction_type,
+                    'is_taxable' => (bool) $cat->is_taxable,
                 ]),
             'company_invoices' => fn () => [
                 'sales' => Invoice::withoutGlobalScope('center_scoped')

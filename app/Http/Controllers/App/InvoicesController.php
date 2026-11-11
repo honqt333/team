@@ -499,7 +499,7 @@ class InvoicesController extends Controller
                     ->from('company_transactions')
                     ->whereColumn('company_transactions.purchase_invoice_id', 'purchase_invoices.id');
             })
-            ->with(['supplier', 'purchaseOrder'])
+            ->with(['supplier', 'purchaseOrder', 'workOrder:id,code'])
             ->when($request->input('search'), function ($q, $search) {
                 $q->where(function ($query) use ($search) {
                     $query->where('code', 'like', "%{$search}%")
@@ -586,6 +586,13 @@ class InvoicesController extends Controller
         $defaultWarehouse = Warehouse::forCenter($centerId)->default()->first();
         $warehouses = Warehouse::forCenter($centerId)->active()->get(['id', 'name']);
         $units = InventoryUnit::where('is_active', true)->get(['id', 'name_ar', 'name_en']);
+        $workOrders = WorkOrder::where('tenant_id', $tenantId)
+            ->where('center_id', $centerId)
+            ->whereNotIn('status', [WorkOrder::STATUS_CANCELLED])
+            ->with(['customer:id,name', 'vehicle:id,plate_number'])
+            ->latest('id')
+            ->limit(100)
+            ->get(['id', 'code', 'customer_id', 'vehicle_id', 'status']);
 
         return Inertia::render('Invoices/Purchasing/Index', [
             'invoices' => $invoices,
@@ -607,6 +614,7 @@ class InvoicesController extends Controller
             'defaultWarehouse' => $defaultWarehouse,
             'warehouses' => $warehouses,
             'units' => $units,
+            'workOrders' => $workOrders,
         ]);
     }
 }

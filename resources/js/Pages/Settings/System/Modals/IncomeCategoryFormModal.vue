@@ -90,6 +90,23 @@
                         />
                     </div>
 
+                    <!-- Is Taxable (Default Taxable) -->
+                    <div
+                        class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg"
+                    >
+                        <div>
+                            <label
+                                class="block text-sm font-semibold text-gray-700 dark:text-gray-300"
+                            >
+                                {{ $t('company_profile.income_categories.form.is_taxable') }}
+                            </label>
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                                {{ $t('company_profile.income_categories.form.is_taxable_hint') }}
+                            </p>
+                        </div>
+                        <AppToggle v-model="form.is_taxable" color="success" />
+                    </div>
+
                     <!-- Is Active -->
                     <div
                         class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg"
@@ -149,6 +166,7 @@ const form = useForm({
     name_ar: props.incomeCategory?.name_ar || '',
     name_en: props.incomeCategory?.name_en || '',
     transaction_type: props.incomeCategory?.transaction_type || 'revenue',
+    is_taxable: props.incomeCategory?.is_taxable ?? true,
     is_active: props.incomeCategory?.is_active ?? true,
 });
 

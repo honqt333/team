@@ -26,7 +26,7 @@
                 </div>
                 <p class="text-3xl font-bold">{{ (employee.base_salary || 0).toLocaleString() }}</p>
                 <p class="text-white/60 text-xs mt-1">
-                    {{ $t('common.currency') }} / {{ $t('hr.employees.monthly') }}
+                    {{ activeCurrencySymbol }} / {{ $t('hr.employees.monthly') }}
                 </p>
             </div>
 
@@ -62,7 +62,7 @@
                     {{ $t('hr.financial.payroll.net_salary') }}
                 </p>
                 <p class="text-3xl font-bold">{{ netSalary.toLocaleString() }}</p>
-                <p class="text-white/60 text-xs mt-1">{{ $t('common.currency') }}</p>
+                <p class="text-white/60 text-xs mt-1">{{ activeCurrencySymbol }}</p>
             </div>
         </div>
 
@@ -82,7 +82,7 @@
                     </p>
                     <p class="text-sm text-amber-700 dark:text-amber-300">
                         {{ employee.gosi_rate || 9.75 }}% = {{ gosiAmount.toLocaleString() }}
-                        {{ $t('common.currency') }}
+                        {{ activeCurrencySymbol }}
                     </p>
                 </div>
             </div>
@@ -111,7 +111,7 @@
                         {{ $t('hr.financial.payroll.expected_amount') }}
                     </span>
                     <span class="text-2xl font-bold text-blue-600 dark:text-blue-400">
-                        {{ netSalary.toLocaleString() }} {{ $t('common.currency') }}
+                        {{ netSalary.toLocaleString() }} {{ activeCurrencySymbol }}
                     </span>
                 </div>
             </div>
@@ -242,7 +242,7 @@
                                     class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
                                 >
                                     {{ $t('hr.financial.payroll.base_salary') }} ({{
-                                        $t('common.currency')
+                                        activeCurrencySymbol
                                     }})
                                 </label>
                                 <input
@@ -295,6 +295,9 @@
 <script setup>
 import { ref, computed, watch } from 'vue';
 import { useForm } from '@inertiajs/vue3';
+import { useNumberFormat } from '@/Composables/useNumberFormat';
+
+const { activeCurrencySymbol } = useNumberFormat();
 
 const props = defineProps({
     employee: Object,

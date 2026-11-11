@@ -9,8 +9,10 @@ import OverviewTab from '@/Components/DashboardV2/tabs/OverviewTab.vue';
 import FinancialTab from '@/Components/DashboardV2/tabs/FinancialTab.vue';
 import OperationsTab from '@/Components/DashboardV2/tabs/OperationsTab.vue';
 import AlertsTab from '@/Components/DashboardV2/tabs/AlertsTab.vue';
+import { useNumberFormat } from '@/Composables/useNumberFormat';
 
 const { t } = useI18n();
+const { activeCurrencyCode, activeCurrencySymbol } = useNumberFormat();
 
 const props = defineProps({
     userContext: {
@@ -38,10 +40,16 @@ const props = defineProps({
     topServices: { type: Array, default: () => [] },
     technicianPerformance: { type: Array, default: () => [] },
     topCustomers: { type: Array, default: () => [] },
-    currency: { type: String, default: 'SAR' },
+    checkedOutPaymentDue: { type: Object, default: () => null },
+    activeWorkshopVehicles: { type: Array, default: () => [] },
+    workingTechniciansNow: { type: Array, default: () => [] },
+    currency: { type: String, default: '' },
 });
 
 const page = usePage();
+const dashboardCurrency = computed(
+    () => props.currency || activeCurrencySymbol.value || activeCurrencyCode.value
+);
 const userName = computed(() => page.props.auth?.user?.name?.split(' ')[0] || '');
 
 const greeting = computed(() => {
@@ -135,6 +143,9 @@ function refresh() {
             'topServices',
             'technicianPerformance',
             'topCustomers',
+            'checkedOutPaymentDue',
+            'activeWorkshopVehicles',
+            'workingTechniciansNow',
         ],
         onFinish: () => {
             isRefreshing.value = false;
@@ -252,6 +263,7 @@ function refresh() {
                     (alerts?.overdueWorkOrders ?? 0) > 0 ||
                     (readyForDelivery?.length ?? 0) > 0 ||
                     (todayAppointments?.length ?? 0) > 0 ||
+                    (userContext?.canViewFinancials && (checkedOutPaymentDue?.count ?? 0) > 0) ||
                     (userContext?.canViewInventory && (alerts?.lowStock ?? 0) > 0)
                 "
                 class="flex flex-wrap items-center gap-2.5 rounded-2xl border border-slate-200/80 bg-white/70 backdrop-blur-sm p-3.5 dark:border-slate-800 dark:bg-slate-800/60 shadow-2xs"
@@ -310,6 +322,20 @@ function refresh() {
                     <span class="h-1.5 w-1.5 rounded-full bg-amber-500"></span>
                     <span>{{ $t('dashboard.low_stock_parts') }}: {{ alerts.lowStock }}</span>
                 </Link>
+
+                <!-- Checked-Out Payment Due -->
+                <Link
+                    v-if="userContext?.canViewFinancials && (checkedOutPaymentDue?.count ?? 0) > 0"
+                    href="/app/work-orders?status=done"
+                    class="inline-flex items-center gap-1.5 rounded-xl bg-orange-50 px-3 py-1.5 text-xs font-semibold text-orange-700 transition hover:bg-orange-100 dark:bg-orange-950/50 dark:text-orange-300 dark:hover:bg-orange-900/60"
+                >
+                    <span class="h-1.5 w-1.5 rounded-full bg-orange-500"></span>
+                    <span>
+                        {{ $t('dashboard.checked_out_payment_due') }}:
+                        {{ checkedOutPaymentDue.count }} ({{ checkedOutPaymentDue.amount }}
+                        {{ dashboardCurrency }})
+                    </span>
+                </Link>
             </div>
 
             <!-- Approved Standard AppTabs (Pills Variant) -->
@@ -335,7 +361,7 @@ function refresh() {
                         :ready-for-delivery="readyForDelivery"
                         :my-assigned-work-orders="myAssignedWorkOrders"
                         :top-services="topServices"
-                        :currency="currency"
+                        :currency="dashboardCurrency"
                     />
 
                     <FinancialTab
@@ -344,7 +370,7 @@ function refresh() {
                         :charts="charts"
                         :recent-invoices="recentInvoices"
                         :top-customers="topCustomers"
-                        :currency="currency"
+                        :currency="dashboardCurrency"
                     />
 
                     <OperationsTab
@@ -357,7 +383,9 @@ function refresh() {
                         :today-new-work-orders="todayNewWorkOrders"
                         :top-services="topServices"
                         :technician-performance="technicianPerformance"
-                        :currency="currency"
+                        :active-workshop-vehicles="activeWorkshopVehicles"
+                        :working-technicians-now="workingTechniciansNow"
+                        :currency="dashboardCurrency"
                     />
 
                     <AlertsTab
@@ -365,7 +393,7 @@ function refresh() {
                         :user-context="userContext"
                         :alerts="alerts"
                         :recent-invoices="recentInvoices"
-                        :currency="currency"
+                        :currency="dashboardCurrency"
                     />
                 </Transition>
             </div>

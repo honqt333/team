@@ -14,8 +14,10 @@ use App\Models\Department;
 use App\Models\HR\Employee;
 use App\Models\InventoryUnit;
 use App\Models\Part;
+use App\Models\PurchaseInvoice;
 use App\Models\Service;
 use App\Models\Setting;
+use App\Models\Supplier;
 use App\Models\VehicleColor;
 use App\Models\VehicleMake;
 use App\Models\VehicleModel;
@@ -25,8 +27,10 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
 use Maatwebsite\Excel\Facades\Excel;
@@ -377,6 +381,7 @@ class WorkOrderController
             'inspections' => fn ($q) => $q->withoutGlobalScope('center_scoped')->with('performedBy'),
             'invoice' => fn ($q) => $q->withoutGlobalScope('center_scoped'),
             'creditNotes' => fn ($q) => $q->withoutGlobalScope('center_scoped'),
+            'purchaseInvoices' => fn ($q) => $q->with('supplier:id,name')->orderByDesc('issue_date'),
         ]);
 
         // TODO(refactor): Move tab-specific relations to partial-reload endpoints.
@@ -450,6 +455,26 @@ class WorkOrderController
             ->select('id', 'name_ar', 'name_en')
             ->get();
 
+        $availablePurchaseInvoices = PurchaseInvoice::query()
+            ->where('tenant_id', $workOrder->tenant_id)
+            ->where('center_id', $workOrder->center_id)
+            ->whereNull('work_order_id')
+            ->where('status', '!=', PurchaseInvoice::STATUS_CANCELLED)
+            ->whereNotExists(function ($q) {
+                $q->select(DB::raw(1))
+                    ->from('company_transactions')
+                    ->whereColumn('company_transactions.purchase_invoice_id', 'purchase_invoices.id');
+            })
+            ->with('supplier:id,name')
+            ->latest('id')
+            ->limit(100)
+            ->get(['id', 'code', 'invoice_number', 'supplier_id', 'issue_date', 'subtotal', 'tax_amount', 'total', 'balance', 'status']);
+
+        $suppliers = Supplier::forTenant($workOrder->tenant_id)
+            ->forCenter($workOrder->center_id)
+            ->active()
+            ->get(['id', 'name']);
+
         // The inspection preference belongs to the tenant — reading the
         // system-wide row would show one workshop's setting to another.
         $enableSystematicInspections = Setting::forTenant(
@@ -488,8 +513,71 @@ class WorkOrderController
             'warehouses' => $warehouses,
             'inventoryParts' => $inventoryParts,
             'inventoryUnits' => $inventoryUnits,
+            'availablePurchaseInvoices' => $availablePurchaseInvoices,
+            'suppliers' => $suppliers,
             'enableSystematicInspections' => filter_var($enableSystematicInspections, FILTER_VALIDATE_BOOLEAN),
         ]);
+    }
+
+    /**
+     * Link an existing purchase invoice in the same tenant/center to this work order.
+     */
+    public function linkPurchaseInvoice(Request $request, WorkOrder $workOrder): RedirectResponse
+    {
+        $this->authorize('update', $workOrder);
+
+        $validated = $request->validate([
+            'purchase_invoice_id' => [
+                'required',
+                'integer',
+                Rule::exists('purchase_invoices', 'id')
+                    ->where('tenant_id', $workOrder->tenant_id)
+                    ->where('center_id', $workOrder->center_id)
+                    ->whereNull('deleted_at'),
+            ],
+        ]);
+
+        $purchaseInvoice = PurchaseInvoice::query()
+            ->where('tenant_id', $workOrder->tenant_id)
+            ->where('center_id', $workOrder->center_id)
+            ->findOrFail($validated['purchase_invoice_id']);
+
+        $purchaseInvoice->update(['work_order_id' => $workOrder->id]);
+
+        $workOrder->activities()->create([
+            'tenant_id' => $workOrder->tenant_id,
+            'center_id' => $workOrder->center_id,
+            'user_id' => $request->user()?->id,
+            'action' => 'purchase_invoice_linked',
+            'description' => __('messages.work_orders.purchase_invoice_linked_activity', ['code' => $purchaseInvoice->code]),
+        ]);
+
+        return redirect()->back()->with('success', __('messages.work_orders.purchase_invoice_linked'));
+    }
+
+    /**
+     * Unlink a purchase invoice from this work order.
+     */
+    public function unlinkPurchaseInvoice(Request $request, WorkOrder $workOrder, PurchaseInvoice $purchaseInvoice): RedirectResponse
+    {
+        $this->authorize('update', $workOrder);
+
+        if ((int) $purchaseInvoice->tenant_id !== (int) $workOrder->tenant_id
+            || (int) $purchaseInvoice->work_order_id !== (int) $workOrder->id) {
+            abort(403);
+        }
+
+        $purchaseInvoice->update(['work_order_id' => null]);
+
+        $workOrder->activities()->create([
+            'tenant_id' => $workOrder->tenant_id,
+            'center_id' => $workOrder->center_id,
+            'user_id' => $request->user()?->id,
+            'action' => 'purchase_invoice_unlinked',
+            'description' => __('messages.work_orders.purchase_invoice_unlinked_activity', ['code' => $purchaseInvoice->code]),
+        ]);
+
+        return redirect()->back()->with('success', __('messages.work_orders.purchase_invoice_unlinked'));
     }
 
     /**

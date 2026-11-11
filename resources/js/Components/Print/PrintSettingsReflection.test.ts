@@ -4,6 +4,7 @@ import { createI18n } from 'vue-i18n';
 import TemplateDefaultA4 from './PrintTemplates/TemplateDefaultA4.vue';
 import TemplateThermal80 from './PrintTemplates/TemplateThermal80.vue';
 import PrintLayout from './PrintLayout.vue';
+import PrintMoney from './PrintMoney.vue';
 import InvoicePrint from '@/Pages/Invoices/Print.vue';
 import { resolveDocumentSettings, resolveVisualSettings } from '@/Composables/usePrint';
 
@@ -354,5 +355,57 @@ describe('Print settings reflection across unified print engine', () => {
 
         wrapper.unmount();
         expect(document.head.querySelector('style[data-print-layout-page="true"]')).toBeNull();
+    });
+
+    it('renders PrintMoney governed by show_currency_symbol, currency_display_style, and tenant currency', async () => {
+        const sarSvg = mount(PrintMoney, {
+            global: { plugins: [i18nPlugin] },
+            props: {
+                amount: 150,
+                currencyCode: 'SAR',
+                visualSettings: { show_currency_symbol: true, currency_display_style: 'symbol' },
+            },
+        });
+        expect(sarSvg.text()).toContain('150.00');
+        expect(sarSvg.find('svg[aria-label="SAR"]').exists()).toBe(true);
+        sarSvg.unmount();
+
+        const sarText = mount(PrintMoney, {
+            global: { plugins: [i18nPlugin] },
+            props: {
+                amount: 150,
+                currencyCode: 'SAR',
+                visualSettings: { show_currency_symbol: true, currency_display_style: 'text' },
+            },
+        });
+        expect(sarText.text()).toContain('150.00');
+        expect(sarText.text()).toContain('ر.س');
+        expect(sarText.find('svg').exists()).toBe(false);
+        sarText.unmount();
+
+        const kwdMoney = mount(PrintMoney, {
+            global: { plugins: [i18nPlugin] },
+            props: {
+                amount: 12.5,
+                currencyCode: 'KWD',
+                visualSettings: { show_currency_symbol: true, currency_display_style: 'symbol' },
+            },
+        });
+        expect(kwdMoney.text()).toContain('12.500');
+        expect(kwdMoney.text()).toContain('د.ك');
+        kwdMoney.unmount();
+
+        const hiddenSymbol = mount(PrintMoney, {
+            global: { plugins: [i18nPlugin] },
+            props: {
+                amount: 250,
+                currencyCode: 'AED',
+                visualSettings: { show_currency_symbol: false, currency_display_style: 'symbol' },
+            },
+        });
+        expect(hiddenSymbol.text()).toContain('250.00');
+        expect(hiddenSymbol.text()).not.toContain('د.إ');
+        expect(hiddenSymbol.text()).not.toContain('AED');
+        hiddenSymbol.unmount();
     });
 });

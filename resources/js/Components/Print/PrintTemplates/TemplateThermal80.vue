@@ -217,7 +217,11 @@
                         {{ $t('work_orders.print_view.receipt') }}
                     </span>
                     <span class="font-bold text-emerald-600 text-sm" dir="ltr">
-                        {{ printHelpers.formatCurrency(data.amount || 250) }}
+                        <PrintMoney
+                            :amount="data.amount || 250"
+                            :currency-code="data.currency_code"
+                            :visual-settings="visualSettings"
+                        />
                     </span>
                 </div>
                 <p>
@@ -228,7 +232,13 @@
                 </p>
                 <p class="mt-1">
                     {{ $t('common.amount') }}:
-                    <strong>{{ printHelpers.formatCurrency(data.amount || 250) }}</strong>
+                    <strong>
+                        <PrintMoney
+                            :amount="data.amount || 250"
+                            :currency-code="data.currency_code"
+                            :visual-settings="visualSettings"
+                        />
+                    </strong>
                 </p>
                 <p class="mt-1 text-gray-500 italic">
                     {{ $t('common.notes') }}:
@@ -284,11 +294,11 @@
                                 {{ index + 1 }}. {{ item.service_name || item.description }}
                             </span>
                             <span v-if="showPricingColumns" dir="ltr">
-                                {{
-                                    printHelpers.formatCurrency(
-                                        printTotals.lineSubtotalDisplay(item)
-                                    )
-                                }}
+                                <PrintMoney
+                                    :amount="printTotals.lineSubtotalDisplay(item)"
+                                    :currency-code="data.currency_code"
+                                    :visual-settings="visualSettings"
+                                />
                             </span>
                         </div>
                         <div
@@ -304,17 +314,23 @@
                             <span>
                                 {{ $t('work_orders.print_view.calculation') }}:
                                 {{ item.qty || 1 }} ×
-                                {{ printHelpers.formatCurrency(item.unit_price) }}
+                                <PrintMoney
+                                    :amount="item.unit_price"
+                                    :currency-code="data.currency_code"
+                                    :visual-settings="visualSettings"
+                                />
                             </span>
                             <span
                                 v-if="printTotals.lineDiscountDisplay(item) > 0"
                                 class="text-red-500"
                             >
-                                {{ $t('common.discount') }}: -{{
-                                    printHelpers.formatCurrency(
-                                        printTotals.lineDiscountDisplay(item)
-                                    )
-                                }}
+                                {{ $t('common.discount') }}:
+                                <PrintMoney
+                                    :amount="printTotals.lineDiscountDisplay(item)"
+                                    :currency-code="data.currency_code"
+                                    :visual-settings="visualSettings"
+                                    :negate="true"
+                                />
                             </span>
                         </div>
                     </div>
@@ -345,11 +361,11 @@
                                 {{ index + 1 }}. {{ item.service_name || item.description }}
                             </span>
                             <span v-if="showPricingColumns" dir="ltr">
-                                {{
-                                    printHelpers.formatCurrency(
-                                        printTotals.lineSubtotalDisplay(item)
-                                    )
-                                }}
+                                <PrintMoney
+                                    :amount="printTotals.lineSubtotalDisplay(item)"
+                                    :currency-code="data.currency_code"
+                                    :visual-settings="visualSettings"
+                                />
                             </span>
                         </div>
                         <div
@@ -365,17 +381,23 @@
                             <span>
                                 {{ $t('work_orders.print_view.calculation') }}:
                                 {{ item.qty || 1 }} ×
-                                {{ printHelpers.formatCurrency(item.unit_price) }}
+                                <PrintMoney
+                                    :amount="item.unit_price"
+                                    :currency-code="data.currency_code"
+                                    :visual-settings="visualSettings"
+                                />
                             </span>
                             <span
                                 v-if="printTotals.lineDiscountDisplay(item) > 0"
                                 class="text-red-500"
                             >
-                                {{ $t('common.discount') }}: -{{
-                                    printHelpers.formatCurrency(
-                                        printTotals.lineDiscountDisplay(item)
-                                    )
-                                }}
+                                {{ $t('common.discount') }}:
+                                <PrintMoney
+                                    :amount="printTotals.lineDiscountDisplay(item)"
+                                    :currency-code="data.currency_code"
+                                    :visual-settings="visualSettings"
+                                    :negate="true"
+                                />
                             </span>
                         </div>
                     </div>
@@ -399,7 +421,13 @@
                             {{ index + 1 }}.
                             {{ printHelpers.getMethodLabel(payment.payment_method) }}
                         </span>
-                        <span dir="ltr">{{ printHelpers.formatCurrency(payment.amount) }}</span>
+                        <span dir="ltr">
+                            <PrintMoney
+                                :amount="payment.amount"
+                                :currency-code="data.currency_code"
+                                :visual-settings="visualSettings"
+                            />
+                        </span>
                     </div>
                     <div class="text-[8px] text-gray-400 mt-0.5 flex justify-between">
                         <span>{{ printHelpers.formatDate(payment.payment_date) }}</span>
@@ -458,7 +486,11 @@
                             {{ index + 1 }}. {{ item.service_name || item.description }}
                         </span>
                         <span v-if="showPricingColumns" dir="ltr">
-                            {{ printHelpers.formatCurrency(printTotals.lineSubtotalDisplay(item)) }}
+                            <PrintMoney
+                                :amount="printTotals.lineSubtotalDisplay(item)"
+                                :currency-code="data.currency_code"
+                                :visual-settings="visualSettings"
+                            />
                         </span>
                     </div>
                     <div
@@ -473,12 +505,20 @@
                     >
                         <span>
                             {{ $t('work_orders.print_view.calculation') }}: {{ item.qty || 1 }} ×
-                            {{ printHelpers.formatCurrency(item.unit_price) }}
+                            <PrintMoney
+                                :amount="item.unit_price"
+                                :currency-code="data.currency_code"
+                                :visual-settings="visualSettings"
+                            />
                         </span>
                         <span v-if="printTotals.lineDiscountDisplay(item) > 0" class="text-red-500">
-                            {{ $t('common.discount') }}: -{{
-                                printHelpers.formatCurrency(printTotals.lineDiscountDisplay(item))
-                            }}
+                            {{ $t('common.discount') }}:
+                            <PrintMoney
+                                :amount="printTotals.lineDiscountDisplay(item)"
+                                :currency-code="data.currency_code"
+                                :visual-settings="visualSettings"
+                                :negate="true"
+                            />
                         </span>
                     </div>
                     <div
@@ -498,21 +538,34 @@
         >
             <div v-if="documentType !== 'payments'" class="flex justify-between text-gray-500">
                 <span>{{ $t('quotes.form.subtotal') }}:</span>
-                <span dir="ltr">{{ printHelpers.formatCurrency(totals.subtotal) }}</span>
+                <PrintMoney
+                    :amount="totals.subtotal"
+                    :currency-code="data.currency_code"
+                    :visual-settings="visualSettings"
+                />
             </div>
             <div
                 v-if="documentType !== 'payments' && totals.discount > 0"
                 class="flex justify-between text-red-500"
             >
                 <span>{{ $t('quotes.form.total_discount') }}:</span>
-                <span dir="ltr">-{{ printHelpers.formatCurrency(totals.discount) }}</span>
+                <PrintMoney
+                    :amount="totals.discount"
+                    :currency-code="data.currency_code"
+                    :visual-settings="visualSettings"
+                    :negate="true"
+                />
             </div>
             <div
                 v-if="documentType !== 'payments' && totals.vat > 0"
                 class="flex justify-between text-gray-500"
             >
                 <span>{{ $t('common.vat') }}:</span>
-                <span dir="ltr">{{ printHelpers.formatCurrency(totals.vat) }}</span>
+                <PrintMoney
+                    :amount="totals.vat"
+                    :currency-code="data.currency_code"
+                    :visual-settings="visualSettings"
+                />
             </div>
             <div
                 class="flex justify-between font-bold text-sm text-gray-900 border-t border-dashed border-gray-200 pt-1.5"
@@ -529,7 +582,11 @@
                     }}
                 </span>
                 <span :style="{ color: primaryColor }" dir="ltr">
-                    {{ printHelpers.formatCurrency(totals.total) }}
+                    <PrintMoney
+                        :amount="totals.total"
+                        :currency-code="data.currency_code"
+                        :visual-settings="visualSettings"
+                    />
                 </span>
             </div>
             <div
@@ -537,9 +594,11 @@
                 class="flex justify-between text-gray-500 text-[10px]"
             >
                 <span>{{ isRtl ? 'المبلغ المدفوع:' : 'Paid Amount:' }}</span>
-                <span dir="ltr">
-                    {{ printHelpers.formatCurrency(totals.paid - (data.bad_debt || 0)) }}
-                </span>
+                <PrintMoney
+                    :amount="totals.paid - (data.bad_debt || 0)"
+                    :currency-code="data.currency_code"
+                    :visual-settings="visualSettings"
+                />
             </div>
             <div
                 v-if="
@@ -549,14 +608,22 @@
                 class="flex justify-between text-amber-600 text-[10px]"
             >
                 <span>{{ isRtl ? 'الديون المعدومة:' : 'Bad Debt:' }}</span>
-                <span dir="ltr">{{ printHelpers.formatCurrency(data.bad_debt) }}</span>
+                <PrintMoney
+                    :amount="data.bad_debt"
+                    :currency-code="data.currency_code"
+                    :visual-settings="visualSettings"
+                />
             </div>
             <div
                 v-if="!['quotation', 'proforma_invoice'].includes(documentType)"
                 class="flex justify-between font-bold text-gray-800 text-[10px] bg-gray-50/50 p-1 rounded"
             >
                 <span>{{ isRtl ? 'الباقي:' : 'Remaining:' }}</span>
-                <span dir="ltr">{{ printHelpers.formatCurrency(totals.balance) }}</span>
+                <PrintMoney
+                    :amount="totals.balance"
+                    :currency-code="data.currency_code"
+                    :visual-settings="visualSettings"
+                />
             </div>
             <div
                 v-if="centerData.iban && documentSettings.show_iban"
@@ -737,6 +804,7 @@ import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { usePage } from '@inertiajs/vue3';
 import SaudiPlateDisplay from '@/Components/Vehicles/SaudiPlateDisplay.vue';
+import PrintMoney from '@/Components/Print/PrintMoney.vue';
 import { usePrint } from '@/Composables/usePrint';
 import { usePrintTotals } from '@/Composables/usePrintTotals';
 

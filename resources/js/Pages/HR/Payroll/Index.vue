@@ -524,7 +524,7 @@ import { useNumberFormat } from '@/Composables/useNumberFormat';
 const { t } = useI18n();
 const { success } = useToast();
 const { can, isAnyAdmin } = usePermission();
-const { toEnglish } = useNumberFormat();
+const { toEnglish, formatMoney } = useNumberFormat();
 
 const props = defineProps({
     payrollRuns: Object,
@@ -708,9 +708,7 @@ function formatDate(dateStr) {
 }
 
 function currency(amount) {
-    return new Intl.NumberFormat('ar-SA-u-nu-latn', { style: 'currency', currency: 'SAR' }).format(
-        amount || 0
-    );
+    return formatMoney(amount);
 }
 
 function getStatusClass(status) {

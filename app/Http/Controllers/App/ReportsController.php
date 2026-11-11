@@ -31,6 +31,7 @@ use App\Models\Warehouse;
 use App\Models\WorkOrder;
 use App\Models\WorkOrderItem;
 use App\Models\WorkOrderItemPart;
+use App\Support\CountryCurrencyRegistry;
 use App\Support\TenancyContext;
 use Carbon\Carbon;
 use Closure;
@@ -319,6 +320,11 @@ class ReportsController extends Controller
             // Write UTF-8 BOM for Excel
             fwrite($output, "\xEF\xBB\xBF");
 
+            $currencyLabel = CountryCurrencyRegistry::currencyLabel(
+                CountryCurrencyRegistry::tenantCurrency(auth()->user()?->tenant),
+                app()->getLocale()
+            );
+
             // CSV Header
             fputcsv($output, [
                 'رقم المعاملة',
@@ -332,7 +338,7 @@ class ReportsController extends Controller
                 'المركبة',
                 'رقم اللوحة',
                 'طريقة الدفع',
-                'المبلغ (ر.س)',
+                "المبلغ ({$currencyLabel})",
                 'المستلم',
                 'الملاحظات',
             ]);
@@ -2449,6 +2455,17 @@ class ReportsController extends Controller
             ->whereNull('deleted_at')
             ->sum(DB::raw('COALESCE(cost_snapshot, 0) * qty'));
 
+        $purchaseAgg = DB::table('purchase_invoices')
+            ->whereIn('work_order_id', $woIdsQuery)
+            ->whereNull('deleted_at')
+            ->where('status', '!=', PurchaseInvoice::STATUS_CANCELLED)
+            ->selectRaw('COALESCE(SUM(subtotal), 0) as purchase_subtotal, COALESCE(SUM(tax_amount), 0) as purchase_vat, COALESCE(SUM(total), 0) as purchase_total')
+            ->first();
+
+        $totalPurchaseSubtotal = (float) ($purchaseAgg->purchase_subtotal ?? 0);
+        $totalPurchaseVat = (float) ($purchaseAgg->purchase_vat ?? 0);
+        $totalPurchaseAmount = (float) ($purchaseAgg->purchase_total ?? 0);
+
         $totalPaidCollected = (float) DB::table('payments')
             ->whereIn('work_order_id', $woIdsQuery)
             ->whereNull('deleted_at')
@@ -2474,7 +2491,7 @@ class ReportsController extends Controller
             ->sum('discount_amount');
 
         $totalRemaining = max(0, $totalAmount - $totalPaid);
-        $netAmount = $totalAmount - $totalPartsCost;
+        $netAmount = $totalAmount - $totalPartsCost - $totalPurchaseAmount;
 
         $statusBreakdown = (clone $kpiQuery)
             ->selectRaw('status, count(*) as count, sum(total_incl_tax) as total_amount')
@@ -2496,6 +2513,7 @@ class ReportsController extends Controller
             'invoice:id,work_order_id,invoice_number,status,total_incl_tax,total_paid',
             'payments:id,work_order_id,amount,type,payment_method,payment_date',
             'parts:id,work_order_id,qty,unit_price,total,cost_snapshot,deleted_at',
+            'purchaseInvoices:id,work_order_id,subtotal,tax_amount,total,status',
         ];
 
         $tickets = null;
@@ -2503,11 +2521,15 @@ class ReportsController extends Controller
 
         $mapTicket = function ($wo) {
             $partsCost = (float) $wo->parts->whereNull('deleted_at')->sum(fn ($p) => ($p->cost_snapshot ?? 0) * $p->qty);
+            $activePurchases = $wo->purchaseInvoices->where('status', '!=', PurchaseInvoice::STATUS_CANCELLED);
+            $purchaseSubtotal = (float) $activePurchases->sum('subtotal');
+            $purchaseTax = (float) $activePurchases->sum('tax_amount');
+            $purchaseTotal = (float) $activePurchases->sum('total');
             $totalPaid = (float) $wo->total_paid;
             $badDebt = (float) $wo->bad_debt;
             $balance = (float) $wo->balance;
             $totalIncl = (float) $wo->total_incl_tax;
-            $net = $totalIncl - $partsCost;
+            $net = $totalIncl - $partsCost - $purchaseTotal;
 
             return [
                 'id' => $wo->id,
@@ -2524,6 +2546,10 @@ class ReportsController extends Controller
                 'total_tax' => (float) $wo->total_tax,
                 'total_incl_tax' => $totalIncl,
                 'parts_cost' => $partsCost,
+                'purchase_subtotal' => $purchaseSubtotal,
+                'purchase_tax' => $purchaseTax,
+                'purchase_total' => $purchaseTotal,
+                'net_vat' => (float) $wo->total_tax - $purchaseTax,
                 'net_amount' => $net,
                 'total_paid' => $totalPaid,
                 'balance' => $balance,
@@ -2582,6 +2608,7 @@ class ReportsController extends Controller
                     'total_paid' => (float) $items->sum('total_paid'),
                     'total_remaining' => (float) $items->sum('balance'),
                     'total_bad_debt' => (float) $items->sum('bad_debt'),
+                    'total_purchase_amount' => (float) $items->sum('purchase_total'),
                     'net_amount' => (float) $items->sum('net_amount'),
                     'tickets' => $items->values()->all(),
                 ];
@@ -2637,6 +2664,9 @@ class ReportsController extends Controller
                 'total_amount' => $totalAmount,
                 'total_tax' => $totalTax,
                 'total_parts_cost' => $totalPartsCost,
+                'total_purchase_subtotal' => $totalPurchaseSubtotal,
+                'total_purchase_vat' => $totalPurchaseVat,
+                'total_purchase_amount' => $totalPurchaseAmount,
                 'net_amount' => $netAmount,
                 'total_paid' => $totalPaid,
                 'total_remaining' => $totalRemaining,
@@ -2708,6 +2738,7 @@ class ReportsController extends Controller
             'invoice:id,work_order_id,invoice_number,status,total_incl_tax,total_paid',
             'payments:id,work_order_id,amount,type',
             'parts:id,work_order_id,qty,cost_snapshot,deleted_at',
+            'purchaseInvoices:id,work_order_id,subtotal,tax_amount,total,status',
         ];
 
         $filename = 'tickets_report_'.now()->format('Y-m-d_His').'.csv';
@@ -2735,6 +2766,8 @@ class ReportsController extends Controller
                 'الضريبة',
                 'الإجمالي شامل الضريبة',
                 'تكلفة القطع',
+                'مشتريات الكرت',
+                'ضريبة المشتريات',
                 'صافي المبلغ',
                 'المدفوع',
                 'المتبقي',
@@ -2747,10 +2780,13 @@ class ReportsController extends Controller
                 ->chunk(250, function ($records) use ($handle) {
                     foreach ($records as $wo) {
                         $partsCost = (float) $wo->parts->whereNull('deleted_at')->sum(fn ($p) => ($p->cost_snapshot ?? 0) * $p->qty);
+                        $activePurchases = $wo->purchaseInvoices->where('status', '!=', PurchaseInvoice::STATUS_CANCELLED);
+                        $purchaseTax = (float) $activePurchases->sum('tax_amount');
+                        $purchaseTotal = (float) $activePurchases->sum('total');
                         $totalPaid = (float) $wo->total_paid;
                         $balance = (float) $wo->balance;
                         $badDebt = (float) $wo->bad_debt;
-                        $net = (float) ($wo->total_incl_tax - $partsCost);
+                        $net = (float) ($wo->total_incl_tax - $partsCost - $purchaseTotal);
 
                         $vehicleName = trim(($wo->vehicle?->make->name_ar ?? $wo->vehicle->make_other ?? '').' '.($wo->vehicle?->model->name_ar ?? $wo->vehicle->model_other ?? '').' '.($wo->vehicle->year ?? ''));
 
@@ -2772,6 +2808,8 @@ class ReportsController extends Controller
                             number_format((float) $wo->total_tax, 2, '.', ''),
                             number_format((float) $wo->total_incl_tax, 2, '.', ''),
                             number_format($partsCost, 2, '.', ''),
+                            number_format($purchaseTotal, 2, '.', ''),
+                            number_format($purchaseTax, 2, '.', ''),
                             number_format($net, 2, '.', ''),
                             number_format($totalPaid, 2, '.', ''),
                             number_format($balance, 2, '.', ''),
@@ -4791,6 +4829,11 @@ class ReportsController extends Controller
             // Write UTF-8 BOM for Excel compatibility
             fwrite($handle, "\xEF\xBB\xBF");
 
+            $currencyLabel = CountryCurrencyRegistry::currencyLabel(
+                CountryCurrencyRegistry::tenantCurrency(auth()->user()?->tenant),
+                app()->getLocale()
+            );
+
             fputcsv($handle, [
                 '#',
                 'الفرع',
@@ -4804,9 +4847,9 @@ class ReportsController extends Controller
                 'الخدمة',
                 'حالة الخدمة',
                 'تاريخ الاستحقاق',
-                'تكلفة الخدمة (ر.س)',
-                'تكلفة قطع الغيار (ر.س)',
-                'الإجمالي (ر.س)',
+                "تكلفة الخدمة ({$currencyLabel})",
+                "تكلفة قطع الغيار ({$currencyLabel})",
+                "الإجمالي ({$currencyLabel})",
                 'الملاحظات',
             ]);
 

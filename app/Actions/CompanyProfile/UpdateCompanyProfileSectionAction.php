@@ -8,7 +8,9 @@ use App\Models\Tenant;
 use App\Models\TenantAddress;
 use App\Models\TenantTaxSetting;
 use App\Models\TenantZatcaSetting;
+use App\Support\CountryCurrencyRegistry;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 
 class UpdateCompanyProfileSectionAction
@@ -56,6 +58,9 @@ class UpdateCompanyProfileSectionAction
                     'owner_name' => 'required|string|max:255',
                     'cr_number' => 'nullable|string|max:20',
                     'iban' => 'nullable|string|max:34',
+                    'country' => ['nullable', 'string', Rule::in(CountryCurrencyRegistry::countryCodes())],
+                    'currency' => ['nullable', 'string', Rule::in(CountryCurrencyRegistry::currencyCodes())],
+                    'timezone' => 'nullable|string|max:64',
                 ];
                 break;
 
@@ -70,12 +75,29 @@ class UpdateCompanyProfileSectionAction
                     'vat_number' => 'nullable|string',
                 ];
 
-                // If VAT is enabled, VAT number is required and must be exactly 15 digits starting and ending with 3 (ZATCA Rule)
+                $country = CountryCurrencyRegistry::tenantCountry($tenant);
+                $countryMeta = CountryCurrencyRegistry::countryMeta($country);
+
+                // If VAT is enabled, validate VAT number according to tenant's country rules (ZATCA 3...3 rule for SA only)
                 if ($data['vat_enabled'] ?? false) {
-                    $rules['vat_number'] = ['required', 'string', 'size:15', 'regex:/^3[0-9]{13}3$/'];
+                    if ($country === 'SA') {
+                        $rules['vat_number'] = ['required', 'string', 'size:15', 'regex:/^3[0-9]{13}3$/'];
+                    } else {
+                        $min = (int) ($countryMeta['vat_number_min'] ?? 5);
+                        $max = (int) ($countryMeta['vat_number_max'] ?? 30);
+                        $vatRules = ['required', 'string', "min:{$min}", "max:{$max}"];
+
+                        if (! empty($countryMeta['vat_number_regex'])) {
+                            $vatRules[] = 'regex:'.$countryMeta['vat_number_regex'];
+                        }
+                        $rules['vat_number'] = $vatRules;
+                    }
+
                     $messages = [
                         'vat_number.required' => __('validation.required', ['attribute' => __('purchasing.tax_number')]),
                         'vat_number.size' => __('validation.tax_number_invalid'),
+                        'vat_number.min' => __('validation.tax_number_invalid'),
+                        'vat_number.max' => __('validation.tax_number_invalid'),
                         'vat_number.regex' => __('validation.tax_number_invalid'),
                     ];
                 }
@@ -137,17 +159,29 @@ class UpdateCompanyProfileSectionAction
 
     private function updateProfile(Tenant $tenant, array $data): void
     {
+        $country = CountryCurrencyRegistry::normalizeCountry($data['country'] ?? $tenant->country);
+        $currency = CountryCurrencyRegistry::normalizeCurrency($data['currency'] ?? $tenant->currency, $country);
+        $countryMeta = CountryCurrencyRegistry::countryMeta($country);
+        $timezone = $data['timezone'] ?? $tenant->timezone ?? $countryMeta['timezone'];
+
         $tenant->update([
             'legal_name' => $data['legal_name'] ?? $tenant->legal_name,
             'legal_name_en' => $data['legal_name_en'] ?? null,
             'trade_name' => $data['trade_name'] ?? null,
             'owner_name' => $data['owner_name'] ?? null,
-            'vat_number' => $data['vat_number'] ?? null,
+            'vat_number' => array_key_exists('vat_number', $data) ? $data['vat_number'] : $tenant->vat_number,
             'cr_number' => $data['cr_number'] ?? null,
             'iban' => $data['iban'] ?? null,
-            'country' => $data['country'] ?? $tenant->country ?? 'SA',
-            'currency' => $data['currency'] ?? $tenant->currency ?? 'SAR',
+            'country' => $country,
+            'currency' => $currency,
+            'timezone' => $timezone,
         ]);
+
+        // Keep TenantTaxSetting currency_code in sync with the tenant's operating currency
+        TenantTaxSetting::updateOrCreate(
+            ['tenant_id' => $tenant->id],
+            ['currency_code' => $currency]
+        );
     }
 
     private function updateContact(Tenant $tenant, array $data): void
@@ -177,17 +211,36 @@ class UpdateCompanyProfileSectionAction
 
     private function updateVat(Tenant $tenant, array $data): void
     {
-        // Enforce 15% VAT rate for Saudi Arabia ('SA')
+        $country = CountryCurrencyRegistry::tenantCountry($tenant);
+        $currency = CountryCurrencyRegistry::tenantCurrency($tenant);
+        $defaultRate = CountryCurrencyRegistry::defaultVatRate($country);
+
+        if (CountryCurrencyRegistry::isVatRateLocked($country)) {
+            $servicesRate = $defaultRate;
+            $partsRate = $defaultRate;
+        } else {
+            $servicesRate = (float) ($data['services_vat_rate'] ?? $defaultRate);
+            $partsRate = (float) ($data['parts_vat_rate'] ?? $servicesRate);
+        }
+
+        $payload = [
+            'vat_enabled' => $data['vat_enabled'] ?? false,
+            'vat_rate' => $servicesRate,
+            'services_vat_rate' => $servicesRate,
+            'parts_vat_rate' => $partsRate,
+            'services_inclusive' => $data['services_inclusive'] ?? false,
+            'parts_inclusive' => $data['parts_inclusive'] ?? false,
+            'show_amount_before_vat' => $data['show_amount_before_vat'] ?? true,
+            'currency_code' => $currency,
+        ];
+
+        if (array_key_exists('vat_number', $data)) {
+            $payload['tax_number'] = $data['vat_number'];
+        }
+
         TenantTaxSetting::updateOrCreate(
             ['tenant_id' => $tenant->id],
-            [
-                'vat_enabled' => $data['vat_enabled'] ?? false,
-                'services_vat_rate' => 15,
-                'parts_vat_rate' => 15,
-                'services_inclusive' => $data['services_inclusive'] ?? false,
-                'parts_inclusive' => $data['parts_inclusive'] ?? false,
-                'show_amount_before_vat' => $data['show_amount_before_vat'] ?? true,
-            ]
+            $payload
         );
 
         // Update VAT number on tenant profile if provided

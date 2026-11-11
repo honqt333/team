@@ -249,11 +249,13 @@
                     <dt class="text-sm text-slate-500 dark:text-slate-400">
                         {{ t('customer_portal.booking.review_vehicle') }}
                     </dt>
-                    <dd class="font-semibold text-end text-sm" dir="ltr">
-                        {{
-                            selectedVehicle?.plate_number ||
-                            t('customer_portal.booking.no_vehicle_picked')
-                        }}
+                    <dd class="font-semibold text-end text-sm">
+                        <SaudiPlateDisplay
+                            v-if="selectedVehicle?.plate_number"
+                            :plate-number="selectedVehicle.plate_number"
+                            size="xs"
+                        />
+                        <span v-else>{{ t('customer_portal.booking.no_vehicle_picked') }}</span>
                     </dd>
                 </div>
                 <div class="flex items-start justify-between gap-3 py-3">
@@ -296,6 +298,22 @@
                     </dd>
                 </div>
             </dl>
+
+            <!-- Optional Booking Notes -->
+            <div class="mt-4 pt-4 border-t border-slate-100 dark:border-slate-800">
+                <label
+                    class="block text-sm font-semibold text-slate-700 dark:text-slate-200 mb-1.5"
+                >
+                    {{ t('customer_portal.portal_appointments.notes_label') }}
+                </label>
+                <textarea
+                    v-model="form.notes"
+                    rows="3"
+                    maxlength="1000"
+                    :placeholder="t('customer_portal.portal_appointments.notes_placeholder')"
+                    class="w-full rounded-xl border-slate-300 dark:border-slate-700 dark:bg-slate-950 text-sm"
+                ></textarea>
+            </div>
         </section>
 
         <!--
@@ -420,6 +438,7 @@ import { useI18n } from 'vue-i18n';
 import CustomerPortalLayout from '@/Layouts/CustomerPortalLayout.vue';
 import WizardStepper from '@/Components/CustomerPortal/WizardStepper.vue';
 import SelectionCard from '@/Components/CustomerPortal/SelectionCard.vue';
+import SaudiPlateDisplay from '@/Components/Vehicles/SaudiPlateDisplay.vue';
 
 const props = defineProps({
     tenant: { type: Object, required: true },
@@ -456,6 +475,7 @@ const form = ref({
     serviceIds: [],
     date: null,
     scheduledAt: null,
+    notes: '',
 });
 
 const selectedCenter = computed(
@@ -643,11 +663,15 @@ function submit() {
             vehicle_id: form.value.vehicleId,
             service_ids: form.value.serviceIds,
             scheduled_at: form.value.scheduledAt,
+            notes: form.value.notes || null,
         },
         {
             onError: (errors) => {
                 submitting.value = false;
-                const msg = errors?.booking || Object.values(errors || {})[0] || 'Booking failed';
+                const msg =
+                    errors?.booking ||
+                    Object.values(errors || {})[0] ||
+                    t('customer_portal.booking.errors.slot_no_longer_available');
                 bookingError.value = msg;
             },
             onFinish: () => {

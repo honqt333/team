@@ -638,6 +638,7 @@ import { Head } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import PageHeader from '@/Components/PageHeader.vue';
+import { useVideoEmbed } from '@/Composables/useVideoEmbed';
 
 const props = defineProps({
     contactSupport: {
@@ -695,51 +696,7 @@ const openVideo = (video) => {
     activeVideo.value = video;
 };
 
-const getVideoEmbed = (url) => {
-    if (!url || typeof url !== 'string') return null;
-    const trimmed = url.trim();
-
-    // YouTube: watch?v=ID, youtu.be/ID, embed/ID, shorts/ID, live/ID
-    const ytMatch = trimmed.match(
-        /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=|shorts\/|live\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/i
-    );
-    if (ytMatch && ytMatch[1]) {
-        return {
-            type: 'youtube',
-            src: `https://www.youtube-nocookie.com/embed/${ytMatch[1]}?autoplay=1&rel=0`,
-        };
-    }
-
-    // Vimeo: vimeo.com/ID
-    const vimeoMatch = trimmed.match(
-        /vimeo\.com\/(?:channels\/(?:\w+\/)?|groups\/[^\/]*\/videos\/|album\/\d+\/video\/|video\/|)(\d+)/i
-    );
-    if (vimeoMatch && vimeoMatch[1]) {
-        return {
-            type: 'vimeo',
-            src: `https://player.vimeo.com/video/${vimeoMatch[1]}?autoplay=1`,
-        };
-    }
-
-    // Direct video formats (.mp4, .webm, .ogg)
-    if (/\.(mp4|webm|ogg)($|\?)/i.test(trimmed)) {
-        return {
-            type: 'video',
-            src: trimmed,
-        };
-    }
-
-    // Already an embed or player URL
-    if (trimmed.includes('/embed/') || trimmed.includes('player.')) {
-        return {
-            type: 'iframe',
-            src: trimmed,
-        };
-    }
-
-    return null;
-};
-
+const { getVideoEmbed } = useVideoEmbed();
 const activeVideoEmbed = computed(() => {
     if (!activeVideo.value || !activeVideo.value.video_url) return null;
     return getVideoEmbed(activeVideo.value.video_url);

@@ -12,11 +12,19 @@ use App\Models\Appointment;
 use App\Models\Center;
 use App\Models\Customer;
 use App\Models\CustomerPortalOtp;
+use App\Models\Invoice;
+use App\Models\InvoiceLine;
+use App\Models\Payment;
+use App\Models\Quote;
+use App\Models\QuoteLine;
 use App\Models\ServiceBay;
 use App\Models\Tenant;
 use App\Models\TenantWebsite;
 use App\Models\Vehicle;
+use App\Models\VehicleMake;
+use App\Models\VehicleModel;
 use App\Models\WorkOrder;
+use App\Models\WorkOrderItem;
 use App\Support\CustomerPortalSession;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -969,6 +977,464 @@ class CustomerPortalHttpTest extends TestCase
             ->assertRedirect('/'.$tenant->slug);
 
         $this->assertNull(session(CustomerPortalSession::key()));
+    }
+
+    public function test_dashboard_surfaces_vehicle_make_model_and_tenant_branding_and_locale(): void
+    {
+        Storage::fake('public');
+        $tenant = $this->publishedTenant();
+        $website = TenantWebsite::where('tenant_id', $tenant->id)->first();
+        $this->assertNotNull($website);
+        $website->update([
+            'site_name' => 'Khidmh Pro Model Workshop',
+            'logo_path' => 'tenants/'.$tenant->id.'/website/test-logo.png',
+            'primary_color' => '#1e40af',
+            'secondary_color' => '#0284c7',
+        ]);
+
+        $customer = $this->customerIn($tenant);
+
+        $make = VehicleMake::create([
+            'source' => 'system',
+            'name_ar' => 'تويوتا',
+            'name_en' => 'Toyota',
+            'is_active' => true,
+        ]);
+        $model = VehicleModel::create([
+            'source' => 'system',
+            'make_id' => $make->id,
+            'name_ar' => 'كامري',
+            'name_en' => 'Camry',
+            'is_active' => true,
+        ]);
+
+        $vehicleFromCatalog = Vehicle::factory()->create([
+            'tenant_id' => $tenant->id,
+            'customer_id' => $customer->id,
+            'plate_number' => 'أ ب ج 1234',
+            'make_id' => $make->id,
+            'model_id' => $model->id,
+            'year' => 2024,
+            'color' => 'أبيض',
+        ]);
+
+        $vehicleCustom = Vehicle::factory()->create([
+            'tenant_id' => $tenant->id,
+            'customer_id' => $customer->id,
+            'plate_number' => 'د هـ و 5678',
+            'make_id' => null,
+            'model_id' => null,
+            'make_other' => 'ريفيان',
+            'model_other' => 'R1T',
+            'year' => 2025,
+            'color' => 'أزرق',
+        ]);
+
+        $this->loginAs($customer, $tenant);
+
+        $this->get('/'.$tenant->slug.'/portal/dashboard?lang=en')
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page
+                ->component('Public/Portal/Dashboard')
+                ->where('tenant.slug', $tenant->slug)
+                ->where('tenant.site_name', 'Khidmh Pro Model Workshop')
+                ->where('tenant.has_logo', true)
+                ->where('tenant.primary_color', '#1e40af')
+                ->where('tenant.secondary_color', '#0284c7')
+                ->where('locale.current', 'en')
+                ->where('locale.is_rtl', false)
+                ->where('vehicles', function ($vehicles) use ($vehicleFromCatalog, $vehicleCustom) {
+                    $byId = collect($vehicles)->keyBy('id');
+                    $cat = $byId->get($vehicleFromCatalog->id);
+                    $cus = $byId->get($vehicleCustom->id);
+
+                    return $cat !== null
+                        && $cat['make'] === 'Toyota'
+                        && $cat['model'] === 'Camry'
+                        && $cat['year'] === 2024
+                        && $cus !== null
+                        && $cus['make'] === 'ريفيان'
+                        && $cus['model'] === 'R1T';
+                })
+            );
+    }
+
+    // ─────────────────────────────────────────────────────────────────
+    // Work Orders tracking (Index & Show + Isolation)
+    // ─────────────────────────────────────────────────────────────────
+
+    public function test_portal_work_orders_lists_only_authenticated_customers_work_orders(): void
+    {
+        $tenant = $this->publishedTenant();
+        $center = Center::factory()->create(['tenant_id' => $tenant->id]);
+        $customer = $this->customerIn($tenant, '+966501234567', 'Owner');
+        $otherCustomer = $this->customerIn($tenant, '+966509998877', 'Other');
+
+        $vehicle = Vehicle::factory()->create([
+            'tenant_id' => $tenant->id,
+            'customer_id' => $customer->id,
+        ]);
+        $otherVehicle = Vehicle::factory()->create([
+            'tenant_id' => $tenant->id,
+            'customer_id' => $otherCustomer->id,
+        ]);
+
+        $mine = WorkOrder::factory()->create([
+            'tenant_id' => $tenant->id,
+            'center_id' => $center->id,
+            'customer_id' => $customer->id,
+            'vehicle_id' => $vehicle->id,
+            'code' => 'WO-MINE-01',
+            'status' => WorkOrder::STATUS_IN_PROGRESS,
+        ]);
+
+        WorkOrderItem::create([
+            'tenant_id' => $tenant->id,
+            'center_id' => $center->id,
+            'work_order_id' => $mine->id,
+            'title' => 'Brake Pads Replacement',
+            'qty' => 1,
+            'unit_price' => 250,
+            'line_total' => 250,
+            'status' => WorkOrderItem::STATUS_COMPLETED,
+        ]);
+
+        $foreign = WorkOrder::factory()->create([
+            'tenant_id' => $tenant->id,
+            'center_id' => $center->id,
+            'customer_id' => $otherCustomer->id,
+            'vehicle_id' => $otherVehicle->id,
+            'code' => 'WO-OTHER-99',
+            'status' => WorkOrder::STATUS_OPEN,
+        ]);
+
+        $this->loginAs($customer, $tenant);
+
+        $this->get('/'.$tenant->slug.'/portal/work-orders')
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page
+                ->component('Public/Portal/WorkOrders/Index')
+                ->has('workOrders', 1)
+                ->where('workOrders.0.code', 'WO-MINE-01')
+            );
+
+        $this->get('/'.$tenant->slug.'/portal/work-order/'.$mine->id)
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page
+                ->component('Public/Portal/WorkOrders/Show')
+                ->where('workOrder.code', 'WO-MINE-01')
+                ->has('workOrder.items', 1)
+                ->where('workOrder.items.0.title', 'Brake Pads Replacement')
+            );
+
+        // Cross-customer work order is unreachable (404)
+        $this->get('/'.$tenant->slug.'/portal/work-order/'.$foreign->id)
+            ->assertNotFound();
+    }
+
+    // ─────────────────────────────────────────────────────────────────
+    // Quotes review, approve (with signature) & reject
+    // ─────────────────────────────────────────────────────────────────
+
+    public function test_portal_quotes_review_and_approve_with_signature(): void
+    {
+        Storage::fake('public');
+
+        $tenant = $this->publishedTenant();
+        $center = Center::factory()->create(['tenant_id' => $tenant->id]);
+        $customer = $this->customerIn($tenant, '+966501234567', 'Owner');
+        $otherCustomer = $this->customerIn($tenant, '+966509998877', 'Other');
+
+        $vehicle = Vehicle::factory()->create([
+            'tenant_id' => $tenant->id,
+            'customer_id' => $customer->id,
+        ]);
+        $otherVehicle = Vehicle::factory()->create([
+            'tenant_id' => $tenant->id,
+            'customer_id' => $otherCustomer->id,
+        ]);
+
+        $quote = Quote::create([
+            'tenant_id' => $tenant->id,
+            'center_id' => $center->id,
+            'code' => 'QT-PORTAL-01',
+            'customer_id' => $customer->id,
+            'vehicle_id' => $vehicle->id,
+            'status' => Quote::STATUS_SENT,
+            'valid_until' => now()->addDays(7)->toDateString(),
+            'subtotal' => 400,
+            'total_tax' => 60,
+            'total_incl_tax' => 460,
+            'tax_enabled_snapshot' => true,
+            'tax_rate_snapshot' => 15,
+        ]);
+
+        QuoteLine::create([
+            'quote_id' => $quote->id,
+            'title' => 'Engine Tune-Up',
+            'description' => 'Full diagnostic & spark plugs',
+            'qty' => 1,
+            'unit_price' => 400,
+            'line_total' => 400,
+        ]);
+
+        $otherQuote = Quote::create([
+            'tenant_id' => $tenant->id,
+            'center_id' => $center->id,
+            'code' => 'QT-OTHER-99',
+            'customer_id' => $otherCustomer->id,
+            'vehicle_id' => $otherVehicle->id,
+            'status' => Quote::STATUS_SENT,
+            'valid_until' => now()->addDays(7)->toDateString(),
+            'subtotal' => 100,
+            'total_incl_tax' => 100,
+        ]);
+
+        $this->loginAs($customer, $tenant);
+
+        $this->get('/'.$tenant->slug.'/portal/quotes')
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page
+                ->component('Public/Portal/Quotes/Index')
+                ->has('quotes', 1)
+                ->where('quotes.0.code', 'QT-PORTAL-01')
+                ->where('quotes.0.can_be_actioned', true)
+            );
+
+        $this->get('/'.$tenant->slug.'/portal/quote/'.$quote->id)
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page
+                ->component('Public/Portal/Quotes/Show')
+                ->where('quote.code', 'QT-PORTAL-01')
+                ->has('quote.lines', 1)
+            );
+
+        // Cross-customer quote returns 404
+        $this->get('/'.$tenant->slug.'/portal/quote/'.$otherQuote->id)
+            ->assertNotFound();
+
+        // SVG script signature is rejected
+        $svg = '<svg xmlns="http://www.w3.org/2000/svg"><script>alert(1)</script></svg>';
+        $this->post('/'.$tenant->slug.'/portal/quote/'.$quote->id.'/approve', [
+            'signature' => 'data:image/svg+xml;base64,'.base64_encode($svg),
+        ])->assertSessionHasErrors('signature');
+
+        $this->assertSame(Quote::STATUS_SENT, $quote->fresh()->status);
+
+        // Valid PNG signature approves the quote
+        $png = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=';
+        $this->post('/'.$tenant->slug.'/portal/quote/'.$quote->id.'/approve', [
+            'signature' => 'data:image/png;base64,'.$png,
+        ])->assertRedirect('/'.$tenant->slug.'/portal/quote/'.$quote->id)
+            ->assertSessionHas('success');
+
+        $quote->refresh();
+        $this->assertSame(Quote::STATUS_APPROVED, $quote->status);
+        $this->assertNotNull($quote->approved_at);
+        $this->assertNotNull($quote->signature_path);
+    }
+
+    public function test_portal_quote_can_be_rejected_with_reason_and_enforces_ownership(): void
+    {
+        $tenant = $this->publishedTenant();
+        $center = Center::factory()->create(['tenant_id' => $tenant->id]);
+        $customer = $this->customerIn($tenant, '+966501234567', 'Owner');
+        $otherCustomer = $this->customerIn($tenant, '+966509998877', 'Other');
+
+        $vehicle = Vehicle::factory()->create([
+            'tenant_id' => $tenant->id,
+            'customer_id' => $customer->id,
+        ]);
+
+        $quote = Quote::create([
+            'tenant_id' => $tenant->id,
+            'center_id' => $center->id,
+            'code' => 'QT-REJ-01',
+            'customer_id' => $customer->id,
+            'vehicle_id' => $vehicle->id,
+            'status' => Quote::STATUS_SENT,
+            'valid_until' => now()->addDays(5)->toDateString(),
+            'subtotal' => 300,
+            'total_incl_tax' => 300,
+        ]);
+
+        $this->loginAs($otherCustomer, $tenant);
+        $this->post('/'.$tenant->slug.'/portal/quote/'.$quote->id.'/reject', [
+            'rejection_reason' => 'Not mine',
+        ])->assertNotFound();
+
+        $this->loginAs($customer, $tenant);
+        $this->post('/'.$tenant->slug.'/portal/quote/'.$quote->id.'/reject', [
+            'rejection_reason' => 'Too expensive, please revise.',
+        ])->assertRedirect('/'.$tenant->slug.'/portal/quote/'.$quote->id)
+            ->assertSessionHas('success');
+
+        $quote->refresh();
+        $this->assertSame(Quote::STATUS_REJECTED, $quote->status);
+        $this->assertSame('Too expensive, please revise.', $quote->rejection_reason);
+    }
+
+    // ─────────────────────────────────────────────────────────────────
+    // Invoices statement, draft exclusion & ZATCA QR SVG rendering
+    // ─────────────────────────────────────────────────────────────────
+
+    public function test_portal_invoices_excludes_drafts_renders_qr_and_enforces_isolation(): void
+    {
+        $tenant = $this->publishedTenant();
+        $center = Center::factory()->create(['tenant_id' => $tenant->id]);
+        $customer = $this->customerIn($tenant, '+966501234567', 'Owner');
+        $otherCustomer = $this->customerIn($tenant, '+966509998877', 'Other');
+
+        $validInvoice = Invoice::create([
+            'tenant_id' => $tenant->id,
+            'center_id' => $center->id,
+            'customer_id' => $customer->id,
+            'invoice_number' => 'INV-PORTAL-01',
+            'issue_date' => now(),
+            'supply_date' => now()->toDateString(),
+            'type' => 'invoice',
+            'status' => 'valid',
+            'payment_status' => 'partial',
+            'tax_enabled_snapshot' => true,
+            'tax_rate_snapshot' => 15,
+            'total_excl_tax' => 1000,
+            'total_tax' => 150,
+            'total_incl_tax' => 1150,
+            'total_paid' => 500,
+            'currency_code' => 'SAR',
+            'zatca_qr_tlv' => 'ARVLaGlkbWggUHJvIFdvcmtzaG9wAg8zMTAwMDAwMDAwMDAwMDM=',
+        ]);
+
+        InvoiceLine::create([
+            'invoice_id' => $validInvoice->id,
+            'description' => 'Transmission Overhaul',
+            'qty' => 1,
+            'unit_price' => 1000,
+            'line_total_excl_tax' => 1000,
+            'tax_amount' => 150,
+            'line_total_incl_tax' => 1150,
+            'is_part' => false,
+        ]);
+
+        Payment::create([
+            'tenant_id' => $tenant->id,
+            'center_id' => $center->id,
+            'invoice_id' => $validInvoice->id,
+            'amount' => 500,
+            'payment_method' => 'mada',
+            'payment_date' => now(),
+            'type' => 'payment',
+        ]);
+
+        $draftInvoice = Invoice::create([
+            'tenant_id' => $tenant->id,
+            'center_id' => $center->id,
+            'customer_id' => $customer->id,
+            'invoice_number' => 'INV-DRAFT-HIDDEN',
+            'issue_date' => now(),
+            'supply_date' => now()->toDateString(),
+            'type' => 'invoice',
+            'status' => 'draft',
+            'payment_status' => 'unpaid',
+            'total_excl_tax' => 200,
+            'total_tax' => 0,
+            'total_incl_tax' => 200,
+            'total_paid' => 0,
+            'currency_code' => 'SAR',
+        ]);
+
+        $foreignInvoice = Invoice::create([
+            'tenant_id' => $tenant->id,
+            'center_id' => $center->id,
+            'customer_id' => $otherCustomer->id,
+            'invoice_number' => 'INV-FOREIGN-99',
+            'issue_date' => now(),
+            'supply_date' => now()->toDateString(),
+            'type' => 'invoice',
+            'status' => 'valid',
+            'payment_status' => 'unpaid',
+            'total_excl_tax' => 300,
+            'total_tax' => 0,
+            'total_incl_tax' => 300,
+            'total_paid' => 0,
+            'currency_code' => 'SAR',
+        ]);
+
+        $this->loginAs($customer, $tenant);
+
+        $this->get('/'.$tenant->slug.'/portal/invoices')
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page
+                ->component('Public/Portal/Invoices/Index')
+                ->has('invoices', 1)
+                ->where('invoices.0.invoice_number', 'INV-PORTAL-01')
+                ->where('financialSummary.total_invoiced', 1150)
+                ->where('financialSummary.total_paid', 500)
+                ->where('financialSummary.total_balance', 650)
+            );
+
+        $this->get('/'.$tenant->slug.'/portal/invoice/'.$validInvoice->id)
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page
+                ->component('Public/Portal/Invoices/Show')
+                ->where('invoice.invoice_number', 'INV-PORTAL-01')
+                ->has('invoice.lines', 1)
+                ->has('invoice.payments', 1)
+                ->where('invoice.zatca_qr_svg', fn ($svg) => is_string($svg) && str_starts_with($svg, 'data:image/svg+xml;base64,'))
+            );
+
+        // Draft and cross-customer invoices must not be accessible
+        $this->get('/'.$tenant->slug.'/portal/invoice/'.$draftInvoice->id)
+            ->assertNotFound();
+        $this->get('/'.$tenant->slug.'/portal/invoice/'.$foreignInvoice->id)
+            ->assertNotFound();
+    }
+
+    // ─────────────────────────────────────────────────────────────────
+    // Appointments Hub
+    // ─────────────────────────────────────────────────────────────────
+
+    public function test_portal_appointments_hub_splits_upcoming_and_past(): void
+    {
+        $tenant = $this->publishedTenant();
+        $center = Center::factory()->create(['tenant_id' => $tenant->id]);
+        $bay = ServiceBay::factory()->create(['tenant_id' => $tenant->id, 'center_id' => $center->id]);
+        $customer = $this->customerIn($tenant, '+966501234567', 'Owner');
+        $vehicle = Vehicle::factory()->create(['tenant_id' => $tenant->id, 'customer_id' => $customer->id]);
+
+        Appointment::create([
+            'tenant_id' => $tenant->id,
+            'center_id' => $center->id,
+            'service_bay_id' => $bay->id,
+            'customer_id' => $customer->id,
+            'vehicle_id' => $vehicle->id,
+            'scheduled_at' => now()->addDays(2),
+            'estimated_end_at' => now()->addDays(2)->addHour(),
+            'status' => Appointment::STATUS_CONFIRMED,
+            'notes' => 'AC check',
+        ]);
+
+        Appointment::create([
+            'tenant_id' => $tenant->id,
+            'center_id' => $center->id,
+            'service_bay_id' => $bay->id,
+            'customer_id' => $customer->id,
+            'vehicle_id' => $vehicle->id,
+            'scheduled_at' => now()->subDays(5),
+            'estimated_end_at' => now()->subDays(5)->addHour(),
+            'status' => Appointment::STATUS_CONVERTED,
+        ]);
+
+        $this->loginAs($customer, $tenant);
+
+        $this->get('/'.$tenant->slug.'/portal/appointments')
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page
+                ->component('Public/Portal/Appointments/Index')
+                ->has('upcomingAppointments', 1)
+                ->where('upcomingAppointments.0.notes', 'AC check')
+                ->has('pastAppointments', 1)
+            );
     }
 
     // ─────────────────────────────────────────────────────────────────

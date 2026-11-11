@@ -9,7 +9,7 @@ const props = defineProps({ warehouseId: [String, Number], showCurrency: Boolean
 const partId = defineModel();
 const emit = defineEmits(['select']);
 const { getName } = useLocalized();
-const { formatCurrency, formatQuantity, toEnglish } = useNumberFormat();
+const { formatCurrency, formatQuantity, toEnglish, activeCurrencySymbol } = useNumberFormat();
 const options = ref([]);
 const query = ref('');
 function setQuery(value) {
@@ -73,7 +73,7 @@ function selectPart(id) {
                     </div>
                     <div class="text-[10px] text-emerald-600 font-bold mt-0.5">
                         {{ formatCurrency(option.default_sale_price) }}
-                        <span v-if="showCurrency">{{ $t('common.currency') }}</span>
+                        <span v-if="showCurrency">{{ activeCurrencySymbol }}</span>
                     </div>
                 </div>
                 <div class="text-right flex flex-col items-end">

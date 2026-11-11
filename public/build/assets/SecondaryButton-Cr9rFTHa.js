@@ -1,1 +1,0 @@
-import{A as a}from"./AppButton-iXNtW-PO.js";import{f as o,y as r,z as p,p as n}from"./vendor-vue-DOYD4HSC.js";const y={__name:"SecondaryButton",props:{type:{type:String,default:"button"}},setup(t){return(e,s)=>(o(),r(a,{variant:"secondary",type:t.type},{default:p(()=>[n(e.$slots,"default")]),_:3},8,["type"]))}};export{y as _};

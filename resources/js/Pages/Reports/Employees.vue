@@ -1266,46 +1266,13 @@
                 </div>
 
                 <!-- Pagination Component -->
-                <div
-                    v-if="employees && employees.links && employees.links.length > 3"
-                    class="p-4 border-t border-gray-200 dark:border-gray-700 flex flex-wrap items-center justify-between gap-3 text-xs"
-                >
-                    <div class="text-gray-500 dark:text-gray-400">
-                        {{ $t('reports.employees_report.showing') }}
-                        <span class="font-bold text-gray-900 dark:text-white font-mono">
-                            {{ employees.from || 0 }}
-                        </span>
-                        {{ $t('reports.employees_report.to') }}
-                        <span class="font-bold text-gray-900 dark:text-white font-mono">
-                            {{ employees.to || 0 }}
-                        </span>
-                        {{ $t('reports.employees_report.of') }}
-                        <span class="font-bold text-gray-900 dark:text-white font-mono">
-                            {{ employees.total || 0 }}
-                        </span>
-                    </div>
-
-                    <div class="flex items-center gap-1">
-                        <template v-for="(link, lIdx) in employees.links" :key="lIdx">
-                            <a
-                                v-if="link.url"
-                                :href="link.url"
-                                class="px-3 py-1.5 rounded-lg border font-mono transition-colors"
-                                :class="
-                                    link.active
-                                        ? 'bg-orange-600 text-white border-orange-600 font-bold'
-                                        : 'border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
-                                "
-                                v-html="link.label"
-                            />
-                            <span
-                                v-else
-                                class="px-3 py-1.5 rounded-lg border border-transparent text-gray-400 dark:text-gray-600 font-mono"
-                                v-html="link.label"
-                            />
-                        </template>
-                    </div>
-                </div>
+                <AppPagination
+                    class="print:hidden"
+                    :links="employees?.links || []"
+                    :from="employees?.from"
+                    :to="employees?.to"
+                    :total="employees?.total"
+                />
             </div>
 
             <!-- Standard Official Print Footer -->
@@ -1318,6 +1285,7 @@
 
 <script setup>
 import DataTable from '@/Components/Common/DataTable.vue';
+import AppPagination from '@/Components/Common/AppPagination.vue';
 import AppPrintButton from '@/Components/Common/AppPrintButton.vue';
 import AppToggle from '@/Components/Common/AppToggle.vue';
 import { ref, computed } from 'vue';

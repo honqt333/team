@@ -1051,7 +1051,7 @@
                                         >
                                             {{
                                                 svc.base_price > 0
-                                                    ? `${svc.base_price} ر.س`
+                                                    ? `${svc.base_price} ${activeCurrencySymbol}`
                                                     : 'غير محدد'
                                             }}
                                         </td>
@@ -1750,6 +1750,9 @@ import { useI18n } from 'vue-i18n';
 import { usePage, useForm } from '@inertiajs/vue3';
 import { computed, ref, h } from 'vue';
 import { useFormScrollToError } from '@/Composables/useFormScrollToError';
+import { useNumberFormat } from '@/Composables/useNumberFormat';
+
+const { activeCurrencySymbol } = useNumberFormat();
 
 const props = defineProps({
     website: { type: Object, default: () => ({}) },
@@ -1965,7 +1968,7 @@ const pricingModes = computed(() => [
         id: 'starting_from',
         title: t('tenant_site.admin.services_manager.pricing_modes.starting_from'),
         desc: 'يظهر للعميل الحد الأدنى للسعر لإعطاء فكرة تقريبية دون إلزام.',
-        example: 'يبدأ من 150 ر.س',
+        example: `يبدأ من 150 ${activeCurrencySymbol.value}`,
     },
     {
         id: 'upon_inspection',
@@ -1977,7 +1980,7 @@ const pricingModes = computed(() => [
         id: 'exact',
         title: t('tenant_site.admin.services_manager.pricing_modes.exact'),
         desc: 'عرض السعر الدقيق والكامل للخدمة المسجلة بالنظام.',
-        example: '250 ر.س',
+        example: `250 ${activeCurrencySymbol.value}`,
     },
     {
         id: 'hidden',

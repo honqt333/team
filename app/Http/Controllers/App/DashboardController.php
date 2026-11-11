@@ -13,6 +13,7 @@ use App\Models\Payment;
 use App\Models\Vehicle;
 use App\Models\WorkOrder;
 use App\Models\WorkOrderItem;
+use App\Support\CountryCurrencyRegistry;
 use App\Support\Permissions;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -390,6 +391,97 @@ class DashboardController extends Controller
             ])
             ->toArray();
 
+        // ─── Checked-Out / Done Work Orders with Balance Due ──────────────
+        $checkedOutPaymentDue = null;
+
+        if ($canViewFinancials) {
+            $paidSubquery = DB::table('payments')
+                ->selectRaw('work_order_id, COALESCE(SUM(CASE WHEN type IN ("payment", "bad_debt") THEN amount WHEN type = "refund" THEN -amount ELSE 0 END), 0) as net_paid')
+                ->whereNull('deleted_at')
+                ->groupBy('work_order_id');
+
+            $dueRow = (clone $workOrdersBase)
+                ->leftJoinSub($paidSubquery, 'wo_paid', 'wo_paid.work_order_id', '=', 'work_orders.id')
+                ->where('work_orders.status', 'done')
+                ->where('work_orders.total_incl_tax', '>', 0)
+                ->whereRaw('(work_orders.total_incl_tax - COALESCE(wo_paid.net_paid, 0)) > 0.01')
+                ->selectRaw('COUNT(*) as due_count, COALESCE(SUM(work_orders.total_incl_tax - COALESCE(wo_paid.net_paid, 0)), 0) as due_amount')
+                ->first();
+
+            $checkedOutPaymentDue = [
+                'count' => (int) ($dueRow->due_count ?? 0),
+                'amount' => round((float) ($dueRow->due_amount ?? 0), 2),
+            ];
+        }
+
+        // ─── Active Workshop Vehicles (Live Progress & WhatsApp) ───────────
+        $activeWorkshopVehicles = (clone $workOrdersBase)
+            ->with([
+                'customer:id,name,phone,whatsapp',
+                'vehicle:id,plate_number,make_id,model_id,make_other,model_other,year',
+                'vehicle.make:id,name_ar,name_en',
+                'vehicle.model:id,name_ar,name_en',
+                'items:id,work_order_id,status',
+            ])
+            ->whereNotIn('status', ['done', 'cancelled'])
+            ->latest()
+            ->take(8)
+            ->get(['id', 'code', 'status', 'customer_id', 'vehicle_id', 'expected_end_date', 'created_at'])
+            ->map(function ($wo) {
+                $activeItems = $wo->items->where('status', '!=', 'cancelled');
+                $totalItems = $activeItems->count();
+                $doneItems = $activeItems->whereIn('status', ['completed', 'ready_for_qc'])->count();
+                $progress = $totalItems > 0 ? (int) round(($doneItems / $totalItems) * 100) : 0;
+                $rawPhone = preg_replace('/\D+/', '', (string) ($wo->customer?->whatsapp ?: $wo->customer?->phone ?: ''));
+
+                return [
+                    'id' => $wo->id,
+                    'code' => $wo->code,
+                    'status' => $wo->status,
+                    'customer_name' => $wo->customer?->name ?? '—',
+                    'customer_phone' => $wo->customer?->whatsapp ?: $wo->customer?->phone,
+                    'whatsapp_phone' => $rawPhone ?: null,
+                    'plate_number' => $wo->vehicle?->plate_number ?? '—',
+                    'vehicle_label' => trim(($wo->vehicle?->make?->name_ar ?? $wo->vehicle?->make_other ?? '').' '.($wo->vehicle?->model?->name_ar ?? $wo->vehicle?->model_other ?? '').' '.($wo->vehicle?->year ?? '')),
+                    'progress_percent' => $progress,
+                    'done_items' => $doneItems,
+                    'total_items' => $totalItems,
+                ];
+            })
+            ->values()
+            ->toArray();
+
+        // ─── Currently Working Technicians ──────────────────────────────────
+        $workingTechniciansNow = DB::table('work_order_item_technician as wit')
+            ->join('work_order_items as woi', 'woi.id', '=', 'wit.work_order_item_id')
+            ->join('work_orders as wo', 'wo.id', '=', 'woi.work_order_id')
+            ->join('users as u', 'u.id', '=', 'wit.user_id')
+            ->leftJoin('vehicles as v', 'v.id', '=', 'wo.vehicle_id')
+            ->where('wo.tenant_id', $tenantId)
+            ->when($centerId, fn ($q) => $q->where('wo.center_id', $centerId))
+            ->whereNotIn('wo.status', ['done', 'cancelled'])
+            ->where('woi.status', 'in_progress')
+            ->select(
+                'u.id as user_id',
+                'u.name as technician_name',
+                'wo.id as work_order_id',
+                'wo.code as work_order_code',
+                'woi.title as service_title',
+                'v.plate_number'
+            )
+            ->orderByDesc('woi.updated_at')
+            ->limit(10)
+            ->get()
+            ->map(fn ($row) => [
+                'user_id' => $row->user_id,
+                'technician_name' => $row->technician_name,
+                'work_order_id' => $row->work_order_id,
+                'work_order_code' => $row->work_order_code,
+                'service_title' => $row->service_title,
+                'plate_number' => $row->plate_number ?? '—',
+            ])
+            ->toArray();
+
         // ─── Technician Performance (last 30 days) ─────────────────────────
         $technicianPerformance = DB::table('work_order_item_technician as wit')
             ->join('work_order_items as woi', 'woi.id', '=', 'wit.work_order_item_id')
@@ -484,7 +576,10 @@ class DashboardController extends Controller
             'topServices' => $topServices,
             'technicianPerformance' => $technicianPerformance,
             'topCustomers' => $topCustomers,
-            'currency' => session('currency_code', 'SAR'),
+            'checkedOutPaymentDue' => $checkedOutPaymentDue,
+            'activeWorkshopVehicles' => $activeWorkshopVehicles,
+            'workingTechniciansNow' => $workingTechniciansNow,
+            'currency' => CountryCurrencyRegistry::tenantCurrency($user?->tenant),
         ]);
     }
 }

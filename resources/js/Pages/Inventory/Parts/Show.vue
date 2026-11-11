@@ -235,7 +235,7 @@
                                 {{ formatCurrency(avgCost) }}
                             </div>
                             <span class="text-xs text-gray-400 font-medium">
-                                {{ $t('common.currency_sar') }}
+                                {{ activeCurrencySymbol }}
                             </span>
                         </div>
                     </div>
@@ -281,7 +281,7 @@
                                 {{ formatCurrency(defaultSalePrice) }}
                             </div>
                             <span class="text-xs text-gray-400 font-medium">
-                                {{ $t('common.currency_sar') }}
+                                {{ activeCurrencySymbol }}
                             </span>
                         </div>
                         <div
@@ -455,6 +455,65 @@
                                     </svg>
                                 </template>
                             </AppEmptyState>
+                        </div>
+                    </div>
+
+                    <!-- Compatible Vehicles Card -->
+                    <div
+                        class="mt-6 bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700"
+                    >
+                        <div
+                            class="p-4 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between"
+                        >
+                            <h2 class="text-base font-bold text-gray-900 dark:text-white">
+                                {{ $t('inventory.parts.compatibility.title') }}
+                            </h2>
+                            <button
+                                v-if="can('inventory.parts.edit')"
+                                @click="editPart"
+                                class="text-xs text-action-primary hover:text-selection-text font-bold hover:underline"
+                            >
+                                {{ $t('common.edit') }}
+                            </button>
+                        </div>
+                        <div v-if="part.compatibilities?.length" class="p-4 flex flex-wrap gap-2">
+                            <span
+                                v-for="c in part.compatibilities"
+                                :key="c.id"
+                                class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-gray-100 dark:bg-gray-700/60 text-gray-800 dark:text-gray-200 border border-gray-200 dark:border-gray-600"
+                            >
+                                <span>
+                                    {{
+                                        locale === 'ar'
+                                            ? c.make?.name_ar || c.make?.name_en
+                                            : c.make?.name_en || c.make?.name_ar
+                                    }}
+                                </span>
+                                <span v-if="c.model" class="text-gray-500 dark:text-gray-400">
+                                    •
+                                    {{
+                                        locale === 'ar'
+                                            ? c.model?.name_ar || c.model?.name_en
+                                            : c.model?.name_en || c.model?.name_ar
+                                    }}
+                                </span>
+                                <span v-else class="text-gray-400 text-[11px]">
+                                    ({{ $t('inventory.parts.compatibility.all_models') }})
+                                </span>
+                                <span
+                                    v-if="c.year_from || c.year_to"
+                                    class="font-mono text-[11px] text-action-primary"
+                                    dir="ltr"
+                                >
+                                    {{ c.year_from || '...' }}–{{ c.year_to || '...' }}
+                                </span>
+                            </span>
+                        </div>
+                        <div
+                            v-else
+                            class="p-5 text-xs text-gray-500 dark:text-gray-400 text-center"
+                        >
+                            {{ $t('inventory.parts.compatibility.empty') }}
                         </div>
                     </div>
                 </div>
@@ -781,6 +840,8 @@
                 :units="units"
                 :categories="categories"
                 :warehouses="warehouses"
+                :vehicle-makes="vehicleMakes"
+                :vehicle-models="vehicleModels"
                 @close="showEditModal = false"
             />
 
@@ -822,11 +883,19 @@ const props = defineProps({
         type: Array,
         default: () => [],
     },
+    vehicleMakes: {
+        type: Array,
+        default: () => [],
+    },
+    vehicleModels: {
+        type: Array,
+        default: () => [],
+    },
 });
 
 const { t, locale } = useI18n();
 const page = usePage();
-const { formatQuantity, formatCurrency, toEnglish } = useNumberFormat();
+const { formatQuantity, formatCurrency, toEnglish, activeCurrencySymbol } = useNumberFormat();
 const can = (permission) => page.props.auth?.permissions?.includes(permission) ?? false;
 
 const breadcrumbItems = computed(() => [

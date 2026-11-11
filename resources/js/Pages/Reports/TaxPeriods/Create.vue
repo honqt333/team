@@ -346,8 +346,10 @@ import { Head, Link, router } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 import { useI18n } from 'vue-i18n';
+import { useNumberFormat } from '@/Composables/useNumberFormat';
 
 const { t } = useI18n();
+const { formatMoney } = useNumberFormat();
 
 const props = defineProps({
     periodMeta: Object,
@@ -477,12 +479,5 @@ const saveTaxPeriod = () => {
     );
 };
 
-const formatCurrency = (val) => {
-    const num = Number(val || 0);
-    return (
-        num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) +
-        ' ' +
-        t('common.currency')
-    );
-};
+const formatCurrency = (val) => formatMoney(val);
 </script>

@@ -1329,15 +1329,39 @@ class WorkOrdersCrudTest extends TestCase
         // 3. Verify service is shared & queryable from Branch B
         $this->assertNotNull(Service::find($service->id));
 
-        // 4. Verify user can VIEW Branch A's work order (cross-branch read access)
+        // 4. Verify user canNOT VIEW Branch A's work order while their
+        //    current center is Branch B.
+        //
+        //    `WorkOrderPolicy::view()` requires the work order's center
+        //    to be the user's CURRENT center. The route binding
+        //    deliberately drops the center global scope so a work order
+        //    from a sibling branch still binds — the POLICY is what
+        //    stops it from being displayed. This was hardened in
+        //    commit c093fc40, which tightened the check from
+        //    tenant-only to tenant + current center.
+        //
+        //    This test was written against the earlier, tenant-only
+        //    behaviour and was not updated with the hardening.
+        //    `WorkOrderQuoteBranchIsolationTest` already asserts the
+        //    current contract (`assertForbidden()` for a sibling
+        //    branch's work order).
         $responseView = $this->actingAs($userBranchA)->get("/app/work-orders/{$workOrderBranchA->id}");
-        $responseView->assertStatus(200);
+        $responseView->assertStatus(403);
 
         // 5. Verify user CANNOT edit/update Branch A's work order (restricted write access)
         $responseUpdate = $this->actingAs($userBranchA)->put("/app/work-orders/{$workOrderBranchA->id}", [
             'status' => 'in_progress',
         ]);
         $responseUpdate->assertStatus(403);
+
+        // 6. Verify the user CAN view it again once they switch BACK to
+        //    Branch A — the restriction follows the current center, it
+        //    is not a permanent block on the document.
+        $userBranchA->update(['current_center_id' => $workOrderBranchA->center_id]);
+        $userBranchA->refresh();
+
+        $responseOwnBranch = $this->actingAs($userBranchA)->get("/app/work-orders/{$workOrderBranchA->id}");
+        $responseOwnBranch->assertStatus(200);
     }
 
     public function test_work_order_creation_checks_customer_credit_limit(): void

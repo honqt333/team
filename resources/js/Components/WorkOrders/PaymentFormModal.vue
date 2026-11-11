@@ -144,7 +144,7 @@
                             <span
                                 class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm"
                             >
-                                SAR
+                                {{ activeCurrencySymbol }}
                             </span>
                         </div>
                         <p v-if="errors.amount" class="mt-1 text-sm text-red-500">
@@ -277,6 +277,9 @@ import { router } from '@inertiajs/vue3';
 import Modal from '@/Components/Modal.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 import { useToast } from '@/Composables/useToast';
+import { useNumberFormat } from '@/Composables/useNumberFormat';
+
+const { activeCurrencySymbol } = useNumberFormat();
 
 const props = defineProps({
     show: { type: Boolean, default: false },

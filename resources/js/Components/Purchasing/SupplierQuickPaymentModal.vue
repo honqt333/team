@@ -164,7 +164,7 @@
                 <div>
                     <div class="flex items-center justify-between mb-1.5">
                         <label class="block text-xs font-bold text-gray-700 dark:text-gray-300">
-                            {{ $t('payments.form.amount') }} (SAR)
+                            {{ $t('payments.form.amount') }} ({{ activeCurrencySymbol }})
                             <span class="text-red-500">*</span>
                         </label>
                         <span class="text-[11px] text-gray-500 dark:text-gray-400 font-mono">
@@ -333,6 +333,7 @@
 import { ref, computed, watch } from 'vue';
 import { router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
+import { useNumberFormat } from '@/Composables/useNumberFormat';
 import BaseModal from '@/Components/BaseModal.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 
@@ -354,6 +355,7 @@ const props = defineProps({
 
 const emit = defineEmits(['close']);
 const { t } = useI18n();
+const { formatMoney: formatCurrency, activeCurrencySymbol } = useNumberFormat();
 
 const allocationType = ref('fifo');
 const submitting = ref(false);
@@ -427,15 +429,7 @@ const paymentMethodOptions = computed(() => [
     { value: 'other', label: t('payments.methods.other') },
 ]);
 
-function formatCurrency(val) {
-    const num = Number(val) || 0;
-    return (
-        new Intl.NumberFormat('en-US', {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2,
-        }).format(num) + ' SAR'
-    );
-}
+// formatCurrency provided by useNumberFormat()
 
 watch(
     () => props.show,

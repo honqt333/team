@@ -1,5 +1,5 @@
 <script setup>
-import { router } from '@inertiajs/vue3';
+import { Link, router } from '@inertiajs/vue3';
 import KPICard from '@/Components/DashboardV2/common/KPICard.vue';
 import ChartCard from '@/Components/DashboardV2/common/ChartCard.vue';
 import StatusBreakdown from '@/Components/DashboardV2/widgets/StatusBreakdown.vue';
@@ -18,6 +18,8 @@ defineProps({
     todayNewWorkOrders: { type: Array, default: () => [] },
     topServices: { type: Array, default: () => [] },
     technicianPerformance: { type: Array, default: () => [] },
+    activeWorkshopVehicles: { type: Array, default: () => [] },
+    workingTechniciansNow: { type: Array, default: () => [] },
     currency: { type: String, default: 'SAR' },
 });
 
@@ -132,6 +134,123 @@ const ICONS = {
                 :subtitle="$t('dashboard.last_30_days')"
             >
                 <TechnicianPerformance :technicians="technicianPerformance" />
+            </ChartCard>
+        </div>
+
+        <!-- Live Workshop Floor: Active Vehicles & Working Technicians Now -->
+        <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
+            <ChartCard
+                :title="$t('dashboard.active_workshop_vehicles')"
+                :subtitle="$t('dashboard.active_workshop_vehicles_subtitle')"
+                :action="$t('dashboard.view_all')"
+                @action="navigate('/app/workshop')"
+            >
+                <div
+                    v-if="activeWorkshopVehicles?.length"
+                    class="divide-y divide-slate-100 dark:divide-slate-800"
+                >
+                    <div
+                        v-for="item in activeWorkshopVehicles"
+                        :key="item.id"
+                        class="flex items-center justify-between gap-3 py-3"
+                    >
+                        <div class="min-w-0 flex-1">
+                            <div class="flex items-center gap-2">
+                                <Link
+                                    :href="`/app/work-orders/${item.id}`"
+                                    class="font-mono text-xs font-bold text-action-primary hover:underline"
+                                >
+                                    {{ item.code }}
+                                </Link>
+                                <span
+                                    class="truncate text-sm font-semibold text-slate-800 dark:text-slate-200"
+                                >
+                                    {{ item.vehicle_label || item.plate_number }}
+                                </span>
+                                <span
+                                    class="rounded bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 font-mono text-[11px] text-slate-600 dark:text-slate-300"
+                                >
+                                    {{ item.plate_number }}
+                                </span>
+                            </div>
+                            <p class="mt-0.5 truncate text-xs text-slate-500 dark:text-slate-400">
+                                {{ item.customer_name }}
+                            </p>
+                            <div class="mt-2 flex items-center gap-2">
+                                <div
+                                    class="h-1.5 flex-1 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800"
+                                >
+                                    <div
+                                        class="h-full rounded-full bg-emerald-500 transition-all"
+                                        :style="{ width: `${item.progress_percent}%` }"
+                                    ></div>
+                                </div>
+                                <span
+                                    class="font-mono text-[11px] font-bold text-slate-600 dark:text-slate-300"
+                                >
+                                    {{ item.progress_percent }}%
+                                </span>
+                            </div>
+                        </div>
+
+                        <a
+                            v-if="item.whatsapp_phone"
+                            :href="`https://wa.me/${item.whatsapp_phone}`"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            class="shrink-0 rounded-xl bg-emerald-50 dark:bg-emerald-950/50 px-2.5 py-1.5 text-xs font-bold text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100 transition-colors"
+                            :title="item.customer_phone"
+                        >
+                            {{ $t('customers.quick.whatsapp') }}
+                        </a>
+                    </div>
+                </div>
+                <div v-else class="py-8 text-center text-xs text-slate-400">
+                    {{ $t('dashboard.no_active_vehicles') }}
+                </div>
+            </ChartCard>
+
+            <ChartCard
+                :title="$t('dashboard.working_technicians_now')"
+                :subtitle="$t('dashboard.working_technicians_now_subtitle')"
+                :action="$t('dashboard.view_all')"
+                @action="navigate('/app/workshop')"
+            >
+                <div
+                    v-if="workingTechniciansNow?.length"
+                    class="divide-y divide-slate-100 dark:divide-slate-800"
+                >
+                    <div
+                        v-for="(tech, idx) in workingTechniciansNow"
+                        :key="`${tech.user_id}-${tech.work_order_id}-${idx}`"
+                        class="flex items-center justify-between gap-3 py-3"
+                    >
+                        <div class="min-w-0 flex-1">
+                            <p
+                                class="truncate text-sm font-bold text-slate-800 dark:text-slate-200"
+                            >
+                                {{ tech.technician_name }}
+                            </p>
+                            <p class="truncate text-xs text-slate-500 dark:text-slate-400">
+                                {{ tech.service_title }}
+                            </p>
+                        </div>
+                        <div class="text-end shrink-0">
+                            <Link
+                                :href="`/app/work-orders/${tech.work_order_id}`"
+                                class="font-mono text-xs font-bold text-action-primary hover:underline block"
+                            >
+                                {{ tech.work_order_code }}
+                            </Link>
+                            <span class="font-mono text-[11px] text-slate-400">
+                                {{ tech.plate_number }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <div v-else class="py-8 text-center text-xs text-slate-400">
+                    {{ $t('dashboard.no_working_technicians') }}
+                </div>
             </ChartCard>
         </div>
     </div>

@@ -2002,7 +2002,7 @@ const props = defineProps({
 const { t, locale } = useI18n();
 const page = usePage();
 const isRtl = computed(() => locale.value === 'ar');
-const { toEnglish, formatCurrency } = useNumberFormat();
+const { toEnglish, formatCurrency, formatMoney } = useNumberFormat();
 
 const tenant = computed(() => props.invoice.tenant || page.props.tenant || {});
 const isCompany = computed(() => !!props.invoice.company_transaction);
@@ -2070,14 +2070,7 @@ const backUrl = computed(() => {
 });
 
 const formatCurrencyEnglish = (amount) => {
-    return (
-        Number(amount).toLocaleString('en-US', {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2,
-        }) +
-        ' ' +
-        t('common.currency_sar')
-    );
+    return formatMoney(amount, props.invoice?.currency_code);
 };
 
 const activeTab = ref('received_items'); // 'received_items', 'payments', 'attachments'

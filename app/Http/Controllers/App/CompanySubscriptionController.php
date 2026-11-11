@@ -102,7 +102,7 @@ class CompanySubscriptionController extends Controller
             'vat_amount' => round($vatAmount, 2),
             'total' => round($total, 2),
             'promo_code' => $promo?->code,
-            'currency' => 'SAR',
+            'currency' => PaymentSettings::getPlatformCurrency(),
         ]);
     }
 
@@ -306,9 +306,14 @@ class CompanySubscriptionController extends Controller
             // the tenant never sees a "pending" subscription unless the
             // gateway actually accepted the payment request.
             try {
+                $platformCurrency = PaymentSettings::getPlatformCurrency();
                 $formData = $this->paymentManager->initiate([
                     'amount' => $total,
-                    'currency' => 'SAR',
+                    'currency' => $platformCurrency,
+                    'country_code' => $tenant->country,
+                    'customer_phone' => $tenant->phone,
+                    'customer_email' => $tenant->email,
+                    'customer_name' => $tenant->trade_name ?: $tenant->name,
                     'description' => "اشتراك {$plan->name_ar} - {$tenant->trade_name}",
                     'callback_url' => route('app.billing.callback', ['payment' => '__PAYMENT_ID__']),
                     'metadata' => [
@@ -392,7 +397,7 @@ class CompanySubscriptionController extends Controller
                 'subscription_id' => $subscription->id,
                 'subscription_invoice_id' => $invoice->id,
                 'amount' => $total,
-                'currency' => 'SAR',
+                'currency' => PaymentSettings::getPlatformCurrency(),
                 'gateway' => $validated['gateway'],
                 'status' => 'pending',
             ]);
@@ -877,7 +882,7 @@ class CompanySubscriptionController extends Controller
                     'subscription_id' => $subscription->id,
                     'subscription_invoice_id' => $invoice->id,
                     'amount' => $total,
-                    'currency' => 'SAR',
+                    'currency' => PaymentSettings::getPlatformCurrency(),
                     'gateway' => 'bank_transfer',
                     'status' => 'pending',
                 ]);

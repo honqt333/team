@@ -430,7 +430,9 @@ function submit() {
             onError: (errors) => {
                 submitting.value = false;
                 const msg =
-                    errors?.booking || Object.values(errors || {})[0] || 'Reschedule failed';
+                    errors?.booking ||
+                    Object.values(errors || {})[0] ||
+                    t('customer_portal.actions.errors.slot_no_longer_available');
                 bookingError.value = msg;
             },
             onFinish: () => {

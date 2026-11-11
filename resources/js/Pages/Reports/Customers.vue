@@ -851,31 +851,13 @@
                 </div>
 
                 <!-- Pagination Bar -->
-                <div
-                    v-if="records.links && records.links.length > 3"
-                    class="p-4 border-t border-gray-100 dark:border-gray-700/60 flex items-center justify-between gap-4 text-xs"
-                >
-                    <span class="text-gray-500">
-                        {{ records.from || 0 }} - {{ records.to || 0 }} / {{ records.total }}
-                    </span>
-                    <div class="flex items-center gap-1">
-                        <component
-                            :is="link.url ? 'a' : 'span'"
-                            v-for="(link, i) in records.links"
-                            :key="i"
-                            :href="link.url"
-                            v-html="link.label"
-                            class="px-2.5 py-1.5 rounded-lg font-bold transition-colors"
-                            :class="[
-                                link.active
-                                    ? 'bg-sky-600 text-white'
-                                    : link.url
-                                      ? 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'
-                                      : 'text-gray-300 dark:text-gray-600 cursor-not-allowed',
-                            ]"
-                        />
-                    </div>
-                </div>
+                <AppPagination
+                    class="print:hidden"
+                    :links="records.links || []"
+                    :from="records.from"
+                    :to="records.to"
+                    :total="records.total"
+                />
             </div>
 
             <!-- EMPTY STATE -->
@@ -927,6 +909,7 @@
 
 <script setup>
 import DataTable from '@/Components/Common/DataTable.vue';
+import AppPagination from '@/Components/Common/AppPagination.vue';
 import CustomDatePicker from '@/Components/CustomDatePicker.vue';
 import { ref, reactive, computed, onMounted } from 'vue';
 import { router } from '@inertiajs/vue3';

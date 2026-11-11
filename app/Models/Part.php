@@ -114,6 +114,11 @@ class Part extends Model
         return $this->hasMany(InventoryMove::class);
     }
 
+    public function compatibilities(): HasMany
+    {
+        return $this->hasMany(PartVehicleCompatibility::class, 'part_id');
+    }
+
     // ─────────────────────────────────────────────────────────────
     // Scopes
     // ─────────────────────────────────────────────────────────────

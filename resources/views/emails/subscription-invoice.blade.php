@@ -18,7 +18,7 @@
     | **رقم الفاتورة** | {{ $invoice->invoice_number }} |
     | **تاريخ الإصدار** | {{ $invoice->created_at->format('Y-m-d') }} |
     | **تاريخ الاستحقاق** | {{ $invoice->due_at?->format('Y-m-d') ?? '—' }} |
-    | **المجموع** | **{{ number_format($invoice->total, 2) }} ر.س** |
+    | **المجموع** | **{{ number_format($invoice->total, 2) }} {{ \App\Support\CountryCurrencyRegistry::currencyLabel($invoice->currency ?? config('app.default_currency', 'SAR'), 'ar') }}** |
     | **الحالة** | {{ $invoice->status === 'paid' ? '✅ مدفوعة' : '⏳ معلقة' }} |
 
     ---

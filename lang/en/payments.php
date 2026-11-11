@@ -16,9 +16,9 @@ return [
     'deleted_successfully' => 'Deleted Successfully',
     'edit_payment' => 'Edit Payment',
     'errors' => [
-        'amount_exceeds_invoice_balance' => 'The entered amount exceeds the remaining invoice balance (:balance SAR).',
+        'amount_exceeds_invoice_balance' => 'The entered amount exceeds the remaining invoice balance (:balance :currency).',
         'amount_exceeds_max' => 'The entered amount exceeds the maximum allowed.',
-        'amount_exceeds_supplier_balance' => 'The entered amount exceeds the total outstanding supplier balance (:balance SAR).',
+        'amount_exceeds_supplier_balance' => 'The entered amount exceeds the total outstanding supplier balance (:balance :currency).',
         'cannot_refund_unpaid_invoice' => 'Cannot Refund Unpaid Invoice',
         'invoice_already_paid' => 'This invoice is fully paid and has no outstanding balance.',
         'no_outstanding_balance' => 'There is no outstanding balance for this supplier to record a payment against.',

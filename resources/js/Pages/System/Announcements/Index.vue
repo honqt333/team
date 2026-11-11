@@ -42,12 +42,13 @@
             <!-- Filters -->
             <div class="flex gap-4">
                 <SearchableSelect
-                    v-model="status"
+                    v-model="tableFilters.status"
                     :options="statusOptions"
                     option-label="label"
                     option-value="value"
                     :placeholder="$t('system.announcements.all_statuses')"
                     compact
+                    @update:model-value="applyFilters"
                 />
             </div>
 
@@ -209,6 +210,12 @@
                         </tr>
                     </tbody>
                 </DataTable>
+                <AppPagination
+                    :links="announcements.links || []"
+                    :from="announcements.from"
+                    :to="announcements.to"
+                    :total="announcements.total"
+                />
             </div>
         </div>
     </SystemLayout>
@@ -216,7 +223,8 @@
 
 <script setup>
 import DataTable from '@/Components/Common/DataTable.vue';
-import { ref, computed } from 'vue';
+import AppPagination from '@/Components/Common/AppPagination.vue';
+import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { Head, Link, router } from '@inertiajs/vue3';
 import SystemLayout from '@/Layouts/SystemLayout.vue';
@@ -224,6 +232,7 @@ import SearchableSelect from '@/Components/SearchableSelect.vue';
 import PageHeader from '@/Components/PageHeader.vue';
 import { useConfirm } from '@/Composables/useConfirm';
 import { useNumberFormat } from '@/Composables/useNumberFormat';
+import { useServerTable } from '@/Composables/useServerTable';
 
 const { t } = useI18n();
 const { confirm } = useConfirm();
@@ -235,19 +244,17 @@ const props = defineProps({
 });
 
 const statusOptions = computed(() => [
+    { value: '', label: t('system.announcements.all_statuses') },
     { value: 'published', label: t('system.status.published') },
     { value: 'draft', label: t('system.status.draft') },
 ]);
 
-const status = ref(props.filters?.status || '');
-
-const applyFilters = () => {
-    router.get(
-        '/system/announcements',
-        { status: status.value || undefined },
-        { preserveState: true }
-    );
-};
+const { filters: tableFilters, applyFilters } = useServerTable({
+    routeUrl: '/system/announcements',
+    initialFilters: {
+        status: props.filters?.status || '',
+    },
+});
 
 const formatDate = (date) =>
     date ? new Date(date).toLocaleDateString('ar-SA-u-nu-latn') : t('common.na');

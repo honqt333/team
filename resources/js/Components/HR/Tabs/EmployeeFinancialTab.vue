@@ -124,7 +124,7 @@
                                                     ({{
                                                         a.is_flexible
                                                             ? $t('hr.financial.flexible')
-                                                            : `${a.amount} ${a.type === 'percentage' ? '%' : $t('common.currency')}`
+                                                            : `${a.amount} ${a.type === 'percentage' ? '%' : activeCurrencySymbol}`
                                                     }})
                                                 </span>
                                             </div>
@@ -243,7 +243,7 @@
                                         {{
                                             getAllowanceById(item.id)?.type === 'percentage'
                                                 ? '%'
-                                                : $t('common.currency')
+                                                : activeCurrencySymbol
                                         }}
                                     </div>
                                 </div>
@@ -362,7 +362,7 @@
                                                     ({{
                                                         d.is_flexible
                                                             ? $t('hr.financial.flexible')
-                                                            : `${d.amount} ${d.type === 'percentage' ? '%' : $t('common.currency')}`
+                                                            : `${d.amount} ${d.type === 'percentage' ? '%' : activeCurrencySymbol}`
                                                     }})
                                                 </span>
                                             </div>
@@ -481,7 +481,7 @@
                                         {{
                                             getDeductionById(item.id)?.type === 'percentage'
                                                 ? '%'
-                                                : $t('common.currency')
+                                                : activeCurrencySymbol
                                         }}
                                     </div>
                                 </div>
@@ -522,6 +522,7 @@
 <script setup>
 import { ref, watch, onMounted, onUnmounted, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { useNumberFormat } from '@/Composables/useNumberFormat';
 import { router } from '@inertiajs/vue3';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 import BankInfoTab from '@/Components/HR/Tabs/Financial/BankInfoTab.vue';
@@ -537,6 +538,7 @@ const props = defineProps({
 });
 
 const { t } = useI18n();
+const { activeCurrencySymbol } = useNumberFormat();
 
 const periodTypeOptions = computed(() => [
     { value: 'indefinite', label: t('hr.financial.periods.indefinite') },

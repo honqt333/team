@@ -1237,7 +1237,7 @@ const props = defineProps({
 
 const { t } = useI18n();
 const { confirm } = useConfirm();
-const { toEnglish, formatCurrency } = useNumberFormat();
+const { toEnglish, formatCurrency, formatMoney } = useNumberFormat();
 
 const page = usePage();
 const isVatEnabled = computed(() => page?.props?.tenant?.tax_settings?.vat_enabled ?? true);
@@ -1274,14 +1274,7 @@ const onCreditNoteCreated = () => {
 };
 
 const formatCurrencyEnglish = (amount) => {
-    return (
-        Number(amount).toLocaleString('en-US', {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2,
-        }) +
-        ' ' +
-        t('common.currency_sar')
-    );
+    return formatMoney(amount, props.invoice?.currency_code);
 };
 
 const activeTab = ref('invoice_items'); // 'invoice_items', 'parts', 'payments'

@@ -1,26 +1,45 @@
+import { computed } from 'vue';
+import { usePage } from '@inertiajs/vue3';
+import { useI18n } from 'vue-i18n';
+import { getCurrencyDecimals, getCurrencyLabel, resolveTenantCurrency } from '@/Utils/currency';
+
 /**
- * Unified composable for all numeral operations.
+ * Unified composable for all numeral and currency operations.
  *
- * Handles both:
+ * Handles:
  * 1. Conversion between Arabic (٠-٩) and English (0-9) numerals
  * 2. Formatting numbers for display with English numerals only
- *
- * This consolidates the functionality from useArabicNumerals and useNumberFormat.
+ * 3. Tenant-aware currency formatting (code, localized symbol, decimals)
  */
 export function useNumberFormat() {
     const arabicNumerals = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
     const englishNumerals = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
 
+    let page = null;
+    try {
+        page = usePage();
+    } catch {
+        page = null;
+    }
+
+    let localeRef = null;
+    try {
+        localeRef = useI18n().locale;
+    } catch {
+        localeRef = null;
+    }
+
+    const activeCurrencyCode = computed(() => resolveTenantCurrency(page?.props?.tenant));
+    const activeCurrencyDecimals = computed(() => getCurrencyDecimals(activeCurrencyCode.value));
+    const activeLocale = computed(() => localeRef?.value || page?.props?.locale || 'ar');
+    const activeCurrencySymbol = computed(() =>
+        getCurrencyLabel(activeCurrencyCode.value, activeLocale.value)
+    );
+
     // ============================================
     // CONVERSION FUNCTIONS (Input Processing)
     // ============================================
 
-    /**
-     * Convert Arabic numerals to English numerals.
-     *
-     * @param {string|any} value - The value to convert
-     * @returns {string|any} - The converted value
-     */
     function toEnglish(value) {
         if (typeof value !== 'string') return value;
 
@@ -31,12 +50,6 @@ export function useNumberFormat() {
         return result;
     }
 
-    /**
-     * Convert English numerals to Arabic numerals.
-     *
-     * @param {string|any} value - The value to convert
-     * @returns {string|any} - The converted value
-     */
     function toArabic(value) {
         if (typeof value !== 'string') return value;
 
@@ -47,13 +60,6 @@ export function useNumberFormat() {
         return result;
     }
 
-    /**
-     * Sanitize input event value by converting Arabic numerals to English.
-     * Useful for v-on:input handlers.
-     *
-     * @param {Event} event - Input event
-     * @returns {string} - Sanitized value
-     */
     function sanitizeInput(event) {
         const value = event.target.value;
         const sanitized = toEnglish(value);
@@ -67,68 +73,91 @@ export function useNumberFormat() {
     // FORMATTING FUNCTIONS (Display Processing)
     // ============================================
 
-    /**
-     * Format a number with English numerals and specified decimal places.
-     *
-     * @param {number|string|null|undefined} value - The value to format
-     * @param {number} decimals - Number of decimal places (default: 2)
-     * @returns {string} Formatted number with English numerals
-     */
     function formatNumber(value, decimals = 2) {
         if (value === null || value === undefined || value === '') {
-            return '0.00';
+            return (0).toLocaleString('en-US', {
+                minimumFractionDigits: decimals,
+                maximumFractionDigits: decimals,
+                useGrouping: false,
+            });
         }
 
         const num = typeof value === 'string' ? parseFloat(value) : value;
 
         if (isNaN(num)) {
-            return '0.00';
+            return (0).toLocaleString('en-US', {
+                minimumFractionDigits: decimals,
+                maximumFractionDigits: decimals,
+                useGrouping: false,
+            });
         }
 
         // Force en-US locale to ensure English numerals (0-9)
         return num.toLocaleString('en-US', {
             minimumFractionDigits: decimals,
             maximumFractionDigits: decimals,
-            useGrouping: false, // No thousand separators
+            useGrouping: false,
         });
     }
 
     /**
-     * Format currency value with English numerals.
-     *
-     * @param {number|string|null|undefined} value - The value to format
-     * @param {number} decimals - Number of decimal places (default: 2)
-     * @returns {string} Formatted currency value
+     * Format currency numeric value with English numerals.
+     * Accepts either a decimal count (number) or a currency code (string) as the 2nd argument.
      */
-    function formatCurrency(value, decimals = 2) {
+    function formatCurrency(value, decimalsOrCurrency = undefined) {
+        const decimals =
+            typeof decimalsOrCurrency === 'number'
+                ? decimalsOrCurrency
+                : typeof decimalsOrCurrency === 'string'
+                  ? getCurrencyDecimals(decimalsOrCurrency)
+                  : activeCurrencyDecimals.value;
+
         return formatNumber(value, decimals);
     }
 
     /**
-     * Format an integer (no decimal places).
-     *
-     * @param {number|string|null|undefined} value - The value to format
-     * @returns {string} Formatted integer
+     * Format an amount paired with its currency label (e.g. "100.00 ر.س" / "100.00 AED").
      */
+    function formatMoney(value, currencyCode = undefined, showSymbol = true) {
+        const code = resolveTenantCurrency(page?.props?.tenant, currencyCode);
+        const decimals = getCurrencyDecimals(code);
+        const num = typeof value === 'string' ? parseFloat(value) : Number(value);
+        const safe = Number.isFinite(num) ? num : 0;
+
+        const formatted = safe.toLocaleString('en-US', {
+            minimumFractionDigits: decimals,
+            maximumFractionDigits: decimals,
+        });
+
+        if (!showSymbol) {
+            return formatted;
+        }
+
+        return `${formatted} ${getCurrencyLabel(code, activeLocale.value)}`;
+    }
+
+    function getCurrencySuffix(currencyCode = undefined) {
+        const code = resolveTenantCurrency(page?.props?.tenant, currencyCode);
+        return getCurrencyLabel(code, activeLocale.value);
+    }
+
     function formatInteger(value) {
         return formatNumber(value, 0);
     }
 
-    /**
-     * Format quantity/stock (strip trailing zeros).
-     *
-     * @param {number|string|null|undefined} value - The value to format
-     * @returns {string} Formatted quantity
-     */
     function formatQuantity(value) {
         if (value === null || value === undefined || value === '') return '0';
         const num = typeof value === 'string' ? parseFloat(toEnglish(value)) : value;
         if (isNaN(num)) return '0';
-        // This naturally strips trailing zeros: 40.000 -> "40", 40.500 -> "40.5"
         return num.toString();
     }
 
     return {
+        // Reactive tenant currency helpers
+        activeCurrencyCode,
+        activeCurrencySymbol,
+        activeCurrencyDecimals,
+
         // Conversion functions
         toEnglish,
         toArabic,
@@ -138,6 +167,8 @@ export function useNumberFormat() {
         formatNumber,
         formatCurrency,
         currency: formatCurrency,
+        formatMoney,
+        getCurrencySuffix,
         formatInteger,
         formatQuantity,
     };

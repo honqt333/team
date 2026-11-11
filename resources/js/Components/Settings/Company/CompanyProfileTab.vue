@@ -391,9 +391,10 @@
 </template>
 
 <script setup>
-import { computed } from 'vue';
+import { computed, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
+import { getCountryMeta } from '@/Utils/currency';
 
 const { t } = useI18n();
 
@@ -421,7 +422,7 @@ const currencyOptions = computed(() => [
     { value: 'EUR', label: 'EUR - Euro' },
 ]);
 
-defineProps({
+const props = defineProps({
     profile: Object,
     contact: Object,
     address: Object,
@@ -432,6 +433,18 @@ defineProps({
     uploadingLogo: Boolean,
     saving: Boolean,
 });
+
+watch(
+    () => props.form?.profile?.country,
+    (newCountry, oldCountry) => {
+        if (!newCountry || !oldCountry || newCountry === oldCountry) return;
+        const oldDefault = getCountryMeta(oldCountry).default_currency;
+        const newDefault = getCountryMeta(newCountry).default_currency;
+        if (!props.form.profile.currency || props.form.profile.currency === oldDefault) {
+            props.form.profile.currency = newDefault;
+        }
+    }
+);
 
 defineEmits(['upload-logo', 'delete-logo', 'save-section']);
 </script>

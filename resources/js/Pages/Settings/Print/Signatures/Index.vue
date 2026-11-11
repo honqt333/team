@@ -52,10 +52,12 @@
                 >
                     <h2 class="font-bold text-gray-900 dark:text-white">
                         {{
-                            $t(
-                                `settings.print.documents.${group.documentType}.title`,
-                                group.documentType
-                            )
+                            $te(`print_settings.${group.documentType}`)
+                                ? $t(`print_settings.${group.documentType}`)
+                                : $t(
+                                      `settings.print.documents.${group.documentType}.title`,
+                                      group.documentType
+                                  )
                         }}
                     </h2>
                     <span

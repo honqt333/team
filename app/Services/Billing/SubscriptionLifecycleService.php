@@ -19,6 +19,50 @@ use Illuminate\Support\Facades\DB;
  */
 class SubscriptionLifecycleService
 {
+    /**
+     * The lifecycle resolved for the current request, keyed by tenant id.
+     *
+     * Resolving the lifecycle costs 5 queries (1 settings read + up to 4
+     * subscription reads). It is needed on EVERY request, by two
+     * different places:
+     *
+     *  - `EnsureTenantActive` middleware, to decide whether the tenant
+     *    may operate at all;
+     *  - `HandleInertiaRequests`, to share the state with the frontend.
+     *
+     * Without memoization the same computation runs twice per request —
+     * roughly 10 of the 29-35 queries every page issues — and it was
+     * measured on every failing performance endpoint.
+     *
+     * The memo is keyed by tenant id AND by a CLOCK IDENTITY — see
+     * `clockKey()`. The time part matters: the resolution is
+     * time-dependent (a trial that ends at 10:00 expires at 10:00), so
+     * the memo must not survive a change of "now" — whether the clock
+     * moved on inside the request, or a test moved it with
+     * `Carbon::setTestNow()`.
+     *
+     * A state change made during the request (a renewal, a suspension)
+     * invalidates the memo too — see `TenantObserver`.
+     *
+     * @var array<int, array{clock: string, state: array<string, mixed>}>
+     */
+    private array $resolvedStates = [];
+
+    /**
+     * Forget the memoized lifecycle, so the next resolution re-reads the
+     * database. Call this after the subscription state changes.
+     */
+    public function flushResolvedState(?int $tenantId = null): void
+    {
+        if ($tenantId === null) {
+            $this->resolvedStates = [];
+
+            return;
+        }
+
+        unset($this->resolvedStates[$tenantId]);
+    }
+
     public const STATE_ACTIVE = 'active';
 
     public const STATE_TRIAL = 'trial';
@@ -85,6 +129,66 @@ class SubscriptionLifecycleService
      * }
      */
     public function resolveTenantState(Tenant $tenant): array
+    {
+        $tenantId = (int) $tenant->getKey();
+        $clock = $this->clockKey();
+
+        // Resolved once per request — see `$resolvedStates`.
+        //
+        // The memo is only valid while the CLOCK is the same. The
+        // resolution is time-dependent (a trial ends at a wall-clock
+        // moment), so a memo computed at a different "now" would
+        // describe a different state.
+        //
+        // The clock key is deliberately NOT the current second: the
+        // middleware and the Inertia handler are separated by the whole
+        // request, and a request that crosses a second boundary would
+        // then MISS the memo — which is exactly the flakiness this
+        // memoization is meant to remove.
+        //
+        // Instead the key identifies the CLOCK ITSELF:
+        //  - when the clock is frozen (tests), the frozen instant is the
+        //    key, so `Carbon::setTestNow()` invalidates the memo and a
+        //    passing second does not;
+        //  - when the clock runs normally, the key is the wall-clock
+        //    minute, which is finer than any trial boundary that matters
+        //    (a trial is measured in days) and coarse enough that a
+        //    single request never straddles it.
+        if (isset($this->resolvedStates[$tenantId])
+            && $this->resolvedStates[$tenantId]['clock'] === $clock) {
+            return $this->resolvedStates[$tenantId]['state'];
+        }
+
+        $state = $this->resolveTenantStateUncached($tenant);
+
+        $this->resolvedStates[$tenantId] = [
+            'clock' => $clock,
+            'state' => $state,
+        ];
+
+        return $state;
+    }
+
+    /**
+     * An identity for the current clock.
+     */
+    private function clockKey(): string
+    {
+        $now = Carbon::now();
+
+        // A frozen clock is identified by the instant it is frozen at,
+        // so moving it invalidates every memo.
+        if (Carbon::hasTestNow()) {
+            return 'frozen:'.$now->getTimestamp();
+        }
+
+        return 'wall:'.$now->format('Y-m-d-H-i');
+    }
+
+    /**
+     * The actual resolution. Always goes to the database.
+     */
+    private function resolveTenantStateUncached(Tenant $tenant): array
     {
         $graceDays = $this->getGracePeriodDays();
         $now = Carbon::now();
@@ -468,6 +572,13 @@ class SubscriptionLifecycleService
             } else {
                 // Temporarily unset suspension so resolveTenantState can detect grace period
                 $tenant->forceFill($tenantUpdates + ['status' => 'active']);
+
+                // The tenant's status was just changed IN MEMORY, so the
+                // memoized lifecycle no longer describes it. The flush is
+                // mandatory here — without it the resolution below would
+                // return the cached state and read the wrong branch.
+                $this->flushResolvedState((int) $tenant->getKey());
+
                 $resolved = $this->resolveTenantState($tenant);
 
                 if ($resolved['state'] === self::STATE_GRACE_PERIOD) {
@@ -502,7 +613,16 @@ class SubscriptionLifecycleService
             return 0;
         }
 
-        return (int) ceil($from->floatDiffInDays($to));
+        // `diffInDays($to)` is the explicit form. `floatDiffInDays()` is
+        // a Carbon ALIAS for exactly this call — the signed difference —
+        // but it emits an E_USER_DEPRECATED notice on every invocation
+        // and PHPStan cannot see it (it is resolved through Carbon's
+        // `__call`).
+        //
+        // NOTE: the second argument of `diffInDays()` is the "absolute"
+        // flag. `floatDiffInDays($to)` is signed, so it maps to
+        // `diffInDays($to)` and NOT to `diffInDays($to, true)`.
+        return (int) ceil($from->diffInDays($to));
     }
 
     private function buildStatePayload(

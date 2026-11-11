@@ -355,13 +355,17 @@
                 <th style="width: 40%; text-align: right;">الوصف</th>
             </tr>
         </thead>
+        @php
+            $subCurrency = $invoice->currency ?? config('app.default_currency', 'SAR');
+            $subCurrencyLabel = \App\Support\CountryCurrencyRegistry::currencyLabel($subCurrency, 'ar');
+        @endphp
         <tbody>
             <tr>
                 <td style="text-align: left; font-weight: bold; white-space: nowrap;">
-                    {{ number_format($invoice->subtotal, 2) }} ر.س
+                    {{ number_format($invoice->subtotal, 2) }} {{ $subCurrencyLabel }}
                 </td>
                 <td style="text-align: left; white-space: nowrap;">
-                    {{ number_format($invoice->subtotal, 2) }} ر.س
+                    {{ number_format($invoice->subtotal, 2) }} {{ $subCurrencyLabel }}
                 </td>
                 <td style="text-align: center; font-size: 11px;">
                     <span style="direction: ltr; display: inline-block;">{{ $subscription?->starts_at?->format('Y-m-d') ?? '-' }}</span><br>
@@ -380,27 +384,27 @@
         <table class="totals-table">
             <tr>
                 <td style="text-align: left; font-weight: bold; white-space: nowrap;">
-                    {{ number_format($invoice->subtotal, 2) }} ر.س
+                    {{ number_format($invoice->subtotal, 2) }} {{ $subCurrencyLabel }}
                 </td>
                 <td style="text-align: right; color: #6b7280;">المجموع الفرعي</td>
             </tr>
             @if ($invoice->discount > 0)
                 <tr>
                     <td style="text-align: left; font-weight: bold; color: #16a34a; white-space: nowrap;">
-                        - {{ number_format($invoice->discount, 2) }} ر.س
+                        - {{ number_format($invoice->discount, 2) }} {{ $subCurrencyLabel }}
                     </td>
                     <td style="text-align: right; color: #6b7280;">الخصم</td>
                 </tr>
             @endif
             <tr>
                 <td style="text-align: left; font-weight: bold; white-space: nowrap;">
-                    {{ number_format($invoice->vat, 2) }} ر.س
+                    {{ number_format($invoice->vat, 2) }} {{ $subCurrencyLabel }}
                 </td>
                 <td style="text-align: right; color: #6b7280;">ضريبة القيمة المضافة ({{ $vat_rate }}%)</td>
             </tr>
             <tr class="total-row">
                 <td style="text-align: left; white-space: nowrap;">
-                    {{ number_format($invoice->total, 2) }} ر.س
+                    {{ number_format($invoice->total, 2) }} {{ $subCurrencyLabel }}
                 </td>
                 <td style="text-align: right;">الإجمالي</td>
             </tr>

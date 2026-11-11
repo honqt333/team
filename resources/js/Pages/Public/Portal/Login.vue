@@ -37,17 +37,20 @@
                     :class="form.errors.phone ? 'border-rose-400' : 'border-slate-200'"
                     :style="{ '--tw-ring-color': 'var(--portal-primary-soft)' }"
                 >
-                    <div
-                        class="flex items-center gap-2 border-e border-slate-200 bg-slate-50 px-3.5 text-sm font-extrabold text-slate-700"
+                    <select
+                        v-model="selectedCountryCode"
+                        aria-label="Country code"
+                        class="border-0 border-e border-slate-200 bg-slate-50 px-3 text-sm font-extrabold text-slate-700 outline-none focus:ring-0"
                         dir="ltr"
                     >
-                        <span
-                            class="flex h-5 w-7 items-center justify-center rounded bg-[#087a3d] text-[9px] text-white"
+                        <option
+                            v-for="country in countryDialOptions"
+                            :key="country.code"
+                            :value="country.code"
                         >
-                            SA
-                        </span>
-                        <span>+966</span>
-                    </div>
+                            {{ country.flag }} {{ country.code }} {{ country.dial_code }}
+                        </option>
+                    </select>
                     <input
                         id="phone"
                         v-model="form.phone"
@@ -55,7 +58,10 @@
                         inputmode="numeric"
                         autocomplete="tel"
                         dir="ltr"
-                        :placeholder="t('customer_portal.login.local_phone_placeholder')"
+                        :placeholder="
+                            activeCountryMeta.local_placeholder ||
+                            t('customer_portal.login.local_phone_placeholder')
+                        "
                         class="min-w-0 flex-1 border-0 bg-white px-4 text-lg font-semibold tracking-wide text-slate-950 outline-none ring-0 placeholder:text-slate-300 focus:ring-0"
                         @input="onPhoneInput"
                     />
@@ -122,9 +128,10 @@
 
 <script setup>
 import { Head, useForm } from '@inertiajs/vue3';
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import AuthShell from '@/Components/CustomerPortal/AuthShell.vue';
+import { COUNTRIES, getCountryMeta } from '@/Utils/currency';
 
 const props = defineProps({
     tenant: { type: Object, required: true },
@@ -135,9 +142,18 @@ const props = defineProps({
 
 const { t } = useI18n();
 
+const countryDialOptions = Object.values(COUNTRIES);
+const selectedCountryCode = ref(
+    props.tenant?.country && COUNTRIES[String(props.tenant.country).toUpperCase()]
+        ? String(props.tenant.country).toUpperCase()
+        : 'SA'
+);
+const activeCountryMeta = computed(() => getCountryMeta(selectedCountryCode.value));
+
 function localPhoneValue(phone) {
     const digits = String(phone || '').replace(/\D/g, '');
-    if (digits.startsWith('966')) return digits.slice(3);
+    const dialDigits = activeCountryMeta.value.dial_digits || '966';
+    if (digits.startsWith(dialDigits)) return digits.slice(dialDigits.length);
     return digits;
 }
 
@@ -150,15 +166,18 @@ const benefits = computed(() => [
 ]);
 
 function onPhoneInput(event) {
-    const cleaned = event.target.value.replace(/\D/g, '').slice(0, 10);
+    const cleaned = event.target.value.replace(/\D/g, '').slice(0, 12);
     form.phone = cleaned;
 }
 
 function normalizedPhone() {
     const raw = String(form.phone || '').trim();
-    if (/^05\d{8}$/.test(raw)) return `+966${raw.slice(1)}`;
-    if (/^5\d{8}$/.test(raw)) return `+966${raw}`;
-    return raw;
+    if (!raw) return '';
+    if (raw.startsWith('+')) return raw;
+    if (raw.startsWith('00')) return `+${raw.slice(2)}`;
+    const dialCode = activeCountryMeta.value.dial_code || '+966';
+    const stripped = raw.startsWith('0') ? raw.slice(1) : raw;
+    return `${dialCode}${stripped}`;
 }
 
 function submit() {

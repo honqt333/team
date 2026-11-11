@@ -391,7 +391,7 @@
                                     {{ formatCurrencyValue(quote.total) }}
                                 </span>
                                 <span class="text-[9px] font-bold text-content-secondary uppercase">
-                                    {{ $t('common.currency') }}
+                                    {{ activeCurrencySymbol }}
                                 </span>
                             </div>
                         </div>
@@ -734,7 +734,7 @@ const props = defineProps({
 
 const { t } = useI18n();
 const { success } = useToast();
-const { formatCurrency: formatCurrencyEN, toEnglish } = useNumberFormat();
+const { formatCurrency: formatCurrencyEN, toEnglish, activeCurrencySymbol } = useNumberFormat();
 const { can } = usePermission();
 
 const showModal = ref(false);

@@ -136,6 +136,7 @@ const mappedPrintData = computed(() => {
         created_at: props.invoice.issue_date,
         entry_date: props.invoice.supply_date || props.invoice.issue_date,
         tax_enabled_snapshot: true,
+        currency_code: props.invoice.currency_code,
         pricing_mode_snapshot: 'exclusive',
         total_excl_tax:
             Number(calculatedInvoiceSubtotal.value || 0) -

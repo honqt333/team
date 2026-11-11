@@ -1823,6 +1823,7 @@ const props = defineProps({
 const { t, locale } = useI18n();
 const isRtl = computed(() => locale.value === 'ar');
 const { confirm } = useConfirm();
+const { formatMoney } = useNumberFormat();
 const { can, isAnyAdmin } = usePermission();
 const { toEnglish } = useNumberFormat();
 
@@ -2128,7 +2129,7 @@ function isInvoiceOverdue(order) {
     return today >= dueDate;
 }
 function formatCurrency(amount) {
-    return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'SAR' }).format(amount);
+    return formatMoney(amount);
 }
 function getStatusClass(status) {
     const classes = {

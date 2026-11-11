@@ -10,6 +10,7 @@ use App\Models\Tenant;
 use App\Models\TenantWebsite;
 use App\Services\CustomerPortal\CustomerPortalOtpService;
 use App\Services\CustomerPortal\OtpRateLimitedException;
+use App\Support\CountryCurrencyRegistry;
 use App\Support\CustomerPortalSession;
 use App\Support\PhoneNumber;
 use Carbon\Carbon;
@@ -92,7 +93,7 @@ class CustomerPortalAuthController extends Controller
         ]);
 
         $tenant = $this->resolveTenant($request);
-        $phone = PhoneNumber::normalize($validated['phone']);
+        $phone = PhoneNumber::normalize($validated['phone'], $tenant?->country);
 
         try {
             $this->otp->requestOtp(
@@ -412,6 +413,8 @@ class CustomerPortalAuthController extends Controller
         return [
             'id' => $tenant->id,
             'slug' => $tenant->slug,
+            'country' => CountryCurrencyRegistry::normalizeCountry($tenant->country),
+            'currency' => CountryCurrencyRegistry::tenantCurrency($tenant),
             'site_name' => $website?->display_name ?? $tenant->name,
             'tagline' => $website?->tagline,
             'logo_url' => $logoUrl,

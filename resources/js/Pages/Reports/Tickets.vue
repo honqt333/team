@@ -111,6 +111,15 @@
                     </div>
 
                     <div class="flex items-center gap-1.5 ps-3">
+                        <span class="text-orange-600 dark:text-orange-400 font-semibold">
+                            {{ $t('reports.tickets_report.purchase_amount') }}:
+                        </span>
+                        <span class="font-mono font-bold text-orange-700 dark:text-orange-300">
+                            {{ formatMoney(kpis.total_purchase_amount) }}
+                        </span>
+                    </div>
+
+                    <div class="flex items-center gap-1.5 ps-3">
                         <span class="text-emerald-600 dark:text-emerald-400 font-bold">
                             {{ $t('reports.tickets_report.net_amount') }}:
                         </span>
@@ -666,6 +675,9 @@
                                             {{ $t('reports.tickets_report.parts_cost') }}
                                         </th>
                                         <th class="py-3 px-3 text-end">
+                                            {{ $t('reports.tickets_report.purchase_amount') }}
+                                        </th>
+                                        <th class="py-3 px-3 text-end">
                                             {{ $t('reports.tickets_report.net_amount') }}
                                         </th>
                                         <th class="py-3 px-3 text-end">
@@ -788,6 +800,11 @@
                                             {{ formatMoney(tkt.parts_cost) }}
                                         </td>
                                         <td
+                                            class="py-3 px-3 text-end font-mono text-orange-600 dark:text-orange-400"
+                                        >
+                                            {{ formatMoney(tkt.purchase_total) }}
+                                        </td>
+                                        <td
                                             class="py-3 px-3 text-end font-mono font-bold text-emerald-600 dark:text-emerald-400"
                                         >
                                             {{ formatMoney(tkt.net_amount) }}
@@ -855,6 +872,9 @@
                                     {{ $t('reports.tickets_report.parts_cost') }}
                                 </th>
                                 <th class="py-3 px-3 text-end">
+                                    {{ $t('reports.tickets_report.purchase_amount') }}
+                                </th>
+                                <th class="py-3 px-3 text-end">
                                     {{ $t('reports.tickets_report.net_amount') }}
                                 </th>
                                 <th class="py-3 px-3 text-end">
@@ -871,7 +891,7 @@
                         <tbody class="divide-y divide-gray-100 dark:divide-gray-700/60">
                             <tr v-if="!tickets?.data || tickets.data.length === 0">
                                 <td
-                                    :colspan="centers && centers.length > 1 ? 12 : 11"
+                                    :colspan="centers && centers.length > 1 ? 13 : 12"
                                     class="py-12 text-center"
                                 >
                                     <div class="max-w-xs mx-auto text-center space-y-2">
@@ -1008,6 +1028,11 @@
                                     {{ formatMoney(tkt.parts_cost) }}
                                 </td>
                                 <td
+                                    class="py-3 px-3 text-end font-mono text-orange-600 dark:text-orange-400"
+                                >
+                                    {{ formatMoney(tkt.purchase_total) }}
+                                </td>
+                                <td
                                     class="py-3 px-3 text-end font-mono font-bold text-emerald-600 dark:text-emerald-400"
                                 >
                                     {{ formatMoney(tkt.net_amount) }}
@@ -1036,42 +1061,13 @@
                 </div>
 
                 <!-- Pagination Footer -->
-                <div
-                    v-if="tickets?.links && tickets.links.length > 3"
-                    class="p-4 border-t border-gray-100 dark:border-gray-700/60 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs print:hidden"
-                >
-                    <div class="text-gray-500 dark:text-gray-400">
-                        {{ $t('reports.payments_report.showing') }}
-                        <span class="font-mono font-bold text-gray-800 dark:text-gray-200">
-                            {{ tickets.from || 0 }}
-                        </span>
-                        {{ $t('reports.payments_report.to') }}
-                        <span class="font-mono font-bold text-gray-800 dark:text-gray-200">
-                            {{ tickets.to || 0 }}
-                        </span>
-                        {{ $t('reports.payments_report.of') }}
-                        <span class="font-mono font-bold text-gray-800 dark:text-gray-200">
-                            {{ tickets.total || 0 }}
-                        </span>
-                    </div>
-
-                    <div class="flex items-center gap-1">
-                        <template v-for="(link, i) in tickets.links" :key="i">
-                            <a
-                                v-if="link.url"
-                                :href="link.url"
-                                :class="[
-                                    'px-3 py-1.5 rounded-lg font-bold transition-all',
-                                    link.active
-                                        ? 'bg-blue-600 text-white shadow-sm'
-                                        : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200',
-                                ]"
-                                v-html="link.label"
-                            />
-                            <span v-else class="px-2 py-1 text-gray-400" v-html="link.label" />
-                        </template>
-                    </div>
-                </div>
+                <AppPagination
+                    class="print:hidden"
+                    :links="tickets?.links || []"
+                    :from="tickets?.from"
+                    :to="tickets?.to"
+                    :total="tickets?.total"
+                />
             </div>
 
             <!-- Unified Print Footer (no signatures/stamps) -->
@@ -1083,6 +1079,7 @@
 <script setup>
 import PrintEngine from '@/Components/Print/PrintEngine.vue';
 import DataTable from '@/Components/Common/DataTable.vue';
+import AppPagination from '@/Components/Common/AppPagination.vue';
 import AppPrintButton from '@/Components/Common/AppPrintButton.vue';
 import AppToggle from '@/Components/Common/AppToggle.vue';
 import { printDocument } from '@/Composables/usePrint';

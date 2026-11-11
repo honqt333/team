@@ -180,6 +180,7 @@ const mappedData = computed(() => {
             color: wo.vehicle?.color,
         },
         tax_enabled_snapshot: isTaxEnabled.value,
+        currency_code: wo.currency_code,
         pricing_mode_snapshot: wo.pricing_mode_snapshot || 'exclusive',
         total_excl_tax: Number(wo.total_excl_tax || props.grandTotal || 0),
         total_tax: isTaxEnabled.value ? Number(wo.total_tax || 0) : 0,

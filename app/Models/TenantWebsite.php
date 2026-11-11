@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Support\CountryCurrencyRegistry;
 use App\Support\TenantWebsite\ThemeRegistry;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -165,11 +166,8 @@ class TenantWebsite extends Model
     // ─────────────────────────────────────────────────────────────────
 
     /**
-     * wa.me-compatible link. Strip everything that isn't a
-     * digit, then prefix with the Saudi country code if it
-     * doesn't already start with one. We don't try to detect
-     * 00x prefixes — if the user enters a number with country
-     * code, we trust it; if not, default to 966 (Saudi).
+     * wa.me-compatible link. Uses existing country code when present or falls
+     * back to the tenant's configured country dial code (default 966).
      */
     public function getWhatsappLinkAttribute(): ?string
     {
@@ -185,19 +183,30 @@ class TenantWebsite extends Model
             return null;
         }
 
-        // Already has country code (starts with 966 or any 3-digit
-        // country code) → leave alone.
-        if (str_starts_with($digits, '966') || strlen($digits) > 10) {
+        if (str_starts_with($digits, '00') && strlen($digits) >= 7) {
+            return 'https://wa.me/'.substr($digits, 2);
+        }
+
+        foreach (CountryCurrencyRegistry::dialDigitsList() as $code) {
+            if (str_starts_with($digits, $code) && strlen($digits) >= strlen($code) + 7) {
+                return 'https://wa.me/'.$digits;
+            }
+        }
+
+        if (strlen($digits) > 10) {
             return 'https://wa.me/'.$digits;
         }
 
-        // Local number (10 digits, leading 0) → strip the 0 and
-        // add 966.
         if (str_starts_with($digits, '0')) {
             $digits = substr($digits, 1);
         }
 
-        return 'https://wa.me/966'.$digits;
+        $tenantCountry = $this->relationLoaded('tenant')
+            ? $this->tenant?->country
+            : $this->tenant()->value('country');
+        $dialDigits = (string) (CountryCurrencyRegistry::countryMeta($tenantCountry)['dial_digits'] ?? '966');
+
+        return 'https://wa.me/'.$dialDigits.$digits;
     }
 
     public function getPhoneLinkAttribute(): ?string

@@ -69,4 +69,23 @@ class PhoneNumberTest extends TestCase
         $this->assertSame($a, $c);
         $this->assertSame($a, $d);
     }
+
+    public function test_normalizes_gcc_and_arab_numbers_with_default_country(): void
+    {
+        $this->assertSame('+971501234567', PhoneNumber::normalize('0501234567', 'AE'));
+        $this->assertSame('+971501234567', PhoneNumber::normalize('501234567', 'AE'));
+        $this->assertSame('+96550123456', PhoneNumber::normalize('50123456', 'KW'));
+        $this->assertSame('+96550123456', PhoneNumber::normalize('0096550123456', 'SA'));
+        $this->assertSame('+201012345678', PhoneNumber::normalize('01012345678', 'EG'));
+        $this->assertSame('+962791234567', PhoneNumber::normalize('0791234567', 'JO'));
+    }
+
+    public function test_preserves_international_e164_numbers(): void
+    {
+        $this->assertSame('+447911123456', PhoneNumber::normalize('+44 7911 123456', 'SA'));
+        $this->assertSame('+12025550123', PhoneNumber::normalize('0012025550123', 'AE'));
+        $this->assertTrue(PhoneNumber::isValidE164('+971501234567'));
+        $this->assertTrue(PhoneNumber::isValidE164('+447911123456'));
+        $this->assertFalse(PhoneNumber::isValidE164('0501234567'));
+    }
 }

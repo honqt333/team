@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Models\Concerns\CenterScoped;
+use App\Support\CountryCurrencyRegistry;
 use App\Support\PricingHelper;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -81,7 +82,7 @@ class QuoteLine extends Model
             $quote = $line->quote;
 
             if ($quote && $quote->tax_enabled_snapshot) {
-                $taxRate = $quote->tax_rate_snapshot ?? 15; // Default 15%
+                $taxRate = $quote->tax_rate_snapshot ?? CountryCurrencyRegistry::defaultVatRate($quote->tenant?->country);
                 $line->is_taxable = true;
                 $line->tax_rate_snapshot = $taxRate;
 

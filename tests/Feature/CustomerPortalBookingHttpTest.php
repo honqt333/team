@@ -13,6 +13,8 @@ use App\Models\ServiceBay;
 use App\Models\Tenant;
 use App\Models\TenantWebsite;
 use App\Models\Vehicle;
+use App\Models\VehicleMake;
+use App\Models\VehicleModel;
 use App\Services\AppointmentSchedulingService;
 use App\Support\CustomerPortalSession;
 use Carbon\Carbon;
@@ -188,7 +190,29 @@ class CustomerPortalBookingHttpTest extends TestCase
         $tenant = $this->publishedTenant();
         $center = $this->openCenter($tenant);
         $customer = $this->customerIn($tenant);
-        $this->vehicleFor($customer, $tenant);
+
+        $make = VehicleMake::create([
+            'source' => 'system',
+            'name_ar' => 'لكزس',
+            'name_en' => 'Lexus',
+            'is_active' => true,
+        ]);
+        $model = VehicleModel::create([
+            'source' => 'system',
+            'make_id' => $make->id,
+            'name_ar' => 'ES350',
+            'name_en' => 'ES350',
+            'is_active' => true,
+        ]);
+
+        Vehicle::factory()->create([
+            'tenant_id' => $tenant->id,
+            'customer_id' => $customer->id,
+            'plate_number' => 'ح ط ي 9999',
+            'make_id' => $make->id,
+            'model_id' => $model->id,
+            'year' => 2023,
+        ]);
         $this->serviceIn($tenant, $center);
 
         $this->loginAs($customer, $tenant);
@@ -199,6 +223,10 @@ class CustomerPortalBookingHttpTest extends TestCase
                 ->component('Public/Portal/Appointments/New')
                 ->where('tenant.slug', $tenant->slug)
                 ->where('centers.0.id', $center->id)
+                ->where('vehicles.0.make', 'لكزس')
+                ->where('vehicles.0.model', 'ES350')
+                ->where('vehicles.0.year', 2023)
+                ->where('vehicles.0.label', 'لكزس · ES350 · 2023 · ح ط ي 9999')
             );
     }
 

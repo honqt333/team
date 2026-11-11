@@ -7,6 +7,7 @@ namespace App\Services\Zatca;
 use App\Models\Tenant;
 use App\Models\TenantZatcaSetting;
 use App\Support\ArabicNumeralConverter;
+use App\Support\CountryCurrencyRegistry;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
@@ -61,6 +62,10 @@ class ZatcaOnboardingService
         $errors = [];
         $taxSettings = $tenant->taxSettings;
         $vatNumber = $taxSettings?->tax_number ?? $tenant->vat_number;
+
+        if (! CountryCurrencyRegistry::isZatcaApplicable($tenant->country)) {
+            $errors[] = 'الربط مع هيئة الزكاة والضريبة والجمارك (ZATCA) متاح للمنشآت المسجلة في المملكة العربية السعودية فقط.';
+        }
 
         if (! ($taxSettings?->vat_enabled ?? false)) {
             $errors[] = 'ضريبة القيمة المضافة غير مفعلة في النظام.';

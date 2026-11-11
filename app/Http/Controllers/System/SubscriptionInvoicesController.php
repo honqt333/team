@@ -10,6 +10,7 @@ use App\Models\AdminUser;
 use App\Models\BankTransferReceipt;
 use App\Models\Billing\SubscriptionInvoice;
 use App\Models\Billing\SubscriptionPayment;
+use App\Models\PaymentSettings;
 use App\Services\Billing\SubscriptionLifecycleService;
 use App\Services\Invoice\SubscriptionInvoiceService;
 use Illuminate\Http\Request;
@@ -214,7 +215,7 @@ class SubscriptionInvoicesController extends Controller
                     'subscription_id' => $invoice->subscription_id,
                     'subscription_invoice_id' => $invoice->id,
                     'amount' => $paidAmount,
-                    'currency' => 'SAR',
+                    'currency' => PaymentSettings::getPlatformCurrency(),
                     'gateway' => $method,
                     'payment_method' => $method,
                     'gateway_ref' => $reference,

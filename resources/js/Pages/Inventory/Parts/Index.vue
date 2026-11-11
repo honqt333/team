@@ -132,6 +132,58 @@
                             />
                         </div>
 
+                        <!-- Vehicle Make Filter -->
+                        <div class="w-full sm:w-44" v-if="vehicleMakes.length">
+                            <label class="block text-[11px] font-bold text-text-secondary mb-1">
+                                {{ $t('inventory.parts.compatibility.make') }}
+                            </label>
+                            <SearchableSelect
+                                v-model="tableFilters.vehicle_make_id"
+                                :options="computedMakes"
+                                option-label="name"
+                                option-value="id"
+                                :placeholder="$t('inventory.parts.compatibility.all_makes')"
+                                @update:modelValue="onMakeFilterChange"
+                                compact
+                            />
+                        </div>
+
+                        <!-- Vehicle Model Filter -->
+                        <div
+                            class="w-full sm:w-44"
+                            v-if="vehicleMakes.length && filteredModels.length > 1"
+                        >
+                            <label class="block text-[11px] font-bold text-text-secondary mb-1">
+                                {{ $t('inventory.parts.compatibility.model') }}
+                            </label>
+                            <SearchableSelect
+                                v-model="tableFilters.vehicle_model_id"
+                                :options="filteredModels"
+                                option-label="name"
+                                option-value="id"
+                                :placeholder="$t('inventory.parts.compatibility.all_models')"
+                                @update:modelValue="() => applyFilters()"
+                                compact
+                            />
+                        </div>
+
+                        <!-- Manufacture Year Filter -->
+                        <div class="w-28" v-if="vehicleMakes.length">
+                            <label class="block text-[11px] font-bold text-text-secondary mb-1">
+                                {{ $t('inventory.parts.compatibility.manufacture_year') }}
+                            </label>
+                            <input
+                                v-model="tableFilters.manufacture_year"
+                                type="number"
+                                min="1950"
+                                max="2100"
+                                dir="ltr"
+                                lang="en"
+                                :placeholder="$t('inventory.parts.compatibility.manufacture_year')"
+                                class="block w-full px-3 py-2 text-xs text-text-primary bg-surface border border-border rounded-xl focus:ring-2 focus:ring-focus-ring focus:border-action-primary transition-all outline-none font-mono"
+                            />
+                        </div>
+
                         <!-- Reset Filters Button -->
                         <button
                             v-if="hasActiveFilters"
@@ -482,6 +534,24 @@
                                 >
                                     {{ item.name_en }}
                                 </span>
+                                <div
+                                    v-if="item.compatibilities?.length"
+                                    class="flex flex-wrap gap-1 mt-1"
+                                >
+                                    <span
+                                        v-for="c in item.compatibilities.slice(0, 3)"
+                                        :key="c.id"
+                                        class="inline-flex items-center px-1.5 py-0.5 rounded-md text-[10px] font-medium bg-surface-muted text-text-secondary border border-border/60"
+                                    >
+                                        {{ formatCompatBadge(c) }}
+                                    </span>
+                                    <span
+                                        v-if="item.compatibilities.length > 3"
+                                        class="inline-flex items-center px-1.5 py-0.5 rounded-md text-[10px] font-bold bg-surface-muted text-text-muted"
+                                    >
+                                        +{{ toEnglish(item.compatibilities.length - 3) }}
+                                    </span>
+                                </div>
                             </div>
                         </template>
 
@@ -607,6 +677,8 @@
                 :units="units"
                 :categories="categories"
                 :warehouses="warehouses"
+                :vehicle-makes="vehicleMakes"
+                :vehicle-models="vehicleModels"
                 @close="closeModal"
             />
 
@@ -726,6 +798,14 @@ const props = defineProps({
         type: Array,
         default: () => [],
     },
+    vehicleMakes: {
+        type: Array,
+        default: () => [],
+    },
+    vehicleModels: {
+        type: Array,
+        default: () => [],
+    },
     filters: {
         type: Object,
         default: () => ({}),
@@ -766,6 +846,49 @@ const computedCategories = computed(() => {
     return [allOption, ...cats];
 });
 
+const computedMakes = computed(() => {
+    const allOption = { id: '', name: t('inventory.parts.compatibility.all_makes') };
+    const makes = (props.vehicleMakes || []).map((m) => ({
+        ...m,
+        name: locale.value === 'ar' ? m.name_ar || m.name_en : m.name_en || m.name_ar,
+    }));
+    return [allOption, ...makes];
+});
+
+const filteredModels = computed(() => {
+    const allOption = { id: '', name: t('inventory.parts.compatibility.all_models') };
+    const makeId = tableFilters.vehicle_make_id;
+    const models = (props.vehicleModels || [])
+        .filter((m) => !makeId || Number(m.make_id) === Number(makeId))
+        .map((m) => ({
+            ...m,
+            name: locale.value === 'ar' ? m.name_ar || m.name_en : m.name_en || m.name_ar,
+        }));
+    return [allOption, ...models];
+});
+
+const formatCompatBadge = (compat) => {
+    const makeName =
+        locale.value === 'ar'
+            ? compat.make?.name_ar || compat.make?.name_en || ''
+            : compat.make?.name_en || compat.make?.name_ar || '';
+    const modelName = compat.model
+        ? locale.value === 'ar'
+            ? compat.model.name_ar || compat.model.name_en || ''
+            : compat.model.name_en || compat.model.name_ar || ''
+        : '';
+    const years =
+        compat.year_from || compat.year_to
+            ? ` (${compat.year_from || '...'}–${compat.year_to || '...'})`
+            : '';
+    return `${makeName}${modelName ? ' ' + modelName : ''}${years}`.trim();
+};
+
+const onMakeFilterChange = () => {
+    tableFilters.vehicle_model_id = '';
+    applyFilters();
+};
+
 // Server Table Composable
 const {
     filters: tableFilters,
@@ -781,6 +904,9 @@ const {
         search: props.filters?.search || '',
         category: props.filters?.category || '',
         status: props.filters?.status || '',
+        vehicle_make_id: props.filters?.vehicle_make_id || '',
+        vehicle_model_id: props.filters?.vehicle_model_id || '',
+        manufacture_year: props.filters?.manufacture_year || '',
     },
     initialSort: {
         column: props.filters?.sort || 'name_ar',
@@ -826,6 +952,9 @@ const hasActiveFilters = computed(() => {
         tableFilters.search ||
         tableFilters.category ||
         tableFilters.status ||
+        tableFilters.vehicle_make_id ||
+        tableFilters.vehicle_model_id ||
+        tableFilters.manufacture_year ||
         sortColumn.value !== 'name_ar'
     );
 });
@@ -835,6 +964,9 @@ const resetAllFilters = () => {
     tableFilters.search = '';
     tableFilters.category = '';
     tableFilters.status = '';
+    tableFilters.vehicle_make_id = '';
+    tableFilters.vehicle_model_id = '';
+    tableFilters.manufacture_year = '';
     sortColumn.value = 'name_ar';
     sortDirection.value = 'asc';
     applyFilters();

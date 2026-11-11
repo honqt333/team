@@ -146,6 +146,7 @@ const mappedPrintData = computed(() => {
             color: props.quote.vehicle?.color,
         },
         tax_enabled_snapshot: Boolean(props.quote.tax_enabled_snapshot),
+        currency_code: props.quote.currency_code,
         pricing_mode_snapshot: props.quote.pricing_mode_snapshot || 'exclusive',
         total_excl_tax: Number(props.quote.total_excl_tax || 0),
         total_tax: props.quote.tax_enabled_snapshot ? Number(props.quote.total_tax || 0) : 0,

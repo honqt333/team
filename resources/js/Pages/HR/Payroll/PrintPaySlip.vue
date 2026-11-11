@@ -131,6 +131,7 @@
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import StandardReportLayout from '@/Components/Print/StandardReportLayout.vue';
+import { usePrint } from '@/Composables/usePrint';
 
 const props = defineProps({
     payrollItem: {
@@ -176,13 +177,7 @@ const totalDeductions = computed(() => {
     return gosi + (Number(props.payrollItem?.total_deductions) || 0);
 });
 
-function formatCurrency(value) {
-    return new Intl.NumberFormat('en-SA', {
-        style: 'currency',
-        currency: 'SAR',
-        minimumFractionDigits: 2,
-    }).format(Number(value) || 0);
-}
+const { formatCurrency } = usePrint();
 </script>
 
 <style>

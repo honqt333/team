@@ -302,6 +302,9 @@ import { ref, reactive, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { Link } from '@inertiajs/vue3';
 import axios from 'axios';
+import { useNumberFormat } from '@/Composables/useNumberFormat';
+
+const { formatMoney } = useNumberFormat();
 
 import DataTable from '@/Components/Common/DataTable.vue';
 import AppEmptyState from '@/Components/Common/AppEmptyState.vue';
@@ -491,9 +494,7 @@ function getStatusClass(status) {
 }
 
 function formatCurrency(amount) {
-    return new Intl.NumberFormat('ar-SA-u-nu-latn', { style: 'currency', currency: 'SAR' }).format(
-        amount || 0
-    );
+    return formatMoney(amount);
 }
 
 function formatDate(date) {

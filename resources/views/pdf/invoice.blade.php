@@ -328,6 +328,12 @@
                 <th style="width: 15%">المجموع</th>
             </tr>
         </thead>
+        @php
+            $currencyCode = $invoice->currency_code ?? \App\Support\CountryCurrencyRegistry::tenantCurrency($tenant ?? $invoice->tenant);
+            $currencyDecimals = \App\Support\CountryCurrencyRegistry::decimalsFor($currencyCode);
+            $visualSettings = ($tenant ?? $invoice->tenant)?->print_settings['visual'] ?? [];
+            $currencySuffixHtml = \App\Support\CountryCurrencyRegistry::renderCurrencyHtml($currencyCode, $visualSettings, 'ar');
+        @endphp
         <tbody>
             @foreach ($lines as $line)
                 <tr>
@@ -337,11 +343,11 @@
                             <br><span style="color: #666; font-size: 10px;">{{ $line->description }}</span>
                         @endif
                     </td>
-                    <td>{{ number_format($line->unit_price, 2) }} ر.س</td>
+                    <td>{{ number_format($line->unit_price, $currencyDecimals) }} {!! $currencySuffixHtml !!}</td>
                     <td>{{ $line->qty ?? 1 }}</td>
-                    <td>{{ number_format($line->discount_amount ?? $line->discount ?? 0, 2) }} ر.س</td>
-                    <td>{{ number_format($line->tax_amount ?? 0, 2) }} ر.س</td>
-                    <td>{{ number_format($line->line_total_incl_tax ?? ($line->unit_price * ($line->qty ?? 1) - ($line->discount ?? 0)), 2) }} ر.س</td>
+                    <td>{{ number_format($line->discount_amount ?? $line->discount ?? 0, $currencyDecimals) }} {!! $currencySuffixHtml !!}</td>
+                    <td>{{ number_format($line->tax_amount ?? 0, $currencyDecimals) }} {!! $currencySuffixHtml !!}</td>
+                    <td>{{ number_format($line->line_total_incl_tax ?? ($line->unit_price * ($line->qty ?? 1) - ($line->discount ?? 0)), $currencyDecimals) }} {!! $currencySuffixHtml !!}</td>
                 </tr>
             @endforeach
         </tbody>
@@ -351,21 +357,21 @@
     <div class="totals">
         <div class="totals-row">
             <span class="totals-label">المجموع الفرعي&nbsp;&nbsp;&nbsp;</span>
-            <span class="totals-value">{{ number_format($invoice->total_excl_tax ?? $invoice->subtotal ?? 0, 2) }} ر.س</span>
+            <span class="totals-value">{{ number_format($invoice->total_excl_tax ?? $invoice->subtotal ?? 0, $currencyDecimals) }} {!! $currencySuffixHtml !!}</span>
         </div>
         @if ($invoice->discount > 0)
             <div class="totals-row">
                 <span class="totals-label">الخصم&nbsp;&nbsp;&nbsp;</span>
-                <span class="totals-value" style="color: #16a34a;">- {{ number_format($invoice->discount, 2) }} ر.س</span>
+                <span class="totals-value" style="color: #16a34a;">- {{ number_format($invoice->discount, $currencyDecimals) }} {!! $currencySuffixHtml !!}</span>
             </div>
         @endif
         <div class="totals-row">
             <span class="totals-label">ضريبة القيمة المضافة&nbsp;&nbsp;&nbsp;</span>
-            <span class="totals-value">{{ number_format($invoice->total_tax ?? $invoice->vat ?? 0, 2) }} ر.س</span>
+            <span class="totals-value">{{ number_format($invoice->total_tax ?? $invoice->vat ?? 0, $currencyDecimals) }} {!! $currencySuffixHtml !!}</span>
         </div>
         <div class="totals-row total">
             <span class="totals-label">الإجمالي&nbsp;&nbsp;&nbsp;</span>
-            <span class="totals-value">{{ number_format($invoice->total_incl_tax ?? $invoice->total ?? 0, 2) }} ر.س</span>
+            <span class="totals-value">{{ number_format($invoice->total_incl_tax ?? $invoice->total ?? 0, $currencyDecimals) }} {!! $currencySuffixHtml !!}</span>
         </div>
     </div>
 

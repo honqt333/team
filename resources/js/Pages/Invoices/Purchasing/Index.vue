@@ -655,6 +655,7 @@
             :warehouses="warehouses"
             :units="units"
             :defaultWarehouse="defaultWarehouse"
+            :work-orders="workOrders"
             @close="showCreateModal = false"
             @saved="onInvoiceSaved"
         />
@@ -683,7 +684,7 @@ import { usePermission } from '@/Composables/usePermission';
 import { useServerTable } from '@/Composables/useServerTable';
 
 const { t } = useI18n();
-const { toEnglish } = useNumberFormat();
+const { toEnglish, formatMoney: formatCurrency } = useNumberFormat();
 const { can, isAnyAdmin } = usePermission();
 
 const props = defineProps({
@@ -695,6 +696,7 @@ const props = defineProps({
     defaultWarehouse: { type: Object, default: () => null },
     warehouses: { type: Array, default: () => [] },
     units: { type: Array, default: () => [] },
+    workOrders: { type: Array, default: () => [] },
 });
 
 const showCreateModal = ref(false);
@@ -890,12 +892,7 @@ const formatDate = (date) => {
     return new Date(date).toLocaleDateString('en-GB', { numberingSystem: 'latn' });
 };
 
-const formatCurrency = (amount) =>
-    new Intl.NumberFormat('en-GB', {
-        style: 'currency',
-        currency: 'SAR',
-        numberingSystem: 'latn',
-    }).format(amount || 0);
+// formatCurrency provided by useNumberFormat()
 
 const invoiceStatusClass = (status) => {
     const map = {

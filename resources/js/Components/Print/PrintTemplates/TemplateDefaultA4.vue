@@ -317,7 +317,11 @@
                 <p class="mt-2">
                     {{ $t('work_orders.print_view.amount_of') }}:
                     <strong class="font-mono">
-                        {{ printHelpers.formatCurrency(data.amount || 250) }}
+                        <PrintMoney
+                            :amount="data.amount || 250"
+                            :currency-code="data.currency_code"
+                            :visual-settings="visualSettings"
+                        />
                     </strong>
                 </p>
                 <p class="mt-2 text-gray-600">
@@ -779,7 +783,11 @@
                                     class="p-2 border border-gray-200 text-center font-bold font-mono"
                                     :class="payment.type === 'bad_debt' ? 'text-amber-700' : ''"
                                 >
-                                    {{ printHelpers.formatCurrency(payment.amount) }}
+                                    <PrintMoney
+                                        :amount="payment.amount"
+                                        :currency-code="data.currency_code"
+                                        :visual-settings="visualSettings"
+                                    />
                                 </td>
                             </tr>
                             <tr
@@ -792,7 +800,11 @@
                                 <td
                                     class="p-2 border border-gray-200 text-center font-mono text-gray-900"
                                 >
-                                    {{ printHelpers.formatCurrency(totals.paid) }}
+                                    <PrintMoney
+                                        :amount="totals.paid"
+                                        :currency-code="data.currency_code"
+                                        :visual-settings="visualSettings"
+                                    />
                                 </td>
                             </tr>
                             <tr v-if="!data.payments || data.payments.length === 0">
@@ -1229,7 +1241,11 @@
                         >
                             <td class="py-1 px-2">{{ $t('quotes.form.subtotal') }}:</td>
                             <td class="py-1 px-2 text-left font-mono">
-                                {{ printHelpers.formatCurrency(totals.subtotal) }}
+                                <PrintMoney
+                                    :amount="totals.subtotal"
+                                    :currency-code="data.currency_code"
+                                    :visual-settings="visualSettings"
+                                />
                             </td>
                         </tr>
                         <tr
@@ -1238,7 +1254,12 @@
                         >
                             <td class="py-1 px-2">{{ $t('quotes.form.total_discount') }}:</td>
                             <td class="py-1 px-2 text-left font-mono">
-                                -{{ printHelpers.formatCurrency(totals.discount) }}
+                                <PrintMoney
+                                    :amount="totals.discount"
+                                    :currency-code="data.currency_code"
+                                    :visual-settings="visualSettings"
+                                    :negate="true"
+                                />
                             </td>
                         </tr>
                         <tr
@@ -1247,7 +1268,11 @@
                         >
                             <td class="py-1 px-2">{{ $t('common.vat') }}:</td>
                             <td class="py-1 px-2 text-left font-mono">
-                                {{ printHelpers.formatCurrency(totals.vat) }}
+                                <PrintMoney
+                                    :amount="totals.vat"
+                                    :currency-code="data.currency_code"
+                                    :visual-settings="visualSettings"
+                                />
                             </td>
                         </tr>
                         <tr
@@ -1271,7 +1296,11 @@
                                 }}
                             </td>
                             <td class="py-2 px-2 text-left text-gray-900 font-mono">
-                                {{ printHelpers.formatCurrency(totals.total) }}
+                                <PrintMoney
+                                    :amount="totals.total"
+                                    :currency-code="data.currency_code"
+                                    :visual-settings="visualSettings"
+                                />
                             </td>
                         </tr>
                         <tr
@@ -1282,9 +1311,11 @@
                                 {{ isRtl ? 'المبلغ المدفوع:' : 'Paid Amount:' }}
                             </td>
                             <td class="py-1 px-2 text-left font-mono font-bold">
-                                {{
-                                    printHelpers.formatCurrency(totals.paid - (data.bad_debt || 0))
-                                }}
+                                <PrintMoney
+                                    :amount="totals.paid - (data.bad_debt || 0)"
+                                    :currency-code="data.currency_code"
+                                    :visual-settings="visualSettings"
+                                />
                             </td>
                         </tr>
                         <tr
@@ -1295,7 +1326,11 @@
                                 {{ isRtl ? 'الديون المعدومة:' : 'Bad Debt:' }}
                             </td>
                             <td class="py-1 px-2 text-left font-mono font-bold">
-                                {{ printHelpers.formatCurrency(data.bad_debt) }}
+                                <PrintMoney
+                                    :amount="data.bad_debt"
+                                    :currency-code="data.currency_code"
+                                    :visual-settings="visualSettings"
+                                />
                             </td>
                         </tr>
                         <tr
@@ -1304,7 +1339,11 @@
                         >
                             <td class="py-1.5 px-2">{{ isRtl ? 'الباقي:' : 'Remaining:' }}</td>
                             <td class="py-1.5 px-2 text-left font-mono">
-                                {{ printHelpers.formatCurrency(totals.balance) }}
+                                <PrintMoney
+                                    :amount="totals.balance"
+                                    :currency-code="data.currency_code"
+                                    :visual-settings="visualSettings"
+                                />
                             </td>
                         </tr>
                     </tbody>
@@ -1488,6 +1527,7 @@ import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { usePage } from '@inertiajs/vue3';
 import SaudiPlateDisplay from '@/Components/Vehicles/SaudiPlateDisplay.vue';
+import PrintMoney from '@/Components/Print/PrintMoney.vue';
 import { usePrint } from '@/Composables/usePrint';
 import { usePrintTotals } from '@/Composables/usePrintTotals';
 

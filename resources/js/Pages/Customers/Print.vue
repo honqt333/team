@@ -89,10 +89,12 @@
 </template>
 
 <script setup>
-import { printDocument } from '@/Composables/usePrint';
+import { printDocument, usePrint } from '@/Composables/usePrint';
 import { onMounted } from 'vue';
 import { Head } from '@inertiajs/vue3';
 import StandardReportLayout from '@/Components/Print/StandardReportLayout.vue';
+
+const { formatCurrency: formatMoney } = usePrint();
 
 const props = defineProps({
     customers: {
@@ -124,12 +126,7 @@ function handleBack() {
     }
 }
 
-function formatMoney(amount) {
-    return new Intl.NumberFormat('en-US', {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2,
-    }).format(amount);
-}
+// formatMoney provided by usePrint()
 
 onMounted(() => {
     // Optional print trigger after render if requested

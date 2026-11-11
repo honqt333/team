@@ -153,6 +153,9 @@
 import AppPagination from '@/Components/Common/AppPagination.vue';
 import EmployeePortalLayout from '@/Layouts/EmployeePortalLayout.vue';
 import { Link } from '@inertiajs/vue3';
+import { useNumberFormat } from '@/Composables/useNumberFormat';
+
+const { formatMoney } = useNumberFormat();
 
 defineProps({
     payslips: Object,
@@ -160,9 +163,7 @@ defineProps({
 });
 
 function formatCurrency(amount) {
-    return new Intl.NumberFormat('ar-SA-u-nu-latn', { style: 'currency', currency: 'SAR' }).format(
-        amount || 0
-    );
+    return formatMoney(amount);
 }
 
 function formatDate(dateString) {

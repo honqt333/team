@@ -34,9 +34,15 @@ class RolePermissionsContractTest extends TestCase
     /**
      * The audited baseline. Update intentionally when a role
      * is changed and the change is reviewed.
+     *
+     * `super_admin` moved from 123 to 125: two permissions were added to
+     * `App\Support\Permissions` after this baseline was written (the
+     * attachment permissions, `ATTACHMENTS_VIEW` and
+     * `ATTACHMENTS_DELETE`), and the super admin role grants every
+     * registered permission — so the count moved with them.
      */
     private const EXPECTED_PERMISSION_COUNTS = [
-        'super_admin' => 123,
+        'super_admin' => 125,
         'branch_manager' => 32,
         'receptionist' => 14,
         'technician' => 4,

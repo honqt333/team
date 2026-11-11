@@ -1193,42 +1193,13 @@
                 </div>
 
                 <!-- Pagination Footer -->
-                <div
-                    v-if="services?.links && services.links.length > 3"
-                    class="p-4 border-t border-gray-100 dark:border-gray-700/60 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs print:hidden"
-                >
-                    <div class="text-gray-500 dark:text-gray-400">
-                        {{ $t('reports.payments_report.showing') }}
-                        <span class="font-mono font-bold text-gray-800 dark:text-gray-200">
-                            {{ services.from || 0 }}
-                        </span>
-                        {{ $t('reports.payments_report.to') }}
-                        <span class="font-mono font-bold text-gray-800 dark:text-gray-200">
-                            {{ services.to || 0 }}
-                        </span>
-                        {{ $t('reports.payments_report.of') }}
-                        <span class="font-mono font-bold text-gray-800 dark:text-gray-200">
-                            {{ services.total || 0 }}
-                        </span>
-                    </div>
-
-                    <div class="flex items-center gap-1">
-                        <template v-for="(link, i) in services.links" :key="i">
-                            <a
-                                v-if="link.url"
-                                :href="link.url"
-                                :class="[
-                                    'px-3 py-1.5 rounded-lg font-bold transition-all',
-                                    link.active
-                                        ? 'bg-teal-600 text-white shadow-sm'
-                                        : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200',
-                                ]"
-                                v-html="link.label"
-                            />
-                            <span v-else class="px-2 py-1 text-gray-400" v-html="link.label" />
-                        </template>
-                    </div>
-                </div>
+                <AppPagination
+                    class="print:hidden"
+                    :links="services?.links || []"
+                    :from="services?.from"
+                    :to="services?.to"
+                    :total="services?.total"
+                />
             </div>
 
             <!-- Unified Print Footer (no signatures/stamps) -->
@@ -1240,6 +1211,7 @@
 <script setup>
 import PrintEngine from '@/Components/Print/PrintEngine.vue';
 import DataTable from '@/Components/Common/DataTable.vue';
+import AppPagination from '@/Components/Common/AppPagination.vue';
 import AppPrintButton from '@/Components/Common/AppPrintButton.vue';
 import AppToggle from '@/Components/Common/AppToggle.vue';
 import { printDocument } from '@/Composables/usePrint';

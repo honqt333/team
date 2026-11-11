@@ -488,7 +488,7 @@
                                             <td
                                                 class="px-4 py-3 font-semibold text-teal-600 dark:text-teal-400 align-middle"
                                             >
-                                                {{ service.base_price }} {{ $t('common.currency') }}
+                                                {{ service.base_price }} {{ activeCurrencySymbol }}
                                             </td>
                                             <!-- Min Price -->
                                             <td
@@ -793,7 +793,7 @@
                                             <td
                                                 class="px-4 py-3 font-semibold text-teal-600 dark:text-teal-400 align-middle"
                                             >
-                                                {{ service.base_price }} {{ $t('common.currency') }}
+                                                {{ service.base_price }} {{ activeCurrencySymbol }}
                                             </td>
                                             <!-- Min Price -->
                                             <td
@@ -1001,7 +1001,7 @@
                         </template>
                         <template #cell-base_price="{ item }">
                             <span class="font-bold text-action-primary">
-                                {{ toEnglish(item.base_price) }} {{ $t('common.currency_sar') }}
+                                {{ toEnglish(item.base_price) }} {{ activeCurrencySymbol }}
                             </span>
                         </template>
                         <template #cell-items="{ item }">
@@ -1122,7 +1122,7 @@
                                     </span>
                                     <span class="font-bold text-action-primary text-base">
                                         {{ toEnglish(pkg.base_price) }}
-                                        {{ $t('common.currency_sar') }}
+                                        {{ activeCurrencySymbol }}
                                     </span>
                                 </div>
                                 <div class="flex items-center gap-1">
@@ -1579,7 +1579,7 @@ const { confirm } = useConfirm();
 const { success, error } = useToast();
 const { getName } = useLocalized();
 const { can, isAnyAdmin } = usePermission();
-const { toEnglish } = useNumberFormat();
+const { toEnglish, activeCurrencySymbol } = useNumberFormat();
 
 const props = defineProps({
     departments: {

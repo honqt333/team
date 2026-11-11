@@ -1252,33 +1252,13 @@
                 </div>
 
                 <!-- Flat Table Pagination Footer -->
-                <div
-                    v-if="items.data && items.data.length > 0 && items.last_page > 1"
-                    class="px-5 py-3.5 border-t border-gray-100 dark:border-gray-700/60 flex items-center justify-between text-xs text-gray-500"
-                >
-                    <div>
-                        {{ $t('reports.vehicles_report.showing') }} {{ items.from }}
-                        {{ $t('reports.vehicles_report.to') }} {{ items.to }}
-                        {{ $t('reports.vehicles_report.of') }} {{ items.total }}
-                    </div>
-                    <div class="flex items-center gap-1.5">
-                        <button
-                            type="button"
-                            v-for="link in items.links"
-                            :key="link.label"
-                            @click="changePage(link.url)"
-                            :disabled="!link.url || link.active"
-                            v-html="link.label"
-                            :class="[
-                                link.active
-                                    ? 'bg-cyan-600 text-white font-bold'
-                                    : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200',
-                                !link.url ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer',
-                            ]"
-                            class="px-2.5 py-1 rounded-lg text-xs transition-all font-mono"
-                        ></button>
-                    </div>
-                </div>
+                <AppPagination
+                    class="print:hidden"
+                    :links="items.links || []"
+                    :from="items.from"
+                    :to="items.to"
+                    :total="items.total"
+                />
             </div>
         </PrintEngine>
     </AppLayout>
@@ -1287,6 +1267,7 @@
 <script setup>
 import PrintEngine from '@/Components/Print/PrintEngine.vue';
 import DataTable from '@/Components/Common/DataTable.vue';
+import AppPagination from '@/Components/Common/AppPagination.vue';
 import AppPrintButton from '@/Components/Common/AppPrintButton.vue';
 import { ref, computed } from 'vue';
 import { router } from '@inertiajs/vue3';

@@ -7,6 +7,7 @@ namespace App\Models;
 use App\Models\Concerns\CenterScoped;
 use App\Models\Concerns\HasTaxSnapshot;
 use App\Services\Optimization\TaxCalculator;
+use App\Support\CountryCurrencyRegistry;
 use App\Support\TenancyContext;
 use App\Traits\HasWorkOrderOperations;
 use App\Traits\HasWorkOrderRelations;
@@ -109,7 +110,7 @@ class WorkOrder extends Model
             $this->total_tax = 0;
             $this->total_incl_tax = $netTotal;
         } else {
-            $taxRate = (float) ($this->tax_rate_snapshot ?: 15.00);
+            $taxRate = (float) ($this->tax_rate_snapshot ?? CountryCurrencyRegistry::defaultVatRate($this->tenant?->country));
             $isInclusive = ($this->pricing_mode_snapshot ?? 'exclusive') === 'inclusive';
 
             $calc = app(TaxCalculator::class)->calculateLine(
@@ -258,7 +259,7 @@ class WorkOrder extends Model
             return (float) $netTotal;
         }
 
-        $taxRate = (float) ($this->tax_rate_snapshot ?: 15.00);
+        $taxRate = (float) ($this->tax_rate_snapshot ?? CountryCurrencyRegistry::defaultVatRate($this->tenant?->country));
 
         return round($netTotal * (1 + ($taxRate / 100)), 2);
     }

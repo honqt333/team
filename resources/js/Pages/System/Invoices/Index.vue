@@ -53,7 +53,7 @@
                         />
                     </svg>
                     <input
-                        v-model="search"
+                        v-model="tableFilters.search"
                         type="text"
                         :placeholder="$t('system.invoices.search_placeholder')"
                         class="w-full px-4 py-2 pr-10 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-focus-ring"
@@ -61,7 +61,7 @@
                     />
                 </div>
                 <SearchableSelect
-                    v-model="status"
+                    v-model="tableFilters.status"
                     :options="statusOptions"
                     option-label="label"
                     option-value="value"
@@ -216,13 +216,13 @@
 <script setup>
 import DataTable from '@/Components/Common/DataTable.vue';
 import AppPagination from '@/Components/Common/AppPagination.vue';
-import { ref, computed } from 'vue';
+import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { router } from '@inertiajs/vue3';
 import SystemLayout from '@/Layouts/SystemLayout.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 import PageHeader from '@/Components/PageHeader.vue';
 import { useNumberFormat } from '@/Composables/useNumberFormat';
+import { useServerTable } from '@/Composables/useServerTable';
 
 const { t } = useI18n();
 const { toEnglish } = useNumberFormat();
@@ -275,19 +275,13 @@ const statCards = computed(() => [
     },
 ]);
 
-const search = ref(props.filters?.search || '');
-const status = ref(props.filters?.status || '');
-
-const applyFilters = () => {
-    router.get(
-        '/system/invoices',
-        {
-            search: search.value || undefined,
-            status: status.value || undefined,
-        },
-        { preserveState: true, replace: true }
-    );
-};
+const { filters: tableFilters, applyFilters } = useServerTable({
+    routeUrl: '/system/invoices',
+    initialFilters: {
+        search: props.filters?.search || '',
+        status: props.filters?.status || '',
+    },
+});
 
 const formatCurrency = (amount) => {
     return new Intl.NumberFormat('ar-SA-u-nu-latn', {

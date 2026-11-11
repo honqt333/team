@@ -73,6 +73,7 @@ const mappedData = computed(() => {
             color: props.workOrder.vehicle?.color,
         },
         total_incl_tax: props.grandTotal,
+        currency_code: props.workOrder.currency_code,
         total_tax: 0,
         total_excl_tax: props.grandTotal,
         bad_debt:

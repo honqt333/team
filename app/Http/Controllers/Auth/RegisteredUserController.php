@@ -12,6 +12,8 @@ use App\Models\Tenant;
 use App\Models\User;
 use App\Services\Billing\PromoCodeValidator;
 use App\Services\Billing\SubscriptionLifecycleService;
+use App\Support\CountryCurrencyRegistry;
+use App\Support\PhoneNumber;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -57,13 +59,16 @@ class RegisteredUserController extends Controller
             'last_name' => 'required|string|max:255',
             'email' => 'required|string|lowercase|email|max:255|unique:'.User::class,
             'phone' => 'required|string|max:20',
+            'country' => 'nullable|string|max:2',
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
             'promo_code' => 'nullable|string|max:50',
             'terms' => 'required|accepted',
         ]);
 
+        $countryCode = CountryCurrencyRegistry::normalizeCountry($request->input('country'));
+
         // Check if phone already exists for any tenant
-        $formattedPhone = $this->formatPhoneNumber($request->phone);
+        $formattedPhone = $this->formatPhoneNumber($request->phone, $countryCode);
 
         if (Tenant::where('phone', $formattedPhone)->exists()) {
             return back()->withErrors(['phone' => __('auth.phone_already_registered')]);
@@ -71,7 +76,7 @@ class RegisteredUserController extends Controller
 
         // Check phone verification if Authentica is enabled
         if (PhoneVerificationController::isEnabled()) {
-            if (! session('phone_verified') || session('verified_phone_number') !== $this->formatPhoneNumber($request->phone)) {
+            if (! session('phone_verified') || session('verified_phone_number') !== $formattedPhone) {
                 return back()->withErrors(['phone' => __('auth.verify_phone_first')]);
             }
         }
@@ -106,15 +111,19 @@ class RegisteredUserController extends Controller
         $baseTrialDays = (int) ($trialPlan?->trial_days ?: app(SubscriptionLifecycleService::class)->getDefaultTrialDays());
         $trialDays = $baseTrialDays + $extraTrialDays;
 
-        $user = DB::transaction(function () use ($request, $promoCheck, $extraTrialDays, $trialDays, $trialPlan) {
+        $user = DB::transaction(function () use ($request, $promoCheck, $extraTrialDays, $trialDays, $trialPlan, $formattedPhone, $countryCode) {
             $ownerName = $request->first_name.' '.$request->last_name;
-            $phone = '+966'.ltrim($request->phone, '0');
+            $phone = $formattedPhone;
+            $countryMeta = CountryCurrencyRegistry::countryMeta($countryCode);
 
             // 1. Create Tenant with full company profile
             $tenant = Tenant::create([
                 'name' => $request->company_name,
                 'slug' => Str::slug($request->company_name).'-'.Str::random(6),
                 'status' => 'trial',
+                'country' => $countryCode,
+                'currency' => (string) ($countryMeta['default_currency'] ?? CountryCurrencyRegistry::DEFAULT_CURRENCY),
+                'timezone' => (string) ($countryMeta['timezone'] ?? 'Asia/Riyadh'),
                 'trial_ends_at' => now()->addDays($trialDays),
                 // Company Profile - all same as company_name initially
                 'legal_name' => $request->company_name,
@@ -176,7 +185,7 @@ class RegisteredUserController extends Controller
                 'current_center_id' => $center->id,
                 'name' => $request->first_name.' '.$request->last_name,
                 'email' => $request->email,
-                'phone' => '+966'.ltrim($request->phone, '0'),
+                'phone' => $phone,
                 'password' => Hash::make($request->password),
             ]);
 
@@ -208,30 +217,10 @@ class RegisteredUserController extends Controller
     }
 
     /**
-     * Format phone number to international format.
+     * Format phone number to international E.164 format.
      */
-    protected function formatPhoneNumber(string $phone): string
+    protected function formatPhoneNumber(string $phone, ?string $countryCode = null): string
     {
-        // Remove any spaces or dashes
-        $phone = preg_replace('/[\s\-]/', '', $phone);
-
-        // If starts with 0, remove it and add +966
-        if (str_starts_with($phone, '0')) {
-            $phone = '+966'.substr($phone, 1);
-        }
-        // If starts with 5 (Saudi mobile), add +966
-        elseif (str_starts_with($phone, '5')) {
-            $phone = '+966'.$phone;
-        }
-        // If starts with 966, add +
-        elseif (str_starts_with($phone, '966')) {
-            $phone = '+'.$phone;
-        }
-        // If doesn't start with +, add it
-        elseif (! str_starts_with($phone, '+')) {
-            $phone = '+'.$phone;
-        }
-
-        return $phone;
+        return PhoneNumber::normalize($phone, $countryCode) ?? $phone;
     }
 }

@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Http\Requests\Customer;
 
 use App\Http\Requests\Concerns\TenantAware;
+use App\Support\CountryCurrencyRegistry;
+use App\Support\PhoneNumber;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -17,9 +19,30 @@ class CustomerUpdateRequest extends FormRequest
         return $this->user()->can('crm.customers.update') || $this->user()->can('customers.update');
     }
 
+    protected function prepareForValidation(): void
+    {
+        $country = $this->user()?->tenant?->country;
+
+        if ($this->phone) {
+            $this->merge([
+                'phone' => PhoneNumber::normalize($this->phone, $country),
+            ]);
+        }
+
+        if ($this->whatsapp) {
+            $this->merge([
+                'whatsapp' => PhoneNumber::normalize($this->whatsapp, $country),
+            ]);
+        }
+    }
+
     public function rules(): array
     {
         $customerId = $this->route('customer')?->id ?? $this->route('customer');
+        $tenantCountry = PhoneNumber::resolveCountry($this->user()?->tenant?->country);
+        $taxRule = CountryCurrencyRegistry::isZatcaApplicable($tenantCountry)
+            ? ['nullable', 'string', 'regex:/^\d{15}$/']
+            : ['nullable', 'string', 'max:50'];
 
         return [
             'type' => ['sometimes', Rule::in(['individual', 'company', 'government'])],
@@ -28,15 +51,15 @@ class CustomerUpdateRequest extends FormRequest
             'phone' => [
                 'sometimes',
                 'string',
-                'max:20',
+                'max:25',
                 Rule::unique('customers', 'phone')
                     ->where('tenant_id', $this->tenantId())
                     ->whereNull('deleted_at')
                     ->ignore($customerId),
             ],
-            'whatsapp' => ['nullable', 'string', 'max:20'],
+            'whatsapp' => ['nullable', 'string', 'max:25'],
             'email' => ['nullable', 'email', 'max:255'],
-            'tax_number' => ['nullable', 'string', 'regex:/^\d{15}$/'],
+            'tax_number' => $taxRule,
             'credit_limit' => ['nullable', 'numeric', 'min:0'],
             'payment_terms_days' => ['nullable', 'integer', 'min:0'],
             'address_line' => ['nullable', 'string', 'max:500'],

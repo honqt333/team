@@ -617,6 +617,7 @@
 <script setup>
 import { ref, computed, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { useNumberFormat } from '@/Composables/useNumberFormat';
 import { router } from '@inertiajs/vue3';
 import axios from 'axios';
 import BaseModal from '@/Components/BaseModal.vue';
@@ -639,6 +640,7 @@ const props = defineProps({
 
 const emit = defineEmits(['close', 'created']);
 const { t } = useI18n();
+const { formatMoney } = useNumberFormat();
 
 const loading = ref(false);
 const submitting = ref(false);
@@ -702,16 +704,8 @@ const storeUrl = computed(() => {
 });
 
 const formatCurrency = (val) => {
-    const num = Number(val || 0);
-    const currency = effectiveWorkOrder.value?.currency || props.invoice?.currency_code || 'SAR';
-    return (
-        num.toLocaleString('en-US', {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2,
-        }) +
-        ' ' +
-        currency
-    );
+    const currency = effectiveWorkOrder.value?.currency || props.invoice?.currency_code;
+    return formatMoney(val, currency);
 };
 
 const fetchSummary = async () => {

@@ -54,22 +54,24 @@
             <div class="flex gap-4">
                 <div class="flex-1">
                     <SearchableSelect
-                        v-model="adminId"
+                        v-model="tableFilters.admin_id"
                         :options="admins"
                         option-label="name"
                         option-value="id"
                         :placeholder="$t('system.admin_users.all_administrators')"
                         compact
+                        @update:model-value="applyFilters"
                     />
                 </div>
                 <div class="flex-1">
                     <SearchableSelect
-                        v-model="action"
+                        v-model="tableFilters.action"
                         :options="actionOptions"
                         option-label="label"
                         option-value="value"
                         :placeholder="$t('system.admin_users.all_actions')"
                         compact
+                        @update:model-value="applyFilters"
                     />
                 </div>
             </div>
@@ -132,6 +134,12 @@
                         </tr>
                     </tbody>
                 </DataTable>
+                <AppPagination
+                    :links="logs.links || []"
+                    :from="logs.from"
+                    :to="logs.to"
+                    :total="logs.total"
+                />
             </div>
         </div>
     </SystemLayout>
@@ -139,14 +147,16 @@
 
 <script setup>
 import DataTable from '@/Components/Common/DataTable.vue';
+import AppPagination from '@/Components/Common/AppPagination.vue';
 import { useI18n } from 'vue-i18n';
 const { t } = useI18n();
 
-import { ref, computed } from 'vue';
-import { Link, router } from '@inertiajs/vue3';
+import { computed } from 'vue';
+import { Link } from '@inertiajs/vue3';
 import SystemLayout from '@/Layouts/SystemLayout.vue';
 import PageHeader from '@/Components/PageHeader.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
+import { useServerTable } from '@/Composables/useServerTable';
 
 const actionOptions = computed(() => [
     { value: 'login', label: t('hr.attendance.check_in') },
@@ -161,19 +171,13 @@ const props = defineProps({
     filters: Object,
 });
 
-const adminId = ref(props.filters?.admin_id || '');
-const action = ref(props.filters?.action || '');
-
-const applyFilters = () => {
-    router.get(
-        '/system/activity-log',
-        {
-            admin_id: adminId.value || undefined,
-            action: action.value || undefined,
-        },
-        { preserveState: true }
-    );
-};
+const { filters: tableFilters, applyFilters } = useServerTable({
+    routeUrl: '/system/activity-log',
+    initialFilters: {
+        admin_id: props.filters?.admin_id ? Number(props.filters.admin_id) : '',
+        action: props.filters?.action || '',
+    },
+});
 
 const formatDate = (date) => (date ? new Date(date).toLocaleString('ar-SA-u-nu-latn') : '-');
 

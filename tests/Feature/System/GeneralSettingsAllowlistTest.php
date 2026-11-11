@@ -7,6 +7,7 @@ namespace Tests\Feature\System;
 use App\Http\Controllers\System\GeneralSettingsController;
 use App\Models\AdminUser;
 use App\Models\Setting;
+use App\Services\Billing\SubscriptionLifecycleService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Tests\TestCase;
@@ -145,10 +146,18 @@ class GeneralSettingsAllowlistTest extends TestCase
 
     public function test_the_allowlist_contains_only_the_key_the_page_uses(): void
     {
-        // The Vue page (GeneralSettings.vue) sends exactly one key. If
-        // the allowlist drifts, one of the two sides needs updating.
+        // The Vue pages (GeneralSettingsTab.vue / GeneralSettings.vue)
+        // send these keys. If the allowlist drifts, one of the two sides
+        // needs updating.
+        //
+        // `subscription.grace_period_days` was added when the grace
+        // period became a system setting
+        // (`SubscriptionLifecycleService::SETTING_GRACE_PERIOD_DAYS`).
         $this->assertSame(
-            ['security.2fa_sms_enabled'],
+            [
+                'security.2fa_sms_enabled',
+                SubscriptionLifecycleService::SETTING_GRACE_PERIOD_DAYS,
+            ],
             GeneralSettingsController::ALLOWED_KEYS,
             'The allowlist must match the keys the page actually sends.'
         );

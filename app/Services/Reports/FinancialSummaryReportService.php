@@ -10,22 +10,24 @@ use Illuminate\Support\Facades\DB;
 class FinancialSummaryReportService
 {
     /**
-     * Compute full P&L financial statement breakdown for a single center.
+     * Compute full P&L financial statement breakdown for a single center or administration (center_id = null).
      *
      * @return array<string, float>
      */
     public function computeCenterFinancialStatement(
         int $tenantId,
-        int $centerId,
-        ?Carbon $from,
-        ?Carbon $to,
-        bool $storeSalesOnly
+        ?int $centerId = null,
+        Carbon|string|null $from = null,
+        Carbon|string|null $to = null,
+        bool $storeSalesOnly = false
     ): array {
+        $from = is_string($from) && $from !== '' ? Carbon::parse($from) : ($from instanceof Carbon ? $from : null);
+        $to = is_string($to) && $to !== '' ? Carbon::parse($to) : ($to instanceof Carbon ? $to : null);
+
         // 1. Sales Invoices Lines (Services vs Parts)
         $invServicesQuery = DB::table('invoice_lines')
             ->join('invoices', 'invoices.id', '=', 'invoice_lines.invoice_id')
             ->where('invoices.tenant_id', $tenantId)
-            ->where('invoices.center_id', $centerId)
             ->where('invoices.type', 'invoice')
             ->whereNull('invoices.deleted_at')
             ->whereNotIn('invoices.status', ['cancelled', 'draft'])
@@ -41,7 +43,6 @@ class FinancialSummaryReportService
         $invPartsQuery = DB::table('invoice_lines')
             ->join('invoices', 'invoices.id', '=', 'invoice_lines.invoice_id')
             ->where('invoices.tenant_id', $tenantId)
-            ->where('invoices.center_id', $centerId)
             ->where('invoices.type', 'invoice')
             ->whereNull('invoices.deleted_at')
             ->whereNotIn('invoices.status', ['cancelled', 'draft'])
@@ -53,6 +54,14 @@ class FinancialSummaryReportService
                     ->where('company_transactions.status', 'approved');
             })
             ->where('invoice_lines.is_part', 1);
+
+        if ($centerId === null) {
+            $invServicesQuery->whereNull('invoices.center_id');
+            $invPartsQuery->whereNull('invoices.center_id');
+        } else {
+            $invServicesQuery->where('invoices.center_id', $centerId);
+            $invPartsQuery->where('invoices.center_id', $centerId);
+        }
 
         if ($storeSalesOnly) {
             $invServicesQuery->whereNull('invoices.work_order_id');
@@ -89,7 +98,6 @@ class FinancialSummaryReportService
         $retServicesQuery = DB::table('invoice_lines')
             ->join('invoices', 'invoices.id', '=', 'invoice_lines.invoice_id')
             ->where('invoices.tenant_id', $tenantId)
-            ->where('invoices.center_id', $centerId)
             ->where('invoices.type', 'credit_note')
             ->whereNull('invoices.deleted_at')
             ->whereNotIn('invoices.status', ['cancelled', 'draft'])
@@ -98,11 +106,18 @@ class FinancialSummaryReportService
         $retPartsQuery = DB::table('invoice_lines')
             ->join('invoices', 'invoices.id', '=', 'invoice_lines.invoice_id')
             ->where('invoices.tenant_id', $tenantId)
-            ->where('invoices.center_id', $centerId)
             ->where('invoices.type', 'credit_note')
             ->whereNull('invoices.deleted_at')
             ->whereNotIn('invoices.status', ['cancelled', 'draft'])
             ->where('invoice_lines.is_part', 1);
+
+        if ($centerId === null) {
+            $retServicesQuery->whereNull('invoices.center_id');
+            $retPartsQuery->whereNull('invoices.center_id');
+        } else {
+            $retServicesQuery->where('invoices.center_id', $centerId);
+            $retPartsQuery->where('invoices.center_id', $centerId);
+        }
 
         if ($storeSalesOnly) {
             $retServicesQuery->whereNull('invoices.work_order_id');
@@ -138,7 +153,6 @@ class FinancialSummaryReportService
         // 3. Purchases & Returns from Suppliers
         $purchQuery = DB::table('purchase_invoices')
             ->where('tenant_id', $tenantId)
-            ->where('center_id', $centerId)
             ->whereNull('deleted_at')
             ->whereNotIn('status', ['cancelled', 'draft'])
             ->whereNotExists(function ($q) {
@@ -148,6 +162,12 @@ class FinancialSummaryReportService
                     ->whereNull('company_transactions.deleted_at')
                     ->where('company_transactions.status', 'approved');
             });
+
+        if ($centerId === null) {
+            $purchQuery->whereNull('center_id');
+        } else {
+            $purchQuery->where('center_id', $centerId);
+        }
 
         if ($from) {
             $purchQuery->where(function ($sub) use ($from) {
@@ -177,8 +197,13 @@ class FinancialSummaryReportService
 
         $purchRetQuery = DB::table('purchase_return_invoices')
             ->where('tenant_id', $tenantId)
-            ->where('center_id', $centerId)
             ->whereNull('deleted_at');
+
+        if ($centerId === null) {
+            $purchRetQuery->whereNull('center_id');
+        } else {
+            $purchRetQuery->where('center_id', $centerId);
+        }
 
         if ($from) {
             $purchRetQuery->where(function ($sub) use ($from) {
@@ -209,7 +234,6 @@ class FinancialSummaryReportService
         // 4. Other Income & Expenses (Company Transactions)
         $incQuery = DB::table('company_transactions')
             ->where('tenant_id', $tenantId)
-            ->where('center_id', $centerId)
             ->where('transaction_type', 'revenue')
             ->where('status', 'approved')
             ->whereNull('deleted_at')
@@ -226,7 +250,6 @@ class FinancialSummaryReportService
 
         $expQuery = DB::table('company_transactions')
             ->where('tenant_id', $tenantId)
-            ->where('center_id', $centerId)
             ->where('transaction_type', 'expense')
             ->where('status', 'approved')
             ->whereNull('deleted_at')
@@ -240,6 +263,14 @@ class FinancialSummaryReportService
                             ->whereNotIn('purchase_invoices.status', ['cancelled', 'draft']);
                     });
             });
+
+        if ($centerId === null) {
+            $incQuery->whereNull('center_id');
+            $expQuery->whereNull('center_id');
+        } else {
+            $incQuery->where('center_id', $centerId);
+            $expQuery->where('center_id', $centerId);
+        }
 
         if ($from) {
             $incQuery->where(function ($sub) use ($from) {
@@ -290,14 +321,20 @@ class FinancialSummaryReportService
         // 5. Salaries (Payroll & Other HR Payments)
         $payrollQuery = DB::table('hr_payrolls')
             ->where('tenant_id', $tenantId)
-            ->where('center_id', $centerId)
             ->where('status', '!=', 'draft');
 
         $otherSalaryQuery = DB::table('hr_other_payments')
             ->where('tenant_id', $tenantId)
-            ->where('center_id', $centerId)
             ->where('status', '!=', 'rejected')
             ->whereNull('deleted_at');
+
+        if ($centerId === null) {
+            $payrollQuery->whereNull('center_id');
+            $otherSalaryQuery->whereNull('center_id');
+        } else {
+            $payrollQuery->where('center_id', $centerId);
+            $otherSalaryQuery->where('center_id', $centerId);
+        }
 
         if ($from) {
             $payrollQuery->where(function ($sub) use ($from) {
@@ -336,9 +373,14 @@ class FinancialSummaryReportService
         // 6. Bad Debt
         $badDebtQuery = DB::table('payments')
             ->where('tenant_id', $tenantId)
-            ->where('center_id', $centerId)
             ->where('type', 'bad_debt')
             ->whereNull('deleted_at');
+
+        if ($centerId === null) {
+            $badDebtQuery->whereNull('center_id');
+        } else {
+            $badDebtQuery->where('center_id', $centerId);
+        }
 
         if ($from) {
             $badDebtQuery->where(function ($sub) use ($from) {

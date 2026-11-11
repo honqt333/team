@@ -156,6 +156,23 @@
                             class="w-full"
                         />
                     </FormField>
+
+                    <!-- Linked Work Order (Optional, Span 6) -->
+                    <FormField
+                        v-if="workOrderOptions.length > 0"
+                        class="md:col-span-6"
+                        :label="$t('work_orders.purchase_invoices.work_order_optional')"
+                        :error="form.errors.work_order_id"
+                    >
+                        <SearchableSelect
+                            v-model="form.work_order_id"
+                            :options="workOrderOptions"
+                            option-label="label"
+                            option-value="value"
+                            :placeholder="$t('work_orders.purchase_invoices.select_work_order')"
+                            class="w-full"
+                        />
+                    </FormField>
                 </div>
             </div>
 
@@ -748,6 +765,8 @@ const props = defineProps({
     units: Array,
     defaultWarehouse: Object,
     defaultSupplierId: [Number, String],
+    workOrders: { type: Array, default: () => [] },
+    defaultWorkOrderId: [Number, String],
 });
 
 const tenantTaxSettings = computed(() => {
@@ -772,9 +791,17 @@ const allSuppliers = computed(() => {
     return [...props.suppliers, ...localAddedSuppliers.value];
 });
 
+const workOrderOptions = computed(() => {
+    return (props.workOrders || []).map((wo) => ({
+        value: wo.id,
+        label: [wo.code, wo.customer?.name, wo.vehicle?.plate_number].filter(Boolean).join(' • '),
+    }));
+});
+
 const form = useForm({
     warehouse_id: props.defaultWarehouse?.id || '',
     supplier_id: props.defaultSupplierId || '',
+    work_order_id: props.defaultWorkOrderId || '',
     invoice_number: '',
     issue_date: new Date().toISOString().split('T')[0],
     tax_included: false,
@@ -794,6 +821,7 @@ watch(
                 props.defaultWarehouse?.id ||
                 (props.warehouses?.length > 0 ? props.warehouses[0].id : '');
             form.supplier_id = props.defaultSupplierId || '';
+            form.work_order_id = props.defaultWorkOrderId || '';
             form.issue_date = new Date().toISOString().split('T')[0];
             form.items = [];
             form.payments = [];

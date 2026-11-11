@@ -120,14 +120,23 @@ class Subscription extends Model
      */
     public function getDaysRemainingAttribute(): int
     {
+        // `diffInDays($to)` is the explicit form. `floatDiffInDays()` is
+        // a Carbon ALIAS for exactly this call — the signed difference —
+        // but it emits an E_USER_DEPRECATED notice on every invocation
+        // and PHPStan cannot see it (it is resolved through Carbon's
+        // `__call`).
+        //
+        // NOTE: the second argument of `diffInDays()` is the "absolute"
+        // flag. `floatDiffInDays($to)` is signed, so it maps to
+        // `diffInDays($to)` and NOT to `diffInDays($to, true)`.
         if ($this->onTrial()) {
             $end = $this->trial_ends_at ?? $this->ends_at;
 
-            return $end ? max(0, (int) ceil($end->floatDiffInDays(now(), true) > 0 && $end->isFuture() ? now()->floatDiffInDays($end) : 0)) : 0;
+            return $end ? max(0, (int) ceil($end->diffInDays(now()) > 0 && $end->isFuture() ? now()->diffInDays($end) : 0)) : 0;
         }
 
         if ($this->ends_at && $this->ends_at->isFuture()) {
-            return max(0, (int) ceil(now()->floatDiffInDays($this->ends_at)));
+            return max(0, (int) ceil(now()->diffInDays($this->ends_at)));
         }
 
         return 0;

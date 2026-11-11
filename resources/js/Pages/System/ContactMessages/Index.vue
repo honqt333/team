@@ -1,15 +1,18 @@
 <script setup>
 import DataTable from '@/Components/Common/DataTable.vue';
+import AppPagination from '@/Components/Common/AppPagination.vue';
 import SystemLayout from '@/Layouts/SystemLayout.vue';
-import { Head, Link, router } from '@inertiajs/vue3';
+import { Head, router } from '@inertiajs/vue3';
 import { ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { debounce } from 'lodash-es';
 import PageHeader from '@/Components/PageHeader.vue';
 import { useNumberFormat } from '@/Composables/useNumberFormat';
+import { useConfirm } from '@/Composables/useConfirm';
 
 const { t } = useI18n();
 const { toEnglish } = useNumberFormat();
+const { confirm } = useConfirm();
 
 const props = defineProps({
     messages: Object,
@@ -44,8 +47,15 @@ const markAsRead = (id) => {
     );
 };
 
-const deleteMessage = (id) => {
-    if (confirm(t('system.contact_messages.confirm_delete'))) {
+const deleteMessage = async (id) => {
+    const ok = await confirm({
+        title: t('common.delete'),
+        message: t('system.contact_messages.confirm_delete'),
+        confirmText: t('common.delete'),
+        cancelText: t('common.cancel'),
+        type: 'danger',
+    });
+    if (ok) {
         router.delete(route('system.contact_messages.destroy', id), {
             onSuccess: () => (selectedMessage.value = null),
         });
@@ -259,26 +269,12 @@ const closeMessage = () => {
                 </div>
 
                 <!-- Pagination -->
-                <div
-                    v-if="messages.links?.length > 3"
-                    class="px-6 py-4 border-t border-gray-200 dark:border-gray-700 flex justify-center"
-                >
-                    <div class="flex gap-1">
-                        <Link
-                            v-for="(link, i) in messages.links"
-                            :key="i"
-                            :href="link.url || '#'"
-                            v-safe-html="link.label"
-                            class="px-3 py-1 rounded text-sm transition-all"
-                            :class="[
-                                link.active
-                                    ? 'bg-action-primary text-white'
-                                    : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700',
-                                !link.url ? 'opacity-50 cursor-not-allowed' : '',
-                            ]"
-                        />
-                    </div>
-                </div>
+                <AppPagination
+                    :links="messages.links || []"
+                    :from="messages.from"
+                    :to="messages.to"
+                    :total="messages.total"
+                />
             </div>
         </div>
 

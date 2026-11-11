@@ -691,7 +691,7 @@ import Tooltip from '@/Components/Tooltip.vue';
 import StandardReportHeader from '@/Components/Print/StandardReportHeader.vue';
 import StandardReportFooter from '@/Components/Print/StandardReportFooter.vue';
 
-const { toEnglish } = useNumberFormat();
+const { toEnglish, formatMoney } = useNumberFormat();
 
 const props = defineProps({
     suppliers: Object,
@@ -783,11 +783,7 @@ const closeModal = () => {
 function formatCurrency(value) {
     if (!value && value !== 0) return '-';
     const val = Math.abs(value) < 0.01 ? 0 : value;
-    return new Intl.NumberFormat('en-US', {
-        style: 'currency',
-        currency: 'SAR',
-        minimumFractionDigits: 0,
-    }).format(val);
+    return formatMoney(val);
 }
 
 function exportSuppliers() {

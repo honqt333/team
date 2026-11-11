@@ -12,6 +12,7 @@ use App\Models\Service;
 use App\Models\User;
 use App\Models\WorkOrder;
 use App\Services\AI\Providers\MockProvider;
+use App\Support\CountryCurrencyRegistry;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
@@ -191,7 +192,7 @@ AR;
             $centerId,
             $catalogRows,
             $locale,
-            (string) ($workOrder->currency_code ?: 'SAR'),
+            (string) ($workOrder->currency_code ?: CountryCurrencyRegistry::tenantCurrency($workOrder->tenant)),
         );
         $suggestions = $hydrated['items'];
         $totalCandidates = $hydrated['total_candidates'];

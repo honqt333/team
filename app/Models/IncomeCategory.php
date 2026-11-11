@@ -18,11 +18,13 @@ class IncomeCategory extends Model
         'name_ar',
         'name_en',
         'transaction_type',
+        'is_taxable',
         'is_active',
         'updated_by',
     ];
 
     protected $casts = [
+        'is_taxable' => 'boolean',
         'is_active' => 'boolean',
     ];
 
@@ -66,10 +68,12 @@ class IncomeCategory extends Model
 
     /**
      * Check if this category has linked data.
-     * For now it returns false as related tables don't exist yet.
      */
     public function hasLinkedData(): bool
     {
-        return false;
+        return CompanyTransaction::withoutGlobalScopes()
+            ->where('income_category_id', $this->id)
+            ->whereNull('deleted_at')
+            ->exists();
     }
 }

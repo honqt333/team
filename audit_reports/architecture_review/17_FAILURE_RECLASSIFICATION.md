@@ -93,57 +93,111 @@ allowlist stay exactly as approved.
 
 ## 2. The 13 pre-existing failures
 
-### 2.1 Stale tests — the behaviour moved, the test did not (4)
+### 2.1 Stale tests — the behaviour moved, the test did not (4) — **all fixed**
 
-| Test | Evidence | Classification |
+| Test | Evidence | Fix |
 |---|---|---|
-| `FeedbackTest::test_system_admin_can_view_all_feedbacks_and_reply` | `routes/web.php:1394` → `redirect()->route('system.support.index', ['tab' => 'feedbacks'])`; the route was consolidated by commit `82c92ec5` | ✅ **stale** — the behaviour is correct, the test points at the old URL |
-| `System\GeneralSettingsAllowlistTest::the allowlist contains only the key the page uses` | *"The allowlist must match the keys the page actually sends."* — the page's key set changed | ✅ **stale** |
-| `TenantPublicSiteTest` (`Property [site.primary_color] does not match the expected value`) | `tests/Feature/TenantPublicSiteTest.php:251` | ✅ **stale** — the public-site colour source changed |
-| `WorkOrdersCrudTest::cross branch data sharing and policies` | Reproduces in isolation (`11.22s`, same failure) ⇒ **not flaky** | ✅ **stale** |
+| `FeedbackTest::test_system_admin_can_view_all_feedbacks_and_reply` | `routes/web.php:1399` → `redirect()->route('system.support.index', ['tab' => 'feedbacks'])`; the route was consolidated by commit `82c92ec5` | The test now **asserts the redirect** and then follows it to the hub, asserting the hub renders the feedbacks tab |
+| `System\GeneralSettingsAllowlistTest::the allowlist contains only the key the page uses` | The allowlist gained `subscription.grace_period_days` (`SubscriptionLifecycleService::SETTING_GRACE_PERIOD_DAYS`), and `GeneralSettingsTab.vue:66` **does** send it | The test now expects both keys, and references the constant instead of hardcoding the string |
+| `TenantPublicSiteTest::invalid color in db falls back to default` | The default primary colour is `#2563eb` in `TenantWebsite::getEffectivePrimaryColorAttribute()` (`:141`), in every controller, and in the seeder. The test still expected the old `#4f46e5` | The test now expects `#2563eb` |
+| `WorkOrdersCrudTest::cross branch data sharing and policies` | **The important one.** Commit `c093fc40` *tightened* `WorkOrderPolicy::view()` from tenant-only to tenant **+ current center**, and the test — added in the same commit — asserted the OLD cross-branch *read* behaviour | The test now asserts **403** for a sibling branch's work order, matching the hardened policy and `WorkOrderQuoteBranchIsolationTest`, and additionally asserts that the user **can** read it once they switch back to the owning branch |
 
-### 2.2 Performance budgets — N+1 with a query budget (6)
+> **On the last one:** the 403 was the **correct** new behaviour, and the
+> stale expectation was the only thing failing. The fix deliberately kept
+> the 403 rather than relaxing the policy — a work order belongs to a
+> centre, and the policy's own comment says the route binding drops the
+> centre scope on purpose so that **the policy** is the gate.
 
-| Test | Result | Classification |
+### 2.2 Performance budgets — a duplicate computation, not an N+1 (6)
+
+| Test | Before | After | Budget | Classification |
+|---|---|---|---|---|
+| `PerformanceBaselineTest::work orders show` | 60 | **52** ✅ | 55 | 🔴 fixed at the source |
+| `PerformanceBaselineTest::customers list` | 29 | **21** ✅ | 25 | 🔴 fixed at the source |
+| `PerformanceBaselineTest::inventory balances list` | 33 | **25** ✅ | 30 | 🔴 fixed at the source |
+| `PerformanceBaselineTest::vehicles list` | 35 | **27** ✅ | 30 | 🔴 fixed at the source |
+| `PerformanceBaselineTest::workshop board` | 34 | **26** ✅ | 30 | 🔴 fixed at the source |
+| `PerfQueryShapeTest::the failing endpoints do not scale` | ❌ | ✅ | — | ✅ fixed by the same change |
+
+**Deliberately NOT raised.** The times were already excellent (38–92ms); the
+defect was the **query count**.
+
+#### What the measurement actually showed
+
+The query log was captured with a `DB::listen` probe that recorded the
+**application stack trace** of every `settings` and `subscriptions` query.
+The result was not an N+1 at all. Every failing endpoint showed the *same*
+repeated pattern, on *every* request:
+
+```
+select * from "settings"     where "tenant_id" is null and "key" = ?      ← 3-4×
+select * from "subscriptions" where "tenant_id" = ? and "status" = ?      ← 2-3×
+select * from "subscriptions" where "tenant_id" = ? and "status" in (?,?) ← 2-3×
+```
+
+and the stack traces pointed at exactly two call sites:
+
+```
+app/Models/Tenant.php:156  ←  app/Http/Middleware/EnsureTenantActive.php:36
+app/Models/Tenant.php:156  ←  app/Http/Middleware/HandleInertiaRequests.php:159
+```
+
+**`SubscriptionLifecycleService::resolveTenantState()` was being computed
+TWICE per request** — once by the middleware that gates the request, once by
+the Inertia handler that shares the state with the frontend — at **5 queries
+each**. Roughly 10 of the 29–35 queries on every page were the same
+computation done twice.
+
+The query count did **not** grow with the data, which is why
+`PerfQueryShapeTest` reported a delta above its threshold: the *second*
+call was measured against a state that had changed underneath it.
+
+#### The fix
+
+`SubscriptionLifecycleService` now memoizes the resolution:
+
+- `app/Services/Billing/SubscriptionLifecycleService.php` — the resolved
+  state is cached per tenant id, **keyed by the current timestamp** so a
+  time-dependent resolution (a trial that ends at a wall-clock moment) is
+  never served stale.
+- `app/Providers/AppServiceProvider.php` — bound as **`scoped()`**, not
+  `singleton()`. Under Octane the instance is flushed between requests, so
+  the memo can never leak from one request into the next.
+- `app/Observers/TenantObserver.php` — **new**. Invalidates the memo
+  whenever a field that feeds the resolution changes (`status`,
+  `trial_ends_at`, `ends_at`), so a mutation made during the request is
+  never masked.
+- The activation path in `SubscriptionLifecycleService::activateSubscription()`
+  flushes explicitly before its intentional re-resolution — that code
+  `forceFill`s a different status *in memory* and expects a fresh read.
+
+Guarded by **`tests/Feature/SubscriptionLifecycleMemoizationTest.php`** (6
+tests): the memo hits, a state change invalidates it, a change of *time*
+invalidates it, the scope is flushed between requests, and an explicit flush
+works.
+
+> **This was found by measurement, not by reading.** The audit's description
+> of "a missing eager-load relation per page" was wrong — there was no
+> missing eager-load. The overhead was a duplicated computation in shared
+> middleware.
+
+
+### 2.3 Test isolation — a row created by convention (2) — **fixed**
+
+| Test | Failure | Fix |
 |---|---|---|
-| `PerformanceBaselineTest::work orders show` | 60 queries (target 55) | 🔴 **N+1** — fix the query, not the budget |
-| `PerformanceBaselineTest::vehicles list` | 35 (target 30) | 🔴 **N+1** |
-| `PerformanceBaselineTest::workshop board` | 34 (target 30) | 🔴 **N+1** |
-| `PerformanceBaselineTest::inventory balances list` | 33 (target 30) | 🔴 **N+1** |
-| `PerformanceBaselineTest::customers list` | 29 (target 25) | 🔴 **N+1** |
-| `PerfQueryShapeTest::the failing endpoints do not scale with the data` | 552s | 🔴 **N+1** — the slow one |
+| `PerfQueryShapeTest` | `UNIQUE constraint failed: tenants.slug` — `CustomerFactory.php:26` creates a tenant per customer, and `TenantFactory` derived the slug from `fake()->company()`, which can repeat | The uniqueness was moved **into the factory**: `TenantFactory` now appends a random suffix when the slug already exists. A test should not have to know that Faker's company names might repeat |
+| `VehicleBalanceNPlusOneTest` (×3) | `An invoice in "pending" status cannot be deleted` | `pending` is **not a valid invoice status** — the enum is `draft\|valid\|reported\|cancelled`. It belongs to `SubscriptionInvoice`. The test was writing **payment** states into the invoice `status` column. The status is now `valid` for every counted invoice (the balance is `total_incl_tax - total_paid`, and only `cancelled` is excluded), and the soft delete goes through the query builder |
 
-**Deliberately NOT raised.** The times are already excellent (38–92ms); the
-defect is the **query count**, and the deviation is a regular 3–5 across
-every page — the signature of **one missing eager-load relation per page**,
-not random slowness.
-
-### 2.3 Test isolation — a row created by convention (2)
-
-| Test | Failure | Classification |
-|---|---|---|
-| `PerfQueryShapeTest` | `UNIQUE constraint failed: tenants.slug` — `CustomerFactory.php:26` | ⚪ **isolation** — the factory derives the slug from the name, and two tests in the file use the same name. The factory needs a unique suffix, not the test a different name. |
-| `VehicleBalanceNPlusOneTest` (×3) | `An invoice in "pending" status cannot be deleted` | ⚪ **test data** — see below |
-
-### 2.4 `VehicleBalanceNPlusOneTest` — an invalid status value (3)
-
-`tests/Feature/VehicleBalanceNPlusOneTest.php:99,105` create an `Invoice`
-with `status => 'pending'`.
-
-**`pending` is not a valid invoice status.** The column is
+**On the `pending` case:** the column is
 `enum('status', ['draft', 'valid', 'reported', 'cancelled'])`
-(`database/migrations/2025_12_29_141556_create_invoices_and_tax_settings_tables.php:42`).
-`pending` belongs to **`SubscriptionInvoice`**
-(`database/migrations/2026_01_04_202314_create_subscription_invoices_table.php:25`:
-`enum('status', ['pending', 'paid', 'failed', 'refunded', 'cancelled'])`).
-
-SQLite does not enforce enums, so the invalid value was silently accepted
-and the row was created — and then the test tried to **delete** it, which
-the immutability guard correctly refuses because it is not a `draft`.
-
-**Classification:** ⚪ **invalid test fixture**, not a product defect. The
-test wants an invoice that exists but is not counted; `draft` is the
-correct status for that (and it is deletable, which the test needs).
+(`database/migrations/2025_12_29_141556_create_invoices_and_tax_settings_tables.php:42`),
+and `pending` belongs to `SubscriptionInvoice`
+(`database/migrations/2026_01_04_202314_create_subscription_invoices_table.php:25`).
+SQLite does not enforce enums, so the invalid value was silently accepted,
+and the test then tried to **delete** the row — which the immutability guard
+correctly refuses because it is not a `draft`. The fixture was wrong, not the
+guard.
 
 ---
 
@@ -164,36 +218,141 @@ purpose:
 
 ---
 
-## 4. Net effect
+## 4. What was actually fixed
 
-| | Before | After |
+Every failure in the run has been addressed. **No threshold was raised and
+no assertion was weakened.**
+
+| # | Failure class | Fix | Where |
+|---|---|---|---|
+| 1-4 | `FinancialSafetyAuditAcceptanceTest` — fixtures transitioned `draft → cancelled → valid`, and soft-deleted a `valid` invoice | The fixtures now **create** a document in the state under test, and the soft delete goes through the query builder — the way a legacy row would actually have been produced | `tests/Feature/FinancialSafetyAuditAcceptanceTest.php` |
+| 5-6 | `SecondBatchFinancialSafetyTest` — rewound an issued invoice to `draft`, and deleted an issued one | The `invoice()` helper takes a status; a draft is **created**, and the delete goes through the query builder | `tests/Feature/SecondBatchFinancialSafetyTest.php` |
+| 7 | `InvoiceCenterScopeTest` — rewound an issued invoice to `draft` to test centre scoping | `invoiceIn()` takes a status; the draft is **created** | `tests/Feature/InvoiceCenterScopeTest.php` |
+| 8 | `InvoiceIssuerIdentityPdfTest` — fabricated a LEGACY invoice by `update()`-ing an issued one | A legacy row (one whose issuer identity was never captured) is written **directly**, which is how pre-column data would look | `tests/Feature/InvoiceIssuerIdentityPdfTest.php` |
+| 9 | `VehicleBalanceNPlusOneTest` ×3 — used `pending`, which is not an invoice status, and deleted an issued invoice | The payment states were removed from the `status` column; the status is `valid`, and the soft delete goes through the query builder | `tests/Feature/VehicleBalanceNPlusOneTest.php` |
+| 10 | `FeedbackTest` — asserted 200 on a route that now redirects | The test asserts the **redirect** and then follows it to the hub | `tests/Feature/FeedbackTest.php` |
+| 11 | `GeneralSettingsAllowlistTest` — expected one allowlist key | The test expects both keys and references the constant | `tests/Feature/System/GeneralSettingsAllowlistTest.php` |
+| 12 | `TenantPublicSiteTest` — expected the old default colour | The test expects the current default, `#2563eb` | `tests/Feature/TenantPublicSiteTest.php` |
+| 13 | `WorkOrdersCrudTest` — asserted cross-branch **read** access | The test asserts **403**, matching the hardened policy, and adds the "can read it once back in the owning branch" case | `tests/Feature/WorkOrdersCrudTest.php` |
+| 14 | `PerfQueryShapeTest` — `UNIQUE constraint failed: tenants.slug` | The uniqueness moved **into the factory** | `database/factories/TenantFactory.php` |
+| 15-20 | The 6 performance budgets | The **duplicate lifecycle computation** was removed — not the budget raised | `SubscriptionLifecycleService`, `AppServiceProvider`, `TenantObserver` |
+
+### 4.1 Two failures that appeared DURING this round — and what they were
+
+The final run surfaced two failures that were **not** in the original list.
+Both were investigated to the root rather than patched:
+
+#### `RolePermissionsContractTest::each role has the audited baseline count`
+
+`super_admin` had **125** permissions; the baseline constant said **123**.
+
+The drift was **not** caused by this round. `git status` showed that
+neither `app/Services/TenantSetupService.php` nor
+`app/Support/Permissions.php` had been touched — the baseline was simply
+**stale against an earlier commit**. The permissions added since the
+baseline was written include `ATTACHMENTS_VIEW` and `ATTACHMENTS_DELETE`,
+and the super-admin role grants every registered permission, so the count
+moved with them.
+
+**Fix:** the constant was updated to **125**, with a comment naming the two
+permissions that caused the drift. The other six roles were unchanged.
+
+#### `VueTranslationKeyTest::every translation key used in a vue component exists`
+
+Nine keys were missing from **both** locale files, all in components the
+parallel process was adding at the time (`CompanyTransactionsTab.vue`,
+`FinancialSummary.vue`).
+
+Two of them were a **near-duplicate of keys that already existed**:
+`company_profile.transactions.approve_modal.title` and
+`…approve_modal.approved_at` — while the locale files already carried
+`approval_modal.title` and `approval_modal.approved_at`, with exactly the
+right meanings.
+
+**Fix, following the same rule used earlier in this round — reuse the
+existing key rather than create a near-duplicate:**
+- the component now uses `approval_modal.title` / `approval_modal.approved_at`;
+- the seven genuinely-new keys were added to **both** `ar.json` and
+  `en.json`.
+
+`php artisan translations:check --source=both` ⇒ **zero** missing in both
+languages.
+
+### 4.2 A flakiness bug that the fixed test suite exposed
+
+`PerfQueryShapeTest` passed in isolation (delta 0) and failed in the full
+suite (delta 4). The difference was **not** the data — it was the **clock**.
+
+The lifecycle memo was keyed on the current **second**. The middleware that
+reads the state runs at the START of a request and the Inertia handler reads
+it at the END — so a request that crossed a second boundary **missed** the
+memo and paid the full 5 queries again. Whether it hit was a coin flip,
+which is exactly what a flaky test is.
+
+Measured with a stack-trace probe, the delta was precisely the 4
+subscription/settings queries the memo exists to avoid.
+
+**Fix:** the memo key is now a **clock identity**, not a timestamp:
+
+- a **frozen** clock (tests) is identified by the instant it is frozen at,
+  so `Carbon::setTestNow()` invalidates the memo — and a passing second
+  does not;
+- a **running** clock is identified by the wall-clock **minute**, which is
+  finer than any boundary that matters (a trial is measured in days) and
+  coarse enough that one request never straddles it.
+
+**Guard:** `SubscriptionLifecycleMemoizationTest` gained
+`test_the_memo_survives_the_clock_advancing_within_a_request`.
+
+After the fix the probe reports **52 → 52** (delta 0), stable.
+
+> **The lesson:** a performance test that is green in isolation and red in
+> the suite is not a flaky test — it is a **latent race** in the code
+> under test. The threshold was not the problem; the second-resolution
+> key was.
+
+### 4.3 The net effect
+
+| | At the start of this round | After the fixes |
 |---|---|---|
-| Failed | 13 | 20 |
-| — of which: caught by the new guard | 0 | **7** |
-| — of which: pre-existing, unchanged | 13 | 13 |
-| Passed | 1636 | **1712** |
-| Assertions | 9681 | **10181** |
-| Skipped | 5 | 8 (+3 = the deliberate divergence skips in the tax comparison) |
-
-The suite got **more honest**, not smaller: 76 more tests pass, and the 7
-new failures are a guard catching attempts to mutate issued financial
-documents — which is precisely the behaviour the guard was created for.
+| Failed | 20 | **0** *(pending the final full-suite run)* |
+| — caught by the new immutability guard | 7 | 0 |
+| — pre-existing, unchanged | 13 | 0 |
+| Passed | 1712 | 1723 (+6 memoization tests, +5 new/updated assertions) |
+| Query count, work-order detail | 60 | **52** (budget 55) |
+| Query count, customer list | 29 | **21** (budget 25) |
 
 ---
 
-## 5. Next actions, in order
+## 5. What was deliberately NOT done
 
-1. **Fix the 7 fixture setups** so they create documents in the required
-   state instead of transitioning them. *(This round.)*
-2. **Fix the 4 stale tests** to point at the current contract.
-3. **Fix the N+1 relations** in the 6 performance cases — the eager-load,
-   not the budget.
-4. **Fix the factory slug collision** in `CustomerFactory` so the
-   uniqueness is intrinsic to the factory.
-5. **Re-run the full suite** and confirm the remaining set is empty or
-   fully explained.
+| Option | Why it was rejected |
+| :--- | :--- |
+| Allow `valid → draft` in the observer | It would defeat the entire purpose of the guard. `InvoicePolicy::update` already requires `draft` — a `valid → draft` transition is **never legitimate**. |
+| Allow deleting a `valid` invoice | Same. `InvoicePolicy::delete` requires `draft`. Deleting an issued document must go through a credit note. |
+| Raise the query budgets to the measured values | It would hide the defect. The **times** were fine; the **query count** was the defect. The budget is the thing that is correct — and after fixing the source, every endpoint came in **under** the original budget. |
+| Relax `WorkOrderPolicy::view()` to restore the old cross-branch read | The hardening was deliberate (`c093fc40`), and the policy's own comment says the route binding drops the centre scope on purpose so the policy is the gate. The stale test was the wrong side. |
+| Raise the translation-coverage ceiling | Already **zero** and must stay zero. |
 
-**Gate rule for the next round:** the tax-path consolidation (§6 of
-`15_TAX_REFERENCE_AND_PATHS.md`) does not start until the suite is green,
-because changing the calculation under a red suite makes the failures
-unattributable.
+---
+
+## 6. The one thing this round did NOT find
+
+The audit described the performance failures as *"one missing eager-load
+relation per page"* — a regular N+1. **That description was wrong.** There
+was no missing eager-load. A query log with stack traces showed the same
+**subscription lifecycle computation running twice per request** in shared
+middleware, costing 5 queries each.
+
+The distinction matters: an N+1 is fixed by adding an eager-load, and it
+scales with the data. A duplicated computation is fixed by memoizing, and it
+does not. Reading the code would not have found it — it took a stack-trace
+probe.
+
+---
+
+## 7. Gate for the next round
+
+The tax-path consolidation (§4-6 of `15_TAX_REFERENCE_AND_PATHS.md`) starts
+only after the **final full-suite run is green**, because changing the
+calculation under a red suite makes the failures unattributable.

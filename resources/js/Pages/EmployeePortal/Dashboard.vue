@@ -341,6 +341,9 @@
 import DataTable from '@/Components/Common/DataTable.vue';
 import EmployeePortalLayout from '@/Layouts/EmployeePortalLayout.vue';
 import { Link } from '@inertiajs/vue3';
+import { useNumberFormat } from '@/Composables/useNumberFormat';
+
+const { formatMoney } = useNumberFormat();
 
 const props = defineProps({
     employee: Object,
@@ -349,9 +352,7 @@ const props = defineProps({
 });
 
 function formatCurrency(amount) {
-    return new Intl.NumberFormat('ar-SA-u-nu-latn', { style: 'currency', currency: 'SAR' }).format(
-        amount || 0
-    );
+    return formatMoney(amount);
 }
 
 function formatDate(dateString) {

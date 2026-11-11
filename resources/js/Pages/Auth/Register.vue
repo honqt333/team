@@ -2,9 +2,11 @@
 import AppToggle from '@/Components/Common/AppToggle.vue';
 import AuthLayout from '@/Layouts/AuthLayout.vue';
 import InputError from '@/Components/InputError.vue';
+import SearchableSelect from '@/Components/SearchableSelect.vue';
 import { Head, Link, useForm, usePage } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import { ref, computed, watch } from 'vue';
+import { COUNTRIES, getCountryMeta } from '@/Utils/currency';
 
 const { locale } = useI18n();
 const isRTL = computed(() => locale.value === 'ar');
@@ -21,6 +23,7 @@ const form = useForm({
     company_name: '',
     first_name: '',
     last_name: '',
+    country: 'SA',
     email: '',
     phone: '',
     password: '',
@@ -29,8 +32,18 @@ const form = useForm({
     terms: false,
 });
 
+const countryOptions = computed(() =>
+    Object.values(COUNTRIES).map((c) => ({
+        value: c.code,
+        label: `${c.flag} ${isRTL.value ? c.name_ar : c.name_en} (${c.dial_code})`,
+    }))
+);
+
+const activeCountryMeta = computed(() => getCountryMeta(form.country));
+
 const otpForm = useForm({
     phone: '',
+    country: 'SA',
     otp: '',
 });
 
@@ -62,17 +75,19 @@ watch(
 );
 
 const formatPhone = (phone) => {
-    phone = phone.replace(/[\s\-]/g, '');
-    if (phone.startsWith('0')) {
-        return '+966' + phone.substring(1);
-    } else if (phone.startsWith('5')) {
-        return '+966' + phone;
-    } else if (phone.startsWith('966')) {
-        return '+' + phone;
-    } else if (!phone.startsWith('+')) {
-        return '+' + phone;
+    const cleaned = String(phone || '').replace(/[\s\-]/g, '');
+    if (!cleaned) return '';
+    if (cleaned.startsWith('+')) return cleaned;
+    if (cleaned.startsWith('00')) return '+' + cleaned.substring(2);
+    const dialDigits = activeCountryMeta.value.dial_digits || '966';
+    const dialCode = activeCountryMeta.value.dial_code || '+966';
+    if (cleaned.startsWith(dialDigits) && cleaned.length >= dialDigits.length + 7) {
+        return '+' + cleaned;
     }
-    return phone;
+    if (cleaned.startsWith('0')) {
+        return dialCode + cleaned.substring(1);
+    }
+    return dialCode + cleaned;
 };
 
 // Cooldown timer
@@ -93,6 +108,7 @@ const startCooldown = (seconds) => {
 
 const sendOtp = () => {
     otpForm.phone = form.phone;
+    otpForm.country = form.country;
     otpForm.post(route('phone.send-otp'), {
         preserveScroll: true,
         onSuccess: (page) => {
@@ -105,6 +121,7 @@ const sendOtp = () => {
 
 const verifyOtp = () => {
     otpForm.phone = form.phone;
+    otpForm.country = form.country;
     otpForm.post(route('phone.verify-otp'), {
         preserveScroll: true,
         onSuccess: () => {
@@ -227,6 +244,20 @@ const submit = () => {
                 <InputError class="mt-1" :message="form.errors.email" />
             </div>
 
+            <!-- Country -->
+            <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                    {{ isRTL ? 'الدولة' : 'Country' }}
+                    <span class="text-red-500">*</span>
+                </label>
+                <SearchableSelect
+                    v-model="form.country"
+                    :options="countryOptions"
+                    :disabled="phoneVerified"
+                />
+                <InputError class="mt-1" :message="form.errors.country" />
+            </div>
+
             <!-- Phone with OTP Verification -->
             <div>
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
@@ -239,16 +270,17 @@ const submit = () => {
                 <div class="flex gap-2">
                     <div
                         class="flex items-center gap-1 px-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-700 text-gray-700 dark:text-gray-300"
+                        dir="ltr"
                     >
-                        <span class="text-lg">🇸🇦</span>
-                        <span class="text-sm">+966</span>
+                        <span class="text-lg">{{ activeCountryMeta.flag }}</span>
+                        <span class="text-sm">{{ activeCountryMeta.dial_code }}</span>
                     </div>
                     <input
                         type="tel"
                         v-model="form.phone"
                         required
                         :disabled="phoneVerified"
-                        placeholder="5xxxxxxxx"
+                        :placeholder="activeCountryMeta.local_placeholder || '5xxxxxxxx'"
                         class="flex-1 px-4 py-2.5 border rounded-xl focus:ring-2 focus:ring-focus-ring focus:border-action-primary bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 disabled:opacity-50"
                         :class="
                             form.errors.phone

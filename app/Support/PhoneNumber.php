@@ -4,38 +4,43 @@ declare(strict_types=1);
 
 namespace App\Support;
 
+use Throwable;
+
 /**
- * Shared phone-number normalization.
- *
- * The Customer store request used to own a private
- * normalizePhoneNumber() method. The customer portal needs
- * the same logic to map a typed-in phone to the canonical
- * format we store on the customer row (and compare against).
- * Centralising it here means both call sites see identical
- * rules; otherwise two registrations of the same number
- * could end up with different stored representations and
- * break the OTP lookup.
- *
- * The function is intentionally tolerant:
- *   - Arabic + Persian digits → English
- *   - whitespace, dashes, parens, dots → stripped
- *   - leading + kept
- *   - common Saudi prefixes (00966, 05, 5, 966) collapsed
- *     into +9665xxxxxxxx
- *
- * The function is NOT a validator. It only normalizes. The
- * caller decides whether the result is acceptable (length,
- * country code, etc.).
+ * Shared phone-number normalization across supported countries.
  */
 class PhoneNumber
 {
     /**
-     * Normalize to the canonical +9665xxxxxxxx form when
-     * possible. Returns null for empty input. Returns the
-     * raw digits string when no rule matches (caller can
-     * validate).
+     * Resolve the active ISO country code from explicit argument, active tenant, or default ('SA').
      */
-    public static function normalize(?string $number): ?string
+    public static function resolveCountry(?string $country = null): string
+    {
+        if ($country !== null && trim($country) !== '') {
+            return CountryCurrencyRegistry::normalizeCountry($country);
+        }
+
+        try {
+            if (function_exists('app') && app()->bound('auth') && auth()->hasUser()) {
+                $tenantCountry = auth()->user()?->tenant?->country;
+
+                if (is_string($tenantCountry) && trim($tenantCountry) !== '') {
+                    return CountryCurrencyRegistry::normalizeCountry($tenantCountry);
+                }
+            }
+        } catch (Throwable) {
+            // Pure unit contexts without Laravel container fall back cleanly.
+        }
+
+        return CountryCurrencyRegistry::DEFAULT_COUNTRY;
+    }
+
+    /**
+     * Normalize to canonical E.164 international format (+<country><number>) when possible.
+     * Supports SA, GCC, EG, JO local formats using the provided or tenant default country,
+     * as well as any international E.164 (+...) or 00-prefixed number.
+     */
+    public static function normalize(?string $number, ?string $defaultCountry = null): ?string
     {
         if ($number === null) {
             return null;
@@ -66,19 +71,65 @@ class PhoneNumber
             return null;
         }
 
-        // Country-code collapse rules (Saudi-focused, matching
-        // the existing CustomerStoreRequest behaviour).
-        if (str_starts_with($number, '00966')) {
-            $number = '+966'.substr($number, 5);
-        } elseif (str_starts_with($number, '05') && strlen($number) === 10) {
-            $number = '+966'.substr($number, 1);
-        } elseif (str_starts_with($number, '5') && strlen($number) === 9) {
-            $number = '+966'.$number;
-        } elseif (str_starts_with($number, '966') && ! str_starts_with($number, '+')) {
-            $number = '+'.$number;
+        if (str_starts_with($number, '+')) {
+            return $number;
+        }
+
+        if (str_starts_with($number, '00') && strlen($number) >= 7) {
+            return '+'.substr($number, 2);
+        }
+
+        $countries = CountryCurrencyRegistry::allCountries();
+        uasort(
+            $countries,
+            static fn (array $a, array $b): int => strlen((string) $b['dial_digits']) <=> strlen((string) $a['dial_digits'])
+        );
+
+        foreach ($countries as $meta) {
+            $dialDigits = (string) $meta['dial_digits'];
+
+            if (! str_starts_with($number, $dialDigits)) {
+                continue;
+            }
+
+            $e164Regex = (string) ($meta['e164_regex'] ?? '');
+
+            if ($e164Regex !== '' && preg_match($e164Regex, '+'.$number)) {
+                return '+'.$number;
+            }
+
+            if ($dialDigits === '966' && strlen($number) >= 10) {
+                return '+'.$number;
+            }
+        }
+
+        $resolvedCountry = self::resolveCountry($defaultCountry);
+        $countryMeta = CountryCurrencyRegistry::countryMeta($resolvedCountry);
+        $dialCode = (string) ($countryMeta['dial_code'] ?? '+966');
+        $localLengths = (array) ($countryMeta['local_lengths'] ?? [9]);
+        $localRegex = (string) ($countryMeta['local_regex'] ?? '/^5\d{8}$/');
+
+        if (str_starts_with($number, '0')) {
+            $stripped = substr($number, 1);
+
+            if (in_array(strlen($stripped), $localLengths, true) && preg_match($localRegex, $stripped)) {
+                return $dialCode.$stripped;
+            }
+        }
+
+        if (in_array(strlen($number), $localLengths, true) && preg_match($localRegex, $number)) {
+            return $dialCode.$number;
         }
 
         return $number;
+    }
+
+    /**
+     * Validate canonical E.164 format (+ followed by 7 to 15 digits).
+     */
+    public static function isValidE164(?string $number): bool
+    {
+        return is_string($number) && preg_match('/^\+[1-9]\d{6,14}$/', $number) === 1;
     }
 
     /**
@@ -86,9 +137,9 @@ class PhoneNumber
      * Two phone numbers normalize to the same key if they refer
      * to the same line, regardless of formatting.
      */
-    public static function lookupKey(?string $number): ?string
+    public static function lookupKey(?string $number, ?string $defaultCountry = null): ?string
     {
-        $normalized = self::normalize($number);
+        $normalized = self::normalize($number, $defaultCountry);
 
         if ($normalized === null) {
             return null;

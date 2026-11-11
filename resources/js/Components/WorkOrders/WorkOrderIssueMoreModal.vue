@@ -250,7 +250,7 @@
                         {{ formatCurrency(grandTotalValue) }}
                     </span>
                     <span class="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase">
-                        {{ $t('common.currency') }}
+                        {{ activeCurrencySymbol }}
                     </span>
                 </div>
             </div>
@@ -298,7 +298,7 @@ const props = defineProps({
 
 const emit = defineEmits(['close', 'saved']);
 const { t } = useI18n();
-const { formatCurrency, formatQuantity, toEnglish } = useNumberFormat();
+const { formatCurrency, formatQuantity, toEnglish, activeCurrencySymbol } = useNumberFormat();
 
 const currentStock = ref(0);
 const loadingStock = ref(false);

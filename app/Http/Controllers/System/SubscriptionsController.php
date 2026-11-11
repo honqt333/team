@@ -272,7 +272,7 @@ class SubscriptionsController extends Controller
                     'subscription_id' => $subscription->id,
                     'subscription_invoice_id' => $invoice->id,
                     'amount' => $collectedAmount,
-                    'currency' => 'SAR',
+                    'currency' => PaymentSettings::getPlatformCurrency(),
                     'gateway' => $paymentMethod,
                     'payment_method' => $paymentMethod,
                     'gateway_ref' => $ref,

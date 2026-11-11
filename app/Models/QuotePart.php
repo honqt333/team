@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Models\Concerns\CenterScoped;
+use App\Support\CountryCurrencyRegistry;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -84,7 +85,7 @@ class QuotePart extends Model
             $quote = $part->quote;
 
             if ($quote && $quote->tax_enabled_snapshot) {
-                $taxRate = $part->tax_rate_snapshot ?: $quote->tax_rate_snapshot ?: 15;
+                $taxRate = $part->tax_rate_snapshot ?? $quote->tax_rate_snapshot ?? CountryCurrencyRegistry::defaultVatRate($quote->tenant?->country);
                 $part->is_taxable = true;
                 $part->tax_rate_snapshot = $taxRate;
 

@@ -180,6 +180,9 @@ import { printDocument } from '@/Composables/usePrint';
 import { computed } from 'vue';
 import { Head, router } from '@inertiajs/vue3';
 import EmployeePortalLayout from '@/Layouts/EmployeePortalLayout.vue';
+import { useNumberFormat } from '@/Composables/useNumberFormat';
+
+const { formatMoney } = useNumberFormat();
 
 const props = defineProps({
     payslip: Object,
@@ -212,11 +215,7 @@ const totalDeductions = computed(() => {
 });
 
 function formatCurrency(value) {
-    return new Intl.NumberFormat('en-SA', {
-        style: 'currency',
-        currency: 'SAR',
-        minimumFractionDigits: 2,
-    }).format(Number(value) || 0);
+    return formatMoney(value);
 }
 
 function formatDate(dateString) {

@@ -1251,54 +1251,13 @@
                 </div>
 
                 <!-- Pagination -->
-                <div
-                    v-if="invoices && invoices.links && invoices.links.length > 3"
-                    class="p-4 border-t border-gray-100 dark:border-gray-700/60 flex items-center justify-between text-xs"
-                >
-                    <div class="text-gray-500">
-                        {{ $t('reports.suppliers_report.showing') }}
-                        <span class="font-bold text-gray-800 dark:text-gray-200">
-                            {{ invoices.from || 0 }}
-                        </span>
-                        {{ $t('reports.suppliers_report.to') }}
-                        <span class="font-bold text-gray-800 dark:text-gray-200">
-                            {{ invoices.to || 0 }}
-                        </span>
-                        {{ $t('reports.suppliers_report.of') }}
-                        <span class="font-bold text-gray-800 dark:text-gray-200">
-                            {{ invoices.total || 0 }}
-                        </span>
-                        {{ $t('reports.suppliers_report.record') }}
-                    </div>
-
-                    <div class="flex items-center gap-1">
-                        <template v-for="(link, i) in invoices.links" :key="i">
-                            <button
-                                v-if="link.url"
-                                type="button"
-                                @click="
-                                    router.get(
-                                        link.url,
-                                        {},
-                                        { preserveState: true, preserveScroll: true }
-                                    )
-                                "
-                                :class="[
-                                    'px-3 py-1.5 rounded-lg text-xs font-bold transition-all',
-                                    link.active
-                                        ? 'bg-rose-600 text-white shadow-sm'
-                                        : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600',
-                                ]"
-                                v-html="link.label"
-                            />
-                            <span
-                                v-else
-                                class="px-2 py-1 text-gray-400 text-xs"
-                                v-html="link.label"
-                            />
-                        </template>
-                    </div>
-                </div>
+                <AppPagination
+                    class="print:hidden"
+                    :links="invoices?.links || []"
+                    :from="invoices?.from"
+                    :to="invoices?.to"
+                    :total="invoices?.total"
+                />
             </div>
 
             <!-- Standard Print Footer -->
@@ -1311,9 +1270,11 @@
 
 <script setup>
 import DataTable from '@/Components/Common/DataTable.vue';
+import AppPagination from '@/Components/Common/AppPagination.vue';
 import PrintEngine from '@/Components/Print/PrintEngine.vue';
 import AppPrintButton from '@/Components/Common/AppPrintButton.vue';
 import { printDocument } from '@/Composables/usePrint';
+import { useNumberFormat } from '@/Composables/useNumberFormat';
 import { ref, reactive, computed, watch } from 'vue';
 import { router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
@@ -1697,10 +1658,7 @@ const getDocumentTypeLabel = (recordType) => {
 };
 
 // Formatter Helpers
-const formatMoney = (val) => {
-    const num = Number(val || 0);
-    return `${num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ر.س`;
-};
+const { formatMoney } = useNumberFormat();
 
 const formatNumber = (val) => {
     const num = Number(val || 0);

@@ -56,7 +56,7 @@
                 <span
                     class="rounded-md bg-gray-100 px-2 py-0.5 text-xs font-semibold text-gray-600 dark:bg-gray-700 dark:text-gray-300"
                 >
-                    {{ currency }}
+                    {{ effectiveCurrency }}
                 </span>
             </div>
         </dl>
@@ -68,14 +68,22 @@ import { useI18n } from 'vue-i18n';
 const { t } = useI18n();
 
 import { computed } from 'vue';
+import { useNumberFormat } from '@/Composables/useNumberFormat';
+import { getCurrencyDecimals } from '@/Utils/currency';
+
+const { activeCurrencyCode } = useNumberFormat();
 
 const props = defineProps({
     invoice: { type: Object, required: true },
     currency: {
         type: String,
-        default: 'SAR',
+        default: null,
     },
 });
+
+const effectiveCurrency = computed(
+    () => props.invoice?.currency_code || props.currency || activeCurrencyCode.value
+);
 
 const isAr = computed(() => (document?.documentElement?.lang || 'ar') === 'ar');
 
@@ -87,14 +95,15 @@ const vatRate = computed(() => {
     // that may be stale or missing.
     const subtotal = Number(props.invoice.subtotal) || 0;
     const vat = Number(props.invoice.vat) || 0;
-    if (subtotal <= 0) return 15;
+    if (subtotal <= 0) return 0;
     return Math.round((vat / subtotal) * 100);
 });
 
 function formatMoney(n) {
+    const decimals = getCurrencyDecimals(effectiveCurrency.value);
     return new Intl.NumberFormat(isAr.value ? 'ar-SA-u-nu-latn' : 'en-US', {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2,
+        minimumFractionDigits: decimals,
+        maximumFractionDigits: decimals,
     }).format(n || 0);
 }
 </script>

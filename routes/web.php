@@ -252,7 +252,36 @@ Route::prefix('/{tenant}/portal')
             Route::get('/dashboard', [CustomerPortalController::class, 'dashboard'])
                 ->name('dashboard');
 
-            // ─── Self-service booking (Phase 8) ───
+            // ─── Vehicles & Work Orders tracking ───
+            Route::get('/work-orders', [CustomerPortalController::class, 'workOrders'])
+                ->name('workOrders.index');
+            Route::get('/work-order/{id}', [CustomerPortalController::class, 'showWorkOrder'])
+                ->where(['id' => '\d+'])
+                ->name('workOrders.show');
+
+            // ─── Quotes & Digital Approval ───
+            Route::get('/quotes', [CustomerPortalController::class, 'quotes'])
+                ->name('quotes.index');
+            Route::get('/quote/{id}', [CustomerPortalController::class, 'showQuote'])
+                ->where(['id' => '\d+'])
+                ->name('quotes.show');
+            Route::post('/quote/{id}/approve', [CustomerPortalController::class, 'approveQuote'])
+                ->where(['id' => '\d+'])
+                ->name('quotes.approve');
+            Route::post('/quote/{id}/reject', [CustomerPortalController::class, 'rejectQuote'])
+                ->where(['id' => '\d+'])
+                ->name('quotes.reject');
+
+            // ─── Invoices & Payments ───
+            Route::get('/invoices', [CustomerPortalController::class, 'invoices'])
+                ->name('invoices.index');
+            Route::get('/invoice/{id}', [CustomerPortalController::class, 'showInvoice'])
+                ->where(['id' => '\d+'])
+                ->name('invoices.show');
+
+            // ─── Appointments Hub & Self-service booking (Phase 8) ───
+            Route::get('/appointments', [CustomerPortalController::class, 'appointments'])
+                ->name('appointments.index');
             // The booking endpoints run behind the
             // portal session middleware, so the
             // controller can trust portal_customer is
@@ -555,6 +584,10 @@ Route::prefix('app')->middleware(['auth', 'verified', 'tenant.active', 'center.c
     Route::post('/work-orders/{workOrder}/attachments', [WorkOrderMediaController::class, 'uploadAttachments'])->name('work-orders.attachments.store');
     Route::delete('/work-orders/{workOrder}/attachments/{attachment}', [WorkOrderMediaController::class, 'destroyAttachment'])->name('work-orders.attachments.destroy');
 
+    // Work Order Linked Purchase Invoices
+    Route::post('/work-orders/{workOrder}/purchase-invoices', [WorkOrderController::class, 'linkPurchaseInvoice'])->name('work-orders.purchase-invoices.link');
+    Route::delete('/work-orders/{workOrder}/purchase-invoices/{purchaseInvoice}', [WorkOrderController::class, 'unlinkPurchaseInvoice'])->name('work-orders.purchase-invoices.unlink');
+
     // Quotes
     Route::get('/quotes/export', [QuoteController::class, 'export'])->name('app.quotes.export');
     Route::get('/quotes', [QuoteController::class, 'index'])->name('app.quotes.index');
@@ -629,6 +662,8 @@ Route::prefix('app')->middleware(['auth', 'verified', 'tenant.active', 'center.c
         ->only(['store', 'update', 'destroy'])
         ->names('settings.company.transactions');
     Route::post('/settings/company/transactions/{transaction}/approve', [CompanyTransactionController::class, 'approve'])->name('settings.company.transactions.approve');
+    Route::post('/settings/company/transactions/{transaction}/attachment', [CompanyTransactionController::class, 'uploadAttachment'])->name('settings.company.transactions.attachment.upload');
+    Route::delete('/settings/company/transactions/{transaction}/attachment', [CompanyTransactionController::class, 'deleteAttachment'])->name('settings.company.transactions.attachment.delete');
 
     // Notification Settings
     Route::prefix('settings/notifications')->name('settings.notifications.')->group(function () {

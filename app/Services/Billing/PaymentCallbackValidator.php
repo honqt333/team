@@ -6,6 +6,7 @@ namespace App\Services\Billing;
 
 use App\Exceptions\PaymentMismatchException;
 use App\Models\Billing\SubscriptionPayment;
+use App\Models\PaymentSettings;
 
 /**
  * Checks that a gateway callback really settles the payment it is
@@ -102,7 +103,7 @@ class PaymentCallbackValidator
     private function assertCurrencyMatches(SubscriptionPayment $payment, array $verifyResult): void
     {
         $gatewayCurrency = strtoupper(trim((string) ($verifyResult['currency'] ?? '')));
-        $expectedCurrency = strtoupper(trim((string) ($payment->currency ?: 'SAR')));
+        $expectedCurrency = strtoupper(trim((string) ($payment->currency ?: PaymentSettings::getPlatformCurrency())));
 
         if ($gatewayCurrency === '') {
             throw new PaymentMismatchException('لم تُرجع بوابة الدفع أي عملة، فلا يمكن مطابقتها مع الدفعة المسجلة.');

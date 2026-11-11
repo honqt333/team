@@ -39,6 +39,7 @@ use App\Observers\CenterObserver;
 use App\Observers\EmployeeObserver;
 use App\Observers\InvoiceObserver;
 use App\Observers\PaymentObserver;
+use App\Observers\TenantObserver;
 use App\Observers\WorkOrderItemObserver;
 use App\Observers\WorkOrderObserver;
 use App\Policies\AppointmentMessageDeliveryPolicy;
@@ -65,6 +66,7 @@ use App\Policies\VehiclePolicy;
 use App\Policies\WorkOrderInspectionPolicy;
 use App\Policies\WorkOrderItemPolicy;
 use App\Policies\WorkOrderPolicy;
+use App\Services\Billing\SubscriptionLifecycleService;
 use App\Services\CustomerPortal\AuthenticaCustomerPortalOtpChannel;
 use App\Services\CustomerPortal\CustomerPortalOtpService;
 use App\Services\CustomerPortal\LoggingCustomerPortalOtpChannel;
@@ -92,6 +94,18 @@ class AppServiceProvider extends ServiceProvider
         // Make SmtpConfigService a singleton so we look up the default email
         // integration once per request and reuse the resolved config.
         $this->app->singleton(SmtpConfigService::class);
+
+        // SubscriptionLifecycleService resolves the tenant's lifecycle
+        // state, which costs 5 queries. Two different places need it on
+        // every request — `EnsureTenantActive` (the gate) and
+        // `HandleInertiaRequests` (the shared state for the frontend) —
+        // so without a shared instance the same computation runs twice
+        // per request.
+        //
+        // `scoped()` (not `singleton()`) is the correct binding here:
+        // under Octane the instance is flushed between requests, so the
+        // memoized state can never leak from one request into the next.
+        $this->app->scoped(SubscriptionLifecycleService::class);
 
         // Phase 10 — SmsService binding.
         //
@@ -262,6 +276,11 @@ class AppServiceProvider extends ServiceProvider
         // test. Registering it inside a test would only prove that the
         // guard works when somebody remembered to switch it on.
         Invoice::observe(InvoiceObserver::class);
+
+        // Keeps the memoized subscription lifecycle in step with the
+        // tenant's status, so a state change made during a request is
+        // never masked by a stale cached value.
+        Tenant::observe(TenantObserver::class);
 
         // Super Admin Bypass
         //

@@ -91,8 +91,13 @@
                     <dt class="text-slate-500 dark:text-slate-400 w-1/3">
                         {{ t('customer_portal.booking.confirmed_vehicle') }}
                     </dt>
-                    <dd class="font-semibold text-end" dir="ltr">
-                        {{ appointment.vehicle_label }}
+                    <dd class="font-semibold text-end flex flex-col items-end gap-1.5" dir="ltr">
+                        <span>{{ appointment.vehicle_label }}</span>
+                        <SaudiPlateDisplay
+                            v-if="appointment.vehicle_plate"
+                            :plate-number="appointment.vehicle_plate"
+                            size="xs"
+                        />
                     </dd>
                 </div>
                 <div
@@ -120,6 +125,14 @@
                             </li>
                         </ul>
                         <span v-else class="text-slate-400">—</span>
+                    </dd>
+                </div>
+                <div v-if="appointment.notes" class="flex items-start justify-between gap-3 py-3">
+                    <dt class="text-slate-500 dark:text-slate-400 w-1/3">
+                        {{ t('customer_portal.portal_appointments.notes_label') }}
+                    </dt>
+                    <dd class="font-semibold text-end">
+                        {{ appointment.notes }}
                     </dd>
                 </div>
             </dl>
@@ -236,6 +249,7 @@ import { Head, router, usePage } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import CustomerPortalLayout from '@/Layouts/CustomerPortalLayout.vue';
+import SaudiPlateDisplay from '@/Components/Vehicles/SaudiPlateDisplay.vue';
 
 const props = defineProps({
     tenant: { type: Object, required: true },

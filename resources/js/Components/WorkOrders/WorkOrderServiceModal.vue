@@ -579,7 +579,7 @@
                                         class="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none"
                                     >
                                         <span class="text-xs text-gray-500">
-                                            {{ $t('common.currency') }}
+                                            {{ activeCurrencySymbol }}
                                         </span>
                                     </div>
                                 </div>
@@ -688,7 +688,7 @@
                                     <span
                                         class="text-[9px] font-bold text-gray-500 dark:text-gray-400 uppercase"
                                     >
-                                        {{ $t('common.currency') }}
+                                        {{ activeCurrencySymbol }}
                                     </span>
                                 </div>
                             </div>
@@ -723,7 +723,7 @@
                         {{ $t('work_orders.item.parts_cost') }}
                     </span>
                     <span class="font-bold text-green-600 dark:text-green-400 font-mono" dir="ltr">
-                        {{ formatCurrency(partsTotalCost) }} {{ $t('common.currency') }}
+                        {{ formatCurrency(partsTotalCost) }} {{ activeCurrencySymbol }}
                     </span>
                 </div>
             </div>
@@ -1138,7 +1138,7 @@ function getPreferredTitle(service) {
     }
     return getDescription(service) || name;
 }
-const { formatCurrency, toEnglish } = useNumberFormat();
+const { formatCurrency, toEnglish, activeCurrencySymbol } = useNumberFormat();
 
 // State
 const activeTab = ref('service');

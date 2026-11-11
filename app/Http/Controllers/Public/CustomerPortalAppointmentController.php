@@ -99,14 +99,20 @@ class CustomerPortalAppointmentController extends Controller
         $centers = Center::query()
             ->where('tenant_id', $tenant->id)
             ->where('is_active', true)
+            ->with(['address:id,center_id,address_line,district,city'])
             ->orderBy('is_main', 'desc')
             ->orderBy('name_ar')
-            ->get(['id', 'name', 'name_ar', 'name_en', 'is_main']);
+            ->get(['id', 'name', 'name_ar', 'name_en', 'is_main', 'phone']);
 
-        $vehicles = $customer->vehicles()
+        $vehicles = Vehicle::query()
+            ->where('customer_id', $customer->id)
             ->where('tenant_id', $tenant->id)
+            ->with([
+                'make:id,name_ar,name_en,logo_path',
+                'model:id,name_ar,name_en',
+            ])
             ->orderByDesc('created_at')
-            ->get(['id', 'plate_number', 'make', 'model', 'year', 'color']);
+            ->get(['id', 'plate_number', 'make_id', 'model_id', 'make_other', 'model_other', 'year', 'color', 'odometer']);
 
         // Services: tenant-scoped, active, internal.
         // The portal never sees packages. We expose the
@@ -125,15 +131,35 @@ class CustomerPortalAppointmentController extends Controller
         return Inertia::render('Public/Portal/Appointments/New', [
             'tenant' => $this->tenantContext($request),
             'locale' => $this->localeContext($request),
-            'centers' => $centers->map(fn (Center $c) => [
-                'id' => $c->id,
-                'name' => $c->display_name,
-                'is_main' => (bool) $c->is_main,
-            ])->values(),
+            'centers' => $centers->map(function (Center $c) {
+                $addr = $c->address;
+                $formattedAddress = $addr !== null
+                    ? (implode('، ', array_filter([$addr->address_line, $addr->district, $addr->city])) ?: null)
+                    : null;
+
+                return [
+                    'id' => $c->id,
+                    'name' => $c->display_name,
+                    'is_main' => (bool) $c->is_main,
+                    'address' => $formattedAddress,
+                    'phone' => $c->phone,
+                ];
+            })->values(),
             'vehicles' => $vehicles->map(fn (Vehicle $v) => [
                 'id' => $v->id,
                 'plate_number' => $v->plate_number,
-                'label' => trim(implode(' · ', array_filter([$v->make, $v->model, $v->year, $v->plate_number]))),
+                'make' => $v->display_make ?? $v->make?->name,
+                'model' => $v->display_model ?? $v->model?->name,
+                'year' => $v->year,
+                'color' => $v->color,
+                'odometer' => $v->odometer,
+                'logo_url' => $v->make?->logo_url,
+                'label' => trim(implode(' · ', array_filter([
+                    $v->display_make ?? $v->make?->name,
+                    $v->display_model ?? $v->model?->name,
+                    $v->year,
+                    $v->plate_number,
+                ]))),
             ])->values(),
             'services' => $services->map(fn (Service $s) => [
                 'id' => $s->id,
@@ -227,6 +253,7 @@ class CustomerPortalAppointmentController extends Controller
             'service_ids' => ['required', 'array', 'min:1'],
             'service_ids.*' => ['integer'],
             'scheduled_at' => ['required', 'date'],
+            'notes' => ['nullable', 'string', 'max:1000'],
             // We deliberately do NOT validate
             // service_bay_id, assigned_user_id, or any
             // duration the client tries to set. Those
@@ -375,6 +402,9 @@ class CustomerPortalAppointmentController extends Controller
                 overrides: [
                     'status' => Appointment::STATUS_SCHEDULED,
                     'source' => Appointment::SOURCE_CUSTOMER_PORTAL,
+                    'notes' => isset($data['notes']) && trim((string) $data['notes']) !== ''
+                        ? trim((string) $data['notes'])
+                        : null,
                 ],
                 centerIdOverride: $center->id,
             );
@@ -464,7 +494,10 @@ class CustomerPortalAppointmentController extends Controller
                 'estimated_end_at' => $appointment->estimated_end_at?->toIso8601String(),
                 'status' => $appointment->status,
                 'source' => $appointment->source,
+                'notes' => $appointment->notes,
+                'work_order_id' => $appointment->work_order_id,
                 'center_name' => $appointment->center?->display_name,
+                'vehicle_plate' => $appointment->vehicle?->plate_number,
                 'vehicle_label' => trim(implode(' · ', array_filter([
                     $appointment->vehicle?->display_make ?? $appointment->vehicle?->make?->name,
                     $appointment->vehicle?->display_model ?? $appointment->vehicle?->model?->name,

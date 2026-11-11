@@ -632,32 +632,13 @@
                     </div>
 
                     <!-- Pagination -->
-                    <div
-                        v-if="items.links && items.links.length > 3"
-                        class="p-4 border-t border-gray-100 dark:border-gray-700 flex items-center justify-between flex-wrap gap-2"
-                    >
-                        <div class="text-xs text-gray-500 dark:text-gray-400">
-                            {{ $t('common.showing') }} {{ items.from }} - {{ items.to }}
-                            {{ $t('common.of') }} {{ items.total }}
-                        </div>
-                        <div class="flex items-center gap-1">
-                            <button
-                                v-for="(link, lIdx) in items.links"
-                                :key="lIdx"
-                                :disabled="!link.url || link.active"
-                                @click="changePage(link.url)"
-                                class="px-3 py-1.5 text-xs rounded-lg transition-all"
-                                :class="[
-                                    link.active
-                                        ? 'bg-slate-800 text-white font-bold dark:bg-slate-200 dark:text-gray-900'
-                                        : link.url
-                                          ? 'hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300'
-                                          : 'opacity-40 cursor-not-allowed text-gray-400',
-                                ]"
-                                v-html="link.label"
-                            />
-                        </div>
-                    </div>
+                    <AppPagination
+                        class="print:hidden"
+                        :links="items.links || []"
+                        :from="items.from"
+                        :to="items.to"
+                        :total="items.total"
+                    />
                 </div>
             </div>
         </div>
@@ -666,6 +647,7 @@
 
 <script setup>
 import DataTable from '@/Components/Common/DataTable.vue';
+import AppPagination from '@/Components/Common/AppPagination.vue';
 import AppPrintButton from '@/Components/Common/AppPrintButton.vue';
 import { ref, computed } from 'vue';
 import { router } from '@inertiajs/vue3';

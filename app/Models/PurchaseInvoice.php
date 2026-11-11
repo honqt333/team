@@ -23,7 +23,7 @@ class PurchaseInvoice extends Model
     const STATUS_CANCELLED = 'cancelled';
 
     protected $fillable = [
-        'tenant_id', 'center_id', 'supplier_id', 'purchase_order_id',
+        'tenant_id', 'center_id', 'supplier_id', 'purchase_order_id', 'work_order_id',
         'invoice_number', 'code', 'issue_date', 'due_date', 'status',
         'subtotal', 'tax_amount', 'discount_amount', 'total', 'balance', 'notes', 'attachment_path',
     ];

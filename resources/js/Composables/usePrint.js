@@ -1,8 +1,10 @@
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { usePage } from '@inertiajs/vue3';
 import { useNumberFormat } from '@/Composables/useNumberFormat';
 import { useFormatters } from '@/Composables/useFormatters';
 import { buildPrintSignatures as buildPrintSignaturesUtil } from '@/Utils/printSignatures';
+import { getCurrencyDecimals, getCurrencyLabel, resolveTenantCurrency } from '@/Utils/currency';
 
 /**
  * Trigger browser print safely with optional document title.
@@ -115,6 +117,9 @@ export function resolveVisualSettings({ tenantSettings = null, center = {}, over
         primary_color: overrides.primary_color ?? (vis.primary_color || '#fbbf24'),
         footer_text: overrides.footer_text ?? vis.footer_text ?? tenantSettings?.footer_text ?? '',
         stamp_url: overrides.stamp_url ?? (center?.stamp_url || vis.stamp_url || ''),
+        show_currency_symbol: overrides.show_currency_symbol ?? vis.show_currency_symbol !== false,
+        currency_display_style:
+            overrides.currency_display_style ?? (vis.currency_display_style || 'text'),
     };
 }
 
@@ -144,31 +149,56 @@ export function usePrint() {
     // Re-export date formatters
     const { formatDate: formatDateBase, formatDateTime: formatDateTimeBase } = formatters;
 
+    let page = null;
+    try {
+        page = usePage();
+    } catch {
+        page = null;
+    }
+
     /**
-     * Format a currency value with SAR suffix.
-     * Unlike formatCurrency (no suffix), this is for labels.
+     * Format a currency value with localized suffix based on tenant currency & print settings.
+     * Unlike formatRawPrice (no suffix), this is for labels.
      */
-    function formatCurrency(value = 0, showSuffix = true) {
-        const numValue = typeof value === 'string' ? parseFloat(value) : value;
-        if (isNaN(numValue)) return '0.00';
-        const suffix = isRtl.value ? ' ر.س' : ' SAR';
+    function formatCurrency(value = 0, showSuffix = true, currencyCode = null) {
+        const code = resolveTenantCurrency(page?.props?.tenant, currencyCode);
+        const decimals = getCurrencyDecimals(code);
+        const numValue = typeof value === 'string' ? parseFloat(value) : Number(value);
+        if (!Number.isFinite(numValue)) {
+            return (0).toLocaleString('en-US', {
+                minimumFractionDigits: decimals,
+                maximumFractionDigits: decimals,
+            });
+        }
+
+        const showInPrint =
+            page?.props?.tenant?.print_settings?.visual?.show_currency_symbol !== false;
+        const suffix = ` ${getCurrencyLabel(code, locale.value)}`;
+
         return (
             numValue.toLocaleString('en-US', {
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2,
-            }) + (showSuffix ? suffix : '')
+                minimumFractionDigits: decimals,
+                maximumFractionDigits: decimals,
+            }) + (showSuffix && showInPrint ? suffix : '')
         );
     }
 
     /**
      * Format raw price (no suffix) for table cells.
      */
-    function formatRawPrice(value = 0) {
-        const numValue = typeof value === 'string' ? parseFloat(value) : value;
-        if (isNaN(numValue)) return '0.00';
+    function formatRawPrice(value = 0, currencyCode = null) {
+        const code = resolveTenantCurrency(page?.props?.tenant, currencyCode);
+        const decimals = getCurrencyDecimals(code);
+        const numValue = typeof value === 'string' ? parseFloat(value) : Number(value);
+        if (!Number.isFinite(numValue)) {
+            return (0).toLocaleString('en-US', {
+                minimumFractionDigits: decimals,
+                maximumFractionDigits: decimals,
+            });
+        }
         return numValue.toLocaleString('en-US', {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2,
+            minimumFractionDigits: decimals,
+            maximumFractionDigits: decimals,
         });
     }
 

@@ -177,6 +177,205 @@
                     <div v-if="activeTab === 'signatures'" key="tab-signatures">
                         <WorkOrderSignatures :work-order="workOrder" :is-read-only="isReadOnly" />
                     </div>
+
+                    <!-- Purchase Invoices Tab -->
+                    <div v-if="activeTab === 'purchase_invoices'" key="tab-purchase-invoices">
+                        <div class="space-y-4">
+                            <div
+                                class="flex flex-wrap items-center justify-between gap-3 bg-surface-secondary/50 dark:bg-gray-800/60 p-4 rounded-2xl border border-border-subtle"
+                            >
+                                <div>
+                                    <h3 class="text-sm font-bold text-text-primary">
+                                        {{ $t('work_orders.purchase_invoices.title') }}
+                                    </h3>
+                                </div>
+
+                                <div v-if="!isReadOnly" class="flex flex-wrap items-center gap-2">
+                                    <div
+                                        v-if="linkablePurchaseInvoiceOptions.length > 0"
+                                        class="flex items-center gap-2"
+                                    >
+                                        <div class="w-64">
+                                            <SearchableSelect
+                                                v-model="selectedPurchaseInvoiceId"
+                                                :options="linkablePurchaseInvoiceOptions"
+                                                option-label="label"
+                                                option-value="value"
+                                                :placeholder="
+                                                    $t(
+                                                        'work_orders.purchase_invoices.select_invoice'
+                                                    )
+                                                "
+                                                compact
+                                            />
+                                        </div>
+                                        <button
+                                            type="button"
+                                            :disabled="
+                                                !selectedPurchaseInvoiceId ||
+                                                isLinkingPurchaseInvoice
+                                            "
+                                            @click="linkSelectedPurchaseInvoice"
+                                            class="px-3 py-2 bg-action-primary hover:bg-action-primary-hover disabled:opacity-50 text-white text-xs font-bold rounded-xl transition-colors cursor-pointer"
+                                        >
+                                            {{ $t('work_orders.purchase_invoices.link_btn') }}
+                                        </button>
+                                    </div>
+
+                                    <button
+                                        type="button"
+                                        @click="showNewPurchaseInvoiceModal = true"
+                                        class="px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl flex items-center gap-1.5 transition-colors cursor-pointer"
+                                    >
+                                        <svg
+                                            class="w-3.5 h-3.5"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            viewBox="0 0 24 24"
+                                        >
+                                            <path
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                stroke-width="2.5"
+                                                d="M12 4v16m8-8H4"
+                                            />
+                                        </svg>
+                                        {{ $t('invoices.purchases.add') }}
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div
+                                v-if="workOrder.purchase_invoices?.length"
+                                class="overflow-x-auto rounded-2xl border border-border-subtle bg-surface"
+                            >
+                                <DataTable structured class="min-w-full text-xs">
+                                    <thead
+                                        class="bg-surface-secondary/70 dark:bg-gray-800 text-text-secondary"
+                                    >
+                                        <tr>
+                                            <th class="px-4 py-3 text-start font-semibold">
+                                                {{ $t('common.code') }}
+                                            </th>
+                                            <th class="px-4 py-3 text-start font-semibold">
+                                                {{ $t('invoices.purchases.invoice_number') }}
+                                            </th>
+                                            <th class="px-4 py-3 text-start font-semibold">
+                                                {{ $t('purchasing.orders.supplier') }}
+                                            </th>
+                                            <th class="px-4 py-3 text-center font-semibold">
+                                                {{ $t('invoices.issue_date') }}
+                                            </th>
+                                            <th class="px-4 py-3 text-end font-semibold">
+                                                {{ $t('invoices.subtotal') }}
+                                            </th>
+                                            <th class="px-4 py-3 text-end font-semibold">
+                                                {{ $t('invoices.tax') }}
+                                            </th>
+                                            <th class="px-4 py-3 text-end font-semibold">
+                                                {{ $t('common.total') }}
+                                            </th>
+                                            <th class="px-4 py-3 text-center font-semibold">
+                                                {{ $t('common.status') }}
+                                            </th>
+                                            <th class="px-4 py-3 text-center font-semibold">
+                                                {{ $t('common.actions') }}
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-border-subtle">
+                                        <tr
+                                            v-for="pinv in workOrder.purchase_invoices"
+                                            :key="pinv.id"
+                                            class="hover:bg-surface-secondary/40 transition-colors"
+                                        >
+                                            <td class="px-4 py-3 font-mono font-bold">
+                                                <Link
+                                                    :href="
+                                                        route(
+                                                            'app.invoices.purchases.show',
+                                                            pinv.id
+                                                        )
+                                                    "
+                                                    class="text-action-primary hover:underline"
+                                                >
+                                                    {{ pinv.code }}
+                                                </Link>
+                                            </td>
+                                            <td class="px-4 py-3 font-mono">
+                                                {{ pinv.invoice_number || '—' }}
+                                            </td>
+                                            <td class="px-4 py-3 font-medium">
+                                                {{ pinv.supplier?.name || '—' }}
+                                            </td>
+                                            <td class="px-4 py-3 text-center font-mono">
+                                                {{ formatDate(pinv.issue_date) }}
+                                            </td>
+                                            <td class="px-4 py-3 text-end font-mono">
+                                                {{ formatPrice(pinv.subtotal) }}
+                                            </td>
+                                            <td class="px-4 py-3 text-end font-mono">
+                                                {{ formatPrice(pinv.tax_amount) }}
+                                            </td>
+                                            <td class="px-4 py-3 text-end font-mono font-bold">
+                                                {{ formatPrice(pinv.total) }}
+                                            </td>
+                                            <td class="px-4 py-3 text-center">
+                                                <span
+                                                    class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-surface-secondary text-text-primary border border-border-subtle"
+                                                >
+                                                    {{
+                                                        $t(
+                                                            `invoices.purchases.statuses.${pinv.status}`,
+                                                            pinv.status
+                                                        )
+                                                    }}
+                                                </span>
+                                            </td>
+                                            <td class="px-4 py-3 text-center">
+                                                <div class="flex items-center justify-center gap-2">
+                                                    <Link
+                                                        :href="
+                                                            route(
+                                                                'app.invoices.purchases.show',
+                                                                pinv.id
+                                                            )
+                                                        "
+                                                        class="text-action-primary hover:underline font-semibold"
+                                                    >
+                                                        {{ $t('common.view') }}
+                                                    </Link>
+                                                    <button
+                                                        v-if="!isReadOnly"
+                                                        type="button"
+                                                        @click="unlinkPurchaseInvoice(pinv)"
+                                                        class="text-danger hover:underline font-semibold cursor-pointer"
+                                                    >
+                                                        {{
+                                                            $t(
+                                                                'work_orders.purchase_invoices.unlink_btn'
+                                                            )
+                                                        }}
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </DataTable>
+                            </div>
+                            <div
+                                v-else
+                                class="text-center py-8 px-4 rounded-2xl border border-dashed border-border-subtle bg-surface-secondary/20"
+                            >
+                                <p class="text-sm font-bold text-text-primary">
+                                    {{ $t('work_orders.purchase_invoices.empty') }}
+                                </p>
+                                <p class="text-xs text-text-secondary mt-1">
+                                    {{ $t('work_orders.purchase_invoices.empty_hint') }}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
                 </WorkOrderTabsContainer>
             </div>
         </div>
@@ -604,6 +803,20 @@
             @close="showCreditNoteModal = false"
             @created="refreshWorkOrder"
         />
+
+        <!-- New Linked Purchase Invoice Modal -->
+        <PurchaseInvoiceFormModal
+            v-if="showNewPurchaseInvoiceModal"
+            :show="showNewPurchaseInvoiceModal"
+            :suppliers="suppliers"
+            :warehouses="warehouses"
+            :units="inventoryUnits"
+            :default-warehouse="warehouses?.[0] || null"
+            :work-orders="[workOrder]"
+            :default-work-order-id="workOrder.id"
+            @close="showNewPurchaseInvoiceModal = false"
+            @saved="onNewPurchaseInvoiceSaved"
+        />
     </AppLayout>
 </template>
 
@@ -651,6 +864,9 @@ import WorkOrderPhotoModal from '@/Components/WorkOrders/WorkOrderPhotoModal.vue
 import WorkOrderAttachmentModal from '@/Components/WorkOrders/WorkOrderAttachmentModal.vue';
 import InspectionChecklist from '@/Components/WorkOrders/InspectionChecklist.vue';
 import WorkOrderSignatures from '@/Components/WorkOrders/WorkOrderSignatures.vue';
+import SearchableSelect from '@/Components/SearchableSelect.vue';
+import DataTable from '@/Components/Common/DataTable.vue';
+import PurchaseInvoiceFormModal from '@/Components/Purchasing/PurchaseInvoiceFormModal.vue';
 import PartsDisplay from '@/Components/Common/PartsDisplay.vue';
 import WorkOrderIssueMoreModal from '@/Components/WorkOrders/WorkOrderIssueMoreModal.vue';
 import WorkOrderReturnModal from '@/Components/WorkOrders/WorkOrderReturnModal.vue';
@@ -686,20 +902,19 @@ const props = defineProps({
     warehouses: { type: Array, default: () => [] },
     inventoryParts: { type: Array, default: () => [] },
     inventoryUnits: { type: Array, default: () => [] },
+    availablePurchaseInvoices: { type: Array, default: () => [] },
+    suppliers: { type: Array, default: () => [] },
     enableSystematicInspections: { type: Boolean, default: true },
 });
 
 const { t } = useI18n();
-const { formatNumber, formatCurrency } = useNumberFormat();
+const { formatNumber, formatCurrency, formatMoney } = useNumberFormat();
 const { formatDate, getUserRoleName, getNoteDate, getNoteTime } = useFormatters();
 const { success, error: errorToast } = useToast();
 const { confirm } = useConfirm();
 
-// Local helper — depends on formatCurrency + t() which are scoped to the
-// page. Kept here on purpose: pricing needs both the formatted number and
-// the localized currency unit, so it composes the two at the call site.
 function formatPrice(value) {
-    return formatCurrency(value) + ' ' + t('common.currency');
+    return formatMoney(value, props.workOrder?.currency_code);
 }
 
 const showEditModal = ref(false);
@@ -715,6 +930,63 @@ const editingIssueMorePart = ref(null);
 const showReturnModal = ref(false);
 const editingReturnPart = ref(null);
 const showCreditNoteModal = ref(false);
+const selectedPurchaseInvoiceId = ref('');
+const isLinkingPurchaseInvoice = ref(false);
+const showNewPurchaseInvoiceModal = ref(false);
+
+const linkablePurchaseInvoiceOptions = computed(() =>
+    (props.availablePurchaseInvoices || []).map((inv) => ({
+        value: inv.id,
+        label: [inv.code, inv.invoice_number, inv.supplier?.name, formatPrice(inv.total)]
+            .filter(Boolean)
+            .join(' • '),
+    }))
+);
+
+function linkSelectedPurchaseInvoice() {
+    if (!selectedPurchaseInvoiceId.value || isLinkingPurchaseInvoice.value) return;
+    isLinkingPurchaseInvoice.value = true;
+    router.post(
+        route('work-orders.purchase-invoices.link', props.workOrder.id),
+        { purchase_invoice_id: selectedPurchaseInvoiceId.value },
+        {
+            preserveScroll: true,
+            onSuccess: () => {
+                selectedPurchaseInvoiceId.value = '';
+                success(t('common.saved_success'));
+            },
+            onFinish: () => {
+                isLinkingPurchaseInvoice.value = false;
+            },
+        }
+    );
+}
+
+async function unlinkPurchaseInvoice(pinv) {
+    const confirmed = await confirm({
+        title: t('common.confirm_delete_title'),
+        message: t('work_orders.purchase_invoices.confirm_unlink'),
+        confirmText: t('work_orders.purchase_invoices.unlink_btn'),
+        cancelText: t('common.cancel'),
+        type: 'warning',
+    });
+    if (!confirmed) return;
+    router.delete(
+        route('work-orders.purchase-invoices.unlink', {
+            workOrder: props.workOrder.id,
+            purchaseInvoice: pinv.id,
+        }),
+        {
+            preserveScroll: true,
+            onSuccess: () => success(t('common.deleted_success')),
+        }
+    );
+}
+
+function onNewPurchaseInvoiceSaved() {
+    showNewPurchaseInvoiceModal.value = false;
+    router.reload({ only: ['workOrder', 'availablePurchaseInvoices'] });
+}
 
 const showExclusive = computed(() => {
     if (props.workOrder?.pricing_mode_snapshot !== 'inclusive') {
@@ -1325,6 +1597,11 @@ const tabs = computed(() => {
         { key: 'parts', label: t('work_orders.show.tabs.parts'), icon: '🔩' },
         { key: 'technicians', label: t('work_orders.show.tabs.technicians'), icon: '👷' },
         { key: 'payments', label: t('work_orders.show.tabs.payments'), icon: '💰' },
+        {
+            key: 'purchase_invoices',
+            label: t('work_orders.show.tabs.purchase_invoices'),
+            icon: '🧾',
+        },
         { key: 'condition', label: t('work_orders.show.tabs.condition'), icon: '🚗' },
         { key: 'photos', label: t('work_orders.show.tabs.photos'), icon: '📸' },
         { key: 'notes', label: t('work_orders.show.tabs.notes'), icon: '📝' },

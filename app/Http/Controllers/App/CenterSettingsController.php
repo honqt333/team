@@ -11,6 +11,7 @@ use App\Models\CompanyTransaction;
 use App\Models\IncomeCategory;
 use App\Models\Invoice;
 use App\Models\PurchaseInvoice;
+use App\Models\TaxPeriod;
 use App\Support\CenterTypeGuard;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -93,15 +94,20 @@ class CenterSettingsController extends Controller
                 'close_time' => $wh->close_time,
             ]),
             'center_transactions' => CompanyTransaction::where('center_id', $center->id)
-                ->with(['incomeCategory', 'approvedBy', 'updatedBy'])
+                ->with(['incomeCategory', 'approvedBy:id,name', 'updatedBy:id,name', 'invoice:id,invoice_number', 'purchaseInvoice:id,invoice_number,code'])
                 ->latest('transaction_date')
                 ->get(),
+            'taxPeriods' => TaxPeriod::where('tenant_id', $center->tenant_id)
+                ->orderByDesc('start_date')
+                ->get(['id', 'name as period_name', 'name', 'start_date', 'end_date']),
+            'vatRate' => (float) ($center->tenant?->taxSettings?->vat_rate ?? $center->tenant?->taxSettings?->services_vat_rate ?? 15),
             'income_categories' => IncomeCategory::active()
                 ->get()
                 ->map(fn ($cat) => [
                     'id' => $cat->id,
                     'name' => $cat->name,
                     'transaction_type' => $cat->transaction_type,
+                    'is_taxable' => (bool) $cat->is_taxable,
                 ]),
             'center_invoices' => [
                 'sales' => Invoice::where('center_id', $center->id)

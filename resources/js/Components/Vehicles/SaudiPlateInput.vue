@@ -18,11 +18,12 @@
                 </div>
             </div>
 
-            <!-- Skip Format Checkbox -->
-            <AppCheckbox
+            <!-- Skip Format Toggle -->
+            <AppToggle
                 v-if="selectedCountry === 'SA'"
                 v-model="skipFormat"
                 :label="$t('vehicles.plate.skip_format')"
+                size="sm"
             />
         </div>
 
@@ -213,7 +214,9 @@
 <script setup>
 import { ref, computed, watch, nextTick } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { usePage } from '@inertiajs/vue3';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
+import AppToggle from '@/Components/Common/AppToggle.vue';
 import { useNumberFormat } from '@/Composables/useNumberFormat';
 
 const props = defineProps({
@@ -259,7 +262,11 @@ const plateLetters = [
 
 const arabicNums = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
 
-const selectedCountry = ref('SA');
+const page = usePage();
+const defaultPlateCountry = computed(() =>
+    (page.props.tenant?.country || 'SA').toUpperCase() === 'SA' ? 'SA' : 'OTHER'
+);
+const selectedCountry = ref(defaultPlateCountry.value);
 const skipFormat = ref(false);
 const letter1 = ref('');
 const letter2 = ref('');

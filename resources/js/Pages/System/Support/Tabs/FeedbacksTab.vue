@@ -229,26 +229,12 @@
             </div>
 
             <!-- Pagination -->
-            <div
-                v-if="feedbacks?.links && feedbacks.links.length > 3"
-                class="flex justify-center pt-2"
-            >
-                <nav class="flex items-center gap-1">
-                    <Link
-                        v-for="(link, i) in feedbacks.links"
-                        :key="i"
-                        :href="link.url || '#'"
-                        :class="[
-                            'px-3 py-1 text-xs rounded-lg font-medium transition-colors',
-                            link.active
-                                ? 'bg-action-primary text-white font-bold'
-                                : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100',
-                            !link.url ? 'opacity-40 pointer-events-none' : '',
-                        ]"
-                        v-html="link.label"
-                    />
-                </nav>
-            </div>
+            <AppPagination
+                :links="feedbacks?.links || []"
+                :from="feedbacks?.from"
+                :to="feedbacks?.to"
+                :total="feedbacks?.total"
+            />
         </div>
 
         <!-- Admin Reply Modal -->
@@ -354,10 +340,12 @@
 
 <script setup>
 import DataTable from '@/Components/Common/DataTable.vue';
+import AppPagination from '@/Components/Common/AppPagination.vue';
 import { ref, watch, computed } from 'vue';
-import { Link, router, useForm } from '@inertiajs/vue3';
+import { router, useForm } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import { useNumberFormat } from '@/Composables/useNumberFormat';
+import { useConfirm } from '@/Composables/useConfirm';
 import Modal from '@/Components/Modal.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 import VideoPlayerModal from '@/Pages/Feedback/Partials/VideoPlayerModal.vue';
@@ -366,6 +354,7 @@ import AppButton from '@/Components/App/AppButton.vue';
 
 const { t, locale } = useI18n();
 const { toEnglish } = useNumberFormat();
+const { confirm } = useConfirm();
 
 const props = defineProps({
     feedbacks: Object,
@@ -477,8 +466,15 @@ const updateStatus = (item, newStatus) => {
     );
 };
 
-const deleteFeedback = (item) => {
-    if (confirm(t('system.feedbacks.confirm_delete'))) {
+const deleteFeedback = async (item) => {
+    const ok = await confirm({
+        title: t('common.delete'),
+        message: t('system.feedbacks.confirm_delete'),
+        confirmText: t('common.delete'),
+        cancelText: t('common.cancel'),
+        type: 'danger',
+    });
+    if (ok) {
         router.delete(route('system.feedbacks.destroy', item.id), {
             preserveScroll: true,
         });

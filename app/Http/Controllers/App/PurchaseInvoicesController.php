@@ -10,9 +10,11 @@ use App\Models\Payment;
 use App\Models\PurchaseInvoice;
 use App\Models\Supplier;
 use App\Models\Warehouse;
+use App\Models\WorkOrder;
 use App\Services\PurchaseAttachmentService;
 use App\Services\Purchasing\PurchasingService;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 
 class PurchaseInvoicesController extends Controller
@@ -30,7 +32,7 @@ class PurchaseInvoicesController extends Controller
 
         $query = PurchaseInvoice::where('tenant_id', $tenantId)
             ->where('center_id', $centerId)
-            ->with(['supplier', 'purchaseOrder'])
+            ->with(['supplier', 'purchaseOrder', 'workOrder:id,code'])
             ->when($request->input('search'), fn ($q, $s) => $q->where('code', 'like', "%{$s}%")
                 ->orWhere('invoice_number', 'like', "%{$s}%")
                 ->orWhereHas('supplier', fn ($sq) => $sq->where('name', 'like', "%{$s}%"))
@@ -44,6 +46,13 @@ class PurchaseInvoicesController extends Controller
         $defaultWarehouse = Warehouse::forCenter($centerId)->default()->first();
         $warehouses = Warehouse::forCenter($centerId)->active()->get(['id', 'name']);
         $units = InventoryUnit::where('is_active', true)->get(['id', 'name_ar', 'name_en']);
+        $workOrders = WorkOrder::where('tenant_id', $tenantId)
+            ->where('center_id', $centerId)
+            ->whereNotIn('status', [WorkOrder::STATUS_CANCELLED])
+            ->with(['customer:id,name', 'vehicle:id,plate_number'])
+            ->latest('id')
+            ->limit(100)
+            ->get(['id', 'code', 'customer_id', 'vehicle_id', 'status']);
 
         return Inertia::render('Purchasing/Invoices/Index', [
             'invoices' => $query->paginate(25)->withQueryString(),
@@ -58,6 +67,7 @@ class PurchaseInvoicesController extends Controller
             'defaultWarehouse' => $defaultWarehouse,
             'warehouses' => $warehouses,
             'units' => $units,
+            'workOrders' => $workOrders,
         ]);
     }
 
@@ -70,6 +80,11 @@ class PurchaseInvoicesController extends Controller
         $validated = $request->validate([
             'supplier_id' => 'required|exists:suppliers,id',
             'warehouse_id' => 'required|exists:warehouses,id',
+            'work_order_id' => [
+                'nullable',
+                'integer',
+                Rule::exists('work_orders', 'id')->where('tenant_id', $user->tenant_id),
+            ],
             'invoice_number' => 'required|string|max:100',
             'issue_date' => 'required|date',
             'due_date' => 'nullable|date|after_or_equal:issue_date',
@@ -107,6 +122,7 @@ class PurchaseInvoicesController extends Controller
         $purchaseInvoice->load([
             'supplier',
             'purchaseOrder',
+            'workOrder:id,code,status',
             'lines.part',
             'lines.returnLines',
             'center.address',
@@ -191,6 +207,7 @@ class PurchaseInvoicesController extends Controller
         $purchaseInvoice->load([
             'supplier',
             'purchaseOrder',
+            'workOrder:id,code,status',
             'lines.part',
             'center.address',
             'payments.receivedBy',

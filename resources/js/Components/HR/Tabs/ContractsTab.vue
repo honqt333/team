@@ -236,7 +236,7 @@
                                             {{ employee.base_salary }}
                                         </span>
                                         <span class="text-xs text-gray-500">
-                                            {{ $t('common.currency_sar') }}
+                                            {{ activeCurrencySymbol }}
                                         </span>
                                     </div>
                                 </div>
@@ -291,6 +291,7 @@
 <script setup>
 import { ref, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { useNumberFormat } from '@/Composables/useNumberFormat';
 import { useForm, router } from '@inertiajs/vue3';
 import { useToast } from '@/Composables/useToast';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
@@ -300,6 +301,7 @@ const props = defineProps({
 });
 
 const { t } = useI18n();
+const { activeCurrencySymbol } = useNumberFormat();
 const { success } = useToast();
 const showModal = ref(false);
 const editingId = ref(null);

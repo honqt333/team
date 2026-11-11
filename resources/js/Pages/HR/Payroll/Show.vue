@@ -517,8 +517,10 @@
 <script setup>
 import DataTable from '@/Components/Common/DataTable.vue';
 import CustomDatePicker from '@/Components/CustomDatePicker.vue';
+import { useNumberFormat } from '@/Composables/useNumberFormat';
 import { useI18n } from 'vue-i18n';
 const { t } = useI18n();
+const { formatMoney } = useNumberFormat();
 
 import { ref, computed } from 'vue';
 import { Link, router, useForm } from '@inertiajs/vue3';
@@ -659,9 +661,7 @@ function formatPeriod(dateStr) {
 }
 
 function formatCurrency(amount) {
-    return new Intl.NumberFormat('ar-SA-u-nu-latn', { style: 'currency', currency: 'SAR' }).format(
-        amount || 0
-    );
+    return formatMoney(amount);
 }
 
 function getStatusClass(status) {

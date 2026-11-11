@@ -38,6 +38,8 @@ const props = defineProps({
             show_qr_code: true,
             primary_color: '#fbbf24',
             footer_text: '',
+            show_currency_symbol: true,
+            currency_display_style: 'text',
         }),
     },
     previewMode: {

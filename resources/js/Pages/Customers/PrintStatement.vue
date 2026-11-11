@@ -141,6 +141,7 @@
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import StandardReportLayout from '@/Components/Print/StandardReportLayout.vue';
+import { usePrint } from '@/Composables/usePrint';
 
 const props = defineProps({
     customer: {
@@ -173,6 +174,7 @@ const props = defineProps({
 });
 
 const { t } = useI18n();
+const { formatCurrency: formatMoney } = usePrint();
 
 const customerSummary = computed(() => {
     if (!props.customer?.name) return '';
@@ -181,16 +183,6 @@ const customerSummary = computed(() => {
     }
     return props.customer.name;
 });
-
-const formatMoney = (val) => {
-    const num = Number(val) || 0;
-    return (
-        new Intl.NumberFormat('en-US', {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2,
-        }).format(num) + ' SAR'
-    );
-};
 </script>
 
 <style>

@@ -258,13 +258,25 @@
                                         {{ $t('reports.tax_periods_report.transactions_count') }}
                                     </th>
                                     <th class="p-3 text-left">
-                                        {{ $t('reports.tax_periods_report.taxable_amount_sar') }}
+                                        {{
+                                            $t('reports.tax_periods_report.taxable_amount_sar', {
+                                                currency: activeCurrencySymbol,
+                                            })
+                                        }}
                                     </th>
                                     <th class="p-3 text-left">
-                                        {{ $t('reports.tax_periods_report.adjustment_amount_sar') }}
+                                        {{
+                                            $t('reports.tax_periods_report.adjustment_amount_sar', {
+                                                currency: activeCurrencySymbol,
+                                            })
+                                        }}
                                     </th>
                                     <th class="p-3 text-left">
-                                        {{ $t('reports.tax_periods_report.vat_amount_sar') }}
+                                        {{
+                                            $t('reports.tax_periods_report.vat_amount_sar', {
+                                                currency: activeCurrencySymbol,
+                                            })
+                                        }}
                                     </th>
                                 </tr>
                             </thead>
@@ -286,7 +298,7 @@
                                         {{ formatCurrency(summary.income.subtotal) }}
                                     </td>
                                     <td class="p-3 text-left font-mono text-gray-400">
-                                        0.00 {{ $t('common.currency') }}
+                                        {{ formatCurrency(0) }}
                                     </td>
                                     <td
                                         class="p-3 text-left font-mono font-bold text-emerald-600 dark:text-emerald-400"
@@ -310,7 +322,7 @@
                                         {{ formatCurrency(summary.income.subtotal) }}
                                     </td>
                                     <td class="p-3 text-left font-mono text-gray-400">
-                                        0.00 {{ $t('common.currency') }}
+                                        {{ formatCurrency(0) }}
                                     </td>
                                     <td
                                         class="p-3 text-left font-mono text-emerald-600 dark:text-emerald-400"
@@ -336,7 +348,7 @@
                                         {{ formatCurrency(summary.expense.subtotal) }}
                                     </td>
                                     <td class="p-3 text-left font-mono text-gray-400">
-                                        0.00 {{ $t('common.currency') }}
+                                        {{ formatCurrency(0) }}
                                     </td>
                                     <td
                                         class="p-3 text-left font-mono font-bold text-rose-600 dark:text-rose-400"
@@ -360,7 +372,7 @@
                                         {{ formatCurrency(summary.expense.subtotal) }}
                                     </td>
                                     <td class="p-3 text-left font-mono text-gray-400">
-                                        0.00 {{ $t('common.currency') }}
+                                        {{ formatCurrency(0) }}
                                     </td>
                                     <td
                                         class="p-3 text-left font-mono text-rose-600 dark:text-rose-400"
@@ -594,8 +606,10 @@ import SearchableSelect from '@/Components/SearchableSelect.vue';
 import { useConfirm } from '@/Composables/useConfirm';
 import { usePrint } from '@/Composables/usePrint';
 import { useI18n } from 'vue-i18n';
+import { useNumberFormat } from '@/Composables/useNumberFormat';
 
 const { t } = useI18n();
+const { formatMoney, activeCurrencySymbol } = useNumberFormat();
 const { confirm } = useConfirm();
 const { printDocument, formatCurrency: printFormatCurrency } = usePrint();
 
@@ -700,12 +714,7 @@ const formatCurrency = (val) => {
     if (printFormatCurrency) {
         return printFormatCurrency(Number(val) || 0);
     }
-    const num = Number(val || 0);
-    return (
-        num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) +
-        ' ' +
-        t('common.currency')
-    );
+    return formatMoney(val);
 };
 
 const formatDate = (dateStr) => {

@@ -6,6 +6,7 @@ namespace App\Services\Payment\Gateways;
 
 use App\Models\PaymentSettings;
 use App\Services\Payment\Contracts\PaymentGatewayInterface;
+use App\Support\CountryCurrencyRegistry;
 use Exception;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -51,16 +52,21 @@ class TabbyGateway implements PaymentGatewayInterface
     public function initiate(array $data): array
     {
         try {
+            $currency = (string) ($data['currency'] ?? PaymentSettings::getPlatformCurrency());
+            $countryCode = strtoupper((string) ($data['country_code'] ?? CountryCurrencyRegistry::DEFAULT_COUNTRY));
+            $phoneFallback = (string) (CountryCurrencyRegistry::countryMeta($countryCode)['phone_example'] ?? '+966500000000');
+            $countryName = (string) (CountryCurrencyRegistry::countryMeta($countryCode)['name_en'] ?? 'Saudi Arabia');
+
             $response = Http::withHeaders([
                 'Authorization' => 'Bearer '.$this->config['secret_key'],
                 'Content-Type' => 'application/json',
             ])->post("{$this->baseUrl}/checkout", [
                 'payment' => [
                     'amount' => (string) $data['amount'],
-                    'currency' => $data['currency'] ?? 'SAR',
+                    'currency' => $currency,
                     'description' => $data['description'] ?? 'Subscription Payment',
                     'buyer' => [
-                        'phone' => $data['customer_phone'] ?? '+966500000000',
+                        'phone' => $data['customer_phone'] ?? $phoneFallback,
                         'email' => $data['customer_email'] ?? 'customer@example.com',
                         'name' => $data['customer_name'] ?? 'Customer',
                     ],
@@ -80,12 +86,12 @@ class TabbyGateway implements PaymentGatewayInterface
                         ],
                     ],
                     'shipping_address' => [
-                        'city' => 'Riyadh',
-                        'address' => 'Saudi Arabia',
-                        'zip' => '12345',
+                        'city' => $data['city'] ?? ($countryCode === 'SA' ? 'Riyadh' : 'Dubai'),
+                        'address' => $data['address'] ?? $countryName,
+                        'zip' => $data['zip'] ?? '12345',
                     ],
                 ],
-                'lang' => 'ar',
+                'lang' => $data['lang'] ?? 'ar',
                 'merchant_code' => $this->config['merchant_code'] ?? 'default',
                 'merchant_urls' => [
                     'success' => $data['callback_url'] ?? url(config('payment.callback_url')),

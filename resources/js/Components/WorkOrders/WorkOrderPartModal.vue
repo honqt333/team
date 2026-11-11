@@ -354,7 +354,7 @@
                                             : 'text-gray-500 dark:text-gray-400',
                                     ]"
                                 >
-                                    {{ $t('common.currency') }}
+                                    {{ activeCurrencySymbol }}
                                 </button>
                                 <button
                                     type="button"
@@ -472,7 +472,7 @@
                                 }}
                             </span>
                             <span class="text-xs font-bold text-gray-700 dark:text-gray-300">
-                                {{ formatCurrency(vatAmount) }} {{ $t('common.currency') }}
+                                {{ formatCurrency(vatAmount) }} {{ activeCurrencySymbol }}
                             </span>
                         </div>
 
@@ -491,7 +491,7 @@
                                 {{ formatCurrency(grandTotalValue) }}
                             </span>
                             <span class="text-[10px] font-bold text-emerald-700 uppercase">
-                                {{ $t('common.currency') }}
+                                {{ activeCurrencySymbol }}
                             </span>
                         </div>
                     </div>
@@ -614,7 +614,7 @@ import AppToggle from '@/Components/Common/AppToggle.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 import { useToast } from '@/Composables/useToast';
 
-const { formatCurrency, formatQuantity, toEnglish } = useNumberFormat();
+const { formatCurrency, formatQuantity, toEnglish, activeCurrencySymbol } = useNumberFormat();
 const { scrollToError } = useFormScrollToError();
 
 const props = defineProps({

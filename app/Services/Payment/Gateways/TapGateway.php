@@ -6,6 +6,7 @@ namespace App\Services\Payment\Gateways;
 
 use App\Models\PaymentSettings;
 use App\Services\Payment\Contracts\PaymentGatewayInterface;
+use App\Support\CountryCurrencyRegistry;
 use Exception;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -52,12 +53,16 @@ class TapGateway implements PaymentGatewayInterface
     public function initiate(array $data): array
     {
         try {
+            $currency = (string) ($data['currency'] ?? PaymentSettings::getPlatformCurrency());
+            $countryCode = strtoupper((string) ($data['country_code'] ?? CountryCurrencyRegistry::DEFAULT_COUNTRY));
+            $dialDigits = (string) (CountryCurrencyRegistry::countryMeta($countryCode)['dial_digits'] ?? '966');
+
             $response = Http::withHeaders([
                 'Authorization' => 'Bearer '.$this->config['secret_key'],
                 'Content-Type' => 'application/json',
             ])->post("{$this->baseUrl}/charges", [
                 'amount' => $data['amount'],
-                'currency' => $data['currency'] ?? 'SAR',
+                'currency' => $currency,
                 'customer_initiated' => true,
                 'threeDSecure' => true,
                 'save_card' => false,
@@ -75,7 +80,7 @@ class TapGateway implements PaymentGatewayInterface
                     'first_name' => $data['customer_name'] ?? 'Customer',
                     'email' => $data['customer_email'] ?? null,
                     'phone' => [
-                        'country_code' => '966',
+                        'country_code' => $data['phone_country_code'] ?? $dialDigits,
                         'number' => $data['customer_phone'] ?? null,
                     ],
                 ],

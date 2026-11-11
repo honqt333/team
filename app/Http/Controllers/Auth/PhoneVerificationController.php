@@ -28,11 +28,12 @@ class PhoneVerificationController extends Controller
     public function sendOtp(Request $request)
     {
         $request->validate([
-            'phone' => 'required|string|min:9|max:15',
+            'phone' => 'required|string|min:8|max:20',
+            'country' => 'nullable|string|max:2',
         ]);
 
         // Format phone number
-        $phone = $this->formatPhoneNumber($request->phone);
+        $phone = $this->formatPhoneNumber($request->phone, $request->input('country'));
 
         // Check rate limiting
         $rateLimitResult = $this->checkRateLimit($phone);
@@ -206,30 +207,10 @@ class PhoneVerificationController extends Controller
     }
 
     /**
-     * Format phone number to international format.
+     * Format phone number to international E.164 format.
      */
-    protected function formatPhoneNumber(string $phone): string
+    protected function formatPhoneNumber(string $phone, ?string $country = null): string
     {
-        // Remove any spaces or dashes
-        $phone = preg_replace('/[\s\-]/', '', $phone);
-
-        // If starts with 0, remove it and add +966
-        if (str_starts_with($phone, '0')) {
-            $phone = '+966'.substr($phone, 1);
-        }
-        // If starts with 5 (Saudi mobile), add +966
-        elseif (str_starts_with($phone, '5')) {
-            $phone = '+966'.$phone;
-        }
-        // If starts with 966, add +
-        elseif (str_starts_with($phone, '966')) {
-            $phone = '+'.$phone;
-        }
-        // If doesn't start with +, add it
-        elseif (! str_starts_with($phone, '+')) {
-            $phone = '+'.$phone;
-        }
-
-        return $phone;
+        return PhoneNumber::normalize($phone, $country) ?? $phone;
     }
 }

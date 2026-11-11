@@ -6,6 +6,7 @@ namespace App\Services\Payment\Gateways;
 
 use App\Models\PaymentSettings;
 use App\Services\Payment\Contracts\PaymentGatewayInterface;
+use App\Support\CountryCurrencyRegistry;
 use Exception;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -57,12 +58,15 @@ class MoyasarGateway implements PaymentGatewayInterface
      */
     public function initiate(array $data): array
     {
+        $currency = (string) ($data['currency'] ?? PaymentSettings::getPlatformCurrency());
+        $minorMultiplier = 10 ** CountryCurrencyRegistry::decimalsFor($currency);
+
         // Moyasar uses client-side form, return data for form rendering
         return [
             'gateway' => 'moyasar',
             'publishable_key' => $this->config['publishable_key'],
-            'amount' => (int) ($data['amount'] * 100), // Moyasar expects amount in halalas
-            'currency' => $data['currency'] ?? 'SAR',
+            'amount' => (int) round((float) $data['amount'] * $minorMultiplier),
+            'currency' => $currency,
             'description' => $data['description'] ?? 'Subscription Payment',
             'callback_url' => $data['callback_url'] ?? url(config('payment.callback_url')),
             'metadata' => $data['metadata'] ?? [],
