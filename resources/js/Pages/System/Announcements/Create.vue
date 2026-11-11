@@ -152,7 +152,7 @@
                         <button
                             type="submit"
                             :disabled="form.processing"
-                            class="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium disabled:opacity-50"
+                            class="px-6 py-2.5 bg-action-primary hover:bg-action-primary-hover text-white rounded-lg font-medium disabled:opacity-50"
                         >
                             {{ $t('system.announcements.create_draft') }}
                         </button>

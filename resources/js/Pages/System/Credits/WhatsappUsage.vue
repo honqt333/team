@@ -93,7 +93,7 @@
                 <div
                     class="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700"
                 >
-                    <p class="text-2xl font-bold text-indigo-600">
+                    <p class="text-2xl font-bold text-action-primary">
                         {{ stats.read?.toLocaleString() }}
                     </p>
                     <p class="text-sm text-gray-500">{{ $t('system.credits.read') }}</p>
@@ -203,7 +203,7 @@ const getStatusClass = (s) =>
     ({
         sent: 'bg-blue-100 text-blue-700',
         delivered: 'bg-emerald-100 text-emerald-700',
-        read: 'bg-indigo-100 text-indigo-700',
+        read: 'bg-selection-bg text-selection-text',
         failed: 'bg-red-100 text-red-700',
         pending: 'bg-amber-100 text-amber-700',
     })[s] || 'bg-gray-100 text-gray-700';

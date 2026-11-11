@@ -30,10 +30,10 @@
                         v-model="form.name"
                         type="text"
                         :class="[
-                            'w-full px-4 py-2.5 rounded-xl border bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500/20 dark:focus:ring-indigo-500/20 shadow-sm transition-all',
+                            'w-full px-4 py-2.5 rounded-xl border bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring/20 shadow-sm transition-all',
                             form.errors.name
-                                ? 'border-red-500 focus:ring-red-500'
-                                : 'border-gray-300 dark:border-gray-600 focus:border-indigo-500 dark:focus:border-indigo-500',
+                                ? 'border-red-500 focus:ring-danger'
+                                : 'border-gray-300 dark:border-gray-600 focus:border-action-primary',
                         ]"
                     />
                     <p v-if="form.errors.name" class="mt-1.5 text-sm text-red-500">
@@ -54,10 +54,10 @@
                         v-model="form.contact_person"
                         type="text"
                         :class="[
-                            'w-full px-4 py-2.5 rounded-xl border bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500/20 dark:focus:ring-indigo-500/20 shadow-sm transition-all',
+                            'w-full px-4 py-2.5 rounded-xl border bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring/20 shadow-sm transition-all',
                             form.errors.contact_person
-                                ? 'border-red-500 focus:ring-red-500'
-                                : 'border-gray-300 dark:border-gray-600 focus:border-indigo-500 dark:focus:border-indigo-500',
+                                ? 'border-red-500 focus:ring-danger'
+                                : 'border-gray-300 dark:border-gray-600 focus:border-action-primary',
                         ]"
                     />
                     <p v-if="form.errors.contact_person" class="mt-1.5 text-sm text-red-500">
@@ -79,7 +79,7 @@
                             :inputOptions="{ placeholder: '05xxxxxxxx' }"
                             mode="international"
                             :validCharactersOnly="false"
-                            class="w-full text-sm rounded-xl bg-white dark:bg-gray-900 border-gray-300 dark:border-gray-600 focus-within:ring-2 focus-within:ring-indigo-500 focus-within:border-transparent transition-all ltr"
+                            class="w-full text-sm rounded-xl bg-white dark:bg-gray-900 border-gray-300 dark:border-gray-600 focus-within:ring-2 focus-within:ring-focus-ring focus-within:border-transparent transition-all ltr"
                         ></vue-tel-input>
                     </div>
                     <p
@@ -103,7 +103,7 @@
                             "
                             type="button"
                             @click="form.whatsapp = form.phone"
-                            class="text-xs text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 transition-colors"
+                            class="text-xs text-action-primary hover:text-selection-text transition-colors"
                         >
                             {{ $t('customers.form.copy_from_phone') }}
                         </button>
@@ -115,7 +115,7 @@
                             :inputOptions="{ placeholder: '05xxxxxxxx' }"
                             mode="international"
                             :validCharactersOnly="false"
-                            class="w-full text-sm rounded-xl bg-white dark:bg-gray-900 border-gray-300 dark:border-gray-600 focus-within:ring-2 focus-within:ring-indigo-500 focus-within:border-transparent transition-all ltr"
+                            class="w-full text-sm rounded-xl bg-white dark:bg-gray-900 border-gray-300 dark:border-gray-600 focus-within:ring-2 focus-within:ring-focus-ring focus-within:border-transparent transition-all ltr"
                         ></vue-tel-input>
                     </div>
                     <p
@@ -140,10 +140,10 @@
                         dir="ltr"
                         maxlength="15"
                         :class="[
-                            'w-full px-4 py-2.5 rounded-xl border bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500/20 dark:focus:ring-indigo-500/20 shadow-sm transition-all placeholder-gray-400 dark:placeholder-gray-600',
+                            'w-full px-4 py-2.5 rounded-xl border bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring/20 shadow-sm transition-all placeholder-gray-400 dark:placeholder-gray-600',
                             form.errors.tax_number
-                                ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20'
-                                : 'border-gray-300 dark:border-gray-600 focus:border-indigo-500 dark:focus:border-indigo-500',
+                                ? 'border-red-500 focus:border-danger focus:ring-danger/20'
+                                : 'border-gray-300 dark:border-gray-600 focus:border-action-primary',
                         ]"
                     />
                     <p v-if="form.errors.tax_number" class="mt-1.5 text-sm text-red-500">
@@ -163,7 +163,7 @@
                         v-model="form.cr_number"
                         type="text"
                         dir="ltr"
-                        class="w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500/20 dark:focus:ring-indigo-500/20 focus:border-indigo-500 dark:focus:border-indigo-500 shadow-sm transition-all placeholder-gray-400 dark:placeholder-gray-600"
+                        class="w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring/20 focus:border-action-primary shadow-sm transition-all placeholder-gray-400 dark:placeholder-gray-600"
                     />
                     <p v-if="form.errors.cr_number" class="mt-1.5 text-sm text-red-500">
                         {{ form.errors.cr_number }}
@@ -182,7 +182,7 @@
                         v-model="form.email"
                         type="email"
                         dir="ltr"
-                        class="w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500/20 dark:focus:ring-indigo-500/20 focus:border-indigo-500 dark:focus:border-indigo-500 shadow-sm transition-all placeholder-gray-400 dark:placeholder-gray-600"
+                        class="w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring/20 focus:border-action-primary shadow-sm transition-all placeholder-gray-400 dark:placeholder-gray-600"
                     />
                     <p v-if="form.errors.email" class="mt-1.5 text-sm text-red-500">
                         {{ form.errors.email }}
@@ -221,7 +221,7 @@
                                 type="button"
                                 @click="fetchLocation"
                                 :disabled="isLocating"
-                                class="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-lg transition-colors disabled:opacity-50"
+                                class="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium text-action-primary hover:bg-selection-bg rounded-lg transition-colors disabled:opacity-50"
                                 :title="$t('customers.form.locate_me')"
                             >
                                 <svg
@@ -294,7 +294,7 @@
                                     name="address"
                                     v-model="form.address"
                                     rows="2"
-                                    class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 shadow-sm transition-all resize-none placeholder-gray-400 dark:placeholder-gray-600"
+                                    class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring/20 focus:border-action-primary shadow-sm transition-all resize-none placeholder-gray-400 dark:placeholder-gray-600"
                                 ></textarea>
                             </div>
 
@@ -310,7 +310,7 @@
                                         name="building_number"
                                         v-model="form.building_number"
                                         type="text"
-                                        class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 shadow-sm transition-all"
+                                        class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring/20 focus:border-action-primary shadow-sm transition-all"
                                     />
                                 </div>
                                 <div>
@@ -323,7 +323,7 @@
                                         name="postal_code"
                                         v-model="form.postal_code"
                                         type="text"
-                                        class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 shadow-sm transition-all"
+                                        class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring/20 focus:border-action-primary shadow-sm transition-all"
                                     />
                                 </div>
                                 <div>
@@ -336,7 +336,7 @@
                                         name="district"
                                         v-model="form.district"
                                         type="text"
-                                        class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 shadow-sm transition-all"
+                                        class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring/20 focus:border-action-primary shadow-sm transition-all"
                                     />
                                 </div>
                             </div>
@@ -353,7 +353,7 @@
                                         name="city"
                                         v-model="form.city"
                                         type="text"
-                                        class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 shadow-sm transition-all"
+                                        class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring/20 focus:border-action-primary shadow-sm transition-all"
                                     />
                                 </div>
                                 <div>
@@ -366,7 +366,7 @@
                                         name="region"
                                         v-model="form.region"
                                         type="text"
-                                        class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 shadow-sm transition-all"
+                                        class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring/20 focus:border-action-primary shadow-sm transition-all"
                                     />
                                 </div>
                                 <div>
@@ -379,7 +379,7 @@
                                         name="country"
                                         v-model="form.country"
                                         type="text"
-                                        class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 shadow-sm transition-all"
+                                        class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring/20 focus:border-action-primary shadow-sm transition-all"
                                     />
                                 </div>
                             </div>
@@ -405,7 +405,7 @@
                         name="bank_name"
                         v-model="form.bank_name"
                         type="text"
-                        class="w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500/20 dark:focus:ring-indigo-500/20 focus:border-indigo-500 dark:focus:border-indigo-500 shadow-sm transition-all placeholder-gray-400 dark:placeholder-gray-600"
+                        class="w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring/20 focus:border-action-primary shadow-sm transition-all placeholder-gray-400 dark:placeholder-gray-600"
                     />
                 </div>
 
@@ -421,7 +421,7 @@
                         v-model="form.iban"
                         type="text"
                         dir="ltr"
-                        class="w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500/20 dark:focus:ring-indigo-500/20 focus:border-indigo-500 dark:focus:border-indigo-500 shadow-sm transition-all placeholder-gray-400 dark:placeholder-gray-600"
+                        class="w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring/20 focus:border-action-primary shadow-sm transition-all placeholder-gray-400 dark:placeholder-gray-600"
                         placeholder="SA..."
                     />
                 </div>
@@ -437,7 +437,7 @@
                         name="notes"
                         v-model="form.notes"
                         rows="2"
-                        class="w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500/20 dark:focus:ring-indigo-500/20 focus:border-indigo-500 dark:focus:border-indigo-500 shadow-sm transition-all resize-none placeholder-gray-400 dark:placeholder-gray-600"
+                        class="w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring/20 focus:border-action-primary shadow-sm transition-all resize-none placeholder-gray-400 dark:placeholder-gray-600"
                     ></textarea>
                 </div>
 
@@ -447,9 +447,11 @@
                         class="flex items-center gap-3 p-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700/30"
                     >
                         <div
-                            class="relative inline-block w-11 h-6 transition-colors duration-200 ease-in-out border-2 border-transparent rounded-full cursor-pointer focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                            class="relative inline-block w-11 h-6 transition-colors duration-200 ease-in-out border-2 border-transparent rounded-full cursor-pointer focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-focus-ring"
                             :class="
-                                form.is_active ? 'bg-indigo-600' : 'bg-gray-200 dark:bg-gray-600'
+                                form.is_active
+                                    ? 'bg-action-primary'
+                                    : 'bg-gray-200 dark:bg-gray-600'
                             "
                             @click="form.is_active = !form.is_active"
                         >

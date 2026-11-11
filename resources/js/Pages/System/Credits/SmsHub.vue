@@ -7,14 +7,14 @@
             <PageHeader
                 :title="$t('system.credits.sms_hub_title')"
                 :subtitle="$t('system.credits.sms_hub_subtitle')"
-                gradientFrom="from-indigo-600"
+                gradientFrom="from-action-primary"
                 gradientTo="to-purple-600"
-                glowFrom="from-indigo-500"
+                glowFrom="from-action-primary"
                 glowTo="to-purple-600"
-                badgeBg="bg-indigo-50/70 dark:bg-indigo-950/40"
-                badgeText="text-indigo-600 dark:text-indigo-400"
-                badgeBorder="border-indigo-200/50 dark:border-indigo-800/40"
-                badgeDot="bg-indigo-500"
+                badgeBg="bg-selection-bg"
+                badgeText="text-action-primary"
+                badgeBorder="border-action-primary/25"
+                badgeDot="bg-action-primary"
             >
                 <template #icon>
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -30,7 +30,7 @@
                     <button
                         v-if="currentTab === 'packages'"
                         @click="packagesTabRef?.openAddModal()"
-                        class="inline-flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white rounded-xl text-sm font-semibold transition-all shadow-md active:scale-95"
+                        class="inline-flex items-center gap-2 px-4 py-2.5 bg-action-primary hover:bg-action-primary-hover text-white rounded-xl text-sm font-semibold transition-all shadow-md active:scale-95"
                     >
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path
@@ -45,7 +45,7 @@
                     <button
                         v-else-if="currentTab === 'balances'"
                         @click="balancesTabRef?.openAddModal(null)"
-                        class="inline-flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white rounded-xl text-sm font-semibold transition-all shadow-md active:scale-95"
+                        class="inline-flex items-center gap-2 px-4 py-2.5 bg-action-primary hover:bg-action-primary-hover text-white rounded-xl text-sm font-semibold transition-all shadow-md active:scale-95"
                     >
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path

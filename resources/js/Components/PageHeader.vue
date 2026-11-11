@@ -18,7 +18,7 @@ defineProps({
     },
     gradientFrom: {
         type: String,
-        default: 'from-indigo-600',
+        default: 'from-action-primary',
     },
     gradientTo: {
         type: String,
@@ -26,7 +26,7 @@ defineProps({
     },
     glowFrom: {
         type: String,
-        default: 'from-indigo-500',
+        default: 'from-action-primary',
     },
     glowTo: {
         type: String,
@@ -34,19 +34,19 @@ defineProps({
     },
     badgeBg: {
         type: String,
-        default: 'bg-indigo-50/70 dark:bg-indigo-950/40',
+        default: 'bg-selection-bg',
     },
     badgeText: {
         type: String,
-        default: 'text-indigo-600 dark:text-indigo-400',
+        default: 'text-action-primary',
     },
     badgeBorder: {
         type: String,
-        default: 'border-indigo-200/50 dark:border-indigo-800/40',
+        default: 'border-action-primary/25',
     },
     badgeDot: {
         type: String,
-        default: 'bg-indigo-500',
+        default: 'bg-action-primary',
     },
 });
 </script>

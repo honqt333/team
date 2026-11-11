@@ -311,19 +311,17 @@ async function submit() {
 <template>
     <div class="space-y-4">
         <!-- Header info -->
-        <div
-            class="rounded-lg border border-indigo-200 bg-indigo-50 p-4 dark:border-indigo-800/50 dark:bg-indigo-900/10"
-        >
-            <p class="text-sm font-semibold text-indigo-700 dark:text-indigo-300">
+        <div class="rounded-lg border border-action-primary/25 bg-selection-bg p-4">
+            <p class="text-sm font-semibold text-selection-text">
                 {{ $t('subscription.receipt.upload_instructions') }}
             </p>
             <p
                 v-if="paymentSettings.bank_transfer_receipt_instructions"
-                class="mt-1 whitespace-pre-line text-xs text-indigo-600/80 dark:text-indigo-400/80"
+                class="mt-1 whitespace-pre-line text-xs text-action-primary"
             >
                 {{ paymentSettings.bank_transfer_receipt_instructions }}
             </p>
-            <p v-else class="mt-1 text-xs text-indigo-600/80 dark:text-indigo-400/80">
+            <p v-else class="mt-1 text-xs text-action-primary">
                 {{ $t('subscription.receipt.upload_help') }}
             </p>
         </div>
@@ -417,7 +415,7 @@ async function submit() {
             <div
                 v-if="!form.receipt"
                 @click="pickFile"
-                class="cursor-pointer rounded-lg border-2 border-dashed border-slate-300 bg-slate-50 p-6 text-center transition-colors hover:border-indigo-400 hover:bg-indigo-50/50 dark:border-slate-600 dark:bg-slate-800/50 dark:hover:border-indigo-500"
+                class="cursor-pointer rounded-lg border-2 border-dashed border-slate-300 bg-slate-50 p-6 text-center transition-colors hover:border-action-primary hover:bg-selection-bg dark:border-slate-600 dark:bg-slate-800/50"
             >
                 <svg
                     class="mx-auto h-10 w-10 text-slate-400"
@@ -521,7 +519,7 @@ async function submit() {
                     <span>{{ $t('subscription.receipt.amount_transferred') }}</span>
                     <span
                         v-if="defaultAmount"
-                        class="inline-flex items-center gap-1 text-[10px] font-medium text-indigo-600 dark:text-indigo-400"
+                        class="inline-flex items-center gap-1 text-[10px] font-medium text-action-primary"
                         :title="
                             locale === 'ar'
                                 ? 'المبلغ المتوقع حسب خطتك'
@@ -592,7 +590,7 @@ async function submit() {
                     :placeholder="locale === 'ar' ? 'رقم العملية...' : 'Transaction ID...'"
                     :class="
                         refCheckError
-                            ? 'border-rose-500 focus:border-rose-500 focus:ring-rose-500'
+                            ? 'border-rose-500 focus:border-danger focus:ring-danger'
                             : 'border-slate-300 dark:border-slate-600'
                     "
                     class="w-full rounded-lg border bg-white px-3 py-2 text-sm font-mono dark:bg-slate-700 dark:text-white"
@@ -646,7 +644,7 @@ async function submit() {
                 type="button"
                 @click="submit"
                 :disabled="processing || !form.receipt"
-                class="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-5 py-2 text-sm font-semibold text-white hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50"
+                class="inline-flex items-center gap-2 rounded-lg bg-action-primary px-5 py-2 text-sm font-semibold text-white hover:bg-action-primary-hover disabled:cursor-not-allowed disabled:opacity-50"
             >
                 <svg v-if="processing" class="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
                     <circle

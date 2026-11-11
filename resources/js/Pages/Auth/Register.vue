@@ -142,7 +142,7 @@ const submit = () => {
                     required
                     autofocus
                     :placeholder="isRTL ? 'اسم الشركة أو المركز' : 'Company or Center Name'"
-                    class="w-full px-4 py-2.5 border rounded-xl focus:ring-2 focus:ring-violet-500 focus:border-violet-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400"
+                    class="w-full px-4 py-2.5 border rounded-xl focus:ring-2 focus:ring-focus-ring focus:border-action-primary bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400"
                     :class="
                         form.errors.company_name
                             ? 'border-red-500'
@@ -166,7 +166,7 @@ const submit = () => {
                         v-model="form.first_name"
                         required
                         :placeholder="isRTL ? 'الاسم الأول' : 'First Name'"
-                        class="w-full px-4 py-2.5 border rounded-xl focus:ring-2 focus:ring-violet-500 focus:border-violet-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400"
+                        class="w-full px-4 py-2.5 border rounded-xl focus:ring-2 focus:ring-focus-ring focus:border-action-primary bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400"
                         :class="
                             form.errors.first_name
                                 ? 'border-red-500'
@@ -187,7 +187,7 @@ const submit = () => {
                         v-model="form.last_name"
                         required
                         :placeholder="isRTL ? 'اسم الأخير' : 'Last Name'"
-                        class="w-full px-4 py-2.5 border rounded-xl focus:ring-2 focus:ring-violet-500 focus:border-violet-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400"
+                        class="w-full px-4 py-2.5 border rounded-xl focus:ring-2 focus:ring-focus-ring focus:border-action-primary bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400"
                         :class="
                             form.errors.last_name
                                 ? 'border-red-500'
@@ -210,7 +210,7 @@ const submit = () => {
                     required
                     autocomplete="email"
                     placeholder="example@company.com"
-                    class="w-full px-4 py-2.5 border rounded-xl focus:ring-2 focus:ring-violet-500 focus:border-violet-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400"
+                    class="w-full px-4 py-2.5 border rounded-xl focus:ring-2 focus:ring-focus-ring focus:border-action-primary bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400"
                     :class="
                         form.errors.email
                             ? 'border-red-500'
@@ -242,7 +242,7 @@ const submit = () => {
                         required
                         :disabled="phoneVerified"
                         placeholder="5xxxxxxxx"
-                        class="flex-1 px-4 py-2.5 border rounded-xl focus:ring-2 focus:ring-violet-500 focus:border-violet-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 disabled:opacity-50"
+                        class="flex-1 px-4 py-2.5 border rounded-xl focus:ring-2 focus:ring-focus-ring focus:border-action-primary bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 disabled:opacity-50"
                         :class="
                             form.errors.phone
                                 ? 'border-red-500'
@@ -255,7 +255,7 @@ const submit = () => {
                         type="button"
                         @click="sendOtp"
                         :disabled="otpForm.processing || !form.phone"
-                        class="px-4 py-2.5 bg-violet-600 hover:bg-violet-700 text-white rounded-xl text-sm font-medium disabled:opacity-50"
+                        class="px-4 py-2.5 bg-action-primary hover:bg-action-primary-hover text-white rounded-xl text-sm font-medium disabled:opacity-50"
                     >
                         {{ isRTL ? 'تحقق' : 'Verify' }}
                     </button>
@@ -265,9 +265,9 @@ const submit = () => {
                 <!-- OTP Input (show after code sent) -->
                 <div
                     v-if="codeSent && !phoneVerified"
-                    class="mt-3 p-4 bg-violet-50 dark:bg-violet-900/20 rounded-xl border border-violet-200 dark:border-violet-800"
+                    class="mt-3 p-4 bg-selection-bg rounded-xl border border-action-primary/25"
                 >
-                    <p class="text-sm text-violet-700 dark:text-violet-300 mb-3">
+                    <p class="text-sm text-selection-text mb-3">
                         {{
                             isRTL
                                 ? 'تم إرسال رمز التحقق إلى هاتفك'
@@ -282,7 +282,7 @@ const submit = () => {
                             :placeholder="
                                 isRTL ? 'أدخل الرمز المكون من 6 أرقام' : 'Enter 6-digit code'
                             "
-                            class="flex-1 px-4 py-2.5 border border-violet-300 dark:border-violet-600 rounded-xl focus:ring-2 focus:ring-violet-500 focus:border-violet-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-center tracking-widest font-mono"
+                            class="flex-1 px-4 py-2.5 border border-action-primary/25 rounded-xl focus:ring-2 focus:ring-focus-ring focus:border-action-primary bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-center tracking-widest font-mono"
                         />
                         <button
                             type="button"
@@ -301,7 +301,7 @@ const submit = () => {
                         :class="
                             cooldownRemaining > 0
                                 ? 'text-gray-400 cursor-not-allowed'
-                                : 'text-violet-600 hover:underline'
+                                : 'text-action-primary hover:underline'
                         "
                     >
                         <span v-if="cooldownRemaining > 0">
@@ -335,7 +335,7 @@ const submit = () => {
                             required
                             autocomplete="new-password"
                             placeholder="••••••"
-                            class="w-full px-4 py-2.5 pe-10 border rounded-xl focus:ring-2 focus:ring-violet-500 focus:border-violet-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400"
+                            class="w-full px-4 py-2.5 pe-10 border rounded-xl focus:ring-2 focus:ring-focus-ring focus:border-action-primary bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400"
                             :class="
                                 form.errors.password
                                     ? 'border-red-500'
@@ -399,7 +399,7 @@ const submit = () => {
                             required
                             autocomplete="new-password"
                             placeholder="••••••"
-                            class="w-full px-4 py-2.5 pe-10 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-violet-500 focus:border-violet-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400"
+                            class="w-full px-4 py-2.5 pe-10 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-focus-ring focus:border-action-primary bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400"
                         />
                         <button
                             type="button"
@@ -455,7 +455,7 @@ const submit = () => {
                     type="text"
                     v-model="form.promo_code"
                     :placeholder="isRTL ? 'أدخل الرمز إن وجد' : 'Enter code if you have one'"
-                    class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-violet-500 focus:border-violet-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400"
+                    class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-focus-ring focus:border-action-primary bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400"
                 />
                 <InputError class="mt-1" :message="form.errors.promo_code" />
             </div>
@@ -468,7 +468,7 @@ const submit = () => {
                     <button
                         type="button"
                         @click="showTermsModal = true"
-                        class="text-violet-600 hover:underline"
+                        class="text-action-primary hover:underline"
                     >
                         {{ isRTL ? 'سياسة الاستخدام' : 'Terms of Service' }}
                     </button>
@@ -476,7 +476,7 @@ const submit = () => {
                     <button
                         type="button"
                         @click="showPrivacyModal = true"
-                        class="text-violet-600 hover:underline"
+                        class="text-action-primary hover:underline"
                     >
                         {{ isRTL ? 'سياسة الخصوصية' : 'Privacy Policy' }}
                     </button>
@@ -490,7 +490,7 @@ const submit = () => {
                 :disabled="
                     form.processing || !form.terms || (phoneVerificationEnabled && !phoneVerified)
                 "
-                class="w-full py-3 px-4 bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 text-white font-semibold rounded-xl shadow-lg shadow-violet-500/30 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                class="w-full py-3 px-4 bg-action-primary hover:bg-action-primary-hover text-white font-semibold rounded-xl shadow-lg shadow-focus-ring-soft transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
             >
                 <span v-if="form.processing" class="flex items-center justify-center gap-2">
                     <svg class="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24">
@@ -520,7 +520,7 @@ const submit = () => {
             <div class="flex items-center justify-between text-sm pt-2">
                 <Link
                     :href="route('login')"
-                    class="font-medium text-violet-600 hover:text-violet-500 dark:text-violet-400"
+                    class="font-medium text-action-primary hover:text-action-primary"
                 >
                     {{ isRTL ? 'تسجيل الدخول' : 'Sign In' }}
                 </Link>
@@ -542,7 +542,7 @@ const submit = () => {
                         class="relative bg-white dark:bg-gray-800 rounded-2xl shadow-xl max-w-2xl w-full max-h-[80vh] overflow-hidden"
                     >
                         <div
-                            class="bg-gradient-to-r from-violet-600 to-indigo-600 px-6 py-4 flex items-center justify-between"
+                            class="bg-action-primary hover:bg-action-primary-hover px-6 py-4 flex items-center justify-between"
                         >
                             <h3 class="text-lg font-bold text-white">
                                 {{ isRTL ? 'سياسة الاستخدام' : 'Terms of Service' }}
@@ -605,7 +605,7 @@ const submit = () => {
                         class="relative bg-white dark:bg-gray-800 rounded-2xl shadow-xl max-w-2xl w-full max-h-[80vh] overflow-hidden"
                     >
                         <div
-                            class="bg-gradient-to-r from-violet-600 to-indigo-600 px-6 py-4 flex items-center justify-between"
+                            class="bg-action-primary hover:bg-action-primary-hover px-6 py-4 flex items-center justify-between"
                         >
                             <h3 class="text-lg font-bold text-white">
                                 {{ isRTL ? 'سياسة الخصوصية' : 'Privacy Policy' }}

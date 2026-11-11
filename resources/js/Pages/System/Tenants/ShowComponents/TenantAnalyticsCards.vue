@@ -58,8 +58,8 @@ const cards = computed(() => [
     {
         key: 'vehicles',
         label: t('system.tenants.analytics.vehicles'),
-        iconBg: 'bg-purple-100 dark:bg-purple-900/30',
-        iconColor: 'text-purple-600 dark:text-purple-400',
+        iconBg: 'bg-purple-100',
+        iconColor: 'text-purple-600',
         iconPath:
             'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4',
     },
@@ -82,8 +82,8 @@ const cards = computed(() => [
     {
         key: 'users',
         label: t('system.tenants.analytics.users'),
-        iconBg: 'bg-indigo-100 dark:bg-indigo-900/30',
-        iconColor: 'text-indigo-600 dark:text-indigo-400',
+        iconBg: 'bg-selection-bg',
+        iconColor: 'text-action-primary',
         iconPath: 'M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z',
     },
     {

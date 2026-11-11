@@ -193,7 +193,7 @@
                                         <a
                                             v-if="backup.status === 'completed'"
                                             :href="`/system/backups/${backup.id}/download`"
-                                            class="inline-flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-lg transition-colors"
+                                            class="inline-flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-action-primary hover:text-selection-text hover:bg-selection-bg rounded-lg transition-colors"
                                         >
                                             <svg
                                                 class="w-4 h-4"
@@ -282,7 +282,7 @@
                                 :class="[
                                     'px-3 py-1 rounded text-sm',
                                     link.active
-                                        ? 'bg-indigo-600 text-white'
+                                        ? 'bg-action-primary text-white'
                                         : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200',
                                 ]"
                                 v-html="link.label"
@@ -379,9 +379,9 @@ const statCards = computed(() => [
         key: 'total_size',
         label: t('system.backups.stats.total_size'),
         value: `${(props.stats?.total_size_mb || 0).toLocaleString()} MB`,
-        valueColor: 'text-indigo-600 dark:text-indigo-400',
-        iconBg: 'bg-indigo-100 dark:bg-indigo-900/30',
-        iconColor: 'text-indigo-600 dark:text-indigo-400',
+        valueColor: 'text-action-primary',
+        iconBg: 'bg-selection-bg',
+        iconColor: 'text-action-primary',
         iconPath:
             'M5 19a2 2 0 01-2-2V7a2 2 0 012-2h4l2 2h4a2 2 0 012 2v1M5 19h14a2 2 0 002-2v-5a2 2 0 00-2-2H9a2 2 0 00-2 2v5a2 2 0 01-2 2z',
     },

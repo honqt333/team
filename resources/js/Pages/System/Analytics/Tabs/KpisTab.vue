@@ -90,7 +90,7 @@
                     class="mt-4 flex flex-col items-center justify-center p-6 text-center rounded-xl bg-gray-50/60 dark:bg-gray-700/30 border border-dashed border-gray-200 dark:border-gray-700"
                 >
                     <div
-                        class="w-10 h-10 rounded-full bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 flex items-center justify-center mb-2"
+                        class="w-10 h-10 rounded-full bg-selection-bg text-action-primary flex items-center justify-center mb-2"
                     >
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path
@@ -119,7 +119,7 @@
                     </p>
                     <Link
                         :href="route('system.plans.index')"
-                        class="mt-3 inline-flex items-center gap-1.5 text-xs font-medium text-indigo-600 dark:text-indigo-400 hover:underline"
+                        class="mt-3 inline-flex items-center gap-1.5 text-xs font-medium text-action-primary hover:underline"
                     >
                         <span>
                             {{
@@ -151,7 +151,7 @@
                     >
                         <div class="flex items-center gap-3">
                             <span
-                                class="flex h-7 w-7 items-center justify-center rounded-full bg-indigo-50 text-xs font-bold text-indigo-600 dark:bg-indigo-950/40 dark:text-indigo-400"
+                                class="flex h-7 w-7 items-center justify-center rounded-full bg-selection-bg text-xs font-bold text-action-primary"
                             >
                                 #{{ plan.rank }}
                             </span>
@@ -314,7 +314,7 @@ function gatewayLabel(g) {
 
 function gatewayColor(g) {
     const map = {
-        moyasar: 'bg-indigo-500',
+        moyasar: 'bg-action-primary',
         tap: 'bg-blue-500',
         paytabs: 'bg-cyan-500',
         tabby: 'bg-emerald-500',

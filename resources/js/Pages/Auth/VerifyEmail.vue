@@ -20,11 +20,9 @@ const verificationLinkSent = computed(() => props.status === 'verification-link-
         <Head :title="isRTL ? 'تفعيل البريد' : 'Email Verification'" />
 
         <div class="flex justify-center mb-6">
-            <div
-                class="w-20 h-20 rounded-full bg-violet-100 dark:bg-violet-900/30 flex items-center justify-center"
-            >
+            <div class="w-20 h-20 rounded-full bg-selection-bg flex items-center justify-center">
                 <svg
-                    class="w-10 h-10 text-violet-600"
+                    class="w-10 h-10 text-action-primary"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -58,7 +56,7 @@ const verificationLinkSent = computed(() => props.status === 'verification-link-
             <button
                 type="submit"
                 :disabled="form.processing"
-                class="w-full py-3 bg-gradient-to-r from-violet-600 to-indigo-600 text-white font-semibold rounded-xl shadow-lg disabled:opacity-50"
+                class="w-full py-3 bg-action-primary hover:bg-action-primary-hover text-white font-semibold rounded-xl shadow-lg disabled:opacity-50"
             >
                 {{ $t('system.invoice_show.sending') }}
             </button>

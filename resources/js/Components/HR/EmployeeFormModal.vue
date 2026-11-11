@@ -20,10 +20,10 @@
                             v-model="form.name_ar"
                             type="text"
                             :class="[
-                                'w-full px-4 py-2.5 text-sm border rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-violet-500',
+                                'w-full px-4 py-2.5 text-sm border rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring',
                                 form.errors.name_ar || (form.hasErrors && !form.name_ar)
-                                    ? 'border-red-500 focus:border-red-500'
-                                    : 'border-gray-300 dark:border-gray-600 focus:border-violet-500',
+                                    ? 'border-red-500 focus:border-danger'
+                                    : 'border-gray-300 dark:border-gray-600 focus:border-action-primary',
                             ]"
                         />
                         <p v-if="form.errors.name_ar" class="mt-1 text-xs text-red-500">
@@ -44,10 +44,10 @@
                             type="text"
                             required
                             :class="[
-                                'w-full px-4 py-2.5 text-sm border rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-violet-500',
+                                'w-full px-4 py-2.5 text-sm border rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring',
                                 form.errors.name_en || (form.hasErrors && !form.name_en)
-                                    ? 'border-red-500 focus:border-red-500'
-                                    : 'border-gray-300 dark:border-gray-600 focus:border-violet-500',
+                                    ? 'border-red-500 focus:border-danger'
+                                    : 'border-gray-300 dark:border-gray-600 focus:border-action-primary',
                             ]"
                         />
                         <p v-if="form.errors.name_en" class="mt-1 text-xs text-red-500">
@@ -68,10 +68,10 @@
                             type="tel"
                             dir="ltr"
                             :class="[
-                                'w-full px-4 py-2.5 text-sm border rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-violet-500',
+                                'w-full px-4 py-2.5 text-sm border rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring',
                                 form.errors.phone || (form.hasErrors && !form.phone)
-                                    ? 'border-red-500 focus:border-red-500'
-                                    : 'border-gray-300 dark:border-gray-600 focus:border-violet-500',
+                                    ? 'border-red-500 focus:border-danger'
+                                    : 'border-gray-300 dark:border-gray-600 focus:border-action-primary',
                             ]"
                         />
                         <p v-if="form.errors.phone" class="mt-1 text-xs text-red-500">
@@ -157,10 +157,10 @@
                             v-model="form.email"
                             type="email"
                             :class="[
-                                'w-full px-4 py-2.5 text-sm border rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-violet-500',
+                                'w-full px-4 py-2.5 text-sm border rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring',
                                 form.errors.email
-                                    ? 'border-red-500 focus:border-red-500'
-                                    : 'border-gray-300 dark:border-gray-600 focus:border-violet-500',
+                                    ? 'border-red-500 focus:border-danger'
+                                    : 'border-gray-300 dark:border-gray-600 focus:border-action-primary',
                             ]"
                             required
                         />
@@ -240,7 +240,7 @@
                 <button
                     @click="submit"
                     :disabled="form.processing"
-                    class="px-4 py-2 text-sm font-medium text-white bg-violet-600 rounded-lg hover:bg-violet-700 disabled:opacity-50"
+                    class="px-4 py-2 text-sm font-medium text-white bg-action-primary rounded-lg hover:bg-action-primary-hover disabled:opacity-50"
                 >
                     {{ form.processing ? $t('common.saving') : $t('common.save') }}
                 </button>

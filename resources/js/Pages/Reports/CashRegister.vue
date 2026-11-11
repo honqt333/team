@@ -450,7 +450,7 @@
                                 v-model="searchInput"
                                 @keydown.enter="applyFilters"
                                 :placeholder="$t('reports.cash_register_report.search')"
-                                class="w-full px-3 py-2 text-xs rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200 focus:ring-2 focus:ring-slate-500"
+                                class="w-full px-3 py-2 text-xs rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200 focus:ring-2 focus:ring-focus-ring"
                             />
                         </div>
 
@@ -849,11 +849,11 @@ const categoryBadgeClass = (category) => {
         case 'refund':
             return 'bg-rose-100 text-rose-800 dark:bg-rose-900/40 dark:text-rose-300';
         case 'revenue':
-            return 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/40 dark:text-indigo-300';
+            return 'bg-selection-bg text-selection-text';
         case 'expense':
             return 'bg-orange-100 text-orange-800 dark:bg-orange-900/40 dark:text-orange-300';
         case 'payroll':
-            return 'bg-purple-100 text-purple-800 dark:bg-purple-900/40 dark:text-purple-300';
+            return 'bg-purple-100 text-purple-800';
         case 'bad_debt':
             return 'bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-300';
         default:

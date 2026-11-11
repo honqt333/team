@@ -8,17 +8,17 @@
                 <div class="relative flex flex-col md:flex-row items-center justify-between gap-6">
                     <div>
                         <div
-                            class="flex items-center gap-2 bg-indigo-500/10 text-indigo-400 text-xs px-3 py-1 rounded-full border border-indigo-500/20 w-fit"
+                            class="flex items-center gap-2 bg-action-primary/10 text-action-primary text-xs px-3 py-1 rounded-full border border-action-primary w-fit"
                         >
                             <span
-                                class="w-1.5 h-1.5 bg-indigo-400 rounded-full animate-ping"
+                                class="w-1.5 h-1.5 bg-action-primary rounded-full animate-ping"
                             ></span>
                             {{ $t('system.developer.console_badge') }}
                         </div>
                         <h1 class="text-white text-3xl font-extrabold mt-3 tracking-tight">
                             {{ $t('system.developer.title') }}
                         </h1>
-                        <p class="text-indigo-200/70 text-sm mt-1">
+                        <p class="text-white/75 text-sm mt-1">
                             {{ $t('system.developer.subtitle') }}
                         </p>
                     </div>
@@ -27,7 +27,7 @@
                         <button
                             @click="runFreshAudit"
                             :disabled="loading"
-                            class="bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white font-semibold px-6 py-3 rounded-2xl shadow-lg shadow-indigo-600/30 transition-all flex items-center gap-2 border border-indigo-500/30"
+                            class="bg-action-primary hover:bg-action-primary disabled:opacity-50 text-white font-semibold px-6 py-3 rounded-2xl shadow-lg shadow-focus-ring-soft transition-all flex items-center gap-2 border border-action-primary"
                         >
                             <svg
                                 v-if="loading"
@@ -76,7 +76,7 @@
                     class="bg-white dark:bg-gray-800 rounded-3xl border border-gray-200 dark:border-gray-700 p-6 flex flex-col items-center justify-center text-center shadow-sm relative overflow-hidden"
                 >
                     <div
-                        class="absolute -top-10 -left-10 w-24 h-24 bg-indigo-500/5 rounded-full blur-2xl pointer-events-none"
+                        class="absolute -top-10 -left-10 w-24 h-24 bg-action-primary/10 rounded-full blur-2xl pointer-events-none"
                     />
                     <h2
                         class="text-sm font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider"
@@ -86,9 +86,9 @@
 
                     <div class="relative my-6 flex items-center justify-center">
                         <div
-                            class="w-36 h-36 rounded-full border-8 border-gray-100 dark:border-gray-700 flex items-center justify-center ring-8 ring-indigo-500/10"
+                            class="w-36 h-36 rounded-full border-8 border-gray-100 dark:border-gray-700 flex items-center justify-center ring-8 ring-focus-ring"
                         >
-                            <span class="text-4xl font-black text-indigo-600 dark:text-indigo-400">
+                            <span class="text-4xl font-black text-action-primary">
                                 {{ snapshot ? Math.round(snapshot.score_overall) : 0 }}%
                             </span>
                         </div>
@@ -179,7 +179,7 @@
                         @click="activeTab = tab.id"
                         :class="
                             activeTab === tab.id
-                                ? 'border-indigo-600 text-indigo-600 dark:text-indigo-400 bg-white dark:bg-gray-800'
+                                ? 'border-action-primary text-action-primary bg-white dark:bg-gray-800'
                                 : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
                         "
                         class="px-6 py-4 font-semibold text-sm transition-all border-b-2 whitespace-nowrap"
@@ -248,13 +248,13 @@
                                             </span>
                                         </td>
                                         <td
-                                            class="py-3 px-4 font-semibold text-indigo-600 dark:text-indigo-400 uppercase text-xs"
+                                            class="py-3 px-4 font-semibold text-action-primary uppercase text-xs"
                                         >
                                             {{ v.category }}
                                         </td>
                                         <td class="py-3 px-4 font-mono text-xs max-w-xs truncate">
                                             {{ v.file_path }}
-                                            <span v-if="v.line_number" class="text-indigo-400">
+                                            <span v-if="v.line_number" class="text-action-primary">
                                                 :L{{ v.line_number }}
                                             </span>
                                         </td>
@@ -275,7 +275,7 @@
                             </h3>
                             <button
                                 @click="loadGraphData"
-                                class="text-xs text-indigo-500 hover:underline"
+                                class="text-xs text-action-primary hover:underline"
                             >
                                 {{ $t('system.developer.reload_map') }}
                             </button>
@@ -291,7 +291,7 @@
                                 class="relative flex flex-col items-center justify-center gap-6 z-10"
                             >
                                 <div
-                                    class="bg-indigo-600 text-white font-bold px-6 py-3 rounded-2xl shadow-lg shadow-indigo-600/20 border border-indigo-500/30"
+                                    class="bg-action-primary text-white font-bold px-6 py-3 rounded-2xl shadow-lg shadow-focus-ring-soft border border-action-primary"
                                 >
                                     {{ $t('system.developer.work_orders_module') }}
                                 </div>
@@ -361,7 +361,7 @@
                                         </span>
                                     </div>
                                     <p
-                                        class="font-mono text-xs text-indigo-600 dark:text-indigo-400 bg-white dark:bg-gray-800 p-2.5 rounded-lg border border-gray-100 dark:border-gray-750 break-all select-all"
+                                        class="font-mono text-xs text-action-primary bg-white dark:bg-gray-800 p-2.5 rounded-lg border border-gray-100 dark:border-gray-750 break-all select-all"
                                     >
                                         {{ q.sql_statement }}
                                     </p>
@@ -389,7 +389,7 @@
                         <div class="flex items-center justify-between">
                             <h3 class="font-bold text-lg flex items-center gap-2">
                                 <svg
-                                    class="w-5 h-5 text-indigo-500"
+                                    class="w-5 h-5 text-action-primary"
                                     fill="none"
                                     stroke="currentColor"
                                     viewBox="0 0 24 24"
@@ -406,7 +406,7 @@
                             <button
                                 @click="fetchAiAdvice"
                                 :disabled="loadingAi"
-                                class="text-xs bg-indigo-600/10 text-indigo-600 hover:bg-indigo-600/20 px-3 py-1.5 rounded-lg border border-indigo-500/20"
+                                class="text-xs bg-action-primary/10 text-action-primary hover:bg-action-primary/10 px-3 py-1.5 rounded-lg border border-action-primary"
                             >
                                 {{
                                     loadingAi

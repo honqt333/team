@@ -80,7 +80,7 @@
                         <td class="px-6 py-4 text-gray-700 dark:text-gray-300">
                             {{ item.package?.name_ar || $t('system.credits.custom_package') }}
                         </td>
-                        <td class="px-6 py-4 font-bold text-indigo-600 dark:text-indigo-400">
+                        <td class="px-6 py-4 font-bold text-action-primary">
                             +{{ item.credits?.toLocaleString() }}
                         </td>
                         <td class="px-6 py-4 font-medium text-gray-900 dark:text-white">

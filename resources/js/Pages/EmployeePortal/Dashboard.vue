@@ -3,7 +3,7 @@
         <div class="space-y-6">
             <!-- Welcome Header -->
             <div
-                class="bg-gradient-to-r from-violet-600 to-purple-600 rounded-2xl p-6 text-white shadow-lg"
+                class="bg-action-primary hover:bg-action-primary-hover rounded-2xl p-6 text-white shadow-lg"
             >
                 <div class="flex items-center gap-4">
                     <div
@@ -15,7 +15,7 @@
                         <h1 class="text-2xl font-bold">
                             {{ $t('employee_portal.welcome') }}، {{ employee?.name_ar }}
                         </h1>
-                        <p class="text-violet-200">
+                        <p class="text-white/80">
                             {{ employee?.job_title?.name_ar || $t('common.employee') }} •
                             {{ employee?.center?.name }}
                         </p>
@@ -123,9 +123,9 @@
                     class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-200 dark:border-gray-700"
                 >
                     <div class="flex items-center gap-4">
-                        <div class="p-3 bg-purple-100 dark:bg-purple-900/30 rounded-xl">
+                        <div class="p-3 bg-purple-100 rounded-xl">
                             <svg
-                                class="w-6 h-6 text-purple-600 dark:text-purple-400"
+                                class="w-6 h-6 text-purple-600"
                                 fill="none"
                                 stroke="currentColor"
                                 viewBox="0 0 24 24"
@@ -160,13 +160,13 @@
                 <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
                     <Link
                         :href="route('employee.profile')"
-                        class="flex flex-col items-center p-6 bg-gray-50 dark:bg-gray-900/50 rounded-2xl border border-gray-200 dark:border-gray-700 hover:border-violet-500 dark:hover:border-violet-500 transition-all hover:-translate-y-1"
+                        class="flex flex-col items-center p-6 bg-gray-50 dark:bg-gray-900/50 rounded-2xl border border-gray-200 dark:border-gray-700 hover:border-action-primary transition-all hover:-translate-y-1"
                     >
                         <div
-                            class="w-12 h-12 rounded-xl bg-violet-100 dark:bg-violet-900/30 flex items-center justify-center mb-3"
+                            class="w-12 h-12 rounded-xl bg-selection-bg flex items-center justify-center mb-3"
                         >
                             <svg
-                                class="w-6 h-6 text-violet-600 dark:text-violet-400"
+                                class="w-6 h-6 text-action-primary"
                                 fill="none"
                                 stroke="currentColor"
                                 viewBox="0 0 24 24"

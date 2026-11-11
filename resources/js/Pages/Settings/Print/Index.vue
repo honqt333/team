@@ -135,7 +135,7 @@
                                         form.visual.active_template === tmpl.id
                                             ? 'border-amber-500 bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/10 shadow-sm shadow-amber-100 dark:shadow-amber-900/20'
                                             : previewingTemplate === tmpl.id
-                                              ? 'border-indigo-400 bg-indigo-50/40 dark:bg-indigo-950/10'
+                                              ? 'border-action-primary bg-selection-bg'
                                               : 'border-gray-100 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 bg-gray-50/30 dark:bg-gray-900/20',
                                     ]"
                                 >
@@ -150,7 +150,7 @@
                                     <!-- Previewing badge -->
                                     <span
                                         v-else-if="previewingTemplate === tmpl.id"
-                                        class="absolute top-2.5 end-2.5 text-[9px] font-black px-2 py-0.5 rounded-full bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400"
+                                        class="absolute top-2.5 end-2.5 text-[9px] font-black px-2 py-0.5 rounded-full bg-selection-bg text-action-primary"
                                     >
                                         {{ $t('print_settings.previewing') }}
                                     </span>
@@ -263,7 +263,7 @@
                                         v-model="form.visual.primary_color"
                                         type="text"
                                         dir="ltr"
-                                        class="w-full px-2.5 py-1.5 rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white font-mono text-xs focus:ring-1 focus:ring-amber-400 focus:border-amber-400 outline-none"
+                                        class="w-full px-2.5 py-1.5 rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white font-mono text-xs focus:ring-1 focus:ring-focus-ring focus:border-action-primary outline-none"
                                     />
                                 </div>
                             </div>
@@ -280,7 +280,7 @@
                                 <textarea
                                     v-model="form.visual.footer_text"
                                     rows="2"
-                                    class="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-xs leading-relaxed resize-none focus:ring-1 focus:ring-amber-400 focus:border-amber-400 outline-none transition"
+                                    class="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-xs leading-relaxed resize-none focus:ring-1 focus:ring-focus-ring focus:border-action-primary outline-none transition"
                                     :placeholder="$t('print_settings.footer_placeholder')"
                                 ></textarea>
                             </div>
@@ -501,7 +501,7 @@
                                     <button
                                         type="button"
                                         @click="openSignatureModal(selectedDocKey)"
-                                        class="flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl border-2 border-indigo-200 dark:border-indigo-800 hover:border-indigo-400 dark:hover:border-indigo-600 text-indigo-600 dark:text-indigo-400 bg-indigo-50/30 dark:bg-indigo-950/10 font-bold text-xs transition-all"
+                                        class="flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl border-2 border-action-primary/25 hover:border-action-primary text-action-primary bg-selection-bg font-bold text-xs transition-all"
                                     >
                                         <svg
                                             class="w-4 h-4"

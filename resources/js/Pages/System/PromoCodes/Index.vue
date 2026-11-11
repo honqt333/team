@@ -22,7 +22,7 @@
                 <template #actions>
                     <button
                         @click="openModal()"
-                        class="inline-flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white rounded-xl text-sm font-semibold transition-all shadow-md hover:shadow-indigo-500/25 active:scale-95"
+                        class="inline-flex items-center gap-2 px-4 py-2.5 bg-action-primary hover:bg-action-primary-hover text-white rounded-xl text-sm font-semibold transition-all shadow-md hover:shadow-focus-ring-soft active:scale-95"
                     >
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path
@@ -85,7 +85,7 @@
                             >
                                 <td class="px-6 py-4 align-middle text-center">
                                     <span
-                                        class="font-mono font-bold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/30 px-2 py-1 rounded"
+                                        class="font-mono font-bold text-action-primary bg-selection-bg px-2 py-1 rounded"
                                     >
                                         {{ code.code }}
                                     </span>
@@ -130,7 +130,7 @@
                                     <div class="flex items-center justify-center gap-2">
                                         <button
                                             @click="openModal(code)"
-                                            class="inline-flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-lg transition-colors"
+                                            class="inline-flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-action-primary hover:text-selection-text hover:bg-selection-bg rounded-lg transition-colors"
                                         >
                                             <svg
                                                 class="w-4 h-4"
@@ -193,7 +193,7 @@
                     </p>
                     <button
                         @click="openModal()"
-                        class="mt-4 inline-flex items-center text-sm font-medium text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300"
+                        class="mt-4 inline-flex items-center text-sm font-medium text-action-primary hover:text-selection-text"
                     >
                         {{ $t('system.promo_codes.create_first') }}
                     </button>
@@ -449,7 +449,7 @@
                             <button
                                 @click="submit"
                                 :disabled="form.processing"
-                                class="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium disabled:opacity-50"
+                                class="px-5 py-2 bg-action-primary hover:bg-action-primary-hover text-white rounded-lg font-medium disabled:opacity-50"
                             >
                                 {{
                                     editingCode
@@ -487,10 +487,6 @@ const discountTypeOptions = computed(() => [
 
 const billingCycleOptions = computed(() => [
     { value: 'any', label: t('system.common.all') },
-    {
-        value: 'monthly',
-        label: t('system.subscriptions.monthly') + ' (' + t('system.common.only') + ')',
-    },
     {
         value: 'yearly',
         label: t('system.subscriptions.yearly') + ' (' + t('system.common.only') + ')',

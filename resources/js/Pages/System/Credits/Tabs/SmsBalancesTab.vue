@@ -5,7 +5,7 @@
             <div
                 class="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700"
             >
-                <p class="text-2xl font-bold text-indigo-600 dark:text-indigo-400">
+                <p class="text-2xl font-bold text-action-primary">
                     {{ stats?.total_credits?.toLocaleString() || 0 }}
                 </p>
                 <p class="text-sm text-gray-500">
@@ -164,7 +164,7 @@
                         <td class="px-6 py-4 text-left">
                             <button
                                 @click="openAddCreditsModal(item)"
-                                class="text-indigo-600 hover:text-indigo-800 text-sm font-medium"
+                                class="text-action-primary hover:text-selection-text text-sm font-medium"
                             >
                                 {{ $t('system.credits.add_credit') }}
                             </button>
@@ -259,7 +259,7 @@
                                 <button
                                     type="submit"
                                     :disabled="form.processing"
-                                    class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50 text-sm font-medium"
+                                    class="px-4 py-2 bg-action-primary text-white rounded-lg hover:bg-action-primary-hover disabled:opacity-50 text-sm font-medium"
                                 >
                                     {{
                                         form.processing

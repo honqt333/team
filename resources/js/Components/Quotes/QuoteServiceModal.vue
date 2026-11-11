@@ -3,7 +3,7 @@
         <template #title>
             <div class="flex items-center gap-3">
                 <div
-                    class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-500 flex items-center justify-center"
+                    class="w-10 h-10 rounded-xl bg-action-primary hover:bg-action-primary-hover flex items-center justify-center"
                 >
                     <svg
                         class="w-5 h-5 text-white"
@@ -115,7 +115,7 @@
                     v-model="form.description"
                     rows="2"
                     :disabled="isReadOnly"
-                    class="w-full px-4 py-2.5 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none disabled:bg-gray-100 dark:disabled:bg-gray-900 disabled:text-gray-500 text-sm"
+                    class="w-full px-4 py-2.5 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring focus:border-action-primary resize-none disabled:bg-gray-100 dark:disabled:bg-gray-900 disabled:text-gray-500 text-sm"
                     :placeholder="$t('quotes.service_modal.description_placeholder')"
                 ></textarea>
             </div>
@@ -142,12 +142,12 @@
                             "
                             :disabled="isPriceLocked || isReadOnly"
                             :class="[
-                                'w-full py-2.5 pl-4 pr-16 border rounded-xl font-mono text-right focus:ring-2 focus:border-blue-500 text-sm',
+                                'w-full py-2.5 pl-4 pr-16 border rounded-xl font-mono text-right focus:ring-2 focus:border-action-primary text-sm',
                                 isPriceLocked || isReadOnly
                                     ? 'bg-gray-100 dark:bg-gray-900 text-gray-500 dark:text-gray-400 cursor-not-allowed border-gray-200 dark:border-gray-700'
                                     : isPriceBelowMinimum
-                                      ? 'bg-white dark:bg-gray-800 text-gray-900 dark:text-white border-red-300 dark:border-red-700 focus:ring-red-500'
-                                      : 'bg-white dark:bg-gray-800 text-gray-900 dark:text-white border-gray-200 dark:border-gray-700 focus:ring-blue-500',
+                                      ? 'bg-white dark:bg-gray-800 text-gray-900 dark:text-white border-red-300 dark:border-red-700 focus:ring-danger'
+                                      : 'bg-white dark:bg-gray-800 text-gray-900 dark:text-white border-gray-200 dark:border-gray-700 focus:ring-focus-ring',
                             ]"
                             required
                         />
@@ -255,8 +255,8 @@
                                 isReadOnly
                                     ? 'bg-gray-100 dark:bg-gray-900 text-gray-500 dark:text-gray-400 cursor-not-allowed border-gray-200 dark:border-gray-700'
                                     : isPriceBelowMinimum
-                                      ? 'border-red-300 dark:border-red-700 bg-red-50 dark:bg-red-900/20 focus:ring-red-500 focus:border-red-500'
-                                      : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 focus:ring-blue-500 focus:border-blue-500',
+                                      ? 'border-red-300 dark:border-red-700 bg-red-50 dark:bg-red-900/20 focus:ring-danger focus:border-danger'
+                                      : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 focus:ring-focus-ring focus:border-action-primary',
                             ]"
                         />
 
@@ -312,7 +312,7 @@
                     'p-3.5 rounded-xl border flex items-center justify-between',
                     isPriceBelowMinimum
                         ? 'bg-gradient-to-r from-red-50 to-red-100 dark:from-red-900/30 dark:to-red-900/20 border-red-300 dark:border-red-700'
-                        : 'bg-gradient-to-r from-blue-50/80 to-indigo-50/80 dark:from-blue-900/20 dark:to-indigo-900/20 border-blue-200 dark:border-blue-800',
+                        : 'bg-gradient-to-r from-blue-50/80 to-action-primary dark:from-blue-900/20 border-blue-200 dark:border-blue-800',
                 ]"
             >
                 <span class="text-sm font-semibold text-gray-700 dark:text-gray-300">
@@ -402,7 +402,7 @@
                 type="button"
                 @click="submitForm"
                 :disabled="form.processing || isPriceBelowMinimum"
-                class="px-6 py-2 bg-gradient-to-r from-blue-500 to-indigo-500 text-white rounded-lg hover:from-blue-600 hover:to-indigo-600 disabled:opacity-50 transition-all"
+                class="px-6 py-2 bg-action-primary hover:bg-action-primary-hover text-white rounded-lg hover:from-blue-600 hover:to-action-primary disabled:opacity-50 transition-all"
             >
                 {{ form.processing ? $t('common.loading') : $t('common.save') }}
             </button>

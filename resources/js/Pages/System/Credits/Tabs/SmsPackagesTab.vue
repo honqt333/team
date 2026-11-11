@@ -8,20 +8,20 @@
                 :class="[
                     'bg-white dark:bg-gray-800 rounded-xl p-6 border-2 transition-all relative',
                     pkg.is_popular
-                        ? 'border-indigo-500 ring-2 ring-indigo-200 dark:ring-indigo-800'
+                        ? 'border-action-primary ring-2 ring-action-primary/20'
                         : 'border-gray-200 dark:border-gray-700',
                 ]"
             >
                 <div
                     v-if="pkg.is_popular"
-                    class="absolute -top-3 right-4 bg-indigo-500 text-white text-xs px-2.5 py-0.5 rounded-full font-bold shadow-sm"
+                    class="absolute -top-3 right-4 bg-action-primary text-white text-xs px-2.5 py-0.5 rounded-full font-bold shadow-sm"
                 >
                     {{ $t('system.credits.popular') }}
                 </div>
 
                 <div class="flex items-center gap-3 mb-4">
                     <div
-                        class="w-10 h-10 rounded-xl bg-indigo-100 dark:bg-indigo-950/40 flex items-center justify-center text-indigo-600 dark:text-indigo-400"
+                        class="w-10 h-10 rounded-xl bg-selection-bg flex items-center justify-center text-action-primary"
                     >
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path
@@ -51,7 +51,7 @@
                 </div>
 
                 <div class="text-center my-4 py-2 bg-gray-50 dark:bg-gray-900/40 rounded-xl">
-                    <span class="text-3xl font-extrabold text-indigo-600 dark:text-indigo-400">
+                    <span class="text-3xl font-extrabold text-action-primary">
                         {{ pkg.credits.toLocaleString() }}
                     </span>
                     <span class="text-gray-500 mr-1 text-sm">
@@ -75,7 +75,7 @@
                 <div class="flex gap-2">
                     <button
                         @click="editPackage(pkg)"
-                        class="flex-1 py-2 text-center text-sm font-medium text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-950/40 rounded-lg transition-colors"
+                        class="flex-1 py-2 text-center text-sm font-medium text-action-primary hover:bg-selection-bg rounded-lg transition-colors"
                     >
                         {{ $t('common.edit') }}
                     </button>
@@ -204,7 +204,7 @@
                                 <button
                                     type="submit"
                                     :disabled="form.processing"
-                                    class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50 text-sm font-medium"
+                                    class="px-4 py-2 bg-action-primary text-white rounded-lg hover:bg-action-primary-hover disabled:opacity-50 text-sm font-medium"
                                 >
                                     {{ form.processing ? $t('common.saving') : $t('common.save') }}
                                 </button>

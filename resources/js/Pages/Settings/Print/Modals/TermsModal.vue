@@ -23,10 +23,10 @@
                     >
                         <div class="flex items-center gap-3">
                             <div
-                                class="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-900/20 flex items-center justify-center"
+                                class="w-10 h-10 rounded-xl bg-selection-bg flex items-center justify-center"
                             >
                                 <svg
-                                    class="w-6 h-6 text-indigo-600"
+                                    class="w-6 h-6 text-action-primary"
                                     fill="none"
                                     stroke="currentColor"
                                     viewBox="0 0 24 24"
@@ -84,10 +84,10 @@
                         <div
                             v-for="(sig, index) in localSignatures"
                             :key="index"
-                            class="grid grid-cols-[1.5rem_1fr_1fr_2rem_2rem] items-center gap-2 p-2.5 rounded-xl border border-gray-100 dark:border-gray-700 bg-gray-50/40 dark:bg-gray-900/30 group hover:border-indigo-200 dark:hover:border-indigo-800 transition-all"
+                            class="grid grid-cols-[1.5rem_1fr_1fr_2rem_2rem] items-center gap-2 p-2.5 rounded-xl border border-gray-100 dark:border-gray-700 bg-gray-50/40 dark:bg-gray-900/30 group hover:border-action-primary/25 transition-all"
                         >
                             <span
-                                class="w-6 h-6 rounded-lg bg-indigo-50 dark:bg-indigo-950/40 text-indigo-500 text-[10px] font-black flex items-center justify-center"
+                                class="w-6 h-6 rounded-lg bg-selection-bg text-action-primary text-[10px] font-black flex items-center justify-center"
                             >
                                 {{ index + 1 }}
                             </span>
@@ -96,14 +96,14 @@
                                 v-model="sig.name_ar"
                                 type="text"
                                 placeholder="الاسم بالعربي"
-                                class="px-2.5 py-1.5 text-xs rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 dark:text-white focus:ring-1 focus:ring-indigo-400 focus:border-indigo-400 outline-none text-end w-full"
+                                class="px-2.5 py-1.5 text-xs rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 dark:text-white focus:ring-1 focus:ring-focus-ring focus:border-action-primary outline-none text-end w-full"
                             />
 
                             <input
                                 v-model="sig.name_en"
                                 type="text"
                                 placeholder="English name"
-                                class="px-2.5 py-1.5 text-xs rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 dark:text-white focus:ring-1 focus:ring-indigo-400 focus:border-indigo-400 outline-none w-full"
+                                class="px-2.5 py-1.5 text-xs rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 dark:text-white focus:ring-1 focus:ring-focus-ring focus:border-action-primary outline-none w-full"
                                 dir="ltr"
                             />
 
@@ -158,7 +158,7 @@
                         <!-- Add Button -->
                         <button
                             @click="addSignature"
-                            class="w-full flex items-center justify-center gap-2 py-2.5 px-4 border-2 border-dashed border-indigo-200 dark:border-indigo-800 rounded-xl text-indigo-600 dark:text-indigo-400 text-xs font-bold hover:bg-indigo-50 dark:hover:bg-indigo-950/20 hover:border-indigo-400 transition-all"
+                            class="w-full flex items-center justify-center gap-2 py-2.5 px-4 border-2 border-dashed border-action-primary/25 rounded-xl text-action-primary text-xs font-bold hover:bg-selection-bg hover:border-action-primary transition-all"
                         >
                             <svg
                                 class="w-4 h-4"
@@ -189,7 +189,7 @@
                         </button>
                         <button
                             @click="handleSave"
-                            class="px-8 py-2.5 rounded-2xl bg-gradient-to-r from-indigo-600 to-indigo-700 text-white font-bold transition-all shadow-lg shadow-indigo-500/20 hover:scale-[1.02] active:scale-[0.98] text-sm"
+                            class="px-8 py-2.5 rounded-2xl bg-action-primary hover:bg-action-primary-hover text-white font-bold transition-all shadow-lg shadow-focus-ring-soft hover:scale-[1.02] active:scale-[0.98] text-sm"
                         >
                             {{ $t('common.save') }}
                         </button>

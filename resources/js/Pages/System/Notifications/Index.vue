@@ -42,7 +42,7 @@
                     :href="n.action_url || '#'"
                     @click="markRead(n.id)"
                     class="block p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50"
-                    :class="{ 'bg-indigo-50/40 dark:bg-indigo-900/10': !n.read_at }"
+                    :class="{ 'bg-selection-bg': !n.read_at }"
                 >
                     <div class="flex items-start gap-3">
                         <div
@@ -50,7 +50,7 @@
                             :class="
                                 n.read_at
                                     ? 'bg-gray-100 text-gray-400 dark:bg-gray-700'
-                                    : 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-300'
+                                    : 'bg-selection-bg text-action-primary'
                             "
                         >
                             <svg
@@ -80,7 +80,7 @@
                         </div>
                         <span
                             v-if="!n.read_at"
-                            class="mt-1 h-2 w-2 shrink-0 rounded-full bg-indigo-500"
+                            class="mt-1 h-2 w-2 shrink-0 rounded-full bg-action-primary"
                             aria-label="Unread"
                         ></span>
                     </div>

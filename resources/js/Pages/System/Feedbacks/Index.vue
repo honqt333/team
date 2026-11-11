@@ -208,7 +208,7 @@
                                         <button
                                             type="button"
                                             @click="openReplyModal(item)"
-                                            class="px-3 py-1 bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-100 rounded-lg font-semibold text-xs"
+                                            class="px-3 py-1 bg-selection-bg text-action-primary hover:bg-selection-bg rounded-lg font-semibold text-xs"
                                         >
                                             {{
                                                 item.admin_reply
@@ -262,7 +262,7 @@
                         :class="[
                             'px-3 py-1 text-xs rounded-lg font-medium transition-colors',
                             link.active
-                                ? 'bg-indigo-600 text-white font-bold'
+                                ? 'bg-action-primary text-white font-bold'
                                 : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100',
                             !link.url ? 'opacity-40 pointer-events-none' : '',
                         ]"
@@ -336,7 +336,7 @@
                             type="file"
                             accept="video/*"
                             @change="replyForm.reply_video = $event.target.files[0]"
-                            class="text-xs text-gray-500 file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:bg-indigo-50 file:text-indigo-700"
+                            class="text-xs text-gray-500 file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:bg-selection-bg file:text-selection-text"
                         />
                     </div>
 

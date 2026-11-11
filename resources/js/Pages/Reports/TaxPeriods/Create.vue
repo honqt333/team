@@ -455,8 +455,7 @@ const getTypeBadgeClass = (type, isIncome) => {
         return 'bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-300';
     if (type === 'purchase_invoice')
         return 'bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300';
-    if (type === 'purchase_return')
-        return 'bg-purple-100 text-purple-800 dark:bg-purple-900/50 dark:text-purple-300';
+    if (type === 'purchase_return') return 'bg-purple-100 text-purple-800';
     return isIncome ? 'bg-teal-100 text-teal-800' : 'bg-rose-100 text-rose-800';
 };
 

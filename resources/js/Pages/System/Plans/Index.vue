@@ -22,7 +22,7 @@
                 <template #actions>
                     <button
                         @click="openModal()"
-                        class="inline-flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white rounded-xl text-sm font-semibold transition-all shadow-md hover:shadow-indigo-500/25 active:scale-95"
+                        class="inline-flex items-center gap-2 px-4 py-2.5 bg-action-primary hover:bg-action-primary-hover text-white rounded-xl text-sm font-semibold transition-all shadow-md hover:shadow-focus-ring-soft active:scale-95"
                     >
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path
@@ -45,14 +45,14 @@
                     :class="[
                         'bg-white dark:bg-gray-800 rounded-2xl shadow-sm border overflow-hidden relative',
                         plan.is_featured
-                            ? 'border-indigo-500 ring-2 ring-indigo-500'
+                            ? 'border-action-primary ring-2 ring-focus-ring'
                             : 'border-gray-200 dark:border-gray-700',
                     ]"
                 >
                     <!-- Featured Badge -->
                     <div
                         v-if="plan.is_featured"
-                        class="absolute top-4 left-4 px-2.5 py-1 bg-indigo-600 text-white text-xs font-medium rounded-full"
+                        class="absolute top-4 left-4 px-2.5 py-1 bg-action-primary text-white text-xs font-medium rounded-full"
                     >
                         {{ $t('system.plans.featured') }}
                     </div>
@@ -88,7 +88,7 @@
 
                         <!-- Subscribers Count -->
                         <div
-                            class="mt-3 flex items-center gap-1.5 text-xs text-indigo-600 dark:text-indigo-400 font-medium bg-indigo-50 dark:bg-indigo-900/30 px-2.5 py-1 rounded-md w-fit"
+                            class="mt-3 flex items-center gap-1.5 text-xs text-action-primary font-medium bg-selection-bg px-2.5 py-1 rounded-md w-fit"
                         >
                             <svg
                                 class="w-3.5 h-3.5"
@@ -120,15 +120,7 @@
                                 </span>
                             </div>
                             <p
-                                v-if="Number(plan.price_yearly) > 0"
-                                class="text-xs text-gray-500 dark:text-gray-400 mt-1"
-                            >
-                                {{ $t('system.plans.annual_includes') }}
-                                {{ Math.round(plan.price_yearly / 12) }}
-                                {{ $t('system.plans.sar_per_month') }}
-                            </p>
-                            <p
-                                v-else
+                                v-if="Number(plan.price_yearly) <= 0"
                                 class="text-xs text-emerald-600 dark:text-emerald-400 mt-1 font-medium"
                             >
                                 {{ $t('system.plans.free_trial_for') }} {{ plan.trial_days }}
@@ -272,7 +264,7 @@
                     </p>
                     <button
                         @click="openModal()"
-                        class="mt-4 inline-flex items-center text-sm font-medium text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300"
+                        class="mt-4 inline-flex items-center text-sm font-medium text-action-primary hover:text-selection-text"
                     >
                         {{ $t('system.plans.create_first') }}
                     </button>
@@ -422,22 +414,7 @@
                                 <h4 class="text-sm font-medium text-gray-900 dark:text-white mb-3">
                                     {{ $t('system.plans.form.pricing') }}
                                 </h4>
-                                <div class="grid grid-cols-3 gap-4">
-                                    <div>
-                                        <label
-                                            class="block text-sm text-gray-600 dark:text-gray-400 mb-1"
-                                        >
-                                            {{ $t('system.plans.form.price_monthly') }}
-                                        </label>
-                                        <input
-                                            v-model.number="form.price_monthly"
-                                            type="number"
-                                            min="0"
-                                            step="0.01"
-                                            required
-                                            class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                                        />
-                                    </div>
+                                <div class="grid grid-cols-2 gap-4">
                                     <div>
                                         <label
                                             class="block text-sm text-gray-600 dark:text-gray-400 mb-1"
@@ -569,7 +546,7 @@
                                         <button
                                             @click="form.features_ar.push('')"
                                             type="button"
-                                            class="text-sm text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300"
+                                            class="text-sm text-action-primary hover:text-selection-text"
                                         >
                                             {{ $t('system.plans.form.add_feature_ar') }}
                                         </button>
@@ -608,7 +585,7 @@
                                         <button
                                             @click="form.features_en.push('')"
                                             type="button"
-                                            class="text-sm text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300"
+                                            class="text-sm text-action-primary hover:text-selection-text"
                                         >
                                             {{ $t('system.plans.form.add_feature_en') }}
                                         </button>
@@ -668,7 +645,6 @@ const form = useForm({
     slug: '',
     description_ar: '',
     description_en: '',
-    price_monthly: 0,
     price_yearly: 0,
     trial_days: 14,
     limits: {
@@ -691,7 +667,6 @@ const openModal = (plan = null) => {
         form.slug = plan.slug || '';
         form.description_ar = plan.description_ar || '';
         form.description_en = plan.description_en || '';
-        form.price_monthly = plan.price_monthly || 0;
         form.price_yearly = plan.price_yearly || 0;
         form.trial_days = plan.trial_days || 14;
         form.limits = {

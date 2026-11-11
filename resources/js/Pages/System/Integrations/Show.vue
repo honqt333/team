@@ -146,7 +146,7 @@
                                 class="relative flex items-start p-4 rounded-lg border-2 cursor-pointer transition-all"
                                 :class="
                                     form.purpose === key
-                                        ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-900/20'
+                                        ? 'border-action-primary bg-selection-bg'
                                         : 'border-gray-200 dark:border-gray-700 hover:border-gray-300'
                                 "
                             >
@@ -160,7 +160,7 @@
                                 </div>
                                 <div v-if="form.purpose === key" class="absolute top-2 left-2">
                                     <svg
-                                        class="w-5 h-5 text-indigo-600"
+                                        class="w-5 h-5 text-action-primary"
                                         fill="currentColor"
                                         viewBox="0 0 20 20"
                                     >
@@ -179,7 +179,7 @@
                         <button
                             type="submit"
                             :disabled="form.processing"
-                            class="px-6 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium disabled:opacity-50"
+                            class="px-6 py-2 bg-action-primary hover:bg-action-primary-hover text-white rounded-lg font-medium disabled:opacity-50"
                         >
                             {{
                                 form.processing

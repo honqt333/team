@@ -4,13 +4,13 @@
             <!-- Header Section -->
             <PageHeader
                 :title="employee.name_ar"
-                gradientFrom="from-violet-600"
+                gradientFrom="from-action-primary"
                 gradientTo="to-purple-700"
-                glowFrom="from-violet-500"
-                badgeBg="bg-violet-50/50 dark:bg-violet-900/30"
-                badgeText="text-violet-600 dark:text-violet-400"
-                badgeBorder="border-violet-100/50 dark:border-violet-800/30"
-                badgeDot="bg-violet-500"
+                glowFrom="from-action-primary"
+                badgeBg="bg-selection-bg"
+                badgeText="text-action-primary"
+                badgeBorder="border-action-primary/25"
+                badgeDot="bg-action-primary"
             >
                 <template #back>
                     <BackButton :href="route('app.hr.employees.index')" />
@@ -44,7 +44,7 @@
                         </span>
                         <template v-if="employee.center">
                             <span class="text-gray-300 dark:text-gray-600">|</span>
-                            <span class="text-violet-600 dark:text-violet-400 font-semibold">
+                            <span class="text-action-primary font-semibold">
                                 {{ employee.center?.name }}
                             </span>
                         </template>
@@ -111,7 +111,7 @@
                             :class="[
                                 'py-4 text-sm font-medium border-b-2 transition-colors whitespace-nowrap',
                                 activeTab === tab.key
-                                    ? 'border-violet-500 text-violet-600 dark:text-violet-400'
+                                    ? 'border-action-primary text-action-primary'
                                     : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400',
                             ]"
                         >

@@ -278,7 +278,7 @@
                             {{ formatCurrency(totals.grand.tax) }}
                         </td>
                         <td
-                            class="py-2 text-end font-black text-indigo-600 dark:text-indigo-400 font-mono text-sm align-middle"
+                            class="py-2 text-end font-black text-action-primary font-mono text-sm align-middle"
                         >
                             {{ formatCurrency(totals.grand.total) }}
                         </td>
@@ -407,11 +407,11 @@
                     workOrder.invoice.payment_status !== 'paid' &&
                     !isInvoiceOverdue
                 "
-                class="p-3 rounded-xl bg-violet-50 dark:bg-violet-950/20 border border-violet-100 dark:border-violet-800/50 flex items-center justify-between text-violet-700 dark:text-violet-300"
+                class="p-3 rounded-xl bg-selection-bg border border-action-primary/25 flex items-center justify-between text-selection-text"
             >
                 <div class="flex items-center gap-2">
                     <svg
-                        class="w-5 h-5 text-violet-600 dark:text-violet-400 shrink-0"
+                        class="w-5 h-5 text-action-primary shrink-0"
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
@@ -441,7 +441,7 @@
                 </div>
                 <Link
                     :href="route('app.invoices.show', workOrder.invoice.id)"
-                    class="text-xs font-bold px-2.5 py-1.5 bg-violet-100 hover:bg-violet-200 dark:bg-violet-900/50 dark:hover:bg-violet-900 text-violet-700 dark:text-violet-300 rounded-lg transition-colors flex items-center gap-1"
+                    class="text-xs font-bold px-2.5 py-1.5 bg-selection-bg hover:bg-selection-bg text-selection-text rounded-lg transition-colors flex items-center gap-1"
                 >
                     {{ $t('common.view') }}
                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

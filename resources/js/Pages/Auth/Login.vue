@@ -91,7 +91,7 @@ const submit = () => {
                     autofocus
                     autocomplete="username"
                     :placeholder="isRTL ? 'البريد الإلكتروني' : 'Email'"
-                    class="w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-violet-500 focus:border-violet-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400"
+                    class="w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-focus-ring focus:border-action-primary bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400"
                     :class="
                         form.errors.email
                             ? 'border-red-500 dark:border-red-500'
@@ -117,7 +117,7 @@ const submit = () => {
                         required
                         autocomplete="current-password"
                         :placeholder="isRTL ? 'كلمة المرور' : 'Password'"
-                        class="w-full px-4 py-3 pe-12 border rounded-xl focus:ring-2 focus:ring-violet-500 focus:border-violet-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400"
+                        class="w-full px-4 py-3 pe-12 border rounded-xl focus:ring-2 focus:ring-focus-ring focus:border-action-primary bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400"
                         :class="
                             form.errors.password
                                 ? 'border-red-500 dark:border-red-500'
@@ -172,7 +172,7 @@ const submit = () => {
             <button
                 type="submit"
                 :disabled="form.processing"
-                class="w-full py-3 px-4 bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 text-white font-semibold rounded-xl shadow-lg shadow-violet-500/30 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                class="w-full py-3 px-4 bg-action-primary hover:bg-action-primary-hover text-white font-semibold rounded-xl shadow-lg shadow-focus-ring-soft transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
             >
                 <span v-if="form.processing" class="flex items-center justify-center gap-2">
                     <svg class="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24">
@@ -199,7 +199,7 @@ const submit = () => {
             <div class="flex items-center justify-between text-sm" v-if="!props.asAdmin">
                 <Link
                     :href="route('register')"
-                    class="font-medium text-violet-600 hover:text-violet-500 dark:text-violet-400"
+                    class="font-medium text-action-primary hover:text-action-primary"
                 >
                     {{ $t('auth.create_account') }}
                 </Link>

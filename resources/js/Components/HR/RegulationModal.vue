@@ -28,7 +28,7 @@
                     v-model="form.title_ar"
                     type="text"
                     required
-                    class="w-full px-4 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-violet-500"
+                    class="w-full px-4 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring"
                 />
             </div>
 
@@ -40,7 +40,7 @@
                 <input
                     v-model="form.title_en"
                     type="text"
-                    class="w-full px-4 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-violet-500"
+                    class="w-full px-4 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring"
                 />
             </div>
 
@@ -54,36 +54,25 @@
                     v-model="form.content_ar"
                     required
                     rows="4"
-                    class="w-full px-4 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-violet-500"
+                    class="w-full px-4 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring"
                 ></textarea>
             </div>
 
             <!-- Content EN -->
             <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                <label class="block text-sm font-medium text-text-primary mb-1">
                     {{ $t('common.content') }} (English)
                 </label>
                 <textarea
                     v-model="form.content_en"
                     rows="4"
-                    class="w-full px-4 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-violet-500"
+                    class="w-full px-4 py-2.5 text-sm border border-border-strong rounded-xl bg-surface text-text-primary focus:ring-2 focus:ring-focus-ring focus:border-action-primary"
                 ></textarea>
             </div>
 
             <!-- Is Active -->
-            <div class="flex items-center gap-2">
-                <input
-                    v-model="form.is_active"
-                    type="checkbox"
-                    id="reg_active"
-                    class="rounded text-violet-600"
-                />
-                <label
-                    for="reg_active"
-                    class="text-sm font-medium text-gray-700 dark:text-gray-300"
-                >
-                    {{ $t('common.active') }}
-                </label>
+            <div>
+                <AppToggle v-model="form.is_active" :label="$t('common.active')" />
             </div>
         </form>
 
@@ -92,14 +81,14 @@
                 <button
                     type="button"
                     @click="$emit('close')"
-                    class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600"
+                    class="px-4 py-2 text-sm font-medium text-text-primary bg-surface-muted rounded-lg hover:bg-surface-tertiary"
                 >
                     {{ $t('common.cancel') }}
                 </button>
                 <button
                     @click="submit"
                     :disabled="form.processing"
-                    class="px-4 py-2 text-sm font-medium text-white bg-violet-600 rounded-lg hover:bg-violet-700 disabled:opacity-50"
+                    class="px-4 py-2 text-sm font-medium text-action-on bg-action-primary rounded-lg hover:bg-action-primary-hover disabled:opacity-50"
                 >
                     {{ form.processing ? $t('common.saving') : $t('common.save') }}
                 </button>
@@ -114,6 +103,7 @@ import { useForm } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import BaseModal from '@/Components/BaseModal.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
+import AppToggle from '@/Components/Common/AppToggle.vue';
 import { useToast } from '@/Composables/useToast';
 
 const { t } = useI18n();

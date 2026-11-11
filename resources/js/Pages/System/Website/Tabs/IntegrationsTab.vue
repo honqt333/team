@@ -59,14 +59,10 @@ defineProps({
         </div>
 
         <!-- Chatbot Integration -->
-        <div
-            class="border border-indigo-100 dark:border-indigo-900/50 bg-indigo-50/30 dark:bg-indigo-900/10 rounded-xl p-6"
-        >
+        <div class="border border-action-primary/25 bg-selection-bg rounded-xl p-6">
             <div class="flex items-center justify-between mb-6">
                 <div>
-                    <h3
-                        class="text-lg font-bold text-indigo-900 dark:text-indigo-300 flex items-center gap-2"
-                    >
+                    <h3 class="text-lg font-bold text-selection-text flex items-center gap-2">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path
                                 stroke-linecap="round"
@@ -77,7 +73,7 @@ defineProps({
                         </svg>
                         {{ $t('tenant_site.integrations.chatbot') }}
                     </h3>
-                    <p class="text-xs text-indigo-700 dark:text-indigo-400">
+                    <p class="text-xs text-selection-text">
                         {{ $t('tenant_site.integrations.chatbot_desc') }}
                     </p>
                 </div>

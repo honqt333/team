@@ -266,7 +266,7 @@ async function onBannerFileChange(e, banner, index) {
                                 @click="bannerInputs[index]?.click()"
                                 type="button"
                                 :disabled="uploadingIndex === index"
-                                class="text-xs text-indigo-600 dark:text-indigo-400 font-medium hover:text-indigo-800 w-full text-center disabled:opacity-50"
+                                class="text-xs text-action-primary font-medium hover:text-selection-text w-full text-center disabled:opacity-50"
                             >
                                 {{
                                     uploadingIndex === index

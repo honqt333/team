@@ -61,7 +61,7 @@
                         type="text"
                         v-model="searchQuery"
                         :placeholder="$t('common.search') + '...'"
-                        class="w-full ps-9 pe-3 py-2 text-sm border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all shadow-sm"
+                        class="w-full ps-9 pe-3 py-2 text-sm border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-focus-ring focus:border-transparent transition-all shadow-sm"
                     />
                 </div>
             </div>
@@ -331,7 +331,7 @@
                                 required
                                 :min="todayDate"
                                 dir="ltr"
-                                class="w-full px-4 py-2.5 text-sm border rounded-xl bg-gray-50 dark:bg-gray-900 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-amber-500 text-left font-mono"
+                                class="w-full px-4 py-2.5 text-sm border rounded-xl bg-gray-50 dark:bg-gray-900 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-focus-ring text-left font-mono"
                             />
                         </div>
 
@@ -345,7 +345,7 @@
                             <textarea
                                 v-model="creditInvoiceForm.notes"
                                 rows="3"
-                                class="w-full px-4 py-2.5 text-sm border rounded-xl bg-gray-50 dark:bg-gray-900 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-amber-500 placeholder-gray-400 dark:placeholder-gray-500"
+                                class="w-full px-4 py-2.5 text-sm border rounded-xl bg-gray-50 dark:bg-gray-900 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-focus-ring placeholder-gray-400 dark:placeholder-gray-500"
                                 :placeholder="$t('payments.form.notes_placeholder')"
                             ></textarea>
                         </div>
@@ -365,7 +365,7 @@
                         <button
                             type="submit"
                             :disabled="submittingCreditInvoice"
-                            class="px-4 py-2 text-sm font-medium text-white bg-amber-600 hover:bg-amber-700 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                            class="px-4 py-2 text-sm font-medium text-white bg-amber-600 hover:bg-amber-700 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-focus-ring focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             <svg
                                 v-if="submittingCreditInvoice"
@@ -470,12 +470,12 @@ const formatDateTime = (date) => {
 const getMethodBadgeClass = (method) => {
     const classes = {
         cash: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
-        mada: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400',
+        mada: 'bg-purple-100 text-purple-700',
         visa: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
         mastercard: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400',
         transfer: 'bg-cyan-100 text-cyan-700 dark:bg-cyan-900/30 dark:text-cyan-400',
         apple_pay: 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300',
-        stc_pay: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400',
+        stc_pay: 'bg-purple-100 text-purple-700',
         tabby: 'bg-teal-100 text-teal-700 dark:bg-teal-900/30 dark:text-teal-400',
         tamara: 'bg-pink-100 text-pink-700 dark:bg-pink-900/30 dark:text-pink-400',
         credit: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400',

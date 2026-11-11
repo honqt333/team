@@ -202,7 +202,7 @@ watch(
                     >
                         <svg
                             v-if="saveStatus === 'saving'"
-                            class="animate-spin h-4 w-4 text-indigo-600"
+                            class="animate-spin h-4 w-4 text-action-primary"
                             fill="none"
                             viewBox="0 0 24 24"
                         >
@@ -250,7 +250,7 @@ watch(
                         </svg>
                         <span
                             :class="{
-                                'text-indigo-600 dark:text-indigo-400': saveStatus === 'saving',
+                                'text-action-primary': saveStatus === 'saving',
                                 'text-emerald-600 dark:text-emerald-400': saveStatus === 'saved',
                                 'text-rose-600 dark:text-rose-400': saveStatus === 'error',
                             }"
@@ -290,8 +290,8 @@ watch(
                             class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-xl transition-all shadow-sm"
                             :class="
                                 showPreview
-                                    ? 'bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400'
-                                    : 'text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-white dark:hover:bg-gray-800'
+                                    ? 'bg-selection-bg text-action-primary'
+                                    : 'text-gray-700 dark:text-gray-300 hover:text-action-primary hover:bg-white dark:hover:bg-gray-800'
                             "
                         >
                             <svg
@@ -319,7 +319,7 @@ watch(
                         <a
                             :href="route('public.landing.preview', { preview: 1 })"
                             target="_blank"
-                            class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-white dark:hover:bg-gray-800 rounded-xl transition-all shadow-sm"
+                            class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-action-primary hover:bg-white dark:hover:bg-gray-800 rounded-xl transition-all shadow-sm"
                         >
                             <svg
                                 class="w-4 h-4"
@@ -342,7 +342,7 @@ watch(
                     <button
                         @click="submit"
                         :disabled="form.processing"
-                        class="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white rounded-xl text-sm font-semibold transition-all shadow-md hover:shadow-indigo-500/25 active:scale-95 disabled:opacity-50"
+                        class="inline-flex items-center gap-2 px-5 py-2.5 bg-action-primary hover:bg-action-primary-hover text-white rounded-xl text-sm font-semibold transition-all shadow-md hover:shadow-focus-ring-soft active:scale-95 disabled:opacity-50"
                     >
                         <svg
                             v-if="!form.processing"
@@ -405,7 +405,7 @@ watch(
                             @click="activeTab = tab.id"
                             :class="[
                                 activeTab === tab.id
-                                    ? 'bg-indigo-50 dark:bg-indigo-900/50 border-indigo-600 text-indigo-700 dark:text-indigo-300'
+                                    ? 'bg-selection-bg border-action-primary text-selection-text'
                                     : 'border-transparent text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white',
                                 'group border-r-4 px-4 py-3.5 w-full flex items-center text-sm font-medium transition-colors text-right rounded-l-lg',
                             ]"
@@ -413,7 +413,7 @@ watch(
                             <svg
                                 :class="[
                                     activeTab === tab.id
-                                        ? 'text-indigo-600 dark:text-indigo-400'
+                                        ? 'text-action-primary'
                                         : 'text-gray-400 group-hover:text-gray-500',
                                     'flex-shrink-0 ml-3 h-5 w-5',
                                 ]"
@@ -540,7 +540,7 @@ watch(
                                         ? 'bg-amber-500 animate-pulse'
                                         : saveStatus === 'saved'
                                           ? 'bg-emerald-500'
-                                          : 'bg-indigo-500'
+                                          : 'bg-action-primary'
                                 "
                             ></span>
                             <span class="truncate font-medium">
@@ -558,7 +558,7 @@ watch(
                                 type="button"
                                 @click="submit"
                                 :disabled="form.processing"
-                                class="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white rounded-xl text-sm font-semibold transition-all shadow-md hover:shadow-indigo-500/25 active:scale-95 disabled:opacity-50 cursor-pointer"
+                                class="inline-flex items-center gap-2 px-5 py-2.5 bg-action-primary hover:bg-action-primary-hover text-white rounded-xl text-sm font-semibold transition-all shadow-md hover:shadow-focus-ring-soft active:scale-95 disabled:opacity-50 cursor-pointer"
                             >
                                 <svg
                                     v-if="!form.processing"
@@ -614,14 +614,14 @@ watch(
 <!-- Shared utility classes (unscoped to reach child tab components) -->
 <style>
 .input-enterprise {
-    @apply mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm py-2 px-3 bg-white dark:bg-gray-700 dark:text-white transition-colors duration-200;
+    @apply mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-action-primary focus:ring-focus-ring sm:text-sm py-2 px-3 bg-white dark:bg-gray-700 dark:text-white transition-colors duration-200;
 }
 textarea.input-enterprise {
     @apply py-3;
 }
 
 .btn-enterprise {
-    @apply inline-flex justify-center items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed;
+    @apply inline-flex justify-center items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-action-primary hover:bg-action-primary-hover focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-focus-ring transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed;
 }
 .btn-outline {
     @apply inline-flex items-center px-3 py-2 border border-gray-300 dark:border-gray-600 shadow-sm text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200;

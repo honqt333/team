@@ -228,7 +228,7 @@
                             {{ $t('reports.services_report.service_vat') }}
                         </span>
                         <div
-                            class="w-7 h-7 rounded-lg bg-purple-50 dark:bg-purple-900/30 text-purple-600 flex items-center justify-center"
+                            class="w-7 h-7 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center"
                         >
                             <svg
                                 class="w-4 h-4"
@@ -245,7 +245,7 @@
                             </svg>
                         </div>
                     </div>
-                    <div class="text-xl font-black text-purple-600 dark:text-purple-400 font-mono">
+                    <div class="text-xl font-black text-purple-600 font-mono">
                         {{ formatMoney(kpis?.total_service_vat) }}
                         <span class="text-[10px] font-sans font-normal text-gray-400">
                             {{ $t('reports.services_report.currency') }}
@@ -371,7 +371,7 @@
                                 v-model="filterForm.search"
                                 type="text"
                                 :placeholder="$t('reports.services_report.search_placeholder')"
-                                class="w-full h-10 px-3.5 pe-8 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-xs text-gray-800 dark:text-gray-200 focus:ring-2 focus:ring-teal-500"
+                                class="w-full h-10 px-3.5 pe-8 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-xs text-gray-800 dark:text-gray-200 focus:ring-2 focus:ring-focus-ring"
                                 @keyup.enter="applyFilters"
                             />
                             <button
@@ -740,7 +740,7 @@
                                 <span class="text-gray-400 text-[10px] block font-sans">
                                     {{ $t('reports.services_report.service_vat') }}
                                 </span>
-                                <span class="font-bold text-purple-600 dark:text-purple-400">
+                                <span class="font-bold text-purple-600">
                                     {{ formatMoney(grp.total_service_vat) }}
                                 </span>
                             </div>
@@ -932,9 +932,7 @@
                                     >
                                         {{ formatMoney(srv.service_cost) }}
                                     </td>
-                                    <td
-                                        class="py-2.5 px-3 text-end font-mono text-purple-600 dark:text-purple-400"
-                                    >
+                                    <td class="py-2.5 px-3 text-end font-mono text-purple-600">
                                         {{ formatMoney(srv.service_vat) }}
                                         <span
                                             v-if="srv.is_vat_inclusive"
@@ -1167,9 +1165,7 @@
                                 >
                                     {{ formatMoney(srv.service_cost) }}
                                 </td>
-                                <td
-                                    class="py-3 px-3 text-end font-mono text-purple-600 dark:text-purple-400"
-                                >
+                                <td class="py-3 px-3 text-end font-mono text-purple-600">
                                     {{ formatMoney(srv.service_vat) }}
                                     <span
                                         v-if="srv.is_vat_inclusive"
@@ -1720,7 +1716,7 @@ const getServiceStatusBadgeClass = (status) => {
         case 'in_progress':
             return 'bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300';
         case 'ready_for_qc':
-            return 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/40 dark:text-indigo-300';
+            return 'bg-selection-bg text-selection-text';
         case 'on_hold':
             return 'bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300';
         case 'cancelled':

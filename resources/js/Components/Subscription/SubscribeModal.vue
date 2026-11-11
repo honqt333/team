@@ -317,7 +317,7 @@ const formatCurrency = (amount) => {
                 <div v-if="bankTransferResult" class="space-y-4 p-6">
                     <div class="text-center">
                         <div
-                            class="mx-auto mb-3 inline-flex h-14 w-14 items-center justify-center rounded-full bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-300"
+                            class="mx-auto mb-3 inline-flex h-14 w-14 items-center justify-center rounded-full bg-selection-bg text-action-primary"
                         >
                             <svg
                                 class="h-7 w-7"
@@ -413,11 +413,11 @@ const formatCurrency = (amount) => {
                             {{ t('subscription.billing_cycle', 'فترة الاشتراك') }}
                         </label>
                         <div
-                            class="rounded-xl border-2 border-indigo-600 bg-indigo-50/50 p-4 dark:border-indigo-400 dark:bg-indigo-900/20 flex items-center justify-between"
+                            class="rounded-xl border-2 border-action-primary bg-selection-bg p-4 flex items-center justify-between"
                         >
                             <div class="flex items-center gap-3">
                                 <div
-                                    class="w-10 h-10 rounded-lg bg-indigo-600 text-white flex items-center justify-center"
+                                    class="w-10 h-10 rounded-lg bg-action-primary text-white flex items-center justify-center"
                                 >
                                     <svg
                                         class="w-5 h-5"
@@ -442,7 +442,7 @@ const formatCurrency = (amount) => {
                                     </p>
                                 </div>
                             </div>
-                            <span class="text-lg font-black text-indigo-600 dark:text-indigo-400">
+                            <span class="text-lg font-black text-action-primary">
                                 {{ formatCurrency(plan?.price_yearly) }} SAR
                             </span>
                         </div>
@@ -505,7 +505,7 @@ const formatCurrency = (amount) => {
                                 <span class="text-slate-900 dark:text-white">
                                     {{ t('subscription.total', 'الإجمالي') }}
                                 </span>
-                                <span class="font-mono text-indigo-600 dark:text-indigo-400">
+                                <span class="font-mono text-action-primary">
                                     {{ formatCurrency(pricing.total) }} SAR
                                 </span>
                             </div>
@@ -582,7 +582,7 @@ const formatCurrency = (amount) => {
                         type="button"
                         @click="subscribe"
                         :disabled="loading || !pricing"
-                        class="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-5 py-2 text-sm font-semibold text-white hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50"
+                        class="inline-flex items-center gap-2 rounded-lg bg-action-primary px-5 py-2 text-sm font-semibold text-white hover:bg-action-primary-hover disabled:cursor-not-allowed disabled:opacity-50"
                     >
                         <svg
                             v-if="loading"

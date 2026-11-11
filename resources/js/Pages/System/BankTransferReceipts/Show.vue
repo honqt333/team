@@ -355,13 +355,9 @@ const amountState = computed(() => {
                                 </span>
                                 <p class="text-gray-700 dark:text-gray-200">
                                     {{
-                                        receipt.subscription?.billing_cycle === 'yearly'
-                                            ? locale === 'ar'
-                                                ? $t('system.bank_transfer_receipts.yearly')
-                                                : 'Yearly'
-                                            : locale === 'ar'
-                                              ? $t('system.bank_transfer_receipts.monthly')
-                                              : 'Monthly'
+                                        locale === 'ar'
+                                            ? $t('system.bank_transfer_receipts.yearly')
+                                            : 'Yearly'
                                     }}
                                 </p>
                             </div>
@@ -474,11 +470,9 @@ const amountState = computed(() => {
                         </p>
                     </div>
 
-                    <div
-                        class="rounded-xl border border-indigo-200 bg-indigo-50 p-5 dark:border-indigo-800/50 dark:bg-indigo-900/10"
-                    >
+                    <div class="rounded-xl border border-action-primary/25 bg-selection-bg p-5">
                         <h2
-                            class="mb-3 text-sm font-bold uppercase tracking-wider text-indigo-700 dark:text-indigo-300"
+                            class="mb-3 text-sm font-bold uppercase tracking-wider text-selection-text"
                         >
                             {{
                                 locale === 'ar'
@@ -495,9 +489,7 @@ const amountState = computed(() => {
                                             : 'Amount'
                                     }}
                                 </span>
-                                <span
-                                    class="font-mono font-bold text-indigo-700 dark:text-indigo-300"
-                                >
+                                <span class="font-mono font-bold text-selection-text">
                                     {{ formatCurrency(receipt.transfer_amount) }} SAR
                                 </span>
                             </div>
@@ -620,7 +612,7 @@ const amountState = computed(() => {
                         </h2>
                         <a
                             :href="`/system/bank-transfer-receipts/${receipt.id}/download`"
-                            class="inline-flex items-center gap-1 text-xs font-semibold text-indigo-600 hover:text-indigo-700 dark:text-indigo-400"
+                            class="inline-flex items-center gap-1 text-xs font-semibold text-action-primary hover:text-selection-text"
                         >
                             <svg
                                 class="h-3.5 w-3.5"
@@ -680,7 +672,7 @@ const amountState = computed(() => {
                         <a
                             :href="receipt.receipt_url"
                             target="_blank"
-                            class="mt-4 inline-flex rounded-lg bg-indigo-600 px-4 py-2 text-xs font-semibold text-white hover:bg-indigo-700"
+                            class="mt-4 inline-flex rounded-lg bg-action-primary px-4 py-2 text-xs font-semibold text-white hover:bg-action-primary-hover"
                         >
                             {{
                                 locale === 'ar'
@@ -727,7 +719,7 @@ const amountState = computed(() => {
                                   )
                                 : 'e.g. Amount mismatch, receipt unclear...'
                         "
-                        class="mt-4 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-rose-500 focus:ring-1 focus:ring-rose-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                        class="mt-4 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-danger focus:ring-1 focus:ring-danger dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                     ></textarea>
                     <div class="mt-6 flex justify-end gap-2">
                         <button
@@ -945,7 +937,7 @@ const amountState = computed(() => {
                                   )
                                 : 'e.g. Confirmed full amount received from tenant...'
                         "
-                        class="mt-1 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                        class="mt-1 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-action-primary focus:ring-1 focus:ring-focus-ring dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                     ></textarea>
 
                     <div class="mt-6 flex justify-end gap-2">

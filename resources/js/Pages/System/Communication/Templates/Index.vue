@@ -131,7 +131,7 @@
                                                 template.id
                                             )
                                         "
-                                        class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-bold text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50 dark:text-indigo-400 dark:hover:bg-indigo-950/40 transition-colors"
+                                        class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-bold text-action-primary hover:text-selection-text hover:bg-selection-bg transition-colors"
                                     >
                                         <svg
                                             class="w-3.5 h-3.5"

@@ -11,9 +11,9 @@
                 gradientTo="to-pink-600"
                 glowFrom="from-purple-500"
                 glowTo="to-pink-600"
-                badgeBg="bg-purple-50/70 dark:bg-purple-950/40"
-                badgeText="text-purple-600 dark:text-purple-400"
-                badgeBorder="border-purple-200/50 dark:border-purple-800/40"
+                badgeBg="bg-purple-50/70"
+                badgeText="text-purple-600"
+                badgeBorder="border-purple-200/50"
                 badgeDot="bg-purple-500"
             >
                 <template #icon>

@@ -478,7 +478,7 @@
                                                     </span>
                                                     <span
                                                         v-if="service.type === 'external'"
-                                                        class="px-1.5 py-0.5 text-[10px] font-semibold rounded bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400"
+                                                        class="px-1.5 py-0.5 text-[10px] font-semibold rounded bg-purple-100 text-purple-600"
                                                     >
                                                         {{ $t('services_management.coming_soon') }}
                                                     </span>
@@ -783,7 +783,7 @@
                                                     </span>
                                                     <span
                                                         v-if="service.type === 'external'"
-                                                        class="px-1.5 py-0.5 text-[10px] font-semibold rounded bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400"
+                                                        class="px-1.5 py-0.5 text-[10px] font-semibold rounded bg-purple-100 text-purple-600"
                                                     >
                                                         {{ $t('services_management.coming_soon') }}
                                                     </span>
@@ -1787,8 +1787,8 @@ const tabs = computed(() => [
     {
         key: 'packages',
         label: t('packages.title'),
-        iconColor: 'text-indigo-500',
-        bgColor: 'bg-indigo-100 dark:bg-indigo-900/30',
+        iconColor: 'text-action-primary',
+        bgColor: 'bg-selection-bg',
         gradientFrom: '#6366f1', // indigo-500
         gradientTo: '#2563eb', // indigo-600
         count: props.packages?.length || 0,
@@ -1819,7 +1819,7 @@ const headerConfig = computed(() => {
             activeTab.value === 'services'
                 ? 'from-teal-600'
                 : activeTab.value === 'packages'
-                  ? 'from-indigo-600'
+                  ? 'from-action-primary'
                   : 'from-amber-600',
         glowTo:
             activeTab.value === 'services'
@@ -1831,25 +1831,25 @@ const headerConfig = computed(() => {
             activeTab.value === 'services'
                 ? 'bg-teal-50/50 dark:bg-teal-900/30'
                 : activeTab.value === 'packages'
-                  ? 'bg-indigo-50/50 dark:bg-indigo-900/30'
+                  ? 'bg-selection-bg'
                   : 'bg-amber-50/50 dark:bg-amber-900/30',
         badgeText:
             activeTab.value === 'services'
                 ? 'text-teal-600 dark:text-teal-400'
                 : activeTab.value === 'packages'
-                  ? 'text-indigo-600 dark:text-indigo-400'
+                  ? 'text-action-primary'
                   : 'text-amber-600 dark:text-amber-400',
         badgeBorder:
             activeTab.value === 'services'
                 ? 'border-teal-100/50 dark:border-teal-800/30'
                 : activeTab.value === 'packages'
-                  ? 'border-indigo-100/50 dark:border-indigo-800/30'
+                  ? 'border-action-primary/25'
                   : 'border-amber-100/50 dark:border-amber-800/30',
         badgeDot:
             activeTab.value === 'services'
                 ? 'bg-teal-500'
                 : activeTab.value === 'packages'
-                  ? 'bg-indigo-500'
+                  ? 'bg-action-primary'
                   : 'bg-amber-500',
     };
 });

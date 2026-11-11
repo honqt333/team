@@ -103,7 +103,7 @@ const closeMessage = () => {
                     v-model="search"
                     type="text"
                     :placeholder="t('system.contact_messages.search_placeholder')"
-                    class="block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg leading-5 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm transition duration-150 ease-in-out"
+                    class="block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg leading-5 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-focus-ring focus:border-action-primary sm:text-sm transition duration-150 ease-in-out"
                 />
             </div>
 
@@ -186,7 +186,7 @@ const closeMessage = () => {
                                         <a
                                             :href="`mailto:${message.email}`"
                                             @click.stop
-                                            class="text-indigo-600 hover:text-indigo-900"
+                                            class="text-action-primary hover:text-selection-text"
                                             :title="t('system.contact_messages.send_email')"
                                         >
                                             <svg
@@ -272,7 +272,7 @@ const closeMessage = () => {
                             class="px-3 py-1 rounded text-sm transition-all"
                             :class="[
                                 link.active
-                                    ? 'bg-indigo-600 text-white'
+                                    ? 'bg-action-primary text-white'
                                     : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700',
                                 !link.url ? 'opacity-50 cursor-not-allowed' : '',
                             ]"
@@ -326,7 +326,7 @@ const closeMessage = () => {
                                 <div class="text-sm font-bold text-gray-900 dark:text-white">
                                     {{ selectedMessage.name }}
                                 </div>
-                                <div class="text-sm text-indigo-600 dark:text-indigo-400">
+                                <div class="text-sm text-action-primary">
                                     {{ selectedMessage.email }}
                                 </div>
                                 <div
@@ -374,7 +374,7 @@ const closeMessage = () => {
                         <div class="flex gap-2">
                             <a
                                 :href="`mailto:${selectedMessage.email}`"
-                                class="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-bold hover:bg-indigo-700 transition-all"
+                                class="inline-flex items-center gap-2 px-4 py-2 bg-action-primary text-white rounded-lg text-sm font-bold hover:bg-action-primary-hover transition-all"
                             >
                                 <svg
                                     class="w-4 h-4"

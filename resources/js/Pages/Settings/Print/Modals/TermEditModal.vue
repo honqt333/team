@@ -72,7 +72,7 @@
                             <textarea
                                 v-model="localTerm.text_ar"
                                 rows="4"
-                                class="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all text-end"
+                                class="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-focus-ring/20 focus:border-action-primary transition-all text-end"
                             ></textarea>
                         </div>
 
@@ -83,7 +83,7 @@
                             <textarea
                                 v-model="localTerm.text_en"
                                 rows="4"
-                                class="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all"
+                                class="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-focus-ring/20 focus:border-action-primary transition-all"
                             ></textarea>
                         </div>
 
@@ -94,7 +94,7 @@
                             <input
                                 v-model="localTerm.order"
                                 type="number"
-                                class="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all"
+                                class="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-focus-ring/20 focus:border-action-primary transition-all"
                             />
                         </div>
                     </div>

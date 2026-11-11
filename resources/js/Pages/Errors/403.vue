@@ -65,7 +65,7 @@
 
                 <Link
                     :href="homeHref"
-                    class="px-6 py-3 bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white rounded-xl transition-all duration-200 flex items-center justify-center gap-2"
+                    class="px-6 py-3 bg-action-primary hover:bg-action-primary-hover text-white rounded-xl transition-all duration-200 flex items-center justify-center gap-2"
                 >
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path

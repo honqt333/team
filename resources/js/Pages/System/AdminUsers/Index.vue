@@ -27,7 +27,7 @@
                     >
                         <Link
                             :href="route('system.activity-log')"
-                            class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-white dark:hover:bg-gray-800 rounded-xl transition-all shadow-sm"
+                            class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-action-primary hover:bg-white dark:hover:bg-gray-800 rounded-xl transition-all shadow-sm"
                         >
                             <svg
                                 class="w-4 h-4"
@@ -49,7 +49,7 @@
                     <button
                         v-if="isSuperAdmin"
                         @click="openCreateModal"
-                        class="inline-flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white rounded-xl text-sm font-semibold transition-all shadow-md hover:shadow-indigo-500/25 active:scale-95"
+                        class="inline-flex items-center gap-2 px-4 py-2.5 bg-action-primary hover:bg-action-primary-hover text-white rounded-xl text-sm font-semibold transition-all shadow-md hover:shadow-focus-ring-soft active:scale-95"
                     >
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path
@@ -85,7 +85,7 @@
                         type="text"
                         :placeholder="$t('system.admin_users.search_placeholder')"
                         @keyup.enter="applyFilters"
-                        class="w-full px-4 py-2 pr-10 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500"
+                        class="w-full px-4 py-2 pr-10 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring"
                     />
                 </div>
                 <SearchableSelect
@@ -141,7 +141,7 @@
                             <td class="px-4 py-3 align-middle">
                                 <div class="flex items-center gap-3">
                                     <div
-                                        class="w-10 h-10 rounded-full bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center text-indigo-600 dark:text-indigo-300 font-bold"
+                                        class="w-10 h-10 rounded-full bg-selection-bg flex items-center justify-center text-action-primary font-bold"
                                     >
                                         {{ admin.name?.charAt(0) }}
                                     </div>
@@ -193,7 +193,7 @@
                                     <button
                                         v-if="isSuperAdmin"
                                         @click="openEditModal(admin)"
-                                        class="inline-flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-lg transition-colors"
+                                        class="inline-flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-action-primary hover:text-selection-text hover:bg-selection-bg rounded-lg transition-colors"
                                     >
                                         <svg
                                             class="w-4 h-4"
@@ -373,7 +373,7 @@
                                         :class="[
                                             'border rounded-lg p-3 cursor-pointer transition',
                                             form.role === key
-                                                ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-900/20'
+                                                ? 'border-action-primary bg-selection-bg'
                                                 : 'border-gray-200 dark:border-gray-700',
                                         ]"
                                     >
@@ -446,7 +446,7 @@
                                 <button
                                     type="submit"
                                     :disabled="form.processing"
-                                    class="inline-flex items-center px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium disabled:opacity-50 transition-colors"
+                                    class="inline-flex items-center px-6 py-2.5 bg-action-primary hover:bg-action-primary-hover text-white rounded-lg font-medium disabled:opacity-50 transition-colors"
                                 >
                                     {{
                                         form.processing
@@ -607,7 +607,7 @@ const getRoleLabel = (role) =>
 
 const getRoleClass = (role) =>
     ({
-        super_admin: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300',
+        super_admin: 'bg-purple-100 text-purple-700',
         admin: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300',
         support: 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300',
     })[role] || 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300';

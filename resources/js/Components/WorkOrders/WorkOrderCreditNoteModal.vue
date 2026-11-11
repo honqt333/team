@@ -20,10 +20,7 @@
                     </h3>
                     <p class="text-xs text-gray-500 dark:text-gray-400">
                         <span v-if="effectiveWorkOrder?.code">{{ effectiveWorkOrder.code }} •</span>
-                        <span
-                            v-if="invoice?.invoice_number"
-                            class="font-mono text-indigo-600 dark:text-indigo-400"
-                        >
+                        <span v-if="invoice?.invoice_number" class="font-mono text-action-primary">
                             #{{ invoice.invoice_number }}
                         </span>
                     </p>
@@ -193,7 +190,7 @@
                                             :max="svc.remaining_refundable_subtotal"
                                             min="0"
                                             step="0.01"
-                                            class="w-28 text-end px-2.5 py-1.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white font-mono text-xs focus:ring-2 focus:ring-rose-500 focus:border-rose-500 font-bold"
+                                            class="w-28 text-end px-2.5 py-1.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white font-mono text-xs focus:ring-2 focus:ring-danger focus:border-danger font-bold"
                                             :disabled="svc.remaining_refundable_subtotal <= 0"
                                         />
                                         <button
@@ -294,7 +291,7 @@
                                                 :max="part.remaining_refundable_qty"
                                                 min="0"
                                                 step="1"
-                                                class="w-24 text-end px-2.5 py-1.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white font-mono text-xs focus:ring-2 focus:ring-amber-500 focus:border-amber-500 font-bold"
+                                                class="w-24 text-end px-2.5 py-1.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white font-mono text-xs focus:ring-2 focus:ring-focus-ring focus:border-action-primary font-bold"
                                                 :disabled="part.remaining_refundable_qty <= 0"
                                             />
                                             <button
@@ -310,19 +307,15 @@
                                                 {{ $t('common.all') }}
                                             </button>
                                         </div>
-                                        <label
+                                        <div
                                             v-if="returnParts[part.id] > 0 && part.part_id"
-                                            class="inline-flex items-center gap-1 text-[10px] text-gray-500 cursor-pointer"
+                                            class="pt-0.5"
                                         >
-                                            <input
-                                                type="checkbox"
+                                            <AppCheckbox
                                                 v-model="restockParts[part.id]"
-                                                class="w-3 h-3 text-amber-600 rounded border-gray-300 focus:ring-amber-500"
+                                                :label="$t('invoices.credit_note.return_to_stock')"
                                             />
-                                            <span>
-                                                {{ $t('invoices.credit_note.return_to_stock') }}
-                                            </span>
-                                        </label>
+                                        </div>
                                     </div>
                                 </td>
                             </tr>
@@ -442,7 +435,7 @@
                                 type="radio"
                                 value="immediate"
                                 v-model="refundMode"
-                                class="w-4 h-4 text-rose-600 border-gray-300 focus:ring-rose-500"
+                                class="w-4 h-4 text-rose-600 border-gray-300 focus:ring-danger"
                             />
                             <span class="font-bold text-gray-900 dark:text-white">
                                 {{ $t('invoices.credit_note.immediate_refund_option') }}
@@ -467,7 +460,7 @@
                                 type="radio"
                                 value="deferred"
                                 v-model="refundMode"
-                                class="w-4 h-4 text-amber-600 border-gray-300 focus:ring-amber-500"
+                                class="w-4 h-4 text-amber-600 border-gray-300 focus:ring-focus-ring"
                             />
                             <span class="font-bold text-gray-900 dark:text-white">
                                 {{ $t('invoices.credit_note.deferred_refund_option') }}
@@ -506,7 +499,7 @@
                             type="text"
                             v-model="refundReference"
                             placeholder="مثال: رقم الحوالة أو إيصال الشبكة"
-                            class="w-full px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white text-xs focus:ring-2 focus:ring-rose-500"
+                            class="w-full px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white text-xs focus:ring-2 focus:ring-danger"
                         />
                     </div>
                 </div>
@@ -523,7 +516,7 @@
                         <input
                             type="date"
                             v-model="paymentDueDate"
-                            class="w-full px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white text-xs focus:ring-2 focus:ring-amber-500 font-mono"
+                            class="w-full px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white text-xs focus:ring-2 focus:ring-focus-ring font-mono"
                         />
                     </div>
                     <div
@@ -554,7 +547,7 @@
                     v-model="returnReason"
                     rows="2"
                     :placeholder="$t('invoices.credit_note.reason_placeholder')"
-                    class="w-full px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white text-xs focus:ring-2 focus:ring-rose-500 resize-none"
+                    class="w-full px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white text-xs focus:ring-2 focus:ring-danger resize-none"
                 ></textarea>
             </div>
 

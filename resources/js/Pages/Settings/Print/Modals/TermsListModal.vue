@@ -87,7 +87,7 @@
                                     v-model="search"
                                     type="text"
                                     :placeholder="$t('common.search')"
-                                    class="w-full ps-10 pe-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 dark:bg-gray-900 dark:text-white focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all text-sm"
+                                    class="w-full ps-10 pe-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 dark:bg-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring/20 focus:border-action-primary transition-all text-sm"
                                 />
                             </div>
                             <button

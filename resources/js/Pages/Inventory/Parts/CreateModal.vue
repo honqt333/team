@@ -68,7 +68,7 @@
 
                             <div v-else class="flex flex-col items-center text-center">
                                 <div
-                                    class="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 flex items-center justify-center mb-1.5 group-hover:scale-110 transition-transform"
+                                    class="w-10 h-10 rounded-xl bg-selection-bg text-action-primary flex items-center justify-center mb-1.5 group-hover:scale-110 transition-transform"
                                 >
                                     <svg
                                         class="w-5 h-5"
@@ -116,9 +116,9 @@
                                 v-model="form.name_ar"
                                 type="text"
                                 :class="[
-                                    'w-full px-4 py-2.5 rounded-xl border bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 shadow-sm transition-all',
+                                    'w-full px-4 py-2.5 rounded-xl border bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring shadow-sm transition-all',
                                     form.errors.name_ar
-                                        ? 'border-red-500 focus:ring-red-500'
+                                        ? 'border-red-500 focus:ring-danger'
                                         : 'border-gray-300 dark:border-gray-600',
                                 ]"
                                 :placeholder="$t('inventory.parts.name_ar_placeholder')"
@@ -145,7 +145,7 @@
                                 dir="ltr"
                                 required
                                 :class="[
-                                    'w-full px-4 py-2.5 rounded-xl border bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 shadow-sm transition-all',
+                                    'w-full px-4 py-2.5 rounded-xl border bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring shadow-sm transition-all',
                                     form.errors.name_en
                                         ? 'border-red-500'
                                         : 'border-gray-300 dark:border-gray-600',
@@ -175,9 +175,9 @@
                             dir="ltr"
                             @input="sanitizeInput($event, 'sku')"
                             :class="[
-                                'w-full px-4 py-2.5 rounded-xl border bg-white dark:bg-gray-900 text-gray-900 dark:text-white font-mono focus:ring-2 focus:ring-indigo-500 shadow-sm transition-all',
+                                'w-full px-4 py-2.5 rounded-xl border bg-white dark:bg-gray-900 text-gray-900 dark:text-white font-mono focus:ring-2 focus:ring-focus-ring shadow-sm transition-all',
                                 form.errors.sku
-                                    ? 'border-red-500 focus:ring-red-500'
+                                    ? 'border-red-500 focus:ring-danger'
                                     : 'border-gray-300 dark:border-gray-600',
                             ]"
                             :placeholder="$t('inventory.parts.sku_placeholder')"
@@ -194,7 +194,7 @@
                             <button
                                 type="button"
                                 @click="showBarcodePreview = true"
-                                class="flex-shrink-0 text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 p-1"
+                                class="flex-shrink-0 text-gray-400 hover:text-action-primary p-1"
                                 :title="$t('common.expand')"
                             >
                                 <svg
@@ -276,7 +276,7 @@
                                 dir="ltr"
                                 lang="en"
                                 :disabled="!form.purchase_unit_id"
-                                class="w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 shadow-sm font-mono disabled:opacity-50 disabled:cursor-not-allowed"
+                                class="w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring shadow-sm font-mono disabled:opacity-50 disabled:cursor-not-allowed"
                                 :placeholder="'1'"
                             />
                             <span
@@ -336,7 +336,7 @@
                         v-model="form.description"
                         rows="3"
                         :placeholder="$t('inventory.parts.description_placeholder')"
-                        class="w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 shadow-sm transition-all resize-none"
+                        class="w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring shadow-sm transition-all resize-none"
                     ></textarea>
                 </div>
 
@@ -347,7 +347,7 @@
                             class="text-base font-bold text-gray-900 dark:text-white flex items-center gap-2"
                         >
                             <svg
-                                class="w-5 h-5 text-indigo-500"
+                                class="w-5 h-5 text-action-primary"
                                 fill="none"
                                 stroke="currentColor"
                                 viewBox="0 0 24 24"

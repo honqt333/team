@@ -121,8 +121,7 @@ const getStatusColor = (status) => {
             'bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300 border-amber-200 dark:border-amber-800',
         on_hold:
             'bg-orange-100 text-orange-800 dark:bg-orange-900/40 dark:text-orange-300 border-orange-200 dark:border-orange-800',
-        ready_for_qc:
-            'bg-purple-100 text-purple-800 dark:bg-purple-900/40 dark:text-purple-300 border-purple-200 dark:border-purple-800',
+        ready_for_qc: 'bg-purple-100 text-purple-800 border-purple-200',
         completed:
             'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800',
         done: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800',
@@ -630,7 +629,7 @@ const saveChecklist = async () => {
         <div class="space-y-6 pb-12">
             <!-- Header Banner -->
             <div
-                class="bg-gradient-to-r from-indigo-700 via-purple-700 to-violet-800 rounded-2xl p-6 text-white shadow-md relative overflow-hidden"
+                class="bg-gradient-to-r from-action-primary via-purple-700 to-action-primary rounded-2xl p-6 text-white shadow-md relative overflow-hidden"
             >
                 <div
                     class="absolute -left-12 -bottom-12 w-48 h-48 bg-white/5 rounded-full blur-2xl"
@@ -699,8 +698,8 @@ const saveChecklist = async () => {
                     :class="[
                         'p-4 rounded-xl border text-start transition-all duration-200 flex flex-col justify-between',
                         currentFilter === tab.key
-                            ? 'bg-purple-50 border-purple-500 shadow-sm dark:bg-purple-950/40 dark:border-purple-600 ring-2 ring-purple-500/30'
-                            : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:border-purple-300 dark:hover:border-purple-800',
+                            ? 'bg-purple-50 border-purple-500 shadow-sm ring-2 ring-purple-500/30'
+                            : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:border-purple-300',
                     ]"
                 >
                     <div class="flex items-center justify-between gap-2">
@@ -858,7 +857,7 @@ const saveChecklist = async () => {
                                             workOrder.contact_phone
                                         "
                                         :href="`tel:${workOrder.vehicle?.customer?.phone || workOrder.contact_phone}`"
-                                        class="flex items-center gap-1 text-indigo-600 dark:text-indigo-400 font-bold hover:underline"
+                                        class="flex items-center gap-1 text-action-primary font-bold hover:underline"
                                         dir="ltr"
                                     >
                                         <span>📞</span>
@@ -878,7 +877,7 @@ const saveChecklist = async () => {
                             >
                                 <span>المهام الموكلة لك:</span>
                                 <span
-                                    class="w-6 h-6 rounded-full bg-purple-100 dark:bg-purple-900/50 text-purple-700 dark:text-purple-300 flex items-center justify-center font-bold"
+                                    class="w-6 h-6 rounded-full bg-purple-100 text-purple-700 flex items-center justify-center font-bold"
                                 >
                                     {{ workOrder.items?.length || 0 }}
                                 </span>
@@ -912,7 +911,7 @@ const saveChecklist = async () => {
                         <div
                             v-for="item in workOrder.items"
                             :key="item.id"
-                            class="bg-gray-50/70 dark:bg-gray-900/40 rounded-2xl p-4 sm:p-5 border border-gray-200/80 dark:border-gray-700 flex flex-col gap-4 transition-all hover:border-purple-300 dark:hover:border-purple-800"
+                            class="bg-gray-50/70 dark:bg-gray-900/40 rounded-2xl p-4 sm:p-5 border border-gray-200/80 dark:border-gray-700 flex flex-col gap-4 transition-all hover:border-purple-300"
                         >
                             <!-- Task Row 1: Title, Status Badges & Timer -->
                             <div class="flex flex-wrap items-start justify-between gap-4">
@@ -969,7 +968,7 @@ const saveChecklist = async () => {
                                             <span class="font-bold">{{ tech.name }}</span>
                                             <span
                                                 v-if="Number(tech.id) === currentUserId"
-                                                class="text-[10px] text-purple-600 dark:text-purple-400 font-bold"
+                                                class="text-[10px] text-purple-600 font-bold"
                                             >
                                                 (أنت)
                                             </span>
@@ -1152,7 +1151,7 @@ const saveChecklist = async () => {
                                             type="button"
                                             @click="startTimer(workOrder, item)"
                                             :disabled="isItemLoading(`${workOrder.id}-${item.id}`)"
-                                            class="px-3.5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl shadow-2xs flex items-center gap-1.5 disabled:opacity-50 transition-colors"
+                                            class="px-3.5 py-2 bg-action-primary hover:bg-action-primary-hover text-white text-xs font-bold rounded-xl shadow-2xs flex items-center gap-1.5 disabled:opacity-50 transition-colors"
                                         >
                                             <span>▶</span>
                                             {{ $t('employee_portal.actions.start_work') }}
@@ -1232,7 +1231,7 @@ const saveChecklist = async () => {
                                         <span>{{ $t('employee_portal.photos') }}</span>
                                         <span
                                             v-if="item.photos && item.photos.length > 0"
-                                            class="px-1.5 py-0.2 rounded-full bg-purple-100 dark:bg-purple-900/50 text-purple-700 dark:text-purple-300 text-[10px] font-bold"
+                                            class="px-1.5 py-0.2 rounded-full bg-purple-100 text-purple-700 text-[10px] font-bold"
                                         >
                                             {{ item.photos.length }}
                                         </span>
@@ -1248,7 +1247,7 @@ const saveChecklist = async () => {
                                         <span>{{ $t('employee_portal.checklist') }}</span>
                                         <span
                                             v-if="getChecklistSummary(item)"
-                                            class="px-1.5 py-0.2 rounded-full bg-indigo-100 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300 text-[10px] font-bold"
+                                            class="px-1.5 py-0.2 rounded-full bg-selection-bg text-selection-text text-[10px] font-bold"
                                         >
                                             {{ getChecklistSummary(item).completed }}/{{
                                                 getChecklistSummary(item).total
@@ -1294,7 +1293,7 @@ const saveChecklist = async () => {
                 class="text-center py-16 bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 px-4"
             >
                 <div
-                    class="w-16 h-16 rounded-2xl bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 flex items-center justify-center text-3xl mx-auto mb-4"
+                    class="w-16 h-16 rounded-2xl bg-purple-100 text-purple-600 flex items-center justify-center text-3xl mx-auto mb-4"
                 >
                     📋
                 </div>
@@ -1339,7 +1338,7 @@ const saveChecklist = async () => {
 
             <div class="space-y-4">
                 <div
-                    class="p-3 bg-purple-50 dark:bg-purple-950/30 border border-purple-200 dark:border-purple-800 rounded-xl text-xs text-purple-800 dark:text-purple-300 flex items-center gap-2"
+                    class="p-3 bg-purple-50 border border-purple-200 rounded-xl text-xs text-purple-800 flex items-center gap-2"
                 >
                     <span>💡</span>
                     <span>
@@ -1352,7 +1351,7 @@ const saveChecklist = async () => {
                     v-model="notesInput"
                     rows="6"
                     placeholder="اكتب ملاحظاتك التقنية حول تنفيذ الخدمة..."
-                    class="w-full rounded-xl border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-white shadow-sm focus:border-purple-500 focus:ring-purple-500 text-sm p-3.5"
+                    class="w-full rounded-xl border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-white shadow-sm focus:border-action-primary focus:ring-focus-ring text-sm p-3.5"
                 ></textarea>
 
                 <div class="flex justify-between items-center text-xs text-gray-400">
@@ -1561,7 +1560,7 @@ const saveChecklist = async () => {
                         @keyup.enter="addChecklistItem"
                         type="text"
                         placeholder="أدخل عنصر فحص جديد واضغط Enter..."
-                        class="flex-1 rounded-xl border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-white text-xs px-3 py-2.5 focus:border-purple-500 focus:ring-purple-500"
+                        class="flex-1 rounded-xl border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-white text-xs px-3 py-2.5 focus:border-action-primary focus:ring-focus-ring"
                     />
                     <button
                         type="button"

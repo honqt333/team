@@ -59,7 +59,7 @@
                         }}
                     </h2>
                     <span
-                        class="px-3 py-1 text-xs font-bold rounded-full bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300"
+                        class="px-3 py-1 text-xs font-bold rounded-full bg-selection-bg text-selection-text"
                     >
                         {{ group.signatures.length }}
                     </span>

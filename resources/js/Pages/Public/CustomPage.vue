@@ -83,10 +83,7 @@ const siteTitle = computed(() => {
                             :alt="siteTitle"
                             class="h-10 w-auto object-contain transition-transform group-hover:scale-105"
                         />
-                        <span
-                            v-else
-                            class="text-2xl font-black tracking-tight text-indigo-600 dark:text-indigo-400"
-                        >
+                        <span v-else class="text-2xl font-black tracking-tight text-action-primary">
                             {{ siteTitle }}
                         </span>
                     </Link>
@@ -95,7 +92,7 @@ const siteTitle = computed(() => {
                     <nav class="hidden md:flex items-center gap-6">
                         <Link
                             :href="route('home')"
-                            class="text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
+                            class="text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-action-primary transition-colors"
                         >
                             الرئيسية
                         </Link>
@@ -103,7 +100,7 @@ const siteTitle = computed(() => {
                             v-for="(link, i) in props.settings.header_menu || []"
                             :key="i"
                             :href="link.url"
-                            class="text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
+                            class="text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-action-primary transition-colors"
                         >
                             {{ link.label_ar || link.label_en }}
                         </a>
@@ -114,7 +111,7 @@ const siteTitle = computed(() => {
                 <div class="flex items-center gap-4">
                     <Link
                         :href="route('login')"
-                        class="inline-flex items-center justify-center px-4 py-2 text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg shadow-sm transition-all focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                        class="inline-flex items-center justify-center px-4 py-2 text-sm font-semibold text-white bg-action-primary hover:bg-action-primary-hover rounded-lg shadow-sm transition-all focus:ring-2 focus:ring-focus-ring focus:outline-none"
                     >
                         {{ props.settings.login_button_text_ar || 'دخول النظام' }}
                     </Link>
@@ -129,7 +126,7 @@ const siteTitle = computed(() => {
                 class="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400 mb-6"
                 aria-label="Breadcrumb"
             >
-                <Link :href="route('home')" class="hover:text-indigo-600 transition-colors">
+                <Link :href="route('home')" class="hover:text-action-primary transition-colors">
                     الرئيسية
                 </Link>
                 <span>/</span>
@@ -171,7 +168,7 @@ const siteTitle = computed(() => {
                     <div class="flex flex-wrap items-center justify-center gap-6">
                         <Link
                             :href="route('home')"
-                            class="text-xs text-gray-500 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
+                            class="text-xs text-gray-500 hover:text-action-primary transition-colors"
                         >
                             الرئيسية
                         </Link>
@@ -179,7 +176,7 @@ const siteTitle = computed(() => {
                             v-for="(link, i) in props.settings.footer_menu || []"
                             :key="i"
                             :href="link.url"
-                            class="text-xs text-gray-500 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
+                            class="text-xs text-gray-500 hover:text-action-primary transition-colors"
                         >
                             {{ link.label_ar || link.label_en }}
                         </a>

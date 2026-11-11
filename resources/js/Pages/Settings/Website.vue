@@ -191,7 +191,7 @@
                                 <input
                                     v-model="form.site_name"
                                     type="text"
-                                    class="w-full px-3.5 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-sm focus:ring-2 focus:ring-pink-500/20 focus:border-pink-500 transition-colors"
+                                    class="w-full px-3.5 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-sm focus:ring-2 focus:ring-focus-ring/20 focus:border-action-primary transition-colors"
                                     :placeholder="w.display_name"
                                 />
                                 <p v-if="errors.site_name" class="text-xs text-rose-500 mt-1">
@@ -208,7 +208,7 @@
                                 <input
                                     v-model="form.tagline"
                                     type="text"
-                                    class="w-full px-3.5 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-sm focus:ring-2 focus:ring-pink-500/20 focus:border-pink-500 transition-colors"
+                                    class="w-full px-3.5 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-sm focus:ring-2 focus:ring-focus-ring/20 focus:border-action-primary transition-colors"
                                     placeholder="أفضل ورشة لصيانة السيارات والميكانيكا بأحدث التقنيات"
                                 />
                                 <p v-if="errors.tagline" class="text-xs text-rose-500 mt-1">
@@ -496,7 +496,7 @@
                                 <input
                                     v-model="form.settings.announcement_bar.text"
                                     type="text"
-                                    class="w-full px-3.5 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-sm focus:ring-2 focus:ring-pink-500/20 focus:border-pink-500 transition-colors"
+                                    class="w-full px-3.5 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-sm focus:ring-2 focus:ring-focus-ring/20 focus:border-action-primary transition-colors"
                                     :placeholder="
                                         t('tenant_site.admin.announcement.text_placeholder')
                                     "
@@ -670,7 +670,7 @@
                                             <input
                                                 v-model="banner.badge"
                                                 type="text"
-                                                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-xs focus:ring-2 focus:ring-pink-500/20 focus:border-pink-500"
+                                                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-xs focus:ring-2 focus:ring-focus-ring/20 focus:border-action-primary"
                                                 placeholder="عرض خاص لفترة محدودة"
                                             />
                                         </div>
@@ -688,7 +688,7 @@
                                             <input
                                                 v-model="banner.title"
                                                 type="text"
-                                                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-xs focus:ring-2 focus:ring-pink-500/20 focus:border-pink-500"
+                                                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-xs focus:ring-2 focus:ring-focus-ring/20 focus:border-action-primary"
                                                 placeholder="خصم 20% على فحص وبرمجة كمبيوتر السيارة"
                                             />
                                         </div>
@@ -707,7 +707,7 @@
                                         <textarea
                                             v-model="banner.subtitle"
                                             rows="2"
-                                            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-xs focus:ring-2 focus:ring-pink-500/20 focus:border-pink-500 resize-none"
+                                            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-xs focus:ring-2 focus:ring-focus-ring/20 focus:border-action-primary resize-none"
                                             placeholder="احصل على تقرير فحص تفصيلي شامل لأكثر من 50 نقطة في المركبة مع ضمان شهر كامل"
                                         ></textarea>
                                     </div>
@@ -724,7 +724,7 @@
                                             <input
                                                 v-model="banner.cta_text"
                                                 type="text"
-                                                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-xs focus:ring-2 focus:ring-pink-500/20 focus:border-pink-500"
+                                                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-xs focus:ring-2 focus:ring-focus-ring/20 focus:border-action-primary"
                                                 placeholder="احجز الآن"
                                             />
                                         </div>
@@ -740,7 +740,7 @@
                                             <input
                                                 v-model="banner.cta_link"
                                                 type="text"
-                                                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-xs focus:ring-2 focus:ring-pink-500/20 focus:border-pink-500"
+                                                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-xs focus:ring-2 focus:ring-focus-ring/20 focus:border-action-primary"
                                                 placeholder="#booking أو رابط واتساب"
                                             />
                                         </div>
@@ -969,7 +969,7 @@
                                 <input
                                     v-model="serviceSearch"
                                     type="text"
-                                    class="w-full ps-9 pe-4 py-2 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-xs focus:ring-2 focus:ring-pink-500/20 focus:border-pink-500"
+                                    class="w-full ps-9 pe-4 py-2 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-xs focus:ring-2 focus:ring-focus-ring/20 focus:border-action-primary"
                                     :placeholder="
                                         t('tenant_site.admin.services_manager.search_services')
                                     "
@@ -1115,7 +1115,7 @@
                                     v-model="form.contact_phone"
                                     type="text"
                                     dir="ltr"
-                                    class="w-full px-3.5 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-sm focus:ring-2 focus:ring-pink-500/20 focus:border-pink-500"
+                                    class="w-full px-3.5 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-sm focus:ring-2 focus:ring-focus-ring/20 focus:border-action-primary"
                                     placeholder="0501234567"
                                 />
                                 <p v-if="errors.contact_phone" class="text-xs text-rose-500 mt-1">
@@ -1133,7 +1133,7 @@
                                     v-model="form.contact_whatsapp"
                                     type="text"
                                     dir="ltr"
-                                    class="w-full px-3.5 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-sm focus:ring-2 focus:ring-pink-500/20 focus:border-pink-500"
+                                    class="w-full px-3.5 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-sm focus:ring-2 focus:ring-focus-ring/20 focus:border-action-primary"
                                     placeholder="966501234567"
                                 />
                                 <p
@@ -1154,7 +1154,7 @@
                                     v-model="form.contact_email"
                                     type="email"
                                     dir="ltr"
-                                    class="w-full px-3.5 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-sm focus:ring-2 focus:ring-pink-500/20 focus:border-pink-500"
+                                    class="w-full px-3.5 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-sm focus:ring-2 focus:ring-focus-ring/20 focus:border-action-primary"
                                     placeholder="info@workshop.com"
                                 />
                                 <p v-if="errors.contact_email" class="text-xs text-rose-500 mt-1">
@@ -1172,7 +1172,7 @@
                             <input
                                 v-model="form.address_line"
                                 type="text"
-                                class="w-full px-3.5 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-sm focus:ring-2 focus:ring-pink-500/20 focus:border-pink-500"
+                                class="w-full px-3.5 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-sm focus:ring-2 focus:ring-focus-ring/20 focus:border-action-primary"
                                 placeholder="الرياض — صناعية أم الحمام — شارع الورش الرئيسي"
                             />
                             <p v-if="errors.address_line" class="text-xs text-rose-500 mt-1">
@@ -1207,7 +1207,7 @@
                                     v-model="form.social_links[key]"
                                     type="url"
                                     dir="ltr"
-                                    class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-xs focus:ring-2 focus:ring-pink-500/20 focus:border-pink-500"
+                                    class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-xs focus:ring-2 focus:ring-focus-ring/20 focus:border-action-primary"
                                     placeholder="https://..."
                                 />
                             </div>
@@ -1299,7 +1299,7 @@
                                             v-model="form.custom_domain"
                                             type="text"
                                             dir="ltr"
-                                            class="w-full ps-20 pe-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-sm font-mono focus:ring-2 focus:ring-pink-500/20 focus:border-pink-500"
+                                            class="w-full ps-20 pe-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-sm font-mono focus:ring-2 focus:ring-focus-ring/20 focus:border-action-primary"
                                             :placeholder="
                                                 t(
                                                     'tenant_site.admin.custom_domain.input_placeholder'
@@ -1400,7 +1400,7 @@
                                     v-model="form.seo_title"
                                     type="text"
                                     maxlength="70"
-                                    class="w-full px-3.5 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-sm focus:ring-2 focus:ring-pink-500/20 focus:border-pink-500"
+                                    class="w-full px-3.5 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-sm focus:ring-2 focus:ring-focus-ring/20 focus:border-action-primary"
                                     :placeholder="form.site_name || w.display_name"
                                 />
                                 <span class="text-[11px] text-gray-400 mt-1 block">
@@ -1421,7 +1421,7 @@
                                     v-model="form.seo_description"
                                     rows="3"
                                     maxlength="200"
-                                    class="w-full px-3.5 py-2 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-sm focus:ring-2 focus:ring-pink-500/20 focus:border-pink-500 resize-none"
+                                    class="w-full px-3.5 py-2 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-sm focus:ring-2 focus:ring-focus-ring/20 focus:border-action-primary resize-none"
                                     :placeholder="
                                         form.tagline || 'مركز متخصص في صيانة وفحص وبرمجة السيارات'
                                     "
@@ -1513,7 +1513,7 @@
                                     <input
                                         v-model="badge.title"
                                         type="text"
-                                        class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-xs focus:ring-2 focus:ring-pink-500/20 focus:border-pink-500"
+                                        class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-xs focus:ring-2 focus:ring-focus-ring/20 focus:border-action-primary"
                                     />
                                 </div>
                                 <div>
@@ -1525,7 +1525,7 @@
                                     <textarea
                                         v-model="badge.desc"
                                         rows="2"
-                                        class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-xs focus:ring-2 focus:ring-pink-500/20 focus:border-pink-500 resize-none"
+                                        class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-xs focus:ring-2 focus:ring-focus-ring/20 focus:border-action-primary resize-none"
                                     ></textarea>
                                 </div>
                             </div>
@@ -1952,7 +1952,7 @@ function applyPalette(pal) {
 
 // Banner background gradient choices
 const bannerGradients = [
-    { name: 'بنفسجي ملكي', value: 'from-indigo-600 to-blue-700' },
+    { name: 'بنفسجي ملكي', value: 'from-action-primary to-blue-700' },
     { name: 'أحمر ناري', value: 'from-rose-600 to-amber-600' },
     { name: 'زمردي عميق', value: 'from-emerald-600 to-teal-800' },
     { name: 'كربوني داكن', value: 'from-slate-900 to-slate-700' },
@@ -2133,7 +2133,7 @@ function addNewBanner() {
         cta_link: '#booking',
         image_path: null,
         image_url: null,
-        bg_gradient: 'from-indigo-600 to-blue-700',
+        bg_gradient: 'from-action-primary to-blue-700',
         is_active: true,
         sort_order: form.banners.length + 1,
     });

@@ -85,7 +85,7 @@
                                     class="absolute inset-0 bg-white/80 dark:bg-gray-900/80 flex items-center justify-center"
                                 >
                                     <svg
-                                        class="animate-spin w-6 h-6 text-indigo-600"
+                                        class="animate-spin w-6 h-6 text-action-primary"
                                         fill="none"
                                         viewBox="0 0 24 24"
                                     >
@@ -125,7 +125,7 @@
                                         type="button"
                                         @click="logoInput.click()"
                                         :disabled="uploading"
-                                        class="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white text-sm font-medium rounded-lg transition-colors"
+                                        class="inline-flex items-center gap-2 px-4 py-2 bg-action-primary hover:bg-action-primary-hover disabled:opacity-50 text-white text-sm font-medium rounded-lg transition-colors"
                                     >
                                         <svg
                                             class="w-4 h-4"
@@ -230,7 +230,7 @@
                                     class="absolute inset-0 bg-white/80 dark:bg-gray-900/80 flex items-center justify-center"
                                 >
                                     <svg
-                                        class="animate-spin w-6 h-6 text-indigo-600"
+                                        class="animate-spin w-6 h-6 text-action-primary"
                                         fill="none"
                                         viewBox="0 0 24 24"
                                     >
@@ -270,7 +270,7 @@
                                         type="button"
                                         @click="stampInput.click()"
                                         :disabled="uploadingStamp"
-                                        class="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white text-sm font-medium rounded-lg transition-colors"
+                                        class="inline-flex items-center gap-2 px-4 py-2 bg-action-primary hover:bg-action-primary-hover disabled:opacity-50 text-white text-sm font-medium rounded-lg transition-colors"
                                     >
                                         <svg
                                             class="w-4 h-4"
@@ -347,7 +347,7 @@
                                 <input
                                     type="text"
                                     v-model="form.company_legal_name"
-                                    class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-sm focus:ring-indigo-500 focus:border-indigo-500"
+                                    class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-sm focus:ring-focus-ring focus:border-action-primary"
                                 />
                             </div>
                             <div>
@@ -360,7 +360,7 @@
                                     type="text"
                                     v-model="form.company_legal_name_en"
                                     dir="ltr"
-                                    class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-sm focus:ring-indigo-500 focus:border-indigo-500"
+                                    class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-sm focus:ring-focus-ring focus:border-action-primary"
                                 />
                             </div>
                             <div>
@@ -374,7 +374,7 @@
                                     v-model="form.company_vat_number"
                                     dir="ltr"
                                     maxlength="15"
-                                    class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-sm font-mono focus:ring-indigo-500 focus:border-indigo-500"
+                                    class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-sm font-mono focus:ring-focus-ring focus:border-action-primary"
                                 />
                             </div>
                             <div>
@@ -387,7 +387,7 @@
                                     type="text"
                                     v-model="form.company_cr_number"
                                     dir="ltr"
-                                    class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-sm focus:ring-indigo-500 focus:border-indigo-500"
+                                    class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-sm focus:ring-focus-ring focus:border-action-primary"
                                 />
                             </div>
                         </div>
@@ -417,7 +417,7 @@
                                     type="tel"
                                     v-model="form.company_phone"
                                     dir="ltr"
-                                    class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-sm focus:ring-indigo-500 focus:border-indigo-500"
+                                    class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-sm focus:ring-focus-ring focus:border-action-primary"
                                 />
                             </div>
                             <div>
@@ -432,7 +432,7 @@
                                     type="email"
                                     v-model="form.company_email"
                                     dir="ltr"
-                                    class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-sm focus:ring-indigo-500 focus:border-indigo-500"
+                                    class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-sm focus:ring-focus-ring focus:border-action-primary"
                                 />
                             </div>
                             <div class="md:col-span-2">
@@ -445,7 +445,7 @@
                                     type="url"
                                     v-model="form.company_website"
                                     dir="ltr"
-                                    class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-sm focus:ring-indigo-500 focus:border-indigo-500"
+                                    class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-sm focus:ring-focus-ring focus:border-action-primary"
                                 />
                             </div>
                         </div>
@@ -488,7 +488,7 @@
                                     max="100"
                                     step="0.01"
                                     dir="ltr"
-                                    class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-sm focus:ring-indigo-500 focus:border-indigo-500"
+                                    class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-sm focus:ring-focus-ring focus:border-action-primary"
                                 />
                             </div>
                             <div>
@@ -537,7 +537,7 @@
                         <button
                             type="submit"
                             :disabled="form.processing"
-                            class="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white rounded-lg font-medium transition-colors inline-flex items-center gap-2"
+                            class="px-6 py-2.5 bg-action-primary hover:bg-action-primary-hover disabled:opacity-50 text-white rounded-lg font-medium transition-colors inline-flex items-center gap-2"
                         >
                             <svg
                                 v-if="form.processing"

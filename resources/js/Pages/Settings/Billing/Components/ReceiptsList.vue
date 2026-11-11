@@ -127,7 +127,7 @@ const statusChips = computed(() => [
                 :class="[
                     'inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold transition-colors',
                     status === chip.value
-                        ? 'bg-indigo-600 text-white'
+                        ? 'bg-action-primary text-white'
                         : 'bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-700/50 dark:text-slate-300 dark:hover:bg-slate-700',
                 ]"
             >
@@ -278,7 +278,7 @@ const statusChips = computed(() => [
                                 :href="r.receipt_url"
                                 target="_blank"
                                 rel="noopener"
-                                class="text-xs font-semibold text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300"
+                                class="text-xs font-semibold text-action-primary hover:text-selection-text"
                             >
                                 {{ t('system.billing.page.receipts_view') }}
                             </a>
@@ -312,7 +312,7 @@ const statusChips = computed(() => [
             <button
                 type="button"
                 @click="clearFilters"
-                class="mt-3 text-xs font-semibold text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300"
+                class="mt-3 text-xs font-semibold text-action-primary hover:text-selection-text"
             >
                 {{ t('system.billing.page.filter.clear_filters') }}
             </button>

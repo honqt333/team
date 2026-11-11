@@ -27,7 +27,7 @@
                     :href="route('system.sms.packages')"
                     :class="
                         route().current('system.sms.packages')
-                            ? 'border-indigo-600 text-indigo-600 font-medium'
+                            ? 'border-action-primary text-action-primary font-medium'
                             : 'border-transparent text-gray-500 hover:text-gray-700'
                     "
                     class="px-4 py-2 border-b-2"
@@ -38,7 +38,7 @@
                     :href="route('system.sms.balances')"
                     :class="
                         route().current('system.sms.balances')
-                            ? 'border-indigo-600 text-indigo-600 font-medium'
+                            ? 'border-action-primary text-action-primary font-medium'
                             : 'border-transparent text-gray-500 hover:text-gray-700'
                     "
                     class="px-4 py-2 border-b-2"
@@ -49,7 +49,7 @@
                     :href="route('system.sms.purchases')"
                     :class="
                         route().current('system.sms.purchases')
-                            ? 'border-indigo-600 text-indigo-600 font-medium'
+                            ? 'border-action-primary text-action-primary font-medium'
                             : 'border-transparent text-gray-500 hover:text-gray-700'
                     "
                     class="px-4 py-2 border-b-2"
@@ -60,7 +60,7 @@
                     :href="route('system.sms.usage')"
                     :class="
                         route().current('system.sms.usage')
-                            ? 'border-indigo-600 text-indigo-600 font-medium'
+                            ? 'border-action-primary text-action-primary font-medium'
                             : 'border-transparent text-gray-500 hover:text-gray-700'
                     "
                     class="px-4 py-2 border-b-2"
@@ -123,7 +123,7 @@
                             <td class="px-4 py-3 text-gray-600 dark:text-gray-400">
                                 {{ purchase.package?.name_ar || $t('system.credits.custom') }}
                             </td>
-                            <td class="px-4 py-3 text-indigo-600 font-semibold">
+                            <td class="px-4 py-3 text-action-primary font-semibold">
                                 {{ purchase.credits?.toLocaleString() }}
                             </td>
                             <td class="px-4 py-3 text-gray-900 dark:text-white">

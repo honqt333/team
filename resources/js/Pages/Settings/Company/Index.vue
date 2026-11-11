@@ -129,7 +129,7 @@
                                         type="tel"
                                         dir="ltr"
                                         placeholder="+966 500 152 900"
-                                        class="w-full ps-12 px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                                        class="w-full ps-12 px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring focus:border-transparent"
                                     />
                                 </div>
                             </div>
@@ -147,7 +147,7 @@
                                     type="email"
                                     dir="ltr"
                                     placeholder="admin@team-group.com"
-                                    class="w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                                    class="w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring focus:border-transparent"
                                 />
                             </div>
                         </div>
@@ -229,7 +229,7 @@
                                         :placeholder="
                                             $t('company_profile.address.city_placeholder')
                                         "
-                                        class="w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                                        class="w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring focus:border-transparent"
                                     />
                                 </div>
 
@@ -247,7 +247,7 @@
                                         :placeholder="
                                             $t('company_profile.address.district_placeholder')
                                         "
-                                        class="w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                                        class="w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring focus:border-transparent"
                                     />
                                 </div>
                             </div>
@@ -268,7 +268,7 @@
                                         :placeholder="
                                             $t('company_profile.address.address_placeholder')
                                         "
-                                        class="w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                                        class="w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring focus:border-transparent"
                                     />
                                 </div>
 
@@ -284,7 +284,7 @@
                                         name="building_number"
                                         type="text"
                                         placeholder="8545"
-                                        class="w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                                        class="w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring focus:border-transparent"
                                     />
                                 </div>
                             </div>
@@ -303,7 +303,7 @@
                                         name="postal_code"
                                         type="text"
                                         placeholder="23455"
-                                        class="w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                                        class="w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring focus:border-transparent"
                                     />
                                 </div>
 
@@ -350,7 +350,7 @@
                                     name="address_line"
                                     type="text"
                                     :placeholder="$t('company_profile.address.address_placeholder')"
-                                    class="w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:border-transparent font-medium"
+                                    class="w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring focus:border-transparent font-medium"
                                 />
                             </div>
 
@@ -463,7 +463,7 @@
                                         )
                                     "
                                     :class="[
-                                        'w-full px-4 py-2.5 rounded-lg border bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:border-transparent',
+                                        'w-full px-4 py-2.5 rounded-lg border bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring focus:border-transparent',
                                         fieldErrors.vat_number
                                             ? 'border-red-500'
                                             : 'border-emerald-500 dark:border-emerald-500',
@@ -527,7 +527,7 @@
                                                 step="0.01"
                                                 :disabled="props.profile?.country === 'SA'"
                                                 :class="[
-                                                    'w-full px-4 py-2.5 rounded-lg border focus:ring-2 focus:ring-emerald-500 focus:border-transparent',
+                                                    'w-full px-4 py-2.5 rounded-lg border focus:ring-2 focus:ring-focus-ring focus:border-transparent',
                                                     props.profile?.country === 'SA'
                                                         ? 'border-gray-250 dark:border-gray-650 bg-gray-100 dark:bg-gray-800 text-gray-400 cursor-not-allowed opacity-75'
                                                         : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white',
@@ -595,7 +595,7 @@
                                                 step="0.01"
                                                 :disabled="props.profile?.country === 'SA'"
                                                 :class="[
-                                                    'w-full px-4 py-2.5 rounded-lg border focus:ring-2 focus:ring-emerald-500 focus:border-transparent',
+                                                    'w-full px-4 py-2.5 rounded-lg border focus:ring-2 focus:ring-focus-ring focus:border-transparent',
                                                     props.profile?.country === 'SA'
                                                         ? 'border-gray-250 dark:border-gray-650 bg-gray-100 dark:bg-gray-800 text-gray-400 cursor-not-allowed opacity-75'
                                                         : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white',
@@ -1192,7 +1192,7 @@
                                 <input
                                     v-model="form.numbering.invoice_number_format"
                                     type="text"
-                                    class="w-full px-3.5 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white font-mono text-sm focus:ring-2 focus:ring-emerald-500"
+                                    class="w-full px-3.5 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white font-mono text-sm focus:ring-2 focus:ring-focus-ring"
                                 />
                                 <div
                                     class="text-[11px] text-gray-500 dark:text-gray-400 flex items-center justify-between"
@@ -1218,7 +1218,7 @@
                                 <input
                                     v-model="form.numbering.work_order_number_format"
                                     type="text"
-                                    class="w-full px-3.5 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white font-mono text-sm focus:ring-2 focus:ring-emerald-500"
+                                    class="w-full px-3.5 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white font-mono text-sm focus:ring-2 focus:ring-focus-ring"
                                 />
                                 <div
                                     class="text-[11px] text-gray-500 dark:text-gray-400 flex items-center justify-between"
@@ -1244,7 +1244,7 @@
                                 <input
                                     v-model="form.numbering.quote_number_format"
                                     type="text"
-                                    class="w-full px-3.5 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white font-mono text-sm focus:ring-2 focus:ring-emerald-500"
+                                    class="w-full px-3.5 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white font-mono text-sm focus:ring-2 focus:ring-focus-ring"
                                 />
                                 <div
                                     class="text-[11px] text-gray-500 dark:text-gray-400 flex items-center justify-between"
@@ -1421,7 +1421,7 @@
                                         min="0"
                                         max="100"
                                         v-model.number="form.workflow.max_discount_percentage"
-                                        class="w-32 px-3.5 py-2 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white font-mono font-bold text-sm focus:ring-2 focus:ring-emerald-500"
+                                        class="w-32 px-3.5 py-2 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white font-mono font-bold text-sm focus:ring-2 focus:ring-focus-ring"
                                     />
                                     <span class="text-sm font-bold text-gray-500">%</span>
                                 </div>
@@ -1445,7 +1445,7 @@
                                         min="0"
                                         max="3650"
                                         v-model.number="form.workflow.default_warranty_days"
-                                        class="w-32 px-3.5 py-2 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white font-mono font-bold text-sm focus:ring-2 focus:ring-emerald-500"
+                                        class="w-32 px-3.5 py-2 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white font-mono font-bold text-sm focus:ring-2 focus:ring-focus-ring"
                                     />
                                     <span class="text-sm text-gray-500">
                                         {{ $t('common.day') }}
@@ -1545,7 +1545,7 @@
                                 <textarea
                                     rows="2"
                                     v-model="form.notifications.work_order_created"
-                                    class="w-full px-3.5 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-emerald-500"
+                                    class="w-full px-3.5 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-focus-ring"
                                 ></textarea>
                             </div>
 
@@ -1561,7 +1561,7 @@
                                 <textarea
                                     rows="2"
                                     v-model="form.notifications.work_order_completed"
-                                    class="w-full px-3.5 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-emerald-500"
+                                    class="w-full px-3.5 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-focus-ring"
                                 ></textarea>
                             </div>
 
@@ -1577,7 +1577,7 @@
                                 <textarea
                                     rows="2"
                                     v-model="form.notifications.quote_shared"
-                                    class="w-full px-3.5 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-emerald-500"
+                                    class="w-full px-3.5 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-focus-ring"
                                 ></textarea>
                             </div>
 
@@ -1593,7 +1593,7 @@
                                 <textarea
                                     rows="2"
                                     v-model="form.notifications.invoice_issued"
-                                    class="w-full px-3.5 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-emerald-500"
+                                    class="w-full px-3.5 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-focus-ring"
                                 ></textarea>
                             </div>
                         </div>
@@ -1612,11 +1612,11 @@
                     <!-- Payment Tab (DEPRECATED — moved to /app/settings/billing) -->
                     <div v-if="activeTab === 'payment'" class="space-y-6">
                         <div
-                            class="p-6 bg-gradient-to-br from-indigo-50 to-violet-50 dark:from-indigo-900/20 dark:to-violet-900/20 rounded-2xl border border-indigo-200 dark:border-indigo-800/50"
+                            class="p-6 bg-selection-bg rounded-2xl border border-action-primary/25"
                         >
                             <div class="flex items-start gap-4">
                                 <div
-                                    class="w-12 h-12 rounded-xl flex items-center justify-center bg-indigo-600 text-white flex-shrink-0"
+                                    class="w-12 h-12 rounded-xl flex items-center justify-center bg-action-primary text-white flex-shrink-0"
                                 >
                                     <svg
                                         class="w-6 h-6"
@@ -1643,7 +1643,7 @@
                                     </p>
                                     <Link
                                         :href="route('app.billing.index')"
-                                        class="inline-flex items-center gap-2 px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-semibold text-sm transition-colors"
+                                        class="inline-flex items-center gap-2 px-5 py-2.5 bg-action-primary hover:bg-action-primary-hover text-white rounded-lg font-semibold text-sm transition-colors"
                                     >
                                         <svg
                                             class="w-4 h-4"
@@ -1772,7 +1772,7 @@
                                         v-model="form.admin_user.email"
                                         type="email"
                                         dir="ltr"
-                                        class="w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                                        class="w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring focus:border-transparent"
                                     />
                                 </div>
                             </div>
@@ -1794,7 +1794,7 @@
                                         <input
                                             v-model="form.admin_user.current_password"
                                             type="password"
-                                            class="w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                                            class="w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring focus:border-transparent"
                                         />
                                     </div>
                                     <div>
@@ -1806,7 +1806,7 @@
                                         <input
                                             v-model="form.admin_user.new_password"
                                             type="password"
-                                            class="w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                                            class="w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring focus:border-transparent"
                                         />
                                     </div>
                                     <div>
@@ -1818,7 +1818,7 @@
                                         <input
                                             v-model="form.admin_user.new_password_confirmation"
                                             type="password"
-                                            class="w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                                            class="w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring focus:border-transparent"
                                         />
                                     </div>
                                 </div>
@@ -2054,7 +2054,7 @@
                                             <td class="px-6 py-4 text-xs text-gray-500">
                                                 <div class="flex items-center gap-1.5">
                                                     <div
-                                                        class="w-5 h-5 rounded-full bg-indigo-500/10 text-indigo-500 flex items-center justify-center font-bold text-[9px] uppercase"
+                                                        class="w-5 h-5 rounded-full bg-action-primary/10 text-action-primary flex items-center justify-center font-bold text-[9px] uppercase"
                                                     >
                                                         {{
                                                             trans.updated_by?.name?.substring(0, 2)
@@ -2357,7 +2357,7 @@
                                                     <a
                                                         :href="route('app.invoices.print', inv.id)"
                                                         target="_blank"
-                                                        class="text-xs font-bold text-indigo-600 hover:text-indigo-700 hover:underline transition-colors flex items-center gap-1"
+                                                        class="text-xs font-bold text-action-primary hover:text-selection-text hover:underline transition-colors flex items-center gap-1"
                                                     >
                                                         {{ $t('common.print_emoji') }}
                                                     </a>
@@ -2497,7 +2497,7 @@
                                                             )
                                                         "
                                                         target="_blank"
-                                                        class="text-xs font-bold text-indigo-600 hover:text-indigo-700 hover:underline transition-colors flex items-center gap-1"
+                                                        class="text-xs font-bold text-action-primary hover:text-selection-text hover:underline transition-colors flex items-center gap-1"
                                                     >
                                                         {{ $t('common.print_emoji') }}
                                                     </a>
@@ -2582,7 +2582,7 @@
                                 :placeholder="
                                     locale === 'ar' ? 'كلمة المرور الحالية' : 'Current Password'
                                 "
-                                class="w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:border-transparent font-medium"
+                                class="w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring focus:border-transparent font-medium"
                                 :class="[checkPasswordError ? 'border-red-500 font-medium' : '']"
                             />
                             <p

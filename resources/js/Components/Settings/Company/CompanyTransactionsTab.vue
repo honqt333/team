@@ -156,7 +156,7 @@
                                     </button>
                                     <button
                                         @click="$emit('edit-transaction', trans)"
-                                        class="p-1.5 rounded-lg text-gray-400 hover:text-indigo-600 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                                        class="p-1.5 rounded-lg text-gray-400 hover:text-action-primary hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
                                     >
                                         <svg
                                             class="w-4 h-4"

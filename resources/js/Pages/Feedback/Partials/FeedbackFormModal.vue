@@ -9,7 +9,7 @@
             >
                 <div class="flex items-center gap-3">
                     <div
-                        class="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 flex items-center justify-center"
+                        class="w-10 h-10 rounded-xl bg-selection-bg text-action-primary flex items-center justify-center"
                     >
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path
@@ -88,12 +88,12 @@
                             :class="[
                                 'flex items-center gap-3 p-3 rounded-xl border text-start transition-all',
                                 form.type === 'feature_request'
-                                    ? 'border-purple-500 bg-purple-50/70 dark:bg-purple-950/30 text-purple-700 dark:text-purple-300 ring-2 ring-purple-500/20'
+                                    ? 'border-purple-500 bg-purple-50/70 text-purple-700 ring-2 ring-purple-500/20'
                                     : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 bg-white dark:bg-gray-800/60 text-gray-700 dark:text-gray-300',
                             ]"
                         >
                             <span
-                                class="w-8 h-8 rounded-lg bg-purple-100 dark:bg-purple-900/40 text-purple-600 dark:text-purple-400 flex items-center justify-center shrink-0 text-base"
+                                class="w-8 h-8 rounded-lg bg-purple-100 text-purple-600 flex items-center justify-center shrink-0 text-base"
                             >
                                 💡
                             </span>
@@ -193,7 +193,7 @@
                         rows="3"
                         maxlength="1000"
                         :placeholder="$t('feedback.modal.comments_placeholder')"
-                        class="w-full text-sm rounded-xl border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/60 text-gray-900 dark:text-gray-100 focus:border-indigo-500 focus:ring-indigo-500 p-3"
+                        class="w-full text-sm rounded-xl border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/60 text-gray-900 dark:text-gray-100 focus:border-action-primary focus:ring-focus-ring p-3"
                     ></textarea>
                     <p v-if="form.errors.comments" class="text-xs text-rose-500 mt-1">
                         {{ form.errors.comments }}
@@ -357,7 +357,7 @@
                         class="w-full h-2 rounded-full bg-gray-100 dark:bg-gray-700 overflow-hidden"
                     >
                         <div
-                            class="h-full bg-gradient-to-r from-indigo-500 to-sky-500 transition-all duration-200"
+                            class="h-full bg-gradient-to-r from-action-primary to-sky-500 transition-all duration-200"
                             :style="{ width: uploadProgress + '%' }"
                         ></div>
                     </div>

@@ -123,7 +123,7 @@
                     <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">
                         {{ $t('inventory.parts.current_card_qty') }}
                     </p>
-                    <p class="text-lg font-mono font-black text-indigo-600 dark:text-indigo-400">
+                    <p class="text-lg font-mono font-black text-action-primary">
                         {{ formatQuantity(part?.qty || 0) }}
                     </p>
                 </div>
@@ -168,7 +168,7 @@
                     v-model="returnedQty"
                     dir="ltr"
                     @input="returnedQty = toEnglish($event.target.value).replace(/[^0-9.]/g, '')"
-                    class="w-full px-5 py-4 border-2 border-red-300 focus:border-red-500 dark:border-red-700 dark:focus:border-red-500 focus:ring-4 focus:ring-red-500/10 bg-white dark:bg-gray-800 text-gray-900 dark:text-white rounded-2xl font-mono text-center text-xl font-extrabold transition-all"
+                    class="w-full px-5 py-4 border-2 border-red-300 focus:border-danger dark:border-red-700 focus:ring-4 focus:ring-danger/10 bg-white dark:bg-gray-800 text-gray-900 dark:text-white rounded-2xl font-mono text-center text-xl font-extrabold transition-all"
                     placeholder="0"
                 />
             </div>

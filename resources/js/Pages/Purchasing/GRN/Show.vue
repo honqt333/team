@@ -29,7 +29,7 @@
                 <div class="flex items-center gap-3">
                     <button
                         @click="printGrn"
-                        class="p-2.5 text-gray-500 hover:text-indigo-600 hover:bg-white dark:hover:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 transition-all shadow-sm"
+                        class="p-2.5 text-gray-500 hover:text-action-primary hover:bg-white dark:hover:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 transition-all shadow-sm"
                     >
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path
@@ -299,10 +299,10 @@
                             </label>
                             <Link
                                 :href="route('app.purchasing.orders.show', grn.purchase_order_id)"
-                                class="flex items-center gap-3 group p-2 -m-2 rounded-2xl hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition-all"
+                                class="flex items-center gap-3 group p-2 -m-2 rounded-2xl hover:bg-selection-bg transition-all"
                             >
                                 <div
-                                    class="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-900/20 flex items-center justify-center text-indigo-600 group-hover:scale-110 transition-transform"
+                                    class="w-10 h-10 rounded-xl bg-selection-bg flex items-center justify-center text-action-primary group-hover:scale-110 transition-transform"
                                 >
                                     <svg
                                         class="w-5 h-5"
@@ -320,7 +320,7 @@
                                 </div>
                                 <div>
                                     <div
-                                        class="font-black text-gray-900 dark:text-white font-mono group-hover:text-indigo-600 transition-colors"
+                                        class="font-black text-gray-900 dark:text-white font-mono group-hover:text-action-primary transition-colors"
                                     >
                                         {{ grn.purchase_order?.code }}
                                     </div>
@@ -512,7 +512,7 @@
                     <div class="w-64 bg-gray-50 p-3 rounded-lg border border-gray-200 text-xs">
                         <div class="flex justify-between items-center font-bold">
                             <span>{{ $t('common.total') }}</span>
-                            <span class="text-base font-mono text-indigo-700">
+                            <span class="text-base font-mono text-selection-text">
                                 {{ formatCurrency(totalAmount) }}
                             </span>
                         </div>

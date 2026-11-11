@@ -10,7 +10,7 @@
                 <!-- Print Button -->
                 <button
                     @click="emit('print')"
-                    class="p-2.5 text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-xl transition-all"
+                    class="p-2.5 text-gray-500 hover:text-action-primary hover:bg-selection-bg rounded-xl transition-all"
                     :title="$t('common.print')"
                 >
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -27,7 +27,7 @@
                 <button
                     v-if="showPaymentsBtn"
                     @click="emit('payments')"
-                    class="p-2.5 text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-xl transition-all"
+                    class="p-2.5 text-gray-500 hover:text-action-primary hover:bg-selection-bg rounded-xl transition-all"
                     :title="$t('payments.title')"
                 >
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -44,7 +44,7 @@
                 <button
                     v-if="showDeferredInvoiceBtn"
                     @click="emit('create-deferred-invoice')"
-                    class="p-2.5 text-violet-600 hover:text-violet-700 hover:bg-violet-50 dark:hover:bg-violet-900/20 rounded-xl transition-all"
+                    class="p-2.5 text-action-primary hover:text-selection-text hover:bg-selection-bg rounded-xl transition-all"
                     :title="$t('invoices.create_deferred')"
                 >
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -80,7 +80,7 @@
                 <button
                     v-if="!isReadOnly"
                     @click="emit('edit')"
-                    class="p-2.5 text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-xl transition-all"
+                    class="p-2.5 text-gray-500 hover:text-action-primary hover:bg-selection-bg rounded-xl transition-all"
                     :title="$t('common.edit')"
                 >
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -126,7 +126,7 @@
                 <template v-if="workOrder.status === 'on_hold'">
                     <button
                         @click="emit('change-status', 'resume')"
-                        class="p-2.5 bg-indigo-600 text-white rounded-xl shadow-md shadow-indigo-500/20 hover:shadow-indigo-500/35 hover:-translate-y-0.5 transition-all flex items-center justify-center"
+                        class="p-2.5 bg-action-primary text-white rounded-xl shadow-md shadow-focus-ring-soft hover:shadow-focus-ring-soft hover:-translate-y-0.5 transition-all flex items-center justify-center"
                         :title="$t('work_orders.actions.resume_work')"
                     >
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -236,7 +236,7 @@
                         {{ workOrder.code }}
                     </h1>
                     <div
-                        class="w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-600 to-purple-600 shadow-xl shadow-indigo-500/30 flex items-center justify-center text-white shrink-0"
+                        class="w-14 h-14 rounded-2xl bg-action-primary hover:bg-action-primary-hover shadow-xl shadow-focus-ring-soft flex items-center justify-center text-white shrink-0"
                     >
                         <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path

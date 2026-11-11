@@ -43,13 +43,13 @@
                                     type="radio"
                                     v-model="form.type"
                                     value="payment"
-                                    class="text-indigo-600 focus:ring-indigo-500 rounded-full"
+                                    class="text-action-primary focus:ring-focus-ring rounded-full"
                                 />
                                 <span
                                     class="text-sm font-medium"
                                     :class="
                                         form.type === 'payment'
-                                            ? 'text-indigo-700 dark:text-indigo-400'
+                                            ? 'text-selection-text'
                                             : 'text-gray-600 dark:text-gray-400'
                                     "
                                 >
@@ -64,7 +64,7 @@
                                     type="radio"
                                     v-model="form.type"
                                     value="refund"
-                                    class="text-red-600 focus:ring-red-500 rounded-full"
+                                    class="text-red-600 focus:ring-danger rounded-full"
                                 />
                                 <span
                                     class="text-sm font-medium"
@@ -85,7 +85,7 @@
                                     type="radio"
                                     v-model="form.type"
                                     value="bad_debt"
-                                    class="text-amber-600 focus:ring-amber-500 rounded-full"
+                                    class="text-amber-600 focus:ring-focus-ring rounded-full"
                                 />
                                 <span
                                     class="text-sm font-medium"
@@ -137,7 +137,7 @@
                                 v-model="form.amount"
                                 @input="forceEnglishNumbers"
                                 dir="ltr"
-                                class="w-full pr-4 pl-14 py-2.5 text-sm border rounded-xl bg-gray-50 dark:bg-gray-900 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-indigo-500 text-left font-mono"
+                                class="w-full pr-4 pl-14 py-2.5 text-sm border rounded-xl bg-gray-50 dark:bg-gray-900 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-focus-ring text-left font-mono"
                                 :class="{ 'border-red-500': errors.amount }"
                                 :placeholder="$t('payments.form.amount_placeholder')"
                             />
@@ -175,7 +175,7 @@
                             type="date"
                             v-model="form.payment_date"
                             dir="ltr"
-                            class="w-full px-4 py-2.5 text-sm border rounded-xl bg-gray-50 dark:bg-gray-900 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-indigo-500 text-left font-mono"
+                            class="w-full px-4 py-2.5 text-sm border rounded-xl bg-gray-50 dark:bg-gray-900 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-focus-ring text-left font-mono"
                             :class="{ 'border-red-500': errors.payment_date }"
                         />
                         <p v-if="errors.payment_date" class="mt-1 text-sm text-red-500">
@@ -194,7 +194,7 @@
                             type="text"
                             v-model="form.reference"
                             dir="ltr"
-                            class="w-full px-4 py-2.5 text-sm border rounded-xl bg-gray-50 dark:bg-gray-900 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-indigo-500 text-left font-mono"
+                            class="w-full px-4 py-2.5 text-sm border rounded-xl bg-gray-50 dark:bg-gray-900 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-focus-ring text-left font-mono"
                             :placeholder="$t('payments.form.reference_placeholder')"
                         />
                     </div>
@@ -209,7 +209,7 @@
                         <textarea
                             v-model="form.notes"
                             rows="2"
-                            class="w-full px-4 py-2.5 text-sm border rounded-xl bg-gray-50 dark:bg-gray-900 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-indigo-500 placeholder-gray-400 dark:placeholder-gray-500"
+                            class="w-full px-4 py-2.5 text-sm border rounded-xl bg-gray-50 dark:bg-gray-900 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-focus-ring placeholder-gray-400 dark:placeholder-gray-500"
                             :placeholder="$t('payments.form.notes_placeholder')"
                         ></textarea>
                     </div>
@@ -231,8 +231,8 @@
                             class="px-4 py-2 text-sm font-medium text-white rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
                             :class="
                                 form.type === 'refund'
-                                    ? 'bg-red-600 hover:bg-red-700 focus:ring-red-500'
-                                    : 'bg-indigo-600 hover:bg-indigo-700 focus:ring-indigo-500'
+                                    ? 'bg-red-600 hover:bg-red-700 focus:ring-danger'
+                                    : 'bg-action-primary hover:bg-action-primary-hover focus:ring-focus-ring'
                             "
                         >
                             <svg

@@ -22,7 +22,7 @@
                 <template #actions>
                     <button
                         @click="openModal()"
-                        class="inline-flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white rounded-xl text-sm font-semibold transition-all shadow-md hover:shadow-indigo-500/25 active:scale-95"
+                        class="inline-flex items-center gap-2 px-4 py-2.5 bg-action-primary hover:bg-action-primary-hover text-white rounded-xl text-sm font-semibold transition-all shadow-md hover:shadow-focus-ring-soft active:scale-95"
                     >
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path
@@ -98,7 +98,7 @@
                                 v-model="search"
                                 type="text"
                                 :placeholder="$t('system.subscriptions.search_placeholder')"
-                                class="w-full px-4 py-2 pr-10 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                                class="w-full px-4 py-2 pr-10 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-focus-ring focus:border-transparent"
                                 @keyup.enter="applyFilters"
                             />
                         </div>
@@ -184,7 +184,7 @@
                                 </td>
                                 <td class="px-6 py-4 align-middle">
                                     <span
-                                        class="inline-flex px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-400"
+                                        class="inline-flex px-2.5 py-0.5 rounded-full text-xs font-medium bg-selection-bg text-selection-text"
                                     >
                                         {{ sub.plan?.name_ar || $t('common.na') }}
                                     </span>
@@ -192,11 +192,7 @@
                                 <td
                                     class="px-6 py-4 text-sm text-gray-600 dark:text-gray-400 align-middle text-center"
                                 >
-                                    {{
-                                        sub.billing_cycle === 'yearly'
-                                            ? $t('system.subscriptions.yearly')
-                                            : $t('system.subscriptions.monthly')
-                                    }}
+                                    {{ $t('system.subscriptions.yearly') }}
                                 </td>
                                 <td class="px-6 py-4 align-middle text-center">
                                     <span
@@ -214,7 +210,7 @@
                                 <td class="px-6 py-4 align-middle text-center">
                                     <Link
                                         :href="`/system/subscriptions/${sub.id}`"
-                                        class="inline-flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-lg transition-colors"
+                                        class="inline-flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-action-primary hover:text-selection-text hover:bg-selection-bg rounded-lg transition-colors"
                                     >
                                         <svg
                                             class="w-4 h-4"
@@ -275,7 +271,7 @@
                         :class="[
                             'px-3 py-1 rounded text-sm',
                             link.active
-                                ? 'bg-indigo-600 text-white'
+                                ? 'bg-action-primary text-white'
                                 : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700',
                             !link.url && 'opacity-50 cursor-not-allowed',
                         ]"
@@ -377,7 +373,7 @@
                                                 </div>
                                                 <svg
                                                     v-if="form.tenant_id === tenant.id"
-                                                    class="w-5 h-5 text-indigo-600"
+                                                    class="w-5 h-5 text-action-primary"
                                                     fill="none"
                                                     stroke="currentColor"
                                                     viewBox="0 0 24 24"
@@ -470,11 +466,7 @@
                                         }}
                                     </span>
                                     <span class="text-xl font-bold text-gray-900 dark:text-white">
-                                        {{
-                                            form.billing_cycle === 'yearly'
-                                                ? selectedPlan.price_yearly
-                                                : selectedPlan.price_monthly
-                                        }}
+                                        {{ selectedPlan.price_yearly }}
                                         {{ $t('system.subscriptions.create_modal.currency') }}
                                     </span>
                                 </div>
@@ -518,7 +510,7 @@
                                 <button
                                     @click="submit"
                                     :disabled="form.processing || !form.tenant_id"
-                                    class="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium disabled:opacity-50"
+                                    class="px-5 py-2 bg-action-primary hover:bg-action-primary-hover text-white rounded-lg font-medium disabled:opacity-50"
                                 >
                                     {{
                                         form.processing

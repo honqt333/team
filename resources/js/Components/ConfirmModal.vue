@@ -141,14 +141,14 @@ const glowClasses = {
     danger: 'bg-red-500',
     warning: 'bg-amber-500',
     success: 'bg-emerald-500',
-    info: 'bg-indigo-500',
+    info: 'bg-action-primary',
 };
 
 const iconClasses = {
     danger: 'bg-gradient-to-br from-red-500 to-rose-600 text-white shadow-red-500/40',
     warning: 'bg-gradient-to-br from-amber-500 to-orange-600 text-white shadow-amber-500/40',
     success: 'bg-gradient-to-br from-emerald-500 to-green-600 text-white shadow-emerald-500/40',
-    info: 'bg-gradient-to-br from-indigo-500 to-purple-600 text-white shadow-indigo-500/40',
+    info: 'bg-action-primary hover:bg-action-primary-hover text-white shadow-focus-ring-soft',
 };
 
 const buttonClasses = {
@@ -157,7 +157,7 @@ const buttonClasses = {
         'bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 shadow-amber-500/30',
     success:
         'bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-700 hover:to-green-700 shadow-emerald-500/30',
-    info: 'bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 shadow-indigo-500/30',
+    info: 'bg-action-primary hover:bg-action-primary-hover shadow-focus-ring-soft',
 };
 
 function handleConfirm() {

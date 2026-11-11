@@ -24,7 +24,7 @@
                 <template #actions>
                     <Link
                         :href="route('system.announcements.create')"
-                        class="inline-flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white rounded-xl text-sm font-semibold transition-all shadow-md hover:shadow-indigo-500/25 active:scale-95"
+                        class="inline-flex items-center gap-2 px-4 py-2.5 bg-action-primary hover:bg-action-primary-hover text-white rounded-xl text-sm font-semibold transition-all shadow-md hover:shadow-focus-ring-soft active:scale-95"
                     >
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path
@@ -104,7 +104,7 @@
                             <td class="px-4 py-3 align-middle">
                                 <Link
                                     :href="route('system.announcements.show', item.id)"
-                                    class="font-medium text-gray-900 dark:text-white hover:text-indigo-600"
+                                    class="font-medium text-gray-900 dark:text-white hover:text-action-primary"
                                 >
                                     {{ item.title }}
                                 </Link>
@@ -154,7 +154,7 @@
                                 <div class="flex items-center justify-center gap-2">
                                     <Link
                                         :href="route('system.announcements.show', item.id)"
-                                        class="inline-flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-lg transition-colors"
+                                        class="inline-flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-action-primary hover:text-selection-text hover:bg-selection-bg rounded-lg transition-colors"
                                     >
                                         <svg
                                             class="w-4 h-4"
@@ -265,7 +265,7 @@ const getTypeClass = (type) =>
         info: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300',
         warning: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300',
         important: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300',
-        maintenance: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300',
+        maintenance: 'bg-purple-100 text-purple-700',
     })[type] || 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300';
 
 const getTargetLabel = (target) =>

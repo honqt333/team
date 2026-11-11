@@ -188,7 +188,7 @@
                                 data-field="part_number"
                                 dir="ltr"
                                 :disabled="isReadOnly || form.source === 'warehouse'"
-                                class="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white font-mono text-xs focus:ring-2 focus:ring-emerald-500 disabled:bg-gray-100 dark:disabled:bg-gray-900 disabled:opacity-60"
+                                class="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white font-mono text-xs focus:ring-2 focus:ring-focus-ring disabled:bg-gray-100 dark:disabled:bg-gray-900 disabled:opacity-60"
                             />
                         </div>
                         <div data-field="unit_id">
@@ -226,7 +226,7 @@
                             data-field="name"
                             required
                             :disabled="isReadOnly || form.source === 'warehouse'"
-                            class="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-xs font-bold focus:ring-2 focus:ring-emerald-500 disabled:bg-gray-100 dark:disabled:bg-gray-900 disabled:opacity-60"
+                            class="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-xs font-bold focus:ring-2 focus:ring-focus-ring disabled:bg-gray-100 dark:disabled:bg-gray-900 disabled:opacity-60"
                         />
                     </div>
 
@@ -267,7 +267,7 @@
                                 name="description"
                                 data-field="description"
                                 :disabled="isReadOnly || form.source === 'warehouse'"
-                                class="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-xs focus:ring-2 focus:ring-emerald-500 disabled:bg-gray-100 dark:disabled:bg-gray-900 disabled:opacity-60"
+                                class="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-xs focus:ring-2 focus:ring-focus-ring disabled:bg-gray-100 dark:disabled:bg-gray-900 disabled:opacity-60"
                                 :placeholder="$t('inventory.parts.description_placeholder')"
                             />
                         </div>
@@ -304,8 +304,8 @@
                                 :class="[
                                     'w-full py-2 pl-2 pr-9 border rounded-xl font-mono text-center text-xs font-bold focus:ring-2',
                                     isPriceBelowMinimum
-                                        ? 'border-red-400 bg-red-50 dark:bg-red-900/20 text-red-600 focus:ring-red-500'
-                                        : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-emerald-500',
+                                        ? 'border-red-400 bg-red-50 dark:bg-red-900/20 text-red-600 focus:ring-danger'
+                                        : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-focus-ring',
                                     !isPriceEditable
                                         ? 'opacity-60 cursor-not-allowed bg-gray-100 dark:bg-gray-900'
                                         : '',
@@ -379,8 +379,8 @@
                             :class="[
                                 'w-full py-2 px-2 border rounded-xl font-mono text-center text-xs font-bold focus:ring-2',
                                 isPriceBelowMinimum
-                                    ? 'border-red-400 bg-red-50 dark:bg-red-900/20 text-red-600 focus:ring-red-500'
-                                    : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-emerald-500',
+                                    ? 'border-red-400 bg-red-50 dark:bg-red-900/20 text-red-600 focus:ring-danger'
+                                    : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-focus-ring',
                                 form.include_in_package || isReadOnly
                                     ? 'opacity-60 cursor-not-allowed bg-gray-100 dark:bg-gray-900'
                                     : '',
@@ -407,7 +407,7 @@
                             @input="
                                 form.qty = toEnglish($event.target.value).replace(/[^0-9.]/g, '')
                             "
-                            class="w-full py-2 px-2 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white font-mono text-center text-xs font-bold focus:ring-2 focus:ring-emerald-500 disabled:opacity-60 disabled:bg-gray-100"
+                            class="w-full py-2 px-2 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white font-mono text-center text-xs font-bold focus:ring-2 focus:ring-focus-ring disabled:opacity-60 disabled:bg-gray-100"
                         />
                     </div>
 
@@ -436,28 +436,20 @@
                     <div
                         class="flex flex-wrap items-center gap-4 text-xs font-semibold text-gray-700 dark:text-gray-300"
                     >
-                        <label
+                        <AppToggle
                             v-if="form.quote_line_id || showToggles"
-                            class="flex items-center gap-2 cursor-pointer select-none"
-                        >
-                            <input
-                                type="checkbox"
-                                v-model="form.include_in_package"
-                                class="rounded text-emerald-600 focus:ring-emerald-500 w-4 h-4 border-gray-300 dark:border-gray-600"
-                            />
-                            <span>{{ $t('work_orders.item.include_in_package') }}</span>
-                        </label>
-                        <label
+                            v-model="form.include_in_package"
+                            size="sm"
+                            color="success"
+                            :label="$t('work_orders.item.include_in_package')"
+                        />
+                        <AppToggle
                             v-if="form.include_in_package"
-                            class="flex items-center gap-2 cursor-pointer select-none"
-                        >
-                            <input
-                                type="checkbox"
-                                v-model="form.hide_on_print"
-                                class="rounded text-emerald-600 focus:ring-emerald-500 w-4 h-4 border-gray-300 dark:border-gray-600"
-                            />
-                            <span>{{ $t('work_orders.item.hide_on_print') }}</span>
-                        </label>
+                            v-model="form.hide_on_print"
+                            size="sm"
+                            color="success"
+                            :label="$t('work_orders.item.hide_on_print')"
+                        />
                     </div>
 
                     <!-- Totals on right -->
@@ -589,6 +581,7 @@ import { useLocalized } from '@/Composables/useLocalized';
 import { useNumberFormat } from '@/Composables/useNumberFormat';
 import { useFormScrollToError } from '@/Composables/useFormScrollToError';
 import BaseModal from '@/Components/BaseModal.vue';
+import AppToggle from '@/Components/Common/AppToggle.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 import { useToast } from '@/Composables/useToast';
 

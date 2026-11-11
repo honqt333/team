@@ -5,9 +5,9 @@
             <PageHeader
                 :title="$t('reports.payments_report.title')"
                 :subtitle="$t('reports.payments_report.subtitle')"
-                gradientFrom="from-indigo-600"
+                gradientFrom="from-action-primary"
                 gradientTo="to-purple-600"
-                glowFrom="from-indigo-500"
+                glowFrom="from-action-primary"
                 class="print:hidden"
             >
                 <template #back>
@@ -40,7 +40,7 @@
 
                         <a
                             :href="exportUrl"
-                            class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white text-xs font-bold transition-all shadow-lg shadow-indigo-500/25 hover:-translate-y-0.5"
+                            class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-action-primary hover:bg-action-primary-hover text-white text-xs font-bold transition-all shadow-lg shadow-focus-ring-soft hover:-translate-y-0.5"
                         >
                             <svg
                                 class="w-4 h-4"
@@ -116,12 +116,12 @@
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 print:hidden">
                 <!-- Net Collections -->
                 <div
-                    class="bg-white dark:bg-gray-800 rounded-3xl p-5 border border-indigo-100 dark:border-indigo-900/40 shadow-xl shadow-indigo-500/5 relative overflow-hidden"
+                    class="bg-white dark:bg-gray-800 rounded-3xl p-5 border border-action-primary/25 shadow-xl shadow-focus-ring-soft relative overflow-hidden"
                 >
                     <div class="flex items-center justify-between">
                         <div>
                             <span
-                                class="text-[11px] font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400"
+                                class="text-[11px] font-bold uppercase tracking-wider text-action-primary"
                             >
                                 {{ $t('reports.payments_report.net_collected') }}
                             </span>
@@ -132,7 +132,7 @@
                             </div>
                         </div>
                         <div
-                            class="w-12 h-12 rounded-2xl bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shadow-inner"
+                            class="w-12 h-12 rounded-2xl bg-selection-bg text-action-primary flex items-center justify-center shadow-inner"
                         >
                             <svg
                                 class="w-6 h-6"
@@ -237,12 +237,12 @@
 
                 <!-- Transaction Count -->
                 <div
-                    class="bg-white dark:bg-gray-800 rounded-3xl p-5 border border-purple-100 dark:border-purple-900/40 shadow-xl shadow-purple-500/5 relative overflow-hidden"
+                    class="bg-white dark:bg-gray-800 rounded-3xl p-5 border border-purple-100 shadow-xl shadow-focus-ring-soft relative overflow-hidden"
                 >
                     <div class="flex items-center justify-between">
                         <div>
                             <span
-                                class="text-[11px] font-bold uppercase tracking-wider text-purple-600 dark:text-purple-400"
+                                class="text-[11px] font-bold uppercase tracking-wider text-purple-600"
                             >
                                 {{ $t('reports.payments_report.transaction_count') }}
                             </span>
@@ -253,7 +253,7 @@
                             </div>
                         </div>
                         <div
-                            class="w-12 h-12 rounded-2xl bg-purple-50 dark:bg-purple-950/50 text-purple-600 dark:text-purple-400 flex items-center justify-center shadow-inner"
+                            class="w-12 h-12 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center shadow-inner"
                         >
                             <svg
                                 class="w-6 h-6"
@@ -293,7 +293,7 @@
                         <span class="font-bold text-gray-700 dark:text-gray-300">
                             {{ getMethodLabel(item.method) }}:
                         </span>
-                        <span class="font-black text-indigo-600 dark:text-indigo-400 font-mono">
+                        <span class="font-black text-action-primary font-mono">
                             {{ formatMoney(item.total) }}
                         </span>
                         <span
@@ -307,14 +307,14 @@
 
             <!-- DEDICATED DATE RANGE BOX (مربع الفترة الزمنية) -->
             <div
-                class="bg-white dark:bg-gray-800 rounded-3xl p-5 border border-indigo-100/80 dark:border-gray-700/80 shadow-xl shadow-indigo-500/5 space-y-4 print:hidden"
+                class="bg-white dark:bg-gray-800 rounded-3xl p-5 border border-action-primary/25 dark:border-gray-700/80 shadow-xl shadow-focus-ring-soft space-y-4 print:hidden"
             >
                 <div
                     class="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-3 border-b border-gray-100 dark:border-gray-700/60"
                 >
                     <div class="flex items-center gap-2.5">
                         <div
-                            class="w-9 h-9 rounded-xl bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shadow-inner"
+                            class="w-9 h-9 rounded-xl bg-selection-bg text-action-primary flex items-center justify-center shadow-inner"
                         >
                             <svg
                                 class="w-5 h-5"
@@ -350,7 +350,7 @@
                             :class="[
                                 'px-3 py-1.5 rounded-xl text-xs font-bold transition-all',
                                 filterForm.range === preset.id
-                                    ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-md shadow-indigo-500/25'
+                                    ? 'bg-action-primary hover:bg-action-primary-hover text-white shadow-md shadow-focus-ring-soft'
                                     : 'bg-gray-100 dark:bg-gray-700/60 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700',
                             ]"
                         >
@@ -396,7 +396,7 @@
                         <button
                             type="button"
                             @click="applyFilters"
-                            class="flex-1 inline-flex items-center justify-center gap-2 px-5 py-3 rounded-2xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white text-xs font-bold shadow-lg shadow-indigo-500/25 transition-all hover:-translate-y-0.5"
+                            class="flex-1 inline-flex items-center justify-center gap-2 px-5 py-3 rounded-2xl bg-action-primary hover:bg-action-primary-hover text-white text-xs font-bold shadow-lg shadow-focus-ring-soft transition-all hover:-translate-y-0.5"
                         >
                             <svg
                                 class="w-4 h-4"
@@ -443,7 +443,7 @@
                                 v-model="filterForm.search"
                                 @keyup.enter="applyFilters"
                                 :placeholder="$t('reports.payments_report.search_placeholder')"
-                                class="w-full text-xs rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 px-3 py-2.5 pe-8 focus:ring-2 focus:ring-indigo-500 focus:outline-none dark:text-white"
+                                class="w-full text-xs rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 px-3 py-2.5 pe-8 focus:ring-2 focus:ring-focus-ring focus:outline-none dark:text-white"
                             />
                             <button
                                 v-if="filterForm.search"
@@ -529,7 +529,7 @@
 
             <!-- Table of Payments (Screen + Print) -->
             <div
-                class="bg-white dark:bg-gray-800 rounded-3xl border border-gray-200 dark:border-gray-800 shadow-xl shadow-indigo-500/5 overflow-hidden"
+                class="bg-white dark:bg-gray-800 rounded-3xl border border-gray-200 dark:border-gray-800 shadow-xl shadow-focus-ring-soft overflow-hidden"
             >
                 <div class="overflow-x-auto">
                     <DataTable
@@ -628,7 +628,7 @@
                                     >
                                         <a
                                             :href="'/app/work-orders/' + payment.work_order.id"
-                                            class="text-indigo-600 dark:text-indigo-400 hover:underline font-mono text-xs font-bold"
+                                            class="text-action-primary hover:underline font-mono text-xs font-bold"
                                         >
                                             {{ payment.work_order.work_order_number }}
                                         </a>
@@ -777,7 +777,7 @@
                             :class="[
                                 'px-3 py-1.5 rounded-xl transition-all text-xs font-mono font-bold',
                                 link.active
-                                    ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-sm'
+                                    ? 'bg-action-primary hover:bg-action-primary-hover text-white shadow-sm'
                                     : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-750',
                                 !link.url ? 'opacity-40 cursor-not-allowed' : '',
                             ]"
@@ -1101,7 +1101,7 @@ const getMethodBadgeClass = (m) => {
             return 'bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300';
         case 'visa':
         case 'mastercard':
-            return 'bg-purple-100 text-purple-800 dark:bg-purple-900/40 dark:text-purple-300';
+            return 'bg-purple-100 text-purple-800';
         default:
             return 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300';
     }

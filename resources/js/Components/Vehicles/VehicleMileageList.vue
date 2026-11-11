@@ -2,55 +2,93 @@
     <div class="space-y-4">
         <!-- Loading State -->
         <div v-if="loading" class="flex justify-center py-8">
-            <svg class="animate-spin w-8 h-8 text-indigo-600" fill="none" viewBox="0 0 24 24">
-                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+            <svg class="animate-spin w-8 h-8 text-action-primary" fill="none" viewBox="0 0 24 24">
+                <circle
+                    class="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    stroke-width="4"
+                ></circle>
+                <path
+                    class="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                ></path>
             </svg>
         </div>
 
         <!-- Empty State -->
-        <div v-else-if="logs.length === 0" class="text-center py-8 text-gray-500 dark:text-gray-400">
+        <div
+            v-else-if="logs.length === 0"
+            class="text-center py-8 text-gray-500 dark:text-gray-400"
+        >
             {{ $t('vehicles.mileage.no_history') }}
         </div>
 
-        <div v-else class="relative overflow-hidden rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm">
+        <div
+            v-else
+            class="relative overflow-hidden rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm"
+        >
             <table class="w-full text-sm text-start">
-                <thead class="text-xs text-gray-500 uppercase bg-gray-50/50 dark:bg-gray-800/50 dark:text-gray-400 border-b border-gray-200 dark:border-gray-700">
+                <thead
+                    class="text-xs text-gray-500 uppercase bg-gray-50/50 dark:bg-gray-800/50 dark:text-gray-400 border-b border-gray-200 dark:border-gray-700"
+                >
                     <tr>
                         <th class="px-6 py-4 font-semibold text-start">{{ $t('common.date') }}</th>
-                        <th class="px-6 py-4 font-semibold text-center">{{ $t('vehicles.mileage.value') }}</th>
-                        <th class="px-6 py-4 font-semibold text-center">{{ $t('vehicles.mileage.difference') }}</th>
-                        <th class="px-6 py-4 font-semibold text-start">{{ $t('common.source') }}</th>
+                        <th class="px-6 py-4 font-semibold text-center">
+                            {{ $t('vehicles.mileage.value') }}
+                        </th>
+                        <th class="px-6 py-4 font-semibold text-center">
+                            {{ $t('vehicles.mileage.difference') }}
+                        </th>
+                        <th class="px-6 py-4 font-semibold text-start">
+                            {{ $t('common.source') }}
+                        </th>
                         <th class="px-6 py-4 font-semibold text-start">{{ $t('common.user') }}</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-100 dark:divide-gray-800">
-                    <tr v-for="log in logs" :key="log.id"
-                        class="hover:bg-gray-50/50 dark:hover:bg-gray-800/30 transition-colors">
+                    <tr
+                        v-for="log in logs"
+                        :key="log.id"
+                        class="hover:bg-gray-50/50 dark:hover:bg-gray-800/30 transition-colors"
+                    >
                         <!-- Date -->
                         <td class="px-6 py-4 whitespace-nowrap">
                             <div class="flex flex-col">
-                                <span class="text-gray-900 dark:text-white font-medium">{{ formatDate(log.recorded_at) }}</span>
-                                <span class="text-[10px] text-gray-400 mt-0.5">{{ formatTime(log.recorded_at) }}</span>
+                                <span class="text-gray-900 dark:text-white font-medium">
+                                    {{ formatDate(log.recorded_at) }}
+                                </span>
+                                <span class="text-[10px] text-gray-400 mt-0.5">
+                                    {{ formatTime(log.recorded_at) }}
+                                </span>
                             </div>
                         </td>
                         <!-- Value -->
                         <td class="px-6 py-4 text-center">
-                            <span class="font-mono font-bold text-gray-900 dark:text-white text-base">
+                            <span
+                                class="font-mono font-bold text-gray-900 dark:text-white text-base"
+                            >
                                 {{ formatNumber(log.mileage) }}
                             </span>
                         </td>
                         <!-- Difference -->
                         <td class="px-6 py-4 text-center">
                             <div class="flex justify-center">
-                                <span v-if="log.difference > 0"
+                                <span
+                                    v-if="log.difference > 0"
                                     class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-bold bg-emerald-50 text-emerald-600 dark:bg-emerald-900/20 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-800/50"
-                                    dir="ltr">
+                                    dir="ltr"
+                                >
                                     +{{ formatNumber(log.difference) }}
                                 </span>
-                                <span v-else-if="log.difference < 0"
+                                <span
+                                    v-else-if="log.difference < 0"
                                     class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-bold bg-red-50 text-red-600 dark:bg-red-900/20 dark:text-red-400 border border-red-100 dark:border-red-800/50"
-                                    dir="ltr">
+                                    dir="ltr"
+                                >
                                     {{ formatNumber(log.difference) }}
                                 </span>
                                 <span v-else class="text-gray-300">—</span>
@@ -59,38 +97,60 @@
                         <!-- Source -->
                         <td class="px-6 py-4">
                             <div v-if="log.reference_code" class="flex flex-col gap-0.5">
-                                <span class="font-bold text-indigo-600 dark:text-indigo-400 text-xs">
+                                <span class="font-bold text-action-primary text-xs">
                                     {{ toEnglish(log.reference_code) }}
                                 </span>
-                                <span class="text-[10px] text-gray-500 bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 rounded-md self-start">
+                                <span
+                                    class="text-[10px] text-gray-500 bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 rounded-md self-start"
+                                >
                                     {{ formatRefType(log.reference_type) }}
                                 </span>
                             </div>
                             <div v-else class="flex flex-col">
-                                <span v-if="log.previous_mileage === 0" class="inline-flex items-center gap-1.5 text-amber-600 dark:text-amber-400 font-bold text-xs uppercase tracking-wider">
+                                <span
+                                    v-if="log.previous_mileage === 0"
+                                    class="inline-flex items-center gap-1.5 text-amber-600 dark:text-amber-400 font-bold text-xs uppercase tracking-wider"
+                                >
                                     <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
                                     {{ $t('vehicles.mileage.initial_log') }}
                                 </span>
-                                <span v-else class="text-gray-400 text-xs italic">{{ $t('common.manual_update') }}</span>
+                                <span v-else class="text-gray-400 text-xs italic">
+                                    {{ $t('common.manual_update') }}
+                                </span>
                             </div>
                         </td>
                         <!-- User -->
                         <td class="px-6 py-4 whitespace-nowrap">
                             <div class="flex items-center gap-2">
-                                <div class="w-6 h-6 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-[10px] font-bold text-gray-500">
+                                <div
+                                    class="w-6 h-6 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-[10px] font-bold text-gray-500"
+                                >
                                     {{ log.creator?.name?.charAt(0).toUpperCase() }}
                                 </div>
-                                <span class="text-gray-600 dark:text-gray-400 text-xs">{{ log.creator?.name || '-' }}</span>
+                                <span class="text-gray-600 dark:text-gray-400 text-xs">
+                                    {{ log.creator?.name || '-' }}
+                                </span>
                             </div>
                         </td>
                         <!-- Actions -->
                         <td class="px-6 py-4 text-end">
-                            <button @click="deleteLog(log)" 
+                            <button
+                                @click="deleteLog(log)"
                                 class="p-1.5 text-gray-400 hover:text-red-600 dark:hover:text-red-400 transition-colors rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20"
-                                :title="$t('common.delete')">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                :title="$t('common.delete')"
+                            >
+                                <svg
+                                    class="w-4 h-4"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2"
+                                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                                    />
                                 </svg>
                             </button>
                         </td>
@@ -134,7 +194,7 @@ const formatTime = (dateString) => {
     if (!dateString) return '';
     return new Date(dateString).toLocaleTimeString('en-US', {
         hour: '2-digit',
-        minute: '2-digit'
+        minute: '2-digit',
     });
 };
 
@@ -165,12 +225,14 @@ const deleteLog = async (log) => {
         message: t('vehicles.mileage.confirm_delete_log', { mileage: formatNumber(log.mileage) }),
         confirmText: t('common.delete'),
         cancelText: t('common.cancel'),
-        variant: 'danger'
+        variant: 'danger',
     });
 
     if (isConfirmed) {
         try {
-            await axios.delete(route('vehicles.mileage-logs.destroy', { vehicle: props.vehicleId, log: log.id }));
+            await axios.delete(
+                route('vehicles.mileage-logs.destroy', { vehicle: props.vehicleId, log: log.id })
+            );
             await fetchLogs();
         } catch (error) {
             console.error('Failed to delete mileage log', error);
@@ -178,7 +240,11 @@ const deleteLog = async (log) => {
     }
 };
 
-watch(() => props.vehicleId, (newId) => {
-    if (newId) fetchLogs();
-}, { immediate: true });
+watch(
+    () => props.vehicleId,
+    (newId) => {
+        if (newId) fetchLogs();
+    },
+    { immediate: true }
+);
 </script>

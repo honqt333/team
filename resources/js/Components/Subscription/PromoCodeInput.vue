@@ -110,14 +110,14 @@ function clear() {
                 :value="modelValue"
                 @input="emit('update:modelValue', $event.target.value.toUpperCase())"
                 :placeholder="locale === 'ar' ? 'أدخل كود الخصم' : 'Enter promo code'"
-                class="flex-1 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-mono uppercase text-slate-900 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 dark:border-slate-600 dark:bg-slate-700 dark:text-white"
+                class="flex-1 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-mono uppercase text-slate-900 focus:border-action-primary focus:ring-1 focus:ring-focus-ring dark:border-slate-600 dark:bg-slate-700 dark:text-white"
                 :disabled="loading"
             />
             <button
                 type="button"
                 @click="apply"
                 :disabled="loading || !modelValue?.trim()"
-                class="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50"
+                class="rounded-lg bg-action-primary px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-action-primary-hover disabled:cursor-not-allowed disabled:opacity-50"
             >
                 <svg v-if="loading" class="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
                     <circle

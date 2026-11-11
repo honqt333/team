@@ -3,7 +3,7 @@
         <template #title>
             <div class="flex items-center gap-3">
                 <div
-                    class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-600 to-purple-600 flex items-center justify-center"
+                    class="w-10 h-10 rounded-xl bg-action-primary hover:bg-action-primary-hover flex items-center justify-center"
                 >
                     <svg
                         class="w-5 h-5 text-white"
@@ -104,7 +104,7 @@
                             lang="en"
                             min="1"
                             placeholder="30"
-                            class="flex-1 px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                            class="flex-1 px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-focus-ring focus:border-transparent transition-all"
                         />
                         <div class="w-32">
                             <SearchableSelect
@@ -149,7 +149,7 @@
                             lang="en"
                             min="1"
                             placeholder="1"
-                            class="flex-1 px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                            class="flex-1 px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-focus-ring focus:border-transparent transition-all"
                         />
                         <div class="w-32">
                             <SearchableSelect
@@ -192,13 +192,13 @@
                         :class="[
                             'relative flex items-center gap-3 p-4 rounded-xl border-2 cursor-pointer transition-all',
                             form.type === 'internal'
-                                ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-900/20'
+                                ? 'border-action-primary bg-selection-bg'
                                 : 'border-gray-200 dark:border-gray-700 hover:border-gray-300',
                         ]"
                     >
                         <input type="radio" v-model="form.type" value="internal" class="sr-only" />
                         <div
-                            class="w-10 h-10 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center flex-shrink-0"
+                            class="w-10 h-10 rounded-lg bg-action-primary hover:bg-action-primary-hover flex items-center justify-center flex-shrink-0"
                         >
                             <svg
                                 class="w-5 h-5 text-white"
@@ -222,7 +222,7 @@
                         :class="[
                             'relative flex items-center gap-3 p-4 rounded-xl border-2 transition-all',
                             form.type === 'external'
-                                ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/20'
+                                ? 'border-purple-500 bg-purple-50'
                                 : 'border-gray-200 dark:border-gray-700 opacity-60 cursor-not-allowed',
                         ]"
                     >
@@ -254,7 +254,7 @@
                             <span class="font-medium text-gray-900 dark:text-white">
                                 {{ $t('services_management.types.external') }}
                             </span>
-                            <span class="block text-xs text-purple-600 dark:text-purple-400">
+                            <span class="block text-xs text-purple-600">
                                 {{ $t('services_management.coming_soon') }}
                             </span>
                         </div>
@@ -316,7 +316,7 @@
                 <button
                     @click="submitForm"
                     :disabled="form.processing"
-                    class="px-5 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl font-medium shadow-lg shadow-indigo-500/30 hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed transition-all text-center"
+                    class="px-5 py-2.5 bg-action-primary hover:bg-action-primary-hover text-white rounded-xl font-medium shadow-lg shadow-focus-ring-soft hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed transition-all text-center"
                 >
                     {{ form.processing ? $t('common.loading') : $t('common.save') }}
                 </button>

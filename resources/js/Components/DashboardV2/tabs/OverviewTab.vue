@@ -112,7 +112,7 @@ const ICONS = {
                 :label="
                     userContext?.canViewFinancials
                         ? $t('dashboard.total_customers')
-                        : $t('crm.vehicles.title', 'المركبات')
+                        : $t('nav.vehicles')
                 "
                 :value="
                     userContext?.canViewFinancials
@@ -241,7 +241,7 @@ const ICONS = {
                             </p>
                         </div>
                         <span
-                            class="rounded-full bg-indigo-50 px-2 py-0.5 text-xs font-semibold text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300"
+                            class="rounded-full bg-selection-bg px-2 py-0.5 text-xs font-semibold text-selection-text"
                         >
                             {{
                                 new Date(app.scheduled_at).toLocaleTimeString([], {

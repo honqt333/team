@@ -87,7 +87,7 @@
                 <div class="mt-6 flex flex-col sm:flex-row gap-3 justify-center">
                     <button
                         @click="retryPayment"
-                        class="w-full sm:w-auto px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl transition-colors"
+                        class="w-full sm:w-auto px-6 py-3 bg-action-primary hover:bg-action-primary-hover text-white font-semibold rounded-xl transition-colors"
                     >
                         {{ $t('system.payment.retry_payment') }}
                     </button>

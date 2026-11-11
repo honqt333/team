@@ -6,7 +6,7 @@
                 :title="$t('reports.tickets_report.title')"
                 :subtitle="$t('reports.tickets_report.subtitle')"
                 gradientFrom="from-blue-600"
-                gradientTo="to-indigo-600"
+                gradientTo="to-action-primary"
                 glowFrom="from-blue-500"
                 class="print:hidden"
             >
@@ -39,7 +39,7 @@
 
                         <a
                             :href="exportUrl"
-                            class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-xs font-bold transition-all shadow-lg shadow-blue-500/25 hover:-translate-y-0.5"
+                            class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-action-primary hover:bg-action-primary-hover text-white text-xs font-bold transition-all shadow-lg shadow-blue-500/25 hover:-translate-y-0.5"
                         >
                             <svg
                                 class="w-4 h-4"
@@ -138,7 +138,7 @@
                     </div>
 
                     <div class="flex items-center gap-1.5 ps-3">
-                        <span class="text-purple-600 dark:text-purple-400 font-semibold">
+                        <span class="text-purple-600 font-semibold">
                             {{ $t('reports.tickets_report.bad_debt') }}:
                         </span>
                         <span
@@ -311,7 +311,7 @@
                                 v-model="filterForm.search"
                                 @keyup.enter="applyFilters"
                                 :placeholder="$t('reports.tickets_report.search_placeholder')"
-                                class="w-full ps-9 pe-9 py-2 text-xs rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200 focus:ring-2 focus:ring-blue-500"
+                                class="w-full ps-9 pe-9 py-2 text-xs rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200 focus:ring-2 focus:ring-focus-ring"
                             />
                             <svg
                                 class="w-4 h-4 text-gray-400 absolute start-3 top-2.5"
@@ -1441,7 +1441,7 @@ const getStatusBadgeClass = (st) => {
         case 'in_progress':
             return 'bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300';
         case 'ready_for_qc':
-            return 'bg-purple-100 text-purple-800 dark:bg-purple-900/40 dark:text-purple-300';
+            return 'bg-purple-100 text-purple-800';
         case 'on_hold':
             return 'bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300';
         case 'cancelled':
@@ -1473,7 +1473,7 @@ const getCustomerTypeBadgeClass = (type) => {
         case 'government':
             return 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300';
         case 'vip':
-            return 'bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300';
+            return 'bg-purple-100 text-purple-700';
         default:
             return 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300';
     }

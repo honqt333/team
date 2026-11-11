@@ -239,7 +239,7 @@ const regenerate = () =>
                                         v-model="form.code"
                                         maxlength="6"
                                         placeholder="000000"
-                                        class="w-40 text-center text-2xl tracking-wider rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white font-mono focus:ring-emerald-500 focus:border-emerald-500"
+                                        class="w-40 text-center text-2xl tracking-wider rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white font-mono focus:ring-focus-ring focus:border-action-primary"
                                         dir="ltr"
                                         inputmode="numeric"
                                         autofocus
@@ -268,7 +268,7 @@ const regenerate = () =>
                                     type="button"
                                     @click="sendCode"
                                     :disabled="sendCodeForm.processing"
-                                    class="text-indigo-600 hover:text-indigo-800 font-medium"
+                                    class="text-action-primary hover:text-selection-text font-medium"
                                 >
                                     {{ $t('security.resend') }}
                                 </button>
@@ -328,7 +328,7 @@ const regenerate = () =>
                         </h3>
                         <button
                             @click="showRegenModal = true"
-                            class="text-sm text-indigo-600 hover:text-indigo-800"
+                            class="text-sm text-action-primary hover:text-selection-text"
                         >
                             {{ $t('security.new_codes') }}
                         </button>

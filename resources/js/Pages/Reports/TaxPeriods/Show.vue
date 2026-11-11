@@ -420,7 +420,7 @@
                                 type="text"
                                 v-model="searchQuery"
                                 :placeholder="$t('reports.tax_periods_report.search_placeholder')"
-                                class="text-xs bg-gray-50 dark:bg-gray-700/60 border border-gray-200 dark:border-gray-600 rounded-xl px-3 py-1.5 w-60 text-gray-900 dark:text-white focus:ring-2 focus:ring-emerald-500"
+                                class="text-xs bg-gray-50 dark:bg-gray-700/60 border border-gray-200 dark:border-gray-600 rounded-xl px-3 py-1.5 w-60 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring"
                             />
 
                             <div class="w-52">
@@ -658,8 +658,7 @@ const getTypeBadgeClass = (type, isIncome) => {
         return 'bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-300';
     if (type === 'purchase_invoice')
         return 'bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300';
-    if (type === 'purchase_return')
-        return 'bg-purple-100 text-purple-800 dark:bg-purple-900/50 dark:text-purple-300';
+    if (type === 'purchase_return') return 'bg-purple-100 text-purple-800';
     return isIncome ? 'bg-teal-100 text-teal-800' : 'bg-rose-100 text-rose-800';
 };
 

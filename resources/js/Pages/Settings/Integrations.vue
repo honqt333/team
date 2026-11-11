@@ -7,13 +7,13 @@
             <PageHeader
                 :title="$t('settings.integrations.title')"
                 :subtitle="$t('settings.integrations.hub_subtitle')"
-                gradientFrom="from-indigo-600"
+                gradientFrom="from-action-primary"
                 gradientTo="to-purple-700"
-                glowFrom="from-indigo-500"
-                badgeBg="bg-indigo-50/50 dark:bg-indigo-900/30"
-                badgeText="text-indigo-600 dark:text-indigo-400"
-                badgeBorder="border-indigo-100/50 dark:border-indigo-800/30"
-                badgeDot="bg-indigo-500"
+                glowFrom="from-action-primary"
+                badgeBg="bg-selection-bg"
+                badgeText="text-action-primary"
+                badgeBorder="border-action-primary/25"
+                badgeDot="bg-action-primary"
             >
                 <template #icon>
                     <svg
@@ -97,12 +97,12 @@
                 <!-- 2. البلاغات والمقترحات -->
                 <Link
                     href="/app/feedback"
-                    class="group relative bg-white dark:bg-gray-800 rounded-2xl p-6 border border-gray-200 dark:border-gray-700 hover:border-indigo-400 dark:hover:border-indigo-500 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between"
+                    class="group relative bg-white dark:bg-gray-800 rounded-2xl p-6 border border-gray-200 dark:border-gray-700 hover:border-action-primary hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between"
                 >
                     <div>
                         <div class="flex items-center justify-between mb-4">
                             <div
-                                class="w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-500/25 group-hover:scale-110 transition-transform duration-300"
+                                class="w-14 h-14 rounded-2xl bg-action-primary hover:bg-action-primary-hover flex items-center justify-center shadow-lg shadow-focus-ring-soft group-hover:scale-110 transition-transform duration-300"
                             >
                                 <svg
                                     class="w-7 h-7 text-white"
@@ -119,13 +119,13 @@
                                 </svg>
                             </div>
                             <span
-                                class="px-3 py-1 rounded-full text-xs font-bold bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800"
+                                class="px-3 py-1 rounded-full text-xs font-bold bg-selection-bg text-selection-text border border-action-primary/25"
                             >
                                 {{ $t('settings.integrations.badges.direct_support') }}
                             </span>
                         </div>
                         <h3
-                            class="text-lg font-bold text-gray-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors"
+                            class="text-lg font-bold text-gray-900 dark:text-white group-hover:text-action-primary transition-colors"
                         >
                             {{ $t('settings.integrations.feedback_title') }}
                         </h3>
@@ -135,7 +135,7 @@
                     </div>
 
                     <div
-                        class="mt-6 pt-4 border-t border-gray-100 dark:border-gray-700/50 flex items-center justify-between text-xs font-semibold text-indigo-600 dark:text-indigo-400"
+                        class="mt-6 pt-4 border-t border-gray-100 dark:border-gray-700/50 flex items-center justify-between text-xs font-semibold text-action-primary"
                     >
                         <span>{{ $t('settings.integrations.submit_feedback') }}</span>
                         <svg
@@ -217,12 +217,12 @@
                 <!-- 4. موقع المنشأة الإلكتروني -->
                 <Link
                     href="/app/settings/website"
-                    class="group relative bg-white dark:bg-gray-800 rounded-2xl p-6 border border-gray-200 dark:border-gray-700 hover:border-violet-400 dark:hover:border-violet-500 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between"
+                    class="group relative bg-white dark:bg-gray-800 rounded-2xl p-6 border border-gray-200 dark:border-gray-700 hover:border-action-primary hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between"
                 >
                     <div>
                         <div class="flex items-center justify-between mb-4">
                             <div
-                                class="w-14 h-14 rounded-2xl bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-violet-500/25 group-hover:scale-110 transition-transform duration-300"
+                                class="w-14 h-14 rounded-2xl bg-action-primary hover:bg-action-primary-hover flex items-center justify-center shadow-lg shadow-focus-ring-soft group-hover:scale-110 transition-transform duration-300"
                             >
                                 <svg
                                     class="w-7 h-7 text-white"
@@ -239,13 +239,13 @@
                                 </svg>
                             </div>
                             <span
-                                class="px-3 py-1 rounded-full text-xs font-bold bg-violet-50 dark:bg-violet-900/30 text-violet-700 dark:text-violet-300 border border-violet-200 dark:border-violet-800"
+                                class="px-3 py-1 rounded-full text-xs font-bold bg-selection-bg text-selection-text border border-action-primary/25"
                             >
                                 {{ $t('settings.integrations.badges.active') }}
                             </span>
                         </div>
                         <h3
-                            class="text-lg font-bold text-gray-900 dark:text-white group-hover:text-violet-600 dark:group-hover:text-violet-400 transition-colors"
+                            class="text-lg font-bold text-gray-900 dark:text-white group-hover:text-action-primary transition-colors"
                         >
                             {{ $t('settings.integrations.website_title') }}
                         </h3>
@@ -255,7 +255,7 @@
                     </div>
 
                     <div
-                        class="mt-6 pt-4 border-t border-gray-100 dark:border-gray-700/50 flex items-center justify-between text-xs font-semibold text-violet-600 dark:text-violet-400"
+                        class="mt-6 pt-4 border-t border-gray-100 dark:border-gray-700/50 flex items-center justify-between text-xs font-semibold text-action-primary"
                     >
                         <span>{{ $t('settings.integrations.customize_website') }}</span>
                         <svg

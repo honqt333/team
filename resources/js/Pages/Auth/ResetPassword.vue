@@ -61,7 +61,7 @@ const submit = () => {
                         :type="showPassword ? 'text' : 'password'"
                         v-model="form.password"
                         required
-                        class="w-full px-4 py-3 pe-12 border rounded-xl focus:ring-2 focus:ring-violet-500 bg-white dark:bg-gray-800"
+                        class="w-full px-4 py-3 pe-12 border rounded-xl focus:ring-2 focus:ring-focus-ring bg-white dark:bg-gray-800"
                     />
                     <button
                         type="button"
@@ -83,7 +83,7 @@ const submit = () => {
                         :type="showConfirmPassword ? 'text' : 'password'"
                         v-model="form.password_confirmation"
                         required
-                        class="w-full px-4 py-3 pe-12 border rounded-xl focus:ring-2 focus:ring-violet-500 bg-white dark:bg-gray-800"
+                        class="w-full px-4 py-3 pe-12 border rounded-xl focus:ring-2 focus:ring-focus-ring bg-white dark:bg-gray-800"
                     />
                     <button
                         type="button"
@@ -99,7 +99,7 @@ const submit = () => {
             <button
                 type="submit"
                 :disabled="form.processing"
-                class="w-full py-3 bg-gradient-to-r from-violet-600 to-indigo-600 text-white font-semibold rounded-xl shadow-lg disabled:opacity-50"
+                class="w-full py-3 bg-action-primary hover:bg-action-primary-hover text-white font-semibold rounded-xl shadow-lg disabled:opacity-50"
             >
                 {{ $t('common.saving') }}
             </button>

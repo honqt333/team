@@ -174,10 +174,10 @@ onMounted(() => {
             class="bg-gray-50 dark:bg-gray-800/50 rounded-2xl p-8 max-w-lg mx-auto border border-dashed border-gray-300 dark:border-gray-700"
         >
             <div
-                class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-violet-100 dark:bg-violet-900/30 mb-6"
+                class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-selection-bg mb-6"
             >
                 <svg
-                    class="h-8 w-8 text-violet-600 dark:text-violet-400"
+                    class="h-8 w-8 text-action-primary"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -198,7 +198,7 @@ onMounted(() => {
             </p>
             <button
                 @click="createUser"
-                class="inline-flex items-center px-6 py-3 border border-transparent text-sm font-medium rounded-xl shadow-lg text-white bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 transition-all transform hover:scale-105"
+                class="inline-flex items-center px-6 py-3 border border-transparent text-sm font-medium rounded-xl shadow-lg text-white bg-action-primary hover:bg-action-primary-hover transition-all transform hover:scale-105"
             >
                 <svg class="w-5 h-5 me-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path
@@ -219,9 +219,9 @@ onMounted(() => {
             class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-gray-700"
         >
             <div class="flex items-center gap-3 mb-6">
-                <div class="p-2 bg-violet-100 dark:bg-violet-900/30 rounded-lg">
+                <div class="p-2 bg-selection-bg rounded-lg">
                     <svg
-                        class="w-6 h-6 text-violet-600 dark:text-violet-400"
+                        class="w-6 h-6 text-action-primary"
                         fill="none"
                         viewBox="0 0 24 24"
                         stroke="currentColor"
@@ -259,20 +259,20 @@ onMounted(() => {
                     class="relative flex items-start gap-4 p-4 rounded-xl border-2 cursor-pointer transition-all duration-200 group"
                     :class="
                         form.roles.includes(role.id)
-                            ? 'border-violet-500 bg-violet-50/50 dark:bg-violet-900/10'
-                            : 'border-gray-100 dark:border-gray-700 hover:border-violet-200 dark:hover:border-violet-800 hover:bg-gray-50 dark:hover:bg-gray-700/50'
+                            ? 'border-action-primary bg-selection-bg'
+                            : 'border-gray-100 dark:border-gray-700 hover:border-action-primary/25 hover:bg-gray-50 dark:hover:bg-gray-700/50'
                     "
                 >
                     <div class="flex-shrink-0 mt-0.5">
                         <AppCheckbox
                             v-model="form.roles"
                             :value="role.id"
-                            class="w-5 h-5 text-violet-600 border-gray-300 focus:ring-violet-500 rounded"
+                            class="w-5 h-5 text-action-primary border-gray-300 focus:ring-focus-ring rounded"
                         />
                     </div>
                     <div class="flex-1">
                         <span
-                            class="block text-base font-semibold text-gray-900 dark:text-white mb-1 group-hover:text-violet-700 dark:group-hover:text-violet-300 transition-colors"
+                            class="block text-base font-semibold text-gray-900 dark:text-white mb-1 group-hover:text-selection-text transition-colors"
                         >
                             {{ role.label_ar || role.name }}
                         </span>
@@ -285,7 +285,7 @@ onMounted(() => {
                     </div>
                     <div
                         v-if="form.roles.includes(role.id)"
-                        class="absolute top-4 end-4 text-violet-500"
+                        class="absolute top-4 end-4 text-action-primary"
                     >
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path
@@ -316,9 +316,9 @@ onMounted(() => {
             >
                 <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div class="flex items-center gap-3">
-                        <div class="p-2 bg-indigo-100 dark:bg-indigo-900/30 rounded-lg">
+                        <div class="p-2 bg-selection-bg rounded-lg">
                             <svg
-                                class="w-6 h-6 text-indigo-600 dark:text-indigo-400"
+                                class="w-6 h-6 text-action-primary"
                                 fill="none"
                                 viewBox="0 0 24 24"
                                 stroke="currentColor"
@@ -344,12 +344,12 @@ onMounted(() => {
                                 </span>
                             </div>
                             <p class="text-sm text-gray-500 dark:text-gray-400">
-                                <span class="text-violet-600 dark:text-violet-400 font-medium">
+                                <span class="text-action-primary font-medium">
                                     {{ rolePermissions.length }}
                                 </span>
                                 {{ t('permissions.from_roles', 'من الأدوار') }}
                                 •
-                                <span class="text-indigo-600 dark:text-indigo-400 font-medium">
+                                <span class="text-action-primary font-medium">
                                     {{ form.permissions.length }}
                                 </span>
                                 {{ t('users.direct_permissions', 'مباشرة') }}
@@ -362,7 +362,7 @@ onMounted(() => {
                             v-model="searchQuery"
                             type="text"
                             :placeholder="$t('common.search_permissions', 'Search permissions...')"
-                            class="w-full ps-10 pe-4 py-2 text-sm border-gray-300 dark:border-gray-600 rounded-xl focus:ring-violet-500 focus:border-violet-500 bg-white dark:bg-gray-900 text-gray-900 dark:text-white shadow-sm"
+                            class="w-full ps-10 pe-4 py-2 text-sm border-gray-300 dark:border-gray-600 rounded-xl focus:ring-focus-ring focus:border-action-primary bg-white dark:bg-gray-900 text-gray-900 dark:text-white shadow-sm"
                         />
                         <svg
                             class="absolute start-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"
@@ -453,8 +453,8 @@ onMounted(() => {
                                 class="flex items-center justify-between p-3 rounded-xl border transition-colors"
                                 :class="[
                                     isPermissionFromRole(permission)
-                                        ? 'bg-violet-50 dark:bg-violet-900/20 border-violet-200 dark:border-violet-800'
-                                        : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:border-violet-300 dark:hover:border-violet-700',
+                                        ? 'bg-selection-bg border-action-primary/25'
+                                        : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:border-action-primary/25',
                                 ]"
                             >
                                 <div class="flex flex-col pe-3">
@@ -466,7 +466,7 @@ onMounted(() => {
                                         </span>
                                         <span
                                             v-if="isPermissionFromRole(permission)"
-                                            class="px-1.5 py-0.5 text-[10px] font-medium bg-violet-100 dark:bg-violet-800 text-violet-700 dark:text-violet-300 rounded"
+                                            class="px-1.5 py-0.5 text-[10px] font-medium bg-selection-bg text-selection-text rounded"
                                         >
                                             {{ t('permissions.from_role', 'من الدور') }}
                                         </span>
@@ -484,10 +484,7 @@ onMounted(() => {
                                     color="violet"
                                     :value="permission"
                                 />
-                                <div
-                                    v-else
-                                    class="flex items-center gap-1 text-violet-600 dark:text-violet-400"
-                                >
+                                <div v-else class="flex items-center gap-1 text-action-primary">
                                     <svg
                                         class="w-5 h-5"
                                         fill="none"
@@ -523,7 +520,7 @@ onMounted(() => {
         >
             <button
                 type="submit"
-                class="px-8 py-3 text-sm font-bold text-white bg-gradient-to-r from-violet-600 to-indigo-600 rounded-xl hover:from-violet-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-violet-500 shadow-lg shadow-violet-500/30 transition-all duration-200 disabled:opacity-75 disabled:cursor-not-allowed transform hover:-translate-y-0.5"
+                class="px-8 py-3 text-sm font-bold text-white bg-action-primary hover:bg-action-primary-hover rounded-xl focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-focus-ring shadow-lg shadow-focus-ring-soft transition-all duration-200 disabled:opacity-75 disabled:cursor-not-allowed transform hover:-translate-y-0.5"
                 :disabled="form.processing"
             >
                 <span v-if="form.processing" class="flex items-center gap-2">

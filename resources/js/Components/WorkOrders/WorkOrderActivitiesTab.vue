@@ -9,7 +9,8 @@
                     <!-- Icon/Marker -->
                     <div class="w-16 flex justify-center flex-shrink-0 relative">
                         <div
-                            class="w-10 h-10 rounded-full bg-white dark:bg-gray-800 border-2 border-indigo-500 flex items-center justify-center z-10 shadow-sm">
+                            class="w-10 h-10 rounded-full bg-white dark:bg-gray-800 border-2 border-action-primary flex items-center justify-center z-10 shadow-sm"
+                        >
                             <span v-if="activity.action === 'created'">🆕</span>
                             <span v-else-if="activity.action === 'status_changed'">🔄</span>
                             <span v-else-if="activity.action === 'item_added'">🔧</span>
@@ -27,18 +28,20 @@
 
                     <!-- Content -->
                     <div
-                        class="flex-1 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4 shadow-sm">
+                        class="flex-1 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4 shadow-sm"
+                    >
                         <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
                             <h4 class="text-sm font-bold text-gray-900 dark:text-white">
                                 {{ getActivityDescription(activity) }}
                             </h4>
-                            <span class="text-xs text-gray-400 font-medium">{{
-                                formatDateTime(activity.created_at)
-                                }}</span>
+                            <span class="text-xs text-gray-400 font-medium">
+                                {{ formatDateTime(activity.created_at) }}
+                            </span>
                         </div>
                         <div class="flex items-center gap-2">
                             <div
-                                class="w-6 h-6 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-[10px] font-bold">
+                                class="w-6 h-6 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-[10px] font-bold"
+                            >
                                 {{ activity.user?.name?.charAt(0) }}
                             </div>
                             <p class="text-xs text-gray-500 dark:text-gray-400">
@@ -51,10 +54,13 @@
         </div>
         <div v-else class="text-center py-12">
             <div
-                class="w-16 h-16 mx-auto bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mb-4">
+                class="w-16 h-16 mx-auto bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mb-4"
+            >
                 <span class="text-2xl">📋</span>
             </div>
-            <p class="text-gray-500 dark:text-gray-400">{{ $t('work_orders.activities.no_activities') }}</p>
+            <p class="text-gray-500 dark:text-gray-400">
+                {{ $t('work_orders.activities.no_activities') }}
+            </p>
         </div>
     </div>
 </template>

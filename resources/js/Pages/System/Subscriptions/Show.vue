@@ -75,11 +75,7 @@
                                     {{ $t('system.subscriptions.billing_cycle') }}
                                 </p>
                                 <p class="font-medium text-gray-900 dark:text-white">
-                                    {{
-                                        subscription.billing_cycle === 'yearly'
-                                            ? $t('system.subscriptions.yearly')
-                                            : $t('system.subscriptions.monthly')
-                                    }}
+                                    {{ $t('system.subscriptions.yearly') }}
                                 </p>
                             </div>
                             <div>
@@ -88,14 +84,10 @@
                                 </p>
                                 <p class="font-medium text-gray-900 dark:text-white">
                                     {{
-                                        Number(subscription.price) > 0
-                                            ? subscription.price +
-                                              $t('system.subscriptions.currency_suffix')
-                                            : subscription.billing_cycle === 'yearly'
-                                              ? (subscription.plan?.price_yearly ?? 0) +
-                                                $t('system.subscriptions.currency_suffix')
-                                              : (subscription.plan?.price_monthly ?? 0) +
-                                                $t('system.subscriptions.currency_suffix')
+                                        (Number(subscription.price) > 0
+                                            ? subscription.price
+                                            : (subscription.plan?.price_yearly ?? 0)) +
+                                        $t('system.subscriptions.currency_suffix')
                                     }}
                                 </p>
                             </div>
@@ -226,17 +218,18 @@
                         </h2>
                         <div class="space-y-3">
                             <button
-                                v-if="
-                                    subscription.status === 'active' ||
-                                    subscription.status === 'trial'
-                                "
+                                v-if="['active', 'trial', 'trialing'].includes(subscription.status)"
                                 @click="cancelSubscription"
                                 class="w-full px-4 py-2 bg-red-50 dark:bg-red-900/20 text-red-600 hover:bg-red-100 dark:hover:bg-red-900/30 rounded-lg text-sm font-medium"
                             >
                                 {{ $t('system.subscriptions.cancel_subscription') }}
                             </button>
                             <button
-                                v-if="subscription.status === 'cancelled'"
+                                v-if="
+                                    ['cancelled', 'expired', 'pending', 'pending_payment'].includes(
+                                        subscription.status
+                                    )
+                                "
                                 @click="activateSubscription"
                                 class="w-full px-4 py-2 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 hover:bg-emerald-100 dark:hover:bg-emerald-900/30 rounded-lg text-sm font-medium"
                             >
@@ -244,7 +237,7 @@
                             </button>
                             <button
                                 @click="showExtendModal = true"
-                                class="w-full px-4 py-2 bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 hover:bg-indigo-100 dark:hover:bg-indigo-900/30 rounded-lg text-sm font-medium"
+                                class="w-full px-4 py-2 bg-selection-bg text-action-primary hover:bg-selection-bg rounded-lg text-sm font-medium"
                             >
                                 {{ $t('system.subscriptions.extend_subscription') }}
                             </button>
@@ -267,7 +260,7 @@
                             </p>
                             <Link
                                 :href="`/system/tenants/${subscription.tenant?.id}`"
-                                class="text-indigo-600 hover:text-indigo-700 text-sm"
+                                class="text-action-primary hover:text-selection-text text-sm"
                             >
                                 {{ $t('system.subscriptions.view_tenant_details') }}
                             </Link>
@@ -283,7 +276,7 @@
                             {{ $t('system.subscriptions.discount_code') }}
                         </h2>
                         <span
-                            class="font-mono font-bold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/30 px-3 py-1 rounded"
+                            class="font-mono font-bold text-action-primary bg-selection-bg px-3 py-1 rounded"
                         >
                             {{ subscription.promo_code }}
                         </span>
@@ -293,8 +286,9 @@
                         >
                             {{
                                 $t('system.subscriptions.discount') +
-                                formatCurrency(subscription.discount_amount)
-                            }}$t('system.subscriptions.create_modal.currency') }}
+                                formatCurrency(subscription.discount_amount) +
+                                $t('system.subscriptions.create_modal.currency')
+                            }}
                         </p>
                     </div>
                 </div>
@@ -333,7 +327,7 @@
                             </button>
                             <button
                                 @click="extendSubscription"
-                                class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg"
+                                class="px-4 py-2 bg-action-primary hover:bg-action-primary-hover text-white rounded-lg"
                             >
                                 {{ $t('system.subscriptions.extend') }}
                             </button>

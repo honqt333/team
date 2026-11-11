@@ -21,7 +21,7 @@ const activeIndex = computed(() => props.tabs.findIndex((t) => t.id === props.mo
                 :class="[
                     'group relative flex flex-shrink-0 items-center gap-2 border-b-2 px-4 py-3 text-sm font-medium transition-colors',
                     modelValue === tab.id
-                        ? 'border-indigo-600 text-indigo-600 dark:border-indigo-400 dark:text-indigo-300'
+                        ? 'border-action-primary text-action-primary'
                         : 'border-transparent text-slate-500 hover:border-slate-300 hover:text-slate-700 dark:text-slate-400 dark:hover:border-slate-600 dark:hover:text-slate-200',
                 ]"
             >
@@ -32,7 +32,7 @@ const activeIndex = computed(() => props.tabs.findIndex((t) => t.id === props.mo
                     :class="[
                         'ml-1 inline-flex h-5 min-w-[20px] items-center justify-center rounded-full px-1.5 text-xs font-semibold',
                         modelValue === tab.id
-                            ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/50 dark:text-indigo-200'
+                            ? 'bg-selection-bg text-selection-text'
                             : 'bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-300',
                     ]"
                 >

@@ -48,7 +48,7 @@
                     >
                         <a
                             :href="`/system/invoices/${invoice.id}/download`"
-                            class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-white dark:hover:bg-gray-800 rounded-xl transition-all shadow-sm"
+                            class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-action-primary hover:bg-white dark:hover:bg-gray-800 rounded-xl transition-all shadow-sm"
                         >
                             <DownloadIcon class="h-4 w-4" />
                             <span>
@@ -59,7 +59,7 @@
                         <button
                             @click="sendInvoice"
                             :disabled="sending"
-                            class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-white dark:hover:bg-gray-800 rounded-xl transition-all shadow-sm disabled:opacity-50"
+                            class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-action-primary hover:bg-white dark:hover:bg-gray-800 rounded-xl transition-all shadow-sm disabled:opacity-50"
                         >
                             <MailIcon class="h-4 w-4" />
                             <span>
@@ -143,7 +143,7 @@
                     <a
                         :href="`/system/invoices/${invoice.id}/download`"
                         target="_blank"
-                        class="text-xs font-semibold text-indigo-600 hover:text-indigo-800 dark:text-indigo-400"
+                        class="text-xs font-semibold text-action-primary hover:text-selection-text"
                     >
                         {{ isAr ? $t('system.invoices.open_in_new_tab') : 'Open in new tab' }} ↗
                     </a>

@@ -30,7 +30,7 @@
                             type="radio"
                             v-model="localPayment.type"
                             value="payment"
-                            class="text-blue-600 focus:ring-blue-500 rounded-full"
+                            class="text-blue-600 focus:ring-focus-ring rounded-full"
                         />
                         <span
                             class="text-sm font-semibold"
@@ -48,7 +48,7 @@
                             type="radio"
                             v-model="localPayment.type"
                             value="bad_debt"
-                            class="text-amber-600 focus:ring-amber-500 rounded-full"
+                            class="text-amber-600 focus:ring-focus-ring rounded-full"
                         />
                         <span
                             class="text-sm font-semibold"
@@ -112,11 +112,11 @@
                         dir="ltr"
                         v-model="localPayment.amount"
                         @input="handleAmountInput"
-                        class="w-full pr-20 pl-4 py-2.5 rounded-xl border bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-blue-500/20 shadow-sm transition-all"
+                        class="w-full pr-20 pl-4 py-2.5 rounded-xl border bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring/20 shadow-sm transition-all"
                         :class="
                             parseFloat(localPayment.amount) > maxAmount
-                                ? 'border-red-500 focus:border-red-500'
-                                : 'border-gray-300 dark:border-gray-600 focus:border-blue-500 dark:focus:border-blue-500'
+                                ? 'border-red-500 focus:border-danger'
+                                : 'border-gray-300 dark:border-gray-600 focus:border-action-primary'
                         "
                         :placeholder="$t('payments.form.amount_placeholder')"
                     />
@@ -156,7 +156,7 @@
                     type="text"
                     v-model="localPayment.reference"
                     dir="ltr"
-                    class="w-full px-4 py-2.5 text-sm border rounded-xl bg-white dark:bg-gray-900 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 text-left font-mono"
+                    class="w-full px-4 py-2.5 text-sm border rounded-xl bg-white dark:bg-gray-900 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-focus-ring text-left font-mono"
                     :placeholder="$t('payments.form.reference_placeholder')"
                 />
             </div>
@@ -169,7 +169,7 @@
                 <textarea
                     v-model="localPayment.notes"
                     rows="2"
-                    class="w-full px-4 py-2.5 text-sm border rounded-xl bg-white dark:bg-gray-900 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 placeholder-gray-400 dark:placeholder-gray-500 resize-none"
+                    class="w-full px-4 py-2.5 text-sm border rounded-xl bg-white dark:bg-gray-900 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-focus-ring placeholder-gray-400 dark:placeholder-gray-500 resize-none"
                     :placeholder="$t('payments.form.notes_placeholder')"
                 ></textarea>
             </div>

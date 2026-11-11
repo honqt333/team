@@ -60,7 +60,7 @@
                             type="radio"
                             v-model="allocationType"
                             value="fifo"
-                            class="text-emerald-600 focus:ring-emerald-500"
+                            class="text-emerald-600 focus:ring-focus-ring"
                         />
                         <div>
                             <p class="text-xs font-bold">
@@ -84,7 +84,7 @@
                             type="radio"
                             v-model="allocationType"
                             value="specific"
-                            class="text-emerald-600 focus:ring-emerald-500"
+                            class="text-emerald-600 focus:ring-focus-ring"
                         />
                         <div>
                             <p class="text-xs font-bold">
@@ -184,8 +184,8 @@
                         class="w-full px-4 py-2.5 text-sm font-mono font-black rounded-xl border bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 transition-all"
                         :class="
                             isOverAmount
-                                ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20 text-red-600 dark:text-red-400'
-                                : 'border-gray-300 dark:border-gray-600 focus:border-emerald-500 focus:ring-emerald-500/20'
+                                ? 'border-red-500 focus:border-danger focus:ring-danger/20 text-red-600 dark:text-red-400'
+                                : 'border-gray-300 dark:border-gray-600 focus:border-action-primary focus:ring-focus-ring/20'
                         "
                         placeholder="0.00"
                     />
@@ -242,7 +242,7 @@
                         v-model="form.payment_date"
                         type="date"
                         required
-                        class="w-full px-4 py-2.5 text-sm rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all font-mono"
+                        class="w-full px-4 py-2.5 text-sm rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring/20 focus:border-action-primary transition-all font-mono"
                     />
                 </div>
 
@@ -254,7 +254,7 @@
                     <input
                         v-model="form.reference"
                         type="text"
-                        class="w-full px-4 py-2.5 text-sm rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all font-mono"
+                        class="w-full px-4 py-2.5 text-sm rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring/20 focus:border-action-primary transition-all font-mono"
                         placeholder="REF-1234..."
                     />
                 </div>
@@ -268,7 +268,7 @@
                 <textarea
                     v-model="form.notes"
                     rows="2"
-                    class="w-full px-4 py-2 text-sm rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all resize-none"
+                    class="w-full px-4 py-2 text-sm rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring/20 focus:border-action-primary transition-all resize-none"
                     :placeholder="$t('payments.form.notes_placeholder')"
                 ></textarea>
             </div>

@@ -144,7 +144,7 @@
                         </h3>
                         <button
                             @click="showRegenModal = true"
-                            class="text-sm text-indigo-600 hover:text-indigo-800"
+                            class="text-sm text-action-primary hover:text-selection-text"
                         >
                             {{ $t('security.new_codes') }}
                         </button>

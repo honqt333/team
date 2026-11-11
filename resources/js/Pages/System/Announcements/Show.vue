@@ -75,7 +75,7 @@
                 <div
                     class="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700"
                 >
-                    <p class="text-2xl font-bold text-indigo-600">{{ stats.target_count }}</p>
+                    <p class="text-2xl font-bold text-action-primary">{{ stats.target_count }}</p>
                     <p class="text-sm text-gray-500">{{ $t('system.announcements.recipients') }}</p>
                 </div>
                 <div

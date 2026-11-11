@@ -5,9 +5,9 @@
             <PageHeader
                 :title="$t('reports.purchase_invoices_report.title')"
                 :subtitle="$t('reports.purchase_invoices_report.subtitle')"
-                gradientFrom="from-violet-600"
+                gradientFrom="from-action-primary"
                 gradientTo="to-purple-700"
-                glowFrom="from-violet-500"
+                glowFrom="from-action-primary"
                 class="print:hidden"
             >
                 <template #back>
@@ -39,7 +39,7 @@
 
                         <a
                             :href="exportUrl"
-                            class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white text-xs font-bold transition-all shadow-lg shadow-violet-500/25 hover:-translate-y-0.5"
+                            class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-action-primary hover:bg-action-primary-hover text-white text-xs font-bold transition-all shadow-lg shadow-focus-ring-soft hover:-translate-y-0.5"
                         >
                             <svg
                                 class="w-4 h-4"
@@ -150,7 +150,7 @@
                             :class="[
                                 'px-3.5 py-2 rounded-xl text-xs font-bold transition-all',
                                 filterForm.range === preset.id
-                                    ? 'bg-gradient-to-r from-violet-600 to-purple-600 text-white shadow-md shadow-violet-500/20'
+                                    ? 'bg-action-primary hover:bg-action-primary-hover text-white shadow-md shadow-focus-ring-soft'
                                     : 'bg-gray-50 dark:bg-gray-700/50 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700',
                             ]"
                         >
@@ -170,7 +170,7 @@
                                 :class="[
                                     'px-3 py-1.5 rounded-lg text-xs font-bold transition-all',
                                     filterForm.date_type === 'issue_date'
-                                        ? 'bg-white dark:bg-gray-800 text-violet-600 dark:text-violet-400 shadow-sm'
+                                        ? 'bg-white dark:bg-gray-800 text-action-primary shadow-sm'
                                         : 'text-gray-600 dark:text-gray-400 hover:text-gray-900',
                                 ]"
                             >
@@ -182,7 +182,7 @@
                                 :class="[
                                     'px-3 py-1.5 rounded-lg text-xs font-bold transition-all',
                                     filterForm.date_type === 'due_date'
-                                        ? 'bg-white dark:bg-gray-800 text-violet-600 dark:text-violet-400 shadow-sm'
+                                        ? 'bg-white dark:bg-gray-800 text-action-primary shadow-sm'
                                         : 'text-gray-600 dark:text-gray-400 hover:text-gray-900',
                                 ]"
                             >
@@ -298,7 +298,7 @@
                             v-model="filterForm.search"
                             type="text"
                             :placeholder="$t('reports.purchase_invoices_report.search_placeholder')"
-                            class="w-full pl-10 pr-4 py-2 text-xs rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/50 focus:bg-white dark:focus:bg-gray-900 focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-all"
+                            class="w-full pl-10 pr-4 py-2 text-xs rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/50 focus:bg-white dark:focus:bg-gray-900 focus:ring-2 focus:ring-focus-ring focus:border-transparent transition-all"
                             @keyup.enter="applyFilters"
                         />
                         <svg
@@ -455,7 +455,7 @@
                     >
                         <span>{{ $t('reports.purchase_invoices_report.total_vat') }}</span>
                         <div
-                            class="w-7 h-7 rounded-lg bg-purple-50 dark:bg-purple-900/40 text-purple-600 dark:text-purple-400 flex items-center justify-center"
+                            class="w-7 h-7 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center"
                         >
                             <svg
                                 class="w-4 h-4"
@@ -472,7 +472,7 @@
                             </svg>
                         </div>
                     </div>
-                    <div class="text-xl font-bold font-mono text-purple-600 dark:text-purple-400">
+                    <div class="text-xl font-bold font-mono text-purple-600">
                         {{ formatMoney(kpis.total_vat) }}
                     </div>
                     <span class="text-[10px] text-gray-400">15%</span>
@@ -480,16 +480,16 @@
 
                 <!-- Total Invoiced Amount -->
                 <div
-                    class="bg-white dark:bg-gray-800 rounded-2xl p-4 border border-gray-100 dark:border-gray-700/60 shadow-sm bg-gradient-to-br from-violet-50/40 dark:from-violet-950/20 to-transparent"
+                    class="bg-white dark:bg-gray-800 rounded-2xl p-4 border border-gray-100 dark:border-gray-700/60 shadow-sm bg-selection-bg/50"
                 >
                     <div
                         class="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400 mb-1"
                     >
-                        <span class="font-bold text-violet-800 dark:text-violet-400">
+                        <span class="font-bold text-selection-text">
                             {{ $t('reports.purchase_invoices_report.total_amount') }}
                         </span>
                         <div
-                            class="w-7 h-7 rounded-lg bg-violet-100 dark:bg-violet-900/40 text-violet-700 dark:text-violet-300 flex items-center justify-center"
+                            class="w-7 h-7 rounded-lg bg-selection-bg text-selection-text flex items-center justify-center"
                         >
                             <svg
                                 class="w-4 h-4"
@@ -506,7 +506,7 @@
                             </svg>
                         </div>
                     </div>
-                    <div class="text-xl font-bold font-mono text-violet-700 dark:text-violet-300">
+                    <div class="text-xl font-bold font-mono text-selection-text">
                         {{ formatMoney(kpis.total_invoice_amount) }}
                     </div>
                     <span class="text-[10px] text-gray-400">
@@ -562,7 +562,7 @@
                         <button
                             type="button"
                             @click="expandAllGroups"
-                            class="text-xs font-bold text-violet-600 dark:text-violet-400 hover:underline"
+                            class="text-xs font-bold text-action-primary hover:underline"
                         >
                             {{ $t('reports.purchase_invoices_report.expand_all') }}
                         </button>
@@ -607,7 +607,7 @@
                                 {{ grp.group_name }}
                             </span>
                             <span
-                                class="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-violet-100 dark:bg-violet-900/60 text-violet-700 dark:text-violet-300"
+                                class="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-selection-bg text-selection-text"
                             >
                                 {{ grp.total_records }}
                                 {{ $t('reports.purchase_invoices_report.record') }}
@@ -709,7 +709,7 @@
                                         <td class="px-4 py-3">
                                             <a
                                                 :href="route('app.invoices.purchases.show', inv.id)"
-                                                class="font-mono font-bold text-violet-600 dark:text-violet-400 hover:underline block"
+                                                class="font-mono font-bold text-action-primary hover:underline block"
                                             >
                                                 {{ inv.code }}
                                             </a>
@@ -761,12 +761,12 @@
                                             {{ formatMoney(inv.discount_amount) }}
                                         </td>
                                         <td
-                                            class="px-4 py-3 font-mono text-center text-xs text-purple-600 dark:text-purple-400"
+                                            class="px-4 py-3 font-mono text-center text-xs text-purple-600"
                                         >
                                             {{ formatMoney(inv.tax_amount) }}
                                         </td>
                                         <td
-                                            class="px-4 py-3 font-mono text-center text-xs font-bold text-violet-700 dark:text-violet-300"
+                                            class="px-4 py-3 font-mono text-center text-xs font-bold text-selection-text"
                                         >
                                             {{ formatMoney(inv.total) }}
                                         </td>
@@ -868,7 +868,7 @@
                                     <div class="flex items-center gap-1.5">
                                         <a
                                             :href="route('app.invoices.purchases.show', inv.id)"
-                                            class="font-mono font-bold text-violet-600 dark:text-violet-400 hover:underline"
+                                            class="font-mono font-bold text-action-primary hover:underline"
                                         >
                                             {{ inv.code }}
                                         </a>
@@ -933,13 +933,11 @@
                                 >
                                     {{ formatMoney(inv.discount_amount) }}
                                 </td>
-                                <td
-                                    class="px-4 py-3 font-mono text-center text-xs text-purple-600 dark:text-purple-400"
-                                >
+                                <td class="px-4 py-3 font-mono text-center text-xs text-purple-600">
                                     {{ formatMoney(inv.tax_amount) }}
                                 </td>
                                 <td
-                                    class="px-4 py-3 font-mono text-center text-xs font-bold text-violet-700 dark:text-violet-300"
+                                    class="px-4 py-3 font-mono text-center text-xs font-bold text-selection-text"
                                 >
                                     {{ formatMoney(inv.total) }}
                                 </td>
@@ -1022,7 +1020,7 @@
                             :class="[
                                 'px-3 py-1.5 rounded-xl transition-all text-xs font-mono font-bold',
                                 link.active
-                                    ? 'bg-gradient-to-r from-violet-600 to-purple-600 text-white shadow-sm'
+                                    ? 'bg-action-primary hover:bg-action-primary-hover text-white shadow-sm'
                                     : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-750',
                                 !link.url ? 'opacity-40 cursor-not-allowed' : '',
                             ]"

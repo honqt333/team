@@ -92,7 +92,7 @@ const cardClasses = computed(() => {
             'border-emerald-200 bg-emerald-50 dark:border-emerald-800/50 dark:bg-emerald-900/10',
         rose: 'border-rose-200 bg-rose-50 dark:border-rose-800/50 dark:bg-rose-900/10',
         amber: 'border-amber-200 bg-amber-50 dark:border-amber-800/50 dark:bg-amber-900/10',
-        indigo: 'border-indigo-200 bg-indigo-50 dark:border-indigo-800/50 dark:bg-indigo-900/10',
+        indigo: 'border-action-primary/25 bg-selection-bg',
         blue: 'border-blue-200 bg-blue-50 dark:border-blue-800/50 dark:bg-blue-900/10',
         slate: 'border-slate-200 bg-slate-50 dark:border-slate-700 dark:bg-slate-800/30',
     };
@@ -104,7 +104,7 @@ const labelClasses = computed(() => {
         emerald: 'text-emerald-700 dark:text-emerald-300',
         rose: 'text-rose-700 dark:text-rose-300',
         amber: 'text-amber-700 dark:text-amber-300',
-        indigo: 'text-indigo-700 dark:text-indigo-300',
+        indigo: 'text-selection-text',
         blue: 'text-blue-700 dark:text-blue-300',
         slate: 'text-slate-700 dark:text-slate-300',
     };

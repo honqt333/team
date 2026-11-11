@@ -49,7 +49,7 @@
                             <button
                                 type="submit"
                                 :disabled="securityForm.processing"
-                                class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg"
+                                class="px-4 py-2 bg-action-primary hover:bg-action-primary-hover text-white rounded-lg"
                             >
                                 {{ $t('common.save_changes') }}
                             </button>
@@ -267,9 +267,7 @@
                             <h3
                                 class="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2"
                             >
-                                <span
-                                    class="p-1.5 rounded-lg bg-indigo-50 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400"
-                                >
+                                <span class="p-1.5 rounded-lg bg-selection-bg text-action-primary">
                                     <svg
                                         class="w-5 h-5"
                                         fill="none"
@@ -332,6 +330,7 @@
                                 option-label="label"
                                 option-value="value"
                                 :placeholder="$t('system.tenants.--_select_a_package_--')"
+                                :error="local.assignError"
                                 required
                             />
                         </div>
@@ -344,7 +343,7 @@
                                 {{ $t('system.tenants.billing_cycle') }}
                             </label>
                             <div
-                                class="flex items-center justify-between p-3 rounded-xl border border-indigo-200 dark:border-indigo-800 bg-indigo-50/50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-300"
+                                class="flex items-center justify-between p-3 rounded-xl border border-action-primary/25 bg-selection-bg text-selection-text"
                             >
                                 <span class="font-bold text-sm flex items-center gap-2">
                                     <svg
@@ -363,7 +362,7 @@
                                     {{ $t('system.tenants.yearly_subscription_12_months') }}
                                 </span>
                                 <span
-                                    class="text-xs bg-indigo-600 text-white px-2 py-0.5 rounded-full font-medium"
+                                    class="text-xs bg-action-primary text-white px-2 py-0.5 rounded-full font-medium"
                                 >
                                     {{ $t('system.tenants.show.yearly') }}
                                 </span>
@@ -403,8 +402,8 @@
                                 <span class="text-gray-700 dark:text-gray-300">
                                     {{ $t('system.tenants.total_amount') }}
                                 </span>
-                                <span class="text-indigo-600 dark:text-indigo-400">
-                                    {{ selectedPlanObj.price_yearly + $t('common.currency') }}
+                                <span class="text-action-primary">
+                                    {{ selectedPlanObj.price_yearly }} {{ $t('common.currency') }}
                                 </span>
                             </div>
                         </div>
@@ -432,7 +431,7 @@
                             <button
                                 type="submit"
                                 :disabled="!local.assignPlanId || local.isSubmitting"
-                                class="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-semibold disabled:opacity-50 transition-colors shadow-sm"
+                                class="px-5 py-2 bg-action-primary hover:bg-action-primary-hover text-white rounded-lg text-sm font-semibold disabled:opacity-50 transition-colors shadow-sm"
                             >
                                 <span v-if="local.isSubmitting">{{ $t('common.saving') }}</span>
                                 <span v-else>
@@ -481,9 +480,24 @@ const local = reactive({
     extendDays: 14,
     deleteConfirmation: '',
     assignPlanId: '',
-    assignBillingCycle: 'monthly',
+    assignBillingCycle: 'yearly',
+    assignError: '',
     isSubmitting: false,
 });
+
+const planOptions = computed(() =>
+    (props.plans || []).map((p) => {
+        const name = p.name_ar || p.name_en;
+        const priceSuffix =
+            p.slug === 'trial'
+                ? t('system.tenants.trial_days', { days: p.trial_days || 14 })
+                : `${p.price_yearly} ${t('common.currency')} / ${t('system.tenants.show.yearly')}`;
+        return {
+            value: p.id,
+            label: `${name} (${priceSuffix})`,
+        };
+    })
+);
 
 const selectedPlanObj = computed(() => {
     return (props.plans || []).find((p) => p.id === Number(local.assignPlanId));
@@ -494,8 +508,10 @@ watch(
     () => props.modals.assignPlan,
     (open) => {
         if (open) {
-            local.assignPlanId = props.plans[0]?.id || '';
-            local.assignBillingCycle = 'monthly';
+            const firstPaidPlan = (props.plans || []).find((p) => p.slug !== 'trial');
+            local.assignPlanId = firstPaidPlan?.id || props.plans[0]?.id || '';
+            local.assignBillingCycle = 'yearly';
+            local.assignError = '';
             local.isSubmitting = false;
         }
     }
@@ -522,6 +538,7 @@ watch(
 const submitAssignPlan = () => {
     if (!local.assignPlanId) return;
     local.isSubmitting = true;
+    local.assignError = '';
     router.post(
         '/system/subscriptions',
         {
@@ -535,8 +552,14 @@ const submitAssignPlan = () => {
                 local.isSubmitting = false;
                 emit('close', 'assignPlan');
             },
-            onError: () => {
+            onError: (errors) => {
                 local.isSubmitting = false;
+                local.assignError =
+                    errors?.plan_id ||
+                    errors?.billing_cycle ||
+                    errors?.tenant_id ||
+                    Object.values(errors || {})[0] ||
+                    '';
             },
         }
     );

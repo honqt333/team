@@ -135,7 +135,7 @@
                             :key="variable"
                             type="button"
                             @click="copyVariable(variable)"
-                            class="group relative inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-mono bg-gray-50 hover:bg-indigo-50 dark:bg-gray-700/50 dark:hover:bg-indigo-900/30 text-gray-700 hover:text-indigo-600 dark:text-gray-300 dark:hover:text-indigo-300 border border-gray-200 hover:border-indigo-300 dark:border-gray-600 dark:hover:border-indigo-700 transition-all cursor-pointer"
+                            class="group relative inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-mono bg-gray-50 hover:bg-selection-bg dark:bg-gray-700/50 text-gray-700 hover:text-action-primary dark:text-gray-300 border border-gray-200 hover:border-action-primary/25 dark:border-gray-600 transition-all cursor-pointer"
                         >
                             <span>{{ variable }}</span>
                             <svg
@@ -177,7 +177,7 @@
                         :class="[
                             'pb-3 text-xs font-bold border-b-2 transition-colors',
                             viewMode === 'edit'
-                                ? 'border-indigo-600 text-indigo-600 dark:border-indigo-400 dark:text-indigo-400'
+                                ? 'border-action-primary text-action-primary'
                                 : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400',
                         ]"
                     >
@@ -190,7 +190,7 @@
                         :class="[
                             'pb-3 text-xs font-bold border-b-2 transition-colors',
                             viewMode === 'preview'
-                                ? 'border-indigo-600 text-indigo-600 dark:border-indigo-400 dark:text-indigo-400'
+                                ? 'border-action-primary text-action-primary'
                                 : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400',
                         ]"
                     >
@@ -210,7 +210,7 @@
                             <input
                                 type="text"
                                 v-model="form.subject"
-                                class="w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-indigo-500"
+                                class="w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-focus-ring"
                             />
                             <p v-if="form.errors.subject" class="text-rose-500 text-xs mt-1">
                                 {{ form.errors.subject }}
@@ -234,7 +234,7 @@
                             <textarea
                                 v-model="form.content"
                                 rows="16"
-                                class="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white text-sm font-mono focus:ring-2 focus:ring-indigo-500"
+                                class="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white text-sm font-mono focus:ring-2 focus:ring-focus-ring"
                                 dir="ltr"
                             ></textarea>
                             <p v-if="form.errors.content" class="text-rose-500 text-xs mt-1">

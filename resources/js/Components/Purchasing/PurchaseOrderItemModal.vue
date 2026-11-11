@@ -150,7 +150,7 @@
                         dir="ltr"
                         lang="en"
                         @input="(e) => (form.unit_cost = toEnglish(e.target.value))"
-                        class="w-full px-4 py-3 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 text-center font-bold text-lg shadow-sm font-mono"
+                        class="w-full px-4 py-3 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring text-center font-bold text-lg shadow-sm font-mono"
                     />
                 </div>
 
@@ -168,7 +168,7 @@
                         dir="ltr"
                         lang="en"
                         @input="(e) => (form.discount = toEnglish(e.target.value))"
-                        class="w-full px-4 py-3 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 text-center text-lg shadow-sm font-mono"
+                        class="w-full px-4 py-3 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring text-center text-lg shadow-sm font-mono"
                     />
                 </div>
 
@@ -188,7 +188,7 @@
                             dir="ltr"
                             lang="en"
                             @input="(e) => (form.qty = toEnglish(e.target.value))"
-                            class="w-full px-4 py-3 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 text-center font-bold text-lg shadow-sm font-mono"
+                            class="w-full px-4 py-3 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring text-center font-bold text-lg shadow-sm font-mono"
                         />
                     </div>
                 </div>
@@ -291,7 +291,7 @@
                             dir="ltr"
                             lang="en"
                             @input="(e) => (form.conversion_factor = toEnglish(e.target.value))"
-                            class="w-full px-4 py-3 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 text-center font-bold text-lg shadow-sm font-mono"
+                            class="w-full px-4 py-3 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring text-center font-bold text-lg shadow-sm font-mono"
                         />
                         <span
                             class="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none text-gray-400 text-xs font-bold"

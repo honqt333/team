@@ -46,11 +46,7 @@
                             {{ $t('system.payment.cycle') }}
                         </span>
                         <span class="font-medium text-gray-900 dark:text-white">
-                            {{
-                                subscription.billing_cycle === 'yearly'
-                                    ? $t('system.payment.yearly')
-                                    : $t('common.monthly')
-                            }}
+                            {{ $t('system.payment.yearly') }}
                         </span>
                     </div>
                     <hr class="border-gray-200 dark:border-gray-700" />
@@ -58,7 +54,7 @@
                         <span class="font-semibold text-gray-900 dark:text-white">
                             {{ $t('system.payment.total') }}
                         </span>
-                        <span class="font-bold text-indigo-600 dark:text-indigo-400">
+                        <span class="font-bold text-action-primary">
                             {{ subscription.price + $t('common.currency') }}
                         </span>
                     </div>
@@ -96,7 +92,7 @@
                     </p>
                     <a
                         :href="route('system.settings.payment')"
-                        class="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-sm font-semibold transition-colors"
+                        class="inline-flex items-center gap-2 px-4 py-2 bg-action-primary hover:bg-action-primary-hover text-white rounded-xl text-sm font-semibold transition-colors"
                     >
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path
@@ -125,14 +121,14 @@
                                 name="selectedGateway"
                                 v-model="selectedGateway"
                                 :value="gateway"
-                                class="flex items-center gap-3 cursor-pointer p-4 rounded-xl border-2 border-gray-200 dark:border-gray-700 hover:border-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition-all"
+                                class="flex items-center gap-3 cursor-pointer p-4 rounded-xl border-2 border-gray-200 dark:border-gray-700 hover:border-action-primary hover:bg-selection-bg transition-all"
                             >
                                 <div class="flex items-center gap-3 flex-1">
                                     <div
                                         :class="[
                                             'w-10 h-10 rounded-xl flex items-center justify-center',
                                             gateway === 'moyasar'
-                                                ? 'bg-indigo-50 text-indigo-600'
+                                                ? 'bg-selection-bg text-action-primary'
                                                 : gateway === 'tabby'
                                                   ? 'bg-pink-50 text-pink-600'
                                                   : gateway === 'tamara'
@@ -190,7 +186,7 @@
                         <button
                             @click="proceedToPayment"
                             :disabled="form.processing || !selectedGateway"
-                            class="w-full py-3 px-4 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-semibold rounded-xl shadow-lg shadow-indigo-500/30 transition-all disabled:opacity-50"
+                            class="w-full py-3 px-4 bg-action-primary hover:bg-action-primary-hover text-white font-semibold rounded-xl shadow-lg shadow-focus-ring-soft transition-all disabled:opacity-50"
                         >
                             <span
                                 v-if="form.processing"

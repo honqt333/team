@@ -9,7 +9,7 @@
             >
                 <!-- Background decorative SVG with low opacity -->
                 <svg
-                    class="absolute -end-10 -bottom-10 w-72 h-72 text-indigo-600 dark:text-indigo-400 opacity-[0.03] pointer-events-none"
+                    class="absolute -end-10 -bottom-10 w-72 h-72 text-action-primary opacity-[0.03] pointer-events-none"
                     fill="currentColor"
                     viewBox="0 0 24 24"
                 >
@@ -24,7 +24,7 @@
                     <div class="flex items-start sm:items-center gap-5">
                         <!-- Giant Gradient Icon -->
                         <div
-                            class="w-16 h-16 rounded-2xl bg-gradient-to-br from-indigo-600 to-purple-600 flex items-center justify-center text-white ring-4 ring-indigo-500/20 shadow-xl shadow-indigo-500/20 shrink-0"
+                            class="w-16 h-16 rounded-2xl bg-action-primary hover:bg-action-primary-hover flex items-center justify-center text-white ring-4 ring-focus-ring shadow-xl shadow-focus-ring-soft shrink-0"
                         >
                             <svg
                                 class="w-8 h-8"
@@ -49,10 +49,10 @@
                                     {{ $t('help.admin.title') }}
                                 </h1>
                                 <span
-                                    class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-indigo-50 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800"
+                                    class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-selection-bg text-action-primary border border-action-primary/25"
                                 >
                                     <span
-                                        class="w-2 h-2 rounded-full bg-indigo-500 animate-pulse"
+                                        class="w-2 h-2 rounded-full bg-action-primary animate-pulse"
                                     ></span>
                                     <span>{{ $t('help.admin.controller_hint') }}</span>
                                 </span>
@@ -70,9 +70,7 @@
                         class="flex items-center gap-4 bg-gray-50 dark:bg-gray-900/50 p-3 px-4 rounded-2xl border border-gray-200/80 dark:border-gray-700/80 self-stretch sm:self-auto justify-around"
                     >
                         <div class="text-center px-2">
-                            <span
-                                class="block text-lg font-black text-indigo-600 dark:text-indigo-400"
-                            >
+                            <span class="block text-lg font-black text-action-primary">
                                 {{ form.topics.length }}
                             </span>
                             <span
@@ -83,9 +81,7 @@
                         </div>
                         <div class="w-px h-8 bg-gray-200 dark:bg-gray-700"></div>
                         <div class="text-center px-2">
-                            <span
-                                class="block text-lg font-black text-purple-600 dark:text-purple-400"
-                            >
+                            <span class="block text-lg font-black text-purple-600">
                                 {{ form.video_tutorials.length }}
                             </span>
                             <span
@@ -163,7 +159,7 @@
                         type="button"
                         @click="submitForm"
                         :disabled="form.processing"
-                        class="inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white text-sm font-bold shadow-lg shadow-indigo-500/30 transition-all hover:-translate-y-0.5 disabled:opacity-50 w-full sm:w-auto"
+                        class="inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-xl bg-action-primary hover:bg-action-primary-hover text-white text-sm font-bold shadow-lg shadow-focus-ring-soft transition-all hover:-translate-y-0.5 disabled:opacity-50 w-full sm:w-auto"
                     >
                         <svg
                             v-if="form.processing"
@@ -223,7 +219,7 @@
                         :class="[
                             'flex items-center gap-2 px-4 py-3 text-xs sm:text-sm font-bold tracking-wide transition-all relative shrink-0 rounded-t-xl',
                             activeTab === tab.id
-                                ? 'text-indigo-600 dark:text-indigo-400 bg-white dark:bg-gray-800 border-t-2 border-indigo-600 shadow-sm'
+                                ? 'text-action-primary bg-white dark:bg-gray-800 border-t-2 border-action-primary shadow-sm'
                                 : 'text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800/50',
                         ]"
                     >
@@ -234,7 +230,7 @@
                             class="ms-1 px-1.5 py-0.5 rounded-md text-[10px] font-bold"
                             :class="
                                 activeTab === tab.id
-                                    ? 'bg-indigo-100 dark:bg-indigo-900/60 text-indigo-700 dark:text-indigo-300'
+                                    ? 'bg-selection-bg text-selection-text'
                                     : 'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400'
                             "
                         >
@@ -277,7 +273,7 @@
                                     type="text"
                                     dir="ltr"
                                     placeholder="+966 555 785 658"
-                                    class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                    class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-focus-ring focus:border-action-primary"
                                 />
                             </div>
                             <p class="text-[11px] text-gray-500 dark:text-gray-400">
@@ -317,7 +313,7 @@
                                 type="text"
                                 dir="ltr"
                                 placeholder="920000000"
-                                class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-focus-ring focus:border-action-primary"
                             />
                         </div>
 
@@ -331,7 +327,7 @@
                                 type="email"
                                 dir="ltr"
                                 placeholder="support@khidmh.pro"
-                                class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-focus-ring focus:border-action-primary"
                             />
                         </div>
 
@@ -346,7 +342,7 @@
                                 :placeholder="
                                     $t('system.help.saturday_-_thursday_800_am_-_1000_pm')
                                 "
-                                class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-focus-ring focus:border-action-primary"
                             />
                         </div>
 
@@ -360,7 +356,7 @@
                                 type="url"
                                 dir="ltr"
                                 placeholder="https://support.carag.sa"
-                                class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-focus-ring focus:border-action-primary"
                             />
                         </div>
                     </div>
@@ -384,7 +380,7 @@
                     <button
                         type="button"
                         @click="openVideoModal()"
-                        class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 text-white text-xs font-bold shadow-md shadow-indigo-500/20 hover:-translate-y-0.5 transition-all"
+                        class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-action-primary hover:bg-action-primary-hover text-white text-xs font-bold shadow-md shadow-focus-ring-soft hover:-translate-y-0.5 transition-all"
                     >
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path
@@ -407,7 +403,7 @@
                         <div class="p-5 space-y-3">
                             <div class="flex items-center justify-between gap-2">
                                 <span
-                                    class="px-2.5 py-1 rounded-md text-xs font-bold bg-indigo-50 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300"
+                                    class="px-2.5 py-1 rounded-md text-xs font-bold bg-selection-bg text-selection-text"
                                 >
                                     {{ video.category || $t('help.admin.videos.category_general') }}
                                 </span>
@@ -429,7 +425,7 @@
 
                             <div v-if="video.video_url" class="pt-1">
                                 <span
-                                    class="text-[11px] font-mono text-indigo-600 dark:text-indigo-400 truncate block"
+                                    class="text-[11px] font-mono text-action-primary truncate block"
                                 >
                                     🔗 {{ video.video_url }}
                                 </span>
@@ -442,7 +438,7 @@
                             <button
                                 type="button"
                                 @click="openVideoModal(video, idx)"
-                                class="px-3 py-1.5 rounded-lg text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 transition-colors"
+                                class="px-3 py-1.5 rounded-lg text-xs font-bold text-action-primary hover:bg-selection-bg transition-colors"
                             >
                                 {{ $t('help.admin.edit') }}
                             </button>
@@ -488,7 +484,7 @@
                         <button
                             type="button"
                             @click="openTopicModal()"
-                            class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 text-white text-xs font-bold shadow-md shadow-indigo-500/20 hover:-translate-y-0.5 transition-all shrink-0"
+                            class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-action-primary hover:bg-action-primary-hover text-white text-xs font-bold shadow-md shadow-focus-ring-soft hover:-translate-y-0.5 transition-all shrink-0"
                         >
                             <svg
                                 class="w-4 h-4"
@@ -517,7 +513,7 @@
                         <div class="flex items-start justify-between gap-4">
                             <div class="flex items-start gap-3.5">
                                 <span
-                                    class="w-9 h-9 rounded-xl bg-indigo-50 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 font-black text-xs flex items-center justify-center shrink-0 border border-indigo-200 dark:border-indigo-800"
+                                    class="w-9 h-9 rounded-xl bg-selection-bg text-action-primary font-black text-xs flex items-center justify-center shrink-0 border border-action-primary/25"
                                 >
                                     {{ topic.stepNumber || idx + 1 }}
                                 </span>
@@ -542,7 +538,7 @@
                                 <button
                                     type="button"
                                     @click="openTopicModal(topic, getTopicOriginalIndex(topic))"
-                                    class="p-2 rounded-lg text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 transition-colors"
+                                    class="p-2 rounded-lg text-action-primary hover:bg-selection-bg transition-colors"
                                     :title="$t('system.help.edit_topic')"
                                 >
                                     <svg
@@ -613,7 +609,7 @@
                             </span>
                             <span
                                 v-if="topic.link"
-                                class="inline-flex items-center gap-1 text-indigo-600 dark:text-indigo-400 text-[11px] font-mono"
+                                class="inline-flex items-center gap-1 text-action-primary text-[11px] font-mono"
                             >
                                 {{ $t('help.admin.steps.link') }} {{ topic.link.label }} ({{
                                     topic.link.url
@@ -641,7 +637,7 @@
                     <button
                         type="button"
                         @click="openCategoryModal()"
-                        class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 text-white text-xs font-bold shadow-md shadow-indigo-500/20 hover:-translate-y-0.5 transition-all"
+                        class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-action-primary hover:bg-action-primary-hover text-white text-xs font-bold shadow-md shadow-focus-ring-soft hover:-translate-y-0.5 transition-all"
                     >
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path
@@ -663,7 +659,7 @@
                     >
                         <div class="flex items-center gap-3">
                             <div
-                                class="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 font-bold flex items-center justify-center shrink-0"
+                                class="w-10 h-10 rounded-xl bg-selection-bg text-action-primary font-bold flex items-center justify-center shrink-0"
                             >
                                 #
                             </div>
@@ -681,7 +677,7 @@
                             <button
                                 type="button"
                                 @click="openCategoryModal(cat, idx)"
-                                class="p-1.5 rounded-lg text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/30"
+                                class="p-1.5 rounded-lg text-action-primary hover:bg-selection-bg"
                             >
                                 {{ $t('help.admin.edit') }}
                             </button>
@@ -714,7 +710,7 @@
                     <button
                         type="button"
                         @click="openFaqModal()"
-                        class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 text-white text-xs font-bold shadow-md shadow-indigo-500/20 hover:-translate-y-0.5 transition-all"
+                        class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-action-primary hover:bg-action-primary-hover text-white text-xs font-bold shadow-md shadow-focus-ring-soft hover:-translate-y-0.5 transition-all"
                     >
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path
@@ -736,9 +732,7 @@
                     >
                         <div class="flex items-start justify-between gap-4">
                             <div class="flex items-start gap-2.5">
-                                <span
-                                    class="font-black text-indigo-600 dark:text-indigo-400 text-sm"
-                                >
+                                <span class="font-black text-action-primary text-sm">
                                     {{ $t('help.admin.faq.prefix') }}
                                 </span>
                                 <h4 class="text-sm font-bold text-gray-900 dark:text-white">
@@ -750,7 +744,7 @@
                                 <button
                                     type="button"
                                     @click="openFaqModal(faq, idx)"
-                                    class="px-2.5 py-1 text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 rounded-lg"
+                                    class="px-2.5 py-1 text-xs font-bold text-action-primary hover:bg-selection-bg rounded-lg"
                                 >
                                     {{ $t('help.admin.edit') }}
                                 </button>
@@ -793,7 +787,7 @@
                         <div
                             class="flex items-center justify-between border-b border-gray-100 dark:border-gray-700 pb-3"
                         >
-                            <span class="text-xs font-bold text-indigo-600 dark:text-indigo-400">
+                            <span class="text-xs font-bold text-action-primary">
                                 {{ $t('help.admin.quick_cards.number') }}{{ idx + 1 }}
                             </span>
                             <span class="text-xs font-mono text-gray-400">
@@ -924,7 +918,7 @@
                                     </label>
                                     <span
                                         v-if="fetchingDuration"
-                                        class="text-[11px] text-indigo-600 dark:text-indigo-400 font-medium flex items-center gap-1"
+                                        class="text-[11px] text-action-primary font-medium flex items-center gap-1"
                                     >
                                         <svg
                                             class="w-3 h-3 animate-spin"
@@ -961,7 +955,7 @@
                                         type="button"
                                         @click="autoFetchVideoDuration"
                                         :disabled="fetchingDuration"
-                                        class="absolute inset-y-1 end-1 px-2.5 bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-900/40 dark:hover:bg-indigo-900/60 text-indigo-600 dark:text-indigo-300 rounded-lg text-[11px] font-bold transition-colors flex items-center gap-1"
+                                        class="absolute inset-y-1 end-1 px-2.5 bg-selection-bg hover:bg-selection-bg text-action-primary rounded-lg text-[11px] font-bold transition-colors flex items-center gap-1"
                                         :title="
                                             $t(
                                                 'system.help.recalculate_the_duration_automatically_from_the_'
@@ -1065,7 +1059,7 @@
                         <button
                             type="button"
                             @click="saveVideoModal"
-                            class="px-5 py-2 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 text-white text-xs font-bold shadow-md shadow-indigo-500/20"
+                            class="px-5 py-2 rounded-xl bg-action-primary hover:bg-action-primary-hover text-white text-xs font-bold shadow-md shadow-focus-ring-soft"
                         >
                             {{ $t('help.admin.videos.save') }}
                         </button>
@@ -1180,7 +1174,7 @@
                                 <button
                                     type="button"
                                     @click="addTopicStep"
-                                    class="text-xs text-indigo-600 dark:text-indigo-400 font-bold hover:underline"
+                                    class="text-xs text-action-primary font-bold hover:underline"
                                 >
                                     {{ $t('help.admin.topics.add_step') }}
                                 </button>
@@ -1275,7 +1269,7 @@
                         <button
                             type="button"
                             @click="saveTopicModal"
-                            class="px-5 py-2 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 text-white text-xs font-bold shadow-md shadow-indigo-500/20"
+                            class="px-5 py-2 rounded-xl bg-action-primary hover:bg-action-primary-hover text-white text-xs font-bold shadow-md shadow-focus-ring-soft"
                         >
                             {{ $t('help.admin.topics.save') }}
                         </button>
@@ -1356,7 +1350,7 @@
                         <button
                             type="button"
                             @click="saveCategoryModal"
-                            class="px-5 py-2 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 text-white text-xs font-bold shadow-md shadow-indigo-500/20"
+                            class="px-5 py-2 rounded-xl bg-action-primary hover:bg-action-primary-hover text-white text-xs font-bold shadow-md shadow-focus-ring-soft"
                         >
                             {{ $t('help.admin.categories.save') }}
                         </button>
@@ -1436,7 +1430,7 @@
                         <button
                             type="button"
                             @click="saveFaqModal"
-                            class="px-5 py-2 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 text-white text-xs font-bold shadow-md shadow-indigo-500/20"
+                            class="px-5 py-2 rounded-xl bg-action-primary hover:bg-action-primary-hover text-white text-xs font-bold shadow-md shadow-focus-ring-soft"
                         >
                             {{ $t('help.admin.faq.save') }}
                         </button>

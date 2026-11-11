@@ -5,7 +5,7 @@
             <div
                 class="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700"
             >
-                <p class="text-2xl font-bold text-indigo-600 dark:text-indigo-400">
+                <p class="text-2xl font-bold text-action-primary">
                     {{ stats?.total_sent?.toLocaleString() || 0 }}
                 </p>
                 <p class="text-sm text-gray-500">{{ $t('system.credits.total_messages') }}</p>

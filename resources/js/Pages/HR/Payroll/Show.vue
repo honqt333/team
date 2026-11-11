@@ -376,7 +376,7 @@
                             type="number"
                             step="0.01"
                             min="0"
-                            class="w-full px-3 py-2 text-sm border rounded-xl bg-gray-50 dark:bg-gray-900 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-emerald-500 font-mono text-gray-900 dark:text-white"
+                            class="w-full px-3 py-2 text-sm border rounded-xl bg-gray-50 dark:bg-gray-900 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-focus-ring font-mono text-gray-900 dark:text-white"
                             required
                         />
                     </div>
@@ -391,7 +391,7 @@
                             type="number"
                             step="0.01"
                             min="0"
-                            class="w-full px-3 py-2 text-sm border rounded-xl bg-gray-50 dark:bg-gray-900 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-emerald-500 font-mono text-emerald-600 font-bold"
+                            class="w-full px-3 py-2 text-sm border rounded-xl bg-gray-50 dark:bg-gray-900 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-focus-ring font-mono text-emerald-600 font-bold"
                             required
                         />
                     </div>
@@ -406,7 +406,7 @@
                             type="number"
                             step="0.01"
                             min="0"
-                            class="w-full px-3 py-2 text-sm border rounded-xl bg-gray-50 dark:bg-gray-900 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-emerald-500 font-mono text-red-600 font-bold"
+                            class="w-full px-3 py-2 text-sm border rounded-xl bg-gray-50 dark:bg-gray-900 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-focus-ring font-mono text-red-600 font-bold"
                             required
                         />
                     </div>
@@ -434,7 +434,7 @@
                     <textarea
                         v-model="itemForm.notes"
                         rows="2"
-                        class="w-full px-3 py-2 text-sm border rounded-xl bg-gray-50 dark:bg-gray-900 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-emerald-500 text-gray-900 dark:text-white"
+                        class="w-full px-3 py-2 text-sm border rounded-xl bg-gray-50 dark:bg-gray-900 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-focus-ring text-gray-900 dark:text-white"
                     ></textarea>
                 </div>
 
@@ -490,7 +490,7 @@
                     <input
                         v-model="paidForm.reference_number"
                         type="text"
-                        class="w-full px-3 py-2 text-sm border rounded-xl bg-gray-50 dark:bg-gray-900 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-emerald-500 text-gray-900 dark:text-white"
+                        class="w-full px-3 py-2 text-sm border rounded-xl bg-gray-50 dark:bg-gray-900 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-focus-ring text-gray-900 dark:text-white"
                     />
                 </div>
                 <div class="flex justify-end gap-2 pt-2">
@@ -595,9 +595,9 @@ const paidForm = useForm({
 });
 
 const paymentMethodOptions = computed(() => [
-    { id: 'bank_transfer', name: t('financial.bank_transfer') || 'تحويل بنكي' },
-    { id: 'cash', name: t('invoices.cash') || 'نقداً' },
-    { id: 'cheque', name: t('common.cheque') || 'شيك' },
+    { id: 'bank_transfer', name: t('payments.methods.transfer') },
+    { id: 'cash', name: t('payments.methods.cash') },
+    { id: 'cheque', name: t('payments.methods.check') },
 ]);
 
 function openPaidModal() {

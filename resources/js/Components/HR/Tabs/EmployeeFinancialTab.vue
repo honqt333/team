@@ -12,7 +12,7 @@
                     :class="[
                         'flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-all',
                         activeTab === tab.key
-                            ? 'bg-violet-600 text-white shadow-sm'
+                            ? 'bg-action-primary text-white shadow-sm'
                             : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700',
                     ]"
                 >
@@ -101,7 +101,7 @@
                                         />
                                         <div
                                             v-if="item.id"
-                                            class="absolute start-3 top-2 bg-violet-100 dark:bg-violet-900/30 text-violet-700 dark:text-violet-300 text-xs px-2 py-0.5 rounded"
+                                            class="absolute start-3 top-2 bg-selection-bg text-selection-text text-xs px-2 py-0.5 rounded"
                                         >
                                             {{ getAllowanceById(item.id)?.name_ar }}
                                         </div>
@@ -253,7 +253,7 @@
                         <!-- Add Button -->
                         <button
                             @click="addAllowance"
-                            class="w-full py-3 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl text-gray-500 hover:border-violet-400 hover:text-violet-600 transition-colors"
+                            class="w-full py-3 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl text-gray-500 hover:border-action-primary hover:text-action-primary transition-colors"
                         >
                             + {{ $t('hr.financial.add_allowance') }}
                         </button>
@@ -270,7 +270,7 @@
                         <button
                             @click="saveAllowances"
                             :disabled="savingAllowances"
-                            class="px-5 py-2.5 bg-violet-600 text-white rounded-xl font-medium disabled:opacity-50"
+                            class="px-5 py-2.5 bg-action-primary text-white rounded-xl font-medium disabled:opacity-50"
                         >
                             {{ savingAllowances ? $t('common.saving') : $t('common.save') }}
                         </button>
@@ -491,7 +491,7 @@
                         <!-- Add Button -->
                         <button
                             @click="addDeduction"
-                            class="w-full py-3 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl text-gray-500 hover:border-violet-400 hover:text-violet-600 transition-colors"
+                            class="w-full py-3 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl text-gray-500 hover:border-action-primary hover:text-action-primary transition-colors"
                         >
                             + {{ $t('hr.financial.add_deduction') }}
                         </button>
@@ -508,7 +508,7 @@
                         <button
                             @click="saveDeductions"
                             :disabled="savingDeductions"
-                            class="px-5 py-2.5 bg-violet-600 text-white rounded-xl font-medium disabled:opacity-50"
+                            class="px-5 py-2.5 bg-action-primary text-white rounded-xl font-medium disabled:opacity-50"
                         >
                             {{ savingDeductions ? $t('common.saving') : $t('common.save') }}
                         </button>

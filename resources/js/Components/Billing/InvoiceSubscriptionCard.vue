@@ -8,7 +8,7 @@
 
         <div class="mt-4 flex items-center gap-3">
             <div
-                class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-indigo-500 to-blue-600 text-white"
+                class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-action-primary hover:bg-action-primary-hover text-white"
             >
                 <BoltIcon class="h-5 w-5" />
             </div>
@@ -98,14 +98,7 @@ const planName = computed(() => {
 });
 
 const billingCycleLabel = computed(() => {
-    const cycle = props.subscription?.billing_cycle;
-    if (cycle === 'yearly') {
-        return isAr.value ? 'سنوي' : 'Yearly';
-    }
-    if (cycle === 'monthly') {
-        return isAr.value ? 'شهري' : 'Monthly';
-    }
-    return cycle || '—';
+    return isAr.value ? 'سنوي' : 'Yearly';
 });
 
 const statusLabel = computed(() => {

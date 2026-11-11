@@ -27,10 +27,10 @@
             <div
                 class="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700 shadow-sm"
             >
-                <p class="text-xs text-indigo-600 font-medium">
+                <p class="text-xs text-action-primary font-medium">
                     {{ $t('system.credits.revenue') }}
                 </p>
-                <p class="text-2xl font-bold text-indigo-600 mt-1">
+                <p class="text-2xl font-bold text-action-primary mt-1">
                     {{ formatCurrency(stats.total_revenue) }}
                 </p>
             </div>

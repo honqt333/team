@@ -10,21 +10,12 @@
         </p>
 
         <div class="mt-4 space-y-4">
-            <label class="flex items-start gap-3">
-                <input
-                    v-model="form.dunning_opted_out"
-                    type="checkbox"
-                    class="mt-1 h-4 w-4 rounded border-gray-300 text-amber-600"
-                />
-                <div class="flex-1">
-                    <div class="text-sm font-medium text-gray-900 dark:text-white">
-                        {{ $t('system.dunning.opted_out_label') }}
-                    </div>
-                    <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                        {{ $t('system.dunning.opted_out_helper') }}
-                    </p>
-                </div>
-            </label>
+            <AppToggle
+                v-model="form.dunning_opted_out"
+                color="warning"
+                :label="$t('system.dunning.opted_out_label')"
+                :description="$t('system.dunning.opted_out_helper')"
+            />
 
             <div>
                 <label class="block text-sm font-medium text-gray-900 dark:text-white">
@@ -62,6 +53,7 @@ const { t } = useI18n();
 import { ref } from 'vue';
 import { router } from '@inertiajs/vue3';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
+import AppToggle from '@/Components/Common/AppToggle.vue';
 
 const props = defineProps({
     tenant: { type: Object, required: true },

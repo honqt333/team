@@ -122,7 +122,7 @@
                     <p class="text-sm text-gray-500 dark:text-gray-400">
                         {{ $t('system.credits.revenue') }}
                     </p>
-                    <p class="text-2xl font-bold text-indigo-600">
+                    <p class="text-2xl font-bold text-action-primary">
                         {{ formatCurrency(stats.total_revenue) }}
                     </p>
                 </div>
@@ -225,9 +225,7 @@
                                 <td class="px-4 py-3 text-gray-600 dark:text-gray-400">
                                     {{ purchase.package?.name_ar || $t('system.credits.custom') }}
                                 </td>
-                                <td
-                                    class="px-4 py-3 text-indigo-600 dark:text-indigo-400 font-semibold"
-                                >
+                                <td class="px-4 py-3 text-action-primary font-semibold">
                                     {{ purchase.credits?.toLocaleString() }}
                                 </td>
                                 <td class="px-4 py-3 text-gray-900 dark:text-white">

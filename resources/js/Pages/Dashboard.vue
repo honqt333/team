@@ -152,10 +152,10 @@ function refresh() {
             <PageHeader
                 :title="$t('dashboard.title')"
                 :subtitle="`${greeting}، ${userName}`"
-                gradient-from="from-indigo-600"
-                gradient-to="to-violet-600"
-                glow-from="from-indigo-500"
-                glow-to="to-violet-600"
+                gradient-from="from-action-primary"
+                gradient-to="to-action-primary"
+                glow-from="from-action-primary"
+                glow-to="to-action-primary"
             >
                 <template #icon>
                     <svg
@@ -231,7 +231,7 @@ function refresh() {
                 <template #primary-action v-if="userContext?.canCreateWorkOrder">
                     <Link
                         href="/app/work-orders/create"
-                        class="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 px-4 py-2.5 text-sm font-semibold text-white shadow-md shadow-indigo-500/20 transition-all hover:from-indigo-500 hover:to-purple-500 active:scale-95"
+                        class="inline-flex items-center justify-center gap-2 rounded-xl bg-action-primary hover:bg-action-primary-hover px-4 py-2.5 text-sm font-semibold text-white shadow-md shadow-focus-ring-soft transition-all active:scale-95"
                     >
                         <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path
@@ -292,9 +292,9 @@ function refresh() {
                 <Link
                     v-if="(todayAppointments?.length ?? 0) > 0"
                     href="/app/appointments"
-                    class="inline-flex items-center gap-1.5 rounded-xl bg-indigo-50 px-3 py-1.5 text-xs font-semibold text-indigo-700 transition hover:bg-indigo-100 dark:bg-indigo-950/50 dark:text-indigo-300 dark:hover:bg-indigo-900/60"
+                    class="inline-flex items-center gap-1.5 rounded-xl bg-selection-bg px-3 py-1.5 text-xs font-semibold text-selection-text transition hover:bg-selection-bg"
                 >
-                    <span class="h-1.5 w-1.5 rounded-full bg-indigo-500"></span>
+                    <span class="h-1.5 w-1.5 rounded-full bg-action-primary"></span>
                     <span>
                         {{ $t('appointments.title') || 'مواعيد اليوم' }}:
                         {{ todayAppointments.length }}

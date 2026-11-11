@@ -100,7 +100,7 @@
                     <button
                         v-if="transfer.status === 'draft'"
                         @click="showAddModal = true"
-                        class="text-sm text-indigo-600 hover:text-indigo-700 dark:text-indigo-400"
+                        class="text-sm text-action-primary hover:text-selection-text"
                     >
                         + {{ $t('common.add') }}
                     </button>
@@ -258,7 +258,7 @@
                             </button>
                             <button
                                 type="submit"
-                                class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
+                                class="px-4 py-2 bg-action-primary text-white rounded-lg hover:bg-action-primary-hover"
                             >
                                 {{ $t('common.add') }}
                             </button>

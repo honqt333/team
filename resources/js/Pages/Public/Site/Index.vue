@@ -196,7 +196,7 @@
                 >
                     <div
                         class="relative min-h-[220px] sm:min-h-[280px] p-6 sm:p-10 flex flex-col justify-center text-white bg-gradient-to-r transition-all duration-500"
-                        :class="currentBanner.bg_gradient || 'from-indigo-600 to-blue-700'"
+                        :class="currentBanner.bg_gradient || 'from-action-primary to-blue-700'"
                     >
                         <!-- Background image overlay if exists -->
                         <div v-if="currentBanner.image_url" class="absolute inset-0 -z-0">
@@ -343,7 +343,7 @@
                         <a
                             v-if="site.phone_link"
                             :href="site.phone_link"
-                            class="inline-flex items-center gap-2 px-5 py-3 rounded-xl text-white font-semibold shadow-lg shadow-indigo-500/20 hover:opacity-95 transition"
+                            class="inline-flex items-center gap-2 px-5 py-3 rounded-xl text-white font-semibold shadow-lg shadow-focus-ring-soft hover:opacity-95 transition"
                             :style="{ backgroundColor: 'var(--tenant-primary-strong)' }"
                             data-track="phone_click"
                             data-track-placement="hero"

@@ -43,7 +43,7 @@
                             class="flex items-center gap-2 px-4 py-2 text-xs font-black uppercase tracking-widest transition-all relative group shrink-0"
                             :class="
                                 activeTab === tab.key
-                                    ? 'text-indigo-600 dark:text-indigo-400'
+                                    ? 'text-action-primary'
                                     : 'text-gray-400 hover:text-gray-600 dark:text-gray-500'
                             "
                         >
@@ -51,7 +51,7 @@
                             {{ tab.label }}
                             <div
                                 v-if="activeTab === tab.key"
-                                class="absolute bottom-0 left-0 w-full h-1 bg-indigo-600 dark:bg-indigo-400 rounded-t-full shadow-[0_-2px_8px_rgba(79,70,229,0.4)]"
+                                class="absolute bottom-0 left-0 w-full h-1 bg-action-primary rounded-t-full shadow-[0_-2px_8px_rgba(79,70,229,0.4)]"
                             ></div>
                         </button>
                     </nav>
@@ -70,7 +70,7 @@
                             </h3>
                             <button
                                 @click="openModal('employee_type')"
-                                class="inline-flex items-center justify-center gap-3 px-6 py-2.5 bg-gradient-to-r from-violet-600 to-indigo-600 text-white rounded-2xl font-black shadow-lg shadow-violet-500/25 hover:shadow-violet-500/40 hover:-translate-y-0.5 transition-all group/add"
+                                class="inline-flex items-center justify-center gap-3 px-6 py-2.5 bg-action-primary hover:bg-action-primary-hover text-white rounded-2xl font-black shadow-lg shadow-focus-ring-soft hover:shadow-focus-ring-soft hover:-translate-y-0.5 transition-all group/add"
                             >
                                 <div
                                     class="w-6 h-6 rounded-lg bg-white/20 flex items-center justify-center group-hover/add:rotate-90 transition-transform duration-300"
@@ -109,7 +109,7 @@
                             </h3>
                             <button
                                 @click="openModal('job_title')"
-                                class="inline-flex items-center justify-center gap-3 px-6 py-2.5 bg-gradient-to-r from-violet-600 to-indigo-600 text-white rounded-2xl font-black shadow-lg shadow-violet-500/25 hover:shadow-violet-500/40 hover:-translate-y-0.5 transition-all group/add"
+                                class="inline-flex items-center justify-center gap-3 px-6 py-2.5 bg-action-primary hover:bg-action-primary-hover text-white rounded-2xl font-black shadow-lg shadow-focus-ring-soft hover:shadow-focus-ring-soft hover:-translate-y-0.5 transition-all group/add"
                             >
                                 <div
                                     class="w-6 h-6 rounded-lg bg-white/20 flex items-center justify-center group-hover/add:rotate-90 transition-transform duration-300"
@@ -237,7 +237,7 @@
                             </div>
                             <button
                                 @click="openDeviceModal()"
-                                class="inline-flex items-center justify-center gap-3 px-6 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-2xl font-black shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 hover:-translate-y-0.5 transition-all group/add"
+                                class="inline-flex items-center justify-center gap-3 px-6 py-2.5 bg-action-primary hover:bg-action-primary-hover text-white rounded-2xl font-black shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 hover:-translate-y-0.5 transition-all group/add"
                             >
                                 <div
                                     class="w-6 h-6 rounded-lg bg-white/20 flex items-center justify-center group-hover/add:rotate-90 transition-transform duration-300"
@@ -350,7 +350,7 @@
                             </div>
                             <button
                                 @click="openShiftModal()"
-                                class="inline-flex items-center justify-center gap-3 px-6 py-2.5 bg-gradient-to-r from-violet-600 to-indigo-600 text-white rounded-2xl font-black shadow-lg shadow-violet-500/25 hover:shadow-violet-500/40 hover:-translate-y-0.5 transition-all group/add"
+                                class="inline-flex items-center justify-center gap-3 px-6 py-2.5 bg-action-primary hover:bg-action-primary-hover text-white rounded-2xl font-black shadow-lg shadow-focus-ring-soft hover:shadow-focus-ring-soft hover:-translate-y-0.5 transition-all group/add"
                             >
                                 <div
                                     class="w-6 h-6 rounded-lg bg-white/20 flex items-center justify-center group-hover/add:rotate-90 transition-transform duration-300"
@@ -656,7 +656,7 @@
                                     <button
                                         type="submit"
                                         :disabled="savingAttendanceSettings"
-                                        class="inline-flex items-center gap-2 px-6 py-2.5 bg-violet-600 hover:bg-violet-700 text-white font-bold text-sm rounded-xl transition-all shadow-md shadow-violet-500/20 active:scale-95 disabled:opacity-50"
+                                        class="inline-flex items-center gap-2 px-6 py-2.5 bg-action-primary hover:bg-action-primary-hover text-white font-bold text-sm rounded-xl transition-all shadow-md shadow-focus-ring-soft active:scale-95 disabled:opacity-50"
                                     >
                                         <svg
                                             v-if="savingAttendanceSettings"
@@ -702,7 +702,7 @@
                             </div>
                             <button
                                 @click="openRegulationModal()"
-                                class="inline-flex items-center justify-center gap-3 px-6 py-2.5 bg-gradient-to-r from-violet-600 to-indigo-600 text-white rounded-2xl font-black shadow-lg shadow-violet-500/25 hover:shadow-violet-500/40 hover:-translate-y-0.5 transition-all group/add"
+                                class="inline-flex items-center justify-center gap-3 px-6 py-2.5 bg-action-primary hover:bg-action-primary-hover text-white rounded-2xl font-black shadow-lg shadow-focus-ring-soft hover:shadow-focus-ring-soft hover:-translate-y-0.5 transition-all group/add"
                             >
                                 <div
                                     class="w-6 h-6 rounded-lg bg-white/20 flex items-center justify-center group-hover/add:rotate-90 transition-transform duration-300"
@@ -736,14 +736,14 @@
                                 <h4
                                     class="text-xs font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500 flex items-center gap-2"
                                 >
-                                    <span class="w-2 h-2 rounded-full bg-violet-500"></span>
+                                    <span class="w-2 h-2 rounded-full bg-action-primary"></span>
                                     {{ $t(`hr.settings.regulations.categories.${category}`) }}
                                 </h4>
                                 <div class="grid gap-4 sm:grid-cols-2">
                                     <div
                                         v-for="reg in group"
                                         :key="reg.id"
-                                        class="bg-gray-50 dark:bg-gray-700/30 rounded-xl p-4 border border-gray-200 dark:border-gray-600 hover:border-violet-300 dark:hover:border-violet-700 transition-colors"
+                                        class="bg-gray-50 dark:bg-gray-700/30 rounded-xl p-4 border border-gray-200 dark:border-gray-600 hover:border-action-primary/25 transition-colors"
                                     >
                                         <div class="flex justify-between items-start gap-4">
                                             <div class="flex-1 min-w-0">
@@ -762,7 +762,7 @@
                                             <div class="flex items-center gap-1">
                                                 <button
                                                     @click="openRegulationModal(reg)"
-                                                    class="p-1.5 text-gray-500 hover:text-violet-600 hover:bg-violet-100 dark:hover:bg-violet-900/30 rounded-lg transition-colors"
+                                                    class="p-1.5 text-gray-500 hover:text-action-primary hover:bg-selection-bg rounded-lg transition-colors"
                                                 >
                                                     ✏️
                                                 </button>
@@ -823,7 +823,7 @@
                     <input
                         v-model="deviceForm.name"
                         type="text"
-                        class="w-full px-4 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-violet-500"
+                        class="w-full px-4 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring"
                         required
                     />
                 </div>
@@ -849,7 +849,7 @@
                         <input
                             v-model="deviceForm.device_id"
                             type="text"
-                            class="w-full px-4 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-violet-500"
+                            class="w-full px-4 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring"
                         />
                     </div>
                     <div>
@@ -862,7 +862,7 @@
                             v-model="deviceForm.device_type"
                             type="text"
                             placeholder="ZKTeco, Hikvision..."
-                            class="w-full px-4 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-violet-500"
+                            class="w-full px-4 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring"
                         />
                     </div>
                 </div>
@@ -878,7 +878,7 @@
                     <textarea
                         v-model="deviceForm.notes"
                         rows="2"
-                        class="w-full px-4 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-violet-500"
+                        class="w-full px-4 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring"
                     ></textarea>
                 </div>
 
@@ -893,7 +893,7 @@
                     </button>
                     <button
                         @click="saveDevice"
-                        class="px-4 py-2 text-sm font-medium text-white bg-violet-600 rounded-lg hover:bg-violet-700"
+                        class="px-4 py-2 text-sm font-medium text-white bg-action-primary rounded-lg hover:bg-action-primary-hover"
                     >
                         {{ $t('common.save') }}
                     </button>
@@ -920,7 +920,7 @@
                             v-model="shiftForm.name_ar"
                             type="text"
                             placeholder="صباحي، مسائي..."
-                            class="w-full px-4 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-violet-500"
+                            class="w-full px-4 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring"
                             required
                         />
                     </div>
@@ -936,7 +936,7 @@
                             type="text"
                             required
                             placeholder="Morning, Evening..."
-                            class="w-full px-4 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-violet-500"
+                            class="w-full px-4 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring"
                         />
                     </div>
                 </div>
@@ -951,7 +951,7 @@
                         <input
                             v-model="shiftForm.start_time"
                             type="time"
-                            class="w-full px-4 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-violet-500"
+                            class="w-full px-4 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring"
                             required
                         />
                     </div>
@@ -964,7 +964,7 @@
                         <input
                             v-model="shiftForm.end_time"
                             type="time"
-                            class="w-full px-4 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-violet-500"
+                            class="w-full px-4 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring"
                             required
                         />
                     </div>
@@ -982,7 +982,7 @@
                             type="number"
                             min="0"
                             max="180"
-                            class="w-full px-4 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-violet-500"
+                            class="w-full px-4 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring"
                         />
                     </div>
                     <div>
@@ -1022,7 +1022,7 @@
                     </button>
                     <button
                         @click="saveShift"
-                        class="px-4 py-2 text-sm font-medium text-white bg-violet-600 rounded-lg hover:bg-violet-700"
+                        class="px-4 py-2 text-sm font-medium text-white bg-action-primary rounded-lg hover:bg-action-primary-hover"
                     >
                         {{ $t('common.save') }}
                     </button>

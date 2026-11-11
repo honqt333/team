@@ -32,7 +32,7 @@ function formatDate(dateStr) {
                     <div class="min-w-0 flex-1">
                         <div class="flex items-center gap-2">
                             <p
-                                class="truncate text-sm font-semibold text-slate-900 group-hover:text-indigo-600 dark:text-white dark:group-hover:text-indigo-400"
+                                class="truncate text-sm font-semibold text-slate-900 group-hover:text-action-primary dark:text-white"
                             >
                                 {{ item.invoice_number }}
                             </p>

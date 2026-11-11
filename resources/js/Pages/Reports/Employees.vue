@@ -247,9 +247,7 @@
                                 )
                             }}
                         </span>
-                        <div
-                            class="p-2 rounded-xl bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400"
-                        >
+                        <div class="p-2 rounded-xl bg-selection-bg text-action-primary">
                             <svg
                                 class="w-4 h-4"
                                 fill="none"
@@ -265,7 +263,7 @@
                             </svg>
                         </div>
                     </div>
-                    <div class="text-xl font-black text-indigo-600 dark:text-indigo-400 font-mono">
+                    <div class="text-xl font-black text-action-primary font-mono">
                         {{ formatMoney(kpis.total_avg_contribution_by_service_hours) }}
                     </div>
                     <div class="mt-1 text-[11px] text-gray-500 dark:text-gray-400">
@@ -281,9 +279,7 @@
                         <span class="text-xs font-semibold text-gray-500 dark:text-gray-400">
                             {{ $t('reports.employees_report.total_weighted_avg_contribution') }}
                         </span>
-                        <div
-                            class="p-2 rounded-xl bg-purple-50 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400"
-                        >
+                        <div class="p-2 rounded-xl bg-purple-50 text-purple-600">
                             <svg
                                 class="w-4 h-4"
                                 fill="none"
@@ -299,7 +295,7 @@
                             </svg>
                         </div>
                     </div>
-                    <div class="text-xl font-black text-purple-600 dark:text-purple-400 font-mono">
+                    <div class="text-xl font-black text-purple-600 font-mono">
                         {{ formatMoney(kpis.total_weighted_avg_contribution) }}
                     </div>
                     <div class="mt-1 text-[11px] text-gray-500 dark:text-gray-400">
@@ -556,7 +552,7 @@
                             type="text"
                             placeholder="WO-000001"
                             @keyup.enter="applyFilters"
-                            class="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-xs font-medium focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all"
+                            class="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-xs font-medium focus:ring-2 focus:ring-focus-ring focus:border-transparent transition-all"
                         />
                     </div>
 
@@ -587,7 +583,7 @@
                                 type="text"
                                 :placeholder="$t('reports.employees_report.search_placeholder')"
                                 @keyup.enter="applyFilters"
-                                class="w-full pr-10 pl-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-xs font-medium focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all"
+                                class="w-full pr-10 pl-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-xs font-medium focus:ring-2 focus:ring-focus-ring focus:border-transparent transition-all"
                             />
                             <div
                                 class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-gray-400"
@@ -764,9 +760,7 @@
                             </div>
                             <div>
                                 <span class="text-gray-500 dark:text-gray-400">المساهمة/ساعة:</span>
-                                <span
-                                    class="font-mono text-indigo-600 dark:text-indigo-400 font-bold"
-                                >
+                                <span class="font-mono text-action-primary font-bold">
                                     {{
                                         formatMoney(
                                             group.summary.total_avg_contribution_by_service_hours
@@ -778,9 +772,7 @@
                                 <span class="text-gray-500 dark:text-gray-400">
                                     المساهمة المرجحة:
                                 </span>
-                                <span
-                                    class="font-mono text-purple-600 dark:text-purple-400 font-bold"
-                                >
+                                <span class="font-mono text-purple-600 font-bold">
                                     {{ formatMoney(group.summary.total_weighted_avg_contribution) }}
                                 </span>
                             </div>
@@ -853,7 +845,7 @@
                                         }}
                                     </th>
                                     <th
-                                        class="py-3 px-3.5 text-left font-black text-indigo-600 dark:text-indigo-400"
+                                        class="py-3 px-3.5 text-left font-black text-action-primary"
                                     >
                                         {{
                                             $t(
@@ -861,9 +853,7 @@
                                             )
                                         }}
                                     </th>
-                                    <th
-                                        class="py-3 px-3.5 text-left font-black text-purple-600 dark:text-purple-400"
-                                    >
+                                    <th class="py-3 px-3.5 text-left font-black text-purple-600">
                                         {{
                                             $t('reports.employees_report.weighted_avg_contribution')
                                         }}
@@ -993,12 +983,12 @@
                                         {{ formatMoney(row.avg_percent_contribution) }}
                                     </td>
                                     <td
-                                        class="py-3 px-3.5 text-left font-mono font-black text-indigo-600 dark:text-indigo-400 bg-indigo-50/30 dark:bg-indigo-950/20"
+                                        class="py-3 px-3.5 text-left font-mono font-black text-action-primary bg-selection-bg"
                                     >
                                         {{ formatMoney(row.avg_contribution_by_service_hours) }}
                                     </td>
                                     <td
-                                        class="py-3 px-3.5 text-left font-mono font-black text-purple-600 dark:text-purple-400 bg-purple-50/30 dark:bg-purple-950/20"
+                                        class="py-3 px-3.5 text-left font-mono font-black text-purple-600 bg-purple-50/30"
                                     >
                                         {{ formatMoney(row.weighted_avg_contribution) }}
                                     </td>
@@ -1059,18 +1049,14 @@
                                 >
                                     {{ $t('reports.employees_report.avg_percent_contribution') }}
                                 </th>
-                                <th
-                                    class="py-3 px-3.5 text-left font-black text-indigo-600 dark:text-indigo-400"
-                                >
+                                <th class="py-3 px-3.5 text-left font-black text-action-primary">
                                     {{
                                         $t(
                                             'reports.employees_report.avg_contribution_by_service_hours'
                                         )
                                     }}
                                 </th>
-                                <th
-                                    class="py-3 px-3.5 text-left font-black text-purple-600 dark:text-purple-400"
-                                >
+                                <th class="py-3 px-3.5 text-left font-black text-purple-600">
                                     {{ $t('reports.employees_report.weighted_avg_contribution') }}
                                 </th>
                             </tr>
@@ -1221,12 +1207,12 @@
                                     {{ formatMoney(row.avg_percent_contribution) }}
                                 </td>
                                 <td
-                                    class="py-3 px-3.5 text-left font-mono font-black text-indigo-600 dark:text-indigo-400 bg-indigo-50/30 dark:bg-indigo-950/20"
+                                    class="py-3 px-3.5 text-left font-mono font-black text-action-primary bg-selection-bg"
                                 >
                                     {{ formatMoney(row.avg_contribution_by_service_hours) }}
                                 </td>
                                 <td
-                                    class="py-3 px-3.5 text-left font-mono font-black text-purple-600 dark:text-purple-400 bg-purple-50/30 dark:bg-purple-950/20"
+                                    class="py-3 px-3.5 text-left font-mono font-black text-purple-600 bg-purple-50/30"
                                 >
                                     {{ formatMoney(row.weighted_avg_contribution) }}
                                 </td>
@@ -1268,14 +1254,10 @@
                                 >
                                     {{ formatMoney(kpis.total_avg_percent_contribution) }}
                                 </td>
-                                <td
-                                    class="py-3 px-3.5 text-left font-mono text-indigo-600 dark:text-indigo-400"
-                                >
+                                <td class="py-3 px-3.5 text-left font-mono text-action-primary">
                                     {{ formatMoney(kpis.total_avg_contribution_by_service_hours) }}
                                 </td>
-                                <td
-                                    class="py-3 px-3.5 text-left font-mono text-purple-600 dark:text-purple-400"
-                                >
+                                <td class="py-3 px-3.5 text-left font-mono text-purple-600">
                                     {{ formatMoney(kpis.total_weighted_avg_contribution) }}
                                 </td>
                             </tr>

@@ -715,7 +715,7 @@
                         >
                             {{ $t('reports.financial_summary_report.total_salaries') }}
                         </div>
-                        <div class="mt-2 text-lg font-black text-purple-600 dark:text-purple-400">
+                        <div class="mt-2 text-lg font-black text-purple-600">
                             {{ formatCurrency(overallSummary.totalSalary) }}
                         </div>
                         <div class="text-[10px] text-gray-400 mt-0.5">
@@ -1588,11 +1588,9 @@
                                     class="bg-gray-50/80 dark:bg-gray-800/80 font-black text-gray-900 dark:text-white"
                                 >
                                     <td colspan="6" class="py-2.5 px-4">
-                                        <div
-                                            class="flex items-center gap-2 text-indigo-600 dark:text-indigo-400"
-                                        >
+                                        <div class="flex items-center gap-2 text-action-primary">
                                             <svg
-                                                class="w-4 h-4 text-indigo-500"
+                                                class="w-4 h-4 text-action-primary"
                                                 fill="none"
                                                 stroke="currentColor"
                                                 viewBox="0 0 24 24"
@@ -1743,7 +1741,7 @@
                                         }}
                                     </td>
                                     <td
-                                        class="py-2.5 px-4 text-end font-mono font-black text-indigo-600 dark:text-indigo-400"
+                                        class="py-2.5 px-4 text-end font-mono font-black text-action-primary"
                                     >
                                         {{
                                             formatCurrency(
@@ -1863,7 +1861,7 @@
                                         {{ $t('reports.financial_summary_report.salaries_total') }}
                                     </td>
                                     <td
-                                        class="py-2.5 px-4 text-end font-mono font-black text-purple-600 dark:text-purple-400"
+                                        class="py-2.5 px-4 text-end font-mono font-black text-purple-600"
                                     >
                                         {{ formatCurrency(item.shopFinancialSummary.totalSalary) }}
                                     </td>

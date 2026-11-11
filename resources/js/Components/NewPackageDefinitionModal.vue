@@ -3,7 +3,7 @@
         <template #title>
             <div class="flex items-center gap-3">
                 <div
-                    class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-600 to-purple-600 flex items-center justify-center"
+                    class="w-10 h-10 rounded-xl bg-action-primary hover:bg-action-primary-hover flex items-center justify-center"
                 >
                     <svg
                         class="w-5 h-5 text-white"
@@ -95,7 +95,7 @@
                 >
                     <h3 class="font-medium text-gray-900 dark:text-white flex items-center gap-2">
                         <svg
-                            class="w-4 h-4 text-indigo-500"
+                            class="w-4 h-4 text-action-primary"
                             fill="none"
                             stroke="currentColor"
                             viewBox="0 0 24 24"
@@ -135,14 +135,14 @@
                                 type="number"
                                 v-model.number="newItem.quantity"
                                 min="1"
-                                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-focus-ring focus:border-transparent"
                             />
                         </div>
                         <button
                             type="button"
                             @click="addItem"
                             :disabled="!newItem.id"
-                            class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed h-[38px]"
+                            class="px-4 py-2 bg-action-primary hover:bg-action-primary-hover text-white rounded-lg text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed h-[38px]"
                         >
                             {{ $t('packages.add_item') }}
                         </button>
@@ -157,7 +157,7 @@
                         >
                             <div class="flex items-center gap-3">
                                 <div
-                                    class="w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center text-indigo-600 dark:text-indigo-400 font-semibold text-sm"
+                                    class="w-8 h-8 rounded-full bg-selection-bg flex items-center justify-center text-action-primary font-semibold text-sm"
                                 >
                                     {{ item.quantity }}x
                                 </div>
@@ -250,7 +250,7 @@
                 <button
                     @click="submitForm"
                     :disabled="form.processing || form.items.length === 0"
-                    class="px-5 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl font-medium shadow-lg shadow-indigo-500/30 hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed transition-all text-center"
+                    class="px-5 py-2.5 bg-action-primary hover:bg-action-primary-hover text-white rounded-xl font-medium shadow-lg shadow-focus-ring-soft hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed transition-all text-center"
                 >
                     {{ form.processing ? $t('common.loading') : $t('common.save') }}
                 </button>

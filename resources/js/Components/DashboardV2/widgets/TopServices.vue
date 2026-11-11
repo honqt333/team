@@ -49,7 +49,7 @@ const maxUsage = computed(() => {
                             class="h-1.5 flex-1 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-700"
                         >
                             <div
-                                class="h-full rounded-full bg-indigo-500 transition-all dark:bg-indigo-400"
+                                class="h-full rounded-full bg-action-primary transition-all"
                                 :style="{ width: `${(service.times_used / maxUsage) * 100}%` }"
                             ></div>
                         </div>

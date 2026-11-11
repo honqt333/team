@@ -45,7 +45,7 @@
                         v-model="searchQuery"
                         type="text"
                         :placeholder="$t('help.search_placeholder')"
-                        class="w-full px-5 py-4 ps-13 rounded-2xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-sky-500 focus:border-transparent shadow-sm text-base transition-all"
+                        class="w-full px-5 py-4 ps-13 rounded-2xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-focus-ring focus:border-transparent shadow-sm text-base transition-all"
                     />
                     <div
                         class="absolute inset-y-0 start-0 flex items-center ps-4 pointer-events-none text-gray-400"
@@ -231,7 +231,7 @@
             <div class="space-y-4">
                 <div class="flex items-center gap-2">
                     <div
-                        class="w-8 h-8 rounded-lg bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 flex items-center justify-center"
+                        class="w-8 h-8 rounded-lg bg-selection-bg text-action-primary flex items-center justify-center"
                     >
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path
@@ -475,7 +475,7 @@
                             :href="contactSupport.ticket_url"
                             target="_blank"
                             rel="noopener"
-                            class="px-5 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 font-bold text-sm text-white transition-colors flex items-center gap-2 shadow-lg shadow-indigo-600/30"
+                            class="px-5 py-3 rounded-xl bg-action-primary hover:bg-action-primary-hover font-bold text-sm text-white transition-colors flex items-center gap-2 shadow-lg shadow-focus-ring-soft"
                         >
                             <span>{{ $t('help.support.open_ticket') }}</span>
                         </a>
@@ -816,8 +816,8 @@ const defaultQuickStartItems = [
         title: t('help.workflows.customer_portal'),
         desc: t('help.workflows.customer_portal_desc'),
         icon: IconUserCheck,
-        bg: 'bg-purple-50 dark:bg-purple-900/30',
-        text: 'text-purple-600 dark:text-purple-400',
+        bg: 'bg-purple-50',
+        text: 'text-purple-600',
         targetCategory: 'portal',
     },
 ];

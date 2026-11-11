@@ -110,7 +110,7 @@ async function onFaviconChange(e) {
                             v-model="form.settings.website_logo"
                             type="text"
                             :placeholder="$t('system.website.logo_url_placeholder')"
-                            class="block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm py-2 px-3 bg-white dark:bg-gray-700 dark:text-white"
+                            class="block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-action-primary focus:ring-focus-ring sm:text-sm py-2 px-3 bg-white dark:bg-gray-700 dark:text-white"
                             dir="ltr"
                         />
                     </div>
@@ -199,7 +199,7 @@ async function onFaviconChange(e) {
                     <input
                         v-model="form.settings.website_primary_color"
                         type="text"
-                        class="flex-1 rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm py-2 px-3 bg-white dark:bg-gray-700 dark:text-white font-mono"
+                        class="flex-1 rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-action-primary focus:ring-focus-ring sm:text-sm py-2 px-3 bg-white dark:bg-gray-700 dark:text-white font-mono"
                         dir="ltr"
                     />
                 </div>

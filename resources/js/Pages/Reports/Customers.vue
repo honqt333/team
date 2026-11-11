@@ -109,10 +109,10 @@
 
                     <!-- Amount Adjusted (Discounts) -->
                     <div class="flex items-center gap-1.5 ps-3">
-                        <span class="text-indigo-600 dark:text-indigo-400 font-semibold">
+                        <span class="text-action-primary font-semibold">
                             {{ $t('reports.customers_report.total_amount_adjusted') }}:
                         </span>
-                        <span class="font-mono font-bold text-indigo-700 dark:text-indigo-300">
+                        <span class="font-mono font-bold text-selection-text">
                             {{ formatMoney(kpis.total_amount_adjusted) }}
                             {{ $t('reports.customers_report.currency') }}
                         </span>
@@ -183,7 +183,7 @@
                             v-model="filterForm.search"
                             type="text"
                             :placeholder="$t('reports.customers_report.search_placeholder')"
-                            class="w-full ps-10 pe-4 py-2 text-xs rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-750 text-gray-900 dark:text-white focus:bg-white dark:focus:bg-gray-800 focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-all placeholder:text-gray-400"
+                            class="w-full ps-10 pe-4 py-2 text-xs rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-750 text-gray-900 dark:text-white focus:bg-white dark:focus:bg-gray-800 focus:ring-2 focus:ring-focus-ring focus:border-action-primary transition-all placeholder:text-gray-400"
                             @keydown.enter="applyFilters"
                         />
                         <div
@@ -469,7 +469,7 @@
                             </span>
                             <span class="text-gray-500">
                                 {{ $t('reports.customers_report.amount_adjusted') }}:
-                                <strong class="text-indigo-600 dark:text-indigo-400">
+                                <strong class="text-action-primary">
                                     {{ formatMoney(group.total_amount_adjusted) }}
                                 </strong>
                             </span>
@@ -628,7 +628,7 @@
                                         {{ formatMoney(row.amount_paid) }}
                                     </td>
                                     <td
-                                        class="py-3 px-3 text-end font-mono text-indigo-600 dark:text-indigo-400 whitespace-nowrap"
+                                        class="py-3 px-3 text-end font-mono text-action-primary whitespace-nowrap"
                                     >
                                         {{ formatMoney(row.amount_adjusted) }}
                                     </td>
@@ -813,7 +813,7 @@
                                     {{ formatMoney(row.amount_paid) }}
                                 </td>
                                 <td
-                                    class="py-3 px-3 text-end font-mono text-indigo-600 dark:text-indigo-400 whitespace-nowrap"
+                                    class="py-3 px-3 text-end font-mono text-action-primary whitespace-nowrap"
                                 >
                                     {{ formatMoney(row.amount_adjusted) }}
                                 </td>
@@ -1253,7 +1253,7 @@ const exportUrl = computed(() => {
 
 const handlePrint = () => {
     printDocument({
-        title: t('reports.customers.title'),
+        title: t('reports.customers_report.title'),
     });
 };
 
@@ -1298,9 +1298,9 @@ const getCustomerTypeLabel = (type) => {
 const getCustomerTypeBadgeClass = (type) => {
     switch (type) {
         case 'company':
-            return 'bg-purple-100 text-purple-800 dark:bg-purple-900/40 dark:text-purple-300';
+            return 'bg-purple-100 text-purple-800';
         case 'government':
-            return 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/40 dark:text-indigo-300';
+            return 'bg-selection-bg text-selection-text';
         case 'vip':
             return 'bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300';
         default:

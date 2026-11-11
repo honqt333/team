@@ -9,7 +9,7 @@
                     <!-- Title -->
                     <div class="flex items-center gap-4">
                         <div
-                            class="w-12 h-12 rounded-xl bg-gradient-to-br from-violet-600 to-purple-600 flex items-center justify-center shadow-lg shadow-violet-500/30"
+                            class="w-12 h-12 rounded-xl bg-action-primary hover:bg-action-primary-hover flex items-center justify-center shadow-lg shadow-focus-ring-soft"
                         >
                             <svg
                                 class="w-6 h-6 text-white"
@@ -38,7 +38,7 @@
                     <!-- Actions -->
                     <button
                         @click="showRequestModal = true"
-                        class="flex items-center justify-center gap-2 px-5 py-2.5 bg-gradient-to-r from-violet-600 to-purple-600 text-white rounded-xl font-medium shadow-lg shadow-violet-500/30 hover:shadow-xl hover:shadow-violet-500/40 hover:-translate-y-0.5 transition-all"
+                        class="flex items-center justify-center gap-2 px-5 py-2.5 bg-action-primary hover:bg-action-primary-hover text-white rounded-xl font-medium shadow-lg shadow-focus-ring-soft hover:shadow-xl hover:shadow-focus-ring-soft hover:-translate-y-0.5 transition-all"
                     >
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path

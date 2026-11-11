@@ -9,10 +9,7 @@
                             : $t('inventory.parts.add_warehouse')
                     }}
                 </span>
-                <span
-                    v-if="partName"
-                    class="text-sm font-normal text-indigo-600 dark:text-indigo-400"
-                >
+                <span v-if="partName" class="text-sm font-normal text-action-primary">
                     {{ partName }}
                 </span>
             </div>
@@ -55,7 +52,7 @@
                             inputmode="decimal"
                             dir="ltr"
                             @input="sanitizeNumber($event, 'cost_price')"
-                            class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500"
+                            class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring"
                             placeholder="0.00"
                         />
                     </div>
@@ -71,7 +68,7 @@
                             inputmode="decimal"
                             dir="ltr"
                             @input="sanitizeNumber($event, 'sale_price')"
-                            class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500"
+                            class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring"
                             placeholder="0.00"
                         />
                     </div>
@@ -91,7 +88,7 @@
                             inputmode="decimal"
                             dir="ltr"
                             @input="sanitizeNumber($event, 'min_sale_price')"
-                            class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500"
+                            class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring"
                             placeholder="0.00"
                         />
                     </div>
@@ -132,7 +129,7 @@
                             inputmode="decimal"
                             dir="ltr"
                             @input="sanitizeNumber($event, 'min_stock')"
-                            class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500"
+                            class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring"
                             placeholder="0"
                         />
                     </div>
@@ -146,7 +143,7 @@
                             v-model="form.storage_location"
                             type="text"
                             dir="ltr"
-                            class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500"
+                            class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring"
                             placeholder="A1"
                         />
                     </div>

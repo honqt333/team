@@ -128,7 +128,7 @@ defineProps({ form: Object, addItem: Function, removeItem: Function });
                                 </span>
                                 <input
                                     v-model="page.slug"
-                                    class="flex-1 min-w-0 block w-full px-3 py-2 rounded-none rounded-l-md sm:text-sm border-gray-300 dark:border-gray-600 focus:ring-indigo-500 focus:border-indigo-500 bg-white dark:bg-gray-700 dark:text-white text-left font-mono"
+                                    class="flex-1 min-w-0 block w-full px-3 py-2 rounded-none rounded-l-md sm:text-sm border-gray-300 dark:border-gray-600 focus:ring-focus-ring focus:border-action-primary bg-white dark:bg-gray-700 dark:text-white text-left font-mono"
                                     dir="ltr"
                                     placeholder="about-us"
                                 />

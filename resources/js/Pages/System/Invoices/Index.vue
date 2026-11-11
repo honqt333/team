@@ -56,7 +56,7 @@
                         v-model="search"
                         type="text"
                         :placeholder="$t('system.invoices.search_placeholder')"
-                        class="w-full px-4 py-2 pr-10 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-indigo-500"
+                        class="w-full px-4 py-2 pr-10 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-focus-ring"
                         @keyup.enter="applyFilters"
                     />
                 </div>
@@ -153,7 +153,7 @@
                                 <div class="flex items-center justify-center gap-2">
                                     <a
                                         :href="`/system/invoices/${invoice.id}`"
-                                        class="inline-flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-lg transition-colors"
+                                        class="inline-flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-action-primary hover:text-selection-text hover:bg-selection-bg rounded-lg transition-colors"
                                     >
                                         <svg
                                             class="w-4 h-4"
@@ -206,7 +206,7 @@
                     :class="[
                         'px-3 py-1 rounded text-sm',
                         page === invoices.current_page
-                            ? 'bg-indigo-600 text-white'
+                            ? 'bg-action-primary text-white'
                             : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300',
                     ]"
                 >
@@ -271,7 +271,7 @@ const statCards = computed(() => [
         key: 'revenue',
         label: t('system.invoices.stats.revenue'),
         value: formatCurrency(props.stats?.total_revenue ?? 0),
-        valueColor: 'text-indigo-600 dark:text-indigo-400',
+        valueColor: 'text-action-primary',
     },
 ]);
 

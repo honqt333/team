@@ -6,7 +6,7 @@
             </h3>
             <button
                 @click="showUploadModal = true"
-                class="flex items-center gap-2 px-4 py-2 bg-violet-600 hover:bg-violet-700 text-white rounded-xl font-medium transition-colors shadow-sm shadow-violet-200 dark:shadow-none"
+                class="flex items-center gap-2 px-4 py-2 bg-action-primary hover:bg-action-primary-hover text-white rounded-xl font-medium transition-colors shadow-sm shadow-focus-ring-soft dark:shadow-none"
             >
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path
@@ -32,7 +32,7 @@
             >
                 <div class="flex items-start justify-between mb-4">
                     <div
-                        class="w-12 h-12 rounded-xl bg-violet-100 dark:bg-violet-900/30 flex items-center justify-center text-violet-600 dark:text-violet-400"
+                        class="w-12 h-12 rounded-xl bg-selection-bg flex items-center justify-center text-action-primary"
                     >
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path
@@ -49,7 +49,7 @@
                         <a
                             :href="route('app.hr.documents.download', doc.id)"
                             target="_blank"
-                            class="p-2 text-gray-400 hover:text-violet-600 dark:hover:text-violet-400"
+                            class="p-2 text-gray-400 hover:text-action-primary"
                         >
                             <svg
                                 class="w-5 h-5"
@@ -222,7 +222,7 @@
                                     type="file"
                                     @input="form.file = $event.target.files[0]"
                                     accept=".pdf,.jpg,.jpeg,.png,.webp"
-                                    class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-violet-50 file:text-violet-700 hover:file:bg-violet-100"
+                                    class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-selection-bg file:text-selection-text hover:file:bg-selection-bg"
                                     required
                                 />
                             </div>
@@ -238,7 +238,7 @@
                                 <button
                                     type="submit"
                                     :disabled="form.processing"
-                                    class="px-6 py-2 bg-violet-600 text-white rounded-xl font-medium disabled:opacity-50"
+                                    class="px-6 py-2 bg-action-primary text-white rounded-xl font-medium disabled:opacity-50"
                                 >
                                     {{ $t('common.save') }}
                                 </button>

@@ -78,7 +78,7 @@
             <div class="flex flex-col sm:flex-row gap-3 justify-center">
                 <a
                     :href="route('system.subscriptions.show', subscription)"
-                    class="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl transition-colors"
+                    class="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3 bg-action-primary hover:bg-action-primary-hover text-white font-semibold rounded-xl transition-colors"
                 >
                     {{ $t('system.payment.view_subscription') }}
                 </a>

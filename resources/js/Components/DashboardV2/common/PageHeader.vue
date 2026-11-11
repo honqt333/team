@@ -24,7 +24,7 @@ defineProps({
                     {{ title }}
                     <span v-if="userName">
                         ,
-                        <span class="text-indigo-600 dark:text-indigo-400">{{ userName }}</span>
+                        <span class="text-action-primary">{{ userName }}</span>
                     </span>
                 </h1>
                 <p v-if="subtitle" class="mt-1 text-sm text-slate-500 dark:text-slate-400">

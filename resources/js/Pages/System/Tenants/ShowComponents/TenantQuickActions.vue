@@ -3,7 +3,7 @@
         <!-- Impersonate (super_admin only — server enforces) -->
         <button
             @click="$emit('impersonate')"
-            class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-medium transition-colors flex items-center gap-2"
+            class="px-4 py-2 bg-action-primary hover:bg-action-primary-hover text-white rounded-lg text-sm font-medium transition-colors flex items-center gap-2"
         >
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path
@@ -19,7 +19,7 @@
         <!-- Assign / Change Plan -->
         <button
             @click="$emit('assign-plan')"
-            class="px-4 py-2 bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-900/30 dark:hover:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800 rounded-lg text-sm font-medium transition-colors flex items-center gap-2"
+            class="px-4 py-2 bg-selection-bg hover:bg-selection-bg text-selection-text border border-action-primary/25 rounded-lg text-sm font-medium transition-colors flex items-center gap-2"
         >
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path

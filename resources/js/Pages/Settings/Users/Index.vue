@@ -117,13 +117,13 @@ const toggleUserActive = (user) => {
             <PageHeader
                 :title="t('users.title')"
                 :subtitle="t('users.description')"
-                gradientFrom="from-violet-600"
+                gradientFrom="from-action-primary"
                 gradientTo="to-purple-700"
-                glowFrom="from-violet-500"
-                badgeBg="bg-violet-50/50 dark:bg-violet-900/30"
-                badgeText="text-violet-600 dark:text-violet-400"
-                badgeBorder="border-violet-100/50 dark:border-violet-800/30"
-                badgeDot="bg-violet-500"
+                glowFrom="from-action-primary"
+                badgeBg="bg-selection-bg"
+                badgeText="text-action-primary"
+                badgeBorder="border-action-primary/25"
+                badgeDot="bg-action-primary"
             >
                 <template #back>
                     <BackButton :href="route('settings.index')" />
@@ -144,7 +144,7 @@ const toggleUserActive = (user) => {
                     <button
                         v-if="can('users.create')"
                         @click="openCreateModal"
-                        class="group relative inline-flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-violet-600 to-purple-600 text-white font-bold rounded-xl transition-all hover:scale-[1.02] hover:shadow-lg hover:shadow-violet-500/25 active:scale-95 overflow-hidden"
+                        class="group relative inline-flex items-center gap-2 px-6 py-2.5 bg-action-primary hover:bg-action-primary-hover text-white font-bold rounded-xl transition-all hover:scale-[1.02] hover:shadow-lg hover:shadow-focus-ring-soft active:scale-95 overflow-hidden"
                     >
                         <div
                             class="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"

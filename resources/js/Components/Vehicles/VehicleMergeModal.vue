@@ -132,7 +132,7 @@
                         type="text"
                         v-model="searchQuery"
                         :placeholder="$t('vehicles.merge.search_target_placeholder')"
-                        class="w-full ps-10 pe-4 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-amber-500"
+                        class="w-full ps-10 pe-4 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-focus-ring"
                     />
                 </div>
 
@@ -333,7 +333,7 @@
                     </p>
                     <div class="grid grid-cols-2 gap-4 text-center">
                         <div>
-                            <p class="text-xl font-black text-indigo-600 dark:text-indigo-400">
+                            <p class="text-xl font-black text-action-primary">
                                 {{
                                     (source.work_orders_count || 0) +
                                     (selectedTarget.work_orders_count || 0)

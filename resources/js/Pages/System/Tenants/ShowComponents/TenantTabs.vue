@@ -13,7 +13,7 @@
                 :class="[
                     'flex items-center gap-2 whitespace-nowrap border-b-2 px-4 py-3 text-sm font-semibold transition-colors',
                     active === tab.key
-                        ? 'border-indigo-600 text-indigo-600 dark:border-indigo-400 dark:text-indigo-300'
+                        ? 'border-action-primary text-action-primary'
                         : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200',
                 ]"
             >
@@ -139,7 +139,7 @@
                     <button
                         type="button"
                         @click="$emit('assign-plan')"
-                        class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white transition-colors shadow-sm"
+                        class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-action-primary hover:bg-action-primary-hover text-white transition-colors shadow-sm"
                     >
                         <svg
                             class="w-3.5 h-3.5"
@@ -174,7 +174,7 @@
                                 {{ sub.plan?.name_ar || sub.plan?.name_en || $t('common.na') }}
                             </p>
                             <p class="text-xs text-gray-500">
-                                {{ $t(`system.tenants.show.${sub.billing_cycle}`) }}
+                                {{ $t('system.tenants.show.yearly') }}
                             </p>
                         </div>
                         <span

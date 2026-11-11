@@ -3,7 +3,7 @@
         <div class="space-y-6">
             <!-- Welcome Header -->
             <div
-                class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 p-8 shadow-lg"
+                class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-action-primary via-purple-600 to-pink-600 p-8 shadow-lg"
             >
                 <div class="relative">
                     <!-- Decorative blobs -->
@@ -56,13 +56,13 @@
                                 </svg>
                             </div>
                             <div>
-                                <p class="text-indigo-200 text-sm font-medium">
+                                <p class="text-white/80 text-sm font-medium">
                                     {{ $t('system.dashboard.welcome') }}
                                 </p>
                                 <h1 class="text-white text-2xl font-bold tracking-tight">
                                     {{ $t('system.dashboard.title') }}
                                 </h1>
-                                <p class="text-indigo-200/70 text-xs mt-0.5">
+                                <p class="text-white/65 text-xs mt-0.5">
                                     {{ $t('system.dashboard.subtitle_short') }}
                                 </p>
                             </div>
@@ -75,7 +75,7 @@
                                 class="hidden sm:flex items-center gap-2 bg-white/10 backdrop-blur-sm text-white/80 text-xs font-medium px-3 py-2 rounded-xl border border-white/20"
                             >
                                 <svg
-                                    class="w-3.5 h-3.5 text-indigo-200 flex-shrink-0"
+                                    class="w-3.5 h-3.5 text-white/80 flex-shrink-0"
                                     fill="none"
                                     stroke="currentColor"
                                     viewBox="0 0 24 24"
@@ -306,7 +306,7 @@
                         </div>
                         <Link
                             href="/system/tenants"
-                            class="text-sm font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 flex items-center gap-2 transition-colors"
+                            class="text-sm font-medium text-action-primary hover:text-selection-text flex items-center gap-2 transition-colors"
                         >
                             {{ $t('common.view_all') }}
                             <svg
@@ -474,8 +474,8 @@ const statCards = computed(() => [
         label: t('system.dashboard.total_tenants'),
         value: props.stats?.total_tenants ?? 0,
         valueColor: 'text-gray-900 dark:text-white',
-        iconBg: 'bg-indigo-100 dark:bg-indigo-900/50',
-        iconColor: 'text-indigo-600 dark:text-indigo-400',
+        iconBg: 'bg-selection-bg',
+        iconColor: 'text-action-primary',
         iconPath:
             'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4',
     },
@@ -539,8 +539,7 @@ const getProviderCardClass = (provider) => {
     const classes = {
         authentica:
             'bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20',
-        unifonic:
-            'bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20',
+        unifonic: 'bg-gradient-to-br from-blue-50 to-action-primary dark:from-blue-900/20',
         twilio: 'bg-gradient-to-br from-red-50 to-pink-50 dark:from-red-900/20 dark:to-pink-900/20',
         whatsapp_cloud:
             'bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20',

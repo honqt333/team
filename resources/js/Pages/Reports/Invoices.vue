@@ -316,7 +316,7 @@
                             v-model="filterForm.search"
                             type="text"
                             :placeholder="$t('reports.invoices_report.search_placeholder')"
-                            class="w-full pl-10 pr-4 py-2 text-xs rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/50 focus:bg-white dark:focus:bg-gray-900 focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all"
+                            class="w-full pl-10 pr-4 py-2 text-xs rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/50 focus:bg-white dark:focus:bg-gray-900 focus:ring-2 focus:ring-focus-ring focus:border-transparent transition-all"
                             @keyup.enter="applyFilters"
                         />
                         <svg
@@ -472,7 +472,7 @@
                     >
                         <span>{{ $t('reports.invoices_report.total_vat') }}</span>
                         <div
-                            class="w-7 h-7 rounded-lg bg-purple-50 dark:bg-purple-900/40 text-purple-600 dark:text-purple-400 flex items-center justify-center"
+                            class="w-7 h-7 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center"
                         >
                             <svg
                                 class="w-4 h-4"
@@ -489,7 +489,7 @@
                             </svg>
                         </div>
                     </div>
-                    <div class="text-xl font-bold font-mono text-purple-600 dark:text-purple-400">
+                    <div class="text-xl font-bold font-mono text-purple-600">
                         {{ formatMoney(kpis.total_vat) }}
                     </div>
                     <span class="text-[10px] text-gray-400">15%</span>
@@ -775,7 +775,7 @@
                                             {{ formatMoney(inv.total_discount) }}
                                         </td>
                                         <td
-                                            class="px-4 py-3 font-mono text-center text-xs text-purple-600 dark:text-purple-400"
+                                            class="px-4 py-3 font-mono text-center text-xs text-purple-600"
                                         >
                                             {{ formatMoney(inv.total_tax) }}
                                         </td>
@@ -882,7 +882,7 @@
                                     class="text-[9px] px-1.5 py-0.2 rounded font-semibold"
                                     :class="
                                         inv.customer.type === 'company'
-                                            ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/60 dark:text-purple-300'
+                                            ? 'bg-purple-100 text-purple-700'
                                             : 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300'
                                     "
                                 >

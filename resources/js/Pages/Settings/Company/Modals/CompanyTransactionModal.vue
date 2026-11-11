@@ -48,7 +48,7 @@
                             v-model="form.title"
                             type="text"
                             required
-                            class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                            class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring focus:border-transparent"
                             :placeholder="$t('company_profile.transactions.form.title_placeholder')"
                         />
                         <p v-if="form.errors.title" class="mt-1 text-sm text-red-500">
@@ -136,7 +136,7 @@
                             step="0.01"
                             min="0"
                             required
-                            class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:border-transparent font-mono"
+                            class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring focus:border-transparent font-mono"
                             placeholder="0.00"
                         />
                         <p v-if="form.errors.amount" class="mt-1 text-sm text-red-500">
@@ -227,7 +227,7 @@
                         <textarea
                             v-model="form.notes"
                             rows="3"
-                            class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                            class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring focus:border-transparent"
                         ></textarea>
                         <p v-if="form.errors.notes" class="mt-1 text-sm text-red-500">
                             {{ form.errors.notes }}

@@ -45,7 +45,7 @@ const statusConfig = {
         class: 'bg-rose-100 text-rose-800 dark:bg-rose-900/30 dark:text-rose-300',
     },
     refunded: {
-        class: 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300',
+        class: 'bg-purple-100 text-purple-800',
     },
 };
 
@@ -85,21 +85,13 @@ const daysLeft = computed(() => {
     return diff > 0 ? diff : 0;
 });
 
-// Subscription price fallback: legacy subscriptions created before
-// the 'price' column was added in 2026_07_21 (and backfilled in
-// 2026_07_25_150000) may have price=0 even though the plan has a real
-// price. If the subscription's own price is 0 (or missing), look up
-// the plan's price_monthly/price_yearly. The plan is eager-loaded by
-// the controller, so no extra request is needed.
 const effectivePrice = computed(() => {
     const sub = props.subscription;
     if (!sub) return 0;
     if (sub.price && Number(sub.price) > 0) return Number(sub.price);
     const plan = sub.plan;
     if (!plan) return 0;
-    return sub.billing_cycle === 'yearly'
-        ? Number(plan.price_yearly || 0)
-        : Number(plan.price_monthly || 0);
+    return Number(plan.price_yearly || 0);
 });
 
 const formatDate = (dateStr) => {
@@ -132,21 +124,21 @@ const canRenew = computed(() => {
 <template>
     <div
         v-if="subscription"
-        class="relative overflow-hidden rounded-2xl border border-slate-200 bg-gradient-to-br from-indigo-50 via-white to-violet-50 p-6 dark:border-slate-700 dark:from-indigo-900/20 dark:via-slate-800 dark:to-violet-900/20"
+        class="relative overflow-hidden rounded-2xl border border-border bg-surface p-6"
     >
         <!-- Decorative blobs -->
         <div
-            class="absolute -top-10 -right-10 h-40 w-40 rounded-full bg-indigo-200/20 blur-2xl dark:bg-indigo-900/20"
+            class="absolute -top-10 -right-10 h-40 w-40 rounded-full bg-action-primary/10 blur-2xl"
         ></div>
         <div
-            class="absolute -bottom-10 -left-10 h-40 w-40 rounded-full bg-violet-200/20 blur-2xl dark:bg-violet-900/20"
+            class="absolute -bottom-10 -left-10 h-40 w-40 rounded-full bg-action-primary/10 blur-2xl"
         ></div>
 
         <div class="relative flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div>
                 <div class="flex items-center gap-2">
                     <span
-                        class="text-xs font-semibold uppercase tracking-wider text-indigo-600 dark:text-indigo-400"
+                        class="text-xs font-semibold uppercase tracking-wider text-action-primary"
                     >
                         {{ t('system.company_subscription.card.current_label') }}
                     </span>
@@ -181,12 +173,7 @@ const canRenew = computed(() => {
                     <span class="text-base font-normal text-slate-500">SAR</span>
                 </p>
                 <p class="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
-                    /
-                    {{
-                        subscription.billing_cycle === 'yearly'
-                            ? t('system.company_subscription.card.billing_yearly')
-                            : t('system.company_subscription.card.billing_monthly')
-                    }}
+                    / {{ t('system.company_subscription.card.billing_yearly') }}
                 </p>
             </div>
         </div>
@@ -234,7 +221,7 @@ const canRenew = computed(() => {
             <button
                 type="button"
                 @click="emit('renew')"
-                class="w-full sm:w-auto flex-shrink-0 inline-flex items-center justify-center gap-1.5 rounded-lg bg-indigo-600 px-4 py-2 text-xs font-bold text-white shadow-sm hover:bg-indigo-700 transition-colors"
+                class="w-full sm:w-auto flex-shrink-0 inline-flex items-center justify-center gap-1.5 rounded-lg bg-action-primary px-4 py-2 text-xs font-bold text-white shadow-sm hover:bg-action-primary-hover transition-colors"
             >
                 <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path

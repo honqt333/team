@@ -101,7 +101,10 @@
                             {{ entry.reference }}
                         </td>
                         <td class="py-2 px-3 text-xs text-gray-600">
-                            <span v-if="entry.work_order_number" class="font-mono text-indigo-700">
+                            <span
+                                v-if="entry.work_order_number"
+                                class="font-mono text-selection-text"
+                            >
                                 {{ entry.work_order_number }}
                             </span>
                             <span v-if="entry.vehicle_plate" class="text-gray-500 ms-1 font-mono">

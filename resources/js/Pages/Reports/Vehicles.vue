@@ -408,7 +408,7 @@
                             {{ $t('reports.vehicles_report.total_tickets') }}
                         </span>
                         <div
-                            class="w-7 h-7 rounded-lg bg-purple-50 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 flex items-center justify-center"
+                            class="w-7 h-7 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center"
                         >
                             <svg
                                 class="w-4 h-4"
@@ -717,7 +717,7 @@
                                 v-model="ticketNoInput"
                                 @keyup.enter="applyFilters"
                                 placeholder="WO-..."
-                                class="w-full text-xs rounded-xl border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white px-3 py-2 shadow-sm focus:border-cyan-500 focus:ring-cyan-500 font-mono"
+                                class="w-full text-xs rounded-xl border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white px-3 py-2 shadow-sm focus:border-action-primary focus:ring-focus-ring font-mono"
                             />
                         </div>
                     </div>
@@ -735,7 +735,7 @@
                                 v-model="plateNoInput"
                                 @keyup.enter="applyFilters"
                                 placeholder="1234 ABC"
-                                class="w-full text-xs rounded-xl border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white px-3 py-2 shadow-sm focus:border-cyan-500 focus:ring-cyan-500"
+                                class="w-full text-xs rounded-xl border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white px-3 py-2 shadow-sm focus:border-action-primary focus:ring-focus-ring"
                             />
                         </div>
                     </div>
@@ -786,7 +786,7 @@
                         v-model="searchInput"
                         @keyup.enter="applyFilters"
                         :placeholder="$t('reports.vehicles_report.search_placeholder')"
-                        class="w-full text-xs rounded-xl border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white ps-10 pe-20 py-2.5 shadow-sm focus:border-cyan-500 focus:ring-cyan-500"
+                        class="w-full text-xs rounded-xl border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white ps-10 pe-20 py-2.5 shadow-sm focus:border-action-primary focus:ring-focus-ring"
                     />
                     <button
                         type="button"
@@ -1470,7 +1470,7 @@ const serviceStatusBadgeClass = (status) => {
         case 'in_progress':
             return 'bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300';
         case 'ready_for_qc':
-            return 'bg-purple-100 text-purple-800 dark:bg-purple-900/40 dark:text-purple-300';
+            return 'bg-purple-100 text-purple-800';
         case 'on_hold':
             return 'bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300';
         case 'cancelled':
@@ -1487,7 +1487,7 @@ const ticketStatusBadgeClass = (status) => {
         case 'in_progress':
             return 'bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300';
         case 'ready_for_qc':
-            return 'bg-purple-100 text-purple-800 dark:bg-purple-900/40 dark:text-purple-300';
+            return 'bg-purple-100 text-purple-800';
         case 'on_hold':
             return 'bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300';
         case 'cancelled':

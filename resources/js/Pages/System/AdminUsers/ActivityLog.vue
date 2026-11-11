@@ -28,7 +28,7 @@
                 </template>
                 <template #icon>
                     <div
-                        class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-indigo-600 flex items-center justify-center text-white shadow-md shadow-indigo-500/20"
+                        class="w-10 h-10 rounded-xl bg-action-primary hover:bg-action-primary-hover flex items-center justify-center text-white shadow-md shadow-focus-ring-soft"
                     >
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path
@@ -43,7 +43,7 @@
                 <template #badge>
                     <span
                         v-if="logs?.total !== undefined"
-                        class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300 border border-indigo-100 dark:border-indigo-800"
+                        class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-selection-bg text-selection-text border border-action-primary/25"
                     >
                         {{ logs.total }}
                     </span>

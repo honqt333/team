@@ -2,9 +2,7 @@
     <BaseModal :show="show" @close="$emit('close')" size="5xl">
         <template #title>
             <div class="flex items-center gap-3">
-                <div
-                    class="p-2 bg-indigo-50 dark:bg-indigo-900/30 rounded-lg text-indigo-600 dark:text-indigo-400"
-                >
+                <div class="p-2 bg-selection-bg rounded-lg text-action-primary">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path
                             stroke-linecap="round"
@@ -98,7 +96,7 @@
                                 {{ $t('inventory.moves.columns.price') }}
                             </th>
                             <th class="px-4 py-3 text-end">{{ $t('common.discount') }}</th>
-                            <th class="px-4 py-3 text-end text-indigo-600 dark:text-indigo-400">
+                            <th class="px-4 py-3 text-end text-action-primary">
                                 {{ $t('inventory.transfers.qty_requested') }}
                             </th>
                             <th class="px-4 py-3 text-end">
@@ -154,7 +152,7 @@
                                 :class="
                                     isOutOfStock(part)
                                         ? 'text-red-600 dark:text-red-400'
-                                        : 'text-indigo-600 dark:text-indigo-400'
+                                        : 'text-action-primary'
                                 "
                             >
                                 {{ formatQuantity(part.qty) }}
@@ -214,7 +212,7 @@
                         'flex-1 px-4 py-3 rounded-xl text-sm font-black uppercase tracking-widest transition-all flex justify-center items-center gap-2',
                         hasOutOfStock
                             ? 'bg-gray-300 dark:bg-gray-600 text-gray-500 dark:text-gray-400 cursor-not-allowed'
-                            : 'bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg shadow-indigo-200 dark:shadow-none',
+                            : 'bg-action-primary hover:bg-action-primary-hover text-white shadow-lg shadow-focus-ring-soft dark:shadow-none',
                     ]"
                 >
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

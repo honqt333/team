@@ -9,7 +9,7 @@
         <template #title>
             <div class="flex items-center gap-3">
                 <div
-                    class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center"
+                    class="w-10 h-10 rounded-xl bg-action-primary hover:bg-action-primary-hover flex items-center justify-center"
                 >
                     <svg
                         class="w-5 h-5 text-white"
@@ -40,7 +40,7 @@
                 :class="[
                     'relative flex-1 py-2.5 px-4 text-sm font-bold rounded-xl transition-all duration-300 whitespace-nowrap flex items-center justify-center gap-2',
                     activeTab === tab.id
-                        ? 'bg-white dark:bg-gray-700 text-indigo-600 dark:text-indigo-400 shadow-sm'
+                        ? 'bg-white dark:bg-gray-700 text-action-primary shadow-sm'
                         : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 hover:bg-gray-200/50 dark:hover:bg-gray-700/50',
                 ]"
             >
@@ -189,7 +189,7 @@
                                                             activeWarrantyForSelectedService.work_order_id
                                                         )
                                                     "
-                                                    class="text-indigo-600 dark:text-indigo-400 underline hover:text-indigo-800 dark:hover:text-indigo-300 font-bold"
+                                                    class="text-action-primary underline hover:text-selection-text font-bold"
                                                 >
                                                     #{{
                                                         activeWarrantyForSelectedService.work_order_code
@@ -304,7 +304,7 @@
                                                             claim.work_order_id
                                                         )
                                                     "
-                                                    class="text-indigo-600 dark:text-indigo-400 underline hover:text-indigo-800 dark:hover:text-indigo-300 font-bold"
+                                                    class="text-action-primary underline hover:text-selection-text font-bold"
                                                 >
                                                     #{{ claim.work_order_code }}
                                                 </Link>
@@ -347,7 +347,7 @@
                                 data-field="title"
                                 rows="2"
                                 :disabled="isDescriptionDisabled || isReadOnly"
-                                class="w-full px-4 py-2.5 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 resize-none text-sm disabled:bg-gray-100 disabled:text-gray-500 disabled:cursor-not-allowed dark:disabled:bg-gray-900"
+                                class="w-full px-4 py-2.5 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring focus:border-action-primary resize-none text-sm disabled:bg-gray-100 disabled:text-gray-500 disabled:cursor-not-allowed dark:disabled:bg-gray-900"
                                 :placeholder="$t('quotes.service_modal.description_placeholder')"
                             ></textarea>
                             <p v-if="form.errors.title" class="mt-1 text-xs text-red-500">
@@ -372,7 +372,7 @@
                                     name="duration_value"
                                     data-field="duration_value"
                                     :disabled="isDurationDisabled || isReadOnly"
-                                    class="w-full px-4 py-2.5 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 text-sm disabled:bg-gray-100 disabled:text-gray-500 disabled:cursor-not-allowed dark:disabled:bg-gray-900"
+                                    class="w-full px-4 py-2.5 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring text-sm disabled:bg-gray-100 disabled:text-gray-500 disabled:cursor-not-allowed dark:disabled:bg-gray-900"
                                 />
                                 <p
                                     v-if="form.errors.duration_value"
@@ -414,7 +414,7 @@
                                     name="warranty_value_snapshot"
                                     data-field="warranty_value_snapshot"
                                     :disabled="isWarrantyDisabled || isReadOnly"
-                                    class="w-full px-4 py-2.5 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 text-sm disabled:bg-gray-100 disabled:text-gray-500 disabled:cursor-not-allowed dark:disabled:bg-gray-900"
+                                    class="w-full px-4 py-2.5 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring text-sm disabled:bg-gray-100 disabled:text-gray-500 disabled:cursor-not-allowed dark:disabled:bg-gray-900"
                                 />
                                 <p
                                     v-if="form.errors.warranty_value_snapshot"
@@ -451,7 +451,7 @@
                                 class="text-sm font-bold text-gray-700 dark:text-gray-300 border-b border-gray-200 dark:border-gray-700 pb-2 flex items-center gap-2"
                             >
                                 <svg
-                                    class="w-4 h-4 text-indigo-500"
+                                    class="w-4 h-4 text-action-primary"
                                     fill="none"
                                     stroke="currentColor"
                                     viewBox="0 0 24 24"
@@ -566,12 +566,12 @@
                                         "
                                         :disabled="isPriceLocked || isReadOnly || form.is_warranty"
                                         :class="[
-                                            'w-full py-2.5 pl-4 pr-16 border rounded-xl font-mono text-right text-sm focus:ring-2 focus:border-indigo-500',
+                                            'w-full py-2.5 pl-4 pr-16 border rounded-xl font-mono text-right text-sm focus:ring-2 focus:border-action-primary',
                                             isPriceLocked || isReadOnly || form.is_warranty
                                                 ? 'bg-gray-100 dark:bg-gray-900 text-gray-500 dark:text-gray-400 cursor-not-allowed border-gray-200 dark:border-gray-700'
                                                 : isPriceBelowMinimum
-                                                  ? 'bg-white dark:bg-gray-800 text-gray-900 dark:text-white border-red-300 dark:border-red-700 focus:ring-red-500'
-                                                  : 'bg-white dark:bg-gray-800 text-gray-900 dark:text-white border-gray-200 dark:border-gray-700 focus:ring-indigo-500',
+                                                  ? 'bg-white dark:bg-gray-800 text-gray-900 dark:text-white border-red-300 dark:border-red-700 focus:ring-danger'
+                                                  : 'bg-white dark:bg-gray-800 text-gray-900 dark:text-white border-gray-200 dark:border-gray-700 focus:ring-focus-ring',
                                         ]"
                                         required
                                     />
@@ -613,7 +613,7 @@
                                             :class="[
                                                 'px-2.5 py-1 text-xs font-bold rounded-lg border transition-all',
                                                 form.discount_type === 'none'
-                                                    ? 'bg-indigo-600 border-indigo-600 text-white shadow-sm'
+                                                    ? 'bg-action-primary border-action-primary text-white shadow-sm'
                                                     : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700',
                                                 isReadOnly ? 'opacity-70 cursor-not-allowed' : '',
                                             ]"
@@ -627,7 +627,7 @@
                                             :class="[
                                                 'px-2.5 py-1 text-xs font-bold rounded-lg border transition-all',
                                                 form.discount_type === 'fixed'
-                                                    ? 'bg-indigo-600 border-indigo-600 text-white shadow-sm'
+                                                    ? 'bg-action-primary border-action-primary text-white shadow-sm'
                                                     : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700',
                                                 isReadOnly ? 'opacity-70 cursor-not-allowed' : '',
                                             ]"
@@ -641,7 +641,7 @@
                                             :class="[
                                                 'px-2.5 py-1 text-xs font-bold rounded-lg border transition-all',
                                                 form.discount_type === 'percentage'
-                                                    ? 'bg-indigo-600 border-indigo-600 text-white shadow-sm'
+                                                    ? 'bg-action-primary border-action-primary text-white shadow-sm'
                                                     : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700',
                                                 isReadOnly ? 'opacity-70 cursor-not-allowed' : '',
                                             ]"
@@ -669,22 +669,20 @@
                                                 .replace(/[^0-9.]/g, '')
                                                 .replace(/(\..*?)\..*/g, '$1')
                                         "
-                                        class="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 rounded-xl font-mono text-end text-sm focus:ring-2 focus:ring-indigo-500 disabled:bg-gray-100 disabled:text-gray-500 disabled:cursor-not-allowed dark:disabled:bg-gray-900"
+                                        class="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 rounded-xl font-mono text-end text-sm focus:ring-2 focus:ring-focus-ring disabled:bg-gray-100 disabled:text-gray-500 disabled:cursor-not-allowed dark:disabled:bg-gray-900"
                                     />
                                 </div>
                             </div>
 
                             <!-- Calculated Cost (Final Price) -->
                             <div
-                                class="p-3 bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 border border-indigo-200 dark:border-indigo-800 rounded-xl flex items-center justify-between"
+                                class="p-3 bg-selection-bg border border-action-primary/25 rounded-xl flex items-center justify-between"
                             >
                                 <span class="text-xs font-bold text-gray-700 dark:text-gray-300">
                                     {{ $t('quotes.service_modal.total_cost') }}
                                 </span>
                                 <div class="flex items-baseline gap-1 font-mono">
-                                    <span
-                                        class="text-xl font-black text-indigo-600 dark:text-indigo-400"
-                                    >
+                                    <span class="text-xl font-black text-action-primary">
                                         {{ formatCurrency(calculatedTotal) }}
                                     </span>
                                     <span
@@ -779,17 +777,16 @@
                             v-for="tech in props.technicians"
                             :key="tech.id"
                             @click="toggleTechnician(tech)"
-                            class="flex items-center justify-between p-3 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-indigo-500 dark:hover:border-indigo-500 transition-all cursor-pointer select-none"
+                            class="flex items-center justify-between p-3 bg-surface rounded-xl border border-border hover:border-action-primary transition-all cursor-pointer select-none"
                         >
                             <div class="flex items-center gap-3">
-                                <input
-                                    type="checkbox"
-                                    :checked="isTechnicianSelected(tech.id)"
+                                <AppCheckbox
+                                    :model-value="isTechnicianSelected(tech.id)"
                                     :disabled="isReadOnly"
-                                    class="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 disabled:opacity-50 cursor-pointer"
-                                    @click.stop="toggleTechnician(tech)"
+                                    @update:model-value="toggleTechnician(tech)"
+                                    @click.stop
                                 />
-                                <span class="text-sm font-medium text-gray-900 dark:text-white">
+                                <span class="text-sm font-medium text-text-primary">
                                     {{ getTechnicianName(tech) }}
                                 </span>
                             </div>
@@ -831,7 +828,7 @@
                                         min="0"
                                         max="100"
                                         step="0.01"
-                                        class="w-full py-1.5 pl-3 pr-8 border border-gray-200 dark:border-gray-700 rounded-lg font-mono text-right text-xs focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white"
+                                        class="w-full py-1.5 pl-3 pr-8 border border-gray-200 dark:border-gray-700 rounded-lg font-mono text-right text-xs focus:ring-1 focus:ring-focus-ring focus:border-action-primary bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white"
                                     />
                                     <div
                                         class="absolute inset-y-0 right-0 pr-2.5 flex items-center pointer-events-none"
@@ -867,14 +864,14 @@
                     <h4
                         class="text-sm font-semibold text-gray-700 dark:text-gray-300 flex items-center gap-2"
                     >
-                        <div class="w-1.5 h-4 bg-indigo-500 rounded-full"></div>
+                        <div class="w-1.5 h-4 bg-action-primary rounded-full"></div>
                         {{ $t('work_orders.item.tab_notes') }}
                     </h4>
                     <button
                         v-if="!isReadOnly"
                         type="button"
                         @click="showAddNoteModal = true"
-                        class="px-3 py-1.5 text-xs bg-gradient-to-r from-indigo-500 to-purple-500 text-white rounded-lg hover:from-indigo-600 hover:to-purple-600 transition-all flex items-center gap-1 shadow-sm"
+                        class="px-3 py-1.5 text-xs bg-action-primary hover:bg-action-primary-hover text-white rounded-lg transition-all flex items-center gap-1 shadow-sm"
                     >
                         <svg
                             class="w-3.5 h-3.5"
@@ -976,7 +973,7 @@
                         type="button"
                         @click="submitForm"
                         :disabled="saving || isPriceBelowMinimum || isTechniciansShareInvalid"
-                        class="px-6 py-2 bg-gradient-to-r from-indigo-500 to-purple-500 text-white rounded-lg hover:from-indigo-600 hover:to-purple-600 disabled:opacity-50 transition-all flex items-center gap-2"
+                        class="px-6 py-2 bg-action-primary hover:bg-action-primary-hover text-white rounded-lg disabled:opacity-50 transition-all flex items-center gap-2"
                     >
                         <svg
                             v-if="saving"
@@ -1028,7 +1025,7 @@
                         required
                         rows="5"
                         :placeholder="$t('work_orders.item.note_placeholder')"
-                        class="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white px-3 py-2 text-sm focus:ring-2 focus:ring-teal-500 focus:border-teal-500 resize-none"
+                        class="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white px-3 py-2 text-sm focus:ring-2 focus:ring-focus-ring focus:border-action-primary resize-none"
                     ></textarea>
                 </div>
             </form>
@@ -1045,7 +1042,7 @@
                     type="submit"
                     @click="addNote"
                     :disabled="notesLoading || !noteForm.content.trim()"
-                    class="px-5 py-2 text-sm font-semibold text-white bg-indigo-500 hover:bg-indigo-600 disabled:bg-gray-300 dark:disabled:bg-gray-700 disabled:text-gray-500 disabled:cursor-not-allowed rounded-xl transition-all shadow-sm flex items-center gap-2"
+                    class="px-5 py-2 text-sm font-semibold text-white bg-action-primary hover:bg-action-primary disabled:bg-gray-300 dark:disabled:bg-gray-700 disabled:text-gray-500 disabled:cursor-not-allowed rounded-xl transition-all shadow-sm flex items-center gap-2"
                 >
                     <svg
                         v-if="notesLoading"

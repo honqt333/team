@@ -4,7 +4,7 @@
             <div class="flex items-center justify-between w-full pe-4">
                 <div class="flex items-center gap-3">
                     <div
-                        class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-600 to-purple-600 text-white flex items-center justify-center font-bold shadow-md shadow-indigo-500/20"
+                        class="w-10 h-10 rounded-xl bg-action-primary hover:bg-action-primary-hover text-white flex items-center justify-center font-bold shadow-md shadow-focus-ring-soft"
                     >
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path
@@ -28,7 +28,7 @@
                 <button
                     type="button"
                     @click="handlePrint"
-                    class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 text-white text-xs font-bold shadow-md shadow-indigo-500/20 hover:from-indigo-700 hover:to-purple-700 transition-all hover:-translate-y-0.5"
+                    class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-action-primary hover:bg-action-primary-hover text-white text-xs font-bold shadow-md shadow-focus-ring-soft transition-all hover:-translate-y-0.5"
                 >
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path
@@ -266,7 +266,7 @@
                                 <td class="px-3 py-2.5 text-xs text-gray-500">
                                     <span
                                         v-if="entry.work_order_number"
-                                        class="font-mono text-indigo-600 dark:text-indigo-400"
+                                        class="font-mono text-action-primary"
                                     >
                                         {{ entry.work_order_number }}
                                     </span>

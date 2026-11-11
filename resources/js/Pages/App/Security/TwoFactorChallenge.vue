@@ -45,10 +45,10 @@ const toggleRecovery = () => {
 
         <div class="text-center mb-6">
             <div
-                class="w-16 h-16 rounded-full bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center mx-auto mb-4"
+                class="w-16 h-16 rounded-full bg-selection-bg flex items-center justify-center mx-auto mb-4"
             >
                 <svg
-                    class="w-8 h-8 text-indigo-600 dark:text-indigo-400"
+                    class="w-8 h-8 text-action-primary"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -87,7 +87,7 @@ const toggleRecovery = () => {
                     maxlength="6"
                     placeholder="000000"
                     autofocus
-                    class="w-full text-center text-3xl tracking-[0.5em] rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white font-mono py-3.5 focus:ring-2 focus:ring-violet-500 focus:border-violet-500"
+                    class="w-full text-center text-3xl tracking-[0.5em] rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white font-mono py-3.5 focus:ring-2 focus:ring-focus-ring focus:border-action-primary"
                     dir="ltr"
                     inputmode="numeric"
                 />
@@ -107,7 +107,7 @@ const toggleRecovery = () => {
                     type="text"
                     v-model="form.recovery_code"
                     placeholder="XXXX-XXXX"
-                    class="w-full text-center text-xl rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white font-mono py-3 uppercase focus:ring-2 focus:ring-violet-500 focus:border-violet-500"
+                    class="w-full text-center text-xl rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white font-mono py-3 uppercase focus:ring-2 focus:ring-focus-ring focus:border-action-primary"
                     dir="ltr"
                 />
                 <p
@@ -121,7 +121,7 @@ const toggleRecovery = () => {
             <button
                 type="submit"
                 :disabled="form.processing || (!showRecovery && form.code.length !== 6)"
-                class="w-full py-3 px-4 bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 text-white font-semibold rounded-xl shadow-lg shadow-violet-500/30 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                class="w-full py-3 px-4 bg-action-primary hover:bg-action-primary-hover text-white font-semibold rounded-xl shadow-lg shadow-focus-ring-soft transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
             >
                 <span v-if="form.processing" class="flex items-center justify-center gap-2">
                     <svg class="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24">
@@ -151,7 +151,7 @@ const toggleRecovery = () => {
                 type="button"
                 @click="resend"
                 :disabled="resendForm.processing"
-                class="text-sm text-gray-600 hover:text-violet-600 dark:text-gray-400 dark:hover:text-violet-400 transition-colors"
+                class="text-sm text-gray-600 hover:text-action-primary dark:text-gray-400 transition-colors"
             >
                 {{ resendForm.processing ? $t('common.loading') : $t('security.resend') }}
             </button>
@@ -159,7 +159,7 @@ const toggleRecovery = () => {
             <button
                 type="button"
                 @click="toggleRecovery"
-                class="text-sm text-violet-600 hover:text-violet-700 dark:text-violet-400 font-medium transition-colors"
+                class="text-sm text-action-primary hover:text-selection-text font-medium transition-colors"
             >
                 {{
                     showRecovery

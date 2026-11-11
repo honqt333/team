@@ -3,7 +3,7 @@
         <template #title>
             <div class="flex items-center gap-3">
                 <div
-                    class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-600 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-500/20"
+                    class="w-10 h-10 rounded-xl bg-action-primary hover:bg-action-primary-hover flex items-center justify-center shadow-lg shadow-focus-ring-soft"
                 >
                     <svg
                         class="w-5 h-5 text-white"
@@ -162,7 +162,7 @@
                             v-model="form.supplier_reference"
                             required
                             :placeholder="$t('purchasing.orders.supplier_reference_placeholder')"
-                            class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500"
+                            class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring"
                         />
                     </div>
                 </div>
@@ -643,7 +643,7 @@
                 <textarea
                     v-model="form.notes"
                     rows="3"
-                    class="w-full px-4 py-3 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500"
+                    class="w-full px-4 py-3 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring"
                 ></textarea>
             </div>
         </form>
@@ -670,7 +670,7 @@
                         type="button"
                         @click="submit"
                         :disabled="!isFormValid || form.processing || submitting"
-                        class="px-8 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl hover:from-indigo-700 hover:to-purple-700 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-lg shadow-indigo-500/30 font-black uppercase tracking-widest text-xs flex items-center gap-2"
+                        class="px-8 py-2.5 bg-action-primary hover:bg-action-primary-hover text-white rounded-xl disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-lg shadow-focus-ring-soft font-black uppercase tracking-widest text-xs flex items-center gap-2"
                     >
                         <svg
                             v-if="form.processing || submitting"

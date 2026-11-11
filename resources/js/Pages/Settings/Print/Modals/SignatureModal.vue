@@ -113,7 +113,7 @@
                                     :placeholder="
                                         isRtl ? 'مثال: توقيع المدير' : 'e.g. Manager Signature'
                                     "
-                                    class="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 dark:text-white focus:ring-1 focus:ring-amber-400 focus:border-amber-400 outline-none text-end text-sm"
+                                    class="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 dark:text-white focus:ring-1 focus:ring-focus-ring focus:border-action-primary outline-none text-end text-sm"
                                 />
                             </div>
                             <div class="space-y-1.5">
@@ -129,7 +129,7 @@
                                     :placeholder="
                                         isRtl ? 'مثال: Manager Signature' : 'e.g. Manager Signature'
                                     "
-                                    class="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 dark:text-white focus:ring-1 focus:ring-amber-400 focus:border-amber-400 outline-none text-sm"
+                                    class="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 dark:text-white focus:ring-1 focus:ring-focus-ring focus:border-action-primary outline-none text-sm"
                                     dir="ltr"
                                 />
                             </div>
@@ -219,7 +219,7 @@
                             </p>
 
                             <label
-                                class="block cursor-pointer rounded-2xl border-2 border-dashed border-indigo-200 dark:border-indigo-800/50 hover:border-indigo-400 dark:hover:border-indigo-500 bg-indigo-50/30 dark:bg-indigo-950/20 p-6 text-center transition-all"
+                                class="block cursor-pointer rounded-2xl border-2 border-dashed border-action-primary/25 hover:border-action-primary bg-selection-bg p-6 text-center transition-all"
                                 :class="{ 'pointer-events-none opacity-50': uploading }"
                             >
                                 <input
@@ -230,7 +230,7 @@
                                     @change="onFileSelected"
                                 />
                                 <svg
-                                    class="w-10 h-10 mx-auto text-indigo-400 mb-2"
+                                    class="w-10 h-10 mx-auto text-action-primary mb-2"
                                     fill="none"
                                     stroke="currentColor"
                                     viewBox="0 0 24 24"
@@ -242,7 +242,7 @@
                                         d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
                                     />
                                 </svg>
-                                <p class="text-sm font-bold text-indigo-600 dark:text-indigo-400">
+                                <p class="text-sm font-bold text-action-primary">
                                     {{ $t('print_settings.click_to_choose_file') }}
                                 </p>
                                 <p class="text-[10px] text-gray-400 mt-1 font-mono">
@@ -443,7 +443,7 @@
                                                     @click="startEdit(sig)"
                                                     :disabled="busySigId === sig.id"
                                                     :title="isRtl ? 'تعديل الاسم' : 'Rename'"
-                                                    class="p-1.5 rounded-lg text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-950/30 transition-colors disabled:opacity-30"
+                                                    class="p-1.5 rounded-lg text-gray-400 hover:text-action-primary hover:bg-selection-bg transition-colors disabled:opacity-30"
                                                 >
                                                     <svg
                                                         class="w-3.5 h-3.5"
@@ -526,7 +526,7 @@
                                                     type="button"
                                                     @click="saveEdit(sig)"
                                                     :disabled="busySigId === sig.id"
-                                                    class="px-3 py-1.5 text-[10px] font-bold rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-50"
+                                                    class="px-3 py-1.5 text-[10px] font-bold rounded-lg bg-action-primary text-white hover:bg-action-primary-hover disabled:opacity-50"
                                                 >
                                                     {{ $t('common.save') }}
                                                 </button>

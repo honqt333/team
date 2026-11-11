@@ -8,10 +8,8 @@
     >
         <p class="mb-4 text-sm text-text-muted">{{ $t('customers.import.subtitle') }}</p>
         <!-- Instructions -->
-        <div
-            class="mb-6 p-4 rounded-2xl bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-100 dark:border-indigo-800/30"
-        >
-            <h3 class="font-bold text-indigo-900 dark:text-indigo-300 mb-3 flex items-center gap-2">
+        <div class="mb-6 p-4 rounded-2xl bg-selection-bg border border-action-primary/25">
+            <h3 class="font-bold text-selection-text mb-3 flex items-center gap-2">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path
                         stroke-linecap="round"
@@ -22,9 +20,7 @@
                 </svg>
                 {{ $t('customers.import.instructions_title') }}
             </h3>
-            <ol
-                class="text-sm text-indigo-800 dark:text-indigo-200 space-y-2 list-decimal list-inside"
-            >
+            <ol class="text-sm text-selection-text space-y-2 list-decimal list-inside">
                 <li>{{ $t('customers.import.step_1') }}</li>
                 <li>{{ $t('customers.import.step_2') }}</li>
                 <li>{{ $t('customers.import.step_3') }}</li>
@@ -57,7 +53,7 @@
         <!-- Download Template Button -->
         <a
             :href="route('customers.import.template')"
-            class="flex items-center justify-center gap-3 w-full px-6 py-4 mb-6 text-sm font-bold text-white bg-gradient-to-r from-indigo-600 to-purple-600 rounded-2xl hover:from-indigo-700 hover:to-purple-700 shadow-lg shadow-indigo-500/30 transition-all"
+            class="flex items-center justify-center gap-3 w-full px-6 py-4 mb-6 text-sm font-bold text-white bg-action-primary hover:bg-action-primary-hover rounded-2xl shadow-lg shadow-focus-ring-soft transition-all"
         >
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path

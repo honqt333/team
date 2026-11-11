@@ -22,7 +22,7 @@
                 <template #actions>
                     <button
                         @click="showAddModal = true"
-                        class="inline-flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white rounded-xl text-sm font-semibold transition-all shadow-md hover:shadow-indigo-500/25 active:scale-95"
+                        class="inline-flex items-center gap-2 px-4 py-2.5 bg-action-primary hover:bg-action-primary-hover text-white rounded-xl text-sm font-semibold transition-all shadow-md hover:shadow-focus-ring-soft active:scale-95"
                     >
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path
@@ -43,7 +43,7 @@
                     :href="route('system.sms.packages')"
                     :class="
                         route().current('system.sms.packages')
-                            ? 'border-indigo-600 text-indigo-600 font-medium'
+                            ? 'border-action-primary text-action-primary font-medium'
                             : 'border-transparent text-gray-500 hover:text-gray-700'
                     "
                     class="px-4 py-2 border-b-2"
@@ -54,7 +54,7 @@
                     :href="route('system.sms.balances')"
                     :class="
                         route().current('system.sms.balances')
-                            ? 'border-indigo-600 text-indigo-600 font-medium'
+                            ? 'border-action-primary text-action-primary font-medium'
                             : 'border-transparent text-gray-500 hover:text-gray-700'
                     "
                     class="px-4 py-2 border-b-2"
@@ -65,7 +65,7 @@
                     :href="route('system.sms.purchases')"
                     :class="
                         route().current('system.sms.purchases')
-                            ? 'border-indigo-600 text-indigo-600 font-medium'
+                            ? 'border-action-primary text-action-primary font-medium'
                             : 'border-transparent text-gray-500 hover:text-gray-700'
                     "
                     class="px-4 py-2 border-b-2"
@@ -76,7 +76,7 @@
                     :href="route('system.sms.usage')"
                     :class="
                         route().current('system.sms.usage')
-                            ? 'border-indigo-600 text-indigo-600 font-medium'
+                            ? 'border-action-primary text-action-primary font-medium'
                             : 'border-transparent text-gray-500 hover:text-gray-700'
                     "
                     class="px-4 py-2 border-b-2"
@@ -93,13 +93,13 @@
                     :class="[
                         'bg-white dark:bg-gray-800 rounded-xl p-6 border-2 transition-all',
                         pkg.is_popular
-                            ? 'border-indigo-500 ring-2 ring-indigo-200 dark:ring-indigo-800'
+                            ? 'border-action-primary ring-2 ring-action-primary/20'
                             : 'border-gray-200 dark:border-gray-700',
                     ]"
                 >
                     <div
                         v-if="pkg.is_popular"
-                        class="absolute -top-3 right-4 bg-indigo-500 text-white text-xs px-2 py-1 rounded-full"
+                        class="absolute -top-3 right-4 bg-action-primary text-white text-xs px-2 py-1 rounded-full"
                     >
                         {{ $t('system.credits.best_seller') }}
                     </div>
@@ -126,7 +126,7 @@
                     </div>
 
                     <div class="text-center mb-4">
-                        <span class="text-4xl font-bold text-indigo-600">
+                        <span class="text-4xl font-bold text-action-primary">
                             {{ pkg.credits.toLocaleString() }}
                         </span>
                         <span class="text-gray-500 mr-1">{{ $t('system.credits.message') }}</span>
@@ -265,7 +265,7 @@
                                 <button
                                     type="submit"
                                     :disabled="form.processing"
-                                    class="flex-1 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium disabled:opacity-50"
+                                    class="flex-1 px-4 py-2 bg-action-primary hover:bg-action-primary-hover text-white rounded-lg font-medium disabled:opacity-50"
                                 >
                                     {{ form.processing ? $t('common.saving') : $t('common.save') }}
                                 </button>

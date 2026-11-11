@@ -39,7 +39,7 @@
         <template #actions>
             <span
                 v-if="currentSubscription?.plan"
-                class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium bg-indigo-50 text-indigo-700 border border-indigo-200 dark:bg-indigo-900/30 dark:text-indigo-300 dark:border-indigo-800"
+                class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium bg-selection-bg text-selection-text border border-action-primary/25"
             >
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path

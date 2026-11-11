@@ -12,7 +12,7 @@
                 <div v-if="!isReadOnly" class="relative">
                     <button
                         @click="showDeptModal = true"
-                        class="inline-flex items-center gap-2 px-3 py-1.5 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 active:from-indigo-850 active:to-purple-850 text-white text-xs font-bold rounded-xl transition-all shadow-md shadow-indigo-500/20 hover:-translate-y-0.5"
+                        class="inline-flex items-center gap-2 px-3 py-1.5 bg-action-primary hover:bg-action-primary-hover active:from-action-primary active:to-purple-850 text-white text-xs font-bold rounded-xl transition-all shadow-md shadow-focus-ring-soft hover:-translate-y-0.5"
                     >
                         <svg
                             class="w-3.5 h-3.5"
@@ -46,9 +46,9 @@
                 >
                     <div class="flex items-center gap-3 flex-1">
                         <div
-                            class="w-8 h-8 rounded-lg bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center"
+                            class="w-8 h-8 rounded-lg bg-selection-bg flex items-center justify-center"
                         >
-                            <span class="text-indigo-600 dark:text-indigo-400">🔧</span>
+                            <span class="text-action-primary">🔧</span>
                         </div>
                         <span class="font-semibold text-gray-900 dark:text-white">
                             {{ getName(dept) }}
@@ -67,7 +67,7 @@
                             v-if="getItemsForDept(dept.id).length > 0"
                             @click.stop="printDepartment(dept.id)"
                             type="button"
-                            class="w-7 h-7 rounded-lg hover:bg-indigo-50 hover:text-indigo-600 dark:hover:bg-indigo-900/20 dark:hover:text-indigo-400 text-gray-400 flex items-center justify-center transition-colors"
+                            class="w-7 h-7 rounded-lg hover:bg-selection-bg hover:text-action-primary text-gray-400 flex items-center justify-center transition-colors"
                             :title="$t('common.print')"
                         >
                             <svg
@@ -127,7 +127,7 @@
                                 'border-s-emerald-500': item.status === 'completed',
                                 'border-s-amber-500': item.status === 'on_hold',
                                 'border-s-rose-500': item.status === 'cancelled',
-                                'hover:bg-indigo-50/30 dark:hover:bg-indigo-950/10 hover:border-indigo-100 dark:hover:border-indigo-900/30':
+                                'hover:bg-selection-bg hover:border-action-primary/25':
                                     activeDropdownItemId !== item.id,
                             }"
                         >
@@ -145,7 +145,7 @@
                                                 <button
                                                     @click.stop="emit('edit-item', item)"
                                                     type="button"
-                                                    class="font-bold text-gray-900 dark:text-white text-base group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors text-start leading-snug"
+                                                    class="font-bold text-gray-900 dark:text-white text-base group-hover:text-action-primary transition-colors text-start leading-snug"
                                                 >
                                                     {{
                                                         item.service
@@ -188,7 +188,7 @@
                                     >
                                         <!-- Labor price -->
                                         <div
-                                            class="inline-flex items-center gap-1.5 bg-indigo-50/80 dark:bg-indigo-950/30 text-indigo-700 dark:text-indigo-300 border border-indigo-100/80 dark:border-indigo-900/40 px-3 py-1 rounded-full text-xs font-semibold"
+                                            class="inline-flex items-center gap-1.5 bg-selection-bg text-selection-text border border-action-primary/25 px-3 py-1 rounded-full text-xs font-semibold"
                                             :title="$t('work_orders.item.service_cost')"
                                         >
                                             <svg
@@ -278,7 +278,7 @@
                                                     />
                                                     <div
                                                         v-else
-                                                        class="w-7 h-7 rounded-full border-2 border-white dark:border-gray-800 flex items-center justify-center text-[10px] font-bold bg-indigo-100 dark:bg-indigo-900/60 text-indigo-600 dark:text-indigo-400 select-none"
+                                                        class="w-7 h-7 rounded-full border-2 border-white dark:border-gray-800 flex items-center justify-center text-[10px] font-bold bg-selection-bg text-action-primary select-none"
                                                     >
                                                         {{ getInitials(getTechName(tech)) }}
                                                     </div>
@@ -494,7 +494,7 @@
                                                 class="w-full px-4 py-2 text-start text-xs font-semibold hover:bg-gray-50 dark:hover:bg-gray-700/50 flex items-center gap-2"
                                                 :class="
                                                     item.status === status
-                                                        ? 'text-indigo-600 dark:text-indigo-400 bg-indigo-50/20'
+                                                        ? 'text-action-primary bg-selection-bg'
                                                         : 'text-gray-700 dark:text-gray-300'
                                                 "
                                             >
@@ -553,7 +553,7 @@
                                     <template v-if="!isReadOnly">
                                         <button
                                             @click.stop="emit('edit-item', item)"
-                                            class="p-2 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 rounded-lg transition-colors"
+                                            class="p-2 text-gray-400 hover:text-action-primary hover:bg-selection-bg rounded-lg transition-colors"
                                             :title="$t('common.edit')"
                                         >
                                             <svg
@@ -586,7 +586,7 @@
                     <button
                         v-if="!isReadOnly"
                         @click="emit('add-service', dept.id)"
-                        class="w-full flex items-center justify-center gap-2 py-2 text-sm text-indigo-600 dark:text-indigo-400 border border-dashed border-indigo-300 dark:border-indigo-700 rounded-lg hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition-colors"
+                        class="w-full flex items-center justify-center gap-2 py-2 text-sm text-action-primary border border-dashed border-action-primary/25 rounded-lg hover:bg-selection-bg transition-colors"
                     >
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path
@@ -615,7 +615,7 @@
                 </p>
                 <Link
                     :href="route('services.index')"
-                    class="text-indigo-600 dark:text-indigo-400 font-bold hover:underline"
+                    class="text-action-primary font-bold hover:underline"
                 >
                     {{ $t('work_orders.show.click_here_to_add') }}
                 </Link>
@@ -630,7 +630,7 @@
             <template #title>
                 <div class="flex items-center gap-3">
                     <div
-                        class="w-10 h-10 rounded-xl bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center text-indigo-600"
+                        class="w-10 h-10 rounded-xl bg-selection-bg flex items-center justify-center text-action-primary"
                     >
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path
@@ -654,29 +654,13 @@
                         {{ $t('quotes.show.all_departments_added') }}
                     </div>
 
-                    <label
+                    <SelectableCard
                         v-for="dept in availableDepartments"
                         :key="dept.id"
-                        class="flex items-center justify-between p-3 rounded-xl border border-gray-200 dark:border-gray-700 transition-all cursor-pointer hover:border-indigo-500 dark:hover:border-indigo-400"
-                        :class="{
-                            'bg-indigo-50 dark:bg-indigo-900/10 border-indigo-500 ring-1 ring-indigo-500':
-                                selectedDepts.includes(dept.id),
-                        }"
-                    >
-                        <div class="flex items-center gap-2">
-                            <span class="font-medium text-gray-900 dark:text-white">
-                                {{ getName(dept) }}
-                            </span>
-                        </div>
-                        <div class="relative flex items-center">
-                            <input
-                                type="checkbox"
-                                :value="dept.id"
-                                v-model="selectedDepts"
-                                class="w-5 h-5 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 transition duration-150 ease-in-out"
-                            />
-                        </div>
-                    </label>
+                        v-model="selectedDepts"
+                        :value="dept.id"
+                        :title="getName(dept)"
+                    />
                 </div>
             </form>
 
@@ -692,7 +676,7 @@
                     type="button"
                     @click="submitAddDepartments"
                     :disabled="savingDepts || selectedDepts.length === 0"
-                    class="px-6 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-lg hover:from-indigo-700 hover:to-purple-700 disabled:opacity-50 transition-all shadow-md shadow-indigo-500/20"
+                    class="px-6 py-2 bg-action-primary hover:bg-action-primary-hover text-white rounded-lg disabled:opacity-50 transition-all shadow-md shadow-focus-ring-soft"
                 >
                     {{ savingDepts ? $t('common.loading') : $t('common.save') }}
                 </button>
@@ -712,6 +696,7 @@ import axios from 'axios';
 import { router } from '@inertiajs/vue3';
 import { useToast } from '@/Composables/useToast';
 import BaseModal from '@/Components/BaseModal.vue';
+import SelectableCard from '@/Components/Common/SelectableCard.vue';
 
 const props = defineProps({
     workOrder: { type: Object, required: true },

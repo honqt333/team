@@ -18,7 +18,7 @@
                     <div class="flex items-center gap-2">
                         <button
                             @click="printSlip"
-                            class="px-4 py-2 bg-violet-600 text-white rounded-lg text-sm font-medium hover:bg-violet-700"
+                            class="px-4 py-2 bg-action-primary text-white rounded-lg text-sm font-medium hover:bg-action-primary-hover"
                         >
                             🖨️ {{ $t('common.print') }}
                         </button>
@@ -176,14 +176,12 @@
                         </div>
 
                         <!-- Net Salary -->
-                        <div class="mt-6 pt-4 border-t-2 border-violet-200 dark:border-violet-800">
+                        <div class="mt-6 pt-4 border-t-2 border-action-primary/25">
                             <div class="flex justify-between items-center">
                                 <span class="text-lg font-bold text-gray-900 dark:text-white">
                                     {{ $t('hr.financial.payroll.net_salary') }}
                                 </span>
-                                <span
-                                    class="text-2xl font-bold text-violet-600 dark:text-violet-400"
-                                >
+                                <span class="text-2xl font-bold text-action-primary">
                                     {{ formatMoney(payrollItem?.net_salary) }}
                                 </span>
                             </div>

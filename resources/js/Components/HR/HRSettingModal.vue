@@ -8,29 +8,33 @@
             <!-- Name AR -->
             <div>
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    {{ $t('common.name') }} (AR) <span class="text-red-500">*</span>
+                    {{ $t('common.name') }} (AR)
+                    <span class="text-red-500">*</span>
                 </label>
                 <input
                     v-model="form.name_ar"
                     type="text"
                     required
-                    class="w-full px-4 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-violet-500 focus:border-violet-500"
+                    class="w-full px-4 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring focus:border-action-primary"
                 />
             </div>
 
             <!-- Name EN -->
             <div>
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    {{ $t('common.name') }} (EN) <span class="text-red-500">*</span>
+                    {{ $t('common.name') }} (EN)
+                    <span class="text-red-500">*</span>
                 </label>
                 <input
                     v-model="form.name_en"
                     type="text"
                     required
-                    class="w-full px-4 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-violet-500 focus:border-violet-500"
+                    class="w-full px-4 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring focus:border-action-primary"
                     :class="{ 'border-red-500': form.errors.name_en }"
                 />
-                <p v-if="form.errors.name_en" class="mt-1 text-xs text-red-500">{{ form.errors.name_en }}</p>
+                <p v-if="form.errors.name_en" class="mt-1 text-xs text-red-500">
+                    {{ form.errors.name_en }}
+                </p>
             </div>
 
             <!-- Department (for job_title only) -->
@@ -48,18 +52,15 @@
             <!-- Type & Amount (for allowance/deduction only) -->
             <div v-if="type === 'allowance' || type === 'deduction'" class="space-y-4">
                 <!-- Is Flexible (custom amount per employee) - FIRST -->
-                <div class="bg-amber-50 dark:bg-amber-900/20 rounded-xl p-4 border border-amber-200 dark:border-amber-700">
-                    <label class="flex items-center gap-3 cursor-pointer">
-                        <input
-                            v-model="form.is_flexible"
-                            type="checkbox"
-                            class="w-5 h-5 text-amber-600 bg-gray-100 border-gray-300 rounded focus:ring-amber-500"
-                        />
-                        <div>
-                            <p class="font-medium text-amber-900 dark:text-amber-200">{{ $t('hr.financial.flexible') }}</p>
-                            <p class="text-xs text-amber-700 dark:text-amber-300">{{ $t('hr.settings.flexible_hint') }}</p>
-                        </div>
-                    </label>
+                <div
+                    class="bg-amber-50 dark:bg-amber-900/20 rounded-xl p-4 border border-amber-200 dark:border-amber-700"
+                >
+                    <AppToggle
+                        v-model="form.is_flexible"
+                        color="warning"
+                        :label="$t('hr.financial.flexible')"
+                        :description="$t('hr.settings.flexible_hint')"
+                    />
                 </div>
 
                 <!-- Type & Amount - Hidden when flexible -->
@@ -74,7 +75,7 @@
                         />
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        <label class="block text-sm font-medium text-text-primary mb-1">
                             {{ $t('common.amount') }} {{ form.type === 'percentage' ? '(%)' : '' }}
                         </label>
                         <input
@@ -82,7 +83,7 @@
                             type="number"
                             step="0.01"
                             min="0"
-                            class="w-full px-4 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-violet-500 focus:border-violet-500"
+                            class="w-full px-4 py-2.5 text-sm border border-border-strong rounded-xl bg-surface text-text-primary focus:ring-2 focus:ring-focus-ring focus:border-action-primary"
                         />
                     </div>
                 </div>
@@ -100,16 +101,8 @@
             </div>
 
             <!-- Is Active -->
-            <div class="flex items-center gap-2">
-                <input
-                    v-model="form.is_active"
-                    type="checkbox"
-                    id="is_active"
-                    class="w-4 h-4 text-violet-600 bg-gray-100 border-gray-300 rounded focus:ring-violet-500 dark:focus:ring-violet-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
-                />
-                <label for="is_active" class="text-sm font-medium text-gray-700 dark:text-gray-300">
-                    {{ $t('common.active') }}
-                </label>
+            <div>
+                <AppToggle v-model="form.is_active" :label="$t('common.active')" />
             </div>
         </form>
 
@@ -118,14 +111,14 @@
                 <button
                     type="button"
                     @click="$emit('close')"
-                    class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600"
+                    class="px-4 py-2 text-sm font-medium text-text-primary bg-surface-muted rounded-lg hover:bg-surface-tertiary"
                 >
                     {{ $t('common.cancel') }}
                 </button>
                 <button
                     @click="submit"
                     :disabled="form.processing"
-                    class="px-4 py-2 text-sm font-medium text-white bg-violet-600 rounded-lg hover:bg-violet-700 disabled:opacity-50"
+                    class="px-4 py-2 text-sm font-medium text-action-on bg-action-primary rounded-lg hover:bg-action-primary-hover disabled:opacity-50"
                 >
                     {{ form.processing ? $t('common.saving') : $t('common.save') }}
                 </button>
@@ -140,6 +133,7 @@ import { useForm } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import BaseModal from '@/Components/BaseModal.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
+import AppToggle from '@/Components/Common/AppToggle.vue';
 import { useToast } from '@/Composables/useToast';
 
 const { t } = useI18n();
@@ -174,7 +168,10 @@ const typeOptions = computed(() => [
 
 const calculationBaseOptions = computed(() => [
     { value: 'base_salary', label: t('hr.settings.calculation_bases.base_salary') },
-    { value: 'monthly_contribution', label: t('hr.settings.calculation_bases.monthly_contribution') },
+    {
+        value: 'monthly_contribution',
+        label: t('hr.settings.calculation_bases.monthly_contribution'),
+    },
 ]);
 
 const form = useForm({
@@ -199,22 +196,25 @@ function resetForm() {
     form.is_active = true;
 }
 
-watch(() => props.show, (newVal) => {
-    if (newVal) {
-        if (props.item) {
-            form.name_ar = props.item.name_ar || '';
-            form.name_en = props.item.name_en || '';
-            form.department_id = props.item.department_id || null;
-            form.type = props.item.type || 'fixed';
-            form.amount = props.item.amount || 0;
-            form.calculation_base = props.item.calculation_base || 'base_salary';
-            form.is_flexible = props.item.is_flexible ?? false;
-            form.is_active = props.item.is_active ?? true;
-        } else {
-            resetForm();
+watch(
+    () => props.show,
+    (newVal) => {
+        if (newVal) {
+            if (props.item) {
+                form.name_ar = props.item.name_ar || '';
+                form.name_en = props.item.name_en || '';
+                form.department_id = props.item.department_id || null;
+                form.type = props.item.type || 'fixed';
+                form.amount = props.item.amount || 0;
+                form.calculation_base = props.item.calculation_base || 'base_salary';
+                form.is_flexible = props.item.is_flexible ?? false;
+                form.is_active = props.item.is_active ?? true;
+            } else {
+                resetForm();
+            }
         }
     }
-});
+);
 
 function submit() {
     const routes = {
@@ -255,4 +255,3 @@ function submit() {
     }
 }
 </script>
-

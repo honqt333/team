@@ -16,6 +16,106 @@
 import js from '@eslint/js';
 import vueParser from 'vue-eslint-parser';
 
+const HARDCODED_COLOR_RE =
+    /\b(?:violet|indigo|blue|purple|red|green|yellow|orange|pink|teal|cyan|sky|slate|gray|stone|neutral|zinc)-(?:50|100|200|300|400|500|600|700|800|900|950)\b/;
+const LEGACY_BRAND_COLOR_RE =
+    /\b(?:violet|indigo)-(?:50|100|200|300|400|500|600|700|800|900|950)\b/;
+
+const designSystemPlugin = {
+    rules: {
+        'no-hardcoded-colors': {
+            meta: {
+                type: 'problem',
+                docs: {
+                    description:
+                        'Disallow hardcoded Tailwind palette colors in favor of CSS design tokens.',
+                },
+                schema: [
+                    {
+                        type: 'object',
+                        properties: {
+                            mode: { enum: ['all', 'legacy-brand'] },
+                        },
+                        additionalProperties: false,
+                    },
+                ],
+                messages: {
+                    hardcodedColor:
+                        'Avoid hardcoded Tailwind color "{{match}}". Use semantic design tokens (e.g. action-primary, surface, border-strong, text-primary, focus-ring).',
+                },
+            },
+            create(context) {
+                const mode = context.options[0]?.mode || 'all';
+                const pattern =
+                    mode === 'legacy-brand' ? LEGACY_BRAND_COLOR_RE : HARDCODED_COLOR_RE;
+
+                const checkString = (node, value) => {
+                    if (typeof value !== 'string') return;
+                    const found = value.match(pattern);
+                    if (found) {
+                        context.report({
+                            node,
+                            messageId: 'hardcodedColor',
+                            data: { match: found[0] },
+                        });
+                    }
+                };
+
+                const scriptVisitor = {
+                    Literal(node) {
+                        if (typeof node.value === 'string') {
+                            checkString(node, node.value);
+                        }
+                    },
+                    TemplateElement(node) {
+                        checkString(node, node.value?.raw);
+                    },
+                };
+
+                const parserServices = context.sourceCode?.parserServices ?? context.parserServices;
+                if (parserServices?.defineTemplateBodyVisitor) {
+                    return parserServices.defineTemplateBodyVisitor(
+                        {
+                            VLiteral(node) {
+                                if (node.parent?.key?.name === 'class') {
+                                    checkString(node, node.value);
+                                }
+                            },
+                            Literal(node) {
+                                if (typeof node.value === 'string') {
+                                    checkString(node, node.value);
+                                }
+                            },
+                            TemplateElement(node) {
+                                checkString(node, node.value?.raw);
+                            },
+                        },
+                        scriptVisitor
+                    );
+                }
+
+                return scriptVisitor;
+            },
+        },
+    },
+};
+
+const CORE_DESIGN_SYSTEM_COMPONENTS = [
+    'resources/js/Components/TextInput.vue',
+    'resources/js/Components/Checkbox.vue',
+    'resources/js/Components/InputLabel.vue',
+    'resources/js/Components/PrimaryButton.vue',
+    'resources/js/Components/SecondaryButton.vue',
+    'resources/js/Components/DangerButton.vue',
+    'resources/js/Components/SearchableSelect.vue',
+    'resources/js/Components/App/AppTextarea.vue',
+    'resources/js/Components/Common/AppToggle.vue',
+    'resources/js/Components/Common/FormField.vue',
+    'resources/js/Components/Common/FormSection.vue',
+    'resources/js/Components/Common/SelectableCard.vue',
+    'resources/js/Components/Common/RadioGroup.vue',
+];
+
 export default [
     {
         ignores: ['public/**', 'vendor/**', 'node_modules/**', 'storage/**', 'resources/fonts/**'],
@@ -170,6 +270,24 @@ export default [
                 URL: 'readonly',
                 __dirname: 'readonly',
             },
+        },
+    },
+    {
+        files: ['resources/js/{Components,Pages}/**/*.vue'],
+        plugins: {
+            'design-system': designSystemPlugin,
+        },
+        rules: {
+            'design-system/no-hardcoded-colors': ['warn', { mode: 'legacy-brand' }],
+        },
+    },
+    {
+        files: CORE_DESIGN_SYSTEM_COMPONENTS,
+        plugins: {
+            'design-system': designSystemPlugin,
+        },
+        rules: {
+            'design-system/no-hardcoded-colors': ['error', { mode: 'all' }],
         },
     },
 ];

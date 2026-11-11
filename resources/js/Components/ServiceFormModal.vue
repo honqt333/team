@@ -46,7 +46,7 @@
                 <!-- Department badge -->
                 <div
                     v-if="currentDepartment"
-                    class="flex items-center gap-2 px-4 py-2 rounded-xl bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-100 dark:border-indigo-800/30 text-sm text-indigo-700 dark:text-indigo-300 font-semibold w-fit"
+                    class="flex items-center gap-2 px-4 py-2 rounded-xl bg-selection-bg border border-action-primary/25 text-sm text-selection-text font-semibold w-fit"
                 >
                     <svg
                         class="w-4 h-4 flex-shrink-0"
@@ -98,7 +98,7 @@
                             <button
                                 type="button"
                                 @click="showAllCatalogServices = true"
-                                class="text-xs text-indigo-600 dark:text-indigo-400 underline font-semibold hover:text-indigo-800 text-start sm:text-end"
+                                class="text-xs text-action-primary underline font-semibold hover:text-selection-text text-start sm:text-end"
                             >
                                 {{ $t('services_management.show_all_catalog_services') }}
                             </button>
@@ -128,7 +128,7 @@
                         <button
                             type="button"
                             @click="$emit('open-new-definition')"
-                            class="w-full sm:w-auto justify-center px-4 py-2.5 bg-white dark:bg-gray-800 border border-indigo-200 dark:border-indigo-700 text-indigo-600 dark:text-indigo-400 rounded-xl font-bold text-sm shadow-sm hover:bg-indigo-50 dark:hover:bg-indigo-900/20 hover:shadow-md transition-all flex items-center gap-1.5 whitespace-nowrap"
+                            class="w-full sm:w-auto justify-center px-4 py-2.5 bg-white dark:bg-gray-800 border border-action-primary/25 text-action-primary rounded-xl font-bold text-sm shadow-sm hover:bg-selection-bg hover:shadow-md transition-all flex items-center gap-1.5 whitespace-nowrap"
                         >
                             <svg
                                 class="w-4 h-4"
@@ -215,7 +215,7 @@
                             v-model="form.name_ar"
                             dir="rtl"
                             :placeholder="$t('services_management.form.name_ar_placeholder')"
-                            class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all"
+                            class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-focus-ring focus:border-transparent transition-all"
                             :class="{ 'border-red-500': form.errors.name_ar }"
                         />
                         <p v-if="form.errors.name_ar" class="mt-1 text-xs text-red-600">
@@ -234,7 +234,7 @@
                             v-model="form.name_en"
                             dir="ltr"
                             :placeholder="$t('services_management.form.name_en_placeholder')"
-                            class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all"
+                            class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-focus-ring focus:border-transparent transition-all"
                             :class="{ 'border-red-500': form.errors.name_en }"
                         />
                         <p v-if="form.errors.name_en" class="mt-1 text-xs text-red-600">
@@ -255,7 +255,7 @@
                             v-model="form.description_ar"
                             rows="2"
                             dir="rtl"
-                            class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-teal-500 focus:border-transparent resize-none transition-all"
+                            class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-focus-ring focus:border-transparent resize-none transition-all"
                         ></textarea>
                     </div>
                     <div>
@@ -268,7 +268,7 @@
                             v-model="form.description_en"
                             rows="2"
                             dir="ltr"
-                            class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-teal-500 focus:border-transparent resize-none transition-all"
+                            class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-focus-ring focus:border-transparent resize-none transition-all"
                         ></textarea>
                     </div>
                 </div>
@@ -288,7 +288,7 @@
                                 inputmode="numeric"
                                 lang="en"
                                 min="1"
-                                class="flex-1 px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all"
+                                class="flex-1 px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-focus-ring focus:border-transparent transition-all"
                             />
                             <div class="w-32">
                                 <SearchableSelect
@@ -332,7 +332,7 @@
                                 inputmode="numeric"
                                 lang="en"
                                 min="1"
-                                class="flex-1 px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all"
+                                class="flex-1 px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-focus-ring focus:border-transparent transition-all"
                             />
                             <div class="w-32">
                                 <SearchableSelect
@@ -490,7 +490,7 @@
                             lang="en"
                             step="0.01"
                             min="0"
-                            class="w-full px-4 py-2.5 pe-14 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all"
+                            class="w-full px-4 py-2.5 pe-14 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-focus-ring focus:border-transparent transition-all"
                             :class="{ 'border-red-500': form.errors.base_price }"
                         />
                         <span
@@ -564,7 +564,7 @@
                                 lang="en"
                                 step="0.01"
                                 min="0"
-                                class="w-full px-4 py-2.5 pe-10 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all"
+                                class="w-full px-4 py-2.5 pe-10 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-focus-ring focus:border-transparent transition-all"
                             />
                             <span
                                 class="absolute end-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm"
@@ -590,7 +590,7 @@
                             step="0.01"
                             min="0"
                             :max="form.base_price"
-                            class="w-full px-4 py-2.5 pe-12 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all"
+                            class="w-full px-4 py-2.5 pe-12 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-focus-ring focus:border-transparent transition-all"
                             :class="{
                                 'border-red-500': form.errors.min_price || minPriceValidationError,
                             }"

@@ -3,7 +3,7 @@
         <template #title>
             <div class="flex items-center gap-3">
                 <div
-                    class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-600 to-purple-600 flex items-center justify-center"
+                    class="w-10 h-10 rounded-xl bg-action-primary hover:bg-action-primary-hover flex items-center justify-center"
                 >
                     <svg
                         class="w-5 h-5 text-white"
@@ -34,7 +34,7 @@
                     :class="[
                         'relative flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 px-2 sm:px-3 py-2 text-xs sm:text-sm font-medium rounded-lg transition-all flex-1 sm:flex-none',
                         activeTab === tab.key
-                            ? 'bg-white dark:bg-gray-800 text-indigo-600 dark:text-indigo-400 shadow-sm'
+                            ? 'bg-white dark:bg-gray-800 text-action-primary shadow-sm'
                             : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300',
                     ]"
                 >
@@ -68,7 +68,7 @@
                             <button
                                 type="button"
                                 @click="showVehicleModal = true"
-                                class="text-xs text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 flex items-center gap-1"
+                                class="text-xs text-action-primary hover:text-selection-text flex items-center gap-1"
                             >
                                 <svg
                                     class="w-4 h-4"
@@ -96,7 +96,7 @@
                                 @input="debouncedSearch"
                                 @focus="showResults = true"
                                 :placeholder="$t('quotes.form_tabs.search_placeholder')"
-                                class="w-full px-4 py-3 ps-10 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                class="w-full px-4 py-3 ps-10 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring focus:border-action-primary"
                             />
                             <svg
                                 class="w-5 h-5 absolute start-3 top-1/2 -translate-y-1/2 text-gray-400"
@@ -115,7 +115,7 @@
                             <!-- Loading -->
                             <div v-if="searching" class="absolute end-3 top-1/2 -translate-y-1/2">
                                 <svg
-                                    class="animate-spin w-5 h-5 text-indigo-500"
+                                    class="animate-spin w-5 h-5 text-action-primary"
                                     fill="none"
                                     viewBox="0 0 24 24"
                                 >
@@ -165,7 +165,7 @@
                                             route('work-orders.show', vehicle.open_work_order?.id)
                                         "
                                         @click.stop
-                                        class="text-xs text-indigo-600 dark:text-indigo-400 hover:underline font-medium"
+                                        class="text-xs text-action-primary hover:underline font-medium"
                                     >
                                         {{ $t('work_orders.go_to_work_order') }}
                                     </a>
@@ -202,7 +202,7 @@
                                 />
                                 <div class="flex flex-col">
                                     <span
-                                        class="text-xs font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider"
+                                        class="text-xs font-bold text-action-primary uppercase tracking-wider"
                                     >
                                         {{ $t('common.selected') }}
                                     </span>
@@ -241,7 +241,7 @@
                             <div class="space-y-3">
                                 <div class="flex items-center gap-3">
                                     <div
-                                        class="w-8 h-8 rounded-lg bg-indigo-50 dark:bg-indigo-900/30 flex items-center justify-center text-indigo-600 dark:text-indigo-400"
+                                        class="w-8 h-8 rounded-lg bg-selection-bg flex items-center justify-center text-action-primary"
                                     >
                                         <svg
                                             class="w-4 h-4"
@@ -353,7 +353,7 @@
                             >
                                 <div class="flex items-center gap-3">
                                     <div
-                                        class="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-indigo-600 flex items-center justify-center text-white font-bold text-sm shadow-sm ring-2 ring-white dark:ring-gray-800"
+                                        class="w-10 h-10 rounded-full bg-action-primary hover:bg-action-primary-hover flex items-center justify-center text-white font-bold text-sm shadow-sm ring-2 ring-white dark:ring-gray-800"
                                     >
                                         {{
                                             selectedVehicle.customer?.name?.[0]?.toUpperCase() ||
@@ -478,18 +478,12 @@
                                         >
                                             {{ $t('work_orders.credit_limit_warning_desc') }}
                                         </p>
-                                        <label class="flex items-center gap-2 cursor-pointer pt-1">
-                                            <input
-                                                type="checkbox"
+                                        <div class="pt-1">
+                                            <AppCheckbox
                                                 v-model="form.allow_credit_override"
-                                                class="rounded text-rose-600 focus:ring-rose-500"
+                                                :label="$t('work_orders.allow_credit_override')"
                                             />
-                                            <span
-                                                class="text-[11px] font-bold text-rose-800 dark:text-rose-200"
-                                            >
-                                                {{ $t('work_orders.allow_credit_override') }}
-                                            </span>
-                                        </label>
+                                        </div>
                                     </div>
                                 </div>
                                 <div
@@ -555,7 +549,7 @@
                             name="customer_complaint"
                             rows="10"
                             :placeholder="$t('quotes.form_tabs.customer_complaint_placeholder')"
-                            class="w-full px-4 py-3 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 resize-none"
+                            class="w-full px-4 py-3 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring focus:border-action-primary resize-none"
                         ></textarea>
                     </div>
                 </div>
@@ -576,7 +570,7 @@
                             name="initial_assessment"
                             rows="10"
                             :placeholder="$t('quotes.form_tabs.initial_assessment_placeholder')"
-                            class="w-full px-4 py-3 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 resize-none"
+                            class="w-full px-4 py-3 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring focus:border-action-primary resize-none"
                         ></textarea>
                     </div>
                 </div>
@@ -605,21 +599,13 @@
                             {{ $t('quotes.form_tabs.select_departments') }}
                         </label>
                         <div class="space-y-2">
-                            <label
+                            <SelectableCard
                                 v-for="(dept, index) in availableDepartmentsList"
                                 :key="dept.id"
-                                class="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer transition-colors"
-                            >
-                                <input
-                                    type="checkbox"
-                                    v-model="form.departments"
-                                    :value="dept.id"
-                                    class="w-5 h-5 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
-                                />
-                                <span class="text-gray-900 dark:text-white">
-                                    {{ toEnglish(index + 1) }}. {{ toEnglish(getName(dept)) }}
-                                </span>
-                            </label>
+                                v-model="form.departments"
+                                :value="dept.id"
+                                :title="`${toEnglish(index + 1)}. ${toEnglish(getName(dept))}`"
+                            />
                         </div>
                     </div>
                 </div>
@@ -667,7 +653,7 @@
                             !selectedVehicle ||
                             (showOdometerWarning && !form.allow_lower_odometer)
                         "
-                        class="px-6 py-2 bg-gradient-to-r from-indigo-500 to-purple-500 text-white rounded-lg hover:from-indigo-600 hover:to-purple-600 disabled:opacity-50 transition-all flex items-center gap-2"
+                        class="px-6 py-2 bg-action-primary hover:bg-action-primary-hover text-white rounded-lg disabled:opacity-50 transition-all flex items-center gap-2"
                     >
                         <svg
                             v-if="form.processing"
@@ -729,6 +715,7 @@ import { useLocalized } from '@/Composables/useLocalized';
 import { useNumberFormat } from '@/Composables/useNumberFormat';
 import SaudiPlateDisplay from '@/Components/Vehicles/SaudiPlateDisplay.vue';
 import BaseModal from '@/Components/BaseModal.vue';
+import SelectableCard from '@/Components/Common/SelectableCard.vue';
 import VehicleFormModal from '@/Components/Vehicles/VehicleFormModal.vue';
 import VehicleMileageModal from '@/Components/Vehicles/VehicleMileageModal.vue';
 import VehicleConditionReport from '@/Components/WorkOrders/VehicleConditionReport.vue';

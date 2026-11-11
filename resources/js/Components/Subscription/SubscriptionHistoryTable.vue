@@ -52,7 +52,7 @@ const statusConfig = {
         class: 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300',
     },
     refunded: {
-        class: 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300',
+        class: 'bg-purple-100 text-purple-800',
     },
     past_due: {
         class: 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300',
@@ -235,11 +235,7 @@ const tableClass = 'whitespace-nowrap';
                                 </p>
                             </td>
                             <td class="px-4 py-3 text-slate-600 dark:text-slate-300">
-                                {{
-                                    sub.billing_cycle === 'yearly'
-                                        ? t('system.company_subscription.history.cycle_yearly')
-                                        : t('system.company_subscription.history.cycle_monthly')
-                                }}
+                                {{ t('system.company_subscription.history.cycle_yearly') }}
                             </td>
                             <td
                                 class="px-4 py-3 font-mono text-xs text-slate-600 dark:text-slate-300"

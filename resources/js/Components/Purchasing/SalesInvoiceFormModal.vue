@@ -3,7 +3,7 @@
         <template #title>
             <div class="flex items-center gap-3">
                 <div
-                    class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center shadow-lg shadow-blue-500/20"
+                    class="w-10 h-10 rounded-xl bg-action-primary hover:bg-action-primary-hover flex items-center justify-center shadow-lg shadow-blue-500/20"
                 >
                     <svg
                         class="w-5 h-5 text-white"
@@ -297,7 +297,7 @@
                             <textarea
                                 v-model="form.notes"
                                 rows="4"
-                                class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 resize-none"
+                                class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring resize-none"
                             ></textarea>
                         </div>
                         <div class="bg-gray-50 dark:bg-gray-900 rounded-xl p-6 space-y-3">
@@ -343,7 +343,7 @@
                             <div
                                 class="pt-3 border-t border-gray-200 dark:border-gray-700 flex justify-between items-center text-lg"
                             >
-                                <span class="font-bold text-indigo-600 dark:text-indigo-400">
+                                <span class="font-bold text-action-primary">
                                     {{ $t('invoices.balance') }}
                                 </span>
                                 <span

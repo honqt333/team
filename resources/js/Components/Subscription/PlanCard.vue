@@ -61,7 +61,7 @@ const formatCurrency = (amount) => {
         :class="[
             'relative flex flex-col justify-between rounded-2xl border bg-white p-6 transition-all dark:bg-slate-800',
             isCurrent
-                ? 'border-2 border-indigo-600 ring-2 ring-indigo-600/20 dark:border-indigo-400 dark:ring-indigo-400/20'
+                ? 'border-2 border-action-primary ring-2 ring-focus-ring'
                 : hasPendingSubscription
                   ? 'border-2 border-amber-400/70 ring-1 ring-amber-300/50 dark:border-amber-500/50 dark:ring-amber-500/20'
                   : 'border-slate-200 hover:border-slate-300 hover:shadow-md dark:border-slate-700 dark:hover:border-slate-600',
@@ -79,7 +79,7 @@ const formatCurrency = (amount) => {
         </span>
         <span
             v-else-if="isCurrent"
-            class="absolute -top-3 start-6 rounded-full bg-indigo-600 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-white shadow"
+            class="absolute -top-3 start-6 rounded-full bg-action-primary px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-white shadow"
         >
             {{ $t('subscription.your_current_plan') }}
         </span>
@@ -173,10 +173,10 @@ const formatCurrency = (amount) => {
                 isDisabled
                     ? 'cursor-not-allowed bg-slate-100 text-slate-400 dark:bg-slate-700 dark:text-slate-500'
                     : isCurrent && (canRenew || isExpired)
-                      ? 'bg-indigo-600 text-white hover:bg-indigo-700 shadow-md ring-2 ring-indigo-500/20'
+                      ? 'bg-action-primary text-white hover:bg-action-primary-hover shadow-md ring-2 ring-focus-ring'
                       : plan.is_featured
                         ? 'bg-amber-500 text-white hover:bg-amber-600'
-                        : 'bg-indigo-50 text-indigo-700 hover:bg-indigo-100 dark:bg-indigo-900/30 dark:text-indigo-300 dark:hover:bg-indigo-900/50',
+                        : 'bg-selection-bg text-selection-text hover:bg-selection-bg',
             ]"
         >
             {{ buttonLabel }}

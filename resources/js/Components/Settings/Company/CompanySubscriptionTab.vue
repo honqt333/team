@@ -91,10 +91,10 @@
 
             <!-- Current Subscription Info Card -->
             <div
-                class="bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-950/20 dark:to-purple-950/20 p-6 rounded-2xl border border-indigo-100/50 dark:border-indigo-900/30 shadow-sm relative overflow-hidden"
+                class="bg-selection-bg p-6 rounded-2xl border border-action-primary/25 shadow-sm relative overflow-hidden"
             >
                 <div
-                    class="absolute -right-10 -bottom-10 w-40 h-40 bg-indigo-200/20 dark:bg-indigo-900/10 rounded-full blur-2xl"
+                    class="absolute -right-10 -bottom-10 w-40 h-40 bg-selection-bg rounded-full blur-2xl"
                 ></div>
 
                 <div
@@ -103,7 +103,7 @@
                     <div class="space-y-2">
                         <div class="flex items-center gap-3 flex-wrap">
                             <span
-                                class="text-xs uppercase tracking-wider font-semibold text-indigo-600 dark:text-indigo-400"
+                                class="text-xs uppercase tracking-wider font-semibold text-action-primary"
                             >
                                 {{ $t('system.billing.page.section_current') }}
                             </span>
@@ -204,12 +204,7 @@
                             }}
                         </span>
                         <span class="text-xs text-gray-500 dark:text-gray-400 block">
-                            /
-                            {{
-                                currentSubscription?.billing_cycle === 'yearly'
-                                    ? $t('subscription.yearly')
-                                    : $t('common.monthly')
-                            }}
+                            / {{ $t('subscription.yearly') }}
                         </span>
                     </div>
                 </div>
@@ -232,7 +227,7 @@
                         :key="plan.id"
                         class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-6 flex flex-col justify-between hover:shadow-lg transition-all duration-300 relative group"
                         :class="{
-                            'ring-2 ring-indigo-600 dark:ring-indigo-400':
+                            'ring-2 ring-focus-ring':
                                 currentSubscription?.plan_id === plan.id &&
                                 currentSubscription?.status === 'active',
                         }"
@@ -242,7 +237,7 @@
                                 currentSubscription?.plan_id === plan.id &&
                                 currentSubscription?.status === 'active'
                             "
-                            class="absolute -top-3 right-6 bg-indigo-600 text-white text-[10px] px-3 py-1 rounded-full font-bold uppercase tracking-wider shadow"
+                            class="absolute -top-3 right-6 bg-action-primary text-white text-[10px] px-3 py-1 rounded-full font-bold uppercase tracking-wider shadow"
                         >
                             {{ $t('subscription.your_current_plan') }}
                         </div>
@@ -260,19 +255,9 @@
                             <div class="py-2">
                                 <div class="flex items-baseline gap-1">
                                     <span class="text-3xl font-black text-gray-900 dark:text-white">
-                                        {{ formatCurrency(plan.price_monthly) }}
-                                    </span>
-                                    <span class="text-xs text-gray-500 dark:text-gray-400">
-                                        {{ $t('subscription.per_month') }}
-                                    </span>
-                                </div>
-                                <div class="flex items-baseline gap-1 mt-1">
-                                    <span
-                                        class="text-sm font-semibold text-gray-500 dark:text-gray-400"
-                                    >
                                         {{ formatCurrency(plan.price_yearly) }}
                                     </span>
-                                    <span class="text-[10px] text-gray-400">
+                                    <span class="text-xs text-gray-500 dark:text-gray-400">
                                         {{ $t('subscription.per_year') }}
                                     </span>
                                 </div>
@@ -350,7 +335,7 @@
                                 v-else
                                 @click="openSubscribeModal(plan)"
                                 type="button"
-                                class="block w-full py-2.5 px-4 rounded-xl text-center text-xs font-bold transition-all duration-300 bg-indigo-600 hover:bg-indigo-700 text-white shadow-md hover:shadow-lg cursor-pointer"
+                                class="block w-full py-2.5 px-4 rounded-xl text-center text-xs font-bold transition-all duration-300 bg-action-primary hover:bg-action-primary-hover text-white shadow-md hover:shadow-lg cursor-pointer"
                             >
                                 {{
                                     currentSubscription?.status === 'active'
@@ -372,7 +357,7 @@
                 >
                     <div class="flex items-center gap-3">
                         <div
-                            class="w-10 h-10 rounded-full bg-indigo-100 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400 flex items-center justify-center"
+                            class="w-10 h-10 rounded-full bg-selection-bg text-action-primary flex items-center justify-center"
                         >
                             <svg
                                 class="w-5 h-5"
@@ -419,7 +404,7 @@
                         </a>
                         <a
                             :href="`mailto:${contact?.email || 'support@example.com'}`"
-                            class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 rounded-xl text-xs font-bold text-white transition-colors flex items-center gap-1.5 shadow-md"
+                            class="px-4 py-2 bg-action-primary hover:bg-action-primary-hover rounded-xl text-xs font-bold text-white transition-colors flex items-center gap-1.5 shadow-md"
                         >
                             <svg
                                 class="w-3.5 h-3.5"
@@ -552,11 +537,7 @@
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap font-mono text-xs">
                                     {{ formatCurrency(sub.price) }} /
-                                    {{
-                                        sub.billing_cycle === 'yearly'
-                                            ? $t('services_management.warranty_units.years')
-                                            : $t('services_management.warranty_units.months')
-                                    }}
+                                    {{ $t('services_management.warranty_units.years') }}
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap font-mono text-xs">
                                     {{ formatDate(sub.starts_at) }}

@@ -17,10 +17,10 @@ defineProps({
             <div
                 v-for="gw in gateways"
                 :key="gw.name"
-                class="flex items-center gap-3 p-4 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/50 hover:border-indigo-200 dark:hover:border-indigo-700 transition-colors"
+                class="flex items-center gap-3 p-4 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/50 hover:border-action-primary/25 transition-colors"
             >
                 <div
-                    class="w-10 h-10 rounded-lg flex items-center justify-center bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 flex-shrink-0"
+                    class="w-10 h-10 rounded-lg flex items-center justify-center bg-selection-bg text-action-primary flex-shrink-0"
                 >
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path

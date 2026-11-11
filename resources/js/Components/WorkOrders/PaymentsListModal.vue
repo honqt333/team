@@ -108,7 +108,7 @@
                             type="text"
                             v-model="searchQuery"
                             :placeholder="$t('common.search') + '...'"
-                            class="pl-10 pr-4 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-blue-500 focus:border-blue-500 transition-shadow"
+                            class="pl-10 pr-4 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-focus-ring focus:border-action-primary transition-shadow"
                         />
                     </div>
 
@@ -228,7 +228,7 @@
                                         payment.id
                                     "
                                     target="_blank"
-                                    class="text-gray-500 hover:text-indigo-600 transition-colors"
+                                    class="text-gray-500 hover:text-action-primary transition-colors"
                                     :title="$t('common.print')"
                                 >
                                     <svg

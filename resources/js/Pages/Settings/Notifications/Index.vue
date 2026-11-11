@@ -314,7 +314,7 @@
                             <input
                                 v-model="form.channel_configs.email_recipient"
                                 type="email"
-                                class="w-full text-sm rounded-xl border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-amber-500 focus:border-amber-500"
+                                class="w-full text-sm rounded-xl border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-focus-ring focus:border-action-primary"
                                 :placeholder="
                                     $t('settings.notifications.channels.email_recipient_hint')
                                 "
@@ -334,7 +334,7 @@
                                 v-model="form.channel_configs.whatsapp_phone"
                                 type="text"
                                 dir="ltr"
-                                class="w-full text-sm rounded-xl border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-amber-500 focus:border-amber-500"
+                                class="w-full text-sm rounded-xl border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-focus-ring focus:border-action-primary"
                                 :placeholder="
                                     $t('settings.notifications.channels.whatsapp_phone_hint')
                                 "
@@ -562,7 +562,7 @@
                             <textarea
                                 v-model="form.templates.work_order_created"
                                 rows="3"
-                                class="w-full text-sm rounded-xl border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-amber-500 focus:border-amber-500"
+                                class="w-full text-sm rounded-xl border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-focus-ring focus:border-action-primary"
                             ></textarea>
                         </div>
 
@@ -585,7 +585,7 @@
                             <textarea
                                 v-model="form.templates.work_order_completed"
                                 rows="3"
-                                class="w-full text-sm rounded-xl border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-amber-500 focus:border-amber-500"
+                                class="w-full text-sm rounded-xl border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-focus-ring focus:border-action-primary"
                             ></textarea>
                         </div>
 
@@ -606,7 +606,7 @@
                             <textarea
                                 v-model="form.templates.quote_shared"
                                 rows="3"
-                                class="w-full text-sm rounded-xl border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-amber-500 focus:border-amber-500"
+                                class="w-full text-sm rounded-xl border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-focus-ring focus:border-action-primary"
                             ></textarea>
                         </div>
 
@@ -627,7 +627,7 @@
                             <textarea
                                 v-model="form.templates.invoice_issued"
                                 rows="3"
-                                class="w-full text-sm rounded-xl border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-amber-500 focus:border-amber-500"
+                                class="w-full text-sm rounded-xl border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-focus-ring focus:border-action-primary"
                             ></textarea>
                         </div>
 
@@ -648,7 +648,7 @@
                             <textarea
                                 v-model="form.templates.appointment_booked"
                                 rows="3"
-                                class="w-full text-sm rounded-xl border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-amber-500 focus:border-amber-500"
+                                class="w-full text-sm rounded-xl border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-focus-ring focus:border-action-primary"
                             ></textarea>
                         </div>
 
@@ -669,7 +669,7 @@
                             <textarea
                                 v-model="form.templates.low_stock_alert"
                                 rows="3"
-                                class="w-full text-sm rounded-xl border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-amber-500 focus:border-amber-500"
+                                class="w-full text-sm rounded-xl border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-focus-ring focus:border-action-primary"
                             ></textarea>
                         </div>
                     </div>

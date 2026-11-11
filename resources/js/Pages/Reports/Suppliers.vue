@@ -332,7 +332,7 @@
                             v-model="localFilters.search"
                             @keyup.enter="applyFilters"
                             :placeholder="$t('reports.suppliers_report.search_placeholder')"
-                            class="w-full text-xs rounded-xl border-gray-300 dark:border-gray-600 bg-gray-50/50 dark:bg-gray-900/50 focus:bg-white dark:focus:bg-gray-900 text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:ring-2 focus:ring-rose-500 focus:border-transparent pe-8 ps-9 py-2 transition-all"
+                            class="w-full text-xs rounded-xl border-gray-300 dark:border-gray-600 bg-gray-50/50 dark:bg-gray-900/50 focus:bg-white dark:focus:bg-gray-900 text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:ring-2 focus:ring-danger focus:border-transparent pe-8 ps-9 py-2 transition-all"
                         />
                         <svg
                             class="w-4 h-4 text-gray-400 absolute start-3 top-1/2 -translate-y-1/2 pointer-events-none"
@@ -497,14 +497,14 @@
 
                 <!-- 3. Net VAT -->
                 <div
-                    class="bg-gradient-to-br from-indigo-500/10 to-blue-500/5 dark:from-indigo-500/20 dark:to-blue-500/10 rounded-2xl p-4 border border-indigo-500/20 shadow-sm"
+                    class="bg-gradient-to-br from-action-primary to-blue-500/5 dark:to-blue-500/10 rounded-2xl p-4 border border-action-primary shadow-sm"
                 >
                     <div class="flex items-center justify-between">
                         <span class="text-xs font-bold text-gray-600 dark:text-gray-300">
                             {{ $t('reports.suppliers_report.total_vat') }}
                         </span>
                         <div
-                            class="w-8 h-8 rounded-xl bg-indigo-500/20 flex items-center justify-center text-indigo-600 dark:text-indigo-400"
+                            class="w-8 h-8 rounded-xl bg-action-primary/10 flex items-center justify-center text-action-primary"
                         >
                             <svg
                                 class="w-4 h-4"
@@ -521,9 +521,7 @@
                             </svg>
                         </div>
                     </div>
-                    <div
-                        class="mt-2 text-2xl font-black text-indigo-700 dark:text-indigo-400 font-mono"
-                    >
+                    <div class="mt-2 text-2xl font-black text-selection-text font-mono">
                         {{ formatMoney(kpis.total_vat) }}
                     </div>
                     <div class="mt-1 text-[11px] text-gray-500 dark:text-gray-400">
@@ -603,14 +601,14 @@
 
                 <!-- 6. Total Adjustments & Returns -->
                 <div
-                    class="bg-gradient-to-br from-purple-500/10 to-pink-500/5 dark:from-purple-500/20 dark:to-pink-500/10 rounded-2xl p-4 border border-purple-500/20 shadow-sm"
+                    class="bg-gradient-to-br from-purple-500/10 to-pink-500/5 dark:to-pink-500/10 rounded-2xl p-4 border border-purple-500/20 shadow-sm"
                 >
                     <div class="flex items-center justify-between">
                         <span class="text-xs font-bold text-gray-600 dark:text-gray-300">
                             {{ $t('reports.suppliers_report.amount_adjusted') }}
                         </span>
                         <div
-                            class="w-8 h-8 rounded-xl bg-purple-500/20 flex items-center justify-center text-purple-600 dark:text-purple-400"
+                            class="w-8 h-8 rounded-xl bg-purple-500/20 flex items-center justify-center text-purple-600"
                         >
                             <svg
                                 class="w-4 h-4"
@@ -627,9 +625,7 @@
                             </svg>
                         </div>
                     </div>
-                    <div
-                        class="mt-2 text-2xl font-black text-purple-700 dark:text-purple-400 font-mono"
-                    >
+                    <div class="mt-2 text-2xl font-black text-purple-700 font-mono">
                         {{ formatMoney(kpis.total_discount) }}
                     </div>
                     <div class="mt-1 text-[11px] text-gray-500 dark:text-gray-400">
@@ -677,14 +673,14 @@
             <!-- Returns & Debit Notes Info Banner (if returns exist) -->
             <div
                 v-if="kpis.total_returns_amount && kpis.total_returns_amount > 0"
-                class="flex items-center justify-between p-3.5 rounded-2xl bg-purple-50/80 dark:bg-purple-900/20 border border-purple-200/70 dark:border-purple-800/50 text-xs text-purple-900 dark:text-purple-200 shadow-sm print:hidden"
+                class="flex items-center justify-between p-3.5 rounded-2xl bg-purple-50/80 border border-purple-200/70 text-xs text-purple-900 shadow-sm print:hidden"
             >
                 <div class="flex items-center gap-2.5 flex-wrap">
                     <span class="w-2.5 h-2.5 rounded-full bg-purple-600 animate-pulse"></span>
                     <span class="font-bold">
                         {{ $t('reports.suppliers_report.total_returns') }}:
                     </span>
-                    <span class="font-mono font-black text-purple-800 dark:text-purple-300 text-sm">
+                    <span class="font-mono font-black text-purple-800 text-sm">
                         {{ formatMoney(kpis.total_returns_amount) }}
                     </span>
                     <span class="text-gray-600 dark:text-gray-400">
@@ -695,7 +691,7 @@
                 </div>
                 <div
                     v-if="kpis.total_debit_notes_amount > 0"
-                    class="font-mono text-purple-800 dark:text-purple-300 font-bold hidden sm:block text-xs"
+                    class="font-mono text-purple-800 font-bold hidden sm:block text-xs"
                 >
                     {{ $t('reports.suppliers_report.total_debit_notes') }}:
                     {{ formatMoney(kpis.total_debit_notes_amount) }}
@@ -791,7 +787,7 @@
                             </div>
                             <div class="text-right hidden sm:block">
                                 <span class="text-[11px] text-gray-400 block">الضريبة</span>
-                                <span class="font-mono font-bold text-xs text-indigo-600">
+                                <span class="font-mono font-bold text-xs text-action-primary">
                                     {{ formatMoney(grp.total_vat) }}
                                 </span>
                             </div>
@@ -956,7 +952,7 @@
                                         :class="
                                             inv.tax_amount < 0
                                                 ? 'text-rose-600 font-bold'
-                                                : 'text-indigo-600'
+                                                : 'text-action-primary'
                                         "
                                     >
                                         {{ formatMoney(inv.tax_amount) }}
@@ -980,7 +976,7 @@
                                         class="py-2.5 px-3 text-center font-mono"
                                         :class="
                                             inv.discount_amount > 0
-                                                ? 'text-purple-600 dark:text-purple-400 font-bold'
+                                                ? 'text-purple-600 font-bold'
                                                 : 'text-gray-500'
                                         "
                                     >
@@ -1167,7 +1163,7 @@
                                     :class="
                                         inv.tax_amount < 0
                                             ? 'text-rose-600 font-bold'
-                                            : 'text-indigo-600'
+                                            : 'text-action-primary'
                                     "
                                 >
                                     {{ formatMoney(inv.tax_amount) }}
@@ -1191,7 +1187,7 @@
                                     class="py-3 px-3 text-center font-mono"
                                     :class="
                                         inv.discount_amount > 0
-                                            ? 'text-purple-600 dark:text-purple-400 font-bold'
+                                            ? 'text-purple-600 font-bold'
                                             : 'text-gray-500'
                                     "
                                 >
@@ -1651,7 +1647,7 @@ const getPaymentBadgeClasses = (status) => {
         case 'partial':
             return 'bg-amber-100 text-amber-800 dark:bg-amber-900/60 dark:text-amber-300';
         case 'debit_note':
-            return 'bg-purple-100 text-purple-800 dark:bg-purple-900/60 dark:text-purple-300';
+            return 'bg-purple-100 text-purple-800';
         case 'returned':
             return 'bg-amber-100 text-amber-800 dark:bg-amber-900/60 dark:text-amber-300';
         case 'unpaid':
@@ -1679,7 +1675,7 @@ const getPaymentStatusLabel = (status) => {
 const getDocumentTypeBadgeClasses = (recordType) => {
     switch (recordType) {
         case 'debit_note':
-            return 'bg-purple-50 text-purple-700 ring-1 ring-purple-600/20 dark:bg-purple-900/30 dark:text-purple-300';
+            return 'bg-purple-50 text-purple-700 ring-1 ring-purple-600/20';
         case 'return_invoice':
             return 'bg-amber-50 text-amber-700 ring-1 ring-amber-600/20 dark:bg-amber-900/30 dark:text-amber-300';
         case 'purchase_invoice':

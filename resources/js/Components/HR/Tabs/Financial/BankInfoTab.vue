@@ -9,7 +9,7 @@
                 <input
                     v-model="form.bank_name"
                     type="text"
-                    class="w-full px-4 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-violet-500 focus:border-violet-500"
+                    class="w-full px-4 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-focus-ring focus:border-action-primary"
                     :placeholder="$t('hr.financial.bank.name')"
                 />
             </div>
@@ -25,7 +25,7 @@
                         v-model="form.bank_iban"
                         type="text"
                         dir="ltr"
-                        class="w-full px-4 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-violet-500 focus:border-violet-500"
+                        class="w-full px-4 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-focus-ring focus:border-action-primary"
                         placeholder="SA0000000000000000000000"
                     />
                 </div>
@@ -39,7 +39,7 @@
                         v-model="form.bank_account_number"
                         type="text"
                         dir="ltr"
-                        class="w-full px-4 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-violet-500 focus:border-violet-500"
+                        class="w-full px-4 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-focus-ring focus:border-action-primary"
                     />
                 </div>
             </div>
@@ -52,7 +52,7 @@
                 <textarea
                     v-model="form.bank_notes"
                     rows="2"
-                    class="w-full px-4 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-violet-500 focus:border-violet-500"
+                    class="w-full px-4 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-focus-ring focus:border-action-primary"
                 ></textarea>
             </div>
 
@@ -61,7 +61,7 @@
                 <button
                     type="submit"
                     :disabled="form.processing"
-                    class="px-5 py-2.5 bg-gradient-to-r from-violet-600 to-purple-600 text-white rounded-xl font-medium shadow-lg hover:shadow-xl transition-all disabled:opacity-50"
+                    class="px-5 py-2.5 bg-action-primary hover:bg-action-primary-hover text-white rounded-xl font-medium shadow-lg hover:shadow-xl transition-all disabled:opacity-50"
                 >
                     {{ form.processing ? $t('common.saving') : $t('common.save') }}
                 </button>
@@ -85,12 +85,16 @@ const form = useForm({
     bank_notes: props.employee.bank_notes || '',
 });
 
-watch(() => props.employee, (newVal) => {
-    form.bank_name = newVal.bank_name || '';
-    form.bank_iban = newVal.bank_iban || '';
-    form.bank_account_number = newVal.bank_account_number || '';
-    form.bank_notes = newVal.bank_notes || '';
-}, { deep: true });
+watch(
+    () => props.employee,
+    (newVal) => {
+        form.bank_name = newVal.bank_name || '';
+        form.bank_iban = newVal.bank_iban || '';
+        form.bank_account_number = newVal.bank_account_number || '';
+        form.bank_notes = newVal.bank_notes || '';
+    },
+    { deep: true }
+);
 
 function submit() {
     form.put(route('app.hr.employees.bank-info.update', props.employee.id), {

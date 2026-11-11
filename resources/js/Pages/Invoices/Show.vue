@@ -25,7 +25,7 @@
                     invoice.tax_enabled_snapshot ? $t('invoices.grand_total') : $t('invoices.total')
                 "
                 :gradientFrom="invoice.type === 'credit_note' ? 'from-rose-600' : 'from-blue-600'"
-                :gradientTo="invoice.type === 'credit_note' ? 'to-amber-600' : 'to-indigo-600'"
+                :gradientTo="invoice.type === 'credit_note' ? 'to-amber-600' : 'to-action-primary'"
                 :glowFrom="invoice.type === 'credit_note' ? 'from-rose-500' : 'from-blue-500'"
                 badgeBg="bg-blue-50/50 dark:bg-blue-900/30"
                 badgeText="text-blue-600 dark:text-blue-400"

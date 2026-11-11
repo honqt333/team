@@ -46,9 +46,7 @@
                 <dt class="text-sm font-bold uppercase text-gray-700 dark:text-gray-300">
                     {{ $t('common.total') }}
                 </dt>
-                <dd
-                    class="font-mono text-2xl font-bold tabular-nums text-indigo-600 dark:text-indigo-400"
-                >
+                <dd class="font-mono text-2xl font-bold tabular-nums text-action-primary">
                     {{ formatMoney(invoice.total) }}
                 </dd>
             </div>

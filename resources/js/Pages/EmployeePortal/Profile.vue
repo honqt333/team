@@ -5,11 +5,11 @@
             <div
                 class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden"
             >
-                <div class="bg-gradient-to-r from-violet-600 to-purple-600 h-32"></div>
+                <div class="bg-action-primary hover:bg-action-primary-hover h-32"></div>
                 <div class="px-6 pb-6 -mt-12">
                     <div class="flex flex-col sm:flex-row items-start sm:items-end gap-4">
                         <div
-                            class="w-24 h-24 rounded-2xl bg-white dark:bg-gray-700 border-4 border-white dark:border-gray-800 flex items-center justify-center text-3xl font-bold text-violet-600 dark:text-violet-400 shadow-lg overflow-hidden"
+                            class="w-24 h-24 rounded-2xl bg-white dark:bg-gray-700 border-4 border-white dark:border-gray-800 flex items-center justify-center text-3xl font-bold text-action-primary shadow-lg overflow-hidden"
                         >
                             <img
                                 v-if="employee?.photo_url"
@@ -38,9 +38,9 @@
                     class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-6"
                 >
                     <div class="flex items-center gap-3 mb-6">
-                        <div class="p-2.5 bg-violet-100 dark:bg-violet-900/30 rounded-xl">
+                        <div class="p-2.5 bg-selection-bg rounded-xl">
                             <svg
-                                class="w-5 h-5 text-violet-600 dark:text-violet-400"
+                                class="w-5 h-5 text-action-primary"
                                 fill="none"
                                 stroke="currentColor"
                                 viewBox="0 0 24 24"

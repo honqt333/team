@@ -308,7 +308,7 @@
                         required
                         rows="5"
                         :placeholder="$t('work_orders.item.note_placeholder')"
-                        class="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white px-3 py-2 text-sm focus:ring-2 focus:ring-teal-500 focus:border-teal-500 resize-none"
+                        class="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white px-3 py-2 text-sm focus:ring-2 focus:ring-focus-ring focus:border-action-primary resize-none"
                     ></textarea>
                 </div>
             </form>
@@ -373,7 +373,7 @@
                         required
                         rows="3"
                         :placeholder="$t('work_orders.hold_reason_placeholder')"
-                        class="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white px-3 py-2 text-sm focus:ring-2 focus:ring-amber-500 focus:border-amber-500 resize-none"
+                        class="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white px-3 py-2 text-sm focus:ring-2 focus:ring-focus-ring focus:border-action-primary resize-none"
                     ></textarea>
                 </div>
             </div>
@@ -471,7 +471,7 @@
                         v-model="exitNotes"
                         rows="3"
                         :placeholder="$t('work_orders.exit_notes_placeholder')"
-                        class="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 resize-none"
+                        class="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white px-3 py-2 text-sm focus:ring-2 focus:ring-focus-ring focus:border-action-primary resize-none"
                     ></textarea>
                 </div>
             </div>
@@ -500,10 +500,10 @@
             <template #title>
                 <div class="flex items-center gap-2">
                     <div
-                        class="w-7 h-7 rounded-lg bg-violet-100 dark:bg-violet-900/30 flex items-center justify-center"
+                        class="w-7 h-7 rounded-lg bg-selection-bg flex items-center justify-center"
                     >
                         <svg
-                            class="w-4 h-4 text-violet-600 dark:text-violet-400"
+                            class="w-4 h-4 text-action-primary"
                             fill="none"
                             stroke="currentColor"
                             viewBox="0 0 24 24"
@@ -522,16 +522,11 @@
 
             <form @submit.prevent="confirmDeferredInvoice" class="space-y-5 text-right" dir="rtl">
                 <!-- Balance (read-only) -->
-                <div
-                    class="bg-violet-50 dark:bg-violet-950/20 rounded-xl p-4 flex items-center justify-between"
-                >
-                    <span class="text-sm font-bold text-violet-700 dark:text-violet-400">
+                <div class="bg-selection-bg rounded-xl p-4 flex items-center justify-between">
+                    <span class="text-sm font-bold text-selection-text">
                         {{ $t('invoices.remaining_amount') }}
                     </span>
-                    <span
-                        class="text-lg font-black text-violet-700 dark:text-violet-300 font-mono"
-                        dir="ltr"
-                    >
+                    <span class="text-lg font-black text-selection-text font-mono" dir="ltr">
                         {{ formatCurrency(workOrderBalance) }}
                     </span>
                 </div>
@@ -558,7 +553,7 @@
                         v-model="deferredNotes"
                         rows="3"
                         :placeholder="$t('invoices.deferred_notes_placeholder')"
-                        class="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white px-3 py-2.5 text-sm focus:ring-2 focus:ring-violet-500 focus:border-violet-500 resize-none transition-colors"
+                        class="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white px-3 py-2.5 text-sm focus:ring-2 focus:ring-focus-ring focus:border-action-primary resize-none transition-colors"
                     ></textarea>
                 </div>
             </form>
@@ -575,7 +570,7 @@
                     type="button"
                     @click="confirmDeferredInvoice"
                     :disabled="!deferredDueDate || isDeferredSubmitting"
-                    class="px-5 py-2 text-sm font-semibold text-white bg-violet-600 hover:bg-violet-700 disabled:bg-gray-300 dark:disabled:bg-gray-700 disabled:text-gray-500 disabled:cursor-not-allowed rounded-xl transition-all shadow-sm flex items-center gap-2"
+                    class="px-5 py-2 text-sm font-semibold text-white bg-action-primary hover:bg-action-primary-hover disabled:bg-gray-300 dark:disabled:bg-gray-700 disabled:text-gray-500 disabled:cursor-not-allowed rounded-xl transition-all shadow-sm flex items-center gap-2"
                 >
                     <svg
                         v-if="isDeferredSubmitting"

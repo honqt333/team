@@ -4,56 +4,77 @@
         <div class="flex items-center gap-4 flex-wrap">
             <!-- Country Selector -->
             <div class="flex items-center gap-2">
-                <span class="text-xs font-medium text-gray-600 dark:text-gray-400">{{ $t('vehicles.plate.country') }}</span>
-                <div class="relative">
-                    <select 
+                <span class="text-xs font-medium text-text-secondary">
+                    {{ $t('vehicles.plate.country') }}
+                </span>
+                <div class="min-w-[145px]">
+                    <SearchableSelect
                         v-model="selectedCountry"
-                        class="appearance-none px-3 py-1.5 pe-8 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent cursor-pointer"
-                    >
-                        <option value="SA">🇸🇦 {{ $t('vehicles.plate.countries.sa') }}</option>
-                        <option value="OTHER">🌍 {{ $t('vehicles.plate.countries.other') }}</option>
-                    </select>
-                    <svg class="absolute end-2 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                    </svg>
+                        :options="countryOptions"
+                        option-label="label"
+                        option-value="value"
+                        :compact="true"
+                    />
                 </div>
             </div>
 
             <!-- Skip Format Checkbox -->
-            <label v-if="selectedCountry === 'SA'" class="flex items-center gap-2 cursor-pointer select-none">
-                <input 
-                    type="checkbox" 
-                    v-model="skipFormat"
-                    class="w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500 cursor-pointer"
-                />
-                <span class="text-xs text-gray-600 dark:text-gray-400">{{ $t('vehicles.plate.skip_format') }}</span>
-            </label>
+            <AppCheckbox
+                v-if="selectedCountry === 'SA'"
+                v-model="skipFormat"
+                :label="$t('vehicles.plate.skip_format')"
+            />
         </div>
 
         <!-- Saudi Structured Input (when SA selected and not skipped) -->
         <div v-if="selectedCountry === 'SA' && !skipFormat" class="space-y-3">
             <!-- Compact Plate Preview -->
             <div class="flex justify-center">
-                <div class="bg-white rounded border-2 border-gray-700 shadow flex overflow-hidden" style="width: 240px; height: 50px;">
+                <div
+                    class="bg-white rounded border-2 border-gray-700 shadow flex overflow-hidden"
+                    style="width: 240px; height: 50px"
+                >
                     <!-- KSA Badge -->
-                    <div class="w-10 bg-gradient-to-b from-gray-100 to-gray-200 border-e border-gray-700 flex flex-col items-center justify-center">
+                    <div
+                        class="w-10 bg-gradient-to-b from-gray-100 to-gray-200 border-e border-gray-700 flex flex-col items-center justify-center"
+                    >
                         <svg class="w-4 h-4 text-green-700" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M12 2L9 5h6l-3-3zm0 4c-1.1 0-2 .9-2 2v8h4V8c0-1.1-.9-2-2-2zm-4 12l-2 4h12l-2-4H8z"/>
+                            <path
+                                d="M12 2L9 5h6l-3-3zm0 4c-1.1 0-2 .9-2 2v8h4V8c0-1.1-.9-2-2-2zm-4 12l-2 4h12l-2-4H8z"
+                            />
                         </svg>
                         <span class="text-[6px] font-bold text-gray-700">KSA</span>
                     </div>
                     <!-- Letters -->
-                    <div class="flex-1 flex flex-col justify-center items-center border-e border-gray-400 px-1">
-                        <span class="text-sm font-bold text-gray-800" dir="rtl">{{ displayLettersAr }}</span>
-                        <span class="text-[9px] text-gray-500" dir="ltr">{{ displayLettersEn }}</span>
+                    <div
+                        class="flex-1 flex flex-col justify-center items-center border-e border-gray-400 px-1"
+                    >
+                        <span class="text-sm font-bold text-gray-800" dir="rtl">
+                            {{ displayLettersAr }}
+                        </span>
+                        <span class="text-[9px] text-gray-500" dir="ltr">
+                            {{ displayLettersEn }}
+                        </span>
                     </div>
                     <!-- Numbers -->
                     <div class="flex-1 flex flex-col justify-center items-center px-1">
                         <div class="flex flex-row gap-0.5" dir="ltr">
-                            <span v-for="(char, i) in displayNumbersEn.split(' ')" :key="i" class="text-sm font-bold text-gray-800">{{ char }}</span>
+                            <span
+                                v-for="(char, i) in displayNumbersEn.split(' ')"
+                                :key="i"
+                                class="text-sm font-bold text-gray-800"
+                            >
+                                {{ char }}
+                            </span>
                         </div>
                         <div class="flex flex-row gap-0.5" dir="ltr">
-                            <span v-for="(char, i) in displayNumbersEn.split(' ')" :key="i" class="text-[9px] text-gray-500">{{ char }}</span>
+                            <span
+                                v-for="(char, i) in displayNumbersEn.split(' ')"
+                                :key="i"
+                                class="text-[9px] text-gray-500"
+                            >
+                                {{ char }}
+                            </span>
                         </div>
                     </div>
                 </div>
@@ -64,14 +85,16 @@
                 <!-- Letters Input -->
                 <div>
                     <label class="block text-xs text-gray-500 dark:text-gray-400 mb-1">
-                        {{ $t('vehicles.plate.letters') }} <span class="text-red-500">*</span> (3)
+                        {{ $t('vehicles.plate.letters') }}
+                        <span class="text-red-500">*</span>
+                        (3)
                     </label>
                     <div class="flex gap-1">
                         <div class="flex-1">
                             <SearchableSelect
                                 v-model="letter1"
                                 :options="plateLetters"
-                                :option-label="l => `${l.ar} - ${l.en}`"
+                                :option-label="(l) => `${l.ar} - ${l.en}`"
                                 option-value="en"
                                 :placeholder="'-'"
                                 :label="''"
@@ -83,7 +106,7 @@
                             <SearchableSelect
                                 v-model="letter2"
                                 :options="plateLetters"
-                                :option-label="l => `${l.ar} - ${l.en}`"
+                                :option-label="(l) => `${l.ar} - ${l.en}`"
                                 option-value="en"
                                 :placeholder="'-'"
                                 :label="''"
@@ -95,7 +118,7 @@
                             <SearchableSelect
                                 v-model="letter3"
                                 :options="plateLetters"
-                                :option-label="l => `${l.ar} - ${l.en}`"
+                                :option-label="(l) => `${l.ar} - ${l.en}`"
                                 option-value="en"
                                 :placeholder="'-'"
                                 :label="''"
@@ -109,17 +132,23 @@
                 <!-- Numbers Input -->
                 <div>
                     <label class="block text-xs text-gray-500 dark:text-gray-400 mb-1">
-                        {{ $t('vehicles.plate.numbers') }} <span class="text-red-500">*</span> (1-4)
+                        {{ $t('vehicles.plate.numbers') }}
+                        <span class="text-red-500">*</span>
+                        (1-4)
                     </label>
-                    <input 
+                    <input
                         type="text"
                         :value="plateNumbers"
                         maxlength="4"
                         inputmode="numeric"
                         placeholder="1234"
                         dir="ltr"
-                        class="w-full px-3 py-1.5 text-sm text-center border rounded-lg bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 focus:ring-1 focus:ring-blue-500"
-                        :class="error && !plateNumbers ? 'border-red-500 focus:border-red-500' : 'border-gray-300 dark:border-gray-600'"
+                        class="w-full px-3 py-1.5 text-sm text-center border rounded-lg bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 focus:ring-1 focus:ring-focus-ring"
+                        :class="
+                            error && !plateNumbers
+                                ? 'border-red-500 focus:border-danger'
+                                : 'border-gray-300 dark:border-gray-600'
+                        "
                         @input="onNumbersInput($event)"
                         @blur="$emit('blur')"
                     />
@@ -130,15 +159,20 @@
         <!-- Free Text Input (when skipped or other country) -->
         <div v-else>
             <label class="block text-xs text-gray-500 dark:text-gray-400 mb-1">
-                {{ $t('vehicles.plate.free_input') }} <span class="text-red-500">*</span>
+                {{ $t('vehicles.plate.free_input') }}
+                <span class="text-red-500">*</span>
             </label>
-            <input 
+            <input
                 type="text"
                 :value="freeTextPlate"
                 :placeholder="$t('vehicles.form.plate_placeholder')"
                 dir="ltr"
-                class="w-full px-3 py-2 text-center font-semibold border rounded-lg bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 focus:ring-2 focus:ring-blue-500"
-                :class="error && !freeTextPlate ? 'border-red-500 focus:border-red-500' : 'border-gray-300 dark:border-gray-600'"
+                class="w-full px-3 py-2 text-center font-semibold border rounded-lg bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 focus:ring-2 focus:ring-focus-ring"
+                :class="
+                    error && !freeTextPlate
+                        ? 'border-red-500 focus:border-danger'
+                        : 'border-gray-300 dark:border-gray-600'
+                "
                 @input="onFreeTextInput($event)"
                 @blur="$emit('blur')"
             />
@@ -148,6 +182,7 @@
 
 <script setup>
 import { ref, computed, watch, nextTick } from 'vue';
+import { useI18n } from 'vue-i18n';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 import { useNumberFormat } from '@/Composables/useNumberFormat';
 
@@ -163,13 +198,33 @@ const props = defineProps({
 });
 
 const emit = defineEmits(['update:modelValue', 'blur']);
+const { t } = useI18n();
 const { toEnglish } = useNumberFormat();
+
+const countryOptions = computed(() => [
+    { value: 'SA', label: `🇸🇦 ${t('vehicles.plate.countries.sa')}` },
+    { value: 'OTHER', label: `🌍 ${t('vehicles.plate.countries.other')}` },
+]);
 
 // Saudi plate valid letters
 const plateLetters = [
-    { ar: 'أ', en: 'A' }, { ar: 'ب', en: 'B' }, { ar: 'ح', en: 'J' }, { ar: 'د', en: 'D' }, { ar: 'ر', en: 'R' }, { ar: 'س', en: 'S' },
-    { ar: 'ص', en: 'X' }, { ar: 'ط', en: 'T' }, { ar: 'ع', en: 'E' }, { ar: 'ق', en: 'G' }, { ar: 'ك', en: 'K' }, { ar: 'ل', en: 'L' },
-    { ar: 'م', en: 'Z' }, { ar: 'ن', en: 'N' }, { ar: 'هـ', en: 'H' }, { ar: 'و', en: 'U' }, { ar: 'ي', en: 'V' },
+    { ar: 'أ', en: 'A' },
+    { ar: 'ب', en: 'B' },
+    { ar: 'ح', en: 'J' },
+    { ar: 'د', en: 'D' },
+    { ar: 'ر', en: 'R' },
+    { ar: 'س', en: 'S' },
+    { ar: 'ص', en: 'X' },
+    { ar: 'ط', en: 'T' },
+    { ar: 'ع', en: 'E' },
+    { ar: 'ق', en: 'G' },
+    { ar: 'ك', en: 'K' },
+    { ar: 'ل', en: 'L' },
+    { ar: 'م', en: 'Z' },
+    { ar: 'ن', en: 'N' },
+    { ar: 'هـ', en: 'H' },
+    { ar: 'و', en: 'U' },
+    { ar: 'ي', en: 'V' },
 ];
 
 const arabicNums = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
@@ -192,7 +247,7 @@ function toEnglishNum(num) {
 }
 
 function getLetterAr(en) {
-    const found = plateLetters.find(l => l.en === en);
+    const found = plateLetters.find((l) => l.en === en);
     return found ? found.ar : '-';
 }
 
@@ -213,7 +268,10 @@ const displayLettersEn = computed(() => {
 
 const displayNumbersAr = computed(() => {
     if (!plateNumbers.value) return '- - - -';
-    return plateNumbers.value.split('').map(n => toEnglishNum(n)).join(' ');
+    return plateNumbers.value
+        .split('')
+        .map((n) => toEnglishNum(n))
+        .join(' ');
 });
 
 const displayNumbersEn = computed(() => {
@@ -226,7 +284,7 @@ const plateString = computed(() => {
     if (selectedCountry.value !== 'SA' || skipFormat.value) {
         return freeTextPlate.value;
     }
-    const letters = [letter1.value, letter2.value, letter3.value].filter(l => l).join('');
+    const letters = [letter1.value, letter2.value, letter3.value].filter((l) => l).join('');
     if (!letters && !plateNumbers.value) return '';
     return `${letters} ${plateNumbers.value}`.trim();
 });
@@ -236,10 +294,21 @@ function onNumbersInput(e) {
     let value = e.target.value;
     // Map Arabic numerals (٠١٢٣٤٥٦٧٨٩) to English (0123456789)
     const arabicToEnglish = {
-        '٠': '0', '١': '1', '٢': '2', '٣': '3', '٤': '4',
-        '٥': '5', '٦': '6', '٧': '7', '٨': '8', '٩': '9'
+        '٠': '0',
+        '١': '1',
+        '٢': '2',
+        '٣': '3',
+        '٤': '4',
+        '٥': '5',
+        '٦': '6',
+        '٧': '7',
+        '٨': '8',
+        '٩': '9',
     };
-    value = value.split('').map(char => arabicToEnglish[char] || char).join('');
+    value = value
+        .split('')
+        .map((char) => arabicToEnglish[char] || char)
+        .join('');
     // Only keep digits and limit to 4
     plateNumbers.value = value.replace(/[^0-9]/g, '').slice(0, 4);
 }
@@ -249,10 +318,21 @@ function onFreeTextInput(e) {
     let value = e.target.value;
     // Map Arabic numerals (٠١٢٣٤٥٦٧٨٩) to English (0123456789)
     const arabicToEnglish = {
-        '٠': '0', '١': '1', '٢': '2', '٣': '3', '٤': '4',
-        '٥': '5', '٦': '6', '٧': '7', '٨': '8', '٩': '9'
+        '٠': '0',
+        '١': '1',
+        '٢': '2',
+        '٣': '3',
+        '٤': '4',
+        '٥': '5',
+        '٦': '6',
+        '٧': '7',
+        '٨': '8',
+        '٩': '9',
     };
-    freeTextPlate.value = value.split('').map(char => arabicToEnglish[char] || char).join('');
+    freeTextPlate.value = value
+        .split('')
+        .map((char) => arabicToEnglish[char] || char)
+        .join('');
 }
 
 // Validate the input
@@ -308,10 +388,10 @@ watch(selectedCountry, (newVal, oldVal) => {
 // Parse plate value from string format
 function parseInitialValue(val) {
     if (!val) return;
-    
+
     // Prevent emitting during initial parse
     isInternalUpdate = true;
-    
+
     // Try to parse as structured plate (letters + space + numbers)
     const match = val.match(/^([A-Z]{1,3})\s*(\d{1,4})$/);
     if (match) {
@@ -327,7 +407,7 @@ function parseInitialValue(val) {
         skipFormat.value = true;
         freeTextPlate.value = val;
     }
-    
+
     // Reset internal update flag after Vue completes all reactive updates
     nextTick(() => {
         isInternalUpdate = false;
@@ -335,46 +415,51 @@ function parseInitialValue(val) {
 }
 
 // Watch for external modelValue changes (handles edit mode initialization and form reset)
-watch(() => props.modelValue, (newVal, oldVal) => {
-    // Skip if this is our own internal update
-    if (isInternalUpdate) return;
-    
-    // Reset if explicitly set to empty (form reset)
-    if (newVal === '' && oldVal !== '' && oldVal !== undefined) {
-        letter1.value = '';
-        letter2.value = '';
-        letter3.value = '';
-        plateNumbers.value = '';
-        freeTextPlate.value = '';
-        skipFormat.value = false;
-        initialized = false;
-        return;
-    }
-    
-    // Parse new value if:
-    // 1. Not yet initialized, OR
-    // 2. Value changed from parent (different vehicle being edited)
-    if (newVal) {
-        // Check if current state matches incoming value
-        const currentPlateString = skipFormat.value ? freeTextPlate.value : 
-            `${letter1.value}${letter2.value}${letter3.value} ${plateNumbers.value}`.trim();
-        
-        // If values are different, re-parse (new vehicle being edited)
-        if (!initialized || (currentPlateString !== newVal && oldVal !== undefined)) {
-            // Reset state first if re-initializing
-            // Set initialized=false FIRST to prevent watchers from clearing values
-            if (initialized) {
-                initialized = false;
-                letter1.value = '';
-                letter2.value = '';
-                letter3.value = '';
-                plateNumbers.value = '';
-                freeTextPlate.value = '';
-                skipFormat.value = false;
-            }
-            parseInitialValue(newVal);
-            initialized = true;
+watch(
+    () => props.modelValue,
+    (newVal, oldVal) => {
+        // Skip if this is our own internal update
+        if (isInternalUpdate) return;
+
+        // Reset if explicitly set to empty (form reset)
+        if (newVal === '' && oldVal !== '' && oldVal !== undefined) {
+            letter1.value = '';
+            letter2.value = '';
+            letter3.value = '';
+            plateNumbers.value = '';
+            freeTextPlate.value = '';
+            skipFormat.value = false;
+            initialized = false;
+            return;
         }
-    }
-}, { immediate: true });
+
+        // Parse new value if:
+        // 1. Not yet initialized, OR
+        // 2. Value changed from parent (different vehicle being edited)
+        if (newVal) {
+            // Check if current state matches incoming value
+            const currentPlateString = skipFormat.value
+                ? freeTextPlate.value
+                : `${letter1.value}${letter2.value}${letter3.value} ${plateNumbers.value}`.trim();
+
+            // If values are different, re-parse (new vehicle being edited)
+            if (!initialized || (currentPlateString !== newVal && oldVal !== undefined)) {
+                // Reset state first if re-initializing
+                // Set initialized=false FIRST to prevent watchers from clearing values
+                if (initialized) {
+                    initialized = false;
+                    letter1.value = '';
+                    letter2.value = '';
+                    letter3.value = '';
+                    plateNumbers.value = '';
+                    freeTextPlate.value = '';
+                    skipFormat.value = false;
+                }
+                parseInitialValue(newVal);
+                initialized = true;
+            }
+        }
+    },
+    { immediate: true }
+);
 </script>

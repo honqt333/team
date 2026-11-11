@@ -226,7 +226,7 @@ onUnmounted(() => {
                     class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-medium transition-all"
                     :class="
                         activeDevice === d.id
-                            ? 'bg-white dark:bg-gray-700 text-indigo-600 dark:text-indigo-400 shadow-sm font-bold'
+                            ? 'bg-white dark:bg-gray-700 text-action-primary shadow-sm font-bold'
                             : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
                     "
                     :title="t(d.labelKey)"
@@ -256,7 +256,7 @@ onUnmounted(() => {
                 <a
                     :href="previewUrl"
                     target="_blank"
-                    class="p-1.5 text-gray-500 hover:text-indigo-600 dark:text-gray-400 dark:hover:text-indigo-400 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                    class="p-1.5 text-gray-500 hover:text-action-primary dark:text-gray-400 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
                     :title="t('system.website.open_new_tab')"
                 >
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -288,7 +288,7 @@ onUnmounted(() => {
                 >
                     <div class="flex flex-col items-center gap-3 text-gray-600 dark:text-gray-300">
                         <svg
-                            class="animate-spin h-8 w-8 text-indigo-600"
+                            class="animate-spin h-8 w-8 text-action-primary"
                             fill="none"
                             viewBox="0 0 24 24"
                         >

@@ -45,7 +45,7 @@
                 <button
                     @click="saveWeeklySchedule"
                     :disabled="savingWeekly"
-                    class="px-4 py-2 bg-violet-600 text-white rounded-lg hover:bg-violet-700 disabled:opacity-50 text-sm"
+                    class="px-4 py-2 bg-action-primary text-white rounded-lg hover:bg-action-primary-hover disabled:opacity-50 text-sm"
                 >
                     {{
                         savingWeekly

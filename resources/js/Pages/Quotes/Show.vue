@@ -20,7 +20,7 @@
                             <button
                                 v-if="quote.status !== 'rejected'"
                                 @click="shareQuote"
-                                class="p-2.5 text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-xl transition-all"
+                                class="p-2.5 text-gray-500 hover:text-action-primary hover:bg-selection-bg rounded-xl transition-all"
                             >
                                 <svg
                                     class="w-5 h-5"
@@ -58,7 +58,7 @@
                             <button
                                 v-if="quote.status === 'draft' || quote.status === 'sent'"
                                 @click="openEditModal"
-                                class="p-2.5 text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-xl transition-all"
+                                class="p-2.5 text-gray-500 hover:text-action-primary hover:bg-selection-bg rounded-xl transition-all"
                             >
                                 <svg
                                     class="w-5 h-5"
@@ -131,7 +131,7 @@
                         <button
                             v-if="quote.status === 'approved'"
                             @click="approveQuote"
-                            class="flex items-center gap-2 px-6 py-2.5 bg-purple-600 text-white rounded-2xl font-bold shadow-lg shadow-purple-500/25 hover:shadow-purple-500/40 hover:-translate-y-0.5 transition-all"
+                            class="flex items-center gap-2 px-6 py-2.5 bg-purple-600 text-white rounded-2xl font-bold shadow-lg shadow-focus-ring-soft hover:shadow-focus-ring-soft hover:-translate-y-0.5 transition-all"
                         >
                             <svg
                                 class="w-5 h-5"
@@ -252,7 +252,7 @@
                         >
                             <Link
                                 :href="route('work-orders.show', quote.converted_work_order.id)"
-                                class="text-xs font-black text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-900/30 px-3 py-1.5 rounded-xl flex items-center gap-2 hover:bg-purple-100 transition-all border border-purple-100 dark:border-purple-800 shadow-sm"
+                                class="text-xs font-black text-purple-600 bg-purple-50 px-3 py-1.5 rounded-xl flex items-center gap-2 hover:bg-purple-100 transition-all border border-purple-100 shadow-sm"
                             >
                                 <svg
                                     class="w-3.5 h-3.5"
@@ -363,7 +363,7 @@
                             <button
                                 type="button"
                                 @click="openSignatureModal"
-                                class="px-3 py-1.5 text-xs font-bold bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-900/30 dark:hover:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400 rounded-lg transition-all flex items-center gap-1.5"
+                                class="px-3 py-1.5 text-xs font-bold bg-selection-bg hover:bg-selection-bg text-action-primary rounded-lg transition-all flex items-center gap-1.5"
                             >
                                 <span>✍️</span>
                                 <span>{{ $t('work_orders.print_view.customer_signature') }}</span>
@@ -516,9 +516,9 @@
                         >
                             <div class="flex items-center gap-3 flex-1">
                                 <div
-                                    class="w-8 h-8 rounded-lg bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center"
+                                    class="w-8 h-8 rounded-lg bg-selection-bg flex items-center justify-center"
                                 >
-                                    <span class="text-indigo-600 dark:text-indigo-400">🔧</span>
+                                    <span class="text-action-primary">🔧</span>
                                 </div>
                                 <span class="font-semibold text-gray-900 dark:text-white">
                                     {{ getName(dept) }}
@@ -567,7 +567,7 @@
                                 <div
                                     v-for="(line, index) in getLinesForDept(dept.id)"
                                     :key="line.id"
-                                    class="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700/70 border-s-4 border-s-indigo-500/80 p-4 transition-all hover:shadow-lg hover:shadow-indigo-500/5 hover:border-gray-200 dark:hover:border-gray-600 group relative"
+                                    class="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700/70 border-s-4 border-s-indigo-500/80 p-4 transition-all hover:shadow-lg hover:shadow-focus-ring-soft hover:border-gray-200 dark:hover:border-gray-600 group relative"
                                 >
                                     <div class="flex items-start justify-between gap-4">
                                         <!-- Right Side: Content -->
@@ -583,7 +583,7 @@
                                                     <button
                                                         @click="editLine(line)"
                                                         type="button"
-                                                        class="font-bold text-gray-900 dark:text-white text-base hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors text-start leading-snug"
+                                                        class="font-bold text-gray-900 dark:text-white text-base hover:text-action-primary transition-colors text-start leading-snug"
                                                     >
                                                         {{ line.title }}
                                                     </button>
@@ -611,7 +611,7 @@
                                             >
                                                 <!-- Labor/Service cost badge -->
                                                 <div
-                                                    class="inline-flex items-center gap-1.5 bg-indigo-50/80 dark:bg-indigo-950/30 text-indigo-700 dark:text-indigo-300 border border-indigo-100/80 dark:border-indigo-900/40 px-3 py-1 rounded-full text-xs font-semibold"
+                                                    class="inline-flex items-center gap-1.5 bg-selection-bg text-selection-text border border-action-primary/25 px-3 py-1 rounded-full text-xs font-semibold"
                                                     :title="$t('work_orders.item.service_cost')"
                                                 >
                                                     <svg
@@ -692,7 +692,7 @@
                                         >
                                             <button
                                                 @click="editLine(line)"
-                                                class="p-2 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 rounded-lg transition-colors"
+                                                class="p-2 text-gray-400 hover:text-action-primary hover:bg-selection-bg rounded-lg transition-colors"
                                                 :title="$t('common.edit')"
                                             >
                                                 <svg
@@ -745,7 +745,7 @@
                             <button
                                 v-if="quote.status === 'draft' || quote.status === 'sent'"
                                 @click="openServiceModal(dept.id)"
-                                class="w-full flex items-center justify-center gap-2 py-2 text-sm text-indigo-600 dark:text-indigo-400 border border-dashed border-indigo-300 dark:border-indigo-700 rounded-lg hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition-colors mt-2"
+                                class="w-full flex items-center justify-center gap-2 py-2 text-sm text-action-primary border border-dashed border-action-primary/25 rounded-lg hover:bg-selection-bg transition-colors mt-2"
                             >
                                 <svg
                                     class="w-4 h-4"
@@ -1171,7 +1171,7 @@ function getQuoteStatusClass(status) {
         case 'approved':
             return 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300 px-3 py-1 rounded-full text-sm font-medium';
         case 'converted':
-            return 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300 px-3 py-1 rounded-full text-sm font-medium';
+            return 'bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-sm font-medium';
         case 'rejected':
             return 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300 px-3 py-1 rounded-full text-sm font-medium';
         default:

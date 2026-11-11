@@ -5,7 +5,7 @@
         <div class="flex items-center gap-3">
             <!-- Tenant avatar -->
             <div
-                class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 text-lg font-bold text-white"
+                class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-action-primary hover:bg-action-primary-hover text-lg font-bold text-white"
             >
                 {{ initials }}
             </div>

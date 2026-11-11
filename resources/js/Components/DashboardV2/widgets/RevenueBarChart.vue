@@ -77,7 +77,7 @@ const labelStride = computed(() => {
                             :width="100 / data.length - 1"
                             :height="barHeight(d.total)"
                             rx="0.5"
-                            class="fill-indigo-500 hover:fill-indigo-600 dark:fill-indigo-400 dark:hover:fill-indigo-300 transition-colors"
+                            class="fill-action-primary hover:fill-action-primary transition-colors"
                         >
                             <title>
                                 {{ d.label }}: {{ new Intl.NumberFormat('en-US').format(d.total) }}

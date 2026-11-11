@@ -40,7 +40,7 @@
                         type="month"
                         v-model="selectedMonth"
                         @change="changeMonth"
-                        class="px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
+                        class="px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring focus:border-transparent transition-all"
                     />
                 </div>
             </div>
@@ -167,9 +167,9 @@
                     class="bg-white dark:bg-gray-800 rounded-2xl p-5 shadow-sm border border-gray-200 dark:border-gray-700"
                 >
                     <div class="flex items-center gap-3">
-                        <div class="p-2.5 bg-violet-100 dark:bg-violet-900/30 rounded-xl">
+                        <div class="p-2.5 bg-selection-bg rounded-xl">
                             <svg
-                                class="w-5 h-5 text-violet-600 dark:text-violet-400"
+                                class="w-5 h-5 text-action-primary"
                                 fill="none"
                                 stroke="currentColor"
                                 viewBox="0 0 24 24"
@@ -186,7 +186,7 @@
                             <p class="text-xs text-gray-500 dark:text-gray-400">
                                 {{ $t('employee_portal.total_hours') }}
                             </p>
-                            <p class="text-xl font-bold text-violet-600 dark:text-violet-400">
+                            <p class="text-xl font-bold text-action-primary">
                                 {{ summary?.total_hours || 0 }}h
                             </p>
                         </div>

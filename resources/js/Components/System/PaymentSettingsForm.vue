@@ -217,7 +217,7 @@
                         <button
                             type="button"
                             @click="addBankAccount"
-                            class="text-sm text-indigo-600 hover:text-indigo-700"
+                            class="text-sm text-action-primary hover:text-selection-text"
                         >
                             {{ t('system.payment_settings.bank_transfer.add_account') }}
                         </button>
@@ -540,7 +540,7 @@
                 <button
                     type="submit"
                     :disabled="form.processing"
-                    class="inline-flex items-center gap-2 px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm rounded-xl transition-all shadow-md shadow-indigo-500/20 active:scale-95 disabled:opacity-50"
+                    class="inline-flex items-center gap-2 px-6 py-2.5 bg-action-primary hover:bg-action-primary-hover text-white font-bold text-sm rounded-xl transition-all shadow-md shadow-focus-ring-soft active:scale-95 disabled:opacity-50"
                 >
                     <svg
                         v-if="form.processing"

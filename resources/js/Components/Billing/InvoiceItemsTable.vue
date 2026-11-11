@@ -90,11 +90,7 @@ const props = defineProps({
 const isAr = computed(() => (document?.documentElement?.lang || 'ar') === 'ar');
 
 const billingLabel = computed(() => {
-    const cycle = props.subscription?.billing_cycle;
-    if (cycle === 'yearly') {
-        return t('subscription.annual_subscription');
-    }
-    return t('subscription.monthly_subscription');
+    return t('subscription.annual_subscription');
 });
 
 const items = computed(() => {

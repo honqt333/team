@@ -309,7 +309,7 @@
                             v-model="localFilters.search"
                             @keyup.enter="applyFilters"
                             :placeholder="$t('reports.stock_activities_report.search_placeholder')"
-                            class="w-full text-xs rounded-xl border-gray-300 dark:border-gray-600 bg-gray-50/50 dark:bg-gray-900/50 focus:bg-white dark:focus:bg-gray-900 text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:ring-2 focus:ring-amber-500 focus:border-transparent pe-8 ps-9 py-2 transition-all"
+                            class="w-full text-xs rounded-xl border-gray-300 dark:border-gray-600 bg-gray-50/50 dark:bg-gray-900/50 focus:bg-white dark:focus:bg-gray-900 text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:ring-2 focus:ring-focus-ring focus:border-transparent pe-8 ps-9 py-2 transition-all"
                         />
                         <svg
                             class="w-4 h-4 text-gray-400 absolute start-3 top-1/2 -translate-y-1/2 pointer-events-none"
@@ -505,7 +505,7 @@
 
                 <!-- 4. Net Stock Delta -->
                 <div
-                    class="bg-gradient-to-br from-blue-500/10 to-indigo-500/5 dark:from-blue-500/20 dark:to-indigo-500/10 rounded-2xl p-4 border border-blue-500/20 shadow-sm"
+                    class="bg-gradient-to-br from-blue-500/10 to-action-primary dark:from-blue-500/20 rounded-2xl p-4 border border-blue-500/20 shadow-sm"
                 >
                     <div class="flex items-center justify-between">
                         <span class="text-xs font-bold text-gray-600 dark:text-gray-300">
@@ -546,14 +546,14 @@
 
                 <!-- 5. Total Cost -->
                 <div
-                    class="bg-gradient-to-br from-purple-500/10 to-fuchsia-500/5 dark:from-purple-500/20 dark:to-fuchsia-500/10 rounded-2xl p-4 border border-purple-500/20 shadow-sm"
+                    class="bg-gradient-to-br from-purple-500/10 to-fuchsia-500/5 dark:to-fuchsia-500/10 rounded-2xl p-4 border border-purple-500/20 shadow-sm"
                 >
                     <div class="flex items-center justify-between">
                         <span class="text-xs font-bold text-gray-600 dark:text-gray-300">
                             {{ $t('reports.stock_activities_report.total_cost') }}
                         </span>
                         <div
-                            class="w-8 h-8 rounded-xl bg-purple-500/20 flex items-center justify-center text-purple-600 dark:text-purple-400"
+                            class="w-8 h-8 rounded-xl bg-purple-500/20 flex items-center justify-center text-purple-600"
                         >
                             <svg
                                 class="w-4 h-4"
@@ -570,9 +570,7 @@
                             </svg>
                         </div>
                     </div>
-                    <div
-                        class="mt-2 text-2xl font-black text-purple-700 dark:text-purple-400 font-mono"
-                    >
+                    <div class="mt-2 text-2xl font-black text-purple-700 font-mono">
                         {{ formatMoney(kpis.total_cost) }}
                     </div>
                     <div class="mt-1 text-[11px] text-gray-500 dark:text-gray-400">
@@ -683,9 +681,7 @@
                             </div>
                             <div class="text-right">
                                 <span class="text-[11px] text-gray-400 block">إجمالي التكلفة</span>
-                                <span
-                                    class="font-mono font-bold text-xs text-purple-700 dark:text-purple-400"
-                                >
+                                <span class="font-mono font-bold text-xs text-purple-700">
                                     {{ formatMoney(grp.total_cost) }}
                                 </span>
                             </div>
@@ -789,7 +785,7 @@
                                         {{ formatMoney(item.unit_cost) }}
                                     </td>
                                     <td
-                                        class="py-2.5 px-3 text-center font-mono font-bold text-purple-700 dark:text-purple-400"
+                                        class="py-2.5 px-3 text-center font-mono font-bold text-purple-700"
                                     >
                                         {{ formatMoney(item.total_cost) }}
                                     </td>
@@ -910,7 +906,7 @@
                                     {{ formatMoney(item.unit_cost) }}
                                 </td>
                                 <td
-                                    class="py-3 px-3.5 text-center font-mono font-bold text-purple-700 dark:text-purple-400"
+                                    class="py-3 px-3.5 text-center font-mono font-bold text-purple-700"
                                 >
                                     {{ formatMoney(item.total_cost) }}
                                 </td>
@@ -1312,7 +1308,7 @@ const getMoveBadgeClasses = (type) => {
         case 'transfer_in':
             return 'bg-cyan-100 text-cyan-800 dark:bg-cyan-900/60 dark:text-cyan-300';
         case 'transfer_out':
-            return 'bg-purple-100 text-purple-800 dark:bg-purple-900/60 dark:text-purple-300';
+            return 'bg-purple-100 text-purple-800';
         case 'purchase_return':
             return 'bg-rose-100 text-rose-800 dark:bg-rose-900/60 dark:text-rose-300';
         case 'reversal':

@@ -10,7 +10,7 @@
             >
                 <!-- Subtle Gradient Background -->
                 <div
-                    class="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-indigo-50/50 to-transparent dark:from-indigo-900/10 dark:to-transparent -mr-16 -mt-16 rounded-full blur-3xl transition-opacity group-hover:opacity-100 opacity-50"
+                    class="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-action-primary to-transparent dark:to-transparent -mr-16 -mt-16 rounded-full blur-3xl transition-opacity group-hover:opacity-100 opacity-50"
                 ></div>
 
                 <div
@@ -79,7 +79,9 @@
                                 <div
                                     class="flex items-center gap-2 bg-gray-50 dark:bg-gray-900/50 px-2 py-1 rounded-lg border border-gray-100 dark:border-gray-700"
                                 >
-                                    <span class="text-[10px] font-bold text-indigo-500 uppercase">
+                                    <span
+                                        class="text-[10px] font-bold text-action-primary uppercase"
+                                    >
                                         SKU
                                     </span>
                                     <span class="font-mono font-bold">{{ part.sku }}</span>
@@ -128,7 +130,7 @@
                                 v-if="can('inventory.parts.edit')"
                                 @click="editPart"
                                 :title="$t('common.edit')"
-                                class="inline-flex items-center gap-2 px-3 py-2 rounded-xl font-black text-xs border border-indigo-100/70 dark:border-indigo-800/30 bg-indigo-50/70 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-300 hover:bg-white dark:hover:bg-indigo-900/30 hover:shadow-md transition-all"
+                                class="inline-flex items-center gap-2 px-3 py-2 rounded-xl font-black text-xs border border-action-primary/25 bg-selection-bg text-selection-text hover:bg-white hover:shadow-md transition-all"
                             >
                                 <svg
                                     class="w-4 h-4"
@@ -174,7 +176,7 @@
                         <button
                             v-if="can('inventory.parts.edit')"
                             @click="openStockModal"
-                            class="inline-flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl text-xs sm:text-sm font-black shadow-md shadow-indigo-500/25 hover:shadow-lg hover:shadow-indigo-500/35 active:scale-95 transition-all"
+                            class="inline-flex items-center gap-2 px-4 py-2.5 bg-action-primary hover:bg-action-primary-hover text-white rounded-xl text-xs sm:text-sm font-black shadow-md shadow-focus-ring-soft hover:shadow-lg hover:shadow-focus-ring-soft active:scale-95 transition-all"
                         >
                             <svg
                                 class="w-4 h-4"
@@ -201,7 +203,7 @@
                         class="bg-gray-50/50 dark:bg-gray-900/30 rounded-2xl p-4 border border-gray-100 dark:border-gray-700/50 group/stat hover:bg-white dark:hover:bg-gray-800 transition-all cursor-default"
                     >
                         <div
-                            class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1 group-hover/stat:text-indigo-500 transition-colors"
+                            class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1 group-hover/stat:text-action-primary transition-colors"
                         >
                             {{ $t('inventory.stock.total_qty') }}
                         </div>
@@ -222,7 +224,7 @@
                         class="bg-gray-50/50 dark:bg-gray-900/30 rounded-2xl p-4 border border-gray-100 dark:border-gray-700/50 group/stat hover:bg-white dark:hover:bg-gray-800 transition-all cursor-default"
                     >
                         <div
-                            class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1 group-hover/stat:text-indigo-500 transition-colors"
+                            class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1 group-hover/stat:text-action-primary transition-colors"
                         >
                             {{ $t('inventory.stock.avg_cost') }}
                         </div>
@@ -243,7 +245,7 @@
                         @click="can('inventory.parts.edit') ? openStockModal() : null"
                         :class="
                             can('inventory.parts.edit')
-                                ? 'cursor-pointer hover:border-indigo-300 dark:hover:border-indigo-600 hover:shadow-sm'
+                                ? 'cursor-pointer hover:border-action-primary/25 hover:shadow-sm'
                                 : 'cursor-default'
                         "
                         class="bg-gray-50/50 dark:bg-gray-900/30 rounded-2xl p-4 border border-gray-100 dark:border-gray-700/50 group/stat hover:bg-white dark:hover:bg-gray-800 transition-all"
@@ -253,13 +255,13 @@
                     >
                         <div class="flex items-center justify-between mb-1">
                             <div
-                                class="text-[10px] font-black text-gray-400 uppercase tracking-widest group-hover/stat:text-indigo-500 transition-colors"
+                                class="text-[10px] font-black text-gray-400 uppercase tracking-widest group-hover/stat:text-action-primary transition-colors"
                             >
                                 {{ $t('inventory.parts.default_sale_price') }}
                             </div>
                             <svg
                                 v-if="can('inventory.parts.edit')"
-                                class="w-3.5 h-3.5 text-gray-300 group-hover/stat:text-indigo-500 transition-colors"
+                                class="w-3.5 h-3.5 text-gray-300 group-hover/stat:text-action-primary transition-colors"
                                 fill="none"
                                 stroke="currentColor"
                                 viewBox="0 0 24 24"
@@ -299,7 +301,7 @@
                                 : 'cursor-default',
                             isLowStock
                                 ? 'bg-red-50/40 dark:bg-red-900/10 border-red-200 dark:border-red-800/40'
-                                : 'bg-gray-50/50 dark:bg-gray-900/30 border-gray-100 dark:border-gray-700/50 hover:border-indigo-300 dark:hover:border-indigo-600',
+                                : 'bg-gray-50/50 dark:bg-gray-900/30 border-gray-100 dark:border-gray-700/50 hover:border-action-primary/25',
                         ]"
                         class="rounded-2xl p-4 border group/stat hover:bg-white dark:hover:bg-gray-800 transition-all"
                         :title="
@@ -312,7 +314,7 @@
                                 :class="
                                     isLowStock
                                         ? 'text-red-500'
-                                        : 'text-gray-400 group-hover/stat:text-indigo-500'
+                                        : 'text-gray-400 group-hover/stat:text-action-primary'
                                 "
                             >
                                 {{ $t('inventory.parts.min_qty') }}
@@ -325,7 +327,7 @@
                             </span>
                             <svg
                                 v-else-if="can('inventory.parts.edit')"
-                                class="w-3.5 h-3.5 text-gray-300 group-hover/stat:text-indigo-500 transition-colors"
+                                class="w-3.5 h-3.5 text-gray-300 group-hover/stat:text-action-primary transition-colors"
                                 fill="none"
                                 stroke="currentColor"
                                 viewBox="0 0 24 24"
@@ -377,7 +379,7 @@
                         <button
                             v-if="can('inventory.parts.edit')"
                             @click="openStockModal"
-                            class="text-xs text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 font-bold hover:underline"
+                            class="text-xs text-action-primary hover:text-selection-text font-bold hover:underline"
                         >
                             {{ $t('common.edit') }}
                         </button>
@@ -760,7 +762,7 @@
                                 :class="[
                                     'px-2.5 py-1 rounded-lg text-xs font-medium transition-all',
                                     link.active
-                                        ? 'bg-indigo-600 text-white shadow-sm font-bold'
+                                        ? 'bg-action-primary text-white shadow-sm font-bold'
                                         : link.url
                                           ? 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600'
                                           : 'bg-gray-50 dark:bg-gray-800 text-gray-300 dark:text-gray-600 cursor-not-allowed border border-gray-100 dark:border-gray-700',
@@ -959,8 +961,8 @@ const getAllMoveTypeBadgeClass = (type) => {
         sale: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
         adjustment_in: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
         adjustment_out: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
-        transfer_in: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400',
-        transfer_out: 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400',
+        transfer_in: 'bg-purple-100 text-purple-700',
+        transfer_out: 'bg-selection-bg text-selection-text',
         reversal: 'bg-gray-100 text-gray-700 dark:bg-gray-600 dark:text-gray-300',
         purchase_return: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
     };

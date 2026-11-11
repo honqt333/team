@@ -21,7 +21,7 @@
 
                     <button
                         @click="showAddTechDropdown = !showAddTechDropdown"
-                        class="inline-flex items-center gap-2 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white text-xs font-bold rounded-xl transition-all shadow-sm shadow-indigo-100 dark:shadow-none z-30 relative"
+                        class="inline-flex items-center gap-2 px-3 py-1.5 bg-action-primary hover:bg-action-primary-hover active:bg-action-primary-active text-white text-xs font-bold rounded-xl transition-all shadow-sm shadow-focus-ring-soft dark:shadow-none z-30 relative"
                     >
                         <svg
                             class="w-3.5 h-3.5"
@@ -60,7 +60,7 @@
                                 />
                                 <div
                                     v-else
-                                    class="w-8 h-8 rounded-full bg-indigo-50 dark:bg-indigo-950 flex items-center justify-center text-indigo-600 dark:text-indigo-400 font-bold text-xs flex-shrink-0 border border-indigo-100 dark:border-indigo-900"
+                                    class="w-8 h-8 rounded-full bg-selection-bg flex items-center justify-center text-action-primary font-bold text-xs flex-shrink-0 border border-action-primary/25"
                                 >
                                     {{ getInitials(tech.name) }}
                                 </div>
@@ -91,7 +91,7 @@
                         :class="[
                             'p-2 rounded-lg transition-all',
                             viewMode === 'grid'
-                                ? 'bg-white dark:bg-gray-700 shadow-sm text-indigo-600 dark:text-indigo-400'
+                                ? 'bg-white dark:bg-gray-700 shadow-sm text-action-primary'
                                 : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300',
                         ]"
                     >
@@ -109,7 +109,7 @@
                         :class="[
                             'p-2 rounded-lg transition-all',
                             viewMode === 'table'
-                                ? 'bg-white dark:bg-gray-700 shadow-sm text-indigo-600 dark:text-indigo-400'
+                                ? 'bg-white dark:bg-gray-700 shadow-sm text-action-primary'
                                 : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300',
                         ]"
                     >
@@ -144,12 +144,12 @@
                             <img
                                 v-if="tech.photo_url"
                                 :src="tech.photo_url"
-                                class="w-12 h-12 rounded-full object-cover border-2 border-indigo-50 dark:border-indigo-950 flex-shrink-0"
+                                class="w-12 h-12 rounded-full object-cover border-2 border-action-primary/15 flex-shrink-0"
                                 alt=""
                             />
                             <div
                                 v-else
-                                class="w-12 h-12 rounded-full bg-indigo-50 dark:bg-indigo-950/40 flex items-center justify-center text-indigo-600 dark:text-indigo-400 font-bold text-lg border-2 border-indigo-50 dark:border-indigo-950 flex-shrink-0"
+                                class="w-12 h-12 rounded-full bg-selection-bg flex items-center justify-center text-action-primary font-bold text-lg border-2 border-action-primary/15 flex-shrink-0"
                             >
                                 {{ getInitials(tech.name) }}
                             </div>
@@ -195,7 +195,7 @@
                         <button
                             v-else-if="tech.items.length > 0"
                             @click="printTechnicianCard(tech.id)"
-                            class="p-2 text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 rounded-xl transition-all"
+                            class="p-2 text-gray-400 hover:text-action-primary hover:bg-selection-bg rounded-xl transition-all"
                             :title="labels.printWorkCard"
                         >
                             <svg
@@ -240,7 +240,7 @@
 
                             <button
                                 @click.stop="toggleAddServiceDropdown(tech.id)"
-                                class="w-6 h-6 rounded-lg bg-indigo-50 dark:bg-indigo-900/30 hover:bg-indigo-100 dark:hover:bg-indigo-900/55 text-indigo-600 dark:text-indigo-400 flex items-center justify-center transition-colors shadow-sm relative z-20"
+                                class="w-6 h-6 rounded-lg bg-selection-bg hover:bg-selection-bg text-action-primary flex items-center justify-center transition-colors shadow-sm relative z-20"
                                 :title="labels.selectService"
                             >
                                 <svg
@@ -268,9 +268,11 @@
                                         v-for="item in getUnassociatedItems(tech)"
                                         :key="item.id"
                                         @click="assignServiceToTech(tech.id, item.id)"
-                                        class="w-full px-4 py-2.5 text-start text-xs font-semibold text-gray-700 dark:text-gray-300 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors flex items-center gap-2"
+                                        class="w-full px-4 py-2.5 text-start text-xs font-semibold text-gray-700 dark:text-gray-300 hover:bg-selection-bg hover:text-action-primary transition-colors flex items-center gap-2"
                                     >
-                                        <span class="w-1.5 h-1.5 rounded-full bg-indigo-500"></span>
+                                        <span
+                                            class="w-1.5 h-1.5 rounded-full bg-action-primary"
+                                        ></span>
                                         <span class="truncate">{{ getItemName(item) }}</span>
                                     </button>
                                 </div>
@@ -288,12 +290,12 @@
                         <div
                             v-for="item in tech.items"
                             :key="item.id"
-                            class="py-2 px-3 bg-gray-50/70 dark:bg-gray-900/40 rounded-xl border border-gray-100 dark:border-gray-800/80 text-xs text-gray-700 dark:text-gray-300 hover:bg-indigo-50/60 dark:hover:bg-indigo-950/20 hover:border-indigo-100 dark:hover:border-indigo-900/40 transition-colors"
+                            class="py-2 px-3 bg-gray-50/70 dark:bg-gray-900/40 rounded-xl border border-gray-100 dark:border-gray-800/80 text-xs text-gray-700 dark:text-gray-300 hover:bg-selection-bg hover:border-action-primary/25 transition-colors"
                         >
                             <div class="flex items-center justify-between">
                                 <button
                                     @click="$emit('click-service', item.id)"
-                                    class="font-semibold text-gray-700 dark:text-gray-300 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 truncate pr-2 text-start transition-colors"
+                                    class="font-semibold text-gray-700 dark:text-gray-300 group-hover:text-action-primary truncate pr-2 text-start transition-colors"
                                 >
                                     {{ getItemName(item) }}
                                     <span
@@ -301,7 +303,7 @@
                                             item.pivot_share !== undefined &&
                                             parseFloat(item.pivot_share) < 100
                                         "
-                                        class="ms-1 text-gray-400 group-hover:text-indigo-400 font-mono"
+                                        class="ms-1 text-gray-400 group-hover:text-action-primary font-mono"
                                     >
                                         ({{ parseFloat(parseFloat(item.pivot_share).toFixed(2)) }}%)
                                     </span>
@@ -414,7 +416,7 @@
                                     />
                                     <div
                                         v-else
-                                        class="w-8 h-8 rounded-full bg-indigo-50 dark:bg-indigo-950/40 flex items-center justify-center text-indigo-600 dark:text-indigo-400 font-bold text-xs border border-indigo-100 dark:border-indigo-900"
+                                        class="w-8 h-8 rounded-full bg-selection-bg flex items-center justify-center text-action-primary font-bold text-xs border border-action-primary/25"
                                     >
                                         {{ getInitials(tech.name) }}
                                     </div>
@@ -440,9 +442,11 @@
                                         v-for="item in tech.items"
                                         :key="item.id"
                                         @click="$emit('click-service', item.id)"
-                                        class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-gray-100 dark:bg-gray-700/60 text-gray-700 dark:text-gray-300 hover:bg-indigo-50 dark:hover:bg-indigo-950/30 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors border border-gray-150/20 dark:border-gray-650"
+                                        class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-gray-100 dark:bg-gray-700/60 text-gray-700 dark:text-gray-300 hover:bg-selection-bg hover:text-action-primary transition-colors border border-gray-150/20 dark:border-gray-650"
                                     >
-                                        <span class="w-1.5 h-1.5 rounded-full bg-indigo-500"></span>
+                                        <span
+                                            class="w-1.5 h-1.5 rounded-full bg-action-primary"
+                                        ></span>
                                         {{ getItemName(item) }}
                                         <span
                                             v-if="

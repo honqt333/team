@@ -143,7 +143,7 @@
                                 type="text"
                                 name="make_other"
                                 v-model="form.make_other"
-                                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-sm focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all"
+                                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-sm focus:ring-2 focus:ring-focus-ring focus:border-transparent transition-all"
                                 :class="{ 'border-red-500': form.errors.make_other }"
                             />
                         </div>
@@ -155,7 +155,7 @@
                                 type="text"
                                 name="model_other"
                                 v-model="form.model_other"
-                                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-sm focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all"
+                                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-sm focus:ring-2 focus:ring-focus-ring focus:border-transparent transition-all"
                             />
                         </div>
                     </div>
@@ -290,7 +290,7 @@
                                 ).replace(/[^0-9]/g, '')
                             "
                             :placeholder="$t('vehicles.form.odometer_placeholder')"
-                            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-sm focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all"
+                            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-sm focus:ring-2 focus:ring-focus-ring focus:border-transparent transition-all"
                         />
                     </div>
                 </div>
@@ -311,8 +311,8 @@
                                 .toUpperCase()
                         "
                         :placeholder="$t('vehicles.form.vin_placeholder')"
-                        class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-sm focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all"
-                        :class="{ 'border-red-500 focus:ring-red-500': form.errors.vin }"
+                        class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-sm focus:ring-2 focus:ring-focus-ring focus:border-transparent transition-all"
+                        :class="{ 'border-red-500 focus:ring-danger': form.errors.vin }"
                     />
                     <p v-if="form.errors.vin" class="mt-1 text-xs text-red-600 dark:text-red-400">
                         {{ form.errors.vin }}
@@ -329,7 +329,7 @@
                     name="notes"
                     v-model="form.notes"
                     rows="2"
-                    class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-teal-500 focus:border-transparent resize-none transition-all"
+                    class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-focus-ring focus:border-transparent resize-none transition-all"
                 ></textarea>
             </div>
         </form>
@@ -419,7 +419,7 @@
                 <div
                     v-if="duplicateVehicle"
                     @click="navigateToDuplicateVehicle"
-                    class="group relative bg-white dark:bg-gray-800 rounded-2xl border-2 border-dashed border-gray-200 dark:border-gray-700 hover:border-indigo-400 dark:hover:border-indigo-500 hover:shadow-xl hover:-translate-y-1 cursor-pointer transition-all duration-300 overflow-hidden"
+                    class="group relative bg-white dark:bg-gray-800 rounded-2xl border-2 border-dashed border-gray-200 dark:border-gray-700 hover:border-action-primary hover:shadow-xl hover:-translate-y-1 cursor-pointer transition-all duration-300 overflow-hidden"
                 >
                     <!-- Card Content -->
                     <div class="relative z-10 flex flex-col h-full">
@@ -438,7 +438,7 @@
                             <div class="mb-3">
                                 <div class="flex items-baseline justify-between mb-1 gap-1">
                                     <h3
-                                        class="text-sm font-bold text-gray-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors truncate"
+                                        class="text-sm font-bold text-gray-900 dark:text-white group-hover:text-action-primary transition-colors truncate"
                                     >
                                         {{ duplicateVehicle.make_name || $t('common.na') }}
                                     </h3>
@@ -461,7 +461,7 @@
                                 class="mt-auto pt-3 border-t border-gray-100 dark:border-gray-700/50 flex items-center gap-2.5"
                             >
                                 <div
-                                    class="w-7 h-7 rounded-lg bg-indigo-50 dark:bg-indigo-900/30 flex items-center justify-center flex-shrink-0 text-indigo-600 dark:text-indigo-400"
+                                    class="w-7 h-7 rounded-lg bg-selection-bg flex items-center justify-center flex-shrink-0 text-action-primary"
                                 >
                                     <svg
                                         class="w-4 h-4"
@@ -512,7 +512,7 @@
                                 </div>
                                 <div v-if="duplicateVehicle.vin" class="flex items-center gap-1.5">
                                     <svg
-                                        class="w-3.5 h-3.5 text-indigo-500"
+                                        class="w-3.5 h-3.5 text-action-primary"
                                         fill="none"
                                         stroke="currentColor"
                                         viewBox="0 0 24 24"
@@ -546,7 +546,7 @@
                     <button
                         type="button"
                         @click="navigateToDuplicateVehicle"
-                        class="px-4 py-2 text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl transition-all shadow"
+                        class="px-4 py-2 text-sm font-semibold text-white bg-action-primary hover:bg-action-primary-hover rounded-xl transition-all shadow"
                     >
                         {{ $t('vehicles.view_details') }}
                     </button>

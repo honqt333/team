@@ -13,7 +13,7 @@
                         <!-- Print -->
                         <button
                             @click="printOrder"
-                            class="p-2.5 text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-xl transition-all"
+                            class="p-2.5 text-gray-500 hover:text-action-primary hover:bg-selection-bg rounded-xl transition-all"
                             :title="$t('common.print')"
                         >
                             <svg
@@ -58,7 +58,7 @@
                     <button
                         v-if="order.status === 'draft' && order.items?.length > 0"
                         @click="sendOrder"
-                        class="flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-2xl font-bold shadow-lg shadow-indigo-500/30 hover:shadow-indigo-500/50 hover:-translate-y-0.5 transition-all"
+                        class="flex items-center gap-2 px-6 py-2.5 bg-action-primary hover:bg-action-primary-hover text-white rounded-2xl font-bold shadow-lg shadow-focus-ring-soft hover:shadow-focus-ring-soft hover:-translate-y-0.5 transition-all"
                     >
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path
@@ -105,7 +105,7 @@
                                 {{ order.code }}
                             </h1>
                             <div
-                                class="w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-600 to-purple-600 shadow-xl shadow-indigo-500/30 flex items-center justify-center text-white shrink-0"
+                                class="w-14 h-14 rounded-2xl bg-action-primary hover:bg-action-primary-hover shadow-xl shadow-focus-ring-soft flex items-center justify-center text-white shrink-0"
                             >
                                 <svg
                                     class="w-8 h-8"
@@ -130,14 +130,14 @@
             <div>
                 <!-- Supplier Info -->
                 <div
-                    class="bg-white dark:bg-gray-800 rounded-3xl shadow-xl shadow-indigo-500/5 border border-gray-100 dark:border-gray-700 overflow-hidden"
+                    class="bg-white dark:bg-gray-800 rounded-3xl shadow-xl shadow-focus-ring-soft border border-gray-100 dark:border-gray-700 overflow-hidden"
                 >
                     <div class="p-6">
                         <div class="flex flex-col md:flex-row gap-6">
                             <!-- Supplier Icon/Logo -->
                             <div class="shrink-0">
                                 <div
-                                    class="w-24 h-24 rounded-3xl bg-indigo-50 dark:bg-indigo-900/20 flex items-center justify-center text-indigo-600 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-800 shadow-sm"
+                                    class="w-24 h-24 rounded-3xl bg-selection-bg flex items-center justify-center text-action-primary border border-action-primary/25 shadow-sm"
                                 >
                                     <svg
                                         class="w-12 h-12"
@@ -237,15 +237,15 @@
                                     <!-- Credit Invoice Info -->
                                     <div
                                         v-if="order.create_credit_invoice"
-                                        class="p-3 rounded-2xl bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-100 dark:border-indigo-800"
+                                        class="p-3 rounded-2xl bg-selection-bg border border-action-primary/25"
                                     >
                                         <div
-                                            class="text-[10px] font-black text-indigo-600 uppercase tracking-widest mb-1"
+                                            class="text-[10px] font-black text-action-primary uppercase tracking-widest mb-1"
                                         >
                                             {{ $t('purchasing.orders.create_credit_invoice') }}
                                         </div>
                                         <div
-                                            class="text-sm font-bold text-indigo-700 dark:text-indigo-300 font-mono"
+                                            class="text-sm font-bold text-selection-text font-mono"
                                         >
                                             {{
                                                 order.due_date
@@ -310,14 +310,14 @@
             <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
                 <!-- Grand Total -->
                 <div
-                    class="p-5 rounded-3xl bg-gradient-to-br from-indigo-600 to-purple-700 shadow-xl shadow-indigo-500/20 text-white relative overflow-hidden group hover:scale-[1.02] transition-all duration-300"
+                    class="p-5 rounded-3xl bg-action-primary hover:bg-action-primary-hover shadow-xl shadow-focus-ring-soft text-white relative overflow-hidden group hover:scale-[1.02] transition-all duration-300"
                 >
                     <div
                         class="absolute -right-4 -bottom-4 w-24 h-24 bg-white/10 rounded-full blur-2xl"
                     ></div>
                     <div class="relative">
                         <div
-                            class="text-[10px] font-black uppercase tracking-[0.2em] text-indigo-100 opacity-80 mb-1"
+                            class="text-[10px] font-black uppercase tracking-[0.2em] text-action-on/80 mb-1"
                         >
                             {{ $t('common.total') }}
                         </div>
@@ -670,13 +670,13 @@
                         </div>
                     </div>
                     <div
-                        class="p-4 bg-indigo-50/50 rounded-xl border border-indigo-200 border-dashed"
+                        class="p-4 bg-selection-bg rounded-xl border border-action-primary/25 border-dashed"
                         v-if="order.create_credit_invoice"
                     >
-                        <div class="text-xs text-indigo-500 uppercase mb-1">
+                        <div class="text-xs text-action-primary uppercase mb-1">
                             {{ $t('purchasing.orders.create_credit_invoice') }}
                         </div>
-                        <div class="text-sm font-bold text-indigo-700 font-mono">
+                        <div class="text-sm font-bold text-selection-text font-mono">
                             {{ order.due_date ? formatDate(order.due_date) : $t('common.active') }}
                         </div>
                     </div>

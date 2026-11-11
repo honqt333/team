@@ -3,7 +3,7 @@
         <template #title>
             <div class="flex items-center gap-3">
                 <div
-                    class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-600 to-purple-600 flex items-center justify-center"
+                    class="w-10 h-10 rounded-xl bg-action-primary hover:bg-action-primary-hover flex items-center justify-center"
                 >
                     <svg
                         class="w-5 h-5 text-white"
@@ -188,7 +188,7 @@
                             "
                             type="button"
                             @click="form.whatsapp = form.phone"
-                            class="text-xs text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 transition-colors"
+                            class="text-xs text-action-primary hover:text-selection-text transition-colors"
                         >
                             {{ $t('customers.form.copy_from_phone') }}
                         </button>
@@ -315,7 +315,7 @@
                             type="button"
                             @click="fetchLocation"
                             :disabled="isLocating"
-                            class="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-lg transition-colors disabled:opacity-50"
+                            class="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium text-action-primary hover:bg-selection-bg rounded-lg transition-colors disabled:opacity-50"
                             :title="$t('customers.form.locate_me')"
                         >
                             <svg
@@ -412,7 +412,7 @@
                                 v-model="form.address_line"
                                 rows="2"
                                 :placeholder="$t('customers.form.address_placeholder')"
-                                class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500 focus:border-transparent resize-none transition-all"
+                                class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-focus-ring focus:border-transparent resize-none transition-all"
                             ></textarea>
                         </div>
 
@@ -426,7 +426,7 @@
                                     type="text"
                                     name="building_number"
                                     v-model="form.building_number"
-                                    class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                                    class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-focus-ring focus:border-transparent transition-all"
                                 />
                             </div>
                             <div>
@@ -437,7 +437,7 @@
                                     type="text"
                                     name="postal_code"
                                     v-model="form.postal_code"
-                                    class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                                    class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-focus-ring focus:border-transparent transition-all"
                                 />
                             </div>
                             <div>
@@ -448,7 +448,7 @@
                                     type="text"
                                     name="district"
                                     v-model="form.district"
-                                    class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                                    class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-focus-ring focus:border-transparent transition-all"
                                 />
                             </div>
                         </div>
@@ -463,7 +463,7 @@
                                     type="text"
                                     name="city"
                                     v-model="form.city"
-                                    class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                                    class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-focus-ring focus:border-transparent transition-all"
                                 />
                             </div>
                             <div>
@@ -474,7 +474,7 @@
                                     type="text"
                                     name="region"
                                     v-model="form.region"
-                                    class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                                    class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-focus-ring focus:border-transparent transition-all"
                                 />
                             </div>
                         </div>
@@ -489,7 +489,7 @@
                                 name="country"
                                 v-model="form.country"
                                 :placeholder="$t('customers.form.country_placeholder')"
-                                class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                                class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-focus-ring focus:border-transparent transition-all"
                             />
                         </div>
                     </div>
@@ -527,7 +527,7 @@
                     <button
                         @click="submitForm"
                         :disabled="form.processing"
-                        class="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white rounded-xl font-medium shadow-lg shadow-indigo-500/30 hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                        class="inline-flex items-center gap-2 px-5 py-2.5 bg-action-primary hover:bg-action-primary-hover text-white rounded-xl font-medium shadow-lg shadow-focus-ring-soft hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed transition-all"
                     >
                         <svg
                             v-if="form.processing"
@@ -575,12 +575,12 @@
             <div
                 v-if="duplicateCustomer"
                 @click="navigateToDuplicateCustomer"
-                class="group relative bg-white dark:bg-gray-800 rounded-2xl border-2 border-dashed border-gray-200 dark:border-gray-700 hover:border-indigo-400 dark:hover:border-indigo-500 hover:shadow-xl hover:-translate-y-1 cursor-pointer transition-all duration-300 overflow-hidden p-4"
+                class="group relative bg-white dark:bg-gray-800 rounded-2xl border-2 border-dashed border-gray-200 dark:border-gray-700 hover:border-action-primary hover:shadow-xl hover:-translate-y-1 cursor-pointer transition-all duration-300 overflow-hidden p-4"
             >
                 <!-- Card Content -->
                 <div class="relative z-10 flex items-center gap-4">
                     <div
-                        class="w-12 h-12 rounded-xl bg-indigo-50 dark:bg-indigo-950/20 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shrink-0"
+                        class="w-12 h-12 rounded-xl bg-selection-bg text-action-primary flex items-center justify-center shrink-0"
                     >
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path
@@ -593,7 +593,7 @@
                     </div>
                     <div class="flex-1 min-w-0">
                         <h4
-                            class="text-base font-bold text-gray-900 dark:text-white truncate group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors"
+                            class="text-base font-bold text-gray-900 dark:text-white truncate group-hover:text-action-primary transition-colors"
                         >
                             {{ duplicateCustomer.name }}
                         </h4>
@@ -613,7 +613,7 @@
                         </div>
                     </div>
                     <div
-                        class="text-indigo-600 dark:text-indigo-400 opacity-0 group-hover:opacity-100 transition-opacity shrink-0"
+                        class="text-action-primary opacity-0 group-hover:opacity-100 transition-opacity shrink-0"
                     >
                         <svg
                             class="w-5 h-5 rtl:rotate-180"
@@ -1331,7 +1331,7 @@ onUnmounted(() => {
     background-color: #111827 !important; /* gray-900 */
 }
 .vue-tel-input:focus-within {
-    box-shadow: 0 0 0 2px #6366f1 !important; /* ring-indigo-500 */
+    box-shadow: 0 0 0 2px var(--color-focus-ring) !important; /* ring-focus-ring */
     border-color: transparent !important;
 }
 .vti__input {

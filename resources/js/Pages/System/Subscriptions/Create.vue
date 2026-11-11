@@ -77,7 +77,7 @@
                             :class="[
                                 'border rounded-lg p-4 cursor-pointer transition-colors',
                                 form.plan_id === plan.id
-                                    ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-900/20'
+                                    ? 'border-action-primary bg-selection-bg'
                                     : 'border-gray-200 dark:border-gray-700 hover:border-gray-300',
                             ]"
                         >
@@ -87,7 +87,7 @@
                                 </p>
                                 <span
                                     v-if="plan.is_featured"
-                                    class="px-2 py-0.5 bg-indigo-600 text-white text-xs rounded-full"
+                                    class="px-2 py-0.5 bg-action-primary text-white text-xs rounded-full"
                                 >
                                     {{ $t('system.subscriptions.featured') }}
                                 </span>
@@ -95,11 +95,8 @@
                             <p class="text-xs text-gray-500 mt-1">{{ plan.slug }}</p>
                             <div class="mt-3 text-sm text-gray-700 dark:text-gray-300">
                                 <p>
-                                    <span class="font-semibold">{{ plan.price_monthly }}</span>
-                                    {{ $t('system.subscriptions.sar_monthly') }}
-                                </p>
-                                <p class="text-xs text-gray-500">
-                                    {{ plan.price_yearly + $t('system.subscriptions.sar_yearly') }}
+                                    <span class="font-semibold">{{ plan.price_yearly }}</span>
+                                    {{ $t('system.subscriptions.sar_yearly') }}
                                 </p>
                                 <p v-if="plan.trial_days > 0" class="text-xs text-emerald-600 mt-1">
                                     {{
@@ -130,7 +127,7 @@
                             :class="[
                                 'border rounded-lg p-3 cursor-pointer text-center transition-colors',
                                 form.billing_cycle === opt.value
-                                    ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-900/20'
+                                    ? 'border-action-primary bg-selection-bg'
                                     : 'border-gray-200 dark:border-gray-700 hover:border-gray-300',
                             ]"
                         >
@@ -167,7 +164,7 @@
                     <button
                         type="submit"
                         :disabled="form.processing"
-                        class="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium disabled:opacity-50"
+                        class="px-6 py-2.5 bg-action-primary hover:bg-action-primary-hover text-white rounded-lg font-medium disabled:opacity-50"
                     >
                         {{
                             form.processing

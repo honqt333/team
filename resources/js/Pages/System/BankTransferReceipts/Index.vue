@@ -210,19 +210,15 @@ function getAmountBadge(receipt) {
                         {{ stats.rejected }}
                     </p>
                 </div>
-                <div
-                    class="rounded-xl border border-indigo-200 bg-indigo-50 p-4 dark:border-indigo-800/50 dark:bg-indigo-900/10"
-                >
-                    <p
-                        class="text-xs font-semibold uppercase tracking-wide text-indigo-700 dark:text-indigo-300"
-                    >
+                <div class="rounded-xl border border-action-primary/25 bg-selection-bg p-4">
+                    <p class="text-xs font-semibold uppercase tracking-wide text-selection-text">
                         {{
                             locale === 'ar'
                                 ? $t('system.bank_transfer_receipts.pending_amount')
                                 : 'Pending amount'
                         }}
                     </p>
-                    <p class="mt-1 text-xl font-bold text-indigo-700 dark:text-indigo-300">
+                    <p class="mt-1 text-xl font-bold text-selection-text">
                         {{ formatCurrency(stats.total_amount_pending) }}
                         <span class="text-sm font-normal">SAR</span>
                     </p>
@@ -243,7 +239,7 @@ function getAmountBadge(receipt) {
                                 : 'Search by tenant name...'
                         "
                         @keyup.enter="applyFilters"
-                        class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                        class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-action-primary focus:ring-1 focus:ring-focus-ring dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                     />
                 </div>
                 <div class="w-full sm:w-52">
@@ -439,7 +435,7 @@ function getAmountBadge(receipt) {
                             <td class="px-4 py-3 text-end">
                                 <Link
                                     :href="`/system/bank-transfer-receipts/${r.id}`"
-                                    class="rounded-lg bg-indigo-600 px-3 py-1 text-xs font-semibold text-white hover:bg-indigo-700"
+                                    class="rounded-lg bg-action-primary px-3 py-1 text-xs font-semibold text-white hover:bg-action-primary-hover"
                                 >
                                     {{
                                         locale === 'ar'
@@ -462,7 +458,7 @@ function getAmountBadge(receipt) {
                     :class="[
                         'rounded border px-3 py-1 text-xs',
                         link.active
-                            ? 'border-indigo-600 bg-indigo-600 text-white'
+                            ? 'border-action-primary bg-action-primary text-white'
                             : 'border-gray-200 bg-white text-gray-600 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300',
                         !link.url && 'cursor-not-allowed opacity-50',
                     ]"

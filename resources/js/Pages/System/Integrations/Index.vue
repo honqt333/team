@@ -33,7 +33,7 @@
                     </h2>
                     <button
                         @click="openAddModal(section.key)"
-                        class="text-sm font-medium text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 dark:hover:text-indigo-300 transition-colors"
+                        class="text-sm font-medium text-action-primary hover:text-selection-text transition-colors"
                     >
                         {{ $t('system.integrations.add_provider') }}
                     </button>
@@ -69,7 +69,7 @@
                         <div class="flex items-center gap-3">
                             <a
                                 :href="`/system/integrations/${item.id}`"
-                                class="text-sm font-medium text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 dark:hover:text-indigo-300"
+                                class="text-sm font-medium text-action-primary hover:text-selection-text"
                             >
                                 {{ $t('system.integrations.settings') }}
                             </a>
@@ -118,7 +118,7 @@
                                     :class="[
                                         'border rounded-lg p-4 cursor-pointer transition-colors',
                                         form.provider === key
-                                            ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-900/20'
+                                            ? 'border-action-primary bg-selection-bg'
                                             : 'border-gray-200 dark:border-gray-700 hover:border-gray-300',
                                     ]"
                                 >
@@ -139,7 +139,7 @@
                                 <button
                                     type="submit"
                                     :disabled="!form.provider || form.processing"
-                                    class="flex-1 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium disabled:opacity-50 transition-colors"
+                                    class="flex-1 px-4 py-2 bg-action-primary hover:bg-action-primary-hover text-white rounded-lg font-medium disabled:opacity-50 transition-colors"
                                 >
                                     {{ $t('system.integrations.add_and_enable') }}
                                 </button>
@@ -180,7 +180,7 @@ const sections = [
     {
         key: 'sms',
         icon: '📱',
-        hoverClass: 'hover:border-indigo-300',
+        hoverClass: 'hover:border-action-primary/25',
     },
     {
         key: 'whatsapp',

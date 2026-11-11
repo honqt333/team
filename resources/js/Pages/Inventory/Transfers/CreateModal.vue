@@ -15,7 +15,7 @@
                     <div class="flex items-center justify-between mb-8">
                         <div class="flex items-center gap-4">
                             <div
-                                class="w-12 h-12 rounded-2xl bg-indigo-50 dark:bg-indigo-900/30 flex items-center justify-center text-indigo-600 dark:text-indigo-400"
+                                class="w-12 h-12 rounded-2xl bg-selection-bg flex items-center justify-center text-action-primary"
                             >
                                 <svg
                                     class="w-6 h-6"
@@ -98,7 +98,7 @@
                                     v-model="form.notes"
                                     rows="3"
                                     :placeholder="$t('common.notes_placeholder')"
-                                    class="w-full px-5 py-4 bg-gray-50 dark:bg-gray-900/50 border-0 ring-1 ring-gray-200 dark:ring-gray-700 rounded-2xl focus:ring-2 focus:ring-indigo-500 transition-all text-gray-900 dark:text-white"
+                                    class="w-full px-5 py-4 bg-gray-50 dark:bg-gray-900/50 border-0 ring-1 ring-gray-200 dark:ring-gray-700 rounded-2xl focus:ring-2 focus:ring-focus-ring transition-all text-gray-900 dark:text-white"
                                 ></textarea>
                                 <p v-if="form.errors.notes" class="text-xs text-red-500 px-1">
                                     {{ form.errors.notes }}
@@ -120,7 +120,7 @@
                             <button
                                 type="submit"
                                 :disabled="form.processing"
-                                class="px-8 py-3 bg-gradient-to-r from-indigo-600 to-violet-600 text-white rounded-2xl font-black shadow-lg shadow-indigo-500/25 hover:shadow-indigo-500/40 hover:-translate-y-0.5 disabled:opacity-50 disabled:translate-y-0 transition-all"
+                                class="px-8 py-3 bg-action-primary hover:bg-action-primary-hover text-white rounded-2xl font-black shadow-lg shadow-focus-ring-soft hover:shadow-focus-ring-soft hover:-translate-y-0.5 disabled:opacity-50 disabled:translate-y-0 transition-all"
                             >
                                 <span v-if="form.processing" class="flex items-center gap-2">
                                     <svg class="animate-spin h-4 w-4" viewBox="0 0 24 24">

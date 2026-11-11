@@ -90,7 +90,7 @@
                                 @input="debouncedSearch"
                                 @focus="showResults = true"
                                 :placeholder="$t('quotes.form_tabs.search_placeholder')"
-                                class="w-full px-4 py-3 ps-10 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+                                class="w-full px-4 py-3 ps-10 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring focus:border-action-primary"
                             />
                             <svg
                                 class="w-5 h-5 absolute start-3 top-1/2 -translate-y-1/2 text-gray-400"
@@ -228,7 +228,7 @@
                             <div class="space-y-3">
                                 <div class="flex items-center gap-3 group/item">
                                     <div
-                                        class="w-8 h-8 rounded-lg bg-indigo-50 dark:bg-indigo-900/30 flex items-center justify-center text-indigo-600 dark:text-indigo-400"
+                                        class="w-8 h-8 rounded-lg bg-selection-bg flex items-center justify-center text-action-primary"
                                     >
                                         <component :is="IconVIN" class="w-4 h-4" />
                                     </div>
@@ -306,7 +306,7 @@
                             >
                                 <div class="flex items-center gap-3">
                                     <div
-                                        class="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-indigo-600 flex items-center justify-center text-white font-bold text-sm shadow-sm ring-2 ring-white dark:ring-gray-800"
+                                        class="w-10 h-10 rounded-full bg-action-primary hover:bg-action-primary-hover flex items-center justify-center text-white font-bold text-sm shadow-sm ring-2 ring-white dark:ring-gray-800"
                                     >
                                         {{
                                             selectedVehicle.customer?.name?.[0]?.toUpperCase() ||
@@ -451,7 +451,7 @@
                             v-model="form.customer_complaint"
                             rows="10"
                             :placeholder="$t('quotes.form_tabs.customer_complaint_placeholder')"
-                            class="w-full px-4 py-3 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-amber-500 focus:border-amber-500 resize-none"
+                            class="w-full px-4 py-3 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring focus:border-action-primary resize-none"
                         ></textarea>
                     </div>
                 </div>
@@ -470,7 +470,7 @@
                             v-model="form.initial_assessment"
                             rows="10"
                             :placeholder="$t('quotes.form_tabs.initial_assessment_placeholder')"
-                            class="w-full px-4 py-3 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-amber-500 focus:border-amber-500 resize-none"
+                            class="w-full px-4 py-3 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring focus:border-action-primary resize-none"
                         ></textarea>
                     </div>
                 </div>
@@ -486,21 +486,13 @@
                             {{ $t('quotes.form_tabs.select_departments') }}
                         </label>
                         <div class="space-y-2">
-                            <label
+                            <SelectableCard
                                 v-for="(dept, index) in availableDepartmentsList"
                                 :key="dept.id"
-                                class="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer transition-colors"
-                            >
-                                <input
-                                    type="checkbox"
-                                    v-model="form.departments"
-                                    :value="dept.id"
-                                    class="w-5 h-5 rounded border-gray-300 text-amber-600 focus:ring-amber-500"
-                                />
-                                <span class="text-gray-900 dark:text-white">
-                                    {{ toEnglish(index + 1) }}. {{ toEnglish(getName(dept)) }}
-                                </span>
-                            </label>
+                                v-model="form.departments"
+                                :value="dept.id"
+                                :title="`${toEnglish(index + 1)}. ${toEnglish(getName(dept))}`"
+                            />
                         </div>
                     </div>
                 </div>
@@ -562,6 +554,7 @@ import { useI18n } from 'vue-i18n';
 import { useLocalized } from '@/Composables/useLocalized';
 import { useNumberFormat } from '@/Composables/useNumberFormat';
 import BaseModal from '@/Components/BaseModal.vue';
+import SelectableCard from '@/Components/Common/SelectableCard.vue';
 import VehicleFormModal from '@/Components/Vehicles/VehicleFormModal.vue';
 import VehicleMileageModal from '@/Components/Vehicles/VehicleMileageModal.vue';
 import Tooltip from '@/Components/Tooltip.vue';

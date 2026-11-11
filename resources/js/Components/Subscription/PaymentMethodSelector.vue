@@ -107,7 +107,7 @@ function select(key) {
         <div class="flex items-center justify-between">
             <p class="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
                 <svg
-                    class="w-4 h-4 text-indigo-600 dark:text-indigo-400"
+                    class="w-4 h-4 text-action-primary"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -133,7 +133,7 @@ function select(key) {
                 :class="[
                     'group relative flex items-center gap-3.5 rounded-2xl border-2 p-3.5 text-start transition-all duration-200 cursor-pointer shadow-sm',
                     modelValue === gw.key
-                        ? 'border-indigo-600 bg-indigo-50/60 dark:border-indigo-500 dark:bg-indigo-950/40 shadow-md ring-2 ring-indigo-500/20'
+                        ? 'border-action-primary bg-selection-bg shadow-md ring-2 ring-focus-ring'
                         : 'border-slate-200 bg-white hover:border-slate-300 dark:border-slate-700/80 dark:bg-slate-800 dark:hover:border-slate-600',
                 ]"
             >
@@ -258,7 +258,7 @@ function select(key) {
                     :class="[
                         'flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full border-2 transition-colors',
                         modelValue === gw.key
-                            ? 'border-indigo-600 bg-indigo-600 dark:border-indigo-400 dark:bg-indigo-400'
+                            ? 'border-action-primary bg-action-primary'
                             : 'border-slate-300 dark:border-slate-600',
                     ]"
                 >

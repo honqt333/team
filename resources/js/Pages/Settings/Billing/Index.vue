@@ -167,7 +167,7 @@ const noPlanLabel = () => t('system.billing.page.no_plan');
                 :title="t('system.billing.page.title')"
                 :subtitle="t('system.billing.page.subtitle')"
                 gradientFrom="from-blue-600"
-                gradientTo="to-indigo-700"
+                gradientTo="to-action-primary"
                 glowFrom="from-blue-500"
                 badgeBg="bg-blue-50/50 dark:bg-blue-900/30"
                 badgeText="text-blue-600 dark:text-blue-400"
@@ -272,7 +272,7 @@ const noPlanLabel = () => t('system.billing.page.no_plan');
                                         ? 'bg-rose-500'
                                         : storage_usage.usage_percentage > 80
                                           ? 'bg-amber-500'
-                                          : 'bg-gradient-to-r from-blue-500 to-indigo-600'
+                                          : 'bg-action-primary hover:bg-action-primary-hover'
                                 "
                                 :style="{
                                     width: `${storage_usage.is_unlimited ? 5 : Math.max(1, storage_usage.usage_percentage)}%`,

@@ -10,7 +10,7 @@
                 :class="[
                     'inline-flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-xl whitespace-nowrap transition-all',
                     activeSubTab === tab.key
-                        ? 'bg-violet-600 text-white shadow-md shadow-violet-500/20 font-bold'
+                        ? 'bg-action-primary text-white shadow-md shadow-focus-ring-soft font-bold'
                         : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700/60',
                 ]"
             >
@@ -76,10 +76,10 @@
                         type="text"
                         required
                         :class="[
-                            'w-full px-4 py-2.5 text-sm border rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-violet-500',
+                            'w-full px-4 py-2.5 text-sm border rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring',
                             form.errors.name_ar
-                                ? 'border-red-500 focus:border-red-500'
-                                : 'border-gray-300 dark:border-gray-600 focus:border-violet-500',
+                                ? 'border-red-500 focus:border-danger'
+                                : 'border-gray-300 dark:border-gray-600 focus:border-action-primary',
                         ]"
                     />
                     <p v-if="form.errors.name_ar" class="mt-1 text-xs text-red-500">
@@ -100,7 +100,7 @@
                         required
                         :class="[
                             inputClass,
-                            form.errors.name_en ? 'border-red-500 focus:border-red-500' : '',
+                            form.errors.name_en ? 'border-red-500 focus:border-danger' : '',
                         ]"
                     />
                     <p v-if="form.errors.name_en" class="mt-1 text-xs text-red-500">
@@ -117,10 +117,10 @@
                         type="tel"
                         dir="ltr"
                         :class="[
-                            'w-full px-4 py-2.5 text-sm border rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-violet-500',
+                            'w-full px-4 py-2.5 text-sm border rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring',
                             form.errors.phone
-                                ? 'border-red-500 focus:border-red-500'
-                                : 'border-gray-300 dark:border-gray-600 focus:border-violet-500',
+                                ? 'border-red-500 focus:border-danger'
+                                : 'border-gray-300 dark:border-gray-600 focus:border-action-primary',
                         ]"
                     />
                     <p v-if="form.errors.phone" class="mt-1 text-xs text-red-500">
@@ -334,7 +334,7 @@
                     <!-- Grant Access Toggle (If no user linked) -->
                     <div
                         v-else
-                        class="bg-violet-50 dark:bg-violet-900/20 p-4 rounded-xl border border-violet-100 dark:border-violet-800"
+                        class="bg-selection-bg p-4 rounded-xl border border-action-primary/25"
                     >
                         <div class="flex items-center justify-between mb-2">
                             <span class="text-sm font-medium text-gray-900 dark:text-white">
@@ -630,7 +630,7 @@
                     <button
                         type="submit"
                         :disabled="form.processing"
-                        class="inline-flex items-center gap-2 px-6 py-2.5 text-sm font-bold text-white bg-violet-600 hover:bg-violet-700 dark:bg-violet-600 dark:hover:bg-violet-500 rounded-xl transition-all shadow-md shadow-violet-500/20 active:scale-95 disabled:opacity-50"
+                        class="inline-flex items-center gap-2 px-6 py-2.5 text-sm font-bold text-white bg-action-primary hover:bg-action-primary-hover rounded-xl transition-all shadow-md shadow-focus-ring-soft active:scale-95 disabled:opacity-50"
                     >
                         <svg
                             v-if="form.processing"
@@ -776,7 +776,7 @@ const subTabs = computed(() => [
 
 const labelClass = 'block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1';
 const inputClass =
-    'w-full px-4 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-violet-500 focus:border-violet-500';
+    'w-full px-4 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring focus:border-action-primary';
 
 const form = useForm({
     // Basic Info

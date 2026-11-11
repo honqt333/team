@@ -7,11 +7,11 @@
             <!-- Header Card (Unified Design & Colors) -->
             <div class="relative group">
                 <div
-                    class="absolute -inset-1 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-[2.5rem] blur opacity-[0.06] group-hover:opacity-[0.10] transition duration-700"
+                    class="absolute -inset-1 bg-action-primary hover:bg-action-primary-hover rounded-[2.5rem] blur opacity-[0.06] group-hover:opacity-[0.10] transition duration-700"
                 ></div>
 
                 <div
-                    class="relative bg-white dark:bg-gray-800 rounded-[2.25rem] shadow-2xl shadow-indigo-500/10 border border-gray-100 dark:border-gray-700 overflow-hidden"
+                    class="relative bg-white dark:bg-gray-800 rounded-[2.25rem] shadow-2xl shadow-focus-ring-soft border border-gray-100 dark:border-gray-700 overflow-hidden"
                 >
                     <!-- Navigation & Actions Bar -->
                     <div
@@ -27,7 +27,7 @@
                                 <button
                                     v-if="can('crm.vehicles.update') || isAnyAdmin()"
                                     @click="showEditModal = true"
-                                    class="inline-flex items-center gap-2 px-3 py-2 rounded-xl font-black text-xs border border-indigo-100/70 dark:border-indigo-800/30 bg-indigo-50/70 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-300 hover:bg-white dark:hover:bg-indigo-900/30 hover:shadow-md transition-all"
+                                    class="inline-flex items-center gap-2 px-3 py-2 rounded-xl font-black text-xs border border-action-primary/25 bg-selection-bg text-selection-text hover:bg-white hover:shadow-md transition-all"
                                 >
                                     <svg
                                         class="w-5 h-5"
@@ -131,7 +131,7 @@
                             <button
                                 v-if="can('crm.work_orders.create') || isAnyAdmin()"
                                 @click="openWorkOrderModal"
-                                class="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl font-black text-xs bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-md shadow-indigo-500/25 hover:shadow-lg hover:shadow-indigo-500/35 active:scale-95 transition-all"
+                                class="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl font-black text-xs bg-action-primary hover:bg-action-primary-hover text-white shadow-md shadow-focus-ring-soft hover:shadow-lg hover:shadow-focus-ring-soft active:scale-95 transition-all"
                             >
                                 <svg
                                     class="w-4 h-4"
@@ -158,7 +158,7 @@
                         class="absolute top-0 right-0 p-12 opacity-[0.03] dark:opacity-[0.05] pointer-events-none select-none"
                     >
                         <svg
-                            class="w-80 h-80 text-indigo-900 dark:text-white"
+                            class="w-80 h-80 text-selection-text dark:text-white"
                             fill="currentColor"
                             viewBox="0 0 24 24"
                         >
@@ -176,7 +176,7 @@
                                 <!-- Vehicle Brand/Logo Container -->
                                 <div class="relative">
                                     <div
-                                        class="w-24 h-24 rounded-[2.25rem] bg-gradient-to-br from-indigo-600 to-purple-600 shadow-xl shadow-indigo-500/35 flex items-center justify-center text-white ring-4 ring-indigo-50 dark:ring-indigo-900/20 transition-transform group-hover:scale-[1.03] duration-500 overflow-hidden p-4"
+                                        class="w-24 h-24 rounded-[2.25rem] bg-action-primary hover:bg-action-primary-hover shadow-xl shadow-focus-ring-soft flex items-center justify-center text-white ring-4 ring-action-primary/20 transition-transform group-hover:scale-[1.03] duration-500 overflow-hidden p-4"
                                     >
                                         <img
                                             v-if="vehicle.make?.logo_path"
@@ -202,7 +202,7 @@
                                     <!-- Color Indicator Badge -->
                                     <div
                                         v-if="vehicle.color"
-                                        class="absolute -bottom-2 -right-2 w-10 h-10 rounded-2xl bg-white dark:bg-gray-700 shadow-lg border-4 border-indigo-50 dark:border-indigo-900/20 flex items-center justify-center"
+                                        class="absolute -bottom-2 -right-2 w-10 h-10 rounded-2xl bg-white dark:bg-gray-700 shadow-lg border-4 border-action-primary/25 flex items-center justify-center"
                                     >
                                         <div
                                             class="w-6 h-6 rounded-lg shadow-inner border border-black/5"
@@ -233,13 +233,13 @@
                                         <Link
                                             v-if="vehicle.customer"
                                             :href="route('customers.show', vehicle.customer.id)"
-                                            class="flex items-center gap-3 px-4 py-2.5 rounded-2xl bg-indigo-50/50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-400 border border-indigo-100/50 hover:bg-white dark:hover:bg-indigo-900/40 transition-all shadow-sm"
+                                            class="flex items-center gap-3 px-4 py-2.5 rounded-2xl bg-selection-bg text-selection-text border border-action-primary/25 hover:bg-white transition-all shadow-sm"
                                         >
                                             <div
                                                 class="w-8 h-8 rounded-xl bg-white dark:bg-gray-800 shadow-sm flex items-center justify-center"
                                             >
                                                 <svg
-                                                    class="w-4.5 h-4.5 text-indigo-500"
+                                                    class="w-4.5 h-4.5 text-action-primary"
                                                     fill="none"
                                                     stroke="currentColor"
                                                     viewBox="0 0 24 24"
@@ -313,7 +313,7 @@
                                                 class="w-8 h-8 rounded-xl bg-white dark:bg-gray-800 shadow-sm flex items-center justify-center"
                                             >
                                                 <svg
-                                                    class="w-4.5 h-4.5 text-indigo-500"
+                                                    class="w-4.5 h-4.5 text-action-primary"
                                                     fill="none"
                                                     stroke="currentColor"
                                                     viewBox="0 0 24 24"
@@ -339,10 +339,10 @@
                                 class="flex flex-wrap items-center justify-center lg:justify-start gap-3 w-full lg:w-auto"
                             >
                                 <div
-                                    class="group/stat flex flex-col items-center justify-center w-20 h-20 lg:w-24 lg:h-24 bg-indigo-50/50 dark:bg-indigo-900/20 rounded-3xl border border-indigo-100/50 dark:border-indigo-800/30 hover:bg-white dark:hover:bg-indigo-900/40 transition-all hover:shadow-lg hover:shadow-indigo-500/10"
+                                    class="group/stat flex flex-col items-center justify-center w-20 h-20 lg:w-24 lg:h-24 bg-selection-bg rounded-3xl border border-action-primary/25 hover:bg-white transition-all hover:shadow-lg hover:shadow-focus-ring-soft"
                                 >
                                     <span
-                                        class="text-2xl font-black text-indigo-600 dark:text-indigo-400 group-hover/stat:scale-110 transition-transform"
+                                        class="text-2xl font-black text-action-primary group-hover/stat:scale-110 transition-transform"
                                     >
                                         {{ toEnglish(counts.workOrders) }}
                                     </span>
@@ -459,7 +459,7 @@
                             :class="[
                                 'group relative flex items-center gap-3 px-5 py-2.5 rounded-2xl transition-all duration-500 ease-out overflow-hidden',
                                 activeTab === tab.key
-                                    ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-xl shadow-indigo-500/30 scale-[1.01]'
+                                    ? 'bg-action-primary hover:bg-action-primary-hover text-white shadow-xl shadow-focus-ring-soft scale-[1.01]'
                                     : 'text-gray-500 dark:text-gray-400 hover:bg-white dark:hover:bg-gray-800 hover:shadow-lg hover:shadow-gray-200/50 dark:hover:shadow-black/20 hover:-translate-y-0.5',
                             ]"
                         >
@@ -483,7 +483,7 @@
                                         'w-4.5 h-4.5 transition-all duration-500',
                                         activeTab === tab.key
                                             ? 'text-white scale-105'
-                                            : 'text-indigo-500 dark:text-indigo-400 group-hover:text-purple-600',
+                                            : 'text-action-primary group-hover:text-purple-600',
                                     ]"
                                 />
                             </div>
@@ -515,7 +515,7 @@
 
                 <!-- Tab Content Container -->
                 <div
-                    class="bg-white dark:bg-gray-800 rounded-[2rem] shadow-2xl shadow-indigo-500/5 border border-gray-100/50 dark:border-gray-700/50 p-6 min-h-[400px] relative overflow-hidden"
+                    class="bg-white dark:bg-gray-800 rounded-[2rem] shadow-2xl shadow-focus-ring-soft border border-gray-100/50 dark:border-gray-700/50 p-6 min-h-[400px] relative overflow-hidden"
                 >
                     <!-- Background Decoration -->
                     <div
@@ -536,7 +536,7 @@
                                 <!-- Search -->
                                 <div class="relative group max-w-md">
                                     <div
-                                        class="absolute inset-y-0 start-0 ps-3 flex items-center pointer-events-none group-focus-within:text-indigo-500 transition-colors"
+                                        class="absolute inset-y-0 start-0 ps-3 flex items-center pointer-events-none group-focus-within:text-action-primary transition-colors"
                                     >
                                         <svg
                                             class="w-4 h-4 text-gray-400"
@@ -556,7 +556,7 @@
                                         type="text"
                                         v-model="workOrderSearch"
                                         :placeholder="$t('work_orders.search')"
-                                        class="w-full sm:w-48 ps-10 pe-4 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500 transition-all shadow-sm"
+                                        class="w-full sm:w-48 ps-10 pe-4 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-focus-ring transition-all shadow-sm"
                                     />
                                 </div>
                                 <!-- View Toggle -->
@@ -577,12 +577,10 @@
                                 v-for="order in filteredWorkOrders"
                                 :key="order.id"
                                 :href="route('work-orders.show', order.id)"
-                                class="group bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700 hover:border-indigo-300 dark:hover:border-indigo-500 hover:shadow-lg transition-all"
+                                class="group bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700 hover:border-action-primary/25 hover:shadow-lg transition-all"
                             >
                                 <div class="flex items-center justify-between mb-3">
-                                    <span
-                                        class="font-mono font-bold text-indigo-600 dark:text-indigo-400"
-                                    >
+                                    <span class="font-mono font-bold text-action-primary">
                                         {{ toEnglish(order.code) }}
                                     </span>
                                     <span
@@ -614,11 +612,9 @@
                                         order.invoice &&
                                         !isInvoiceOverdue(order)
                                     "
-                                    class="mb-3 p-1.5 rounded-lg bg-violet-50 dark:bg-violet-950/20 border border-violet-100 dark:border-violet-900/50 text-center"
+                                    class="mb-3 p-1.5 rounded-lg bg-selection-bg border border-action-primary/25 text-center"
                                 >
-                                    <span
-                                        class="text-[10px] font-bold text-violet-600 dark:text-violet-400"
-                                    >
+                                    <span class="text-[10px] font-bold text-action-primary">
                                         {{ $t('invoices.deferred_invoice') }}:
                                         {{ formatCurrency(order.balance || 0) }}
                                     </span>
@@ -749,7 +745,7 @@
                                         class="hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer"
                                     >
                                         <td
-                                            class="px-4 py-3 text-center font-bold text-indigo-600 dark:text-indigo-400 whitespace-nowrap align-middle"
+                                            class="px-4 py-3 text-center font-bold text-action-primary whitespace-nowrap align-middle"
                                         >
                                             {{ toEnglish(order.code) }}
                                         </td>
@@ -780,7 +776,7 @@
                                                         order.invoice &&
                                                         !isInvoiceOverdue(order)
                                                     "
-                                                    class="px-2 py-0.5 text-[10px] font-bold rounded-full bg-violet-100 text-violet-700 dark:bg-violet-900/50 dark:text-violet-300"
+                                                    class="px-2 py-0.5 text-[10px] font-bold rounded-full bg-selection-bg text-selection-text"
                                                 >
                                                     {{ $t('invoices.deferred_invoice') }}
                                                 </span>
@@ -890,7 +886,7 @@
                                         type="text"
                                         v-model="quoteSearch"
                                         :placeholder="$t('quotes.search')"
-                                        class="w-full sm:w-48 ps-10 pe-4 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-amber-500 transition-all shadow-sm"
+                                        class="w-full sm:w-48 ps-10 pe-4 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-focus-ring transition-all shadow-sm"
                                     />
                                 </div>
                                 <!-- View Toggle -->
@@ -1284,7 +1280,7 @@
                                             {{ isRtl ? item.name_ar : item.name_en }}
                                         </td>
                                         <td
-                                            class="px-4 py-3 text-center text-indigo-600 dark:text-indigo-400 font-mono font-bold align-middle"
+                                            class="px-4 py-3 text-center text-action-primary font-mono font-bold align-middle"
                                         >
                                             {{ toEnglish(item.work_order_code) }}
                                         </td>
@@ -1426,7 +1422,7 @@
                                             {{ toEnglish(part.part_number) || '-' }}
                                         </td>
                                         <td
-                                            class="px-4 py-3 text-center text-indigo-600 dark:text-indigo-400 font-mono font-bold align-middle"
+                                            class="px-4 py-3 text-center text-action-primary font-mono font-bold align-middle"
                                         >
                                             {{ toEnglish(part.work_order_code) }}
                                         </td>
@@ -1442,7 +1438,7 @@
                                                 class="px-2 py-0.5 rounded-full"
                                                 :class="
                                                     part.source === 'warehouse'
-                                                        ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30'
+                                                        ? 'bg-selection-bg text-selection-text'
                                                         : part.source === 'external'
                                                           ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30'
                                                           : 'bg-teal-100 text-teal-700 dark:bg-teal-900/30'
@@ -1543,13 +1539,13 @@
                                 v-for="note in workOrderNotes"
                                 :key="note.id"
                                 @click="router.visit(route('work-orders.show', note.work_order_id))"
-                                class="group relative bg-white dark:bg-gray-800 rounded-3xl p-6 border border-gray-150 dark:border-gray-700 hover:border-indigo-300 dark:hover:border-indigo-700 hover:shadow-md cursor-pointer transition-all"
+                                class="group relative bg-white dark:bg-gray-800 rounded-3xl p-6 border border-gray-150 dark:border-gray-700 hover:border-action-primary/25 hover:shadow-md cursor-pointer transition-all"
                             >
                                 <div
                                     class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 border-b border-gray-100 dark:border-gray-700 pb-3"
                                 >
                                     <span
-                                        class="font-mono font-bold text-indigo-600 dark:text-indigo-400 flex items-center"
+                                        class="font-mono font-bold text-action-primary flex items-center"
                                     >
                                         #{{ toEnglish(note.work_order_code) }}
                                     </span>
@@ -1562,7 +1558,7 @@
                                         class="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400 font-bold"
                                     >
                                         <svg
-                                            class="w-4 h-4 text-indigo-500"
+                                            class="w-4 h-4 text-action-primary"
                                             fill="none"
                                             stroke="currentColor"
                                             viewBox="0 0 24 24"
@@ -2150,7 +2146,7 @@ function getQuoteStatusClass(status) {
         pending: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400',
         approved: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400',
         rejected: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
-        converted: 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400',
+        converted: 'bg-selection-bg text-selection-text',
     };
     return classes[status] || classes.draft;
 }

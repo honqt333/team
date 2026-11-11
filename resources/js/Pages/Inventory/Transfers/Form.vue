@@ -10,7 +10,9 @@
 
             <!-- Form -->
             <form @submit.prevent="submit" class="space-y-6">
-                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 space-y-6">
+                <div
+                    class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 space-y-6"
+                >
                     <!-- From Warehouse -->
                     <div>
                         <SearchableSelect
@@ -37,7 +39,9 @@
 
                     <!-- Notes -->
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        <label
+                            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+                        >
                             {{ $t('common.notes') }}
                         </label>
                         <textarea
@@ -59,7 +63,7 @@
                     <button
                         type="submit"
                         :disabled="form.processing"
-                        class="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50"
+                        class="px-6 py-2 bg-action-primary text-white rounded-lg hover:bg-action-primary-hover disabled:opacity-50"
                     >
                         {{ $t('common.save') }}
                     </button>
@@ -87,18 +91,18 @@ const form = useForm({
 });
 
 const fromWarehouseOptions = computed(() => {
-    return props.warehouses.map(wh => ({
+    return props.warehouses.map((wh) => ({
         value: wh.id,
-        label: wh.name
+        label: wh.name,
     }));
 });
 
 const toWarehouseOptions = computed(() => {
     return props.warehouses
-        .filter(wh => wh.id !== form.from_warehouse_id)
-        .map(wh => ({
+        .filter((wh) => wh.id !== form.from_warehouse_id)
+        .map((wh) => ({
             value: wh.id,
-            label: wh.name
+            label: wh.name,
         }));
 });
 

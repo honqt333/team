@@ -8,7 +8,7 @@
             >
                 <template #icon>
                     <div
-                        class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-indigo-600 flex items-center justify-center text-white shadow-md shadow-indigo-500/20"
+                        class="w-10 h-10 rounded-xl bg-action-primary hover:bg-action-primary-hover flex items-center justify-center text-white shadow-md shadow-focus-ring-soft"
                     >
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path
@@ -23,7 +23,7 @@
                 <template #badge>
                     <span
                         v-if="tenants?.total !== undefined"
-                        class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300 border border-indigo-100 dark:border-indigo-800"
+                        class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-selection-bg text-selection-text border border-action-primary/25"
                     >
                         {{ tenants.total }}
                     </span>
@@ -55,7 +55,7 @@
                                 v-model="search"
                                 type="text"
                                 :placeholder="$t('system.tenants.search_placeholder')"
-                                class="w-full px-4 py-2.5 pr-10 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-colors"
+                                class="w-full px-4 py-2.5 pr-10 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-focus-ring focus:border-transparent transition-colors"
                                 @input="debouncedSearch"
                             />
                         </div>
@@ -255,7 +255,7 @@
                                 <td class="px-6 py-4 align-middle text-center">
                                     <Link
                                         :href="`/system/tenants/${tenant.id}`"
-                                        class="inline-flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-lg transition-colors"
+                                        class="inline-flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-action-primary hover:text-selection-text hover:bg-selection-bg rounded-lg transition-colors"
                                     >
                                         <svg
                                             class="w-4 h-4"

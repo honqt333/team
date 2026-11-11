@@ -352,7 +352,7 @@ const regenerateCodes = () =>
                             class="absolute inset-0 bg-white/70 dark:bg-gray-800/70 flex items-center justify-center"
                         >
                             <div
-                                class="w-6 h-6 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin"
+                                class="w-6 h-6 border-2 border-action-primary border-t-transparent rounded-full animate-spin"
                             ></div>
                         </div>
                     </div>
@@ -405,10 +405,10 @@ const regenerateCodes = () =>
                         <!-- Job Title & Department Pill -->
                         <span
                             v-if="employeeDetails?.job_title"
-                            class="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1 rounded-xl bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300 border border-indigo-200/50 dark:border-indigo-800/40"
+                            class="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1 rounded-xl bg-selection-bg text-selection-text border border-action-primary/25"
                         >
                             <svg
-                                class="w-3.5 h-3.5 text-indigo-500"
+                                class="w-3.5 h-3.5 text-action-primary"
                                 fill="none"
                                 stroke="currentColor"
                                 viewBox="0 0 24 24"
@@ -659,7 +659,7 @@ const regenerateCodes = () =>
                                         type="text"
                                         name="name"
                                         v-model="profileForm.name"
-                                        class="w-full ps-10 rounded-xl border-gray-300 dark:border-gray-600 dark:bg-gray-700/80 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm"
+                                        class="w-full ps-10 rounded-xl border-gray-300 dark:border-gray-600 dark:bg-gray-700/80 dark:text-white focus:ring-2 focus:ring-focus-ring focus:border-action-primary text-sm"
                                         required
                                     />
                                 </div>
@@ -699,7 +699,7 @@ const regenerateCodes = () =>
                                         type="email"
                                         name="email"
                                         v-model="profileForm.email"
-                                        class="w-full ps-10 rounded-xl border-gray-300 dark:border-gray-600 dark:bg-gray-700/80 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm"
+                                        class="w-full ps-10 rounded-xl border-gray-300 dark:border-gray-600 dark:bg-gray-700/80 dark:text-white focus:ring-2 focus:ring-focus-ring focus:border-action-primary text-sm"
                                         required
                                     />
                                 </div>
@@ -1018,7 +1018,7 @@ const regenerateCodes = () =>
                                     >
                                         <div class="flex items-center gap-3">
                                             <div
-                                                class="w-8 h-8 rounded-lg bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shrink-0"
+                                                class="w-8 h-8 rounded-lg bg-selection-bg text-action-primary flex items-center justify-center shrink-0"
                                             >
                                                 <svg
                                                     class="w-4 h-4"
@@ -1274,7 +1274,7 @@ const regenerateCodes = () =>
                             <div v-else class="space-y-4">
                                 <p class="text-sm text-gray-600 dark:text-gray-300">
                                     {{ $t('security.enter_code_sent_to_address') }}
-                                    <strong class="text-indigo-600">
+                                    <strong class="text-action-primary">
                                         {{
                                             selectedMethod === 'sms'
                                                 ? $t('security.your_phone')
@@ -1289,7 +1289,7 @@ const regenerateCodes = () =>
                                             v-model="codeForm.code"
                                             maxlength="6"
                                             placeholder="000000"
-                                            class="w-40 text-center text-2xl tracking-widest rounded-xl border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white font-mono focus:ring-2 focus:ring-indigo-500"
+                                            class="w-40 text-center text-2xl tracking-widest rounded-xl border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white font-mono focus:ring-2 focus:ring-focus-ring"
                                             dir="ltr"
                                             inputmode="numeric"
                                             autofocus
@@ -1314,7 +1314,7 @@ const regenerateCodes = () =>
                                 <button
                                     @click="sendCode"
                                     :disabled="sendCodeForm.processing"
-                                    class="text-xs text-indigo-600 hover:text-indigo-800 font-semibold"
+                                    class="text-xs text-action-primary hover:text-selection-text font-semibold"
                                 >
                                     {{ $t('customer_portal.verify.resend') }}
                                 </button>
@@ -1370,7 +1370,7 @@ const regenerateCodes = () =>
                                     </h4>
                                     <button
                                         @click="showRegenModal = true"
-                                        class="text-xs text-indigo-600 hover:text-indigo-800 font-semibold"
+                                        class="text-xs text-action-primary hover:text-selection-text font-semibold"
                                     >
                                         {{ $t('security.new_codes') }}
                                     </button>
@@ -1441,7 +1441,7 @@ const regenerateCodes = () =>
                                         type="password"
                                         name="current_password"
                                         v-model="passwordForm.current_password"
-                                        class="w-full ps-10 rounded-xl border-gray-300 dark:border-gray-600 dark:bg-gray-700/80 dark:text-white focus:ring-2 focus:ring-indigo-500 text-sm"
+                                        class="w-full ps-10 rounded-xl border-gray-300 dark:border-gray-600 dark:bg-gray-700/80 dark:text-white focus:ring-2 focus:ring-focus-ring text-sm"
                                         required
                                     />
                                 </div>
@@ -1481,7 +1481,7 @@ const regenerateCodes = () =>
                                         type="password"
                                         name="password"
                                         v-model="passwordForm.password"
-                                        class="w-full ps-10 rounded-xl border-gray-300 dark:border-gray-600 dark:bg-gray-700/80 dark:text-white focus:ring-2 focus:ring-indigo-500 text-sm"
+                                        class="w-full ps-10 rounded-xl border-gray-300 dark:border-gray-600 dark:bg-gray-700/80 dark:text-white focus:ring-2 focus:ring-focus-ring text-sm"
                                         required
                                     />
                                 </div>
@@ -1521,7 +1521,7 @@ const regenerateCodes = () =>
                                         type="password"
                                         name="password_confirmation"
                                         v-model="passwordForm.password_confirmation"
-                                        class="w-full ps-10 rounded-xl border-gray-300 dark:border-gray-600 dark:bg-gray-700/80 dark:text-white focus:ring-2 focus:ring-indigo-500 text-sm"
+                                        class="w-full ps-10 rounded-xl border-gray-300 dark:border-gray-600 dark:bg-gray-700/80 dark:text-white focus:ring-2 focus:ring-focus-ring text-sm"
                                         required
                                     />
                                 </div>
@@ -1546,7 +1546,7 @@ const regenerateCodes = () =>
                 <template #title>
                     <div class="flex items-center gap-2">
                         <svg
-                            class="w-5 h-5 text-indigo-600"
+                            class="w-5 h-5 text-action-primary"
                             fill="none"
                             stroke="currentColor"
                             viewBox="0 0 24 24"
@@ -1581,7 +1581,7 @@ const regenerateCodes = () =>
                                 type="text"
                                 v-model="permissionSearchQuery"
                                 :placeholder="$t('profile.permissions_modal.search_placeholder')"
-                                class="w-full text-sm rounded-xl border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-indigo-500"
+                                class="w-full text-sm rounded-xl border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-focus-ring"
                             />
                         </div>
 

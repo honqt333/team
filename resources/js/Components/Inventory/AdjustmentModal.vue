@@ -134,7 +134,7 @@
                     inputmode="decimal"
                     @input="handleInput($event, 'qty')"
                     dir="ltr"
-                    class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-yellow-500 font-mono shadow-sm"
+                    class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring font-mono shadow-sm"
                     placeholder="0.000"
                 />
                 <p v-if="errors.qty" class="mt-1 text-sm text-red-500 font-medium">
@@ -152,7 +152,7 @@
                     v-model="form.notes"
                     rows="3"
                     required
-                    class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-yellow-500"
+                    class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring"
                     :placeholder="$t('inventory.moves.adjust') + ' - السبب مطلوب'"
                 ></textarea>
                 <p v-if="errors.notes" class="mt-1 text-sm text-red-500">{{ errors.notes }}</p>

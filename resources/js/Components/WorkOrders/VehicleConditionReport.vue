@@ -85,7 +85,7 @@
                         :class="[
                             'px-3 py-1.5 text-xs font-medium rounded-lg transition-all',
                             Number(fuelLevel ?? 50) === level.value
-                                ? 'bg-indigo-600 text-white shadow-lg scale-105'
+                                ? 'bg-action-primary text-white shadow-lg scale-105'
                                 : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600',
                         ]"
                     >
@@ -185,7 +185,7 @@
                     type="text"
                     :disabled="readonly"
                     :placeholder="$t('work_orders.condition_report.description_placeholder')"
-                    class="flex-1 px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-1 focus:ring-indigo-500 disabled:opacity-60 disabled:bg-gray-50 dark:disabled:bg-gray-900"
+                    class="flex-1 px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-1 focus:ring-focus-ring disabled:opacity-60 disabled:bg-gray-50 dark:disabled:bg-gray-900"
                     @input="updateDescription(index, $event.target.value)"
                 />
                 <button

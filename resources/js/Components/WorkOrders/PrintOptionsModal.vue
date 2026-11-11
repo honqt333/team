@@ -2,10 +2,22 @@
     <BaseModal :show="show" @close="emit('close')" size="md">
         <template #header>
             <div class="flex items-center gap-2">
-                <svg class="w-5 h-5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
+                <svg
+                    class="w-5 h-5 text-action-primary"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                >
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"
+                    />
                 </svg>
-                <span class="text-lg font-bold text-gray-900 dark:text-white">{{ $t('print.options_title') }}</span>
+                <span class="text-lg font-bold text-gray-900 dark:text-white">
+                    {{ $t('print.options_title') }}
+                </span>
             </div>
         </template>
 
@@ -14,21 +26,35 @@
                 <!-- Vehicle Condition Report -->
                 <button
                     @click="printOption('condition')"
-                    class="w-full flex items-center gap-4 p-4 rounded-xl border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 hover:border-indigo-300 dark:hover:border-indigo-600 transition-all group"
+                    class="w-full flex items-center gap-4 p-4 rounded-xl border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 hover:border-action-primary/25 transition-all group"
                 >
-                    <div class="w-12 h-12 rounded-xl bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center flex-shrink-0">
+                    <div
+                        class="w-12 h-12 rounded-xl bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center flex-shrink-0"
+                    >
                         <span class="text-2xl">🚗</span>
                     </div>
                     <div class="flex-1 text-start">
-                        <p class="font-semibold text-gray-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400">
+                        <p
+                            class="font-semibold text-gray-900 dark:text-white group-hover:text-action-primary"
+                        >
                             {{ $t('print.vehicle_report') }}
                         </p>
                         <p class="text-sm text-gray-500 dark:text-gray-400">
                             {{ $t('print.vehicle_report_desc') }}
                         </p>
                     </div>
-                    <svg class="w-5 h-5 text-gray-400 group-hover:text-indigo-500 rtl:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                    <svg
+                        class="w-5 h-5 text-gray-400 group-hover:text-action-primary rtl:rotate-180"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M9 5l7 7-7 7"
+                        />
                     </svg>
                 </button>
 
@@ -36,21 +62,35 @@
                 <button
                     v-if="canPrintWorkOrder"
                     @click="printOption('work_order')"
-                    class="w-full flex items-center gap-4 p-4 rounded-xl border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 hover:border-indigo-300 dark:hover:border-indigo-600 transition-all group"
+                    class="w-full flex items-center gap-4 p-4 rounded-xl border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 hover:border-action-primary/25 transition-all group"
                 >
-                    <div class="w-12 h-12 rounded-xl bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center flex-shrink-0">
+                    <div
+                        class="w-12 h-12 rounded-xl bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center flex-shrink-0"
+                    >
                         <span class="text-2xl">📋</span>
                     </div>
                     <div class="flex-1 text-start">
-                        <p class="font-semibold text-gray-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400">
+                        <p
+                            class="font-semibold text-gray-900 dark:text-white group-hover:text-action-primary"
+                        >
                             {{ $t('print.work_order') }}
                         </p>
                         <p class="text-sm text-gray-500 dark:text-gray-400">
                             {{ $t('print.work_order_desc') }}
                         </p>
                     </div>
-                    <svg class="w-5 h-5 text-gray-400 group-hover:text-indigo-500 rtl:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                    <svg
+                        class="w-5 h-5 text-gray-400 group-hover:text-action-primary rtl:rotate-180"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M9 5l7 7-7 7"
+                        />
                     </svg>
                 </button>
 
@@ -61,31 +101,63 @@
                         'w-full flex items-center gap-4 p-4 rounded-xl border transition-all group',
                         hasInvoice
                             ? 'border-emerald-200 dark:border-emerald-700 hover:bg-emerald-50 dark:hover:bg-emerald-950/20 hover:border-emerald-300 dark:hover:border-emerald-600'
-                            : 'border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 hover:border-green-300 dark:hover:border-green-600'
+                            : 'border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 hover:border-green-300 dark:hover:border-green-600',
                     ]"
                 >
-                    <div :class="[
-                        'w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0',
-                        hasInvoice ? 'bg-emerald-100 dark:bg-emerald-900/30' : 'bg-green-100 dark:bg-green-900/30'
-                    ]">
+                    <div
+                        :class="[
+                            'w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0',
+                            hasInvoice
+                                ? 'bg-emerald-100 dark:bg-emerald-900/30'
+                                : 'bg-green-100 dark:bg-green-900/30',
+                        ]"
+                    >
                         <span class="text-2xl">🧾</span>
                     </div>
                     <div class="flex-1 text-start">
-                        <p :class="[
-                            'font-semibold text-gray-900 dark:text-white',
-                            hasInvoice ? 'group-hover:text-emerald-600 dark:group-hover:text-emerald-400' : 'group-hover:text-green-600 dark:group-hover:text-green-400'
-                        ]">
-                            {{ hasInvoice ? (isTaxEnabled ? $t('print.final_tax_invoice') : $t('print.final_invoice')) : $t('print.proforma_invoice') }}
+                        <p
+                            :class="[
+                                'font-semibold text-gray-900 dark:text-white',
+                                hasInvoice
+                                    ? 'group-hover:text-emerald-600 dark:group-hover:text-emerald-400'
+                                    : 'group-hover:text-green-600 dark:group-hover:text-green-400',
+                            ]"
+                        >
+                            {{
+                                hasInvoice
+                                    ? isTaxEnabled
+                                        ? $t('print.final_tax_invoice')
+                                        : $t('print.final_invoice')
+                                    : $t('print.proforma_invoice')
+                            }}
                         </p>
                         <p class="text-sm text-gray-500 dark:text-gray-400">
-                            {{ hasInvoice ? (isTaxEnabled ? $t('print.final_tax_invoice_desc') : $t('print.final_invoice_desc')) : $t('print.proforma_invoice_desc') }}
+                            {{
+                                hasInvoice
+                                    ? isTaxEnabled
+                                        ? $t('print.final_tax_invoice_desc')
+                                        : $t('print.final_invoice_desc')
+                                    : $t('print.proforma_invoice_desc')
+                            }}
                         </p>
                     </div>
-                    <svg :class="[
-                        'w-5 h-5 rtl:rotate-180 transition-colors',
-                        hasInvoice ? 'text-gray-400 group-hover:text-emerald-500' : 'text-gray-400 group-hover:text-green-500'
-                    ]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                    <svg
+                        :class="[
+                            'w-5 h-5 rtl:rotate-180 transition-colors',
+                            hasInvoice
+                                ? 'text-gray-400 group-hover:text-emerald-500'
+                                : 'text-gray-400 group-hover:text-green-500',
+                        ]"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M9 5l7 7-7 7"
+                        />
                     </svg>
                 </button>
 
@@ -93,21 +165,35 @@
                 <button
                     v-if="hasPayments"
                     @click="printOption('payments')"
-                    class="w-full flex items-center gap-4 p-4 rounded-xl border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 hover:border-purple-300 dark:hover:border-purple-600 transition-all group"
+                    class="w-full flex items-center gap-4 p-4 rounded-xl border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 hover:border-purple-300 transition-all group"
                 >
-                    <div class="w-12 h-12 rounded-xl bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center flex-shrink-0">
+                    <div
+                        class="w-12 h-12 rounded-xl bg-purple-100 flex items-center justify-center flex-shrink-0"
+                    >
                         <span class="text-2xl">💰</span>
                     </div>
                     <div class="flex-1 text-start">
-                        <p class="font-semibold text-gray-900 dark:text-white group-hover:text-purple-600 dark:group-hover:text-purple-400">
+                        <p
+                            class="font-semibold text-gray-900 dark:text-white group-hover:text-purple-600"
+                        >
                             {{ $t('print.payments_receipt') }}
                         </p>
                         <p class="text-sm text-gray-500 dark:text-gray-400">
                             {{ $t('print.payments_receipt_desc') }}
                         </p>
                     </div>
-                    <svg class="w-5 h-5 text-gray-400 group-hover:text-purple-500 rtl:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                    <svg
+                        class="w-5 h-5 text-gray-400 group-hover:text-purple-500 rtl:rotate-180"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M9 5l7 7-7 7"
+                        />
                     </svg>
                 </button>
             </div>
@@ -144,7 +230,7 @@ const canPrintWorkOrder = computed(() => {
 
 // Show payments option only if there are payments
 const hasPayments = computed(() => {
-    return props.workOrder.total_paid > 0 || (props.workOrder.payments?.length > 0);
+    return props.workOrder.total_paid > 0 || props.workOrder.payments?.length > 0;
 });
 
 const hasInvoice = computed(() => {

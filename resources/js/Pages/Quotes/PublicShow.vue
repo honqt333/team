@@ -43,7 +43,7 @@
                     />
                     <div
                         v-else
-                        class="h-10 w-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center"
+                        class="h-10 w-10 rounded-xl bg-action-primary hover:bg-action-primary-hover flex items-center justify-center"
                     >
                         <svg
                             class="w-5 h-5 text-white"
@@ -75,12 +75,8 @@
                     </div>
                 </div>
                 <!-- Quote Code Badge -->
-                <div
-                    class="bg-indigo-50 dark:bg-indigo-900/30 border border-indigo-100 dark:border-indigo-800/50 px-3 py-1.5 rounded-xl"
-                >
-                    <p
-                        class="font-black text-indigo-700 dark:text-indigo-300 text-sm tracking-widest font-mono"
-                    >
+                <div class="bg-selection-bg border border-action-primary/25 px-3 py-1.5 rounded-xl">
+                    <p class="font-black text-selection-text text-sm tracking-widest font-mono">
                         {{ quote.code }}
                     </p>
                 </div>
@@ -373,7 +369,7 @@
                         v-model="rejectionReason"
                         rows="4"
                         :placeholder="t('quotes.public.rejection_reason_placeholder')"
-                        class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 rounded-xl text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500 resize-none"
+                        class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 rounded-xl text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-danger resize-none"
                     ></textarea>
                     <div class="flex gap-3 mt-4">
                         <button
@@ -562,7 +558,7 @@ const statusBannerClass = computed(() => ({
         props.quote.status === 'approved',
     'bg-red-50 dark:bg-red-900/20 text-red-800 dark:text-red-300 border border-red-100 dark:border-red-800/50':
         props.quote.status === 'rejected',
-    'bg-indigo-50 dark:bg-indigo-900/20 text-indigo-800 dark:text-indigo-300 border border-indigo-100 dark:border-indigo-800/50':
+    'bg-selection-bg text-selection-text border border-action-primary/25':
         props.quote.status === 'converted',
 }));
 
@@ -570,7 +566,7 @@ const statusIconClass = computed(() => ({
     'bg-amber-100 dark:bg-amber-800/50': ['draft', 'sent'].includes(props.quote.status),
     'bg-emerald-100 dark:bg-emerald-800/50': props.quote.status === 'approved',
     'bg-red-100 dark:bg-red-800/50': props.quote.status === 'rejected',
-    'bg-indigo-100 dark:bg-indigo-800/50': props.quote.status === 'converted',
+    'bg-selection-bg': props.quote.status === 'converted',
 }));
 
 const statusText = computed(() => t(`quotes.public.status_text.${props.quote.status}`));

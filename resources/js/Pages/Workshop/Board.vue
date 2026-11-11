@@ -91,7 +91,7 @@
                                           })
                                         : '#'
                                 "
-                                class="block group rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:border-emerald-400 dark:hover:border-emerald-500 shadow-sm hover:shadow-md transition-all p-3.5 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                                class="block group rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:border-emerald-400 dark:hover:border-emerald-500 shadow-sm hover:shadow-md transition-all p-3.5 focus:outline-none focus:ring-2 focus:ring-focus-ring"
                             >
                                 <!-- Row 1: WO code + overdue badge -->
                                 <div class="flex items-start justify-between gap-2 mb-2">

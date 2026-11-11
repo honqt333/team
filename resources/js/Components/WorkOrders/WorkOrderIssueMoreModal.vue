@@ -9,7 +9,7 @@
         <template #title>
             <div class="flex items-center gap-4">
                 <div
-                    class="w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center shadow-lg shadow-indigo-500/20 transform -rotate-3 hover:rotate-0 transition-transform duration-300"
+                    class="w-12 h-12 rounded-2xl bg-action-primary hover:bg-action-primary-hover flex items-center justify-center shadow-lg shadow-focus-ring-soft transform -rotate-3 hover:rotate-0 transition-transform duration-300"
                 >
                     <svg
                         class="w-6 h-6 text-white"
@@ -123,7 +123,7 @@
                     <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">
                         {{ $t('inventory.parts.current_card_qty') }}
                     </p>
-                    <p class="text-lg font-mono font-black text-indigo-600 dark:text-indigo-400">
+                    <p class="text-lg font-mono font-black text-action-primary">
                         {{ formatQuantity(part?.qty || 0) }}
                     </p>
                 </div>
@@ -148,12 +148,10 @@
 
             <!-- Main Input: Issue More Qty -->
             <div
-                class="bg-indigo-500/5 dark:bg-indigo-500/10 border-2 border-indigo-500/20 rounded-2xl p-5 space-y-3"
+                class="bg-action-primary/10 border-2 border-action-primary rounded-2xl p-5 space-y-3"
             >
                 <div class="flex items-center justify-between">
-                    <label
-                        class="block text-sm font-extrabold text-indigo-700 dark:text-indigo-400"
-                    >
+                    <label class="block text-sm font-extrabold text-selection-text">
                         {{ $t('inventory.parts.issue_more_qty') }}
                     </label>
                     <span
@@ -169,7 +167,7 @@
                     v-model="additionalQty"
                     dir="ltr"
                     @input="additionalQty = toEnglish($event.target.value).replace(/[^0-9.]/g, '')"
-                    class="w-full px-5 py-4 border-2 border-indigo-300 focus:border-indigo-500 dark:border-indigo-700 dark:focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 bg-white dark:bg-gray-800 text-gray-900 dark:text-white rounded-2xl font-mono text-center text-xl font-extrabold transition-all"
+                    class="w-full px-5 py-4 border-2 border-action-primary/25 focus:border-action-primary focus:ring-4 focus:ring-focus-ring/10 bg-white dark:bg-gray-800 text-gray-900 dark:text-white rounded-2xl font-mono text-center text-xl font-extrabold transition-all"
                     placeholder="0"
                 />
             </div>
@@ -214,7 +212,7 @@
                         readonly
                         :value="formatQuantity(calculatedQty)"
                         dir="ltr"
-                        class="w-full px-4 py-2.5 border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-indigo-600 dark:text-indigo-400 text-center font-mono text-sm font-black cursor-not-allowed rounded-xl"
+                        class="w-full px-4 py-2.5 border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-action-primary text-center font-mono text-sm font-black cursor-not-allowed rounded-xl"
                     />
                 </div>
 
@@ -235,7 +233,7 @@
 
             <!-- Grand Total Summary Box -->
             <div
-                class="p-4 bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 border border-indigo-200 dark:border-indigo-800 rounded-2xl flex items-center justify-between shadow-sm"
+                class="p-4 bg-selection-bg border border-action-primary/25 rounded-2xl flex items-center justify-between shadow-sm"
             >
                 <div class="space-y-0.5">
                     <span
@@ -248,7 +246,7 @@
                     </p>
                 </div>
                 <div class="flex items-baseline gap-1 font-mono">
-                    <span class="text-2xl font-black text-indigo-600 dark:text-indigo-400">
+                    <span class="text-2xl font-black text-action-primary">
                         {{ formatCurrency(grandTotalValue) }}
                     </span>
                     <span class="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase">
@@ -275,7 +273,7 @@
                         parseFloat(additionalQty) <= 0 ||
                         parseFloat(additionalQty) > currentStock
                     "
-                    class="px-10 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl font-black uppercase tracking-widest text-xs transition-all shadow-lg shadow-indigo-500/20 disabled:opacity-50"
+                    class="px-10 py-3 bg-action-primary hover:bg-action-primary-hover text-white rounded-2xl font-black uppercase tracking-widest text-xs transition-all shadow-lg shadow-focus-ring-soft disabled:opacity-50"
                 >
                     {{ form.processing ? $t('common.loading') : $t('common.save') }}
                 </button>

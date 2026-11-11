@@ -909,7 +909,7 @@
                                     type="text"
                                     v-model="invoiceSearchQuery"
                                     :placeholder="$t('common.search') + '...'"
-                                    class="block w-full ps-11 pe-4 py-2.5 text-sm text-gray-900 dark:text-white bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-2xl focus:ring-4 focus:ring-green-500/10 focus:border-green-500 transition-all outline-none"
+                                    class="block w-full ps-11 pe-4 py-2.5 text-sm text-gray-900 dark:text-white bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-2xl focus:ring-4 focus:ring-focus-ring/10 focus:border-action-primary transition-all outline-none"
                                 />
                             </div>
                             <div class="flex items-center gap-2 self-end sm:self-auto">
@@ -1609,7 +1609,7 @@
                         </div>
                         <div v-else class="text-center py-12">
                             <div
-                                class="w-16 h-16 mx-auto rounded-full bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center mb-4"
+                                class="w-16 h-16 mx-auto rounded-full bg-purple-100 flex items-center justify-center mb-4"
                             >
                                 <svg
                                     class="w-8 h-8 text-purple-500"
@@ -2161,7 +2161,7 @@ const tabs = computed(() => [
         label: t('purchasing.suppliers.payments'),
         count: props.counts.payments || 0,
         icon: PaymentIcon,
-        activeColor: 'text-purple-600 dark:text-purple-400',
+        activeColor: 'text-purple-600',
     },
 ]);
 
