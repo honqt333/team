@@ -488,7 +488,7 @@
 
                     <!-- Group Table Body (Collapsible) -->
                     <div v-show="openGroups[group.group_key]" class="overflow-x-auto">
-                        <table class="w-full text-xs text-start">
+                        <DataTable structured class="w-full text-xs text-start">
                             <thead
                                 class="bg-gray-100/50 dark:bg-gray-700/50 text-gray-600 dark:text-gray-300 border-y border-gray-200 dark:border-gray-700 font-bold"
                             >
@@ -664,7 +664,7 @@
                                     </td>
                                 </tr>
                             </tbody>
-                        </table>
+                        </DataTable>
                     </div>
                 </div>
             </div>
@@ -677,7 +677,7 @@
                 class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700/80 shadow-sm overflow-hidden print:hidden"
             >
                 <div class="overflow-x-auto">
-                    <table class="w-full text-xs text-start">
+                    <DataTable structured class="w-full text-xs text-start">
                         <thead
                             class="bg-gray-50 dark:bg-gray-750 text-gray-600 dark:text-gray-300 border-b border-gray-200 dark:border-gray-700 font-bold"
                         >
@@ -847,7 +847,7 @@
                                 </td>
                             </tr>
                         </tbody>
-                    </table>
+                    </DataTable>
                 </div>
 
                 <!-- Pagination Bar -->
@@ -926,6 +926,7 @@
 </template>
 
 <script setup>
+import DataTable from '@/Components/Common/DataTable.vue';
 import CustomDatePicker from '@/Components/CustomDatePicker.vue';
 import { ref, reactive, computed, onMounted } from 'vue';
 import { router } from '@inertiajs/vue3';
@@ -936,7 +937,7 @@ import BackButton from '@/Components/BackButton.vue';
 import AppPrintButton from '@/Components/Common/AppPrintButton.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 import PrintEngine from '@/Components/Print/PrintEngine.vue';
-import { usePrint } from '@/Composables/usePrint';
+import { printDocument } from '@/Composables/usePrint';
 
 const { t } = useI18n();
 
@@ -1249,8 +1250,6 @@ const exportUrl = computed(() => {
 
     return `/app/reports/customers/export?${params.toString()}`;
 });
-
-const { printDocument } = usePrint();
 
 const handlePrint = () => {
     printDocument({

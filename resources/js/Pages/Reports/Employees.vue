@@ -32,26 +32,10 @@
 
                 <template #actions>
                     <div class="flex items-center gap-2.5 shrink-0">
-                        <button
-                            type="button"
+                        <AppPrintButton
                             @click="handlePrint"
-                            class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 text-xs font-bold transition-all shadow-sm"
-                        >
-                            <svg
-                                class="w-4 h-4 text-gray-500"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                            >
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    stroke-width="2"
-                                    d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"
-                                />
-                            </svg>
-                            <span>{{ $t('reports.employees_report.print_report') }}</span>
-                        </button>
+                            :label="$t('reports.employees_report.print_report')"
+                        />
 
                         <a
                             :href="exportUrl"
@@ -633,12 +617,7 @@
                     <div class="flex flex-wrap items-center gap-4">
                         <!-- Overdue Only Toggle -->
                         <label class="inline-flex items-center gap-2 cursor-pointer">
-                            <input
-                                type="checkbox"
-                                v-model="localFilters.is_overdue"
-                                @change="applyFilters"
-                                class="rounded border-gray-300 text-orange-600 shadow-sm focus:ring-orange-500"
-                            />
+                            <AppToggle v-model="localFilters.is_overdue" @change="applyFilters" />
                             <span class="text-xs font-semibold text-gray-700 dark:text-gray-300">
                                 {{ $t('reports.employees_report.overdue') }}
                             </span>
@@ -646,11 +625,9 @@
 
                         <!-- Deduct Ticket Discount Toggle -->
                         <label class="inline-flex items-center gap-2 cursor-pointer">
-                            <input
-                                type="checkbox"
+                            <AppToggle
                                 v-model="localFilters.deduct_ticket_discount"
                                 @change="applyFilters"
-                                class="rounded border-gray-300 text-orange-600 shadow-sm focus:ring-orange-500"
                             />
                             <span class="text-xs font-semibold text-gray-700 dark:text-gray-300">
                                 {{ $t('reports.employees_report.deduct_ticket_discount') }}
@@ -659,11 +636,9 @@
 
                         <!-- Remove Inactive Employees Toggle -->
                         <label class="inline-flex items-center gap-2 cursor-pointer">
-                            <input
-                                type="checkbox"
+                            <AppToggle
                                 v-model="localFilters.remove_inactive_employees"
                                 @change="applyFilters"
-                                class="rounded border-gray-300 text-orange-600 shadow-sm focus:ring-orange-500"
                             />
                             <span class="text-xs font-semibold text-gray-700 dark:text-gray-300">
                                 {{ $t('reports.employees_report.remove_inactive_employees') }}
@@ -831,7 +806,7 @@
                         v-show="openGroups.has(group.group_id)"
                         class="overflow-x-auto border-t border-gray-200 dark:border-gray-700"
                     >
-                        <table class="w-full text-right text-xs">
+                        <DataTable structured class="w-full text-right text-xs">
                             <thead
                                 class="bg-gray-100/60 dark:bg-gray-750 text-gray-600 dark:text-gray-300 font-bold uppercase tracking-wider text-[11px]"
                             >
@@ -1029,7 +1004,7 @@
                                     </td>
                                 </tr>
                             </tbody>
-                        </table>
+                        </DataTable>
                     </div>
                 </div>
             </div>
@@ -1040,7 +1015,7 @@
                 class="rounded-2xl bg-white dark:bg-gray-800 border border-gray-200/80 dark:border-gray-700/80 shadow-sm overflow-hidden"
             >
                 <div class="overflow-x-auto">
-                    <table class="w-full text-right text-xs">
+                    <DataTable structured class="w-full text-right text-xs">
                         <thead
                             class="bg-gray-100/70 dark:bg-gray-750 text-gray-600 dark:text-gray-300 font-bold uppercase tracking-wider text-[11px] border-b border-gray-200 dark:border-gray-700"
                         >
@@ -1305,7 +1280,7 @@
                                 </td>
                             </tr>
                         </tfoot>
-                    </table>
+                    </DataTable>
                 </div>
 
                 <!-- Pagination Component -->
@@ -1360,6 +1335,9 @@
 </template>
 
 <script setup>
+import DataTable from '@/Components/Common/DataTable.vue';
+import AppPrintButton from '@/Components/Common/AppPrintButton.vue';
+import AppToggle from '@/Components/Common/AppToggle.vue';
 import { ref, computed } from 'vue';
 import { router } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';

@@ -4,6 +4,23 @@ import { useNumberFormat } from '@/Composables/useNumberFormat';
 import { useFormatters } from '@/Composables/useFormatters';
 
 /**
+ * Trigger browser print safely with optional document title.
+ */
+export function printDocument(options = {}) {
+    if (typeof window === 'undefined') return;
+    const originalTitle = document.title;
+    if (options?.title) {
+        document.title = options.title;
+    }
+    window.print();
+    if (options?.title) {
+        setTimeout(() => {
+            document.title = originalTitle;
+        }, 1000);
+    }
+}
+
+/**
  * Shared print composable - استدعاء الوظائف المشتركة للطباعة
  * used across all print templates.
  *
@@ -355,23 +372,6 @@ export function usePrint() {
             return buildPrintSignatures(docSettings, customerSignatureUrl);
         });
         return buildPrintSignatures(docSettings, customerSignatureUrl);
-    }
-
-    /**
-     * Trigger browser print safely with optional document title.
-     */
-    function printDocument(options = {}) {
-        if (typeof window === 'undefined') return;
-        const originalTitle = document.title;
-        if (options?.title) {
-            document.title = options.title;
-        }
-        window.print();
-        if (options?.title) {
-            setTimeout(() => {
-                document.title = originalTitle;
-            }, 1000);
-        }
     }
 
     function print() {

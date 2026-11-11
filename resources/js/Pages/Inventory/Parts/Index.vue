@@ -1,6 +1,6 @@
 <template>
     <AppLayout :title="$t('inventory.parts.title')">
-        <div class="space-y-6">
+        <PrintEngine document-type="report" class="space-y-6">
             <!-- Page Header -->
             <PageHeader
                 :title="$t('inventory.parts.title')"
@@ -618,14 +618,14 @@
                 :existing-balances="stockEditingPart?.inventory_balances || []"
                 @close="closeStockModal"
             />
-        </div>
+        </PrintEngine>
     </AppLayout>
 
     <!-- Print Section -->
     <Teleport to="body">
         <div class="print-section hidden">
             <StandardReportHeader :title="$t('inventory.parts.title')" />
-            <table class="w-full text-xs border border-gray-300">
+            <DataTable structured class="w-full text-xs border border-gray-300">
                 <thead>
                     <tr class="bg-gray-100">
                         <th style="width: 40px" class="p-2 border border-gray-300 text-center">
@@ -679,13 +679,15 @@
                         </td>
                     </tr>
                 </tbody>
-            </table>
+            </DataTable>
             <StandardReportFooter class="mt-8 border-t pt-4" />
         </div>
     </Teleport>
 </template>
 
 <script setup>
+import PrintEngine from '@/Components/Print/PrintEngine.vue';
+import { printDocument } from '@/Composables/usePrint';
 import { ref, computed, watch } from 'vue';
 import { router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
@@ -906,7 +908,7 @@ const toggleExpanded = (partId) => {
 };
 
 const handlePrint = () => {
-    window.print();
+    printDocument();
 };
 
 // Stock Helpers

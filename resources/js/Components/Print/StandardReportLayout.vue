@@ -1,5 +1,6 @@
 <template>
-    <div
+    <PrintEngine
+        document-type="report"
         class="standard-report-layout bg-white min-h-screen text-gray-900 p-8 print:p-0 print:m-0"
         :class="isRtl ? 'rtl' : 'ltr'"
         :dir="isRtl ? 'rtl' : 'ltr'"
@@ -52,10 +53,11 @@
                 <slot name="footer-center-note" />
             </template>
         </StandardReportFooter>
-    </div>
+    </PrintEngine>
 </template>
 
 <script setup>
+import PrintEngine from '@/Components/Print/PrintEngine.vue';
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import StandardPrintControls from './StandardPrintControls.vue';

@@ -29,9 +29,9 @@ describe('SelectableCard', () => {
             },
         });
 
-        expect(wrapper.attributes('aria-pressed')).toBe('false');
-
-        await wrapper.trigger('click');
+        const radio = wrapper.get('input[type="radio"]');
+        expect((radio.element as HTMLInputElement).checked).toBe(false);
+        await radio.setValue(true);
         expect(wrapper.emitted('update:modelValue')?.[0]).toEqual(['plan_a']);
     });
 

@@ -1,4 +1,5 @@
 <script setup>
+import DataTable from '@/Components/Common/DataTable.vue';
 import SystemLayout from '@/Layouts/SystemLayout.vue';
 import { Head, Link, router } from '@inertiajs/vue3';
 import { ref, watch } from 'vue';
@@ -111,7 +112,10 @@ const closeMessage = () => {
                 class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden"
             >
                 <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                    <DataTable
+                        structured
+                        class="min-w-full divide-y divide-gray-200 dark:divide-gray-700"
+                    >
                         <thead class="bg-gray-50 dark:bg-gray-700/50">
                             <tr>
                                 <th
@@ -251,7 +255,7 @@ const closeMessage = () => {
                                 </td>
                             </tr>
                         </tbody>
-                    </table>
+                    </DataTable>
                 </div>
 
                 <!-- Pagination -->

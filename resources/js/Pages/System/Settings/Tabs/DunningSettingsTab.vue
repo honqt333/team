@@ -41,11 +41,7 @@
                 class="rounded-xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-700 dark:bg-gray-800"
             >
                 <label class="flex cursor-pointer items-start gap-3">
-                    <input
-                        v-model="form.enabled"
-                        type="checkbox"
-                        class="mt-1 h-5 w-5 rounded border-gray-300 text-amber-600 focus:ring-amber-500"
-                    />
+                    <AppToggle v-model="form.enabled" />
                     <div class="flex-1">
                         <div class="text-base font-semibold text-gray-900 dark:text-white">
                             {{
@@ -88,12 +84,7 @@
                         :key="key"
                         class="flex cursor-pointer items-start gap-3 rounded-lg border border-gray-200 p-3 hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-750"
                     >
-                        <input
-                            type="checkbox"
-                            :value="key"
-                            v-model="form.active_tiers_list"
-                            class="mt-1 h-4 w-4 rounded border-gray-300 text-amber-600 focus:ring-amber-500"
-                        />
+                        <AppToggle :value="key" v-model="form.active_tiers_list" />
                         <div class="flex-1 text-sm">
                             <div class="font-medium text-gray-900 dark:text-white">
                                 {{ isAr ? $t('system.settings.tier_3') : 'Tier' }}
@@ -190,7 +181,7 @@
                     </p>
                 </div>
 
-                <table class="w-full text-sm">
+                <DataTable structured class="w-full text-sm">
                     <thead class="bg-gray-50 text-xs uppercase text-gray-500 dark:bg-gray-900/40">
                         <tr>
                             <th class="px-4 py-3 text-start">
@@ -217,18 +208,14 @@
                                 :key="channel.key"
                                 class="px-4 py-3 text-center"
                             >
-                                <input
-                                    type="checkbox"
+                                <AppToggle
                                     :checked="isChannelEnabled(tierKey, channel.key)"
-                                    @change="
-                                        toggleChannel(tierKey, channel.key, $event.target.checked)
-                                    "
-                                    class="h-4 w-4 rounded border-gray-300 text-amber-600 focus:ring-amber-500"
+                                    @change="toggleChannel(tierKey, channel.key, $event)"
                                 />
                             </td>
                         </tr>
                     </tbody>
-                </table>
+                </DataTable>
             </div>
 
             <!-- Save button -->
@@ -293,7 +280,7 @@
             <div
                 class="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800"
             >
-                <table class="w-full text-sm">
+                <DataTable structured class="w-full text-sm">
                     <thead class="bg-gray-50 text-xs uppercase text-gray-500 dark:bg-gray-900/40">
                         <tr>
                             <th class="px-4 py-3 text-start">
@@ -365,13 +352,15 @@
                             </td>
                         </tr>
                     </tbody>
-                </table>
+                </DataTable>
             </div>
         </div>
     </div>
 </template>
 
 <script setup>
+import DataTable from '@/Components/Common/DataTable.vue';
+import AppToggle from '@/Components/Common/AppToggle.vue';
 import { computed, ref } from 'vue';
 import { router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';

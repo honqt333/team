@@ -130,7 +130,7 @@
                 </div>
 
                 <div class="overflow-x-auto">
-                    <table class="w-full text-right text-sm">
+                    <DataTable structured class="w-full text-right text-sm">
                         <thead
                             class="bg-gray-50 dark:bg-gray-900/40 text-gray-600 dark:text-gray-300 text-xs font-semibold uppercase"
                         >
@@ -334,7 +334,7 @@
                                 </td>
                             </tr>
                         </tbody>
-                    </table>
+                    </DataTable>
                 </div>
 
                 <!-- Pagination if multiple pages -->
@@ -552,6 +552,7 @@
 </template>
 
 <script setup>
+import DataTable from '@/Components/Common/DataTable.vue';
 import { ref, computed } from 'vue';
 import { Head, Link, router } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';

@@ -59,6 +59,7 @@ class WorkOrderUpdateRequest extends FormRequest
             'customer_complaint' => ['nullable', 'string', 'max:5000'],
             'initial_assessment' => ['nullable', 'string', 'max:5000'],
             'odometer' => ['nullable', 'integer', 'min:0'],
+            'fuel_level' => ['nullable', 'numeric', 'min:0', 'max:100'],
             'allow_lower_odometer' => ['nullable', 'boolean'],
             'contact_name' => ['nullable', 'string', 'max:255'],
             'contact_phone' => ['nullable', 'string', 'max:20'],
@@ -100,12 +101,14 @@ class WorkOrderUpdateRequest extends FormRequest
     {
         return [
             function ($validator) {
-                if ($this->status === WorkOrder::STATUS_CANCELLED) {
-                    $workOrder = $this->route('workOrder') ?? $this->route('work_order');
+                $workOrder = $this->route('workOrder') ?? $this->route('work_order');
 
-                    if ($workOrder && ! $workOrder->canBeCancelled()) {
-                        $validator->errors()->add('status', __('messages.cannot_cancel_has_relations'));
-                    }
+                if ($this->status === WorkOrder::STATUS_CANCELLED && $workOrder && ! $workOrder->canBeCancelled()) {
+                    $validator->errors()->add('status', __('messages.cannot_cancel_has_relations'));
+                }
+
+                if ($this->status === WorkOrder::STATUS_DONE && $workOrder && $workOrder->hasExcessPayment()) {
+                    $validator->errors()->add('status', __('messages.cannot_complete_excess_payments'));
                 }
             },
         ];

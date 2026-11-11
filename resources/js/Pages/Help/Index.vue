@@ -1,18 +1,10 @@
 <template>
     <AppLayout>
+        <Head :title="$t('help.title')" />
+
         <div class="space-y-8 pb-12">
             <!-- Header Section -->
-            <PageHeader
-                :title="$t('help.title')"
-                :subtitle="$t('help.subtitle')"
-                gradientFrom="from-sky-600"
-                gradientTo="to-indigo-700"
-                glowFrom="from-sky-500"
-                badgeBg="bg-sky-50/50 dark:bg-sky-900/30"
-                badgeText="text-sky-600 dark:text-sky-400"
-                badgeBorder="border-sky-100/50 dark:border-sky-800/30"
-                badgeDot="bg-sky-500"
-            >
+            <PageHeader :title="$t('help.title')" :subtitle="$t('help.subtitle')">
                 <template #icon>
                     <svg
                         class="w-8 h-8 text-white"
@@ -34,7 +26,7 @@
                         :href="`https://wa.me/${contactSupport.whatsapp.replace(/[^0-9]/g, '')}`"
                         target="_blank"
                         rel="noopener"
-                        class="inline-flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-medium shadow-sm transition-colors text-sm"
+                        class="inline-flex items-center gap-2 px-4 py-2.5 bg-success hover:bg-success/90 text-white rounded-xl font-bold shadow-xs transition-colors text-sm"
                     >
                         <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                             <path
@@ -434,25 +426,20 @@
             </div>
 
             <!-- Support Contact Footer Card -->
-            <div
-                class="rounded-3xl bg-gradient-to-br from-slate-900 to-indigo-950 p-8 text-white relative overflow-hidden shadow-xl"
-            >
+            <div class="rounded-2xl bg-surface border border-border-subtle p-7 shadow-xs">
                 <div
-                    class="absolute -right-10 -bottom-10 w-60 h-60 rounded-full bg-sky-500/10 blur-3xl"
-                ></div>
-                <div
-                    class="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6"
+                    class="flex flex-col md:flex-row items-start md:items-center justify-between gap-6"
                 >
                     <div>
                         <span
-                            class="px-3 py-1 rounded-full text-xs font-semibold bg-sky-500/20 text-sky-300 border border-sky-400/30"
+                            class="px-3 py-1 rounded-full text-xs font-semibold bg-info-soft text-info border border-info/30"
                         >
                             {{ $t('help.support_always_here') }}
                         </span>
-                        <h3 class="text-xl font-bold mt-2">
+                        <h3 class="text-xl font-bold text-content-primary mt-2">
                             {{ $t('help.need_more_help') }}
                         </h3>
-                        <p class="text-sm text-slate-300 mt-1 max-w-xl">
+                        <p class="text-sm text-content-secondary mt-1 max-w-xl">
                             {{ $t('help.support_desc') }} ({{
                                 contactSupport.hours || $t('help.support.hours')
                             }})
@@ -465,7 +452,7 @@
                             :href="`https://wa.me/${contactSupport.whatsapp.replace(/[^0-9]/g, '')}`"
                             target="_blank"
                             rel="noopener"
-                            class="px-5 py-3 rounded-xl bg-emerald-500 hover:bg-emerald-600 font-bold text-sm text-white transition-colors flex items-center gap-2 shadow-lg shadow-emerald-500/20"
+                            class="px-5 py-3 rounded-xl bg-success hover:bg-success/90 font-bold text-sm text-white transition-colors flex items-center gap-2 shadow-xs"
                         >
                             <span>{{ $t('help.support.whatsapp_instant') }}</span>
                         </a>
@@ -647,6 +634,7 @@
 
 <script setup>
 import { ref, computed, h } from 'vue';
+import { Head } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import PageHeader from '@/Components/PageHeader.vue';
@@ -1043,20 +1031,20 @@ const defaultAllTopics = [
 // FAQ List
 const defaultFaqs = [
     {
-        q: 'هل يمكن تشغيل لوحة الورشة على شاشة تلفاز معلقة داخل المركز؟',
-        a: 'نعم بالتأكيد! صُممت لوحة الورشة (/app/workshop) لتكون متجاوبة وتعمل بوضوح تام على الشاشات الكبيرة في صالة الصيانة وتتحدث فورياً.',
+        q: t('help.faqs.faq_1_q'),
+        a: t('help.faqs.faq_1_a'),
     },
     {
-        q: 'كيف أربط الفواتير بمتطلبات هيئة الزكاة والضريبة والجمارك (ZATCA)؟',
-        a: 'النظام يدعم المرحلة الأولى والمرحلة الثانية، ويولد QR Code مشفر يحتوي على اسم المنشأة والرقم الضريبي والتوقيت والمجموع والضريبة تلقائياً.',
+        q: t('help.faqs.faq_2_q'),
+        a: t('help.faqs.faq_2_a'),
     },
     {
-        q: 'هل يستطيع الفني العمل على أكثر من سيارة في نفس اللحظة؟',
-        a: 'لا، يمنع النظام تشغيل مؤقتين نشطين في نفس الوقت للفني الواحد؛ يجب عليه إيقاف العمل مؤقتاً على السيارة الأولى قبل بدء العمل على الثانية لضمان دقة احتساب الإنتاجية.',
+        q: t('help.faqs.faq_3_q'),
+        a: t('help.faqs.faq_3_a'),
     },
     {
-        q: 'كيف يتلقى العميل رمز الـ OTP لدخول بوابته الذكية؟',
-        a: 'يدخل العميل رقم جواله في بوابة العميل، ويصله الرمز السداسي عبر رسالة SMS فورية على هاتفه المسجل للدخول الآمن دون الحاجة لتذكر أي كلمة مرور.',
+        q: t('help.faqs.faq_4_q'),
+        a: t('help.faqs.faq_4_a'),
     },
 ];
 

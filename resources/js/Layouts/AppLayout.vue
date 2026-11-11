@@ -62,20 +62,12 @@
                             :alt="page.props.tenant?.name"
                             class="w-full h-full object-contain"
                         />
-                        <svg
+                        <img
                             v-else
-                            class="w-5 h-5 text-gray-400"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                        >
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
-                            />
-                        </svg>
+                            src="/images/brand/logo-64.png"
+                            :alt="$t('common.app_name')"
+                            class="w-full h-full object-contain"
+                        />
                     </div>
                     <!-- Name & ID -->
                     <div class="flex-1 min-w-0">
@@ -83,7 +75,7 @@
                             {{
                                 page.props.tenant?.trade_name ||
                                 page.props.tenant?.name ||
-                                $t('nav.brand')
+                                $t('common.app_name')
                             }}
                         </p>
                         <p
@@ -911,13 +903,14 @@
 
                 <!-- Top bar -->
                 <header
-                    class="relative z-50 h-14 flex items-center justify-between px-3 sm:px-4 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 flex-shrink-0"
+                    class="relative z-50 h-14 flex items-center justify-between gap-2 px-3 sm:px-4 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 flex-shrink-0"
                 >
-                    <div class="flex items-center gap-2">
+                    <!-- Start Section (Right in RTL / Left in LTR): Hamburger + Brand + Active Center -->
+                    <div class="flex items-center gap-2 sm:gap-3 min-w-0">
                         <!-- Mobile hamburger -->
                         <button
                             @click="mobileMenuOpen = true"
-                            class="md:hidden p-1.5 -ms-1 rounded-lg text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700"
+                            class="md:hidden p-1.5 -ms-1 rounded-lg text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 shrink-0"
                             aria-label="Toggle Navigation"
                         >
                             <svg
@@ -935,10 +928,10 @@
                             </svg>
                         </button>
 
-                        <!-- Mobile Brand Logo & Name -->
-                        <div class="flex md:hidden items-center gap-1.5 min-w-0">
+                        <!-- Mobile Brand Logo, Tenant Name & Active Center -->
+                        <div class="relative flex md:hidden items-center gap-2 min-w-0">
                             <div
-                                class="w-7 h-7 rounded-lg bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 flex items-center justify-center overflow-hidden shrink-0"
+                                class="w-8 h-8 rounded-lg bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 flex items-center justify-center overflow-hidden shrink-0"
                             >
                                 <img
                                     v-if="page.props.tenant?.logo_url"
@@ -961,154 +954,58 @@
                                     />
                                 </svg>
                             </div>
-                            <span
-                                class="text-xs font-bold text-gray-900 dark:text-white truncate max-w-[90px] xs:max-w-[130px] sm:max-w-[180px]"
-                            >
-                                {{
-                                    page.props.tenant?.trade_name ||
-                                    page.props.tenant?.name ||
-                                    $t('nav.brand')
-                                }}
-                            </span>
-                        </div>
-                    </div>
-
-                    <!-- Brand info on desktop when isTopNav is active, or empty spacer when in side nav -->
-                    <div v-if="isTopNav" class="hidden md:flex items-center gap-3">
-                        <div
-                            class="w-8 h-8 rounded-lg bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 flex items-center justify-center overflow-hidden shrink-0"
-                        >
-                            <img
-                                v-if="page.props.tenant?.logo_url"
-                                :src="page.props.tenant.logo_url"
-                                :alt="page.props.tenant?.name"
-                                class="w-full h-full object-contain"
-                            />
-                            <svg
-                                v-else
-                                class="w-4 h-4 text-gray-400"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                            >
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    stroke-width="2"
-                                    d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
-                                />
-                            </svg>
-                        </div>
-                        <div class="flex items-center gap-2">
-                            <span
-                                class="text-sm font-bold text-gray-900 dark:text-white truncate max-w-[200px]"
-                            >
-                                {{
-                                    page.props.tenant?.trade_name ||
-                                    page.props.tenant?.name ||
-                                    $t('nav.brand')
-                                }}
-                            </span>
-                            <span
-                                v-if="page.props.center?.id"
-                                class="text-xs text-gray-400 dark:text-gray-500 font-mono"
-                            >
-                                #{{ page.props.center.id }}
-                            </span>
-                        </div>
-                    </div>
-                    <!-- Quick Search / Command Palette trigger -->
-                    <button
-                        type="button"
-                        @click="openCommandPalette"
-                        class="hidden md:inline-flex items-center gap-2.5 px-3 py-1.5 text-xs text-gray-500 dark:text-gray-400 bg-gray-100/80 dark:bg-gray-700/50 hover:bg-gray-200/80 dark:hover:bg-gray-700 rounded-xl border border-gray-200/80 dark:border-gray-600 transition-all cursor-pointer"
-                        title="Command + K"
-                    >
-                        <svg
-                            class="w-4 h-4 text-gray-400"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                        >
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                            />
-                        </svg>
-                        <span>{{ $t('common.quick_search') || 'بحث سريع...' }}</span>
-                        <kbd
-                            class="px-1.5 py-0.5 text-[10px] font-mono bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400 rounded-md border border-gray-200 dark:border-gray-700 shadow-xs"
-                        >
-                            ⌘K
-                        </kbd>
-                    </button>
-
-                    <div class="flex items-center gap-1 sm:gap-1.5">
-                        <!-- Mobile Quick Search trigger -->
-                        <button
-                            type="button"
-                            @click="openCommandPalette"
-                            class="md:hidden p-1.5 rounded-lg text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-                            :title="$t('common.quick_search') || 'بحث سريع'"
-                        >
-                            <svg
-                                class="w-5 h-5 text-gray-500 dark:text-gray-400"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                            >
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    stroke-width="2"
-                                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                                />
-                            </svg>
-                        </button>
-
-                        <!-- Center Switcher -->
-                        <div v-if="page.props.auth.available_centers?.length > 1" class="relative">
-                            <button
-                                @click="toggleCenterMenu"
-                                class="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors border border-transparent hover:border-gray-200 dark:hover:border-gray-600"
-                            >
-                                <span class="hidden sm:inline-block max-w-[150px] truncate">
+                            <div class="flex flex-col min-w-0">
+                                <span
+                                    class="text-xs font-bold text-gray-900 dark:text-white truncate max-w-[135px] xs:max-w-[175px]"
+                                >
                                     {{
-                                        isRtl
-                                            ? page.props.center.name_ar
-                                            : page.props.center.name_en
+                                        page.props.tenant?.trade_name ||
+                                        page.props.tenant?.name ||
+                                        $t('common.app_name')
                                     }}
                                 </span>
+                                <button
+                                    v-if="
+                                        page.props.auth.available_centers?.length > 1 &&
+                                        page.props.center
+                                    "
+                                    type="button"
+                                    @click="toggleCenterMenu"
+                                    class="flex items-center gap-1 text-[11px] font-medium text-indigo-600 dark:text-indigo-400 truncate max-w-[140px] xs:max-w-[180px]"
+                                >
+                                    <span class="truncate">
+                                        {{ getCenterName(page.props.center) }}
+                                    </span>
+                                    <svg
+                                        class="w-3 h-3 shrink-0"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M19 9l-7 7-7-7"
+                                        />
+                                    </svg>
+                                </button>
                                 <span
-                                    class="sm:hidden font-mono font-bold text-xs bg-gray-100 dark:bg-gray-700 px-1.5 py-0.5 rounded"
+                                    v-else-if="page.props.center"
+                                    class="text-[11px] font-medium text-indigo-600 dark:text-indigo-400 truncate max-w-[140px] xs:max-w-[180px]"
                                 >
-                                    #{{ page.props.center.id }}
+                                    {{ getCenterName(page.props.center) }}
                                 </span>
-                                <svg
-                                    class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-gray-400 mt-0.5"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        stroke-width="2"
-                                        d="M19 9l-7 7-7-7"
-                                    />
-                                </svg>
-                            </button>
+                            </div>
 
-                            <!-- Dropdown -->
+                            <!-- Mobile Center Switcher Dropdown -->
                             <Transition name="dropdown">
                                 <div
-                                    v-if="centerMenuOpen"
-                                    :class="[
-                                        'absolute top-full mt-2 w-60 bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 py-1 z-50 overflow-hidden',
-                                        isRtl ? 'left-0' : 'right-0',
-                                    ]"
+                                    v-if="
+                                        centerMenuOpen &&
+                                        page.props.auth.available_centers?.length > 1
+                                    "
+                                    class="absolute top-full start-0 mt-2 w-60 bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 py-1 z-50 overflow-hidden"
                                 >
                                     <div
                                         class="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider bg-gray-50 dark:bg-gray-700/50"
@@ -1126,8 +1023,145 @@
                                                 : 'text-gray-700 dark:text-gray-300',
                                         ]"
                                     >
-                                        <div class="flex items-center justify-between">
-                                            <span>{{ isRtl ? c.name_ar : c.name_en }}</span>
+                                        <div class="flex items-center justify-between gap-2">
+                                            <span class="truncate">{{ getCenterName(c) }}</span>
+                                            <span
+                                                v-if="c.id === page.props.center?.id"
+                                                class="text-indigo-600 dark:text-indigo-400"
+                                            >
+                                                <svg
+                                                    class="w-4 h-4"
+                                                    fill="none"
+                                                    stroke="currentColor"
+                                                    viewBox="0 0 24 24"
+                                                >
+                                                    <path
+                                                        stroke-linecap="round"
+                                                        stroke-linejoin="round"
+                                                        stroke-width="2"
+                                                        d="M5 13l4 4L19 7"
+                                                    />
+                                                </svg>
+                                            </span>
+                                        </div>
+                                    </button>
+                                </div>
+                            </Transition>
+                        </div>
+
+                        <!-- Desktop Brand Info when TopNav is active -->
+                        <div v-if="isTopNav" class="hidden md:flex items-center gap-2.5 min-w-0">
+                            <div
+                                class="w-8 h-8 rounded-lg bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 flex items-center justify-center overflow-hidden shrink-0"
+                            >
+                                <img
+                                    v-if="page.props.tenant?.logo_url"
+                                    :src="page.props.tenant.logo_url"
+                                    :alt="page.props.tenant?.name"
+                                    class="w-full h-full object-contain"
+                                />
+                                <svg
+                                    v-else
+                                    class="w-4 h-4 text-gray-400"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2"
+                                        d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
+                                    />
+                                </svg>
+                            </div>
+                            <span
+                                class="text-sm font-bold text-gray-900 dark:text-white truncate max-w-[190px]"
+                            >
+                                {{
+                                    page.props.tenant?.trade_name ||
+                                    page.props.tenant?.name ||
+                                    $t('common.app_name')
+                                }}
+                            </span>
+                            <span
+                                v-if="page.props.center"
+                                class="w-px h-5 bg-gray-200 dark:bg-gray-700 mx-0.5 shrink-0"
+                            ></span>
+                        </div>
+
+                        <!-- Desktop Center Switcher / Active Center Badge (Anchored at Header Start) -->
+                        <div
+                            v-if="
+                                page.props.auth.available_centers?.length > 1 && page.props.center
+                            "
+                            class="relative hidden md:block"
+                        >
+                            <button
+                                type="button"
+                                @click="toggleCenterMenu"
+                                class="flex items-center gap-2 px-3 py-1.5 rounded-xl text-sm font-semibold text-gray-700 dark:text-gray-200 bg-gray-50/80 dark:bg-gray-700/40 hover:bg-gray-100 dark:hover:bg-gray-700 border border-gray-200/80 dark:border-gray-600/80 transition-colors cursor-pointer"
+                            >
+                                <svg
+                                    class="w-4 h-4 text-indigo-600 dark:text-indigo-400 shrink-0"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2"
+                                        d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
+                                    />
+                                </svg>
+                                <span class="max-w-[180px] truncate">
+                                    {{ getCenterName(page.props.center) }}
+                                </span>
+                                <span
+                                    class="text-[11px] font-mono text-gray-400 dark:text-gray-400"
+                                >
+                                    #{{ page.props.center.id }}
+                                </span>
+                                <svg
+                                    class="w-3.5 h-3.5 text-gray-400 shrink-0"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2"
+                                        d="M19 9l-7 7-7-7"
+                                    />
+                                </svg>
+                            </button>
+
+                            <!-- Desktop Center Switcher Dropdown -->
+                            <Transition name="dropdown">
+                                <div
+                                    v-if="centerMenuOpen"
+                                    class="absolute top-full start-0 mt-2 w-60 bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 py-1 z-50 overflow-hidden"
+                                >
+                                    <div
+                                        class="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider bg-gray-50 dark:bg-gray-700/50"
+                                    >
+                                        {{ $t('common.switch_center') }}
+                                    </div>
+                                    <button
+                                        v-for="c in page.props.auth.available_centers"
+                                        :key="c.id"
+                                        @click="switchCenter(c.id)"
+                                        :class="[
+                                            'w-full text-start px-4 py-2.5 text-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors block border-b last:border-0 border-gray-100 dark:border-gray-700/50',
+                                            c.id === page.props.center?.id
+                                                ? 'text-indigo-600 dark:text-indigo-400 font-bold bg-indigo-50/50 dark:bg-indigo-900/10'
+                                                : 'text-gray-700 dark:text-gray-300',
+                                        ]"
+                                    >
+                                        <div class="flex items-center justify-between gap-2">
+                                            <span class="truncate">{{ getCenterName(c) }}</span>
                                             <span
                                                 v-if="c.id === page.props.center?.id"
                                                 class="text-indigo-600 dark:text-indigo-400"
@@ -1153,10 +1187,78 @@
                         </div>
                         <div
                             v-else-if="page.props.center"
-                            class="hidden sm:block px-3 py-1.5 text-sm font-medium text-gray-500"
+                            class="hidden md:inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-gray-50/80 dark:bg-gray-700/40 border border-gray-200/70 dark:border-gray-700 text-xs sm:text-sm font-semibold text-gray-700 dark:text-gray-200 max-w-[240px]"
                         >
-                            {{ isRtl ? page.props.center.name_ar : page.props.center.name_en }}
+                            <svg
+                                class="w-4 h-4 text-indigo-600 dark:text-indigo-400 shrink-0"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
+                                />
+                            </svg>
+                            <span class="truncate">
+                                {{ getCenterName(page.props.center) }}
+                            </span>
                         </div>
+                    </div>
+
+                    <!-- Center: Quick Search / Command Palette trigger -->
+                    <button
+                        type="button"
+                        @click="openCommandPalette"
+                        class="hidden md:inline-flex items-center gap-2.5 px-3 py-1.5 text-xs text-gray-500 dark:text-gray-400 bg-gray-100/80 dark:bg-gray-700/50 hover:bg-gray-200/80 dark:hover:bg-gray-700 rounded-xl border border-gray-200/80 dark:border-gray-600 transition-all cursor-pointer"
+                        title="Command + K"
+                    >
+                        <svg
+                            class="w-4 h-4 text-gray-400"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                            />
+                        </svg>
+                        <span>{{ $t('common.quick_search') }}</span>
+                        <kbd
+                            class="px-1.5 py-0.5 text-[10px] font-mono bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400 rounded-md border border-gray-200 dark:border-gray-700 shadow-xs"
+                        >
+                            ⌘K
+                        </kbd>
+                    </button>
+
+                    <!-- End Section (Left in RTL / Right in LTR): Utility Actions -->
+                    <div class="flex items-center gap-1 sm:gap-1.5 shrink-0">
+                        <!-- Mobile Quick Search trigger -->
+                        <button
+                            type="button"
+                            @click="openCommandPalette"
+                            class="md:hidden p-1.5 rounded-lg text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                            :title="$t('common.quick_search')"
+                        >
+                            <svg
+                                class="w-5 h-5 text-gray-500 dark:text-gray-400"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                                />
+                            </svg>
+                        </button>
                         <!-- Nav Layout Switcher (Top vs Side) -->
                         <button
                             type="button"
@@ -2357,7 +2459,7 @@
                     </a>
                 </nav>
 
-                <!-- Subscription/Trial Expiration Notice Banner -->
+                <!-- Subscription/Trial/Grace Period Expiration Notice Banner -->
                 <div
                     v-if="showExpirationNotice"
                     class="border-b px-4 py-2.5 text-xs flex items-center justify-center transition-colors flex-shrink-0"
@@ -2367,7 +2469,7 @@
                             : 'bg-amber-500/10 dark:bg-amber-500/5 border-amber-500/20 text-amber-800 dark:text-amber-300'
                     "
                 >
-                    <div class="flex items-center justify-center gap-2 text-center">
+                    <div class="flex items-center justify-center gap-2 text-center flex-wrap">
                         <svg
                             class="w-4 h-4 flex-shrink-0 animate-bounce"
                             :class="isSubscriptionExpired ? 'text-rose-500' : 'text-amber-500'"
@@ -2383,62 +2485,44 @@
                             />
                         </svg>
                         <template v-if="isSubscriptionExpired">
-                            <span v-if="isRtl">
-                                لقد انتهت فترة اشتراكك! لمتابعة استخدام النظام وتفادي توقف العمليات،
-                                يرجى تجديد الاشتراك
+                            <span>
+                                {{ $t('system.company_subscription.banners.expired') }}
                                 <a
                                     href="/app/settings/billing"
-                                    class="font-bold underline text-rose-600 dark:text-rose-400 hover:text-rose-700 transition-colors"
+                                    class="font-bold underline text-rose-600 dark:text-rose-400 hover:text-rose-700 transition-colors ms-1"
                                 >
-                                    بالضغط هنا
+                                    {{ $t('system.company_subscription.banners.renew_now') }}
                                 </a>
-                                .
                             </span>
-                            <span v-else>
-                                Your subscription has expired! To continue using the system, please
-                                renew your subscription
+                        </template>
+                        <template v-else-if="isInGracePeriod">
+                            <span>
+                                {{
+                                    $t('system.company_subscription.banners.grace_period', {
+                                        days: graceDaysRemaining,
+                                    })
+                                }}
                                 <a
                                     href="/app/settings/billing"
-                                    class="font-bold underline text-rose-600 dark:text-rose-400 hover:text-rose-700 transition-colors"
+                                    class="font-bold underline text-amber-600 dark:text-amber-400 hover:text-amber-700 transition-colors ms-1"
                                 >
-                                    by clicking here
+                                    {{ $t('system.company_subscription.banners.renew_now') }}
                                 </a>
-                                .
                             </span>
                         </template>
                         <template v-else>
-                            <span v-if="isRtl">
-                                بقي
-                                <span
-                                    class="font-extrabold font-mono underline decoration-amber-500/50"
-                                >
-                                    {{ subscriptionDaysLeft }}
-                                </span>
-                                أيام على انتهاء اشتراكك. لتفادي انقطاع الخدمة، يرجى التجديد
+                            <span>
+                                {{
+                                    $t('system.company_subscription.banners.expiring_soon', {
+                                        days: subscriptionDaysLeft,
+                                    })
+                                }}
                                 <a
                                     href="/app/settings/billing"
-                                    class="font-bold underline text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-350 transition-colors"
+                                    class="font-bold underline text-amber-600 dark:text-amber-400 hover:text-amber-700 transition-colors ms-1"
                                 >
-                                    اضغط هنا
+                                    {{ $t('system.company_subscription.banners.renew_now') }}
                                 </a>
-                                .
-                            </span>
-                            <span v-else>
-                                Only
-                                <span
-                                    class="font-extrabold font-mono underline decoration-amber-500/50"
-                                >
-                                    {{ subscriptionDaysLeft }}
-                                </span>
-                                days left on your subscription. To prevent service interruption,
-                                please renew
-                                <a
-                                    href="/app/settings/billing"
-                                    class="font-bold underline text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-350 transition-colors"
-                                >
-                                    click here
-                                </a>
-                                .
                             </span>
                         </template>
                     </div>
@@ -2501,7 +2585,7 @@
                                 {{
                                     page.props.tenant?.trade_name ||
                                     page.props.tenant?.name ||
-                                    $t('nav.brand')
+                                    $t('common.app_name')
                                 }}
                             </p>
                             <!-- Show current center name in mobile header -->
@@ -2509,7 +2593,7 @@
                                 v-if="page.props.center"
                                 class="text-xs text-indigo-600 dark:text-indigo-400 font-medium truncate"
                             >
-                                {{ isRtl ? page.props.center.name_ar : page.props.center.name_en }}
+                                {{ getCenterName(page.props.center) }}
                             </p>
                             <p
                                 v-else-if="page.props.tenant?.id"
@@ -2568,7 +2652,7 @@
                                             : 'bg-gray-300 dark:bg-gray-600',
                                     ]"
                                 ></div>
-                                <span class="truncate">{{ isRtl ? c.name_ar : c.name_en }}</span>
+                                <span class="truncate">{{ getCenterName(c) }}</span>
                             </div>
                             <svg
                                 v-if="c.id === page.props.center?.id"
@@ -3520,9 +3604,15 @@ const userInitial = computed(() => {
     }
     return 'U';
 });
+const subscriptionLifecycle = computed(() => page.props.tenant?.subscription_lifecycle || null);
+
 const subscriptionDaysLeft = computed(() => {
     const tenant = page.props.tenant;
     if (!tenant) return null;
+
+    if (subscriptionLifecycle.value && subscriptionLifecycle.value.days_remaining !== null) {
+        return subscriptionLifecycle.value.days_remaining;
+    }
 
     const dateStr = tenant.subscription_ends_at || tenant.trial_ends_at;
     if (!dateStr) return null;
@@ -3530,29 +3620,39 @@ const subscriptionDaysLeft = computed(() => {
     const end = new Date(dateStr);
     const now = new Date();
     const diffTime = end - now;
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    return diffDays;
+    return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+});
+
+const isInGracePeriod = computed(() => {
+    return subscriptionLifecycle.value?.state === 'grace_period';
+});
+
+const graceDaysRemaining = computed(() => {
+    return subscriptionLifecycle.value?.grace_days_remaining ?? 0;
+});
+
+const isSubscriptionExpired = computed(() => {
+    const tenant = page.props.tenant;
+    if (!tenant) return false;
+    if (subscriptionLifecycle.value) {
+        return ['expired', 'suspended'].includes(subscriptionLifecycle.value.state);
+    }
+    if (tenant.status === 'expired') return true;
+
+    const days = subscriptionDaysLeft.value;
+    return days !== null && days <= 0;
 });
 
 const showExpirationNotice = computed(() => {
     const tenant = page.props.tenant;
     if (!tenant) return false;
 
-    if (tenant.status === 'expired') return true;
+    if (isSubscriptionExpired.value || isInGracePeriod.value) return true;
 
     const days = subscriptionDaysLeft.value;
     if (days === null) return false;
 
     return days <= 7;
-});
-
-const isSubscriptionExpired = computed(() => {
-    const tenant = page.props.tenant;
-    if (!tenant) return false;
-    if (tenant.status === 'expired') return true;
-
-    const days = subscriptionDaysLeft.value;
-    return days !== null && days <= 0;
 });
 
 watch(
@@ -3704,6 +3804,13 @@ function isActive(path) {
     return false;
 }
 
+function getCenterName(c) {
+    if (!c) return '';
+    return isRtl.value
+        ? c.name_ar || c.name || c.name_en || c.display_name || ''
+        : c.name_en || c.name || c.name_ar || c.display_name || '';
+}
+
 function logout() {
     userMenuOpen.value = false;
     router.post('/logout');
@@ -3720,6 +3827,7 @@ function switchCenter(centerId) {
             center_id: centerId,
         },
         {
+            preserveState: false,
             onSuccess: () => (centerMenuOpen.value = false),
         }
     );

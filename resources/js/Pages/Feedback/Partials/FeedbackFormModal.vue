@@ -149,11 +149,7 @@
                         class="p-3.5 rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/50"
                     >
                         <label class="flex items-start gap-3 cursor-pointer">
-                            <input
-                                type="checkbox"
-                                v-model="form.allow_admin_access"
-                                class="mt-0.5 rounded border-amber-300 dark:border-amber-700 text-amber-600 focus:ring-amber-500 w-4 h-4 cursor-pointer"
-                            />
+                            <AppToggle v-model="form.allow_admin_access" />
                             <div class="text-xs">
                                 <span class="font-bold text-amber-900 dark:text-amber-200">
                                     {{ $t('feedback.modal.allow_admin_title') }}
@@ -236,11 +232,7 @@
                             <label
                                 class="inline-flex items-center gap-2 text-xs text-gray-600 dark:text-gray-400 cursor-pointer"
                             >
-                                <input
-                                    type="checkbox"
-                                    v-model="recordWithAudio"
-                                    class="rounded border-gray-300 dark:border-gray-600 text-sky-600 focus:ring-sky-500 w-3.5 h-3.5"
-                                />
+                                <AppToggle v-model="recordWithAudio" />
                                 <span>{{ $t('feedback.modal.include_mic') }}</span>
                             </label>
                         </div>
@@ -422,6 +414,7 @@
 </template>
 
 <script setup>
+import AppToggle from '@/Components/Common/AppToggle.vue';
 import { ref, computed } from 'vue';
 import { useForm } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';

@@ -1,6 +1,6 @@
 <template>
     <AppLayout :title="$t('inventory.transfers.title')">
-        <div class="space-y-6">
+        <PrintEngine document-type="report" class="space-y-6">
             <!-- Page Header -->
             <PageHeader
                 :title="$t('inventory.transfers.title')"
@@ -386,7 +386,7 @@
                     </DataTable>
                 </div>
             </div>
-        </div>
+        </PrintEngine>
 
         <!-- Create Modal -->
         <CreateModal
@@ -398,6 +398,8 @@
 </template>
 
 <script setup>
+import PrintEngine from '@/Components/Print/PrintEngine.vue';
+import { printDocument } from '@/Composables/usePrint';
 import { ref, computed, watch } from 'vue';
 import { Link } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
@@ -559,6 +561,6 @@ const formatDate = (date) => {
 };
 
 const handlePrint = () => {
-    window.print();
+    printDocument();
 };
 </script>

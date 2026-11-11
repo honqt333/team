@@ -29,7 +29,7 @@
             class="rounded-2xl p-6 sm:p-8 text-white relative overflow-hidden"
             :style="{
                 background:
-                    'linear-gradient(135deg, color-mix(in srgb, var(--tenant-primary, #4f46e5) 80%, var(--tenant-secondary, #0ea5e9)) 0%, var(--tenant-primary, #4f46e5) 100%)',
+                    'linear-gradient(135deg, color-mix(in srgb, var(--tenant-primary, #2563eb) 80%, var(--tenant-secondary, #0ea5e9)) 0%, var(--tenant-primary, #2563eb) 100%)',
             }"
         >
             <div
@@ -142,7 +142,7 @@
             <a
                 :href="bookAnotherUrl"
                 class="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-lg text-sm font-semibold text-white"
-                :style="{ backgroundColor: 'var(--tenant-primary, #4f46e5)' }"
+                :style="{ backgroundColor: 'var(--tenant-primary, #2563eb)' }"
             >
                 {{ t('customer_portal.booking.book_another') }}
             </a>

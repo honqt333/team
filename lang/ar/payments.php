@@ -9,6 +9,7 @@ return [
     'amount_exceeds_balance' => 'المبلغ لا يمكن أن يتجاوز المتبقي',
     'amount_exceeds_paid' => 'المبلغ يتجاوز المدفوع',
     'auto_payment_notes' => 'تسجيل دفعة تلقائية عند استلام الفاتورة',
+    'bad_debt_credit_invoices_only' => 'تسجيل الديون المعدومة متاح فقط للفواتير الآجلة.',
     'cannot_refund_unpaid' => 'لا يمكن الاسترجاع لفاتورة غير مدفوعة',
     'date' => 'تاريخ الدفع',
     'deleted' => 'تم حذف الدفعة',

@@ -177,13 +177,13 @@ const props = defineProps({
 
 const isRtl = computed(() => props.locale?.is_rtl ?? props.locale?.current === 'ar');
 const cssVars = computed(() => ({
-    '--portal-primary': props.tenant?.primary_color || '#4f46e5',
+    '--portal-primary': props.tenant?.primary_color || '#2563eb',
     '--portal-secondary': props.tenant?.secondary_color || '#0f766e',
-    '--portal-primary-soft': `color-mix(in srgb, ${props.tenant?.primary_color || '#4f46e5'} 10%, white)`,
+    '--portal-primary-soft': `color-mix(in srgb, ${props.tenant?.primary_color || '#2563eb'} 10%, white)`,
 }));
 const brandGradient = computed(
     () =>
-        `linear-gradient(145deg, ${props.tenant?.primary_color || '#4f46e5'} 0%, color-mix(in srgb, ${props.tenant?.primary_color || '#4f46e5'} 68%, ${props.tenant?.secondary_color || '#0f766e'}) 100%)`
+        `linear-gradient(145deg, ${props.tenant?.primary_color || '#2563eb'} 0%, color-mix(in srgb, ${props.tenant?.primary_color || '#2563eb'} 68%, ${props.tenant?.secondary_color || '#0f766e'}) 100%)`
 );
 
 onMounted(() => document.documentElement.classList.remove('dark'));

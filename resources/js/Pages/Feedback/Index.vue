@@ -1,17 +1,14 @@
 <template>
     <AppLayout>
+        <Head :title="$t('feedback.title')" />
+
         <div class="space-y-6 pb-12">
             <!-- Header Section -->
             <PageHeader
                 :title="$t('feedback.title')"
                 :subtitle="$t('feedback.subtitle')"
-                gradientFrom="from-indigo-600"
-                gradientTo="to-purple-700"
-                glowFrom="from-indigo-500"
-                badgeBg="bg-indigo-50/50 dark:bg-indigo-900/30"
-                badgeText="text-indigo-600 dark:text-indigo-400"
-                badgeBorder="border-indigo-100/50 dark:border-indigo-800/30"
-                badgeDot="bg-indigo-500"
+                :total-count="toEnglish(stats.total)"
+                :count-label="$t('feedback.stats.total')"
             >
                 <template #icon>
                     <svg
@@ -28,15 +25,25 @@
                         />
                     </svg>
                 </template>
+
                 <template #actions>
-                    <PrimaryButton
-                        type="button"
-                        @click="showCreateModal = true"
-                        class="w-full sm:w-auto"
-                    >
-                        <template #iconLeft>
+                    <div class="flex items-center gap-3">
+                        <div
+                            class="flex items-center gap-1.5 p-1.5 bg-surface-secondary/80 dark:bg-surface-secondary/40 backdrop-blur-md rounded-2xl border border-border-subtle shadow-inner"
+                        >
+                            <AppViewModeToggle
+                                v-model="viewMode"
+                                storage-key="feedback_view_mode"
+                            />
+                        </div>
+
+                        <button
+                            type="button"
+                            @click="showCreateModal = true"
+                            class="flex items-center justify-center gap-2 px-5 py-2.5 bg-action-primary hover:bg-action-primary-hover text-white rounded-xl font-bold shadow-xs transition-colors cursor-pointer"
+                        >
                             <svg
-                                class="w-5 h-5"
+                                class="w-4 h-4"
                                 fill="none"
                                 stroke="currentColor"
                                 viewBox="0 0 24 24"
@@ -44,72 +51,72 @@
                                 <path
                                     stroke-linecap="round"
                                     stroke-linejoin="round"
-                                    stroke-width="2"
+                                    stroke-width="2.5"
                                     d="M12 4v16m8-8H4"
                                 />
                             </svg>
-                        </template>
-                        {{ $t('feedback.add_feedback') }}
-                    </PrimaryButton>
+                            <span class="text-sm">{{ $t('feedback.add_feedback') }}</span>
+                        </button>
+                    </div>
                 </template>
             </PageHeader>
 
             <!-- Quick Stats -->
             <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
                 <div
-                    class="p-4 bg-white dark:bg-gray-800 rounded-xl border border-border shadow-sm"
+                    class="p-4 bg-surface-primary rounded-2xl border border-border-subtle shadow-2xs"
                 >
-                    <div class="text-xs font-semibold text-gray-500 dark:text-gray-400">
+                    <div class="text-xs font-bold text-content-muted">
                         {{ $t('feedback.stats.total') }}
                     </div>
-                    <div class="mt-2 text-2xl font-bold text-gray-900 dark:text-white">
-                        {{ stats.total }}
+                    <div class="mt-2 text-2xl font-bold text-content-primary font-mono">
+                        {{ toEnglish(stats.total) }}
                     </div>
                 </div>
                 <div
-                    class="p-4 bg-white dark:bg-gray-800 rounded-xl border border-border shadow-sm"
+                    class="p-4 bg-surface-primary rounded-2xl border border-border-subtle shadow-2xs"
                 >
                     <div class="flex items-center justify-between">
-                        <span class="text-xs font-semibold text-amber-600 dark:text-amber-400">
+                        <span class="text-xs font-bold text-warning">
                             {{ $t('feedback.stats.pending') }}
                         </span>
-                        <span class="w-2 h-2 rounded-full bg-amber-500"></span>
+                        <span class="w-2 h-2 rounded-full bg-warning"></span>
                     </div>
-                    <div class="mt-2 text-2xl font-bold text-amber-600 dark:text-amber-400">
-                        {{ stats.pending }}
+                    <div class="mt-2 text-2xl font-bold text-warning font-mono">
+                        {{ toEnglish(stats.pending) }}
                     </div>
                 </div>
                 <div
-                    class="p-4 bg-white dark:bg-gray-800 rounded-xl border border-border shadow-sm"
+                    class="p-4 bg-surface-primary rounded-2xl border border-border-subtle shadow-2xs"
                 >
                     <div class="flex items-center justify-between">
-                        <span class="text-xs font-semibold text-sky-600 dark:text-sky-400">
+                        <span class="text-xs font-bold text-info">
                             {{ $t('feedback.stats.in_progress') }}
                         </span>
-                        <span class="w-2 h-2 rounded-full bg-sky-500"></span>
+                        <span class="w-2 h-2 rounded-full bg-info"></span>
                     </div>
-                    <div class="mt-2 text-2xl font-bold text-sky-600 dark:text-sky-400">
-                        {{ stats.in_progress }}
+                    <div class="mt-2 text-2xl font-bold text-info font-mono">
+                        {{ toEnglish(stats.in_progress) }}
                     </div>
                 </div>
                 <div
-                    class="p-4 bg-white dark:bg-gray-800 rounded-xl border border-border shadow-sm"
+                    class="p-4 bg-surface-primary rounded-2xl border border-border-subtle shadow-2xs"
                 >
                     <div class="flex items-center justify-between">
-                        <span class="text-xs font-semibold text-emerald-600 dark:text-emerald-400">
+                        <span class="text-xs font-bold text-success">
                             {{ $t('feedback.stats.resolved') }}
                         </span>
-                        <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                        <span class="w-2 h-2 rounded-full bg-success"></span>
                     </div>
-                    <div class="mt-2 text-2xl font-bold text-emerald-600 dark:text-emerald-400">
-                        {{ stats.resolved }}
+                    <div class="mt-2 text-2xl font-bold text-success font-mono">
+                        {{ toEnglish(stats.resolved) }}
                     </div>
                 </div>
             </div>
 
             <!-- Filter & Search Bar -->
             <div
-                class="p-4 bg-white dark:bg-gray-800 rounded-xl border border-border shadow-sm space-y-3"
+                class="p-4 bg-surface-primary rounded-2xl border border-border-subtle shadow-2xs space-y-3"
             >
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
                     <!-- Search Input -->
@@ -119,10 +126,10 @@
                             v-model="searchQuery"
                             @keyup.enter="applyFilters"
                             :placeholder="$t('feedback.filters.search_placeholder')"
-                            class="input-field text-xs pe-9 ps-3 py-2.5 focus:border-action-primary focus:ring-action-primary"
+                            class="w-full rounded-xl border border-border-subtle bg-surface-secondary text-content-primary text-xs pe-9 ps-3 py-2.5 focus:border-action-primary focus:ring-2 focus:ring-action-primary/20 transition-colors"
                         />
                         <div
-                            class="absolute inset-y-0 end-0 pe-3 flex items-center pointer-events-none text-gray-400"
+                            class="absolute inset-y-0 end-0 pe-3 flex items-center pointer-events-none text-content-muted"
                         >
                             <svg
                                 class="w-4 h-4"
@@ -179,301 +186,411 @@
 
                 <div
                     v-if="hasActiveFilters"
-                    class="flex justify-end pt-2 border-t border-border/50"
+                    class="flex justify-end pt-2 border-t border-border-subtle"
                 >
                     <button
                         type="button"
                         @click="clearFilters"
-                        class="text-xs text-rose-600 hover:text-rose-700 dark:text-rose-400 font-medium flex items-center gap-1"
+                        class="text-xs text-danger hover:underline font-bold flex items-center gap-1 cursor-pointer"
                     >
                         <span>{{ $t('feedback.filters.clear') }}</span>
                     </button>
                 </div>
             </div>
 
-            <!-- Feedbacks List -->
-            <div
-                v-if="feedbacks.data && feedbacks.data.length > 0"
-                class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5"
+            <!-- Empty State -->
+            <AppEmptyState
+                v-if="!feedbacks.data || feedbacks.data.length === 0"
+                :title="$t('feedback.empty.title')"
+                :description="$t('feedback.empty.desc')"
             >
-                <div
-                    v-for="item in feedbacks.data"
-                    :key="item.id"
-                    class="bg-white dark:bg-gray-800 rounded-xl border border-border/80 shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between overflow-hidden"
-                >
-                    <!-- Card Top Header -->
-                    <div class="p-5 space-y-3.5">
-                        <div class="flex items-center justify-between gap-2">
-                            <!-- Type Badge -->
-                            <span
-                                :class="[
-                                    'inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold',
-                                    getTypeBadgeClass(item.type),
-                                ]"
-                            >
-                                <span>{{ getTypeIcon(item.type) }}</span>
-                                <span>{{ getTypeName(item.type) }}</span>
-                            </span>
+                <template #actions>
+                    <button
+                        type="button"
+                        @click="showCreateModal = true"
+                        class="inline-flex items-center gap-2 px-5 py-2.5 bg-action-primary hover:bg-action-primary-hover text-white rounded-xl font-bold shadow-xs transition-colors cursor-pointer"
+                    >
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2.5"
+                                d="M12 4v16m8-8H4"
+                            />
+                        </svg>
+                        <span>{{ $t('feedback.empty.action') }}</span>
+                    </button>
+                </template>
+            </AppEmptyState>
 
-                            <!-- Status Badge -->
-                            <span
-                                :class="[
-                                    'inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold',
-                                    getStatusBadgeClass(item.status),
-                                ]"
+            <!-- Content Views -->
+            <template v-else>
+                <!-- Table View -->
+                <DataTable v-if="viewMode === 'list'" :items="feedbacks" :columns="columns">
+                    <template #cell-type="{ item }">
+                        <span
+                            :class="[
+                                'inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold',
+                                getTypeBadgeClass(item.type),
+                            ]"
+                        >
+                            <span>{{ getTypeIcon(item.type) }}</span>
+                            <span>{{ getTypeName(item.type) }}</span>
+                        </span>
+                    </template>
+
+                    <template #cell-module="{ item }">
+                        <span
+                            class="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-surface-secondary text-content-primary"
+                        >
+                            {{ getModuleName(item.module) }}
+                        </span>
+                    </template>
+
+                    <template #cell-comments="{ item }">
+                        <div class="max-w-md space-y-1">
+                            <p class="text-xs text-content-primary line-clamp-2">
+                                {{ item.comments || $t('feedback.card.no_comments') }}
+                            </p>
+                            <div
+                                v-if="item.admin_reply"
+                                class="text-[11px] text-action-primary font-semibold flex items-center gap-1"
                             >
+                                <span>{{ $t('feedback.card.admin_reply_title') }}:</span>
                                 <span
-                                    class="w-1.5 h-1.5 rounded-full"
-                                    :class="getStatusDotClass(item.status)"
-                                ></span>
-                                <span>{{ getStatusName(item.status) }}</span>
-                            </span>
+                                    class="truncate max-w-[260px] text-content-secondary font-normal"
+                                >
+                                    {{ item.admin_reply }}
+                                </span>
+                                <span
+                                    v-if="!item.has_user_seen_reply"
+                                    class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-action-primary text-white"
+                                >
+                                    {{ $t('feedback.card.new_reply_badge') }}
+                                </span>
+                            </div>
                         </div>
+                    </template>
 
-                        <!-- Module & Date Info -->
-                        <div
-                            class="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400"
+                    <template #cell-status="{ item }">
+                        <span
+                            :class="[
+                                'inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold',
+                                getStatusBadgeClass(item.status),
+                            ]"
                         >
                             <span
-                                class="inline-flex items-center gap-1 bg-gray-100 dark:bg-gray-700/50 px-2 py-0.5 rounded-md font-medium text-gray-700 dark:text-gray-300"
-                            >
-                                🏢 {{ getModuleName(item.module) }}
-                            </span>
-                            <span>{{ formatDate(item.created_at) }}</span>
-                        </div>
+                                class="w-1.5 h-1.5 rounded-full"
+                                :class="getStatusDotClass(item.status)"
+                            ></span>
+                            <span>{{ getStatusName(item.status) }}</span>
+                        </span>
+                    </template>
 
-                        <!-- Comments Text -->
-                        <div
-                            class="text-xs text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-line bg-gray-50/50 dark:bg-gray-900/30 p-3 rounded-xl border border-border/50"
-                        >
-                            {{ item.comments || $t('feedback.card.no_comments') }}
-                        </div>
+                    <template #cell-user="{ item }">
+                        <span class="text-xs font-medium text-content-secondary">
+                            {{ item.user?.name || $t('feedback.card.user_default') }}
+                        </span>
+                    </template>
 
-                        <!-- Video Screen Recording Preview Button -->
-                        <div v-if="item.video_url" class="pt-1">
-                            <PrimaryButton
+                    <template #cell-created_at="{ item }">
+                        <span class="text-xs text-content-muted whitespace-nowrap">
+                            {{ formatDate(item.created_at) }}
+                        </span>
+                    </template>
+
+                    <template #cell-actions="{ item }">
+                        <div class="flex items-center justify-center gap-1">
+                            <button
+                                v-if="item.video_url"
                                 type="button"
-                                variant="ghost"
-                                size="sm"
-                                class="w-full text-sky-700 dark:text-sky-300 bg-sky-50/50 dark:bg-sky-950/20 hover:bg-sky-100 dark:hover:bg-sky-900/30"
                                 @click="
                                     openVideoModal(
                                         item.video_url,
                                         $t('feedback.card.watch_recording')
                                     )
                                 "
+                                class="p-1.5 text-content-muted hover:text-action-primary hover:bg-surface-secondary rounded-lg transition-colors cursor-pointer"
+                                :title="$t('feedback.card.watch_recording')"
                             >
-                                <template #iconLeft>
-                                    <svg
-                                        class="w-4 h-4 text-sky-500"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        viewBox="0 0 24 24"
-                                    >
-                                        <path
-                                            stroke-linecap="round"
-                                            stroke-linejoin="round"
-                                            stroke-width="2"
-                                            d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"
-                                        />
-                                        <path
-                                            stroke-linecap="round"
-                                            stroke-linejoin="round"
-                                            stroke-width="2"
-                                            d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                                        />
-                                    </svg>
-                                </template>
-                                <span>{{ $t('feedback.card.watch_recording') }}</span>
-                                <span
-                                    v-if="item.video_duration_seconds"
-                                    class="text-[11px] opacity-75"
+                                <svg
+                                    class="w-4 h-4"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
                                 >
-                                    ({{ formatTime(item.video_duration_seconds) }})
-                                </span>
-                            </PrimaryButton>
-                        </div>
-
-                        <!-- Admin Access Badge (if permitted) -->
-                        <div
-                            v-if="item.allow_admin_access"
-                            class="flex items-center gap-1.5 text-[11px] text-emerald-600 dark:text-emerald-400"
-                        >
-                            <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
-                                <path
-                                    fill-rule="evenodd"
-                                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                                    clip-rule="evenodd"
-                                />
-                            </svg>
-                            <span>{{ $t('feedback.card.admin_access_granted') }}</span>
-                        </div>
-
-                        <!-- Admin Reply Section (if available) -->
-                        <div
-                            v-if="item.admin_reply"
-                            :class="[
-                                'p-3.5 rounded-xl border text-xs space-y-2 relative transition-all',
-                                !item.has_user_seen_reply
-                                    ? 'bg-gradient-to-br from-indigo-50 to-sky-50 dark:from-indigo-950/40 dark:to-sky-950/40 border-indigo-200 dark:border-indigo-800 ring-2 ring-indigo-500/20'
-                                    : 'bg-gray-50 dark:bg-gray-900/60 border-gray-200 dark:border-gray-700',
-                            ]"
-                            @mouseenter="markAsSeen(item)"
-                        >
-                            <div class="flex items-center justify-between">
-                                <div class="flex items-center gap-1.5">
-                                    <span
-                                        class="w-5 h-5 rounded-md bg-indigo-600 text-white flex items-center justify-center text-[10px]"
-                                    >
-                                        🛠️
-                                    </span>
-                                    <span class="font-bold text-indigo-900 dark:text-indigo-200">
-                                        {{ $t('feedback.card.admin_reply_title') }}
-                                    </span>
-                                </div>
-                                <div class="flex items-center gap-2">
-                                    <span
-                                        v-if="!item.has_user_seen_reply"
-                                        class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-indigo-600 text-white"
-                                    >
-                                        {{ $t('feedback.card.new_reply_badge') }}
-                                    </span>
-                                    <span class="text-[10px] text-gray-400">
-                                        {{ formatDate(item.admin_replied_at) }}
-                                    </span>
-                                </div>
-                            </div>
-
-                            <p
-                                class="text-gray-800 dark:text-gray-200 leading-relaxed whitespace-pre-line"
-                            >
-                                {{ item.admin_reply }}
-                            </p>
-
-                            <!-- Reply Video (if admin uploaded response video) -->
-                            <PrimaryButton
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2"
+                                        d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"
+                                    />
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2"
+                                        d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                                    />
+                                </svg>
+                            </button>
+                            <button
                                 v-if="item.admin_reply_video_url"
                                 type="button"
-                                variant="ghost"
-                                size="sm"
-                                class="text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 bg-indigo-50/50 dark:bg-indigo-950/20 hover:bg-indigo-100 dark:hover:bg-indigo-900/30"
                                 @click="
                                     openVideoModal(
                                         item.admin_reply_video_url,
                                         $t('feedback.card.watch_reply_video')
                                     )
                                 "
+                                class="p-1.5 text-content-muted hover:text-action-primary hover:bg-surface-secondary rounded-lg transition-colors cursor-pointer"
+                                :title="$t('feedback.card.watch_reply_video')"
                             >
-                                <template #iconLeft>
+                                <svg
+                                    class="w-4 h-4"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2"
+                                        d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"
+                                    />
+                                </svg>
+                            </button>
+                            <span
+                                v-if="!item.video_url && !item.admin_reply_video_url"
+                                class="text-xs text-content-muted"
+                            >
+                                —
+                            </span>
+                        </div>
+                    </template>
+                </DataTable>
+
+                <!-- Grid View -->
+                <div v-else class="space-y-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                        <div
+                            v-for="item in feedbacks.data"
+                            :key="item.id"
+                            class="bg-surface-primary rounded-2xl border border-border-subtle shadow-2xs hover:shadow-md transition-shadow flex flex-col justify-between overflow-hidden"
+                        >
+                            <!-- Card Top Header -->
+                            <div class="p-5 space-y-3.5">
+                                <div class="flex items-center justify-between gap-2">
+                                    <!-- Type Badge -->
+                                    <span
+                                        :class="[
+                                            'inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold',
+                                            getTypeBadgeClass(item.type),
+                                        ]"
+                                    >
+                                        <span>{{ getTypeIcon(item.type) }}</span>
+                                        <span>{{ getTypeName(item.type) }}</span>
+                                    </span>
+
+                                    <!-- Status Badge -->
+                                    <span
+                                        :class="[
+                                            'inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold',
+                                            getStatusBadgeClass(item.status),
+                                        ]"
+                                    >
+                                        <span
+                                            class="w-1.5 h-1.5 rounded-full"
+                                            :class="getStatusDotClass(item.status)"
+                                        ></span>
+                                        <span>{{ getStatusName(item.status) }}</span>
+                                    </span>
+                                </div>
+
+                                <!-- Module & Date Info -->
+                                <div
+                                    class="flex items-center justify-between text-xs text-content-muted"
+                                >
+                                    <span
+                                        class="inline-flex items-center gap-1 bg-surface-secondary px-2 py-0.5 rounded-md font-medium text-content-primary"
+                                    >
+                                        🏢 {{ getModuleName(item.module) }}
+                                    </span>
+                                    <span>{{ formatDate(item.created_at) }}</span>
+                                </div>
+
+                                <!-- Comments Text -->
+                                <div
+                                    class="text-xs text-content-primary leading-relaxed whitespace-pre-line bg-surface-secondary/50 p-3 rounded-xl border border-border-subtle"
+                                >
+                                    {{ item.comments || $t('feedback.card.no_comments') }}
+                                </div>
+
+                                <!-- Video Screen Recording Preview Button -->
+                                <div v-if="item.video_url" class="pt-1">
+                                    <button
+                                        type="button"
+                                        @click="
+                                            openVideoModal(
+                                                item.video_url,
+                                                $t('feedback.card.watch_recording')
+                                            )
+                                        "
+                                        class="w-full inline-flex items-center justify-center gap-2 px-3 py-2 rounded-xl text-xs font-bold text-action-primary bg-action-primary/10 hover:bg-action-primary/20 transition-colors cursor-pointer"
+                                    >
+                                        <svg
+                                            class="w-4 h-4"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            viewBox="0 0 24 24"
+                                        >
+                                            <path
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                stroke-width="2"
+                                                d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"
+                                            />
+                                            <path
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                stroke-width="2"
+                                                d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                                            />
+                                        </svg>
+                                        <span>{{ $t('feedback.card.watch_recording') }}</span>
+                                        <span
+                                            v-if="item.video_duration_seconds"
+                                            class="text-[11px] opacity-75"
+                                        >
+                                            ({{ formatTime(item.video_duration_seconds) }})
+                                        </span>
+                                    </button>
+                                </div>
+
+                                <!-- Admin Access Badge (if permitted) -->
+                                <div
+                                    v-if="item.allow_admin_access"
+                                    class="flex items-center gap-1.5 text-[11px] text-success"
+                                >
                                     <svg
                                         class="w-3.5 h-3.5"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        viewBox="0 0 24 24"
+                                        fill="currentColor"
+                                        viewBox="0 0 20 20"
                                     >
                                         <path
-                                            stroke-linecap="round"
-                                            stroke-linejoin="round"
-                                            stroke-width="2"
-                                            d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"
+                                            fill-rule="evenodd"
+                                            d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                                            clip-rule="evenodd"
                                         />
                                     </svg>
-                                </template>
-                                {{ $t('feedback.card.watch_reply_video') }}
-                            </PrimaryButton>
+                                    <span>{{ $t('feedback.card.admin_access_granted') }}</span>
+                                </div>
+
+                                <!-- Admin Reply Section (if available) -->
+                                <div
+                                    v-if="item.admin_reply"
+                                    :class="[
+                                        'p-3.5 rounded-xl border text-xs space-y-2 relative transition-all',
+                                        !item.has_user_seen_reply
+                                            ? 'bg-action-primary/5 border-action-primary/30 ring-2 ring-action-primary/10'
+                                            : 'bg-surface-secondary/60 border-border-subtle',
+                                    ]"
+                                    @mouseenter="markAsSeen(item)"
+                                >
+                                    <div class="flex items-center justify-between">
+                                        <div class="flex items-center gap-1.5">
+                                            <span
+                                                class="w-5 h-5 rounded-md bg-action-primary text-white flex items-center justify-center text-[10px]"
+                                            >
+                                                🛠️
+                                            </span>
+                                            <span class="font-bold text-content-primary">
+                                                {{ $t('feedback.card.admin_reply_title') }}
+                                            </span>
+                                        </div>
+                                        <div class="flex items-center gap-2">
+                                            <span
+                                                v-if="!item.has_user_seen_reply"
+                                                class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-action-primary text-white"
+                                            >
+                                                {{ $t('feedback.card.new_reply_badge') }}
+                                            </span>
+                                            <span class="text-[10px] text-content-muted">
+                                                {{ formatDate(item.admin_replied_at) }}
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <p
+                                        class="text-content-secondary leading-relaxed whitespace-pre-line"
+                                    >
+                                        {{ item.admin_reply }}
+                                    </p>
+
+                                    <!-- Reply Video (if admin uploaded response video) -->
+                                    <button
+                                        v-if="item.admin_reply_video_url"
+                                        type="button"
+                                        @click="
+                                            openVideoModal(
+                                                item.admin_reply_video_url,
+                                                $t('feedback.card.watch_reply_video')
+                                            )
+                                        "
+                                        class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold text-action-primary bg-action-primary/10 hover:bg-action-primary/20 transition-colors cursor-pointer"
+                                    >
+                                        <svg
+                                            class="w-3.5 h-3.5"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            viewBox="0 0 24 24"
+                                        >
+                                            <path
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                stroke-width="2"
+                                                d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"
+                                            />
+                                        </svg>
+                                        <span>{{ $t('feedback.card.watch_reply_video') }}</span>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Card Footer Actions -->
+                            <div
+                                class="px-5 py-3 bg-surface-secondary/50 border-t border-border-subtle flex items-center justify-between text-xs text-content-muted"
+                            >
+                                <div class="flex items-center gap-2">
+                                    <span
+                                        class="w-6 h-6 rounded-full bg-action-primary/10 text-action-primary font-bold flex items-center justify-center text-[10px]"
+                                    >
+                                        {{ item.user?.name?.charAt(0) || 'U' }}
+                                    </span>
+                                    <span class="text-[11px] font-medium text-content-primary">
+                                        {{ item.user?.name || $t('feedback.card.user_default') }}
+                                    </span>
+                                </div>
+
+                                <span
+                                    v-if="item.created_at"
+                                    class="text-[11px] text-content-muted font-mono"
+                                >
+                                    {{ formatDate(item.created_at) }}
+                                </span>
+                            </div>
                         </div>
                     </div>
 
-                    <!-- Card Footer Actions -->
-                    <div
-                        class="px-5 py-3 bg-gray-50/80 dark:bg-gray-900/40 border-t border-border/60 flex items-center justify-between text-xs text-gray-500 dark:text-gray-400"
-                    >
-                        <div class="flex items-center gap-2">
-                            <span
-                                class="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300 font-bold flex items-center justify-center text-[10px]"
-                            >
-                                {{ item.user?.name?.charAt(0) || 'U' }}
-                            </span>
-                            <span class="text-[11px] font-medium text-gray-700 dark:text-gray-300">
-                                {{ item.user?.name || $t('feedback.card.user_default') }}
-                            </span>
-                        </div>
-
-                        <span v-if="item.created_at" class="text-[11px] text-gray-400 font-mono">
-                            {{ formatDate(item.created_at) }}
-                        </span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Empty State -->
-            <div
-                v-else
-                class="p-12 text-center bg-white dark:bg-gray-800 rounded-xl border border-border shadow-sm space-y-4"
-            >
-                <div
-                    class="w-16 h-16 mx-auto rounded-xl bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 flex items-center justify-center"
-                >
-                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            stroke-width="1.5"
-                            d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"
-                        />
-                    </svg>
-                </div>
-                <div>
-                    <h3 class="text-base font-bold text-gray-900 dark:text-white">
-                        {{ $t('feedback.empty.title') }}
-                    </h3>
-                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 max-w-sm mx-auto">
-                        {{ $t('feedback.empty.desc') }}
-                    </p>
-                </div>
-                <div>
-                    <PrimaryButton type="button" @click="showCreateModal = true" size="sm">
-                        <template #iconLeft>
-                            <svg
-                                class="w-4 h-4"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                            >
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    stroke-width="2"
-                                    d="M12 4v16m8-8H4"
-                                />
-                            </svg>
-                        </template>
-                        {{ $t('feedback.empty.action') }}
-                    </PrimaryButton>
-                </div>
-            </div>
-
-            <!-- Pagination -->
-            <div
-                v-if="feedbacks.links && feedbacks.links.length > 3"
-                class="flex justify-center pt-4"
-            >
-                <nav class="flex items-center gap-1">
-                    <Link
-                        v-for="(link, index) in feedbacks.links"
-                        :key="index"
-                        :href="link.url || '#'"
-                        :class="[
-                            'px-3 py-1.5 text-xs rounded-lg font-medium transition-colors',
-                            link.active
-                                ? 'bg-indigo-600 text-white font-bold'
-                                : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700',
-                            !link.url ? 'opacity-40 pointer-events-none' : '',
-                        ]"
-                        v-html="link.label"
+                    <!-- Grid Pagination -->
+                    <AppPagination
+                        v-if="feedbacks.links && feedbacks.links.length > 3"
+                        :links="feedbacks.links"
+                        :from="feedbacks.from"
+                        :to="feedbacks.to"
+                        :total="feedbacks.total"
                     />
-                </nav>
-            </div>
+                </div>
+            </template>
         </div>
 
         <!-- Modals -->
@@ -494,16 +611,21 @@
 
 <script setup>
 import { ref, computed } from 'vue';
-import { router, Link } from '@inertiajs/vue3';
+import { Head, router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import PageHeader from '@/Components/PageHeader.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
+import AppEmptyState from '@/Components/Common/AppEmptyState.vue';
+import AppViewModeToggle from '@/Components/Common/AppViewModeToggle.vue';
+import AppPagination from '@/Components/Common/AppPagination.vue';
+import DataTable from '@/Components/Common/DataTable.vue';
 import FeedbackFormModal from './Partials/FeedbackFormModal.vue';
 import VideoPlayerModal from './Partials/VideoPlayerModal.vue';
-import PrimaryButton from '@/Components/PrimaryButton.vue';
+import { useNumberFormat } from '@/Composables/useNumberFormat';
 
 const { t, locale } = useI18n();
+const { toEnglish } = useNumberFormat();
 
 const props = defineProps({
     feedbacks: {
@@ -528,6 +650,7 @@ const props = defineProps({
     },
 });
 
+const viewMode = ref('grid');
 const searchQuery = ref(props.filters.search || '');
 const selectedType = ref(props.filters.type || '');
 const selectedStatus = ref(props.filters.status || '');
@@ -537,6 +660,16 @@ const showCreateModal = ref(false);
 const showVideoModal = ref(false);
 const currentVideoUrl = ref(null);
 const currentVideoTitle = ref('');
+
+const columns = computed(() => [
+    { key: 'type', label: t('feedback.modal.type_label') },
+    { key: 'module', label: t('feedback.modal.module_label') },
+    { key: 'comments', label: t('feedback.modal.comments_label') },
+    { key: 'status', label: t('common.status'), align: 'center' },
+    { key: 'user', label: t('feedback.card.user_default') },
+    { key: 'created_at', label: t('common.date') },
+    { key: 'actions', label: t('common.actions'), align: 'center' },
+]);
 
 const typeFilterOptions = computed(() => [
     { id: '', name: t('feedback.filters.all_types') },
@@ -612,13 +745,11 @@ const getTypeIcon = (type) => {
 
 const getTypeBadgeClass = (type) => {
     const map = {
-        bug: 'bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-900/50',
-        feature_request:
-            'bg-purple-50 dark:bg-purple-950/40 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-900/50',
-        suggestion:
-            'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-900/50',
+        bug: 'bg-danger-soft text-danger',
+        feature_request: 'bg-action-primary/10 text-action-primary',
+        suggestion: 'bg-success-soft text-success',
     };
-    return map[type] || 'bg-gray-100 text-gray-700';
+    return map[type] || 'bg-surface-tertiary text-content-secondary';
 };
 
 const getStatusName = (status) => {
@@ -627,25 +758,22 @@ const getStatusName = (status) => {
 
 const getStatusBadgeClass = (status) => {
     const map = {
-        pending:
-            'bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-900/50',
-        in_progress:
-            'bg-sky-50 dark:bg-sky-950/40 text-sky-700 dark:text-sky-300 border border-sky-200 dark:border-sky-900/50',
-        resolved:
-            'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-900/50',
-        closed: 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300',
+        pending: 'bg-warning-soft text-warning',
+        in_progress: 'bg-info-soft text-info',
+        resolved: 'bg-success-soft text-success',
+        closed: 'bg-surface-tertiary text-content-secondary',
     };
-    return map[status] || 'bg-gray-100 text-gray-700';
+    return map[status] || 'bg-surface-tertiary text-content-secondary';
 };
 
 const getStatusDotClass = (status) => {
     const map = {
-        pending: 'bg-amber-500',
-        in_progress: 'bg-sky-500',
-        resolved: 'bg-emerald-500',
-        closed: 'bg-gray-400',
+        pending: 'bg-warning',
+        in_progress: 'bg-info',
+        resolved: 'bg-success',
+        closed: 'bg-content-muted',
     };
-    return map[status] || 'bg-gray-400';
+    return map[status] || 'bg-content-muted';
 };
 
 const formatDate = (dateStr) => {

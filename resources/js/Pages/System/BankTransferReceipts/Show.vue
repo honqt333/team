@@ -1,4 +1,5 @@
 <script setup>
+import AppToggle from '@/Components/Common/AppToggle.vue';
 import { ref, computed, watch } from 'vue';
 import { Head, router, Link } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
@@ -856,11 +857,7 @@ const amountState = computed(() => {
                         v-if="hasMismatch"
                         class="mt-4 flex items-start gap-2 rounded-lg border border-amber-300 bg-amber-50 p-3 text-sm dark:border-amber-700 dark:bg-amber-900/20"
                     >
-                        <input
-                            v-model="forceApprove"
-                            type="checkbox"
-                            class="mt-0.5 rounded border-amber-400 text-amber-600 focus:ring-amber-500"
-                        />
+                        <AppToggle v-model="forceApprove" />
                         <span class="text-amber-800 dark:text-amber-200">
                             {{
                                 locale === 'ar'
@@ -883,11 +880,7 @@ const amountState = computed(() => {
                         class="mt-4 rounded-lg border border-slate-200 bg-slate-50 p-3 dark:border-slate-700 dark:bg-slate-800"
                     >
                         <label class="flex items-center gap-2 text-sm">
-                            <input
-                                v-model="partialApproval"
-                                type="checkbox"
-                                class="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
-                            />
+                            <AppToggle v-model="partialApproval" />
                             <span class="font-medium text-slate-700 dark:text-slate-200">
                                 {{
                                     locale === 'ar'

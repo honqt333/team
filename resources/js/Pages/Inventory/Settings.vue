@@ -103,7 +103,8 @@
 
                 <!-- Units Table -->
                 <div class="overflow-x-auto rounded-xl border border-gray-200 dark:border-gray-700">
-                    <table
+                    <DataTable
+                        structured
                         class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400"
                     >
                         <thead
@@ -164,7 +165,7 @@
                                 </td>
                             </tr>
                         </tbody>
-                    </table>
+                    </DataTable>
                 </div>
             </div>
 
@@ -216,7 +217,8 @@
 
                 <!-- Categories Table -->
                 <div class="overflow-x-auto rounded-xl border border-gray-200 dark:border-gray-700">
-                    <table
+                    <DataTable
+                        structured
                         class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400"
                     >
                         <thead
@@ -277,7 +279,7 @@
                                 </td>
                             </tr>
                         </tbody>
-                    </table>
+                    </DataTable>
                 </div>
             </div>
         </div>
@@ -425,6 +427,7 @@
 </template>
 
 <script setup>
+import DataTable from '@/Components/Common/DataTable.vue';
 import { ref, reactive } from 'vue';
 import { router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';

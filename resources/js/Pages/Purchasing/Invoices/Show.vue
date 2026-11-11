@@ -1,5 +1,6 @@
 <template>
-    <AppLayout :title="`${$t('invoices.purchases.invoice')} #${invoice.code}`">
+    <Head :title="`${$t('invoices.purchases.invoice')} #${invoice.code}`" />
+    <AppLayout>
         <div class="space-y-6 pb-20">
             <!-- Premium Glassmorphic Header -->
             <PageHeader
@@ -137,108 +138,26 @@
 
             <!-- Top Cards Section: Center/Supplier Info & Financial Cost Card -->
             <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
-                <!-- 1. Right Card: Center & Supplier Info -->
-                <div
-                    class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden flex flex-col h-full relative group"
+                <!-- 1. Right Card: Unified Center & Contact/Supplier Card -->
+                <WorkOrderCustomerCard
+                    :customer="resolvedContact"
+                    :customer-name="resolvedContactName"
+                    :vat-number="resolvedContactVat"
+                    :address="resolvedContactAddress"
+                    :party-type="resolvedContactPartyType"
+                    :party-href="resolvedContactHref"
+                    :party-badge="resolvedContactBadge"
                 >
-                    <!-- Card Decoration -->
-                    <div
-                        class="absolute -top-12 -end-12 w-32 h-32 bg-amber-500/5 rounded-full blur-3xl group-hover:bg-amber-500/10 transition-colors"
-                    ></div>
-
-                    <!-- Center Name Header -->
-                    <div
-                        class="flex items-center justify-between bg-gray-50 dark:bg-gray-900/60 border-b border-gray-100 dark:border-gray-700 px-5 py-4"
-                    >
-                        <div class="flex items-center gap-3 text-amber-600">
-                            <div class="p-2 bg-amber-50 dark:bg-amber-900/30 rounded-xl">
-                                <svg
-                                    class="w-5 h-5"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        stroke-width="2"
-                                        d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
-                                    />
-                                </svg>
-                            </div>
-                            <h3 class="text-xs font-black uppercase tracking-[0.15em]">
-                                {{ $t('common.center') }}
-                            </h3>
-                        </div>
-                        <span class="text-lg font-black text-gray-900 dark:text-white" dir="auto">
-                            {{
-                                isCompany
-                                    ? tenant.trade_name || tenant.legal_name || tenant.name
-                                    : invoice.center?.name_ar || invoice.center?.name
-                            }}
-                        </span>
-                    </div>
-
-                    <!-- Middle Section: Center Address & Supplier Info -->
-                    <div class="p-5 flex-1 flex flex-col justify-between gap-6 relative z-10">
-                        <!-- Center Address -->
-                        <div>
-                            <p
-                                class="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-2"
-                            >
-                                {{ $t('common.address') }}
-                            </p>
-                            <div class="flex items-start gap-2.5 text-gray-600 dark:text-gray-300">
-                                <svg
-                                    class="w-5 h-5 text-gray-400 mt-0.5 shrink-0"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        stroke-width="2"
-                                        d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-                                    />
-                                    <path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        stroke-width="2"
-                                        d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
-                                    />
-                                </svg>
-                                <span class="text-sm font-semibold leading-relaxed" dir="auto">
-                                    {{
-                                        isCompany
-                                            ? getTenantAddress(tenant) ||
-                                              $t('common.company_head_office')
-                                            : getCenterAddress(invoice.center) || $t('common.na')
-                                    }}
-                                </span>
-                            </div>
-                        </div>
-
-                        <!-- Divider line -->
-                        <div class="border-t border-gray-100 dark:border-gray-700/65"></div>
-
-                        <!-- Supplier Info -->
-                        <div>
-                            <p
-                                class="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-2"
-                            >
-                                {{ $t('common.customer') }}
-                            </p>
-                            <div class="flex items-center gap-4">
+                    <template #header>
+                        <div
+                            class="flex items-center justify-between bg-white dark:bg-gray-800/90 border-b border-gray-100 dark:border-gray-700/80 px-4 py-3"
+                        >
+                            <div class="flex items-center gap-3 min-w-0">
                                 <div
-                                    class="w-12 h-12 rounded-xl bg-orange-50 dark:bg-orange-950/20 text-orange-600 flex items-center justify-center shrink-0"
+                                    class="w-10 h-10 rounded-full border border-gray-200 dark:border-gray-700 bg-amber-50 dark:bg-amber-900/20 text-amber-600 flex items-center justify-center shrink-0 shadow-inner"
                                 >
                                     <svg
-                                        v-if="
-                                            isCompany &&
-                                            invoice.company_transaction?.contact_type === 'customer'
-                                        "
-                                        class="w-6 h-6"
+                                        class="w-5 h-5"
                                         fill="none"
                                         stroke="currentColor"
                                         viewBox="0 0 24 24"
@@ -247,411 +166,79 @@
                                             stroke-linecap="round"
                                             stroke-linejoin="round"
                                             stroke-width="2"
-                                            d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                                        />
-                                    </svg>
-                                    <svg
-                                        v-else
-                                        class="w-6 h-6"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        viewBox="0 0 24 24"
-                                    >
-                                        <path
-                                            stroke-linecap="round"
-                                            stroke-linejoin="round"
-                                            stroke-width="2"
-                                            d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"
+                                            d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
                                         />
                                     </svg>
                                 </div>
-                                <div>
-                                    <template
-                                        v-if="isCompany && invoice.company_transaction?.contact"
+                                <div class="min-w-0">
+                                    <p
+                                        class="text-[10px] font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500"
                                     >
-                                        <Link
-                                            v-if="
-                                                invoice.company_transaction.contact_type ===
-                                                'supplier'
-                                            "
-                                            :href="
-                                                route(
-                                                    'app.purchasing.suppliers.show',
-                                                    invoice.company_transaction.contact.id
-                                                )
-                                            "
-                                            class="text-base font-black text-amber-600 hover:text-amber-700 dark:text-amber-400 dark:hover:text-amber-300 hover:underline transition-colors flex items-center gap-1.5 w-fit group/sup"
-                                        >
-                                            <span>
-                                                {{ invoice.company_transaction.contact.name }}
-                                            </span>
-                                            <svg
-                                                class="w-4 h-4 opacity-60 group-hover/sup:opacity-100 transition-opacity shrink-0"
-                                                fill="none"
-                                                stroke="currentColor"
-                                                viewBox="0 0 24 24"
-                                            >
-                                                <path
-                                                    stroke-linecap="round"
-                                                    stroke-linejoin="round"
-                                                    stroke-width="2.5"
-                                                    d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
-                                                />
-                                            </svg>
-                                        </Link>
-                                        <Link
-                                            v-else-if="
-                                                invoice.company_transaction.contact_type ===
-                                                'customer'
-                                            "
-                                            :href="
-                                                route(
-                                                    'customers.show',
-                                                    invoice.company_transaction.contact.id
-                                                )
-                                            "
-                                            class="text-base font-black text-amber-600 hover:text-amber-700 dark:text-amber-400 dark:hover:text-amber-300 hover:underline transition-colors flex items-center gap-1.5 w-fit group/sup"
-                                        >
-                                            <span>
-                                                {{ invoice.company_transaction.contact.name }}
-                                            </span>
-                                            <svg
-                                                class="w-4 h-4 opacity-60 group-hover/sup:opacity-100 transition-opacity shrink-0"
-                                                fill="none"
-                                                stroke="currentColor"
-                                                viewBox="0 0 24 24"
-                                            >
-                                                <path
-                                                    stroke-linecap="round"
-                                                    stroke-linejoin="round"
-                                                    stroke-width="2.5"
-                                                    d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
-                                                />
-                                            </svg>
-                                        </Link>
-                                        <div
-                                            class="flex flex-wrap gap-x-4 gap-y-1 mt-1 text-xs text-gray-500 dark:text-gray-400"
-                                        >
-                                            <span
-                                                v-if="invoice.company_transaction.contact.phone"
-                                                class="font-mono flex items-center gap-1"
-                                            >
-                                                <span>📞</span>
-                                                <span dir="ltr">
-                                                    {{ invoice.company_transaction.contact.phone }}
-                                                </span>
-                                            </span>
-                                            <span
-                                                v-if="
-                                                    invoice.company_transaction.contact.tax_number
-                                                "
-                                                class="font-mono flex items-center gap-1"
-                                            >
-                                                <span>📋</span>
-                                                <span>
-                                                    {{ $t('suppliers.tax_number') }}:
-                                                    {{
-                                                        invoice.company_transaction.contact
-                                                            .tax_number
-                                                    }}
-                                                </span>
-                                            </span>
-                                        </div>
-                                    </template>
-                                    <template v-else>
-                                        <Link
-                                            v-if="invoice.supplier_id"
-                                            :href="
-                                                route(
-                                                    'app.purchasing.suppliers.show',
-                                                    invoice.supplier_id
-                                                )
-                                            "
-                                            class="text-base font-black text-amber-600 hover:text-amber-700 dark:text-amber-400 dark:hover:text-amber-300 hover:underline transition-colors flex items-center gap-1.5 w-fit group/sup"
-                                        >
-                                            <span>{{ invoice.supplier?.name }}</span>
-                                            <svg
-                                                class="w-4 h-4 opacity-60 group-hover/sup:opacity-100 transition-opacity shrink-0"
-                                                fill="none"
-                                                stroke="currentColor"
-                                                viewBox="0 0 24 24"
-                                            >
-                                                <path
-                                                    stroke-linecap="round"
-                                                    stroke-linejoin="round"
-                                                    stroke-width="2.5"
-                                                    d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
-                                                />
-                                            </svg>
-                                        </Link>
-                                        <h4
-                                            v-else
-                                            class="text-base font-bold text-gray-900 dark:text-white"
-                                        >
-                                            —
-                                        </h4>
-                                        <div
-                                            class="flex flex-wrap gap-x-4 gap-y-1 mt-1 text-xs text-gray-500 dark:text-gray-400"
-                                        >
-                                            <span
-                                                v-if="invoice.supplier?.phone"
-                                                class="font-mono flex items-center gap-1"
-                                            >
-                                                <span>📞</span>
-                                                <span dir="ltr">{{ invoice.supplier.phone }}</span>
-                                            </span>
-                                            <span
-                                                v-if="invoice.supplier?.tax_number"
-                                                class="font-mono flex items-center gap-1"
-                                            >
-                                                <span>📋</span>
-                                                <span>
-                                                    {{ $t('suppliers.tax_number') }}:
-                                                    {{ invoice.supplier.tax_number }}
-                                                </span>
-                                            </span>
-                                        </div>
-                                    </template>
+                                        {{ $t('common.center') }}
+                                    </p>
+                                    <h4
+                                        class="text-sm font-bold text-gray-900 dark:text-white truncate"
+                                        dir="auto"
+                                    >
+                                        {{
+                                            isCompany
+                                                ? tenant.trade_name ||
+                                                  tenant.legal_name ||
+                                                  tenant.name
+                                                : invoice.center?.name_ar || invoice.center?.name
+                                        }}
+                                    </h4>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                </div>
+                    </template>
 
-                <!-- 2. Left Card: Financial Cost and Payment Summary -->
-                <div
-                    class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-5 flex flex-col h-full"
-                >
-                    <h3
-                        class="text-base font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2"
-                    >
-                        <div class="w-2 h-5 bg-amber-500 rounded-full"></div>
-                        {{ $t('work_orders.cost_and_payment') }}
-                    </h3>
-
-                    <!-- Mobile Card Breakdown (Visible on mobile < sm) -->
-                    <div class="block sm:hidden space-y-3 mb-2">
-                        <!-- Spare Parts breakdown -->
+                    <template #footer>
                         <div
-                            class="p-3 bg-gray-50 dark:bg-gray-900/40 rounded-xl space-y-1.5 border border-gray-100 dark:border-gray-700/50"
+                            class="flex items-center gap-2 px-4 py-2.5 border-t border-gray-100 dark:border-gray-700/80 bg-gray-50/70 dark:bg-gray-900/50 text-xs text-gray-600 dark:text-gray-400"
                         >
-                            <div
-                                class="flex justify-between items-center text-xs font-bold text-gray-900 dark:text-white"
+                            <svg
+                                class="w-4 h-4 text-gray-400 shrink-0"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
                             >
-                                <span>{{ $t('quotes.show.tabs.spare_parts') }}</span>
-                                <span class="font-mono">
-                                    {{ formatCurrency(calculatedInvoiceTotal) }}
-                                </span>
-                            </div>
-                            <div
-                                class="flex justify-between items-center text-[11px] text-gray-500"
-                            >
-                                <span>
-                                    {{ $t('common.unit_price') }}:
-                                    {{ formatCurrency(calculatedInvoiceSubtotal) }}
-                                </span>
-                                <span
-                                    v-if="invoice.discount_amount > 0"
-                                    class="text-red-500 italic"
-                                >
-                                    -{{ formatCurrency(invoice.discount_amount) }}
-                                </span>
-                            </div>
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                                />
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                                />
+                            </svg>
+                            <span class="font-medium truncate" dir="auto">
+                                {{
+                                    isCompany
+                                        ? getTenantAddress(tenant) ||
+                                          $t('common.company_head_office')
+                                        : getCenterAddress(invoice.center) || $t('common.na')
+                                }}
+                            </span>
                         </div>
+                    </template>
+                </WorkOrderCustomerCard>
 
-                        <!-- Grand Total, Paid & Balance Summary Card -->
-                        <div
-                            class="p-3.5 bg-amber-50/70 dark:bg-amber-950/20 rounded-xl border border-amber-200/60 dark:border-amber-800/40 space-y-2"
-                        >
-                            <div
-                                class="flex justify-between items-center text-sm font-black text-amber-900 dark:text-amber-300"
-                            >
-                                <span>{{ $t('common.total') }}</span>
-                                <span
-                                    class="font-mono text-base text-amber-600 dark:text-amber-400"
-                                >
-                                    {{ formatCurrency(calculatedInvoiceTotal) }}
-                                </span>
-                            </div>
-                            <div
-                                class="flex justify-between items-center text-xs font-bold text-emerald-600 dark:text-emerald-400"
-                            >
-                                <span>{{ $t('invoices.paid') }}</span>
-                                <span class="font-mono">
-                                    {{ formatCurrency(invoice.total - invoice.balance) }}
-                                </span>
-                            </div>
-                            <div
-                                class="pt-2 border-t border-amber-200/60 dark:border-amber-800/40 flex justify-between items-center text-sm font-black"
-                                :class="
-                                    invoice.balance > 0.01
-                                        ? 'text-red-600 dark:text-red-400'
-                                        : 'text-emerald-600 dark:text-emerald-400'
-                                "
-                            >
-                                <span>{{ $t('invoices.balance') }}</span>
-                                <span class="font-mono text-base">
-                                    {{ formatCurrency(invoice.balance) }}
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Desktop Table (Visible on sm and larger) -->
-                    <div class="hidden sm:block overflow-x-auto md:overflow-x-visible flex-1">
-                        <table class="w-full min-w-[550px] md:min-w-0 text-sm">
-                            <thead>
-                                <tr
-                                    class="text-gray-400 dark:text-gray-500 border-b border-gray-100 dark:border-gray-700/50 pb-2"
-                                >
-                                    <th
-                                        class="pb-2 text-center font-bold uppercase tracking-wider align-middle"
-                                    >
-                                        {{ $t('common.description') }}
-                                    </th>
-                                    <th
-                                        class="pb-2 text-center font-bold uppercase tracking-wider align-middle"
-                                    >
-                                        {{ $t('common.unit_price') }}
-                                    </th>
-                                    <th
-                                        class="pb-2 text-center font-bold uppercase tracking-wider text-red-500 italic align-middle"
-                                    >
-                                        {{ $t('common.discount') }}
-                                    </th>
-                                    <th
-                                        class="pb-2 text-center font-bold uppercase tracking-wider align-middle"
-                                    >
-                                        {{ $t('common.amount') }}
-                                    </th>
-                                    <th
-                                        class="pb-2 text-center font-bold uppercase tracking-wider italic align-middle"
-                                    >
-                                        {{ $t('common.vat') }}
-                                    </th>
-                                    <th
-                                        class="pb-2 text-center font-bold uppercase tracking-wider text-gray-900 dark:text-white align-middle"
-                                    >
-                                        {{ $t('common.total') }}
-                                    </th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-gray-100 dark:divide-gray-700/30">
-                                <!-- Spare Parts row -->
-                                <tr class="group">
-                                    <td
-                                        class="py-2.5 text-center font-bold text-gray-900 dark:text-white align-middle"
-                                    >
-                                        {{ $t('quotes.show.tabs.spare_parts') }}
-                                    </td>
-                                    <td
-                                        class="py-2.5 text-center font-mono text-gray-500 align-middle"
-                                    >
-                                        {{ formatCurrency(calculatedInvoiceSubtotal) }}
-                                    </td>
-                                    <td
-                                        class="py-2.5 text-center font-mono text-red-500 italic align-middle"
-                                    >
-                                        {{
-                                            invoice.discount_amount > 0
-                                                ? '-' + formatCurrency(invoice.discount_amount)
-                                                : '0.00'
-                                        }}
-                                    </td>
-                                    <td
-                                        class="py-2.5 text-center font-mono text-gray-500 align-middle"
-                                    >
-                                        {{
-                                            formatCurrency(
-                                                calculatedInvoiceSubtotal - invoice.discount_amount
-                                            )
-                                        }}
-                                    </td>
-                                    <td
-                                        class="py-2.5 text-center font-mono text-gray-500 align-middle"
-                                    >
-                                        {{ formatCurrency(calculatedInvoiceTaxAmount) }}
-                                    </td>
-                                    <td
-                                        class="py-2.5 text-center font-black text-gray-900 dark:text-white font-mono text-base align-middle"
-                                    >
-                                        {{ formatCurrency(calculatedInvoiceTotal) }}
-                                    </td>
-                                </tr>
-
-                                <!-- Paid Row -->
-                                <tr class="group text-emerald-600 dark:text-emerald-400">
-                                    <td class="py-2.5 text-center font-bold align-middle">
-                                        {{ $t('invoices.paid') }}
-                                    </td>
-                                    <td colspan="4" class="py-2.5 align-middle"></td>
-                                    <td
-                                        class="py-2.5 text-center font-black font-mono text-base align-middle"
-                                    >
-                                        {{ formatCurrency(invoice.total - invoice.balance) }}
-                                    </td>
-                                </tr>
-
-                                <!-- Balance Row -->
-                                <tr class="group text-red-600 dark:text-red-400">
-                                    <td class="py-2.5 text-center font-bold align-middle">
-                                        {{ $t('invoices.balance') }}
-                                    </td>
-                                    <td colspan="4" class="py-2.5 align-middle"></td>
-                                    <td
-                                        class="py-2.5 text-center font-black font-mono text-base align-middle"
-                                    >
-                                        {{ formatCurrency(invoice.balance) }}
-                                    </td>
-                                </tr>
-
-                                <!-- Grand Total Row -->
-                                <tr
-                                    class="bg-amber-50 dark:bg-amber-900/10 font-black border-t-2 border-amber-200 dark:border-amber-800"
-                                >
-                                    <td
-                                        class="py-2.5 text-center text-amber-900 dark:text-amber-400 font-black uppercase align-middle"
-                                    >
-                                        {{ $t('common.total') }}
-                                    </td>
-                                    <td
-                                        class="py-2.5 text-center font-mono text-amber-700 dark:text-amber-300 align-middle"
-                                    >
-                                        {{ formatCurrency(calculatedInvoiceSubtotal) }}
-                                    </td>
-                                    <td
-                                        class="py-2.5 text-center font-mono text-red-600 italic align-middle"
-                                    >
-                                        {{
-                                            invoice.discount_amount > 0
-                                                ? '-' + formatCurrency(invoice.discount_amount)
-                                                : '0.00'
-                                        }}
-                                    </td>
-                                    <td
-                                        class="py-2.5 text-center font-mono text-amber-700 dark:text-amber-300 align-middle"
-                                    >
-                                        {{
-                                            formatCurrency(
-                                                calculatedInvoiceSubtotal - invoice.discount_amount
-                                            )
-                                        }}
-                                    </td>
-                                    <td
-                                        class="py-2.5 text-center font-mono text-amber-700 dark:text-amber-300 align-middle"
-                                    >
-                                        {{ formatCurrency(calculatedInvoiceTaxAmount) }}
-                                    </td>
-                                    <td
-                                        class="py-2.5 text-center font-black text-amber-600 dark:text-amber-400 font-mono text-xl align-middle"
-                                    >
-                                        {{ formatCurrency(calculatedInvoiceTotal) }}
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
+                <!-- 2. Left Card: Unified Cost & Payment Summary -->
+                <WorkOrderFinancialSummary
+                    :totals="purchasingFinancialTotals"
+                    :has-tax="calculatedInvoiceTaxAmount > 0"
+                    :tax-rate="Number(invoice.lines?.[0]?.tax_rate || 15)"
+                    :total-paid="Number(invoice.total || 0) - Number(invoice.balance || 0)"
+                    :balance="Number(invoice.balance || 0)"
+                    :hide-zero-rows="true"
+                    :parts-label="$t('quotes.show.tabs.spare_parts')"
+                    :grand-label="$t('common.total')"
+                />
             </div>
 
             <!-- Notes Section (If Notes are present) -->
@@ -803,7 +390,7 @@
                 class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700/50 overflow-hidden"
             >
                 <div class="overflow-x-auto">
-                    <table class="w-full min-w-[980px]">
+                    <DataTable structured class="w-full min-w-[980px]">
                         <thead>
                             <tr
                                 class="bg-gray-50/50 dark:bg-gray-900/50 border-b border-gray-100 dark:border-gray-700/50"
@@ -985,7 +572,7 @@
                                 </td>
                             </tr>
                         </tbody>
-                    </table>
+                    </DataTable>
                 </div>
             </div>
 
@@ -1032,7 +619,7 @@
                 </div>
 
                 <div class="overflow-x-auto">
-                    <table class="w-full min-w-[820px] text-sm">
+                    <DataTable structured class="w-full min-w-[820px] text-sm">
                         <thead>
                             <tr
                                 class="text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-gray-700 pb-3 bg-gray-50/50 dark:bg-gray-900/50"
@@ -1184,7 +771,7 @@
                                 </td>
                             </tr>
                         </tbody>
-                    </table>
+                    </DataTable>
                 </div>
             </div>
 
@@ -1193,184 +780,30 @@
                 v-show="activeTab === 'attachments'"
                 class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700/50 p-6"
             >
-                <!-- If attachment exists -->
-                <div
-                    v-if="invoice.attachment_path"
-                    class="flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-xl bg-gray-50 dark:bg-gray-900/50 border border-gray-100 dark:border-gray-700 gap-4"
-                >
-                    <div class="flex items-center gap-3">
-                        <div
-                            class="w-12 h-12 rounded-xl bg-red-50 dark:bg-red-950/20 text-red-500 flex items-center justify-center shrink-0"
-                        >
-                            <svg
-                                class="w-6 h-6"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                            >
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    stroke-width="2"
-                                    d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"
-                                />
-                            </svg>
-                        </div>
-                        <div>
-                            <h4 class="text-sm font-bold text-gray-900 dark:text-white">
-                                {{ $t('common.invoice_attachment') }}
-                            </h4>
-                            <p class="text-xs text-gray-400 mt-0.5 font-mono select-all">
-                                {{ invoice.attachment_path.split('/').pop() }}
-                            </p>
-                        </div>
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <a
-                            :href="`/storage/${invoice.attachment_path}`"
-                            target="_blank"
-                            download
-                            class="flex items-center justify-center gap-2 px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-xl text-sm font-bold transition-all shadow-md shadow-amber-500/10 shrink-0"
-                        >
-                            <svg
-                                class="w-4 h-4"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                            >
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    stroke-width="2"
-                                    d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
-                                />
-                            </svg>
-                            <span>{{ $t('common.download') }}</span>
-                        </a>
-                        <button
-                            @click="deleteAttachment"
-                            :disabled="deleteForm.processing"
-                            class="flex items-center justify-center gap-2 px-4 py-2 bg-red-50 hover:bg-red-100 text-red-600 dark:bg-red-950/20 dark:hover:bg-red-950/40 rounded-xl text-sm font-bold transition-all shrink-0"
-                        >
-                            <svg
-                                class="w-4 h-4"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                            >
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    stroke-width="2"
-                                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                                />
-                            </svg>
-                            <span>
-                                {{
-                                    deleteForm.processing
-                                        ? $t('common.deleting')
-                                        : $t('common.delete')
-                                }}
-                            </span>
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Upload form empty state -->
-                <div
-                    v-else
-                    class="flex flex-col items-center justify-center py-12 text-center border-2 border-dashed border-gray-200 dark:border-gray-700/60 rounded-2xl p-6"
-                >
-                    <div
-                        class="w-16 h-16 bg-gray-50 dark:bg-gray-700/50 rounded-full flex items-center justify-center text-gray-400 mb-4 shadow-inner"
-                    >
-                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="1.5"
-                                d="M9 13h6m-3-3v6m-9 1V4a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z"
-                            />
-                        </svg>
-                    </div>
-                    <h3 class="text-sm font-bold text-gray-900 dark:text-white">
-                        {{ $t('common.no_attachments') }}
-                    </h3>
-                    <p class="text-xs text-gray-400 mt-1 max-w-sm mb-4">
-                        {{ $t('common.no_attachments_desc') }}
-                    </p>
-
-                    <!-- Hidden File Input -->
-                    <input
-                        type="file"
-                        ref="fileInput"
-                        @change="handleFileChange"
-                        class="hidden"
-                        accept=".pdf,.jpg,.jpeg,.png"
-                    />
-
-                    <!-- Upload Trigger Button -->
-                    <button
-                        @click="triggerFileInput"
-                        :disabled="uploadForm.processing"
-                        class="flex items-center justify-center gap-2 px-6 py-2.5 bg-amber-500 hover:bg-amber-600 text-white rounded-xl text-sm font-bold transition-all shadow-md shadow-amber-500/25 active:scale-95 disabled:opacity-50"
-                    >
-                        <svg
-                            v-if="uploadForm.processing"
-                            class="animate-spin w-4 h-4 text-white"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                        >
-                            <circle
-                                class="opacity-25"
-                                cx="12"
-                                cy="12"
-                                r="10"
-                                stroke="currentColor"
-                                stroke-width="4"
-                            ></circle>
-                            <path
-                                class="opacity-75"
-                                fill="currentColor"
-                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                            ></path>
-                        </svg>
-                        <svg
-                            v-else
-                            class="w-4 h-4"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                        >
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"
-                            />
-                        </svg>
-                        <span>
-                            {{
-                                uploadForm.processing
-                                    ? $t('common.uploading')
-                                    : $t('common.upload_attachment')
-                            }}
-                        </span>
-                    </button>
-
-                    <!-- Hints -->
-                    <p class="text-[10px] text-gray-400 mt-2">
-                        {{ $t('common.attachment_limits_hint') }}
-                    </p>
-
-                    <!-- Errors display -->
-                    <div
-                        v-if="uploadError"
-                        class="mt-3 text-xs text-red-500 font-bold bg-red-50 dark:bg-red-950/20 px-3 py-1.5 rounded-lg border border-red-200 dark:border-red-900/40"
-                    >
-                        {{ uploadError }}
-                    </div>
-                </div>
+                <AppAttachmentManager
+                    :attachments="
+                        invoice.attachment_path
+                            ? [
+                                  {
+                                      id: invoice.id,
+                                      path: invoice.attachment_path,
+                                      name: invoice.attachment_path.split('/').pop(),
+                                  },
+                              ]
+                            : []
+                    "
+                    :title="$t('common.invoice_attachment')"
+                    :is-read-only="!canManageAttachment"
+                    :upload-url="route('app.invoices.purchases.attachment.store', invoice.id)"
+                    :delete-url-template="
+                        () => route('app.invoices.purchases.attachment.destroy', invoice.id)
+                    "
+                    upload-field="attachment"
+                    accepted-types="application/pdf,image/jpeg,image/jpg,image/png"
+                    format-label="PDF, JPG, PNG"
+                    :max-size-mb="1"
+                    :allow-multiple="false"
+                />
             </div>
 
             <!-- Return History Tab Content -->
@@ -1379,7 +812,7 @@
                 class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700/50 overflow-hidden"
             >
                 <div class="overflow-x-auto">
-                    <table class="w-full min-w-[900px] text-sm text-start">
+                    <DataTable structured class="w-full min-w-[900px] text-sm text-start">
                         <thead>
                             <tr
                                 class="bg-gray-50/50 dark:bg-gray-900/50 text-gray-400 dark:text-gray-500 border-b border-gray-100 dark:border-gray-700/50 text-xs font-bold uppercase tracking-wider"
@@ -1482,7 +915,7 @@
                                 </td>
                             </tr>
                         </tbody>
-                    </table>
+                    </DataTable>
                 </div>
             </div>
 
@@ -1564,7 +997,8 @@
                             <div
                                 class="border border-gray-100 dark:border-gray-700/60 rounded-2xl overflow-x-auto md:overflow-x-visible bg-gray-50/30 dark:bg-gray-900/20"
                             >
-                                <table
+                                <DataTable
+                                    structured
                                     class="w-full min-w-[980px] md:min-w-0 text-sm md:table-fixed"
                                 >
                                     <thead>
@@ -1709,7 +1143,7 @@
                                             </td>
                                         </tr>
                                     </tbody>
-                                </table>
+                                </DataTable>
                             </div>
                         </div>
 
@@ -1724,7 +1158,7 @@
                             <div
                                 class="border border-gray-100 dark:border-gray-700/60 rounded-2xl overflow-x-auto bg-gray-50/30 dark:bg-gray-900/20"
                             >
-                                <table class="w-full min-w-[760px] text-sm">
+                                <DataTable structured class="w-full min-w-[760px] text-sm">
                                     <thead>
                                         <tr
                                             class="bg-gray-50 dark:bg-gray-900/60 text-gray-400 border-b border-gray-100 dark:border-gray-700/60 text-[10px] font-black uppercase tracking-wider"
@@ -1831,7 +1265,7 @@
                                             </td>
                                         </tr>
                                     </tbody>
-                                </table>
+                                </DataTable>
                             </div>
                         </div>
 
@@ -2037,7 +1471,7 @@
                                 v-if="returnForm.refund_payments.length > 0"
                                 class="overflow-x-auto rounded-xl border border-red-200/60 dark:border-red-900/40 shadow-sm"
                             >
-                                <table class="w-full min-w-[720px] text-xs">
+                                <DataTable structured class="w-full min-w-[720px] text-xs">
                                     <thead
                                         class="bg-red-100/60 dark:bg-red-950/30 text-red-700 dark:text-red-400"
                                     >
@@ -2167,7 +1601,7 @@
                                             <td class="align-middle"></td>
                                         </tr>
                                     </tfoot>
-                                </table>
+                                </DataTable>
                             </div>
 
                             <!-- Empty State -->
@@ -2561,8 +1995,10 @@
 </template>
 
 <script setup>
+import AppAttachmentManager from '@/Components/Common/AppAttachmentManager.vue';
+import DataTable from '@/Components/Common/DataTable.vue';
 import { ref, computed, watch } from 'vue';
-import { Link, useForm, router, usePage } from '@inertiajs/vue3';
+import { Head, Link, useForm, router, usePage } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import PageHeader from '@/Components/PageHeader.vue';
@@ -2571,9 +2007,12 @@ import AppToggle from '@/Components/Common/AppToggle.vue';
 import PurchaseOrderPaymentModal from '@/Components/Purchasing/PurchaseOrderPaymentModal.vue';
 import CustomDatePicker from '@/Components/CustomDatePicker.vue';
 import Tooltip from '@/Components/Tooltip.vue';
+import WorkOrderCustomerCard from '@/Components/WorkOrders/WorkOrderCustomerCard.vue';
+import WorkOrderFinancialSummary from '@/Components/WorkOrders/WorkOrderFinancialSummary.vue';
 import { useNumberFormat } from '@/Composables/useNumberFormat';
 
 const props = defineProps({
+    canManageAttachment: Boolean,
     invoice: Object,
 });
 
@@ -2584,6 +2023,47 @@ const { toEnglish, formatCurrency } = useNumberFormat();
 
 const tenant = computed(() => props.invoice.tenant || page.props.tenant || {});
 const isCompany = computed(() => !!props.invoice.company_transaction);
+
+const resolvedContact = computed(() => {
+    if (isCompany.value && props.invoice.company_transaction?.contact) {
+        return props.invoice.company_transaction.contact;
+    }
+    return props.invoice.supplier || null;
+});
+
+const resolvedContactPartyType = computed(() => {
+    if (isCompany.value && props.invoice.company_transaction?.contact_type === 'customer') {
+        return 'customer';
+    }
+    return 'supplier';
+});
+
+const resolvedContactName = computed(() => resolvedContact.value?.name || '');
+
+const resolvedContactVat = computed(() => resolvedContact.value?.tax_number || '');
+
+const resolvedContactAddress = computed(() => {
+    const contact = resolvedContact.value;
+    if (!contact) return '';
+    if (typeof contact.address === 'string' && contact.address.trim()) {
+        return contact.address.trim();
+    }
+    return formatAddressObject(contact);
+});
+
+const resolvedContactBadge = computed(() =>
+    resolvedContactPartyType.value === 'customer'
+        ? t('common.customer')
+        : t('purchasing.orders.supplier')
+);
+
+const resolvedContactHref = computed(() => {
+    if (resolvedContactPartyType.value === 'customer' && resolvedContact.value?.id) {
+        return route('customers.show', resolvedContact.value.id);
+    }
+    const supplierId = resolvedContact.value?.id || props.invoice.supplier_id;
+    return supplierId ? route('app.purchasing.suppliers.show', supplierId) : '';
+});
 
 const backUrl = computed(() => {
     if (typeof window !== 'undefined') {
@@ -2630,11 +2110,6 @@ const onPaymentSaved = (paymentData) => {
         },
     });
 };
-
-// Form for uploading attachment
-const uploadForm = useForm({
-    attachment: null,
-});
 
 // Return Invoice State
 const showReturnModal = ref(false);
@@ -2703,6 +2178,20 @@ const calculatedInvoiceTaxAmount = computed(() => {
 
 const calculatedInvoiceTotal = computed(() => {
     return Number(props.invoice?.total || 0);
+});
+
+const purchasingFinancialTotals = computed(() => {
+    const subtotal = calculatedInvoiceSubtotal.value;
+    const discountAmt = Number(props.invoice?.discount_amount || 0);
+    const amount = subtotal - discountAmt;
+    const tax = calculatedInvoiceTaxAmount.value;
+    const total = calculatedInvoiceTotal.value;
+
+    return {
+        services: { price: 0, discount: 0, amount: 0, tax: 0, total: 0 },
+        parts: { price: subtotal, discount: discountAmt, amount, tax, total },
+        grand: { price: subtotal, discount: discountAmt, amount, tax, total },
+    };
 });
 
 const addItemToReturn = () => {
@@ -2853,110 +2342,46 @@ const submitReturn = () => {
     });
 };
 
-// Form for deleting attachment
-const deleteForm = useForm({});
-
-const fileInput = ref(null);
-const uploadError = ref(null);
-
-const triggerFileInput = () => {
-    fileInput.value?.click();
-};
-
-const handleFileChange = (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    // Check size limit: 1MB = 1024 * 1024 bytes
-    if (file.size > 1 * 1024 * 1024) {
-        uploadError.value = t('common.errors.file_size_exceeded');
-        return;
-    }
-
-    // Check file type: pdf, jpg, jpeg, png
-    const allowedTypes = ['application/pdf', 'image/jpeg', 'image/jpg', 'image/png'];
-    if (!allowedTypes.includes(file.type)) {
-        uploadError.value = t('common.errors.invalid_file_type');
-        return;
-    }
-
-    uploadError.value = null;
-    uploadForm.attachment = file;
-    submitUpload();
-};
-
-const submitUpload = () => {
-    uploadForm.post(route('app.invoices.purchases.attachment.store', props.invoice.id), {
-        forceFormData: true,
-        preserveScroll: true,
-        onSuccess: () => {
-            uploadForm.reset();
-        },
-        onError: (errors) => {
-            uploadError.value = errors.attachment;
-        },
-    });
-};
-
-const deleteAttachment = () => {
-    if (confirm(t('common.confirm_delete'))) {
-        deleteForm.delete(route('app.invoices.purchases.attachment.destroy', props.invoice.id), {
-            preserveScroll: true,
-        });
-    }
-};
-
 const formatDate = (date) => {
     if (!date) return '—';
     return new Date(date).toLocaleDateString('en-GB', { numberingSystem: 'latn' });
 };
 
-const getCenterAddress = (center) => {
-    if (!center || !center.address) return '';
-    const addr = center.address;
-    const parts = [
-        addr.building_number ? `${t('common.building')} ${addr.building_number}` : '',
-        addr.street ? `${t('common.street')} ${addr.street}` : '',
-        addr.district ? `${t('common.district')} ${addr.district}` : '',
-        addr.city ? addr.city : '',
-        addr.postal_code ? `${t('common.postal_code')} ${addr.postal_code}` : '',
-    ].filter(Boolean);
-    return parts.join('، ');
-};
-
-const getTenantAddress = (tenant) => {
-    if (!tenant) return '';
-    const addr = tenant.address;
+const formatAddressObject = (addr) => {
     if (!addr) return '';
+    if (typeof addr === 'string') {
+        if (addr.startsWith('{')) {
+            try {
+                return formatAddressObject(JSON.parse(addr));
+            } catch {
+                return addr;
+            }
+        }
+        return addr;
+    }
     if (typeof addr === 'object') {
         if (addr.address_line) return addr.address_line;
-        const parts = [
+        return [
             addr.building_number ? `${t('common.building')} ${addr.building_number}` : '',
             addr.street ? `${t('common.street')} ${addr.street}` : '',
             addr.district ? `${t('common.district')} ${addr.district}` : '',
             addr.city ? addr.city : '',
             addr.postal_code ? `${t('common.postal_code')} ${addr.postal_code}` : '',
-        ].filter(Boolean);
-        return parts.join('، ');
+        ]
+            .filter(Boolean)
+            .join('، ');
     }
-    // Safe JSON parse fallback if DB returns stringified JSON
-    if (typeof addr === 'string' && addr.startsWith('{')) {
-        try {
-            const parsed = JSON.parse(addr);
-            if (parsed.address_line) return parsed.address_line;
-            const parts = [
-                parsed.building_number ? `${t('common.building')} ${parsed.building_number}` : '',
-                parsed.street ? `${t('common.street')} ${parsed.street}` : '',
-                parsed.district ? `${t('common.district')} ${parsed.district}` : '',
-                parsed.city ? parsed.city : '',
-                parsed.postal_code ? `${t('common.postal_code')} ${parsed.postal_code}` : '',
-            ].filter(Boolean);
-            return parts.join('، ');
-        } catch (e) {
-            return addr;
-        }
-    }
-    return addr || '';
+    return '';
+};
+
+const getCenterAddress = (center) => {
+    if (!center || !center.address) return '';
+    return formatAddressObject(center.address);
+};
+
+const getTenantAddress = (tenant) => {
+    if (!tenant || !tenant.address) return '';
+    return formatAddressObject(tenant.address);
 };
 
 const statusClass = (status) => {

@@ -121,6 +121,7 @@
         "title_singular": "Center"
     },
     "common": {
+        "date_outside_range": "Choose a date within the allowed range.",
         "actions": "Actions",
         "activate": "Activate",
         "active": "Effective",
@@ -228,6 +229,7 @@
         "id": "ID",
         "import": "Import",
         "import_failed": "Import failed",
+        "imported_rows": "Rows imported: {count}",
         "import_success": "Imported successfully",
         "inactive": "Ineffective",
         "index": "#",
@@ -1950,6 +1952,7 @@
         "available_qty": "Available Quantity",
         "back_to_original": "Back to Original Invoice",
         "balance": "Remaining",
+        "excess_paid": "Excess Paid (Refund Due)",
         "columns": {
             "balance": "Balance",
             "issue_date": "Issue Date",
@@ -2587,6 +2590,28 @@
         "work_order_desc": "List of required services"
     },
     "print_settings": {
+        "lang_ar": "Arabic",
+        "lang_en": "English",
+        "sample_supplier_name": "Global Auto Parts Supply Co.",
+        "sample_employee_name": "Saad Al-Shehri (Senior Technician)",
+        "sample_report_name": "Comprehensive Center Periodic Report",
+        "sample_address": "Riyadh, Al-Malaz, Salah Al-Din Rd.",
+        "sample_damage_1": "Front right bumper dent",
+        "sample_damage_2": "Surface scratch on rear left door",
+        "sample_payment_1": "Advance payment - Mada",
+        "sample_payment_2": "Second payment - Cash",
+        "sample_part_1_name": "Front Brake Pads (OEM)",
+        "sample_part_1_desc": "From main warehouse - Genuine OEM",
+        "sample_part_2_name": "Synthetic Engine Oil Filter",
+        "sample_part_2_desc": "Genuine filter with seal rings",
+        "sample_part_3_name": "Laser Platinum Spark Plugs",
+        "sample_part_3_desc": "Set of 4 genuine spark plugs",
+        "sample_payslip_1_name": "Basic Salary",
+        "sample_payslip_1_desc": "Current month salary",
+        "sample_payslip_2_name": "Housing & Transport Allowance",
+        "sample_payslip_2_desc": "Fixed monthly allowance",
+        "sample_payslip_3_name": "Workshop Performance Bonus",
+        "sample_payslip_3_desc": "Inspection target achievement bonus",
         "add_signature": "Add Signature",
         "bad_debts": "Bad Debts",
         "bad_debts_terms": "Bad Debts Terms",
@@ -2804,6 +2829,11 @@
             "roles": "Roles"
         },
         "preferences": {
+            "layout_hint": "Choose the position and distribution of menus on the screen",
+            "layout_side_desc": "Traditional vertical sidebar menu",
+            "layout_top_desc": "Horizontal top navigation bar",
+            "floating_hint": "Control the visibility of quick action floating buttons at the bottom of the screen",
+            "password_hint": "Be sure to choose a strong password containing letters, numbers, and symbols to protect your account",
             "title": "User & Interface Preferences",
             "subtitle": "Customize your browsing experience and WhatsApp integration",
             "layout": "Navigation Layout",
@@ -2932,6 +2962,7 @@
             "add": "Create a purchase order",
             "all_statuses": "All cases",
             "balance": "Remaining",
+        "excess_paid": "Excess Paid (Refund Due)",
             "cancel": "Cancel",
             "cancelled": "The purchase order has been cancelled",
             "cannot_modify_sent": "A sent order cannot be modified",
@@ -5241,6 +5272,7 @@
         "assigned_services": "Assigned services",
         "back_to_hub": "Back",
         "balance": "Remaining",
+        "excess_paid": "Excess Paid (Refund Due)",
         "closed_date": "Closing",
         "columns": {
             "balance": "The rest",
@@ -5290,6 +5322,8 @@
         "exit_notes_label": "Exit Notes",
         "exit_notes_placeholder": "Type any notes related to vehicle exit...",
         "filters": {
+            "all_cards": "All Cards",
+            "all_cards_tooltip": "Show all cards in the closed work orders section",
             "all_types": "All types",
             "bad_debts": "Bad Debts",
             "bad_debts_tooltip": "Work orders with bad debts",
@@ -5447,6 +5481,7 @@
             "amount": "Amount",
             "amount_of": "An amount of",
             "balance": "Balance",
+            "excess_paid": "Excess Paid (Refund Due)",
             "calculation": "Calculation",
             "color": "Color",
             "condition_details": "Condition Details",
@@ -5479,6 +5514,8 @@
             "scratch": "Scratch",
             "service": "Service",
             "status": "Status",
+            "assigned_technician": "Technician",
+            "department": "Department",
             "technician": "Technician",
             "technician_signature": "Technician",
             "terms_conditions": "Terms & Conditions",
@@ -6359,6 +6396,14 @@
             "enable_sms_2fa": "Enable SMS messages (2FA)",
             "enable_sms_2fa_hint": "Turn on sending verification codes by text message across the whole system.",
             "enable_sms_2fa_warning": "Warning: this option may incur extra costs (SMS balance).",
+            "subscription_lifecycle_title": "Subscription Lifecycle & Grace Period Settings",
+            "subscription_lifecycle_subtitle": "Configure post-expiration working grace period, default trial duration, and unactivated center suspension threshold.",
+            "grace_period_days": "Grace period after expiration",
+            "grace_period_days_hint": "Number of days a center can continue operating normally after a paid subscription ends before switching to read-only.",
+            "default_trial_days": "Default trial period",
+            "default_trial_days_hint": "Default trial days granted to new tenants or trial plans.",
+            "unactivated_cancel_days": "Suspend unactivated centers after expiry",
+            "unactivated_cancel_days_hint": "Number of days after expiry before unactivated centers are automatically suspended (0 to disable).",
             "dunning_settings": "Dunning settings — {name}",
             "dunning_settings_colon": "Dunning settings: {name}",
             "dunning_log": "Dunning Log",
@@ -6959,6 +7004,7 @@
             },
             "status": {
                 "active": "Active",
+                "grace_period": "Grace Period",
                 "trial": "Trial",
                 "trialing": "Trial",
                 "pending": "Awaiting payment",
@@ -6968,6 +7014,12 @@
                 "cancelled": "Cancelled",
                 "expired": "Expired",
                 "refunded": "Refunded"
+            },
+            "banners": {
+                "expired": "Your subscription and grace period have expired! The system is now in read-only mode.",
+                "grace_period": "Your subscription has ended and you are in the grace period ({days} days left to continue working). Please renew to avoid service restrictions.",
+                "expiring_soon": "Only {days} days left on your subscription. Please renew to prevent service interruption.",
+                "renew_now": "Renew now"
             },
             "page": {
                 "title": "Subscription Management",
@@ -7983,7 +8035,8 @@
             "footer_scripts": "Footer scripts (Footer Scripts)",
             "header_scripts": "Header scripts (Header Scripts)",
             "widget_script": "Integration code (Widget Script)",
-            "country_code_note": "Note: make sure to include the country code (for example: 9665xxxxxxxx)."
+            "country_code_note": "Note: make sure to include the country code (for example: 9665xxxxxxxx).",
+            "scripts_restricted": "Raw script fields are available to the platform super admin only, because they execute in every visitor's browser."
         },
         "advanced": {
             "explanatory_note": "Explanatory note",
@@ -8316,6 +8369,16 @@
         }
     },
     "help": {
+        "faqs": {
+            "faq_1_q": "Can the workshop board be displayed on a wall-mounted TV screen inside the center?",
+            "faq_1_a": "Yes, definitely! The workshop board (/app/workshop) is designed to be responsive, work clearly on large screens in the service bay, and update instantly.",
+            "faq_2_q": "How do I comply invoices with ZATCA requirements?",
+            "faq_2_a": "The system supports Phase 1 and Phase 2, automatically generating an encrypted QR code containing the establishment name, VAT number, timestamp, total, and tax.",
+            "faq_3_q": "Can a technician work on more than one vehicle at the same time?",
+            "faq_3_a": "No, the system prevents running two active timers simultaneously for a single technician; they must pause work on the first vehicle before starting on the second to ensure accurate productivity tracking.",
+            "faq_4_q": "How does a customer receive the OTP code to access their smart portal?",
+            "faq_4_a": "The customer enters their mobile number on the customer portal and immediately receives a 6-digit OTP via SMS to their registered phone for secure login without needing a password."
+        },
         "title": "Help & Knowledge Base",
         "subtitle": "Your comprehensive guide to mastering the system features and video tutorials",
         "whatsapp_support": "Contact Support",
@@ -8764,6 +8827,11 @@
         "two_factor_mandatory": "Two-factor authentication is mandatory and cannot be disabled"
     },
     "zatca": {
+        "wizard_title": "ZATCA Self-Onboarding Wizard",
+        "wizard_subtitle": "Connect the system to the Fatoora portal and issue e-invoicing certificates (Phase 2)",
+        "select_environment_placeholder": "Select link environment...",
+        "auto_generate_if_empty": "Auto-generated if left blank",
+        "enter_actual_otp": "Enter the actual OTP",
         "otp_hint": "Enter the six-digit code in the field below and press \"Request compliance certificate\".",
         "restart_hint": "If you want to move from the simulation environment to production, or renew an expired certificate, you can restart the handler.",
         "production_certificate": "Issue the production certificate and enable the live link",

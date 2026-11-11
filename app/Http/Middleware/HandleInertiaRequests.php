@@ -77,7 +77,22 @@ class HandleInertiaRequests extends Middleware
                 'permissions' => $user ? ($isTenantUser
                     ? $user->getAllPermissions()->pluck('name')
                     : $user->effectivePermissions()) : [],
-                'available_centers' => ($user && $isTenantUser) ? $user->centers()->get(['centers.id', 'centers.name_ar', 'centers.name_en']) : [],
+                'available_centers' => ($user && $isTenantUser)
+                    ? $user->centers()
+                        ->orderByDesc('is_main')
+                        ->orderBy('centers.id')
+                        ->get(['centers.id', 'centers.name', 'centers.name_ar', 'centers.name_en', 'centers.is_main'])
+                        ->map(fn ($c) => [
+                            'id' => $c->id,
+                            'name' => $c->name_ar ?: ($c->name_en ?: ($c->name ?: '')),
+                            'name_ar' => $c->name_ar ?: ($c->name ?: ($c->name_en ?: '')),
+                            'name_en' => $c->name_en ?: ($c->name ?: ($c->name_ar ?: '')),
+                            'display_name' => $c->display_name,
+                            'is_main' => (bool) $c->is_main,
+                        ])
+                        ->values()
+                        ->all()
+                    : [],
                 'unread_notifications_count' => ($user && $isTenantUser)
                     ? InternalNotification::where('user_id', $user->id)->where('tenant_id', $user->tenant_id)->whereNull('read_at')->count()
                     + ($tenant ? SystemAnnouncement::forTenant($tenant->id)->whereDoesntHave('reads', fn ($q) => $q->where('tenant_id', $tenant->id))->count() : 0)
@@ -117,8 +132,10 @@ class HandleInertiaRequests extends Middleware
                 'phone' => $tenant->phone,
                 'email' => $tenant->email,
                 'cr_number' => $tenant->cr_number,
-                'vat_number' => $tenant->vat_number,
-                'logo_url' => $tenant->logo_path ? Storage::url($tenant->logo_path) : asset('images/logo.png'),
+                'vat_number' => $tenant->taxSettings?->tax_number ?? $tenant->vat_number ?? '',
+                'logo_url' => $tenant->logo_path ? Storage::url($tenant->logo_path) : asset('images/brand/logo-256.png'),
+                'dunning_opted_out' => (bool) $tenant->dunning_opted_out,
+                'dunning_language' => $tenant->dunning_language,
                 'quote_title' => $tenant->quote_title,
                 'work_order_title' => $tenant->work_order_title,
                 'invoice_title' => $tenant->invoice_title,
@@ -131,12 +148,29 @@ class HandleInertiaRequests extends Middleware
                 'status' => $tenant->status,
                 'trial_ends_at' => $tenant->trial_ends_at ? $tenant->trial_ends_at->toIso8601String() : null,
                 'subscription_ends_at' => rescue(fn () => $tenant->subscriptions()->whereIn('status', ['active', 'trial', 'trialing'])->latest()->first()?->ends_at?->toIso8601String()),
+                'subscription_lifecycle' => rescue(function () use ($tenant) {
+                    $lifecycle = $tenant->getSubscriptionLifecycle();
+
+                    return [
+                        'state' => $lifecycle['state'],
+                        'can_operate' => $lifecycle['can_operate'],
+                        'is_on_trial' => $lifecycle['is_on_trial'],
+                        'is_in_grace_period' => $lifecycle['is_in_grace_period'],
+                        'grace_period_days' => $lifecycle['grace_period_days'],
+                        'grace_days_remaining' => $lifecycle['grace_days_remaining'],
+                        'days_remaining' => $lifecycle['days_remaining'],
+                        'ends_at' => $lifecycle['ends_at']?->toIso8601String(),
+                        'grace_ends_at' => $lifecycle['grace_ends_at']?->toIso8601String(),
+                    ];
+                }),
             ] : null,
             'center' => $user?->currentCenter ? [
                 'id' => $user->currentCenter->id,
-                'name' => $user->currentCenter->name, // Accessor handles lang
-                'name_ar' => $user->currentCenter->name_ar,
-                'name_en' => $user->currentCenter->name_en,
+                'name' => $user->currentCenter->name,
+                'name_ar' => $user->currentCenter->name_ar ?: ($user->currentCenter->name ?: ($user->currentCenter->name_en ?: '')),
+                'name_en' => $user->currentCenter->name_en ?: ($user->currentCenter->name ?: ($user->currentCenter->name_ar ?: '')),
+                'display_name' => $user->currentCenter->display_name,
+                'is_main' => (bool) $user->currentCenter->is_main,
                 'type' => $user->currentCenter->center_type,
                 'phone' => $user->currentCenter->phone,
                 'email' => $user->currentCenter->email,

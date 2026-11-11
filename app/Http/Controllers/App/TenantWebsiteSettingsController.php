@@ -199,7 +199,7 @@ class TenantWebsiteSettingsController extends Controller
             ['tenant_id' => $tenantId],
             [
                 'status' => TenantWebsite::STATUS_DRAFT,
-                'primary_color' => '#4f46e5',
+                'primary_color' => '#2563eb',
                 'secondary_color' => '#0ea5e9',
                 'theme_key' => ThemeRegistry::DEFAULT_THEME,
             ]

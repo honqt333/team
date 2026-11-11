@@ -116,11 +116,7 @@
 
                 <div class="mt-5 space-y-4">
                     <label class="flex cursor-pointer items-start gap-3">
-                        <input
-                            v-model="form.enabled"
-                            type="checkbox"
-                            class="mt-1 h-4 w-4 rounded border-gray-300 text-amber-600"
-                        />
+                        <AppToggle v-model="form.enabled" />
                         <div>
                             <div class="text-sm font-medium text-gray-900 dark:text-white">
                                 {{
@@ -219,6 +215,7 @@
 </template>
 
 <script setup>
+import AppToggle from '@/Components/Common/AppToggle.vue';
 import { useI18n } from 'vue-i18n';
 const { t } = useI18n();
 

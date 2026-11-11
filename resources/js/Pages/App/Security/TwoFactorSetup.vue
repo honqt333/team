@@ -1,4 +1,5 @@
 <script setup>
+import SelectableCard from '@/Components/Common/SelectableCard.vue';
 import { ref } from 'vue';
 import { useForm } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
@@ -123,15 +124,13 @@ const regenerate = () =>
 
                         <!-- Method Selection -->
                         <div class="mb-6 space-y-3">
-                            <label
+                            <SelectableCard
+                                type="radio"
+                                name="selectedMethod"
+                                v-model="selectedMethod"
+                                value="email"
                                 class="flex items-center p-3 border border-gray-200 dark:border-gray-700 rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
                             >
-                                <input
-                                    type="radio"
-                                    v-model="selectedMethod"
-                                    value="email"
-                                    class="w-4 h-4 text-indigo-600 border-gray-300 focus:ring-indigo-500"
-                                />
                                 <span class="ms-3 flex-1">
                                     <span
                                         class="block text-sm font-medium text-gray-900 dark:text-white"
@@ -143,18 +142,16 @@ const regenerate = () =>
                                         {{ $page.props.auth.user.email }}
                                     </span>
                                 </span>
-                            </label>
+                            </SelectableCard>
 
-                            <label
+                            <SelectableCard
+                                type="radio"
+                                name="selectedMethod"
+                                v-model="selectedMethod"
+                                value="sms"
                                 v-if="smsEnabled"
                                 class="flex items-center p-3 border border-gray-200 dark:border-gray-700 rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
                             >
-                                <input
-                                    type="radio"
-                                    v-model="selectedMethod"
-                                    value="sms"
-                                    class="w-4 h-4 text-indigo-600 border-gray-300 focus:ring-indigo-500"
-                                />
                                 <span class="ms-3 flex-1">
                                     <span
                                         class="block text-sm font-medium text-gray-900 dark:text-white"
@@ -169,7 +166,7 @@ const regenerate = () =>
                                         }}
                                     </span>
                                 </span>
-                            </label>
+                            </SelectableCard>
                         </div>
 
                         <button

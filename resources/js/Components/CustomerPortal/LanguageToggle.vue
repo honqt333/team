@@ -25,7 +25,7 @@
             "
             :style="
                 locale?.current === opt.value
-                    ? { backgroundColor: 'var(--tenant-primary, #4f46e5)' }
+                    ? { backgroundColor: 'var(--tenant-primary, #2563eb)' }
                     : {}
             "
         >

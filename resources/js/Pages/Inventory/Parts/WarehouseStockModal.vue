@@ -3,9 +3,16 @@
         <template #title>
             <div class="flex flex-col gap-0.5">
                 <span class="text-xl font-bold">
-                    {{ editRowData ? $t('inventory.parts.edit_warehouse') : $t('inventory.parts.add_warehouse') }}
+                    {{
+                        editRowData
+                            ? $t('inventory.parts.edit_warehouse')
+                            : $t('inventory.parts.add_warehouse')
+                    }}
                 </span>
-                <span v-if="partName" class="text-sm font-normal text-indigo-600 dark:text-indigo-400">
+                <span
+                    v-if="partName"
+                    class="text-sm font-normal text-indigo-600 dark:text-indigo-400"
+                >
                     {{ partName }}
                 </span>
             </div>
@@ -16,7 +23,8 @@
                 <!-- Warehouse -->
                 <div>
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                        {{ $t('inventory.parts.warehouse') }} <span class="text-red-500">*</span>
+                        {{ $t('inventory.parts.warehouse') }}
+                        <span class="text-red-500">*</span>
                     </label>
                     <SearchableSelect
                         v-model="form.warehouse_id"
@@ -28,13 +36,17 @@
                         :error="form.errors.warehouse_id"
                         :disabled="!!editRowData"
                     />
-                    <p v-if="form.errors.warehouse_id" class="mt-1 text-xs text-red-500">{{ form.errors.warehouse_id }}</p>
+                    <p v-if="form.errors.warehouse_id" class="mt-1 text-xs text-red-500">
+                        {{ form.errors.warehouse_id }}
+                    </p>
                 </div>
 
                 <!-- Cost & Sale Price -->
                 <div class="grid grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        <label
+                            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                        >
                             {{ $t('inventory.parts.wac_cost') }}
                         </label>
                         <input
@@ -48,7 +60,9 @@
                         />
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        <label
+                            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                        >
                             {{ $t('inventory.parts.sale_price') }}
                         </label>
                         <input
@@ -66,7 +80,9 @@
                 <!-- Min Sale Price & Initial Stock -->
                 <div class="grid grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        <label
+                            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                        >
                             {{ $t('inventory.parts.min_sale_price') }}
                         </label>
                         <input
@@ -80,9 +96,13 @@
                         />
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        <label
+                            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                        >
                             {{ $t('inventory.parts.initial_stock') }}
-                            <span v-if="editRowData" class="text-xs text-gray-400 font-normal">({{ $t('common.read_only') }})</span>
+                            <span v-if="editRowData" class="text-xs text-gray-400 font-normal">
+                                ({{ $t('common.read_only') }})
+                            </span>
                         </label>
                         <input
                             v-model="form.initial_stock"
@@ -101,7 +121,9 @@
                 <!-- Min Stock & Storage Location -->
                 <div class="grid grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        <label
+                            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                        >
                             {{ $t('inventory.parts.min_stock') }}
                         </label>
                         <input
@@ -115,7 +137,9 @@
                         />
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        <label
+                            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                        >
                             {{ $t('inventory.parts.storage_location') }}
                         </label>
                         <input
@@ -131,20 +155,16 @@
                 <!-- Checkboxes -->
                 <div class="flex items-center gap-6">
                     <label class="flex items-center gap-2 cursor-pointer">
-                        <input
-                            v-model="form.is_active"
-                            type="checkbox"
-                            class="w-4 h-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
-                        />
-                        <span class="text-sm text-gray-700 dark:text-gray-300">{{ $t('common.active') }}</span>
+                        <AppToggle v-model="form.is_active" />
+                        <span class="text-sm text-gray-700 dark:text-gray-300">
+                            {{ $t('common.active') }}
+                        </span>
                     </label>
                     <label class="flex items-center gap-2 cursor-pointer">
-                        <input
-                            v-model="form.allow_price_change"
-                            type="checkbox"
-                            class="w-4 h-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
-                        />
-                        <span class="text-sm text-gray-700 dark:text-gray-300">{{ $t('inventory.parts.allow_price_change') }}</span>
+                        <AppToggle v-model="form.allow_price_change" />
+                        <span class="text-sm text-gray-700 dark:text-gray-300">
+                            {{ $t('inventory.parts.allow_price_change') }}
+                        </span>
                     </label>
                 </div>
             </form>
@@ -170,6 +190,7 @@
 </template>
 
 <script setup>
+import AppToggle from '@/Components/Common/AppToggle.vue';
 import { useForm, usePage } from '@inertiajs/vue3';
 import DialogModal from '@/Components/DialogModal.vue';
 import { ref, computed, watch } from 'vue';
@@ -202,13 +223,13 @@ const warehouseOptions = computed(() => {
     let used = [...props.usedWarehouseIds];
     // When editing, the row's warehouse should still be available
     if (props.editRowData) {
-        used = used.filter(id => id !== props.editRowData.warehouse_id);
+        used = used.filter((id) => id !== props.editRowData.warehouse_id);
     }
     return props.warehouses
-        .filter(w => !used.includes(w.id))
-        .map(w => ({
+        .filter((w) => !used.includes(w.id))
+        .map((w) => ({
             value: w.id,
-            label: `${w.name} - ${w.center_name}`
+            label: `${w.name} - ${w.center_name}`,
         }));
 });
 
@@ -291,11 +312,11 @@ const submit = () => {
 
     const data = {
         warehouse_id: form.warehouse_id,
-        cost_price:     parseFloat(form.cost_price)     || 0,
-        sale_price:     parseFloat(form.sale_price)     || 0,
+        cost_price: parseFloat(form.cost_price) || 0,
+        sale_price: parseFloat(form.sale_price) || 0,
         min_sale_price: parseFloat(form.min_sale_price) || 0,
-        initial_stock:  parseFloat(form.initial_stock)  || 0,
-        min_stock:      parseFloat(form.min_stock)      || 0,
+        initial_stock: parseFloat(form.initial_stock) || 0,
+        min_stock: parseFloat(form.min_stock) || 0,
         storage_location: form.storage_location,
         is_active: form.is_active,
         allow_price_change: form.allow_price_change,

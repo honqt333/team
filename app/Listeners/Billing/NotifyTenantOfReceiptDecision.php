@@ -5,10 +5,9 @@ declare(strict_types=1);
 namespace App\Listeners\Billing;
 
 use App\Events\Billing\ReceiptReviewed;
-use App\Models\InternalNotification;
 use App\Models\User;
+use App\Services\NotificationService;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Str;
 
 /**
  * Notifies the tenant's primary user (first owner-level user) that
@@ -19,6 +18,12 @@ use Illuminate\Support\Str;
  *
  * If the tenant has no users (shouldn't happen but is a defensive
  * guard), the event is logged and dropped.
+ *
+ * These ARE tenant notifications, so they go through NotificationService
+ * and therefore honour the tenant's notification settings. Previously this
+ * listener wrote InternalNotification rows directly, which meant a tenant
+ * who had turned in-app notifications off still received the receipt
+ * decision in their bell.
  */
 class NotifyTenantOfReceiptDecision
 {
@@ -61,24 +66,23 @@ class NotifyTenantOfReceiptDecision
             );
 
         foreach ($users as $user) {
-            InternalNotification::create([
-                'id' => (string) Str::uuid(),
-                'tenant_id' => $receipt->tenant_id,
-                'user_id' => $user->id,
-                'type' => $isApproved
+            NotificationService::notify(
+                tenantId: $receipt->tenant_id,
+                userId: $user->id,
+                type: $isApproved
                     ? 'bank_transfer.receipt.approved'
                     : 'bank_transfer.receipt.rejected',
-                'title' => $title,
-                'body' => $body,
-                'icon' => $isApproved ? 'check' : 'x',
-                'action_url' => '/app/settings/billing',
-                'data' => [
+                title: $title,
+                body: $body,
+                actionUrl: '/app/settings/billing',
+                icon: $isApproved ? 'check' : 'x',
+                data: [
                     'receipt_id' => $receipt->id,
                     'tenant_id' => $receipt->tenant_id,
                     'decision' => $event->decision,
                     'notes' => $event->notes,
                 ],
-            ]);
+            );
         }
     }
 }

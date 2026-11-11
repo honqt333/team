@@ -42,7 +42,6 @@ const goBack = () => {
         window.history.back();
     }
 };
-const printPage = () => window.print();
 
 const formatNumber = (num) =>
     new Intl.NumberFormat(isRtl.value ? 'ar-SA-u-nu-latn' : 'en-US').format(num || 0);
@@ -90,19 +89,22 @@ const mappedData = computed(() => {
             serviceName = item.title || '';
         }
 
+        const itemTechnicians = (item.technicians || [])
+            .map((tech) => {
+                if (tech.employee) {
+                    return locale.value === 'ar'
+                        ? tech.employee.name_ar || tech.employee.name_en || tech.name
+                        : tech.employee.name_en || tech.employee.name_ar || tech.name;
+                }
+                return tech.name;
+            })
+            .filter(Boolean);
+
         return {
             service_name: serviceName,
             description: '',
-            technicians: (item.technicians || [])
-                .map((t) => {
-                    if (t.employee) {
-                        return locale.value === 'ar'
-                            ? t.employee.name_ar || t.employee.name_en || t.name
-                            : t.employee.name_en || t.employee.name_ar || t.name;
-                    }
-                    return t.name;
-                })
-                .filter(Boolean),
+            technicians: itemTechnicians,
+            technician: itemTechnicians.join(' - '),
             status: item.status || null,
             started_at: item.started_at || null,
             due_date: calculateItemDueDate(
@@ -125,6 +127,8 @@ const mappedData = computed(() => {
         initial_assessment: props.workOrder.initial_assessment,
         reception_signature: props.workOrder.reception_signature,
         delivery_signature: props.workOrder.delivery_signature,
+        printed_department: props.printedDepartment || null,
+        printed_technician: props.printedTechnician || null,
         customer: {
             name: props.workOrder.customer?.name,
             phone: props.workOrder.customer?.phone,
@@ -170,8 +174,10 @@ const documentSettings = computed(() => {
     }
 
     if (props.printedTechnician) {
-        titleAr = t('work_orders.technician_label');
-        titleEn = `${titleEn} - Tech: ${props.printedTechnician.name_en}`;
+        const techNameAr = props.printedTechnician.name_ar || props.printedTechnician.name_en || '';
+        const techNameEn = props.printedTechnician.name_en || props.printedTechnician.name_ar || '';
+        titleAr = `${titleAr} ${t('work_orders.technician_label')} ${techNameAr}`.trim();
+        titleEn = `${titleEn} - Tech: ${techNameEn}`.trim();
     }
 
     return {

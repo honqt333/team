@@ -1,6 +1,6 @@
 <template>
     <AppLayout :title="$t('inventory.moves.title')">
-        <div class="space-y-6">
+        <PrintEngine document-type="report" class="space-y-6">
             <!-- Page Header -->
             <PageHeader
                 :title="$t('inventory.moves.title')"
@@ -337,7 +337,7 @@
                     </div>
                 </template>
             </DataTable>
-        </div>
+        </PrintEngine>
 
         <!-- Modals -->
         <ReceiptModal
@@ -362,7 +362,7 @@
                     :subtitle="warehouse ? warehouse.name : ''"
                 />
 
-                <table>
+                <DataTable structured>
                     <thead>
                         <tr>
                             <th style="width: 40px" class="align-middle text-center">#</th>
@@ -409,7 +409,7 @@
                             </td>
                         </tr>
                     </tbody>
-                </table>
+                </DataTable>
 
                 <StandardReportFooter class="mt-8 border-t pt-4" />
             </div>
@@ -418,6 +418,8 @@
 </template>
 
 <script setup>
+import PrintEngine from '@/Components/Print/PrintEngine.vue';
+import { printDocument } from '@/Composables/usePrint';
 import { ref, computed, watch } from 'vue';
 import { Link, router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
@@ -692,6 +694,6 @@ const reverseMove = async (move) => {
 };
 
 const handlePrint = () => {
-    window.print();
+    printDocument();
 };
 </script>

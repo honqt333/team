@@ -186,7 +186,7 @@ class WorkOrderStatusController
             return redirect()->route('work-orders.show', $work_order->id)->with('error', __('messages.cannot_complete_items_pending') ?? 'لا يمكن إكمال العمل لوجود خدمات قيد الانتظار أو قيد التنفيذ');
         }
 
-        if ($work_order->balance < -0.01) {
+        if ($work_order->hasExcessPayment()) {
             return redirect()->route('work-orders.show', $work_order->id)->with('error', __('messages.cannot_complete_excess_payments') ?? 'لا يمكن تسجيل خروج المركبة لوجود مبالغ زائدة مدفوعة لم تسترجع! يرجى رد المبلغ الزائد أولاً.');
         }
 

@@ -12,9 +12,9 @@ use App\Models\PurchaseReturnInvoice;
 use App\Models\PurchaseReturnInvoiceLine;
 use App\Models\Warehouse;
 use App\Services\Inventory\InventoryService;
+use App\Services\PurchaseAttachmentService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 
@@ -197,13 +197,14 @@ class PurchaseReturnsController extends Controller
 
         return Inertia::render('Purchasing/Invoices/ReturnShow', [
             'returnInvoice' => $purchaseReturnInvoice,
+            'canManageAttachment' => request()->user()->can('updateReturn', $purchaseReturnInvoice),
         ]);
     }
 
     /**
      * Upload return attachment.
      */
-    public function uploadReturnAttachment(Request $request, PurchaseReturnInvoice $purchaseReturnInvoice)
+    public function uploadReturnAttachment(Request $request, PurchaseReturnInvoice $purchaseReturnInvoice, PurchaseAttachmentService $attachments)
     {
         $this->authorize('updateReturn', $purchaseReturnInvoice);
 
@@ -211,16 +212,7 @@ class PurchaseReturnsController extends Controller
             'attachment' => 'required|file|mimes:pdf,jpg,png|max:1024',
         ]);
 
-        if ($purchaseReturnInvoice->attachment_path) {
-            Storage::disk('public')->delete($purchaseReturnInvoice->attachment_path);
-        }
-
-        $file = $request->file('attachment');
-        $path = $file->store('purchases/returns/'.$purchaseReturnInvoice->id, 'public');
-
-        $purchaseReturnInvoice->update([
-            'attachment_path' => $path,
-        ]);
+        $attachments->replace($purchaseReturnInvoice, $request->file('attachment'));
 
         return back()->with('success', __('messages.attachment_uploaded') ?? 'تم رفع المرفق بنجاح');
     }
@@ -228,16 +220,11 @@ class PurchaseReturnsController extends Controller
     /**
      * Destroy return attachment.
      */
-    public function destroyReturnAttachment(PurchaseReturnInvoice $purchaseReturnInvoice)
+    public function destroyReturnAttachment(PurchaseReturnInvoice $purchaseReturnInvoice, PurchaseAttachmentService $attachments)
     {
         $this->authorize('updateReturn', $purchaseReturnInvoice);
 
-        if ($purchaseReturnInvoice->attachment_path) {
-            Storage::disk('public')->delete($purchaseReturnInvoice->attachment_path);
-            $purchaseReturnInvoice->update([
-                'attachment_path' => null,
-            ]);
-        }
+        $attachments->replace($purchaseReturnInvoice, null);
 
         return back()->with('success', __('messages.attachment_deleted') ?? 'تم حذف المرفق بنجاح');
     }

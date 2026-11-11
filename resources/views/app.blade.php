@@ -7,14 +7,16 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <title inertia>{{ app()->getLocale() === 'ar' ? config('app.name_ar', 'خدمة برو') : config('app.name', 'Khidmh Pro') }}</title>
-    {{-- Keep the icon small: /images/logo.png is a 28 KB 640×640 file that is
-         rendered at 16 px, and the browser downloads it on every page. The
-         CMS favicon wins when the page provides one (the public pages do),
-         so the browser never fetches two icons. --}}
+    {{-- The brand favicon is a small multi-size ICO (16/32/48) in
+         /images/brand/. It is tiny, and the browser downloads it on every
+         page. The CMS favicon wins when the page provides one (the public
+         pages do), so the browser never fetches two icons. --}}
     @php
         $pageFavicon = $page['props']['settings']['favicon'] ?? ($page['props']['site']['logo_url'] ?? null);
     @endphp
-    <link rel="icon" type="image/png" href="{{ $pageFavicon ?: '/images/favicon.png' }}">
+    <link rel="icon" type="image/png" href="{{ $pageFavicon ?: '/images/brand/favicon-32.png' }}">
+    <link rel="icon" type="image/x-icon" sizes="16x16 32x32 48x48" href="{{ $pageFavicon ?: '/images/brand/favicon.ico' }}">
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ $pageFavicon ?: '/images/brand/apple-touch-icon.png' }}">
 
     <!-- Inline Dark Mode Check -->
     <script>

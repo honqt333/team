@@ -10,6 +10,7 @@ use App\Models\AdminUser;
 use App\Models\BankTransferReceipt;
 use App\Models\Billing\Subscription;
 use App\Models\User;
+use App\Services\Billing\SubscriptionLifecycleService;
 use App\Services\System\SystemAuditService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -20,8 +21,11 @@ use Inertia\Response;
 class BankTransferReceiptsController extends Controller
 {
     public function __construct(
-        protected SystemAuditService $audit
-    ) {}
+        protected SystemAuditService $audit,
+        protected ?SubscriptionLifecycleService $lifecycle = null
+    ) {
+        $this->lifecycle ??= app(SubscriptionLifecycleService::class);
+    }
 
     /**
      * List pending bank transfer receipts for review.
@@ -308,9 +312,16 @@ class BankTransferReceiptsController extends Controller
                 $receipt->payment->update($paymentUpdates);
             }
 
-            // Activate subscription
+            // Activate subscription (recalculates duration if expired or carries active remaining days)
             if ($receipt->subscription) {
-                $receipt->subscription->update(['status' => 'active']);
+                $this->lifecycle->activateSubscription($receipt->subscription);
+            } elseif ($receipt->tenant) {
+                $receipt->tenant->update([
+                    'status' => 'active',
+                    'suspended_at' => null,
+                    'auto_suspended_at' => null,
+                    'suspension_reason' => null,
+                ]);
             }
 
             // Mark invoice as paid ONLY if the approved amount covers
@@ -328,11 +339,6 @@ class BankTransferReceiptsController extends Controller
                 // decide whether to issue a credit or chase the rest.
                 // We surface a session message so the UI can show the
                 // remaining balance on the next page.
-            }
-
-            // Activate tenant
-            if ($receipt->tenant) {
-                $receipt->tenant->update(['status' => 'active']);
             }
         });
 

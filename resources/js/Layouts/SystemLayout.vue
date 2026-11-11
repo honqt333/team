@@ -16,23 +16,11 @@
                 <div
                     class="h-14 flex items-center gap-3 px-4 border-b border-gray-200 dark:border-gray-700 flex-shrink-0"
                 >
-                    <div
-                        class="w-9 h-9 rounded-lg bg-gradient-to-br from-indigo-600 to-purple-600 flex items-center justify-center flex-shrink-0"
-                    >
-                        <svg
-                            class="w-5 h-5 text-white"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                        >
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M13 10V3L4 14h7v7l9-11h-7z"
-                            />
-                        </svg>
-                    </div>
+                    <img
+                        src="/images/brand/logo-64.png"
+                        :alt="$t('common.app_name')"
+                        class="w-9 h-9 rounded-lg object-contain flex-shrink-0"
+                    />
                     <div class="flex-1 min-w-0">
                         <p class="text-sm font-bold text-gray-900 dark:text-white truncate">
                             {{ $t('common.app_name') }}
@@ -441,23 +429,11 @@
                     class="h-14 flex items-center justify-between px-4 border-b border-gray-200 dark:border-gray-700 flex-shrink-0"
                 >
                     <div class="flex items-center gap-3 flex-1 min-w-0">
-                        <div
-                            class="w-9 h-9 rounded-lg bg-gradient-to-br from-indigo-600 to-purple-600 flex items-center justify-center flex-shrink-0"
-                        >
-                            <svg
-                                class="w-5 h-5 text-white"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                            >
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    stroke-width="2"
-                                    d="M13 10V3L4 14h7v7l9-11h-7z"
-                                />
-                            </svg>
-                        </div>
+                        <img
+                            src="/images/brand/logo-64.png"
+                            :alt="$t('common.app_name')"
+                            class="w-9 h-9 rounded-lg object-contain flex-shrink-0"
+                        />
                         <div class="flex-1 min-w-0">
                             <p class="text-sm font-bold text-gray-900 dark:text-white truncate">
                                 {{ $t('common.app_name') }}

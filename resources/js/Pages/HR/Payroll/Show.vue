@@ -189,7 +189,7 @@
                     </h3>
                 </div>
                 <div class="overflow-x-auto">
-                    <table class="w-full text-sm">
+                    <DataTable structured class="w-full text-sm">
                         <thead class="bg-gray-50 dark:bg-gray-700/50">
                             <tr>
                                 <th
@@ -353,7 +353,7 @@
                                 </td>
                             </tr>
                         </tbody>
-                    </table>
+                    </DataTable>
                 </div>
             </div>
         </div>
@@ -469,12 +469,7 @@
                     >
                         {{ $t('hr.payroll.payment_date') }}
                     </label>
-                    <input
-                        v-model="paidForm.payment_date"
-                        type="date"
-                        class="w-full px-3 py-2 text-sm border rounded-xl bg-gray-50 dark:bg-gray-900 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-emerald-500 text-gray-900 dark:text-white"
-                        required
-                    />
+                    <CustomDatePicker v-model="paidForm.payment_date" required />
                 </div>
                 <div>
                     <SearchableSelect
@@ -520,6 +515,8 @@
 </template>
 
 <script setup>
+import DataTable from '@/Components/Common/DataTable.vue';
+import CustomDatePicker from '@/Components/CustomDatePicker.vue';
 import { useI18n } from 'vue-i18n';
 const { t } = useI18n();
 

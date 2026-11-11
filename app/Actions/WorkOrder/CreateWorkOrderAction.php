@@ -33,6 +33,7 @@ class CreateWorkOrderAction
                 'customer_complaint' => $data['customer_complaint'] ?? null,
                 'initial_assessment' => $data['initial_assessment'] ?? null,
                 'odometer' => $data['odometer'] ?? null,
+                'fuel_level' => $data['fuel_level'] ?? 50,
                 'contact_name' => $data['contact_name'] ?? null,
                 'contact_phone' => $data['contact_phone'] ?? null,
                 'entry_date' => $data['entry_date'] ?? now()->toDateString(),

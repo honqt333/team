@@ -1,7 +1,10 @@
 <script setup>
 import AppToggle from '@/Components/Common/AppToggle.vue';
 
-defineProps({ form: Object });
+defineProps({
+    form: Object,
+    canManageScripts: { type: Boolean, default: false },
+});
 </script>
 
 <template>
@@ -90,18 +93,26 @@ defineProps({ form: Object });
                 }"
                 class="grid grid-cols-1 gap-4 transition-opacity"
             >
-                <label class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 block">
-                    {{ $t('tenant_site.integrations.widget_script') }}
-                </label>
-                <textarea
-                    v-model="form.settings.website_chatbot_script"
-                    rows="8"
-                    class="input-enterprise font-mono text-left"
-                    dir="ltr"
-                    placeholder="<!-- Paste your script code here -->"
-                ></textarea>
-                <p class="text-[10px] text-gray-500 dark:text-gray-400">
-                    {{ $t('tenant_site.integrations.paste_warning') }}
+                <template v-if="canManageScripts">
+                    <label class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 block">
+                        {{ $t('tenant_site.integrations.widget_script') }}
+                    </label>
+                    <textarea
+                        v-model="form.settings.website_chatbot_script"
+                        rows="8"
+                        class="input-enterprise font-mono text-left"
+                        dir="ltr"
+                        placeholder="<!-- Paste your script code here -->"
+                    ></textarea>
+                    <p class="text-[10px] text-gray-500 dark:text-gray-400">
+                        {{ $t('tenant_site.integrations.paste_warning') }}
+                    </p>
+                </template>
+                <p
+                    v-else
+                    class="rounded-lg border border-amber-200 bg-amber-50 p-3 text-xs text-amber-800 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-300"
+                >
+                    {{ $t('tenant_site.integrations.scripts_restricted') }}
                 </p>
             </div>
         </div>
@@ -123,7 +134,7 @@ defineProps({ form: Object });
                 </svg>
                 {{ $t('tenant_site.integrations.custom_scripts') }}
             </h3>
-            <div class="space-y-6">
+            <div v-if="canManageScripts" class="space-y-6">
                 <div>
                     <label class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 block">
                         {{ $t('tenant_site.integrations.header_scripts') }}
@@ -155,6 +166,12 @@ defineProps({ form: Object });
                     </p>
                 </div>
             </div>
+            <p
+                v-else
+                class="rounded-lg border border-amber-200 bg-amber-50 p-3 text-xs text-amber-800 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-300"
+            >
+                {{ $t('tenant_site.integrations.scripts_restricted') }}
+            </p>
         </div>
     </div>
 </template>

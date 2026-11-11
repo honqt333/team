@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Middleware;
 
+use App\Services\Billing\SubscriptionLifecycleService;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Schema;
@@ -31,33 +32,38 @@ class EnsureTenantActive
             abort(403, 'Tenant not found or inactive');
         }
 
-        // Check tenant status if column exists
         if (Schema::hasColumn('tenants', 'status')) {
-            $isExpired = $tenant->status === 'expired' ||
-                ($tenant->status === 'trial' && $tenant->trial_ends_at && $tenant->trial_ends_at->isPast());
+            $lifecycle = $tenant->getSubscriptionLifecycle();
 
-            // 1. Block suspended tenants
-            if ($tenant->status === 'suspended') {
-                if ($request->routeIs('logout') ||
-                    ($request->routeIs('app.settings.company') && $request->get('tab') === 'subscription')) {
+            // 1. Suspended tenants: block everything except logout and billing/renewal routes
+            if ($lifecycle['state'] === SubscriptionLifecycleService::STATE_SUSPENDED) {
+                if ($this->isWhitelistedBillingOrAuthRoute($request)) {
                     return $next($request);
                 }
-                abort(403, 'تم إيقاف حسابك مؤقتاً لعدم وجود اشتراك نشط. يرجى التواصل مع الإدارة للتفعيل.');
+
+                abort(403, __('messages.subscription.account_suspended'));
             }
 
-            // 2. Block write/modifying operations for expired or readonly tenants
-            if ($isExpired || $tenant->status === 'readonly') {
-                if ($request->routeIs('logout') ||
-                    ($request->routeIs('app.settings.company') && $request->get('tab') === 'subscription')) {
+            // 2. Expired (post grace period) or readonly: allow GET reads & billing renewal, block write mutations
+            if (! $lifecycle['can_operate']) {
+                if ($this->isWhitelistedBillingOrAuthRoute($request)) {
                     return $next($request);
                 }
 
-                if (in_array($request->method(), ['POST', 'PUT', 'PATCH', 'DELETE'])) {
-                    abort(403, 'انتهت صلاحية اشتراكك. يرجى تجديد الاشتراك لتتمكن من إجراء العمليات.');
+                if (in_array($request->method(), ['POST', 'PUT', 'PATCH', 'DELETE'], true)) {
+                    abort(403, __('messages.subscription.expired_readonly'));
                 }
             }
         }
 
         return $next($request);
+    }
+
+    private function isWhitelistedBillingOrAuthRoute(Request $request): bool
+    {
+        return $request->routeIs('logout')
+            || $request->routeIs('app.billing.*')
+            || $request->routeIs('app.subscription.*')
+            || ($request->routeIs('app.settings.company') && $request->get('tab') === 'subscription');
     }
 }

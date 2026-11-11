@@ -33,7 +33,10 @@
                 class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden shadow-sm"
             >
                 <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700 text-sm">
+                    <DataTable
+                        structured
+                        class="min-w-full divide-y divide-gray-200 dark:divide-gray-700 text-sm"
+                    >
                         <thead class="bg-gray-50 dark:bg-gray-900/50">
                             <tr>
                                 <th
@@ -156,7 +159,7 @@
                                 </td>
                             </tr>
                         </tbody>
-                    </table>
+                    </DataTable>
                 </div>
             </div>
         </div>
@@ -164,6 +167,7 @@
 </template>
 
 <script setup>
+import DataTable from '@/Components/Common/DataTable.vue';
 import { useI18n } from 'vue-i18n';
 const { t } = useI18n();
 

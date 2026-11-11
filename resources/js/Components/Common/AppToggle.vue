@@ -190,7 +190,7 @@ const colorClasses = computed(() => {
             label || $slots.default || description || $slots.description ? 'gap-3' : '',
             labelPosition === 'start' ? 'flex-row-reverse justify-end' : '',
         ]"
-        @click="handleChange"
+        @click.prevent="handleChange"
     >
         <!-- Switch Button (Locked in deterministic LTR coordinate space for clean sliding) -->
         <button

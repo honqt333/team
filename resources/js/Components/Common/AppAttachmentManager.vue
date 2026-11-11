@@ -194,7 +194,7 @@
         </div>
 
         <!-- Upload Modal -->
-        <BaseModal :show="showUploadModal" @close="closeModal" size="lg">
+        <BaseModal :show="showUploadModal" :closeable="!isUploading" @close="closeModal" size="lg">
             <template #title>
                 <div class="flex items-center gap-3">
                     <div
@@ -240,6 +240,7 @@
                         :multiple="allowMultiple"
                         :accept="acceptedTypes"
                         class="hidden"
+                        @click.stop
                         @change="handleFileInputChange"
                     />
 
@@ -271,7 +272,7 @@
                             <p class="text-xs text-gray-400 font-mono">
                                 {{
                                     $t('common.supported_formats', {
-                                        formats: 'PDF, JPG, PNG, WEBP',
+                                        formats: formatLabel,
                                     })
                                 }}
                             </p>
@@ -393,6 +394,8 @@ const props = defineProps({
     title: { type: String, default: '' },
     maxSizeMb: { type: Number, default: 5 },
     acceptedTypes: { type: String, default: '.pdf,image/png,image/jpeg,image/webp' },
+    uploadField: { type: String, default: null },
+    formatLabel: { type: String, default: 'PDF, JPG, PNG, WEBP' },
     allowMultiple: { type: Boolean, default: true },
     storagePrefix: { type: String, default: '/storage/' },
 });
@@ -417,6 +420,7 @@ function triggerFileInput() {
 function handleFileInputChange(event) {
     const files = Array.from(event.target.files || []);
     processFiles(files);
+    event.target.value = '';
 }
 
 function handleDrop(event) {
@@ -426,21 +430,32 @@ function handleDrop(event) {
 }
 
 function processFiles(files) {
+    if (props.isReadOnly || isUploading.value) return;
     const maxBytes = props.maxSizeMb * 1024 * 1024;
     for (const file of files) {
         if (file.size > maxBytes) {
-            error(t('common.file_too_large'));
+            error(t('common.file_too_large', { file: file.name, size: props.maxSizeMb + ' MB' }));
             continue;
+        }
+        if (props.uploadField && !props.acceptedTypes.split(',').includes(file.type)) {
+            error(t('common.errors.invalid_file_type'));
+            continue;
+        }
+        if (!props.allowMultiple) {
+            selectedFiles.value = [file];
+            break;
         }
         selectedFiles.value.push(file);
     }
 }
 
 function removePendingFile(index) {
+    if (isUploading.value) return;
     selectedFiles.value.splice(index, 1);
 }
 
 function closeModal() {
+    if (isUploading.value) return;
     showUploadModal.value = false;
     selectedFiles.value = [];
 }
@@ -475,6 +490,7 @@ function getAttachmentUrl(attachment) {
 }
 
 async function handleDelete(attachment) {
+    if (props.isReadOnly || isUploading.value) return;
     const ok = await confirm({
         title: t('common.confirm_delete_title'),
         message: t('common.confirm_delete_message'),
@@ -505,12 +521,16 @@ async function handleDelete(attachment) {
 }
 
 function handleUploadSubmit() {
-    if (selectedFiles.value.length === 0) return;
+    if (props.isReadOnly || isUploading.value || selectedFiles.value.length === 0) return;
 
     if (props.uploadUrl) {
         isUploading.value = true;
         const formData = new FormData();
         selectedFiles.value.forEach((file) => {
+            if (props.uploadField) {
+                formData.append(props.uploadField, file);
+                return;
+            }
             formData.append('files[]', file);
             formData.append('attachments[]', file);
         });
@@ -521,9 +541,12 @@ function handleUploadSubmit() {
             onSuccess: () => {
                 isUploading.value = false;
                 success(t('common.attachments_uploaded_successfully'));
-                closeModal();
                 emit('upload', selectedFiles.value);
+                closeModal();
                 emit('change');
+            },
+            onFinish: () => {
+                isUploading.value = false;
             },
             onError: (err) => {
                 isUploading.value = false;

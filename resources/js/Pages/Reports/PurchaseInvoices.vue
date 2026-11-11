@@ -1,6 +1,6 @@
 <template>
     <AppLayout>
-        <div class="space-y-6">
+        <PrintEngine document-type="report" class="space-y-6">
             <!-- Screen Only Header Section (AUDIT_STANDARDS.md compliant) -->
             <PageHeader
                 :title="$t('reports.purchase_invoices_report.title')"
@@ -32,26 +32,10 @@
 
                 <template #actions>
                     <div class="flex items-center gap-2.5 shrink-0">
-                        <button
-                            type="button"
+                        <AppPrintButton
                             @click="handlePrint"
-                            class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 text-xs font-bold transition-all shadow-sm"
-                        >
-                            <svg
-                                class="w-4 h-4 text-gray-500"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                            >
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    stroke-width="2"
-                                    d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"
-                                />
-                            </svg>
-                            <span>{{ $t('reports.purchase_invoices_report.print_report') }}</span>
-                        </button>
+                            :label="$t('reports.purchase_invoices_report.print_report')"
+                        />
 
                         <a
                             :href="exportUrl"
@@ -207,21 +191,11 @@
                         </div>
 
                         <!-- Start & End Date Pickers -->
-                        <div class="flex items-center gap-2">
-                            <CustomDatePicker
-                                v-model="filterForm.start_date"
-                                :placeholder="$t('reports.payments_report.date_from')"
-                                class="w-36 text-xs"
-                                @update:modelValue="onCustomDateChange"
-                            />
-                            <span class="text-gray-400 text-xs">—</span>
-                            <CustomDatePicker
-                                v-model="filterForm.end_date"
-                                :placeholder="$t('reports.payments_report.date_to')"
-                                class="w-36 text-xs"
-                                @update:modelValue="onCustomDateChange"
-                            />
-                        </div>
+                        <ReportDateRange
+                            v-model:start="filterForm.start_date"
+                            v-model:end="filterForm.end_date"
+                            @change="onCustomDateChange"
+                        />
                     </div>
                 </div>
 
@@ -345,12 +319,7 @@
                     <div class="flex items-center gap-3">
                         <!-- Overdue Only Toggle -->
                         <label class="inline-flex items-center gap-2 cursor-pointer select-none">
-                            <input
-                                type="checkbox"
-                                v-model="filterForm.is_overdue"
-                                class="rounded border-gray-300 text-rose-600 focus:ring-rose-500 dark:border-gray-600 dark:bg-gray-800"
-                                @change="applyFilters"
-                            />
+                            <AppToggle v-model="filterForm.is_overdue" @change="applyFilters" />
                             <span class="text-xs font-bold text-gray-700 dark:text-gray-300">
                                 {{ $t('reports.purchase_invoices_report.overdue_only') }}
                             </span>
@@ -680,7 +649,7 @@
                         class="border-t border-gray-100 dark:border-gray-700/60"
                     >
                         <div class="overflow-x-auto">
-                            <table class="w-full text-right text-xs">
+                            <DataTable structured class="w-full text-right text-xs">
                                 <thead>
                                     <tr
                                         class="bg-gray-50/70 dark:bg-gray-900/50 text-gray-500 dark:text-gray-400 text-[11px] font-bold border-b border-gray-100 dark:border-gray-700/60"
@@ -817,9 +786,10 @@
                                             {{ formatMoney(inv.balance) }}
                                         </td>
                                         <td class="px-4 py-3 text-center">
-                                            <span :class="getStatusBadgeClass(inv.payment_status)">
-                                                {{ getPaymentStatusLabel(inv.payment_status) }}
-                                            </span>
+                                            <PaymentStatusBadge
+                                                :status="inv.payment_status"
+                                                :label="getPaymentStatusLabel(inv.payment_status)"
+                                            />
                                             <span
                                                 v-if="inv.is_overdue"
                                                 class="block text-[9px] text-rose-600 font-bold mt-0.5"
@@ -829,7 +799,7 @@
                                         </td>
                                     </tr>
                                 </tbody>
-                            </table>
+                            </DataTable>
                         </div>
                     </div>
                 </div>
@@ -841,7 +811,7 @@
                 class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700/60 overflow-hidden"
             >
                 <div class="overflow-x-auto">
-                    <table class="w-full text-right text-xs">
+                    <DataTable structured class="w-full text-right text-xs">
                         <thead>
                             <tr
                                 class="bg-gray-50/70 dark:bg-gray-900/50 text-gray-500 dark:text-gray-400 text-[11px] font-bold border-b border-gray-100 dark:border-gray-700/60"
@@ -989,9 +959,10 @@
                                     {{ formatMoney(inv.balance) }}
                                 </td>
                                 <td class="px-4 py-3 text-center">
-                                    <span :class="getStatusBadgeClass(inv.payment_status)">
-                                        {{ getPaymentStatusLabel(inv.payment_status) }}
-                                    </span>
+                                    <PaymentStatusBadge
+                                        :status="inv.payment_status"
+                                        :label="getPaymentStatusLabel(inv.payment_status)"
+                                    />
                                 </td>
                             </tr>
 
@@ -1024,7 +995,7 @@
                                 </td>
                             </tr>
                         </tbody>
-                    </table>
+                    </DataTable>
                 </div>
 
                 <!-- Pagination Footer -->
@@ -1062,11 +1033,17 @@
 
             <!-- Standard Print Footer -->
             <StandardReportFooter class="hidden print:block pt-4 mt-6 border-t border-gray-300" />
-        </div>
+        </PrintEngine>
     </AppLayout>
 </template>
 
 <script setup>
+import PaymentStatusBadge from '@/Components/Common/PaymentStatusBadge.vue';
+import PrintEngine from '@/Components/Print/PrintEngine.vue';
+import DataTable from '@/Components/Common/DataTable.vue';
+import AppPrintButton from '@/Components/Common/AppPrintButton.vue';
+import AppToggle from '@/Components/Common/AppToggle.vue';
+import { printDocument } from '@/Composables/usePrint';
 import { reactive, computed } from 'vue';
 import { router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
@@ -1074,7 +1051,7 @@ import AppLayout from '@/Layouts/AppLayout.vue';
 import PageHeader from '@/Components/PageHeader.vue';
 import BackButton from '@/Components/BackButton.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
-import CustomDatePicker from '@/Components/CustomDatePicker.vue';
+import ReportDateRange from '@/Components/Common/ReportDateRange.vue';
 import StandardReportHeader from '@/Components/Print/StandardReportHeader.vue';
 import StandardReportFooter from '@/Components/Print/StandardReportFooter.vue';
 
@@ -1344,25 +1321,8 @@ const getPaymentStatusLabel = (status) => {
     }
 };
 
-const getStatusBadgeClass = (status) => {
-    const base = 'inline-block px-2.5 py-0.5 rounded-full text-[10px] font-bold ';
-    switch (status) {
-        case 'paid':
-            return (
-                base +
-                'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300'
-            );
-        case 'partial':
-            return base + 'bg-amber-100 text-amber-700 dark:bg-amber-950/60 dark:text-amber-300';
-        case 'unpaid':
-            return base + 'bg-rose-100 text-rose-700 dark:bg-rose-950/60 dark:text-rose-300';
-        default:
-            return base + 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300';
-    }
-};
-
 const handlePrint = () => {
-    window.print();
+    printDocument();
 };
 </script>
 

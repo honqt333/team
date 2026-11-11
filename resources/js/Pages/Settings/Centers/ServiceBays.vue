@@ -116,7 +116,10 @@
                 class="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 overflow-hidden shadow-sm"
             >
                 <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-gray-100 dark:divide-gray-700">
+                    <DataTable
+                        structured
+                        class="min-w-full divide-y divide-gray-100 dark:divide-gray-700"
+                    >
                         <thead class="bg-gray-50 dark:bg-gray-900/40">
                             <tr>
                                 <th
@@ -196,7 +199,7 @@
                                 </td>
                             </tr>
                         </tbody>
-                    </table>
+                    </DataTable>
                 </div>
             </div>
         </div>
@@ -204,6 +207,7 @@
 </template>
 
 <script setup>
+import DataTable from '@/Components/Common/DataTable.vue';
 import { reactive, ref, computed } from 'vue';
 import { router } from '@inertiajs/vue3';
 import axios from 'axios';

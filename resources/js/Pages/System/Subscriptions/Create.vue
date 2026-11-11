@@ -67,7 +67,11 @@
                         {{ $t('system.subscriptions.package') }}
                     </label>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                        <label
+                        <SelectableCard
+                            type="radio"
+                            name="form.plan_id"
+                            v-model="form.plan_id"
+                            :value="plan.id"
                             v-for="plan in plans"
                             :key="plan.id"
                             :class="[
@@ -77,12 +81,6 @@
                                     : 'border-gray-200 dark:border-gray-700 hover:border-gray-300',
                             ]"
                         >
-                            <input
-                                type="radio"
-                                :value="plan.id"
-                                v-model="form.plan_id"
-                                class="hidden"
-                            />
                             <div class="flex items-center justify-between">
                                 <p class="font-bold text-gray-900 dark:text-white">
                                     {{ plan.name_ar }}
@@ -109,7 +107,7 @@
                                     }}$t('common.day') }}
                                 </p>
                             </div>
-                        </label>
+                        </SelectableCard>
                     </div>
                     <p v-if="form.errors.plan_id" class="text-red-500 text-xs mt-1">
                         {{ form.errors.plan_id }}
@@ -122,7 +120,11 @@
                         {{ $t('system.subscriptions.billing_cycle_2') }}
                     </label>
                     <div class="grid grid-cols-2 gap-3">
-                        <label
+                        <SelectableCard
+                            type="radio"
+                            name="form.billing_cycle"
+                            v-model="form.billing_cycle"
+                            :value="opt.value"
                             v-for="opt in billingCycleOptions"
                             :key="opt.value"
                             :class="[
@@ -132,16 +134,10 @@
                                     : 'border-gray-200 dark:border-gray-700 hover:border-gray-300',
                             ]"
                         >
-                            <input
-                                type="radio"
-                                :value="opt.value"
-                                v-model="form.billing_cycle"
-                                class="hidden"
-                            />
                             <p class="font-medium text-gray-900 dark:text-white">
                                 {{ opt.label }}
                             </p>
-                        </label>
+                        </SelectableCard>
                     </div>
                 </div>
 
@@ -192,6 +188,7 @@
 </template>
 
 <script setup>
+import SelectableCard from '@/Components/Common/SelectableCard.vue';
 import { useI18n } from 'vue-i18n';
 const { t } = useI18n();
 

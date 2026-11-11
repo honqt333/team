@@ -30,34 +30,50 @@ export default {
             },
             colors: {
                 // Brand
-                'brand-primary': 'var(--color-brand-primary)',
-                'brand-primary-hover': 'var(--color-brand-primary-hover)',
-                'brand-primary-active': 'var(--color-brand-primary-active)',
+                'brand-primary': 'rgb(var(--color-brand-primary-rgb) / <alpha-value>)',
+                'brand-primary-hover': 'rgb(var(--color-brand-primary-hover-rgb) / <alpha-value>)',
+                'brand-primary-active':
+                    'rgb(var(--color-brand-primary-active-rgb) / <alpha-value>)',
                 'brand-primary-soft': 'var(--color-brand-primary-soft)',
-                'brand-on': 'var(--color-brand-on)',
+                'brand-on': 'rgb(var(--color-brand-on-rgb) / <alpha-value>)',
+
+                // Accent Gold (heritage highlight)
+                'accent-gold': 'rgb(var(--color-accent-gold-rgb) / <alpha-value>)',
+                'accent-gold-light': 'rgb(var(--color-accent-gold-light-rgb) / <alpha-value>)',
+                'accent-gold-soft': 'var(--color-accent-gold-soft)',
+                'accent-gold-soft-dark': 'var(--color-accent-gold-soft-dark)',
 
                 // Action (Primary Actions)
-                'action-primary': 'var(--color-action-primary)',
-                'action-primary-hover': 'var(--color-action-primary-hover)',
-                'action-primary-active': 'var(--color-action-primary-active)',
+                'action-primary': 'rgb(var(--color-action-primary-rgb) / <alpha-value>)',
+                'action-primary-hover':
+                    'rgb(var(--color-action-primary-hover-rgb) / <alpha-value>)',
+                'action-primary-active':
+                    'rgb(var(--color-action-primary-active-rgb) / <alpha-value>)',
                 'action-primary-soft': 'var(--color-action-primary-soft)',
-                'action-on': 'var(--color-action-on)',
+                'action-on': 'rgb(var(--color-action-on-rgb) / <alpha-value>)',
 
-                // Surfaces
-                surface: 'var(--color-surface)',
-                'surface-muted': 'var(--color-surface-muted)',
-                'surface-raised': 'var(--color-surface-raised)',
-                border: 'var(--color-border)',
-                'border-strong': 'var(--color-border-strong)',
+                // Surfaces (canonical + semantic aliases)
+                surface: 'rgb(var(--color-surface-rgb) / <alpha-value>)',
+                'surface-primary': 'rgb(var(--color-surface-rgb) / <alpha-value>)',
+                'surface-muted': 'rgb(var(--color-surface-muted-rgb) / <alpha-value>)',
+                'surface-secondary': 'rgb(var(--color-surface-muted-rgb) / <alpha-value>)',
+                'surface-raised': 'rgb(var(--color-surface-raised-rgb) / <alpha-value>)',
+                'surface-tertiary': 'rgb(var(--color-surface-tertiary-rgb) / <alpha-value>)',
+                border: 'rgb(var(--color-border-rgb) / <alpha-value>)',
+                'border-subtle': 'rgb(var(--color-border-rgb) / <alpha-value>)',
+                'border-strong': 'rgb(var(--color-border-strong-rgb) / <alpha-value>)',
 
-                // Text
-                'text-primary': 'var(--color-text-primary)',
-                'text-secondary': 'var(--color-text-secondary)',
-                'text-muted': 'var(--color-text-muted)',
-                'text-inverse': 'var(--color-text-inverse)',
+                // Text (canonical + content-* aliases)
+                'text-primary': 'rgb(var(--color-text-primary-rgb) / <alpha-value>)',
+                'content-primary': 'rgb(var(--color-text-primary-rgb) / <alpha-value>)',
+                'text-secondary': 'rgb(var(--color-text-secondary-rgb) / <alpha-value>)',
+                'content-secondary': 'rgb(var(--color-text-secondary-rgb) / <alpha-value>)',
+                'text-muted': 'rgb(var(--color-text-muted-rgb) / <alpha-value>)',
+                'content-muted': 'rgb(var(--color-text-muted-rgb) / <alpha-value>)',
+                'text-inverse': 'rgb(var(--color-text-inverse-rgb) / <alpha-value>)',
 
                 // Focus
-                'focus-ring': 'var(--color-focus-ring)',
+                'focus-ring': 'rgb(var(--color-focus-ring-rgb) / <alpha-value>)',
                 'focus-ring-soft': 'var(--color-focus-ring-soft)',
 
                 // Selection / Toggle states
@@ -68,14 +84,18 @@ export default {
                 'toggle-thumb': 'var(--color-toggle-thumb)',
 
                 // Semantic Feedback
-                success: 'var(--color-success)',
-                'success-soft': 'var(--color-success-soft)',
-                warning: 'var(--color-warning)',
-                'warning-soft': 'var(--color-warning-soft)',
-                danger: 'var(--color-danger)',
-                'danger-soft': 'var(--color-danger-soft)',
-                info: 'var(--color-info)',
-                'info-soft': 'var(--color-info-soft)',
+                success: 'rgb(var(--color-success-rgb) / <alpha-value>)',
+                'success-soft': 'rgb(var(--color-success-soft-rgb) / <alpha-value>)',
+                warning: 'rgb(var(--color-warning-rgb) / <alpha-value>)',
+                'warning-soft': 'rgb(var(--color-warning-soft-rgb) / <alpha-value>)',
+                danger: 'rgb(var(--color-danger-rgb) / <alpha-value>)',
+                'danger-soft': 'rgb(var(--color-danger-soft-rgb) / <alpha-value>)',
+                info: 'rgb(var(--color-info-rgb) / <alpha-value>)',
+                'info-soft': 'rgb(var(--color-info-soft-rgb) / <alpha-value>)',
+            },
+            boxShadow: {
+                '2xs': '0 1px 2px 0 rgb(0 0 0 / 0.03)',
+                xs: 'var(--shadow-xs)',
             },
         },
     },

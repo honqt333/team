@@ -69,7 +69,7 @@ const props = defineProps({
  * (a gold `#e5a448`, for instance) put that text at 2.15:1.
  */
 const cssVars = computed(() => {
-    const primary = settings.value.primary_color || '#4f46e5';
+    const primary = settings.value.primary_color || '#2563eb';
 
     return {
         '--primary': primary,

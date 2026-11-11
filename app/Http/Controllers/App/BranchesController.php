@@ -56,7 +56,7 @@ class BranchesController extends Controller
         // the form anymore — the form only has name_ar / name_en.
         $localizedName = $validated['name_ar']
             ?? $validated['name_en']
-            ?? 'فرع بدون اسم';
+            ?? __('company_profile.branches.unnamed_branch');
         $validated['name'] = $localizedName;
 
         // Generate unique slug from English name (fallback to Arabic)
@@ -80,11 +80,7 @@ class BranchesController extends Controller
         $currentCentersCount = $tenant->centers()->count();
 
         if ($currentCentersCount >= $maxCenters) {
-            $msg = app()->getLocale() === 'en'
-                ? "You have reached the maximum limit of branches for your plan ({$maxCenters}). Please upgrade to add more."
-                : "لقد وصلت للحد الأقصى المسموح به للفروع في باقتك الحالية ({$maxCenters} فرع). يرجى الترقية لإضافة المزيد.";
-
-            return back()->with('error', $msg);
+            return back()->with('error', __('company_profile.branches.max_limit_reached', ['max' => $maxCenters]));
         }
 
         // Determine if this new center is being designated as main.

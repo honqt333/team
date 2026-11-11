@@ -5,11 +5,13 @@ declare(strict_types=1);
 namespace App\Services\Print;
 
 use App\Models\Billing\SubscriptionInvoice;
+use App\Models\Center;
 use App\Models\Invoice;
 use App\Models\PaymentSettings;
 use App\Models\PurchaseInvoice;
 use App\Models\PurchaseReturnInvoice;
 use App\Models\Quote;
+use App\Models\Tenant;
 use App\Models\WorkOrder;
 use App\Support\ArabicPdfShaper;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -115,7 +117,7 @@ class PrintService
         }
 
         // Load company info once
-        $companyInfo = $this->buildCompanyInfo();
+        $companyInfo = $this->buildCompanyInfo($documentType, $model);
 
         // Prepare view data
         $viewData = array_merge([
@@ -153,7 +155,7 @@ class PrintService
             throw new InvalidArgumentException("Unsupported document type: {$documentType}");
         }
 
-        $companyInfo = $this->buildCompanyInfo();
+        $companyInfo = $this->buildCompanyInfo($documentType, $model);
         $viewData = array_merge([
             'company' => $companyInfo,
             'document_type' => $documentType,
@@ -285,8 +287,7 @@ class PrintService
             'workOrder.customer',
             'workOrder.vehicle.make',
             'workOrder.vehicle.model',
-            'lines.service.department',
-            'lines.technicians.employee.jobTitle',
+            'lines.part',
             'center',
             'tenant',
             'payments.receivedBy',
@@ -427,9 +428,112 @@ class PrintService
     }
 
     /**
-     * Build company info from PaymentSettings for PDF header/footer.
+     * Build the issuer identity for the document being printed.
+     *
+     * Tenant documents (invoices, quotes, work orders, purchases, HR)
+     * belong to the tenant that issued them; only platform subscription
+     * invoices may carry the platform company identity. Issuer snapshots
+     * stored on the document win over the current tenant/settings values
+     * so a reprint keeps the identity from the issuance date.
      */
-    protected function buildCompanyInfo(): array
+    protected function buildCompanyInfo(string $documentType, $model = null): array
+    {
+        if ($documentType === 'subscription_invoice') {
+            return $this->buildPlatformCompanyInfo($model);
+        }
+
+        $tenant = $this->resolveTenant($model);
+
+        if (! $tenant) {
+            return $this->buildPlatformCompanyInfo();
+        }
+
+        return $this->buildTenantCompanyInfo(
+            $tenant,
+            $this->resolveCenter($model),
+            $model,
+        );
+    }
+
+    /**
+     * Resolve the tenant that owns the document.
+     */
+    protected function resolveTenant($model): ?Tenant
+    {
+        $tenant = data_get($model, 'tenant');
+
+        if ($tenant instanceof Tenant) {
+            return $tenant;
+        }
+
+        $tenantId = data_get($model, 'tenant_id');
+
+        return $tenantId ? Tenant::with('taxSettings')->find($tenantId) : null;
+    }
+
+    /**
+     * Resolve the branch that issued the document, when it has one.
+     */
+    protected function resolveCenter($model): ?Center
+    {
+        $center = data_get($model, 'center');
+
+        if ($center instanceof Center) {
+            return $center;
+        }
+
+        $centerId = data_get($model, 'center_id');
+
+        return $centerId ? Center::find($centerId) : null;
+    }
+
+    /**
+     * Tenant/branch identity used on tenant-issued documents.
+     */
+    protected function buildTenantCompanyInfo(Tenant $tenant, ?Center $center, $model): array
+    {
+        $tenant->loadMissing('taxSettings');
+
+        $snapshotName = data_get($model, 'seller_name_snapshot');
+        $snapshotNameEn = data_get($model, 'seller_name_en_snapshot');
+        $snapshotVat = data_get($model, 'seller_vat_snapshot');
+        $snapshotCr = data_get($model, 'seller_cr_snapshot');
+
+        $hasIssuer = $snapshotName !== null || $snapshotNameEn !== null;
+        $name = $snapshotName
+            ?? ($tenant->legal_name ?: ($tenant->legal_name_en ?: ($tenant->trade_name ?: $tenant->name)));
+        $nameEn = $snapshotNameEn
+            ?? ($tenant->legal_name_en ?: ($tenant->legal_name ?: ($tenant->trade_name ?: $tenant->name)));
+        $vatNumber = $snapshotVat
+            ?? ($hasIssuer ? null : ($tenant->taxSettings?->tax_number ?: $tenant->vat_number));
+        $crNumber = $snapshotCr ?? ($hasIssuer ? null : $tenant->cr_number);
+
+        $publicDisk = Storage::disk('public');
+        $logoPath = $center?->logo_invoice_path ?: $tenant->logo_path;
+        $stampPath = $center?->stamp_path;
+
+        return [
+            'name' => $name,
+            'name_en' => $nameEn,
+            'vat_number' => $vatNumber,
+            'cr_number' => $crNumber,
+            'phone' => $center?->phone ?: $tenant->phone,
+            'email' => $center?->email ?: $tenant->email,
+            'website' => null,
+            'center_name' => $center?->display_name,
+            'logo_url' => $logoPath && $publicDisk->exists($logoPath)
+                ? $this->fileToDataUrl($publicDisk->path($logoPath))
+                : null,
+            'stamp_url' => $stampPath && $publicDisk->exists($stampPath)
+                ? $this->fileToDataUrl($publicDisk->path($stampPath))
+                : null,
+        ];
+    }
+
+    /**
+     * Platform identity used only on platform subscription invoices.
+     */
+    protected function buildPlatformCompanyInfo(?SubscriptionInvoice $invoice = null): array
     {
         $settings = PaymentSettings::first();
         $publicDisk = Storage::disk('public');
@@ -447,11 +551,11 @@ class PrintService
         }
 
         $name = $settings?->company_legal_name
-            ?: ($settings?->company_legal_name_en ?: 'Khidma Pro');
+            ?: ($settings?->company_legal_name_en ?: config('app.name_ar', 'خدمة برو'));
         $nameEn = $settings?->company_legal_name_en
-            ?: ($settings?->company_legal_name ?: 'Khidma Pro');
+            ?: ($settings?->company_legal_name ?: config('app.name', 'Khidmh Pro'));
 
-        return [
+        return ($invoice?->issuerIdentity($settings) ?? []) + [
             'name' => $name,
             'name_en' => $nameEn,
             'vat_number' => $settings?->company_vat_number,

@@ -87,6 +87,32 @@
                 <span>{{ $t('work_orders.form.expected_end_date') }}:</span>
                 <span>{{ printHelpers.formatDate(data.expected_end_date) }}</span>
             </div>
+            <div
+                v-if="data.printed_department"
+                class="flex justify-between text-indigo-700 font-semibold"
+            >
+                <span>{{ $t('work_orders.print_view.department') }}:</span>
+                <span>
+                    {{
+                        isRtl
+                            ? data.printed_department.name_ar || data.printed_department.name_en
+                            : data.printed_department.name_en || data.printed_department.name_ar
+                    }}
+                </span>
+            </div>
+            <div
+                v-if="data.printed_technician"
+                class="flex justify-between text-indigo-800 font-bold"
+            >
+                <span>{{ $t('work_orders.print_view.assigned_technician') }}:</span>
+                <span>
+                    {{
+                        isRtl
+                            ? data.printed_technician.name_ar || data.printed_technician.name_en
+                            : data.printed_technician.name_en || data.printed_technician.name_ar
+                    }}
+                </span>
+            </div>
         </div>
 
         <!-- Customer & Vehicle Info -->

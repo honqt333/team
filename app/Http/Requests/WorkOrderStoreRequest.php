@@ -87,6 +87,7 @@ class WorkOrderStoreRequest extends FormRequest
             'customer_complaint' => ['nullable', 'string', 'max:5000'],
             'initial_assessment' => ['nullable', 'string', 'max:5000'],
             'odometer' => ['nullable', 'integer', 'min:0'],
+            'fuel_level' => ['nullable', 'numeric', 'min:0', 'max:100'],
             'allow_lower_odometer' => ['nullable', 'boolean'],
             'allow_credit_override' => ['nullable', 'boolean'],
             'contact_name' => ['nullable', 'string', 'max:255'],

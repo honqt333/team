@@ -10,6 +10,7 @@ use App\Models\Billing\DunningReminderLog;
 use App\Models\PaymentSettings;
 use App\Models\Setting;
 use App\Services\Billing\DunningService;
+use App\Services\Billing\SubscriptionLifecycleService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
@@ -18,8 +19,11 @@ use Inertia\Response;
 class SystemSettingsHubController extends Controller
 {
     public function __construct(
-        protected DunningService $dunning
-    ) {}
+        protected DunningService $dunning,
+        protected ?SubscriptionLifecycleService $lifecycle = null
+    ) {
+        $this->lifecycle ??= app(SubscriptionLifecycleService::class);
+    }
 
     public function index(Request $request): Response
     {
@@ -32,6 +36,7 @@ class SystemSettingsHubController extends Controller
         // 1. General Settings
         $generalSettings = [
             'security_2fa_sms_enabled' => Setting::get('security.2fa_sms_enabled', 'false') === 'true',
+            'subscription_grace_period_days' => $this->lifecycle->getGracePeriodDays(),
         ];
 
         // 2. Company Settings

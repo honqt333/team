@@ -256,4 +256,33 @@ class PaymentSettings extends Model
             'logo_url' => $this->company_logo_path ? Storage::url($this->company_logo_path) : null,
         ];
     }
+
+    /**
+     * Safe, tenant-facing subset of the global gateway configuration.
+     *
+     * The model itself carries gateway secret keys (moyasar.secret_key,
+     * tap.secret_key, …) and must never be serialized into an Inertia
+     * response. Tenant pages only need to know which methods are enabled,
+     * where to transfer money, and how subscription VAT is calculated.
+     *
+     * @return array<string, mixed>
+     */
+    public function checkoutSettings(): array
+    {
+        return [
+            'default_gateway' => $this->default_gateway,
+            'bank_transfer_enabled' => (bool) $this->bank_transfer_enabled,
+            'bank_accounts' => $this->bank_accounts ?? [],
+            'bank_transfer_instructions' => $this->bank_transfer_instructions,
+            'bank_transfer_receipt_instructions' => $this->bank_transfer_receipt_instructions,
+            'mada_enabled' => (bool) $this->mada_enabled,
+            'visa_enabled' => (bool) $this->visa_enabled,
+            'mastercard_enabled' => (bool) $this->mastercard_enabled,
+            'applepay_enabled' => (bool) $this->applepay_enabled,
+            'stcpay_enabled' => (bool) $this->stcpay_enabled,
+            'subscription_vat_enabled' => (bool) $this->subscription_vat_enabled,
+            'subscription_vat_rate' => $this->getSubscriptionVatRate(),
+            'subscription_vat_inclusive' => (bool) $this->subscription_vat_inclusive,
+        ];
+    }
 }

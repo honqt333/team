@@ -234,6 +234,14 @@
                         {{ formatPrice(badDebt) }}
                     </span>
                 </div>
+                <div v-if="effectiveExcessPaid > 0.01">
+                    <span class="text-red-600 dark:text-red-400 font-semibold">
+                        {{ $t('work_orders.excess_paid') }}:
+                    </span>
+                    <span class="font-bold text-red-600 dark:text-red-400 mr-2" dir="ltr">
+                        {{ formatPrice(effectiveExcessPaid) }}
+                    </span>
+                </div>
                 <div>
                     <span class="text-gray-500">{{ $t('work_orders.balance') }}:</span>
                     <span
@@ -252,9 +260,9 @@
             :show="showPaymentModal"
             :work-order-id="workOrderId"
             :balance="balance"
-            :allow-refund="
-                payments.length > 0 && !hasInvoice && balance <= 0.01 && status !== 'done'
-            "
+            :excess-paid="effectiveExcessPaid"
+            :allow-refund="totalPaid > 0.01 && !hasInvoice && status !== 'done'"
+            :allow-bad-debt="status === 'done' && hasInvoice && balance > 0.01"
             :total-paid="totalPaid"
             :payment="editingPayment"
             @close="closePaymentModal"
@@ -407,6 +415,7 @@ const props = defineProps({
     totalPaid: { type: Number, default: 0 },
     badDebt: { type: Number, default: 0 },
     balance: { type: Number, default: 0 },
+    excessPaid: { type: Number, default: 0 },
     readOnly: { type: Boolean, default: false },
     hasInvoice: { type: Boolean, default: false },
     status: { type: String, default: '' },
@@ -416,6 +425,11 @@ const emit = defineEmits(['refresh']);
 
 const { t, locale } = useI18n();
 const { confirm } = useConfirm();
+
+const effectiveExcessPaid = computed(() => {
+    if (props.excessPaid > 0) return props.excessPaid;
+    return Math.max(0, Math.round((props.totalPaid - props.grandTotal) * 100) / 100);
+});
 
 const isRtl = computed(() => locale.value === 'ar');
 const searchQuery = ref('');

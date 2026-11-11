@@ -72,7 +72,7 @@
             <div
                 class="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800"
             >
-                <table class="w-full text-sm">
+                <DataTable structured class="w-full text-sm">
                     <thead class="bg-gray-50 text-xs uppercase text-gray-500 dark:bg-gray-900/40">
                         <tr>
                             <th class="px-4 py-3 text-start">
@@ -144,7 +144,7 @@
                             </td>
                         </tr>
                     </tbody>
-                </table>
+                </DataTable>
 
                 <!-- Pagination -->
                 <div
@@ -177,6 +177,7 @@
 </template>
 
 <script setup>
+import DataTable from '@/Components/Common/DataTable.vue';
 import { useI18n } from 'vue-i18n';
 const { t } = useI18n();
 

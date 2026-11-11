@@ -17,7 +17,7 @@
                 <div
                     class="flex justify-between items-center text-xs font-bold text-gray-900 dark:text-white"
                 >
-                    <span>{{ $t('work_orders.services_total') }}</span>
+                    <span>{{ servicesLabel || $t('work_orders.services_total') }}</span>
                     <span class="font-mono">{{ formatCurrency(totals.services.total) }}</span>
                 </div>
                 <div class="flex justify-between items-center text-[11px] text-gray-500">
@@ -38,7 +38,7 @@
                 <div
                     class="flex justify-between items-center text-xs font-bold text-gray-900 dark:text-white"
                 >
-                    <span>{{ $t('work_orders.parts_total') }}</span>
+                    <span>{{ partsLabel || $t('work_orders.parts_total') }}</span>
                     <span class="font-mono">{{ formatCurrency(totals.parts.total) }}</span>
                 </div>
                 <div class="flex justify-between items-center text-[11px] text-gray-500">
@@ -58,38 +58,56 @@
                 <div
                     class="flex justify-between items-center text-sm font-black text-amber-900 dark:text-amber-300"
                 >
-                    <span>{{ $t('work_orders.total') }}</span>
+                    <span>{{ grandLabel || $t('work_orders.total') }}</span>
                     <span class="font-mono text-base text-amber-600 dark:text-amber-400">
                         {{ formatCurrency(totals.grand.total) }}
                     </span>
                 </div>
                 <div
-                    v-if="creditNotesTotal > 0"
-                    class="flex justify-between items-center text-xs font-bold text-red-600 dark:text-red-400"
+                    v-if="!showPayments && hasTax"
+                    class="flex justify-between items-center text-xs text-gray-500"
                 >
-                    <span>{{ $t('invoices.credit_notes_total') }}</span>
-                    <span class="font-mono">-{{ formatCurrency(creditNotesTotal) }}</span>
+                    <span>{{ $t('work_orders.vat_header', { rate: taxRate }) }}</span>
+                    <span class="font-mono">{{ formatCurrency(totals.grand.tax) }}</span>
                 </div>
-                <div
-                    class="flex justify-between items-center text-xs font-bold text-green-600 dark:text-green-500"
-                >
-                    <span>{{ $t('work_orders.paid') }}</span>
-                    <span class="font-mono">{{ formatCurrency(totalPaid) }}</span>
-                </div>
-                <div
-                    v-if="badDebt > 0"
-                    class="flex justify-between items-center text-xs font-bold text-amber-600 dark:text-amber-500"
-                >
-                    <span>{{ $t('payments.types.bad_debt') }}</span>
-                    <span class="font-mono">{{ formatCurrency(badDebt) }}</span>
-                </div>
-                <div
-                    class="pt-2 border-t border-amber-200/60 dark:border-amber-800/40 flex justify-between items-center text-sm font-black"
-                    :class="balance > 0 ? 'text-orange-600 dark:text-orange-500' : 'text-gray-500'"
-                >
-                    <span>{{ $t('work_orders.balance') }}</span>
-                    <span class="font-mono text-base">{{ formatCurrency(balance) }}</span>
-                </div>
+                <template v-if="showPayments">
+                    <div
+                        v-if="creditNotesTotal > 0"
+                        class="flex justify-between items-center text-xs font-bold text-red-600 dark:text-red-400"
+                    >
+                        <span>{{ $t('invoices.credit_notes_total') }}</span>
+                        <span class="font-mono">-{{ formatCurrency(creditNotesTotal) }}</span>
+                    </div>
+                    <div
+                        class="flex justify-between items-center text-xs font-bold text-green-600 dark:text-green-500"
+                    >
+                        <span>{{ $t('work_orders.paid') }}</span>
+                        <span class="font-mono">{{ formatCurrency(totalPaid) }}</span>
+                    </div>
+                    <div
+                        v-if="badDebt > 0"
+                        class="flex justify-between items-center text-xs font-bold text-amber-600 dark:text-amber-500"
+                    >
+                        <span>{{ $t('payments.types.bad_debt') }}</span>
+                        <span class="font-mono">{{ formatCurrency(badDebt) }}</span>
+                    </div>
+                    <div
+                        v-if="excessPaid > 0.01"
+                        class="flex justify-between items-center text-xs font-bold text-red-600 dark:text-red-400"
+                    >
+                        <span>{{ $t('work_orders.excess_paid') }}</span>
+                        <span class="font-mono">{{ formatCurrency(excessPaid) }}</span>
+                    </div>
+                    <div
+                        class="pt-2 border-t border-amber-200/60 dark:border-amber-800/40 flex justify-between items-center text-sm font-black"
+                        :class="
+                            balance > 0 ? 'text-orange-600 dark:text-orange-500' : 'text-gray-500'
+                        "
+                    >
+                        <span>{{ $t('work_orders.balance') }}</span>
+                        <span class="font-mono text-base">{{ formatCurrency(balance) }}</span>
+                    </div>
+                </template>
             </div>
         </div>
 
@@ -135,9 +153,9 @@
                 </thead>
                 <tbody class="divide-y divide-gray-50 dark:divide-gray-700/30">
                     <!-- Services row -->
-                    <tr class="group">
+                    <tr class="group" v-if="showServicesRow">
                         <td class="py-2 font-bold text-gray-900 dark:text-white align-middle">
-                            {{ $t('work_orders.services_total') }}
+                            {{ servicesLabel || $t('work_orders.services_total') }}
                         </td>
                         <td class="py-2 text-center font-mono text-gray-500 align-middle">
                             {{ formatCurrency(totals.services.price) }}
@@ -165,10 +183,10 @@
                         </td>
                     </tr>
 
-                    <!-- Parts row (only when there are parts) -->
-                    <tr class="group" v-if="totals.parts.total > 0">
+                    <!-- Parts row (when there are parts) -->
+                    <tr class="group" v-if="showPartsRow">
                         <td class="py-2 font-bold text-gray-900 dark:text-white align-middle">
-                            {{ $t('work_orders.parts_total') }}
+                            {{ partsLabel || $t('work_orders.parts_total') }}
                         </td>
                         <td class="py-2 text-center font-mono text-gray-500 align-middle">
                             {{ formatCurrency(totals.parts.price) }}
@@ -196,6 +214,37 @@
                         </td>
                     </tr>
 
+                    <!-- Fallback single breakdown row if both services and parts are hidden/zero -->
+                    <tr class="group" v-if="showFallbackRow">
+                        <td class="py-2 font-bold text-gray-900 dark:text-white align-middle">
+                            {{ partsLabel || $t('common.amount') }}
+                        </td>
+                        <td class="py-2 text-center font-mono text-gray-500 align-middle">
+                            {{ formatCurrency(totals.grand.price) }}
+                        </td>
+                        <td class="py-2 text-center font-mono text-red-500 italic align-middle">
+                            {{
+                                totals.grand.discount > 0
+                                    ? '-' + formatCurrency(totals.grand.discount)
+                                    : '0.00'
+                            }}
+                        </td>
+                        <td class="py-2 text-center font-mono text-gray-500 align-middle">
+                            {{ formatCurrency(totals.grand.amount) }}
+                        </td>
+                        <td
+                            v-if="hasTax"
+                            class="py-2 text-center font-mono text-gray-500 align-middle"
+                        >
+                            {{ formatCurrency(totals.grand.tax) }}
+                        </td>
+                        <td
+                            class="py-2 text-end font-bold text-gray-900 dark:text-white font-mono text-sm align-middle"
+                        >
+                            {{ formatCurrency(totals.grand.total) }}
+                        </td>
+                    </tr>
+
                     <!-- Grand total row -->
                     <tr
                         class="bg-gray-50/70 dark:bg-gray-900/40 font-bold border-t-2 border-gray-100 dark:border-gray-700/80"
@@ -203,7 +252,7 @@
                         <td
                             class="py-2 text-gray-900 dark:text-white ps-2 font-bold uppercase align-middle text-xs"
                         >
-                            {{ $t('work_orders.total') }}
+                            {{ grandLabel || $t('work_orders.total') }}
                         </td>
                         <td
                             class="py-2 text-center font-mono text-gray-600 dark:text-gray-300 align-middle"
@@ -235,90 +284,112 @@
                         </td>
                     </tr>
 
-                    <!-- Credit Notes (Returns) row if any -->
-                    <tr v-if="creditNotesTotal > 0" class="bg-red-50/50 dark:bg-red-950/20">
-                        <td
-                            class="py-2 font-bold text-red-600 dark:text-red-400 ps-2 align-middle text-xs"
-                            :colspan="hasTax ? 5 : 4"
-                        >
-                            {{ $t('invoices.credit_notes_total') }}
-                        </td>
-                        <td
-                            class="py-2 text-end font-bold text-red-600 dark:text-red-400 font-mono text-sm align-middle"
-                        >
-                            -{{ formatCurrency(creditNotesTotal) }}
-                        </td>
-                    </tr>
+                    <!-- Payment rows (hidden for quotes via showPayments = false) -->
+                    <template v-if="showPayments">
+                        <!-- Credit Notes (Returns) row if any -->
+                        <tr v-if="creditNotesTotal > 0" class="bg-red-50/50 dark:bg-red-950/20">
+                            <td
+                                class="py-2 font-bold text-red-600 dark:text-red-400 ps-2 align-middle text-xs"
+                                :colspan="hasTax ? 5 : 4"
+                            >
+                                {{ $t('invoices.credit_notes_total') }}
+                            </td>
+                            <td
+                                class="py-2 text-end font-bold text-red-600 dark:text-red-400 font-mono text-sm align-middle"
+                            >
+                                -{{ formatCurrency(creditNotesTotal) }}
+                            </td>
+                        </tr>
 
-                    <!-- Net Total after Credit Notes -->
-                    <tr v-if="creditNotesTotal > 0" class="bg-gray-50/50 dark:bg-gray-900/30">
-                        <td
-                            class="py-2 font-bold text-gray-900 dark:text-white ps-2 align-middle text-xs"
-                            :colspan="hasTax ? 5 : 4"
-                        >
-                            {{ $t('work_orders.net_total') }}
-                        </td>
-                        <td
-                            class="py-2 text-end font-bold text-gray-900 dark:text-white font-mono text-sm align-middle"
-                        >
-                            {{ formatCurrency(Math.max(0, totals.grand.total - creditNotesTotal)) }}
-                        </td>
-                    </tr>
+                        <!-- Net Total after Credit Notes -->
+                        <tr v-if="creditNotesTotal > 0" class="bg-gray-50/50 dark:bg-gray-900/30">
+                            <td
+                                class="py-2 font-bold text-gray-900 dark:text-white ps-2 align-middle text-xs"
+                                :colspan="hasTax ? 5 : 4"
+                            >
+                                {{ $t('work_orders.net_total') }}
+                            </td>
+                            <td
+                                class="py-2 text-end font-bold text-gray-900 dark:text-white font-mono text-sm align-middle"
+                            >
+                                {{
+                                    formatCurrency(
+                                        Math.max(0, totals.grand.total - creditNotesTotal)
+                                    )
+                                }}
+                            </td>
+                        </tr>
 
-                    <!-- Paid row -->
-                    <tr class="bg-gray-50/50 dark:bg-gray-900/30">
-                        <td
-                            class="py-2 font-bold text-green-600 dark:text-green-500 ps-2 align-middle text-xs"
-                            :colspan="hasTax ? 5 : 4"
-                        >
-                            {{ $t('work_orders.paid') }}
-                        </td>
-                        <td
-                            class="py-2 text-end font-bold text-green-600 dark:text-green-500 font-mono text-sm align-middle"
-                        >
-                            {{ formatCurrency(totalPaid) }}
-                        </td>
-                    </tr>
+                        <!-- Paid row -->
+                        <tr class="bg-gray-50/50 dark:bg-gray-900/30">
+                            <td
+                                class="py-2 font-bold text-green-600 dark:text-green-500 ps-2 align-middle text-xs"
+                                :colspan="hasTax ? 5 : 4"
+                            >
+                                {{ $t('work_orders.paid') }}
+                            </td>
+                            <td
+                                class="py-2 text-end font-bold text-green-600 dark:text-green-500 font-mono text-sm align-middle"
+                            >
+                                {{ formatCurrency(totalPaid) }}
+                            </td>
+                        </tr>
 
-                    <!-- Bad Debt row -->
-                    <tr v-if="badDebt > 0" class="bg-gray-50/50 dark:bg-gray-900/30">
-                        <td
-                            class="py-2 font-bold text-amber-600 dark:text-amber-500 ps-2 align-middle text-xs"
-                            :colspan="hasTax ? 5 : 4"
-                        >
-                            {{ $t('payments.types.bad_debt') }}
-                        </td>
-                        <td
-                            class="py-2 text-end font-bold text-amber-600 dark:text-amber-500 font-mono text-sm align-middle"
-                        >
-                            {{ formatCurrency(badDebt) }}
-                        </td>
-                    </tr>
+                        <!-- Bad Debt row -->
+                        <tr v-if="badDebt > 0" class="bg-gray-50/50 dark:bg-gray-900/30">
+                            <td
+                                class="py-2 font-bold text-amber-600 dark:text-amber-500 ps-2 align-middle text-xs"
+                                :colspan="hasTax ? 5 : 4"
+                            >
+                                {{ $t('payments.types.bad_debt') }}
+                            </td>
+                            <td
+                                class="py-2 text-end font-bold text-amber-600 dark:text-amber-500 font-mono text-sm align-middle"
+                            >
+                                {{ formatCurrency(badDebt) }}
+                            </td>
+                        </tr>
 
-                    <!-- Balance row (highlighted when outstanding) -->
-                    <tr class="bg-gray-50/50 dark:bg-gray-900/30 border-b-0">
-                        <td
-                            class="py-2 font-bold ps-2 align-middle text-xs"
-                            :class="
-                                balance > 0
-                                    ? 'text-orange-600 dark:text-orange-500'
-                                    : 'text-gray-500'
-                            "
-                            :colspan="hasTax ? 5 : 4"
-                        >
-                            {{ $t('work_orders.balance') }}
-                        </td>
-                        <td
-                            class="py-2 text-end font-black font-mono text-sm align-middle"
-                            :class="
-                                balance > 0
-                                    ? 'text-orange-600 dark:text-orange-500'
-                                    : 'text-gray-500'
-                            "
-                        >
-                            {{ formatCurrency(balance) }}
-                        </td>
-                    </tr>
+                        <!-- Excess Paid row (when overpayment exists) -->
+                        <tr v-if="excessPaid > 0.01" class="bg-red-50/50 dark:bg-red-950/20">
+                            <td
+                                class="py-2 font-bold text-red-600 dark:text-red-400 ps-2 align-middle text-xs"
+                                :colspan="hasTax ? 5 : 4"
+                            >
+                                {{ $t('work_orders.excess_paid') }}
+                            </td>
+                            <td
+                                class="py-2 text-end font-black text-red-600 dark:text-red-400 font-mono text-sm align-middle"
+                            >
+                                {{ formatCurrency(excessPaid) }}
+                            </td>
+                        </tr>
+
+                        <!-- Balance row (highlighted when outstanding) -->
+                        <tr class="bg-gray-50/50 dark:bg-gray-900/30 border-b-0">
+                            <td
+                                class="py-2 font-bold ps-2 align-middle text-xs"
+                                :class="
+                                    balance > 0
+                                        ? 'text-orange-600 dark:text-orange-500'
+                                        : 'text-gray-500'
+                                "
+                                :colspan="hasTax ? 5 : 4"
+                            >
+                                {{ $t('work_orders.balance') }}
+                            </td>
+                            <td
+                                class="py-2 text-end font-black font-mono text-sm align-middle"
+                                :class="
+                                    balance > 0
+                                        ? 'text-orange-600 dark:text-orange-500'
+                                        : 'text-gray-500'
+                                "
+                            >
+                                {{ formatCurrency(balance) }}
+                            </td>
+                        </tr>
+                    </template>
                 </tbody>
             </table>
         </div>
@@ -443,6 +514,7 @@
                 </Link>
             </div>
         </div>
+        <slot name="footer" />
     </div>
 </template>
 
@@ -454,10 +526,8 @@ import { useFormatters } from '@/Composables/useFormatters';
 
 const props = defineProps({
     /**
-     * Pre-aggregated totals for services, parts, and grand. The parent
-     * (Show.vue) computes these once and shares the same `totals` value
-     * with WorkOrderItemModal / PaymentsSection, so we don't recompute
-     * here. Shape:
+     * Pre-aggregated totals for services, parts, and grand.
+     * Shape:
      *   { services: { price, discount, amount, tax, total },
      *     parts:    { price, discount, amount, tax, total },
      *     grand:    { price, discount, amount, tax, total } }
@@ -468,9 +538,21 @@ const props = defineProps({
     totalPaid: { type: Number, default: 0 },
     badDebt: { type: Number, default: 0 },
     balance: { type: Number, default: 0 },
+    excessPaid: { type: Number, default: 0 },
     creditNotesTotal: { type: Number, default: 0 },
+    showPayments: { type: Boolean, default: true },
+    hideZeroRows: { type: Boolean, default: false },
+    servicesLabel: { type: String, default: '' },
+    partsLabel: { type: String, default: '' },
+    grandLabel: { type: String, default: '' },
     workOrder: { type: Object, default: null },
 });
+
+const showServicesRow = computed(
+    () => !props.hideZeroRows || Number(props.totals?.services?.total || 0) > 0
+);
+const showPartsRow = computed(() => Number(props.totals?.parts?.total || 0) > 0);
+const showFallbackRow = computed(() => !showServicesRow.value && !showPartsRow.value);
 
 const { formatCurrency } = useNumberFormat();
 const { formatDate } = useFormatters();

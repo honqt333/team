@@ -260,17 +260,17 @@
             <div style="text-align: left;">
                 <div class="meta-row">
                     <span class="meta-label">تاريخ الإصدار:</span>
-                    <span class="meta-value">{{ $invoice->created_at->format('Y-m-d') }}</span>
+                    <span class="meta-value">{{ $invoice->issue_date?->format('Y-m-d') ?? $invoice->created_at?->format('Y-m-d') }}</span>
                 </div>
                 <div class="meta-row">
                     <span class="meta-label">تاريخ الاستحقاق:</span>
-                    <span class="meta-value">{{ $invoice->due_at?->format('Y-m-d') ?? '—' }}</span>
+                    <span class="meta-value">{{ $invoice->due_date?->format('Y-m-d') ?? $invoice->due_at?->format('Y-m-d') ?? '—' }}</span>
                 </div>
                 <div class="meta-row">
                     <span class="meta-label">الحالة:</span>
                     <span class="meta-value">
-                        <span class="status-badge {{ $invoice->status === 'paid' ? 'status-paid' : 'status-pending' }}">
-                            {{ $invoice->status === 'paid' ? 'مدفوعة' : 'معلقة' }}
+                        <span class="status-badge {{ $invoice->payment_status === 'paid' ? 'status-paid' : 'status-pending' }}">
+                            {{ $invoice->payment_status === 'paid' ? 'مدفوعة' : 'معلقة' }}
                         </span>
                     </span>
                 </div>
@@ -334,7 +334,7 @@
                     </td>
                     <td>{{ number_format($line->unit_price, 2) }} ر.س</td>
                     <td>{{ $line->qty ?? 1 }}</td>
-                    <td>{{ number_format($line->discount ?? 0, 2) }} ر.س</td>
+                    <td>{{ number_format($line->discount_amount ?? $line->discount ?? 0, 2) }} ر.س</td>
                     <td>{{ number_format($line->tax_amount ?? 0, 2) }} ر.س</td>
                     <td>{{ number_format($line->line_total_incl_tax ?? ($line->unit_price * ($line->qty ?? 1) - ($line->discount ?? 0)), 2) }} ر.س</td>
                 </tr>
@@ -346,7 +346,7 @@
     <div class="totals">
         <div class="totals-row">
             <span class="totals-label">المجموع الفرعي&nbsp;&nbsp;&nbsp;</span>
-            <span class="totals-value">{{ number_format($invoice->subtotal ?? 0, 2) }} ر.س</span>
+            <span class="totals-value">{{ number_format($invoice->total_excl_tax ?? $invoice->subtotal ?? 0, 2) }} ر.س</span>
         </div>
         @if ($invoice->discount > 0)
             <div class="totals-row">
@@ -356,11 +356,11 @@
         @endif
         <div class="totals-row">
             <span class="totals-label">ضريبة القيمة المضافة&nbsp;&nbsp;&nbsp;</span>
-            <span class="totals-value">{{ number_format($invoice->vat ?? 0, 2) }} ر.س</span>
+            <span class="totals-value">{{ number_format($invoice->total_tax ?? $invoice->vat ?? 0, 2) }} ر.س</span>
         </div>
         <div class="totals-row total">
             <span class="totals-label">الإجمالي&nbsp;&nbsp;&nbsp;</span>
-            <span class="totals-value">{{ number_format($invoice->total ?? 0, 2) }} ر.س</span>
+            <span class="totals-value">{{ number_format($invoice->total_incl_tax ?? $invoice->total ?? 0, 2) }} ر.س</span>
         </div>
     </div>
 

@@ -1,14 +1,18 @@
 <script setup>
+import DataTable from '@/Components/Common/DataTable.vue';
+import SelectableCard from '@/Components/Common/SelectableCard.vue';
+import AppTabs from '@/Components/Common/AppTabs.vue';
 import { useI18n } from 'vue-i18n';
 const { t } = useI18n();
 
 import { ref, computed } from 'vue';
-import { useForm, usePage } from '@inertiajs/vue3';
+import { Head, useForm, usePage } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import PageHeader from '@/Components/PageHeader.vue';
 import { useToast } from '@/Composables/useToast';
 import { useConfirm } from '@/Composables/useConfirm';
 import { useFormScrollToError } from '@/Composables/useFormScrollToError';
+import { useNumberFormat } from '@/Composables/useNumberFormat';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import SecondaryButton from '@/Components/SecondaryButton.vue';
 import DangerButton from '@/Components/DangerButton.vue';
@@ -34,6 +38,7 @@ const props = defineProps({
 const { success, error } = useToast();
 const { confirm } = useConfirm();
 const { scrollToError } = useFormScrollToError();
+const { toEnglish } = useNumberFormat();
 const page = usePage();
 const user = computed(() => page.props.auth.user);
 
@@ -56,27 +61,39 @@ const activeTab = ref('profile');
 
 const tabs = computed(() => [
     {
-        key: 'profile',
+        id: 'profile',
         label: t('profile.tabs.info'),
+        count: tabErrorCount.value.profile > 0 ? toEnglish(tabErrorCount.value.profile) : null,
     },
     {
-        key: 'preferences',
+        id: 'preferences',
         label: t('profile.tabs.preferences'),
+        count:
+            tabErrorCount.value.preferences > 0 ? toEnglish(tabErrorCount.value.preferences) : null,
     },
     {
-        key: 'sign_in_history',
+        id: 'sign_in_history',
         label: t('profile.tabs.sign_in_history'),
-        badge: props.signInHistory?.length || null,
+        count: props.signInHistory?.length ? toEnglish(props.signInHistory.length) : null,
     },
     {
-        key: 'security',
+        id: 'security',
         label: t('profile.tabs.security'),
-        badge: props.isEnabled ? '2FA' : null,
+        count: props.isEnabled ? '2FA' : null,
     },
     {
-        key: 'password',
+        id: 'password',
         label: t('profile.tabs.password'),
+        count: tabErrorCount.value.password > 0 ? toEnglish(tabErrorCount.value.password) : null,
     },
+]);
+
+const signInColumns = computed(() => [
+    { key: 'index', label: '#', align: 'center', width: 'w-12' },
+    { key: 'formatted_date', label: t('profile.sign_in_history.date') },
+    { key: 'ip_address', label: t('profile.sign_in_history.ip'), align: 'center' },
+    { key: 'device', label: t('profile.sign_in_history.device') },
+    { key: 'diff_for_humans', label: t('profile.sign_in_history.activity'), align: 'center' },
 ]);
 
 // Permissions Modal
@@ -269,19 +286,11 @@ const regenerateCodes = () =>
 
 <template>
     <AppLayout>
+        <Head :title="$t('profile.title')" />
+
         <div class="space-y-6">
             <!-- Header Section with Integrated Tabs -->
-            <PageHeader
-                :title="user.name"
-                gradientFrom="from-indigo-600"
-                gradientTo="to-violet-700"
-                glowFrom="from-indigo-500"
-                glowTo="to-violet-600"
-                badgeBg="bg-indigo-50/50 dark:bg-indigo-900/30"
-                badgeText="text-indigo-600 dark:text-indigo-400"
-                badgeBorder="border-indigo-100/50 dark:border-indigo-800/30"
-                badgeDot="bg-indigo-500"
-            >
+            <PageHeader :title="user.name">
                 <template #icon>
                     <!-- Photo Display & Upload Overlay -->
                     <div
@@ -525,129 +534,83 @@ const regenerateCodes = () =>
 
                 <!-- Integrated Modern Tabs Navigation inside PageHeader filters slot -->
                 <template #filters>
-                    <nav
-                        class="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none"
-                        aria-label="Profile Tabs"
-                    >
-                        <button
-                            v-for="tab in tabs"
-                            :key="tab.key"
-                            type="button"
-                            @click="activeTab = tab.key"
-                            class="flex items-center gap-2 px-4 py-2 text-xs font-black uppercase tracking-wider transition-all relative group shrink-0 rounded-xl"
-                            :class="
-                                activeTab === tab.key
-                                    ? 'text-indigo-600 dark:text-indigo-400 bg-indigo-50/70 dark:bg-indigo-950/40'
-                                    : 'text-gray-400 hover:text-gray-700 dark:text-gray-500 dark:hover:text-gray-300 hover:bg-gray-100/60 dark:hover:bg-gray-800/40'
-                            "
-                        >
-                            <!-- Tab Icons -->
-                            <template v-if="tab.key === 'profile'">
-                                <svg
-                                    class="w-4 h-4"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        stroke-width="2"
-                                        d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                                    />
-                                </svg>
-                            </template>
-                            <template v-else-if="tab.key === 'preferences'">
-                                <svg
-                                    class="w-4 h-4"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        stroke-width="2"
-                                        d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"
-                                    />
-                                </svg>
-                            </template>
-                            <template v-else-if="tab.key === 'sign_in_history'">
-                                <svg
-                                    class="w-4 h-4"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        stroke-width="2"
-                                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                                    />
-                                </svg>
-                            </template>
-                            <template v-else-if="tab.key === 'security'">
-                                <svg
-                                    class="w-4 h-4"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        stroke-width="2"
-                                        d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
-                                    />
-                                </svg>
-                            </template>
-                            <template v-else-if="tab.key === 'password'">
-                                <svg
-                                    class="w-4 h-4"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        stroke-width="2"
-                                        d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"
-                                    />
-                                </svg>
-                            </template>
-
-                            <span>{{ tab.label }}</span>
-
-                            <!-- Tab Badge -->
-                            <span
-                                v-if="tab.badge"
-                                class="px-1.5 py-0.2 text-[10px] font-bold rounded-full"
-                                :class="
-                                    activeTab === tab.key
-                                        ? 'bg-indigo-600 text-white dark:bg-indigo-400 dark:text-gray-900'
-                                        : 'bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-300'
-                                "
+                    <AppTabs v-model="activeTab" :tabs="tabs" variant="underline">
+                        <template #icon-profile>
+                            <svg
+                                class="w-4 h-4"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
                             >
-                                {{ tab.badge }}
-                            </span>
-
-                            <!-- Tab Errors Counter Badge -->
-                            <span
-                                v-if="tabErrorCount[tab.key] > 0"
-                                class="px-1.5 py-0.5 text-[10px] font-bold rounded-full bg-red-500 text-white shadow-sm animate-pulse"
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                                />
+                            </svg>
+                        </template>
+                        <template #icon-preferences>
+                            <svg
+                                class="w-4 h-4"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
                             >
-                                {{ tabErrorCount[tab.key] }}
-                            </span>
-
-                            <!-- Active Bottom Glowing Indicator -->
-                            <div
-                                v-if="activeTab === tab.key"
-                                class="absolute bottom-0 left-2 right-2 h-0.5 bg-indigo-600 dark:bg-indigo-400 rounded-t-full shadow-[0_-2px_8px_rgba(79,70,229,0.5)]"
-                            ></div>
-                        </button>
-                    </nav>
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"
+                                />
+                            </svg>
+                        </template>
+                        <template #icon-sign_in_history>
+                            <svg
+                                class="w-4 h-4"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                                />
+                            </svg>
+                        </template>
+                        <template #icon-security>
+                            <svg
+                                class="w-4 h-4"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
+                                />
+                            </svg>
+                        </template>
+                        <template #icon-password>
+                            <svg
+                                class="w-4 h-4"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"
+                                />
+                            </svg>
+                        </template>
+                    </AppTabs>
                 </template>
             </PageHeader>
 
@@ -817,118 +780,97 @@ const regenerateCodes = () =>
                                     <h4 class="text-sm font-bold text-gray-900 dark:text-white">
                                         {{ $t('profile.preferences.layout') }}
                                     </h4>
-                                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                                        اختر مكان وتوزيع القوائم في الشاشة
+                                    <p class="text-xs text-content-secondary mt-0.5">
+                                        {{ $t('profile.preferences.layout_hint') }}
                                     </p>
                                 </div>
 
                                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
                                     <!-- Side Nav Card -->
-                                    <label
-                                        :class="[
-                                            'relative flex items-center gap-3.5 p-4 rounded-2xl border-2 cursor-pointer transition-all',
-                                            preferencesForm.layout === 'side'
-                                                ? 'border-indigo-600 bg-indigo-50/40 dark:bg-indigo-950/20 text-indigo-950 dark:text-indigo-200 ring-2 ring-indigo-500/10'
-                                                : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 bg-white dark:bg-gray-800',
-                                        ]"
+                                    <SelectableCard
+                                        type="radio"
+                                        name="preferencesForm.layout"
+                                        v-model="preferencesForm.layout"
+                                        value="side"
                                     >
-                                        <input
-                                            type="radio"
-                                            name="layout"
-                                            v-model="preferencesForm.layout"
-                                            value="side"
-                                            class="sr-only"
-                                        />
-                                        <div
-                                            :class="[
-                                                'w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-colors',
-                                                preferencesForm.layout === 'side'
-                                                    ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/30'
-                                                    : 'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400',
-                                            ]"
-                                        >
-                                            <svg
-                                                class="w-5 h-5"
-                                                fill="none"
-                                                stroke="currentColor"
-                                                viewBox="0 0 24 24"
+                                        <div class="flex items-center gap-3.5">
+                                            <div
+                                                :class="[
+                                                    'w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-colors',
+                                                    preferencesForm.layout === 'side'
+                                                        ? 'bg-action-primary text-action-on shadow-sm'
+                                                        : 'bg-surface-muted text-text-secondary',
+                                                ]"
                                             >
-                                                <path
-                                                    stroke-linecap="round"
-                                                    stroke-linejoin="round"
-                                                    stroke-width="2"
-                                                    d="M4 6h16M4 12h16M4 18h7"
-                                                />
-                                            </svg>
+                                                <svg
+                                                    class="w-5 h-5"
+                                                    fill="none"
+                                                    stroke="currentColor"
+                                                    viewBox="0 0 24 24"
+                                                >
+                                                    <path
+                                                        stroke-linecap="round"
+                                                        stroke-linejoin="round"
+                                                        stroke-width="2"
+                                                        d="M4 6h16M4 12h16M4 18h7"
+                                                    />
+                                                </svg>
+                                            </div>
+                                            <div>
+                                                <span
+                                                    class="block text-sm font-bold text-text-primary"
+                                                >
+                                                    {{ $t('profile.preferences.layout_side') }}
+                                                </span>
+                                                <span class="block text-xs text-text-secondary">
+                                                    {{ $t('profile.preferences.layout_side_desc') }}
+                                                </span>
+                                            </div>
                                         </div>
-                                        <div>
-                                            <span class="block text-sm font-bold">
-                                                {{ $t('profile.preferences.layout_side') }}
-                                            </span>
-                                            <span
-                                                class="block text-xs text-gray-500 dark:text-gray-400"
-                                            >
-                                                القائمة الجانبية التقليدية المعتمدة
-                                            </span>
-                                        </div>
-                                        <div
-                                            v-if="preferencesForm.layout === 'side'"
-                                            class="absolute top-3 end-3 w-2 h-2 rounded-full bg-indigo-600 ring-4 ring-indigo-100 dark:ring-indigo-900/50"
-                                        ></div>
-                                    </label>
+                                    </SelectableCard>
 
                                     <!-- Top Nav Card -->
-                                    <label
-                                        :class="[
-                                            'relative flex items-center gap-3.5 p-4 rounded-2xl border-2 cursor-pointer transition-all',
-                                            preferencesForm.layout === 'top'
-                                                ? 'border-indigo-600 bg-indigo-50/40 dark:bg-indigo-950/20 text-indigo-950 dark:text-indigo-200 ring-2 ring-indigo-500/10'
-                                                : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 bg-white dark:bg-gray-800',
-                                        ]"
+                                    <SelectableCard
+                                        type="radio"
+                                        name="preferencesForm.layout"
+                                        v-model="preferencesForm.layout"
+                                        value="top"
                                     >
-                                        <input
-                                            type="radio"
-                                            v-model="preferencesForm.layout"
-                                            value="top"
-                                            class="sr-only"
-                                        />
-                                        <div
-                                            :class="[
-                                                'w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-colors',
-                                                preferencesForm.layout === 'top'
-                                                    ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/30'
-                                                    : 'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400',
-                                            ]"
-                                        >
-                                            <svg
-                                                class="w-5 h-5"
-                                                fill="none"
-                                                stroke="currentColor"
-                                                viewBox="0 0 24 24"
+                                        <div class="flex items-center gap-3.5">
+                                            <div
+                                                :class="[
+                                                    'w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-colors',
+                                                    preferencesForm.layout === 'top'
+                                                        ? 'bg-action-primary text-action-on shadow-sm'
+                                                        : 'bg-surface-muted text-text-secondary',
+                                                ]"
                                             >
-                                                <path
-                                                    stroke-linecap="round"
-                                                    stroke-linejoin="round"
-                                                    stroke-width="2"
-                                                    d="M4 6h16M4 10h16M4 14h16M4 18h16"
-                                                />
-                                            </svg>
+                                                <svg
+                                                    class="w-5 h-5"
+                                                    fill="none"
+                                                    stroke="currentColor"
+                                                    viewBox="0 0 24 24"
+                                                >
+                                                    <path
+                                                        stroke-linecap="round"
+                                                        stroke-linejoin="round"
+                                                        stroke-width="2"
+                                                        d="M4 6h16M4 10h16M4 14h16M4 18h16"
+                                                    />
+                                                </svg>
+                                            </div>
+                                            <div>
+                                                <span
+                                                    class="block text-sm font-bold text-text-primary"
+                                                >
+                                                    {{ $t('profile.preferences.layout_top') }}
+                                                </span>
+                                                <span class="block text-xs text-text-secondary">
+                                                    {{ $t('profile.preferences.layout_top_desc') }}
+                                                </span>
+                                            </div>
                                         </div>
-                                        <div>
-                                            <span class="block text-sm font-bold">
-                                                {{ $t('profile.preferences.layout_top') }}
-                                            </span>
-                                            <span
-                                                class="block text-xs text-gray-500 dark:text-gray-400"
-                                            >
-                                                شريط تنقل علوي أفقي
-                                            </span>
-                                        </div>
-                                        <div
-                                            v-if="preferencesForm.layout === 'top'"
-                                            class="absolute top-3 end-3 w-2 h-2 rounded-full bg-indigo-600 ring-4 ring-indigo-100 dark:ring-indigo-900/50"
-                                        ></div>
-                                    </label>
+                                    </SelectableCard>
                                 </div>
                             </div>
 
@@ -957,138 +899,102 @@ const regenerateCodes = () =>
                                 </div>
 
                                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-                                    <label
-                                        :class="[
-                                            'flex items-center gap-3 p-3.5 rounded-2xl border-2 cursor-pointer transition-all',
-                                            preferencesForm.open_whatsapp === 'app'
-                                                ? 'border-emerald-500 bg-emerald-50/40 dark:bg-emerald-950/20 text-emerald-900 dark:text-emerald-200'
-                                                : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600',
-                                        ]"
+                                    <SelectableCard
+                                        type="radio"
+                                        name="preferencesForm.open_whatsapp"
+                                        v-model="preferencesForm.open_whatsapp"
+                                        value="app"
                                     >
-                                        <input
-                                            type="radio"
-                                            v-model="preferencesForm.open_whatsapp"
-                                            value="app"
-                                            class="sr-only"
-                                        />
-                                        <div
-                                            :class="[
-                                                'w-8 h-8 rounded-lg flex items-center justify-center shrink-0',
-                                                preferencesForm.open_whatsapp === 'app'
-                                                    ? 'bg-emerald-600 text-white'
-                                                    : 'bg-gray-100 dark:bg-gray-700 text-gray-500',
-                                            ]"
-                                        >
-                                            <svg
-                                                class="w-4 h-4"
-                                                fill="currentColor"
-                                                viewBox="0 0 24 24"
+                                        <div class="flex items-center gap-3">
+                                            <div
+                                                :class="[
+                                                    'w-8 h-8 rounded-lg flex items-center justify-center shrink-0 transition-colors',
+                                                    preferencesForm.open_whatsapp === 'app'
+                                                        ? 'bg-success text-white'
+                                                        : 'bg-surface-muted text-text-secondary',
+                                                ]"
                                             >
-                                                <path
-                                                    d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.771-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.299.045-.677.063-1.092-.069-.252-.08-.575-.187-.988-.365-1.739-.751-2.874-2.502-2.961-2.617-.087-.116-.708-.94-.708-1.793s.448-1.273.607-1.446c.159-.173.346-.217.462-.217l.332.006c.106.005.249-.04.39.298.144.347.491 1.2.534 1.287.043.087.072.188.014.304-.058.116-.087.188-.173.289l-.26.304c-.087.086-.177.18-.076.354.101.174.449.741.964 1.201.662.591 1.221.774 1.394.86.173.086.275.072.376-.043.101-.116.433-.506.549-.68.116-.173.231-.144.39-.086s1.011.477 1.184.564.289.13.332.202c.045.072.045.419-.1.824z"
-                                                />
-                                            </svg>
+                                                <svg
+                                                    class="w-4 h-4"
+                                                    fill="currentColor"
+                                                    viewBox="0 0 24 24"
+                                                >
+                                                    <path
+                                                        d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.771-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.299.045-.677.063-1.092-.069-.252-.08-.575-.187-.988-.365-1.739-.751-2.874-2.502-2.961-2.617-.087-.116-.708-.94-.708-1.793s.448-1.273.607-1.446c.159-.173.346-.217.462-.217l.332.006c.106.005.249-.04.39.298.144.347.491 1.2.534 1.287.043.087.072.188.014.304-.058.116-.087.188-.173.289l-.26.304c-.087.086-.177.18-.076.354.101.174.449.741.964 1.201.662.591 1.221.774 1.394.86.173.086.275.072.376-.043.101-.116.433-.506.549-.68.116-.173.231-.144.39-.086s1.011.477 1.184.564.289.13.332.202c.045.072.045.419-.1.824z"
+                                                    />
+                                                </svg>
+                                            </div>
+                                            <span class="text-xs font-bold text-text-primary">
+                                                {{ $t('profile.preferences.whatsapp_app') }}
+                                            </span>
                                         </div>
-                                        <span class="text-xs font-bold">
-                                            {{ $t('profile.preferences.whatsapp_app') }}
-                                        </span>
-                                    </label>
+                                    </SelectableCard>
 
-                                    <label
-                                        :class="[
-                                            'flex items-center gap-3 p-3.5 rounded-2xl border-2 cursor-pointer transition-all',
-                                            preferencesForm.open_whatsapp === 'web'
-                                                ? 'border-emerald-500 bg-emerald-50/40 dark:bg-emerald-950/20 text-emerald-900 dark:text-emerald-200'
-                                                : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600',
-                                        ]"
+                                    <SelectableCard
+                                        type="radio"
+                                        name="preferencesForm.open_whatsapp"
+                                        v-model="preferencesForm.open_whatsapp"
+                                        value="web"
                                     >
-                                        <input
-                                            type="radio"
-                                            v-model="preferencesForm.open_whatsapp"
-                                            value="web"
-                                            class="sr-only"
-                                        />
-                                        <div
-                                            :class="[
-                                                'w-8 h-8 rounded-lg flex items-center justify-center shrink-0',
-                                                preferencesForm.open_whatsapp === 'web'
-                                                    ? 'bg-emerald-600 text-white'
-                                                    : 'bg-gray-100 dark:bg-gray-700 text-gray-500',
-                                            ]"
-                                        >
-                                            <svg
-                                                class="w-4 h-4"
-                                                fill="none"
-                                                stroke="currentColor"
-                                                viewBox="0 0 24 24"
+                                        <div class="flex items-center gap-3">
+                                            <div
+                                                :class="[
+                                                    'w-8 h-8 rounded-lg flex items-center justify-center shrink-0 transition-colors',
+                                                    preferencesForm.open_whatsapp === 'web'
+                                                        ? 'bg-success text-white'
+                                                        : 'bg-surface-muted text-text-secondary',
+                                                ]"
                                             >
-                                                <path
-                                                    stroke-linecap="round"
-                                                    stroke-linejoin="round"
-                                                    stroke-width="2"
-                                                    d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"
-                                                />
-                                            </svg>
+                                                <svg
+                                                    class="w-4 h-4"
+                                                    fill="none"
+                                                    stroke="currentColor"
+                                                    viewBox="0 0 24 24"
+                                                >
+                                                    <path
+                                                        stroke-linecap="round"
+                                                        stroke-linejoin="round"
+                                                        stroke-width="2"
+                                                        d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"
+                                                    />
+                                                </svg>
+                                            </div>
+                                            <span class="text-xs font-bold text-text-primary">
+                                                {{ $t('profile.preferences.whatsapp_web') }}
+                                            </span>
                                         </div>
-                                        <span class="text-xs font-bold">
-                                            {{ $t('profile.preferences.whatsapp_web') }}
-                                        </span>
-                                    </label>
+                                    </SelectableCard>
                                 </div>
 
                                 <!-- WhatsApp Sharing Confirmation Mode -->
                                 <div class="pt-2">
-                                    <p
-                                        class="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-2"
-                                    >
+                                    <p class="text-xs font-semibold text-text-secondary mb-2">
                                         {{ $t('profile.preferences.whatsapp_sharing') }}
                                     </p>
                                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                        <label
-                                            :class="[
-                                                'flex items-center gap-2.5 p-3 rounded-xl border cursor-pointer transition-all',
-                                                preferencesForm.whatsapp_sharing_preference ===
-                                                'form'
-                                                    ? 'border-indigo-600 bg-indigo-50/40 dark:bg-indigo-950/20 text-indigo-900 dark:text-indigo-200'
-                                                    : 'border-gray-200 dark:border-gray-700 hover:border-gray-300',
-                                            ]"
+                                        <SelectableCard
+                                            type="radio"
+                                            name="preferencesForm.whatsapp_sharing_preference"
+                                            v-model="preferencesForm.whatsapp_sharing_preference"
+                                            value="form"
                                         >
-                                            <input
-                                                type="radio"
-                                                v-model="
-                                                    preferencesForm.whatsapp_sharing_preference
-                                                "
-                                                value="form"
-                                                class="text-indigo-600 focus:ring-indigo-500 w-4 h-4"
-                                            />
-                                            <span class="text-xs font-medium">
+                                            <span class="text-xs font-medium text-text-primary">
                                                 {{ $t('profile.preferences.whatsapp_share_form') }}
                                             </span>
-                                        </label>
+                                        </SelectableCard>
 
-                                        <label
-                                            :class="[
-                                                'flex items-center gap-2.5 p-3 rounded-xl border cursor-pointer transition-all',
-                                                preferencesForm.whatsapp_sharing_preference ===
-                                                'direct'
-                                                    ? 'border-indigo-600 bg-indigo-50/40 dark:bg-indigo-950/20 text-indigo-900 dark:text-indigo-200'
-                                                    : 'border-gray-200 dark:border-gray-700 hover:border-gray-300',
-                                            ]"
+                                        <SelectableCard
+                                            type="radio"
+                                            name="preferencesForm.whatsapp_sharing_preference"
+                                            v-model="preferencesForm.whatsapp_sharing_preference"
+                                            value="direct"
                                         >
-                                            <input
-                                                type="radio"
-                                                v-model="
-                                                    preferencesForm.whatsapp_sharing_preference
-                                                "
-                                                value="direct"
-                                                class="text-indigo-600 focus:ring-indigo-500 w-4 h-4"
-                                            />
-                                            <span class="text-xs font-medium">
+                                            <span class="text-xs font-medium text-text-primary">
                                                 {{
                                                     $t('profile.preferences.whatsapp_share_direct')
                                                 }}
                                             </span>
-                                        </label>
+                                        </SelectableCard>
                                     </div>
                                 </div>
                             </div>
@@ -1101,9 +1007,8 @@ const regenerateCodes = () =>
                                     <h4 class="text-sm font-bold text-gray-900 dark:text-white">
                                         {{ $t('profile.preferences.floating_section') }}
                                     </h4>
-                                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                                        التحكم في ظهور أزرار الإجراءات السريعة العائمة في أسفل
-                                        الشاشة
+                                    <p class="text-xs text-content-secondary mt-0.5">
+                                        {{ $t('profile.preferences.floating_hint') }}
                                     </p>
                                 </div>
 
@@ -1195,113 +1100,76 @@ const regenerateCodes = () =>
                         </div>
 
                         <!-- Sessions Table -->
-                        <div
-                            class="overflow-x-auto rounded-2xl border border-gray-200/80 dark:border-gray-700/80"
+                        <DataTable
+                            :items="signInHistory || []"
+                            :columns="signInColumns"
+                            :empty-title="$t('profile.sign_in_history.no_records')"
                         >
-                            <table
-                                class="min-w-full divide-y divide-gray-200 dark:divide-gray-700 text-sm"
-                            >
-                                <thead
-                                    class="bg-gray-50/70 dark:bg-gray-900/40 text-gray-500 dark:text-gray-400 font-bold text-xs uppercase tracking-wider"
+                            <template #cell-index="{ item }">
+                                <span class="text-content-muted font-mono text-xs">
+                                    {{ toEnglish(item.index) }}
+                                </span>
+                            </template>
+
+                            <template #cell-formatted_date="{ item }">
+                                <div
+                                    class="flex items-center gap-2 font-semibold whitespace-nowrap text-xs sm:text-sm text-content-primary"
                                 >
-                                    <tr>
-                                        <th scope="col" class="py-3.5 px-4 text-center w-12">#</th>
-                                        <th scope="col" class="py-3.5 px-4 text-start">
-                                            {{ $t('profile.sign_in_history.date') }}
-                                        </th>
-                                        <th scope="col" class="py-3.5 px-4 text-center">
-                                            {{ $t('profile.sign_in_history.ip') }}
-                                        </th>
-                                        <th scope="col" class="py-3.5 px-4 text-start">
-                                            {{ $t('profile.sign_in_history.device') }}
-                                        </th>
-                                        <th scope="col" class="py-3.5 px-4 text-center">
-                                            {{ $t('profile.sign_in_history.activity') }}
-                                        </th>
-                                    </tr>
-                                </thead>
-                                <tbody
-                                    class="divide-y divide-gray-100 dark:divide-gray-800 bg-white dark:bg-gray-800"
-                                >
-                                    <tr
-                                        v-for="item in signInHistory"
-                                        :key="item.id"
-                                        class="hover:bg-gray-50/80 dark:hover:bg-gray-750/50 transition-colors"
+                                    <svg
+                                        class="w-4 h-4 text-content-muted shrink-0"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
                                     >
-                                        <td
-                                            class="py-3.5 px-4 text-center text-gray-400 font-mono text-xs"
-                                        >
-                                            {{ item.index }}
-                                        </td>
-                                        <td
-                                            class="py-3.5 px-4 text-gray-900 dark:text-gray-100 font-semibold whitespace-nowrap text-xs sm:text-sm"
-                                        >
-                                            <div class="flex items-center gap-2">
-                                                <svg
-                                                    class="w-4 h-4 text-gray-400"
-                                                    fill="none"
-                                                    stroke="currentColor"
-                                                    viewBox="0 0 24 24"
-                                                >
-                                                    <path
-                                                        stroke-linecap="round"
-                                                        stroke-linejoin="round"
-                                                        stroke-width="2"
-                                                        d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-                                                    />
-                                                </svg>
-                                                {{ item.formatted_date }}
-                                            </div>
-                                        </td>
-                                        <td class="py-3.5 px-4 text-center">
-                                            <span
-                                                class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-mono font-medium bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300"
-                                            >
-                                                {{ item.ip_address }}
-                                            </span>
-                                        </td>
-                                        <td
-                                            class="py-3.5 px-4 text-gray-700 dark:text-gray-300 text-xs sm:text-sm"
-                                        >
-                                            <div class="flex items-center gap-2">
-                                                <svg
-                                                    class="w-4 h-4 text-indigo-500 shrink-0"
-                                                    fill="none"
-                                                    stroke="currentColor"
-                                                    viewBox="0 0 24 24"
-                                                >
-                                                    <path
-                                                        stroke-linecap="round"
-                                                        stroke-linejoin="round"
-                                                        stroke-width="2"
-                                                        d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
-                                                    />
-                                                </svg>
-                                                <span>{{ item.device }}</span>
-                                            </div>
-                                        </td>
-                                        <td class="py-3.5 px-4 text-center whitespace-nowrap">
-                                            <span
-                                                class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-300"
-                                            >
-                                                <span
-                                                    class="w-1.5 h-1.5 rounded-full bg-emerald-500"
-                                                ></span>
-                                                {{ item.diff_for_humans }}
-                                            </span>
-                                        </td>
-                                    </tr>
-                                    <tr v-if="!signInHistory || signInHistory.length === 0">
-                                        <td
-                                            colspan="5"
-                                            class="py-12 text-center text-gray-400 dark:text-gray-500 text-sm"
-                                        >
-                                            {{ $t('profile.sign_in_history.no_records') }}
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                                        />
+                                    </svg>
+                                    <span>{{ toEnglish(item.formatted_date) }}</span>
+                                </div>
+                            </template>
+
+                            <template #cell-ip_address="{ item }">
+                                <span
+                                    class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-mono font-medium bg-surface-secondary text-content-secondary"
+                                >
+                                    {{ item.ip_address }}
+                                </span>
+                            </template>
+
+                            <template #cell-device="{ item }">
+                                <div
+                                    class="flex items-center gap-2 text-xs sm:text-sm text-content-secondary"
+                                >
+                                    <svg
+                                        class="w-4 h-4 text-action-primary shrink-0"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                                        />
+                                    </svg>
+                                    <span>{{ item.device }}</span>
+                                </div>
+                            </template>
+
+                            <template #cell-diff_for_humans="{ item }">
+                                <span
+                                    class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-success-soft text-success"
+                                >
+                                    <span class="w-1.5 h-1.5 rounded-full bg-success"></span>
+                                    {{ item.diff_for_humans }}
+                                </span>
+                            </template>
+                        </DataTable>
                     </div>
 
                     <!-- Tab 4: Security (2FA) -->
@@ -1360,61 +1228,37 @@ const regenerateCodes = () =>
                             <!-- Step 1: Select Method -->
                             <div v-if="!codeSent" class="space-y-4">
                                 <div class="space-y-3">
-                                    <label
-                                        class="flex items-center p-4 border rounded-2xl cursor-pointer hover:bg-gray-50/60 dark:hover:bg-gray-700/40 transition-colors"
-                                        :class="
-                                            selectedMethod === 'email'
-                                                ? 'border-indigo-600 ring-2 ring-indigo-500/10'
-                                                : 'border-gray-200 dark:border-gray-700'
-                                        "
+                                    <SelectableCard
+                                        type="radio"
+                                        name="selectedMethod"
+                                        v-model="selectedMethod"
+                                        value="email"
                                     >
-                                        <input
-                                            type="radio"
-                                            v-model="selectedMethod"
-                                            value="email"
-                                            class="w-4 h-4 text-indigo-600 border-gray-300 focus:ring-indigo-500"
-                                        />
-                                        <span class="ms-3 flex-1">
-                                            <span
-                                                class="block text-sm font-bold text-gray-900 dark:text-white"
-                                            >
-                                                {{ $t('center_settings.contact.email') }}
-                                            </span>
-                                            <span class="block text-xs text-gray-500">
-                                                {{ user.email }}
-                                            </span>
+                                        <span class="block text-sm font-bold text-text-primary">
+                                            {{ $t('center_settings.contact.email') }}
                                         </span>
-                                    </label>
+                                        <span class="block text-xs text-text-secondary">
+                                            {{ user.email }}
+                                        </span>
+                                    </SelectableCard>
 
-                                    <label
+                                    <SelectableCard
                                         v-if="smsEnabled && user.phone"
-                                        class="flex items-center p-4 border rounded-2xl cursor-pointer hover:bg-gray-50/60 dark:hover:bg-gray-700/40 transition-colors"
-                                        :class="
-                                            selectedMethod === 'sms'
-                                                ? 'border-indigo-600 ring-2 ring-indigo-500/10'
-                                                : 'border-gray-200 dark:border-gray-700'
-                                        "
+                                        type="radio"
+                                        name="selectedMethod"
+                                        v-model="selectedMethod"
+                                        value="sms"
                                     >
-                                        <input
-                                            type="radio"
-                                            v-model="selectedMethod"
-                                            value="sms"
-                                            class="w-4 h-4 text-indigo-600 border-gray-300 focus:ring-indigo-500"
-                                        />
-                                        <span class="ms-3 flex-1">
-                                            <span
-                                                class="block text-sm font-bold text-gray-900 dark:text-white"
-                                            >
-                                                {{ $t('security.text_messages_sms') }}
-                                            </span>
-                                            <span
-                                                class="block text-xs text-gray-500 font-mono"
-                                                dir="ltr"
-                                            >
-                                                {{ user.phone }}
-                                            </span>
+                                        <span class="block text-sm font-bold text-text-primary">
+                                            {{ $t('security.text_messages_sms') }}
                                         </span>
-                                    </label>
+                                        <span
+                                            class="block text-xs text-text-secondary font-mono"
+                                            dir="ltr"
+                                        >
+                                            {{ user.phone }}
+                                        </span>
+                                    </SelectableCard>
                                 </div>
 
                                 <PrimaryButton
@@ -1563,9 +1407,8 @@ const regenerateCodes = () =>
                             <h3 class="text-lg font-bold text-gray-900 dark:text-white">
                                 {{ $t('company_profile.admin_user.change_password') }}
                             </h3>
-                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                                احرص على اختيار كلمة مرور قوية تحتوي على أحرف وأرقام ورموز لحماية
-                                حسابك
+                            <p class="text-xs text-content-secondary mt-1">
+                                {{ $t('profile.preferences.password_hint') }}
                             </p>
                         </div>
 

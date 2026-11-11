@@ -25,8 +25,8 @@
                 ? {}
                 : {
                       backgroundColor:
-                          'color-mix(in srgb, var(--tenant-primary, #4f46e5) 12%, transparent)',
-                      color: 'var(--tenant-primary, #4f46e5)',
+                          'color-mix(in srgb, var(--tenant-primary, #2563eb) 12%, transparent)',
+                      color: 'var(--tenant-primary, #2563eb)',
                   }
         "
     >

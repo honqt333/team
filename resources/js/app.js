@@ -1,14 +1,12 @@
-import '../css/app.css';
-import './bootstrap';
-
-// Design System — Track A Phase 1
-// Order matters: tokens (variables) → reset (normalize) → typography (uses tokens)
+// Design System — base tokens, reset, typography before Tailwind utilities
 import '@/Design/tokens.css';
 import '@/Design/reset.css';
 import '@/Design/typography.css';
+import '../css/app.css';
 import '@/Design/global-styles.css';
+import './bootstrap';
 
-import { createInertiaApp } from '@inertiajs/vue3';
+import { createInertiaApp, router } from '@inertiajs/vue3';
 import { createApp, h } from 'vue';
 import { ZiggyVue } from 'ziggy-js';
 import i18n from './i18n';
@@ -33,13 +31,59 @@ const appName = i18n.global.t('common.app_name') || import.meta.env.VITE_APP_NAM
 // Apply initial theme on startup
 applyTheme(getInitialTheme());
 
-// Force page reload on back-forward cache restore to ensure correct auth states
+// Prevent browser back/forward from exposing or manipulating stale cached state
 if (typeof window !== 'undefined') {
-    window.addEventListener('pageshow', function (event) {
-        if (event.persisted) {
+    window.addEventListener('pageshow', (event) => {
+        const navEntry = window.performance?.getEntriesByType?.('navigation')?.[0];
+        if (event.persisted || navEntry?.type === 'back_forward') {
             window.location.reload();
         }
     });
+
+    let lastHrefNoHash = window.location.pathname + window.location.search;
+    let pendingPopstateRefresh = false;
+    let refreshingFromPopstate = false;
+
+    const unlockHistoryUi = () => {
+        refreshingFromPopstate = false;
+        document.documentElement.classList.remove('pointer-events-none', 'opacity-75');
+    };
+
+    window.addEventListener(
+        'popstate',
+        () => {
+            const nextHrefNoHash = window.location.pathname + window.location.search;
+            if (nextHrefNoHash !== lastHrefNoHash) {
+                pendingPopstateRefresh = true;
+                document.documentElement.classList.add('pointer-events-none', 'opacity-75');
+            }
+        },
+        true
+    );
+
+    router.on('start', () => {
+        if (!refreshingFromPopstate && pendingPopstateRefresh) {
+            pendingPopstateRefresh = false;
+            refreshingFromPopstate = true;
+        }
+    });
+
+    router.on('navigate', () => {
+        lastHrefNoHash = window.location.pathname + window.location.search;
+        if (pendingPopstateRefresh) {
+            pendingPopstateRefresh = false;
+            refreshingFromPopstate = true;
+            router.reload({
+                preserveState: false,
+                preserveScroll: false,
+            });
+        }
+    });
+
+    router.on('finish', unlockHistoryUi);
+    router.on('error', unlockHistoryUi);
+    router.on('invalid', unlockHistoryUi);
+    router.on('exception', unlockHistoryUi);
 
     // One delegated listener for the whole application. Anything carrying a
     // `data-track` attribute reports itself; see resources/js/Support/analytics.js.

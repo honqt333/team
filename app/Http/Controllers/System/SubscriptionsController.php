@@ -9,6 +9,7 @@ use App\Models\BankTransferReceipt;
 use App\Models\Billing\Plan;
 use App\Models\Billing\Subscription;
 use App\Models\Tenant;
+use App\Services\Billing\SubscriptionLifecycleService;
 use App\Services\System\SystemAuditService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -17,8 +18,11 @@ use Inertia\Response;
 class SubscriptionsController extends Controller
 {
     public function __construct(
-        protected SystemAuditService $audit
-    ) {}
+        protected SystemAuditService $audit,
+        protected ?SubscriptionLifecycleService $lifecycle = null
+    ) {
+        $this->lifecycle ??= app(SubscriptionLifecycleService::class);
+    }
 
     /**
      * Display a listing of subscriptions.
@@ -112,8 +116,12 @@ class SubscriptionsController extends Controller
             'promo_code' => 'nullable|string|exists:promo_codes,code',
         ]);
 
+        $tenant = Tenant::findOrFail($validated['tenant_id']);
         $plan = Plan::findOrFail($validated['plan_id']);
-        $price = (float) $plan->price_yearly;
+        $billingCycle = $validated['billing_cycle'] ?? 'yearly';
+        $price = $billingCycle === 'monthly'
+            ? (float) $plan->price_monthly
+            : (float) $plan->price_yearly;
 
         // Calculate dates & determine if this is a trial plan
         $startDate = now();
@@ -122,10 +130,13 @@ class SubscriptionsController extends Controller
 
         if ($plan->slug === 'trial' || ($plan->trial_days > 0 && $price == 0.0)) {
             $status = 'trialing';
-            $trialEndsAt = $startDate->copy()->addDays($plan->trial_days ?: 14);
+            $trialDays = $plan->trial_days ?: $this->lifecycle->getDefaultTrialDays();
+            $trialEndsAt = $startDate->copy()->addDays($trialDays);
             $endDate = $trialEndsAt;
         } else {
-            $endDate = $startDate->copy()->addYear();
+            $dates = $this->lifecycle->calculateRenewalDates($tenant, $billingCycle);
+            $startDate = $dates['starts_at'];
+            $endDate = $dates['ends_at'];
         }
 
         // Cancel/expire any existing active/trial/trialing subscriptions for this tenant
@@ -139,7 +150,7 @@ class SubscriptionsController extends Controller
             'tenant_id' => $validated['tenant_id'],
             'plan_id' => $validated['plan_id'],
             'status' => $status,
-            'billing_cycle' => 'yearly',
+            'billing_cycle' => $billingCycle,
             'starts_at' => $startDate,
             'ends_at' => $endDate,
             'trial_ends_at' => $trialEndsAt,
@@ -152,6 +163,9 @@ class SubscriptionsController extends Controller
         $subscription->tenant->update([
             'status' => in_array($status, ['trial', 'trialing']) ? 'trial' : 'active',
             'trial_ends_at' => $trialEndsAt,
+            'suspended_at' => null,
+            'auto_suspended_at' => null,
+            'suspension_reason' => null,
         ]);
 
         if ($request->wantsJson() || $request->header('X-Inertia')) {

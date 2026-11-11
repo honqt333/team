@@ -37,6 +37,38 @@ return Application::configure(basePath: dirname(__DIR__))
         RouteServiceProvider::class,
         EventServiceProvider::class,
     ])
+    // P0 — every event listener is declared EXPLICITLY in
+    // App\Providers\EventServiceProvider::$listen.
+    //
+    // Laravel's Application::configure() registers the base
+    // Illuminate\Foundation\Support\Providers\EventServiceProvider
+    // through withEvents(), and that base instance has
+    // shouldDiscoverEvents() === true. It therefore auto-discovers
+    // every class under app/Listeners and registers it as
+    // `Class@handle`.
+    //
+    // Because we ALSO register App\Providers\EventServiceProvider
+    // above (which registers the same listeners as bare class strings
+    // from its $listen map), the dispatcher ended up holding TWO
+    // registrations for every listener. A bare class string resolves
+    // to the same handle() method, so BOTH fired.
+    //
+    // The observable effect: every domain listener ran twice.
+    //   - NotifyOwnerOnCreation       → 2 bell notifications per work order
+    //   - NotifyAdminsOfReceipt       → 2 admin notifications per receipt
+    //   - NotifyTenantOfReceiptDecision → 2 per receipt decision
+    //   - LogActivityOnStatusChange   → 2 activity rows per status change
+    //   - LinkPaymentToInvoice /
+    //     UpdateInvoiceStatusOnPayment /
+    //     HandleAutoInvoiceOnDoneWorkOrder → 2× payment side effects
+    //   - LogSuccessfulLogin / LogFailedLogin → 2 log rows per login
+    //
+    // Disabling discovery keeps the single explicit registration. Do
+    // NOT re-enable it: a new listener added to app/Listeners must be
+    // declared in App\Providers\EventServiceProvider::$listen as well,
+    // or it will never fire. tests/Feature/DuplicateListenerRegistrationTest.php
+    // enforces both halves of that contract.
+    ->withEvents(discover: false)
     ->withRouting(
         web: __DIR__.'/../routes/web.php',
         api: __DIR__.'/../routes/api.php',

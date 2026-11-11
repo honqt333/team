@@ -78,7 +78,7 @@
                             @click="submit"
                             :disabled="form.processing"
                             class="inline-flex items-center gap-2 px-5 py-2 rounded-xl text-white font-medium text-sm shadow-md transition-all disabled:opacity-60"
-                            :style="{ backgroundColor: form.primary_color || '#4f46e5' }"
+                            :style="{ backgroundColor: form.primary_color || '#2563eb' }"
                         >
                             <svg
                                 v-if="form.processing"
@@ -870,7 +870,11 @@
 
                         <!-- Pricing Mode Radio Cards -->
                         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-                            <label
+                            <SelectableCard
+                                type="radio"
+                                name="form.settings.pricing_mode"
+                                v-model="form.settings.pricing_mode"
+                                :value="mode.id"
                                 v-for="mode in pricingModes"
                                 :key="mode.id"
                                 class="relative p-4 rounded-xl border-2 cursor-pointer transition-all flex flex-col justify-between"
@@ -882,13 +886,6 @@
                             >
                                 <div class="flex items-center justify-between mb-2">
                                     <span class="text-sm font-bold">{{ mode.title }}</span>
-                                    <input
-                                        type="radio"
-                                        name="pricing_mode"
-                                        :value="mode.id"
-                                        v-model="form.settings.pricing_mode"
-                                        class="text-pink-600 focus:ring-pink-500 h-4 w-4"
-                                    />
                                 </div>
                                 <p class="text-xs text-gray-500 dark:text-gray-400">
                                     {{ mode.desc }}
@@ -898,7 +895,7 @@
                                 >
                                     مثال: {{ mode.example }}
                                 </div>
-                            </label>
+                            </SelectableCard>
                         </div>
                     </section>
 
@@ -987,7 +984,7 @@
                         <div
                             class="border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden max-h-96 overflow-y-auto"
                         >
-                            <table class="w-full text-xs text-start">
+                            <DataTable structured class="w-full text-xs text-start">
                                 <thead
                                     class="bg-gray-50 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 sticky top-0"
                                 >
@@ -1024,12 +1021,10 @@
                                         class="hover:bg-gray-50/70 dark:hover:bg-gray-900/40 transition-colors"
                                     >
                                         <td class="py-2.5 px-4">
-                                            <input
+                                            <AppToggle
                                                 v-if="form.settings.services_mode === 'selected'"
-                                                type="checkbox"
                                                 :checked="isServiceSelected(svc.id)"
                                                 @change="toggleServiceSelected(svc.id)"
-                                                class="rounded border-gray-300 text-pink-600 focus:ring-pink-500 h-4 w-4 cursor-pointer"
                                             />
                                             <span
                                                 v-else
@@ -1085,7 +1080,7 @@
                                         </td>
                                     </tr>
                                 </tbody>
-                            </table>
+                            </DataTable>
                         </div>
                     </section>
                 </div>
@@ -1617,7 +1612,11 @@
                         </div>
 
                         <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                            <label
+                            <SelectableCard
+                                type="radio"
+                                name="form.status"
+                                v-model="form.status"
+                                :value="opt.value"
                                 v-for="opt in statusOptions"
                                 :key="opt.value"
                                 class="p-4 rounded-xl border-2 cursor-pointer transition-all flex items-center justify-between"
@@ -1630,14 +1629,7 @@
                                 <span class="text-sm font-bold text-gray-900 dark:text-white">
                                     {{ opt.label }}
                                 </span>
-                                <input
-                                    type="radio"
-                                    name="status"
-                                    :value="opt.value"
-                                    v-model="form.status"
-                                    class="text-pink-600 focus:ring-pink-500 h-4 w-4"
-                                />
-                            </label>
+                            </SelectableCard>
                         </div>
                         <p class="text-xs text-gray-500 dark:text-gray-400">
                             {{ t('tenant_site.admin.fields.status_help') }}
@@ -1699,7 +1691,7 @@
                             @click="submit"
                             :disabled="form.processing"
                             class="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl text-white font-semibold text-sm shadow-md transition-all disabled:opacity-60 active:scale-95"
-                            :style="{ backgroundColor: form.primary_color || '#4f46e5' }"
+                            :style="{ backgroundColor: form.primary_color || '#2563eb' }"
                         >
                             <svg
                                 v-if="form.processing"
@@ -1747,6 +1739,8 @@
 </template>
 
 <script setup>
+import DataTable from '@/Components/Common/DataTable.vue';
+import SelectableCard from '@/Components/Common/SelectableCard.vue';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import PageHeader from '@/Components/PageHeader.vue';
 import ColorField from '@/Components/ColorField.vue';
@@ -2025,7 +2019,7 @@ const form = useForm({
         tiktok: w.social_links?.tiktok || '',
         youtube: w.social_links?.youtube || '',
     },
-    primary_color: w.primary_color || '#4f46e5',
+    primary_color: w.primary_color || '#2563eb',
     secondary_color: w.secondary_color || '#0ea5e9',
     status: w.status || 'draft',
     seo_title: w.seo_title || '',

@@ -465,11 +465,7 @@
                         </div>
 
                         <label class="flex items-center gap-2 cursor-pointer mb-4">
-                            <input
-                                type="checkbox"
-                                v-model="form.subscription_vat_enabled"
-                                class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
-                            />
+                            <AppToggle v-model="form.subscription_vat_enabled" />
                             <span class="text-sm font-medium text-gray-700 dark:text-gray-300">
                                 {{ t('system.company_settings.sections.vat.enable') }}
                             </span>
@@ -749,6 +745,7 @@
 </template>
 
 <script setup>
+import AppToggle from '@/Components/Common/AppToggle.vue';
 import { computed, ref } from 'vue';
 import { useForm } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';

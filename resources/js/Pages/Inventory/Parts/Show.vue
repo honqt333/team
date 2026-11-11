@@ -469,7 +469,7 @@
                         </h2>
                     </div>
                     <div class="overflow-x-auto">
-                        <table class="w-full text-xs">
+                        <DataTable structured class="w-full text-xs">
                             <thead class="bg-gray-50 dark:bg-gray-700/50">
                                 <tr>
                                     <th
@@ -714,7 +714,7 @@
                                     </td>
                                 </tr>
                             </tbody>
-                        </table>
+                        </DataTable>
                     </div>
 
                     <!-- Empty State for Movements -->
@@ -797,6 +797,7 @@
 </template>
 
 <script setup>
+import DataTable from '@/Components/Common/DataTable.vue';
 import { ref, computed } from 'vue';
 import { Link, usePage } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';

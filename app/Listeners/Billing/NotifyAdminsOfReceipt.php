@@ -19,6 +19,13 @@ use Illuminate\Support\Str;
  * The notification points the admin at the receipt's review URL so
  * one click takes them from the bell to the approval modal — saves
  * a context switch and shortens the time-to-approval for tenants.
+ *
+ * NOTE — these are PLATFORM-admin notifications, not tenant
+ * notifications. The admin bell belongs to the platform operator, not
+ * to the tenant that uploaded the receipt, so the TENANT's notification
+ * settings deliberately do NOT apply here. What they DO apply to is the
+ * tenant-facing counterpart, NotifyTenantOfReceiptDecision, which now
+ * goes through NotificationService.
  */
 class NotifyAdminsOfReceipt
 {

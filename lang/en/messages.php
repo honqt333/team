@@ -331,4 +331,10 @@ return [
     'race_lost' => 'Another member of staff completed this first',
     'stale_snapshot' => 'The appointment time changed after the page was loaded',
     'item_completed' => 'Service completed successfully',
+    'feedback_comments_or_video_required' => 'Please enter feedback details or attach a screen recording.',
+    'feedback_submitted_successfully' => 'Your feedback has been submitted successfully and our support team will review it.',
+    'subscription' => [
+        'account_suspended' => 'Your account has been suspended due to no active subscription. Please renew or contact support.',
+        'expired_readonly' => 'Your subscription and grace period have expired. Please renew your subscription to perform operations.',
+    ],
 ];

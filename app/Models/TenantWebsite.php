@@ -138,7 +138,7 @@ class TenantWebsite extends Model
      */
     public function getEffectivePrimaryColorAttribute(): string
     {
-        return self::safeHex($this->primary_color) ?? '#4f46e5';
+        return self::safeHex($this->primary_color) ?? '#2563eb';
     }
 
     public function getEffectiveSecondaryColorAttribute(): string

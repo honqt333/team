@@ -192,21 +192,11 @@
                         </div>
 
                         <!-- Start & End Date Pickers -->
-                        <div class="flex items-center gap-2">
-                            <CustomDatePicker
-                                v-model="filterForm.start_date"
-                                :placeholder="$t('reports.payments_report.date_from')"
-                                class="w-36 text-xs"
-                                @update:modelValue="onCustomDateChange"
-                            />
-                            <span class="text-gray-400 text-xs">—</span>
-                            <CustomDatePicker
-                                v-model="filterForm.end_date"
-                                :placeholder="$t('reports.payments_report.date_to')"
-                                class="w-36 text-xs"
-                                @update:modelValue="onCustomDateChange"
-                            />
-                        </div>
+                        <ReportDateRange
+                            v-model:start="filterForm.start_date"
+                            v-model:end="filterForm.end_date"
+                            @change="onCustomDateChange"
+                        />
                     </div>
                 </div>
 
@@ -675,7 +665,7 @@
                         class="border-t border-gray-100 dark:border-gray-700/60"
                     >
                         <div class="overflow-x-auto">
-                            <table class="w-full text-right text-xs">
+                            <DataTable structured class="w-full text-right text-xs">
                                 <thead>
                                     <tr
                                         class="bg-gray-50/70 dark:bg-gray-900/50 text-gray-500 dark:text-gray-400 text-[11px] font-bold border-b border-gray-100 dark:border-gray-700/60"
@@ -810,9 +800,10 @@
                                             {{ formatMoney(inv.remaining) }}
                                         </td>
                                         <td class="px-4 py-3 text-center">
-                                            <span :class="getStatusBadgeClass(inv.payment_status)">
-                                                {{ getStatusLabel(inv.payment_status) }}
-                                            </span>
+                                            <PaymentStatusBadge
+                                                :status="inv.payment_status"
+                                                :label="getStatusLabel(inv.payment_status)"
+                                            />
                                             <span
                                                 v-if="inv.is_overdue"
                                                 class="block text-[9px] text-rose-600 font-bold mt-0.5"
@@ -822,7 +813,7 @@
                                         </td>
                                     </tr>
                                 </tbody>
-                            </table>
+                            </DataTable>
                         </div>
                     </div>
                 </div>
@@ -931,9 +922,10 @@
                             </span>
                         </template>
                         <template #cell-status="{ item: inv }">
-                            <span :class="getStatusBadgeClass(inv.payment_status)">
-                                {{ getStatusLabel(inv.payment_status) }}
-                            </span>
+                            <PaymentStatusBadge
+                                :status="inv.payment_status"
+                                :label="getStatusLabel(inv.payment_status)"
+                            />
                         </template>
                     </DataTable>
                 </div>
@@ -978,10 +970,11 @@
 </template>
 
 <script setup>
+import PaymentStatusBadge from '@/Components/Common/PaymentStatusBadge.vue';
 import DataTable from '@/Components/Common/DataTable.vue';
 import PrintEngine from '@/Components/Print/PrintEngine.vue';
 import AppPrintButton from '@/Components/Common/AppPrintButton.vue';
-import { usePrint } from '@/Composables/usePrint';
+import { printDocument } from '@/Composables/usePrint';
 import AppToggle from '@/Components/Common/AppToggle.vue';
 import { reactive, computed } from 'vue';
 import { router } from '@inertiajs/vue3';
@@ -990,7 +983,7 @@ import AppLayout from '@/Layouts/AppLayout.vue';
 import PageHeader from '@/Components/PageHeader.vue';
 import BackButton from '@/Components/BackButton.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
-import CustomDatePicker from '@/Components/CustomDatePicker.vue';
+import ReportDateRange from '@/Components/Common/ReportDateRange.vue';
 import StandardReportHeader from '@/Components/Print/StandardReportHeader.vue';
 import StandardReportFooter from '@/Components/Print/StandardReportFooter.vue';
 
@@ -1294,25 +1287,6 @@ const getStatusLabel = (status) => {
             return status || '—';
     }
 };
-
-const getStatusBadgeClass = (status) => {
-    const base = 'inline-block px-2.5 py-0.5 rounded-full text-[10px] font-bold ';
-    switch (status) {
-        case 'paid':
-            return (
-                base +
-                'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300'
-            );
-        case 'partial':
-            return base + 'bg-amber-100 text-amber-700 dark:bg-amber-950/60 dark:text-amber-300';
-        case 'unpaid':
-            return base + 'bg-rose-100 text-rose-700 dark:bg-rose-950/60 dark:text-rose-300';
-        default:
-            return base + 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300';
-    }
-};
-
-const { printDocument } = usePrint();
 </script>
 
 <style>

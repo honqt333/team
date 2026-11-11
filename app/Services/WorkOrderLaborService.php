@@ -121,11 +121,25 @@ class WorkOrderLaborService
                 'notes' => $notes,
             ]);
 
-            // First start flips a pending item into in_progress. Items
-            // already in_progress / on_hold / ready_for_qc are left
-            // alone — the timer is independent of item status.
+            // First start flips a pending item into in_progress and stamps
+            // started_at if not yet set. Items already in_progress / on_hold
+            // / ready_for_qc are left alone — the timer is independent.
+            $itemUpdates = [];
+
             if ($freshItem->status === WorkOrderItem::STATUS_PENDING) {
-                $freshItem->update(['status' => WorkOrderItem::STATUS_IN_PROGRESS]);
+                $itemUpdates['status'] = WorkOrderItem::STATUS_IN_PROGRESS;
+            }
+
+            if (! $freshItem->started_at) {
+                $itemUpdates['started_at'] = $now;
+            }
+
+            if ($itemUpdates !== []) {
+                $freshItem->update($itemUpdates);
+            }
+
+            if (in_array($workOrder->status, [WorkOrder::STATUS_DRAFT, WorkOrder::STATUS_OPEN], true)) {
+                $workOrder->update(['status' => WorkOrder::STATUS_IN_PROGRESS]);
             }
 
             $workOrder->logActivity(

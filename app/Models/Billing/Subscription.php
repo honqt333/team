@@ -7,6 +7,7 @@ namespace App\Models\Billing;
 use App\Models\BankTransferReceipt;
 use App\Models\Concerns\TenantScoped;
 use App\Models\Tenant;
+use App\Services\Billing\SubscriptionLifecycleService;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -82,7 +83,36 @@ class Subscription extends Model
      */
     public function onTrial(): bool
     {
-        return $this->status === 'trialing' && $this->trial_ends_at?->isFuture();
+        $end = $this->trial_ends_at ?? $this->ends_at;
+
+        return in_array($this->status, ['trial', 'trialing'], true) && $end?->isFuture();
+    }
+
+    /**
+     * Check if subscription has ended but is still within the configured grace period.
+     */
+    public function isInGracePeriod(?int $graceDays = null): bool
+    {
+        if (! in_array($this->status, ['active', 'expired'], true) || ! $this->ends_at) {
+            return false;
+        }
+
+        if ($this->ends_at->isFuture()) {
+            return false;
+        }
+
+        $graceDays ??= app(SubscriptionLifecycleService::class)->getGracePeriodDays();
+
+        return $graceDays > 0 && $this->ends_at->copy()->addDays($graceDays)->isFuture();
+    }
+
+    public function isExpired(): bool
+    {
+        if ($this->status === 'expired') {
+            return true;
+        }
+
+        return $this->ends_at !== null && $this->ends_at->isPast();
     }
 
     /**
@@ -91,11 +121,13 @@ class Subscription extends Model
     public function getDaysRemainingAttribute(): int
     {
         if ($this->onTrial()) {
-            return max(0, now()->diffInDays($this->trial_ends_at, false));
+            $end = $this->trial_ends_at ?? $this->ends_at;
+
+            return $end ? max(0, (int) ceil($end->floatDiffInDays(now(), true) > 0 && $end->isFuture() ? now()->floatDiffInDays($end) : 0)) : 0;
         }
 
-        if ($this->ends_at) {
-            return max(0, now()->diffInDays($this->ends_at, false));
+        if ($this->ends_at && $this->ends_at->isFuture()) {
+            return max(0, (int) ceil(now()->floatDiffInDays($this->ends_at)));
         }
 
         return 0;

@@ -109,26 +109,56 @@
 </template>
 
 <script setup>
-import { computed, onBeforeUnmount, ref } from 'vue';
+import { computed, onBeforeUnmount, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { router, usePage } from '@inertiajs/vue3';
 import axios from 'axios';
+import { useToast } from '@/Composables/useToast';
+import { usePermission } from '@/Composables/usePermission';
 
 const props = defineProps({
     workOrder: { type: Object, required: true },
     item: { type: Object, required: true },
-    // All labor entries for THIS item, regardless of user.
+    // Labor entries for THIS item (scoped to technicianId when provided).
     laborEntries: { type: Array, default: () => [] },
+    technicianId: { type: Number, default: null },
+    serverNow: { type: String, default: null },
     readOnly: { type: Boolean, default: false },
 });
 
 const { t } = useI18n();
 const page = usePage();
+const { error: toastError } = useToast();
+const { can, hasRole } = usePermission();
+
 const currentUserId = computed(() => page.props?.auth?.user?.id ?? null);
+const targetUserId = computed(() => props.technicianId ?? currentUserId.value);
+const canManageOtherTechTimers = computed(
+    () => can('crm.work_orders.update') && (hasRole('super_admin') || hasRole('admin'))
+);
 
 const busy = ref(false);
-const now = ref(Date.now());
+const serverOffsetMs = ref(0);
+const effectiveNow = () => Date.now() + serverOffsetMs.value;
+const now = ref(effectiveNow());
 let tickHandle = null;
+
+watch(
+    () => props.serverNow,
+    (val) => {
+        serverOffsetMs.value = val ? new Date(val).getTime() - Date.now() : 0;
+        now.value = effectiveNow();
+    },
+    { immediate: true }
+);
+
+watch(
+    () => props.laborEntries,
+    () => {
+        now.value = effectiveNow();
+    },
+    { deep: true }
+);
 
 const labels = {
     start: t('work_orders.labor.start'),
@@ -143,22 +173,24 @@ const labels = {
 };
 
 const ACTIVE_STATUSES = ['running', 'paused'];
-const itemIsClosed = computed(() => ['completed', 'cancelled'].includes(props.item.status));
+const itemIsClosed = computed(() =>
+    ['completed', 'cancelled', 'on_hold', 'ready_for_qc'].includes(props.item.status)
+);
 
 const myEntries = computed(() =>
-    props.laborEntries.filter((e) => e.user_id === currentUserId.value)
+    props.laborEntries.filter((e) => e.user_id === targetUserId.value)
 );
 
 const otherEntries = computed(() =>
-    props.laborEntries.filter((e) => e.user_id !== currentUserId.value)
+    props.laborEntries.filter((e) => e.user_id !== targetUserId.value)
 );
 
-// My currently open session (if any) — drives the buttons.
+// Currently open session for the target technician — drives the buttons.
 const myActive = computed(
     () => myEntries.value.find((e) => ACTIVE_STATUSES.includes(e.status)) || null
 );
 
-// Anyone else's open session — we show a "running" hint but no controls.
+// Anyone else's open session — we show a hint when viewing someone else's session.
 const otherActive = computed(
     () => otherEntries.value.find((e) => ACTIVE_STATUSES.includes(e.status)) || null
 );
@@ -169,17 +201,17 @@ const state = computed(() => {
     return 'idle';
 });
 
-const isOwn = computed(() => !!myActive.value);
-// P1 revision: an assigned technician can start their own timer on
-// this item even when another technician is already on a session
-// here. The only things that block Start are:
-//   1. the item is completed/cancelled
-//   2. the current user already has their own open session
-// We do NOT block on otherActive.value — multiple technicians can
-// share a service item, each with their own session.
-const canStart = computed(() => !itemIsClosed.value && !myActive.value);
+const canManageTarget = computed(
+    () =>
+        targetUserId.value !== null &&
+        (targetUserId.value === currentUserId.value || canManageOtherTechTimers.value)
+);
 
-// Total accumulated effective seconds across all entries for this item.
+const isOwn = computed(() => Boolean(myActive.value) && canManageTarget.value);
+
+const canStart = computed(() => !itemIsClosed.value && !myActive.value && canManageTarget.value);
+
+// Total accumulated effective seconds across entries in this timer scope.
 const totalSeconds = computed(() => {
     return props.laborEntries.reduce((acc, e) => acc + (e.effective_duration_seconds || 0), 0);
 });
@@ -213,12 +245,11 @@ function formatHms(total) {
 }
 
 // Local 1-second tick so the running timer updates between server
-// round-trips. No polling or websocket — we just increment `now`.
-// (The reload on each action resets it anyway.)
+// round-trips. Uses effectiveNow() adjusted for any server clock offset.
 if (!tickHandle) {
     tickHandle = setInterval(() => {
         if (state.value === 'running') {
-            now.value = Date.now();
+            now.value = effectiveNow();
         }
     }, 1000);
 }
@@ -232,66 +263,60 @@ onBeforeUnmount(() => {
 
 // ==================== API calls ====================
 
-async function start() {
+async function runTimerAction(url, payload = {}) {
     busy.value = true;
     try {
-        await axios.post(
-            route('work-orders.items.labor.start', {
-                work_order: props.workOrder.id,
-                item: props.item.id,
-            })
-        );
-        router.reload({ only: ['workOrder', 'laborEntries'] });
+        await axios.post(url, payload);
+        router.reload({ only: ['workOrder', 'laborEntries', 'serverNow'] });
+    } catch (err) {
+        const message =
+            err?.response?.data?.error ||
+            err?.response?.data?.message ||
+            t('messages.error_occurred');
+        toastError(message);
     } finally {
         busy.value = false;
     }
 }
 
-async function pause() {
-    if (!myActive.value) return;
-    busy.value = true;
-    try {
-        await axios.post(
-            route('work-orders.labor.pause', {
-                work_order: props.workOrder.id,
-                entry: myActive.value.id,
-            })
-        );
-        router.reload({ only: ['workOrder', 'laborEntries'] });
-    } finally {
-        busy.value = false;
-    }
+function start() {
+    const payload = targetUserId.value ? { technician_id: targetUserId.value } : {};
+    return runTimerAction(
+        route('work-orders.items.labor.start', {
+            work_order: props.workOrder.id,
+            item: props.item.id,
+        }),
+        payload
+    );
 }
 
-async function resume() {
+function pause() {
     if (!myActive.value) return;
-    busy.value = true;
-    try {
-        await axios.post(
-            route('work-orders.labor.resume', {
-                work_order: props.workOrder.id,
-                entry: myActive.value.id,
-            })
-        );
-        router.reload({ only: ['workOrder', 'laborEntries'] });
-    } finally {
-        busy.value = false;
-    }
+    return runTimerAction(
+        route('work-orders.labor.pause', {
+            work_order: props.workOrder.id,
+            entry: myActive.value.id,
+        })
+    );
 }
 
-async function end() {
+function resume() {
     if (!myActive.value) return;
-    busy.value = true;
-    try {
-        await axios.post(
-            route('work-orders.labor.end', {
-                work_order: props.workOrder.id,
-                entry: myActive.value.id,
-            })
-        );
-        router.reload({ only: ['workOrder', 'laborEntries'] });
-    } finally {
-        busy.value = false;
-    }
+    return runTimerAction(
+        route('work-orders.labor.resume', {
+            work_order: props.workOrder.id,
+            entry: myActive.value.id,
+        })
+    );
+}
+
+function end() {
+    if (!myActive.value) return;
+    return runTimerAction(
+        route('work-orders.labor.end', {
+            work_order: props.workOrder.id,
+            entry: myActive.value.id,
+        })
+    );
 }
 </script>

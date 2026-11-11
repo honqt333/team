@@ -6,6 +6,7 @@ const props = defineProps({
         type: [Boolean, String, Number, Array],
         default: undefined,
     },
+    name: String,
     value: {
         type: [String, Number, Boolean],
         default: null,
@@ -72,22 +73,33 @@ const handleToggle = () => {
 </script>
 
 <template>
-    <div
-        role="button"
-        tabindex="0"
-        :aria-pressed="isSelected"
+    <component
+        :is="type === 'radio' ? 'label' : 'div'"
+        :role="type === 'radio' ? undefined : 'button'"
+        :tabindex="type === 'radio' ? undefined : 0"
+        :aria-pressed="type === 'radio' ? undefined : isSelected"
         :aria-disabled="disabled"
-        class="relative flex items-start gap-4 p-4 rounded-xl border transition-all duration-200 select-none text-start cursor-pointer"
+        class="relative flex items-start gap-4 p-4 rounded-xl border transition-all duration-200 select-none text-start cursor-pointer focus-within:ring-2 focus-within:ring-focus-ring"
         :class="[
             disabled ? 'opacity-50 cursor-not-allowed' : '',
             isSelected
                 ? 'border-action-primary bg-selection-bg ring-1 ring-action-primary'
                 : 'border-border bg-surface hover:border-action-primary/60',
         ]"
-        @click="handleToggle"
-        @keydown.space.prevent="handleToggle"
-        @keydown.enter.prevent="handleToggle"
+        @click="type !== 'radio' && handleToggle()"
+        @keydown.space.self.prevent="handleToggle"
+        @keydown.enter.self.prevent="handleToggle"
     >
+        <input
+            v-if="type === 'radio'"
+            type="radio"
+            :name="name"
+            :value="value"
+            :checked="isSelected"
+            :disabled="disabled"
+            class="sr-only"
+            @change="handleToggle"
+        />
         <!-- Indicator (Radio / Checkbox style) -->
         <div
             class="mt-0.5 shrink-0 flex items-center justify-center transition-colors duration-200"
@@ -129,5 +141,5 @@ const handleToggle = () => {
                 <slot />
             </div>
         </div>
-    </div>
+    </component>
 </template>

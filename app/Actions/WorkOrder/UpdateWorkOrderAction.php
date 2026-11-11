@@ -20,7 +20,7 @@ class UpdateWorkOrderAction
             // Update main work order fields
             $fields = [
                 'customer_id', 'vehicle_id', 'status', 'notes',
-                'customer_complaint', 'initial_assessment', 'odometer',
+                'customer_complaint', 'initial_assessment', 'odometer', 'fuel_level',
                 'contact_name', 'contact_phone', 'entry_date', 'expected_end_date',
             ];
 

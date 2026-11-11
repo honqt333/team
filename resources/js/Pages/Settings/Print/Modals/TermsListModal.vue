@@ -115,7 +115,7 @@
                         <div
                             class="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-700 overflow-hidden shadow-sm"
                         >
-                            <table class="w-full text-start border-collapse">
+                            <DataTable structured class="w-full text-start border-collapse">
                                 <thead class="bg-gray-50/50 dark:bg-gray-800/50">
                                     <tr class="border-b border-gray-100 dark:border-gray-700">
                                         <th
@@ -259,7 +259,7 @@
                                         </td>
                                     </tr>
                                 </tbody>
-                            </table>
+                            </DataTable>
                         </div>
                     </div>
 
@@ -315,6 +315,7 @@
 </template>
 
 <script setup>
+import DataTable from '@/Components/Common/DataTable.vue';
 import Modal from '@/Components/Modal.vue';
 import { ref, computed, watch } from 'vue';
 import { useI18n } from 'vue-i18n';

@@ -9,6 +9,10 @@ const props = defineProps({
         type: Object,
         required: true,
     },
+    canManageScripts: {
+        type: Boolean,
+        default: false,
+    },
 });
 
 const DEVICES = [
@@ -49,16 +53,19 @@ function mapFormSettingsToPreview(s) {
                 : s.website_favicon instanceof File
                   ? URL.createObjectURL(s.website_favicon)
                   : '',
-        primary_color: s.website_primary_color || '#4f46e5',
+        primary_color: s.website_primary_color || '#2563eb',
         contact_email: s.website_contact_email ?? '',
         contact_phone: s.website_contact_phone ?? '',
         whatsapp_number: s.website_whatsapp_number ?? '',
         whatsapp_floating_enabled: isTrue(s.website_whatsapp_floating_enabled),
         whatsapp_floating_number: s.website_whatsapp_floating_number ?? '',
         chatbot_enabled: isTrue(s.website_chatbot_enabled),
-        chatbot_script: s.website_chatbot_script ?? '',
-        scripts_header: s.website_scripts_header ?? '',
-        scripts_footer: s.website_scripts_footer ?? '',
+        // Raw scripts execute inside the preview iframe. They are only
+        // mapped when the current actor is allowed to manage them; the
+        // server also blanks them for every other role.
+        chatbot_script: props.canManageScripts ? (s.website_chatbot_script ?? '') : '',
+        scripts_header: props.canManageScripts ? (s.website_scripts_header ?? '') : '',
+        scripts_footer: props.canManageScripts ? (s.website_scripts_footer ?? '') : '',
         announcement_enabled: isTrue(s.website_announcement_enabled),
         announcement_text_ar: s.website_announcement_text_ar ?? '',
         announcement_text_en: s.website_announcement_text_en ?? '',

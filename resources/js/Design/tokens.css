@@ -1,5 +1,5 @@
 /* ============================================================
- * Carag V2 — Design Tokens
+ * Khidmh Pro — Design Tokens (v2 Clean Modern)
  * ------------------------------------------------------------
  * Single source of truth for color, spacing, type, motion, etc.
  * Bilingual (light + dark) via :root and [data-theme="dark"].
@@ -13,48 +13,84 @@
 :root,
 :root[data-theme='light'] {
     /* --- Brand --- */
-    --color-brand-primary: #fbbf24;
-    --color-brand-primary-hover: #f59e0b;
-    --color-brand-primary-active: #d97706;
-    --color-brand-primary-soft: #fef3c7;
-    --color-brand-primary-soft-dark: rgba(251, 191, 36, 0.16);
-    --color-brand-on: #0f172a;
+    --color-brand-primary: #2563eb;
+    --color-brand-primary-rgb: 37 99 235;
+    --color-brand-primary-hover: #1d4ed8;
+    --color-brand-primary-hover-rgb: 29 78 216;
+    --color-brand-primary-active: #1e40af;
+    --color-brand-primary-active-rgb: 30 64 175;
+    --color-brand-primary-soft: #eff6ff;
+    --color-brand-primary-soft-dark: rgba(37, 99, 235, 0.12);
+    --color-brand-on: #ffffff;
+    --color-brand-on-rgb: 255 255 255;
 
-    /* --- Action (Indigo for primary actions) --- */
-    --color-action-primary: #4f46e5;
-    --color-action-primary-hover: #4338ca;
-    --color-action-primary-active: #3730a3;
-    --color-action-primary-soft: #eef2ff;
-    --color-action-primary-soft-dark: rgba(79, 70, 229, 0.16);
+    /* --- Accent Gold (heritage highlight) --- */
+    --color-accent-gold: #f59e0b;
+    --color-accent-gold-rgb: 245 158 11;
+    --color-accent-gold-light: #fbbf24;
+    --color-accent-gold-light-rgb: 251 191 36;
+    --color-accent-gold-soft: #fffbeb;
+    --color-accent-gold-soft-dark: rgba(245, 158, 11, 0.14);
+
+    /* --- Action (Primary Actions — aligned with brand for coherence) --- */
+    --color-action-primary: #2563eb;
+    --color-action-primary-rgb: 37 99 235;
+    --color-action-primary-hover: #1d4ed8;
+    --color-action-primary-hover-rgb: 29 78 216;
+    --color-action-primary-active: #1e40af;
+    --color-action-primary-active-rgb: 30 64 175;
+    --color-action-primary-soft: #eff6ff;
+    --color-action-primary-soft-dark: rgba(37, 99, 235, 0.12);
     --color-action-on: #ffffff;
+    --color-action-on-rgb: 255 255 255;
 
     /* --- Surfaces (light) --- */
     --color-background: #f8fafc;
     --color-surface: #ffffff;
+    --color-surface-rgb: 255 255 255;
     --color-surface-muted: #f1f5f9;
+    --color-surface-muted-rgb: 241 245 249;
     --color-surface-raised: #ffffff;
+    --color-surface-raised-rgb: 255 255 255;
+    --color-surface-tertiary: #e2e8f0;
+    --color-surface-tertiary-rgb: 226 232 240;
     --color-border: #e2e8f0;
+    --color-border-rgb: 226 232 240;
     --color-border-strong: #cbd5e1;
+    --color-border-strong-rgb: 203 213 225;
 
     /* --- Text (light) --- */
     --color-text-primary: #0f172a;
+    --color-text-primary-rgb: 15 23 42;
     --color-text-secondary: #475569;
+    --color-text-secondary-rgb: 71 85 105;
     --color-text-muted: #94a3b8;
+    --color-text-muted-rgb: 148 163 184;
     --color-text-inverse: #ffffff;
+    --color-text-inverse-rgb: 255 255 255;
 
-    /* --- Feedback (theme-agnostic) --- */
+    /* --- Feedback (light) --- */
     --color-success: #16a34a;
+    --color-success-rgb: 22 163 74;
     --color-success-soft: #dcfce7;
+    --color-success-soft-rgb: 220 252 231;
     --color-warning: #f59e0b;
-    --color-warning-soft: #fef3c7;
+    --color-warning-rgb: 245 158 11;
+    --color-warning-soft: #fffbeb;
+    --color-warning-soft-rgb: 255 251 235;
     --color-danger: #dc2626;
+    --color-danger-rgb: 220 38 38;
     --color-danger-soft: #fee2e2;
+    --color-danger-soft-rgb: 254 226 226;
     --color-info: #0ea5e9;
+    --color-info-rgb: 14 165 233;
     --color-info-soft: #e0f2fe;
+    --color-info-soft-rgb: 224 242 254;
 
     /* --- Focus --- */
-    --color-focus-ring: #fbbf24;
-    --color-focus-ring-soft: rgba(251, 191, 36, 0.4);
+    --color-focus-ring: #2563eb;
+    --color-focus-ring-rgb: 37 99 235;
+    --color-focus-ring-soft: rgba(37, 99, 235, 0.35);
 
     /* --- Selection & Toggle states --- */
     --color-selection-bg: var(--color-action-primary-soft);
@@ -134,7 +170,7 @@
         0 4px 6px -4px rgba(15, 23, 42, 0.05);
     --shadow-xl: 0 20px 25px -5px rgba(15, 23, 42, 0.12),
         0 8px 10px -6px rgba(15, 23, 42, 0.05);
-    --shadow-focus: 0 0 0 4px rgba(251, 191, 36, 0.4);
+    --shadow-focus: 0 0 0 4px rgba(37, 99, 235, 0.35);
 
     /* --- z-index --- */
     --z-hide: -1;
@@ -161,32 +197,79 @@
 /* Dark mode — active when <html class="dark"> is set (Tailwind) */
 :root.dark,
 :root[data-theme='dark'] {
-    --color-background: #0f172a;
-    --color-surface: #1e293b;
-    --color-surface-muted: #334155;
-    --color-surface-raised: #1e293b;
-    --color-border: #334155;
-    --color-border-strong: #475569;
+    --color-background: #0b1120;
+    --color-surface: #131d2e;
+    --color-surface-rgb: 19 29 46;
+    --color-surface-muted: #1e2a3e;
+    --color-surface-muted-rgb: 30 42 62;
+    --color-surface-raised: #1a2537;
+    --color-surface-raised-rgb: 26 37 55;
+    --color-surface-tertiary: #273549;
+    --color-surface-tertiary-rgb: 39 53 73;
+    --color-border: #1e2d42;
+    --color-border-rgb: 30 45 66;
+    --color-border-strong: #334155;
+    --color-border-strong-rgb: 51 65 85;
 
     --color-text-primary: #f1f5f9;
-    --color-text-secondary: #cbd5e1;
+    --color-text-primary-rgb: 241 245 249;
+    --color-text-secondary: #94a3b8;
+    --color-text-secondary-rgb: 148 163 184;
     --color-text-muted: #64748b;
+    --color-text-muted-rgb: 100 116 139;
     --color-text-inverse: #0f172a;
+    --color-text-inverse-rgb: 15 23 42;
 
-    --color-brand-primary: #fbbf24;
-    --color-brand-primary-hover: #fcd34d;
-    --color-brand-primary-active: #fde68a;
-    --color-brand-primary-soft: rgba(251, 191, 36, 0.16);
-    --color-brand-primary-soft-dark: rgba(251, 191, 36, 0.16);
-    --color-brand-on: #0f172a;
+    --color-brand-primary: #3b82f6;
+    --color-brand-primary-rgb: 59 130 246;
+    --color-brand-primary-hover: #60a5fa;
+    --color-brand-primary-hover-rgb: 96 165 250;
+    --color-brand-primary-active: #93c5fd;
+    --color-brand-primary-active-rgb: 147 197 253;
+    --color-brand-primary-soft: rgba(59, 130, 246, 0.14);
+    --color-brand-primary-soft-dark: rgba(59, 130, 246, 0.14);
+    --color-brand-on: #ffffff;
+    --color-brand-on-rgb: 255 255 255;
 
-    /* --- Action (Indigo for primary actions) --- */
-    --color-action-primary: #6366f1;
-    --color-action-primary-hover: #818cf8;
-    --color-action-primary-active: #a5b4fc;
-    --color-action-primary-soft: rgba(99, 102, 241, 0.16);
-    --color-action-primary-soft-dark: rgba(99, 102, 241, 0.16);
+    /* --- Accent Gold (heritage highlight) --- */
+    --color-accent-gold: #fbbf24;
+    --color-accent-gold-rgb: 251 191 36;
+    --color-accent-gold-light: #fcd34d;
+    --color-accent-gold-light-rgb: 252 211 77;
+    --color-accent-gold-soft: rgba(251, 191, 36, 0.14);
+    --color-accent-gold-soft-dark: rgba(251, 191, 36, 0.14);
+
+    /* --- Action (Primary Actions) --- */
+    --color-action-primary: #3b82f6;
+    --color-action-primary-rgb: 59 130 246;
+    --color-action-primary-hover: #60a5fa;
+    --color-action-primary-hover-rgb: 96 165 250;
+    --color-action-primary-active: #93c5fd;
+    --color-action-primary-active-rgb: 147 197 253;
+    --color-action-primary-soft: rgba(59, 130, 246, 0.14);
+    --color-action-primary-soft-dark: rgba(59, 130, 246, 0.14);
     --color-action-on: #ffffff;
+    --color-action-on-rgb: 255 255 255;
+
+    /* --- Feedback (dark soft surfaces) --- */
+    --color-success: #22c55e;
+    --color-success-rgb: 34 197 94;
+    --color-success-soft: #122b1e;
+    --color-success-soft-rgb: 18 43 30;
+    --color-warning: #fbbf24;
+    --color-warning-rgb: 251 191 36;
+    --color-warning-soft: #2b2110;
+    --color-warning-soft-rgb: 43 33 16;
+    --color-danger: #f87171;
+    --color-danger-rgb: 248 113 113;
+    --color-danger-soft: #2e1518;
+    --color-danger-soft-rgb: 46 21 24;
+    --color-info: #38bdf8;
+    --color-info-rgb: 56 189 248;
+    --color-info-soft: #0f2537;
+    --color-info-soft-rgb: 15 37 55;
+    --color-focus-ring: #3b82f6;
+    --color-focus-ring-rgb: 59 130 246;
 
     /* --- Selection & Toggle states (Dark) --- */
     --color-selection-bg: var(--color-action-primary-soft);
@@ -195,11 +278,11 @@
     --color-toggle-off-bg: var(--color-border);
     --color-toggle-thumb: #ffffff;
 
-    --shadow-xs: 0 1px 2px 0 rgba(0, 0, 0, 0.4);
-    --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.45), 0 1px 2px 0 rgba(0, 0, 0, 0.35);
-    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.55), 0 2px 4px -2px rgba(0, 0, 0, 0.4);
-    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.55), 0 4px 6px -4px rgba(0, 0, 0, 0.4);
-    --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.6), 0 8px 10px -6px rgba(0, 0, 0, 0.4);
+    --shadow-xs: 0 1px 2px 0 rgba(0, 0, 0, 0.5);
+    --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.55), 0 1px 2px 0 rgba(0, 0, 0, 0.4);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.6), 0 2px 4px -2px rgba(0, 0, 0, 0.5);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.6), 0 4px 6px -4px rgba(0, 0, 0, 0.5);
+    --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.65), 0 8px 10px -6px rgba(0, 0, 0, 0.5);
 
     color-scheme: dark;
 }

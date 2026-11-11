@@ -39,11 +39,7 @@
                 class="rounded-xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-700 dark:bg-gray-800"
             >
                 <label class="flex cursor-pointer items-start gap-3">
-                    <input
-                        v-model="form.enabled"
-                        type="checkbox"
-                        class="mt-1 h-5 w-5 rounded border-gray-300 text-amber-600 focus:ring-amber-500"
-                    />
+                    <AppToggle v-model="form.enabled" />
                     <div class="flex-1">
                         <div class="text-base font-semibold text-gray-900 dark:text-white">
                             {{
@@ -134,7 +130,7 @@
                         {{ isAr ? $t('system.settings.reminder_tiers') : 'Reminder Tiers' }}
                     </h2>
                 </div>
-                <table class="w-full text-sm">
+                <DataTable structured class="w-full text-sm">
                     <thead class="bg-gray-50 text-xs uppercase text-gray-500 dark:bg-gray-900/40">
                         <tr>
                             <th class="px-5 py-3 text-start">
@@ -177,27 +173,20 @@
                                                 form.channel_matrix[key]?.includes(ch.key),
                                         }"
                                     >
-                                        <input
+                                        <AppToggle
                                             v-model="form.channel_matrix[key]"
                                             :value="ch.key"
-                                            type="checkbox"
-                                            class="h-3 w-3 rounded text-amber-600"
                                         />
                                         {{ ch.label }}
                                     </label>
                                 </div>
                             </td>
                             <td class="px-5 py-3">
-                                <input
-                                    v-model="form.active_tiers_list"
-                                    :value="key"
-                                    type="checkbox"
-                                    class="h-4 w-4 rounded border-gray-300 text-amber-600"
-                                />
+                                <AppToggle v-model="form.active_tiers_list" :value="key" />
                             </td>
                         </tr>
                     </tbody>
-                </table>
+                </DataTable>
             </div>
 
             <!-- Save button -->
@@ -248,6 +237,8 @@
 </template>
 
 <script setup>
+import DataTable from '@/Components/Common/DataTable.vue';
+import AppToggle from '@/Components/Common/AppToggle.vue';
 import { useI18n } from 'vue-i18n';
 const { t } = useI18n();
 

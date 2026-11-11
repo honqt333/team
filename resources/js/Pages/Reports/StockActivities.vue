@@ -1,6 +1,6 @@
 <template>
     <AppLayout>
-        <div class="space-y-6">
+        <PrintEngine document-type="report" class="space-y-6">
             <!-- Screen Only Header Section (AUDIT_STANDARDS.md compliant) -->
             <PageHeader
                 :title="$t('reports.stock_activities_report.title')"
@@ -32,26 +32,10 @@
 
                 <template #actions>
                     <div class="flex items-center gap-2.5 shrink-0">
-                        <button
-                            type="button"
+                        <AppPrintButton
                             @click="handlePrint"
-                            class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 text-xs font-bold transition-all shadow-sm"
-                        >
-                            <svg
-                                class="w-4 h-4 text-gray-500"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                            >
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    stroke-width="2"
-                                    d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"
-                                />
-                            </svg>
-                            <span>{{ $t('reports.stock_activities_report.print_report') }}</span>
-                        </button>
+                            :label="$t('reports.stock_activities_report.print_report')"
+                        />
 
                         <a
                             :href="exportUrl"
@@ -724,7 +708,7 @@
 
                     <!-- Group Items Table -->
                     <div v-show="isGroupOpen(grp.group_key)" class="overflow-x-auto">
-                        <table class="w-full text-xs text-right">
+                        <DataTable structured class="w-full text-xs text-right">
                             <thead
                                 class="bg-gray-50/75 dark:bg-gray-800/60 text-gray-500 dark:text-gray-400 font-semibold border-b border-gray-100 dark:border-gray-700"
                             >
@@ -826,7 +810,7 @@
                                     </td>
                                 </tr>
                             </tbody>
-                        </table>
+                        </DataTable>
                     </div>
                 </div>
             </div>
@@ -837,7 +821,7 @@
                 class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200/80 dark:border-gray-700/80 overflow-hidden"
             >
                 <div class="overflow-x-auto">
-                    <table class="w-full text-xs text-right">
+                    <DataTable structured class="w-full text-xs text-right">
                         <thead
                             class="bg-gray-50 dark:bg-gray-750 text-gray-500 dark:text-gray-400 font-bold border-b border-gray-100 dark:border-gray-700"
                         >
@@ -976,7 +960,7 @@
                                 </td>
                             </tr>
                         </tbody>
-                    </table>
+                    </DataTable>
                 </div>
 
                 <!-- Pagination (Screen Only) -->
@@ -1016,11 +1000,15 @@
             <div class="print-section hidden">
                 <StandardReportFooter />
             </div>
-        </div>
+        </PrintEngine>
     </AppLayout>
 </template>
 
 <script setup>
+import PrintEngine from '@/Components/Print/PrintEngine.vue';
+import DataTable from '@/Components/Common/DataTable.vue';
+import AppPrintButton from '@/Components/Common/AppPrintButton.vue';
+import { printDocument } from '@/Composables/usePrint';
 import { ref, reactive, computed, watch } from 'vue';
 import { router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
@@ -1305,7 +1293,7 @@ const exportUrl = computed(() => {
 
 // Printing
 const handlePrint = () => {
-    window.print();
+    printDocument();
 };
 
 // Badge styles based on move type

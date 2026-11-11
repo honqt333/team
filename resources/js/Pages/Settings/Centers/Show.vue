@@ -820,7 +820,7 @@
                             class="bg-white dark:bg-gray-850 rounded-2xl border border-gray-200 dark:border-gray-700/60 overflow-hidden shadow-sm"
                         >
                             <div class="overflow-x-auto">
-                                <table class="w-full text-right border-collapse">
+                                <DataTable structured class="w-full text-right border-collapse">
                                     <thead>
                                         <tr
                                             class="bg-gray-50 dark:bg-gray-800/50 border-b border-gray-150 dark:border-gray-700"
@@ -1059,7 +1059,7 @@
                                             </td>
                                         </tr>
                                     </tbody>
-                                </table>
+                                </DataTable>
                             </div>
                         </div>
 
@@ -1136,7 +1136,7 @@
                         >
                             <!-- 1. Sales Invoices -->
                             <div v-if="subInvoiceTab === 'sales'" class="overflow-x-auto">
-                                <table class="w-full text-right border-collapse">
+                                <DataTable structured class="w-full text-right border-collapse">
                                     <thead>
                                         <tr
                                             class="bg-gray-50 dark:bg-gray-800/50 border-b border-gray-150 dark:border-gray-750"
@@ -1266,12 +1266,12 @@
                                             </td>
                                         </tr>
                                     </tbody>
-                                </table>
+                                </DataTable>
                             </div>
 
                             <!-- 2. Purchase Invoices -->
                             <div v-if="subInvoiceTab === 'purchases'" class="overflow-x-auto">
-                                <table class="w-full text-right border-collapse">
+                                <DataTable structured class="w-full text-right border-collapse">
                                     <thead>
                                         <tr
                                             class="bg-gray-50 dark:bg-gray-800/50 border-b border-gray-155 dark:border-gray-750"
@@ -1406,7 +1406,7 @@
                                             </td>
                                         </tr>
                                     </tbody>
-                                </table>
+                                </DataTable>
                             </div>
                         </div>
                     </div>
@@ -1419,6 +1419,7 @@
 </template>
 
 <script setup>
+import DataTable from '@/Components/Common/DataTable.vue';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import BackButton from '@/Components/BackButton.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';

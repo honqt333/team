@@ -532,7 +532,10 @@
                 class="bg-white dark:bg-gray-800 rounded-3xl border border-gray-200 dark:border-gray-800 shadow-xl shadow-indigo-500/5 overflow-hidden"
             >
                 <div class="overflow-x-auto">
-                    <table class="w-full text-start text-xs text-gray-700 dark:text-gray-300">
+                    <DataTable
+                        structured
+                        class="w-full text-start text-xs text-gray-700 dark:text-gray-300"
+                    >
                         <thead
                             class="bg-gray-50 dark:bg-gray-900/60 text-gray-500 dark:text-gray-400 font-bold border-b border-gray-200 dark:border-gray-800 text-[11px]"
                         >
@@ -747,7 +750,7 @@
                                 </td>
                             </tr>
                         </tbody>
-                    </table>
+                    </DataTable>
                 </div>
 
                 <!-- Pagination Footer -->
@@ -790,9 +793,10 @@
 </template>
 
 <script setup>
+import DataTable from '@/Components/Common/DataTable.vue';
 import PrintEngine from '@/Components/Print/PrintEngine.vue';
 import AppPrintButton from '@/Components/Common/AppPrintButton.vue';
-import { usePrint } from '@/Composables/usePrint';
+import { printDocument } from '@/Composables/usePrint';
 import RadioGroup from '@/Components/Common/RadioGroup.vue';
 import { reactive, computed } from 'vue';
 import { router } from '@inertiajs/vue3';
@@ -1007,8 +1011,6 @@ const resetFilters = () => {
     filterForm.search = '';
     applyFilters();
 };
-
-const { printDocument } = usePrint();
 
 // AUDIT_STANDARDS.md Section 3: All numbers & prices formatted in English digits (0-9)
 const formatMoney = (val) => {

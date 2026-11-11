@@ -843,7 +843,7 @@
                             v-else-if="vehicleViewMode === 'list' && filteredVehicles.length > 0"
                             class="bg-gray-50 dark:bg-gray-900/50 rounded-xl border border-gray-200 dark:border-gray-700 overflow-x-auto"
                         >
-                            <table class="min-w-full">
+                            <DataTable structured class="min-w-full">
                                 <thead>
                                     <tr class="bg-gray-100 dark:bg-gray-800">
                                         <th
@@ -952,7 +952,7 @@
                                         </td>
                                     </tr>
                                 </tbody>
-                            </table>
+                            </DataTable>
                         </div>
 
                         <!-- Empty State -->
@@ -1179,7 +1179,7 @@
                             "
                             class="bg-gray-50 dark:bg-gray-900/50 rounded-xl border border-gray-200 dark:border-gray-700 overflow-x-auto"
                         >
-                            <table class="min-w-full">
+                            <DataTable structured class="min-w-full">
                                 <thead>
                                     <tr class="bg-gray-100 dark:bg-gray-800">
                                         <th
@@ -1315,7 +1315,7 @@
                                         </td>
                                     </tr>
                                 </tbody>
-                            </table>
+                            </DataTable>
                         </div>
 
                         <!-- Empty State -->
@@ -1491,7 +1491,7 @@
                             v-else-if="quoteViewMode === 'list' && filteredQuotes.length > 0"
                             class="bg-gray-50 dark:bg-gray-900/50 rounded-xl border border-gray-200 dark:border-gray-700 overflow-x-auto"
                         >
-                            <table class="min-w-full">
+                            <DataTable structured class="min-w-full">
                                 <thead>
                                     <tr class="bg-gray-100 dark:bg-gray-800">
                                         <th
@@ -1588,7 +1588,7 @@
                                         </td>
                                     </tr>
                                 </tbody>
-                            </table>
+                            </DataTable>
                         </div>
 
                         <!-- Empty State -->
@@ -1657,7 +1657,7 @@
                             v-if="filteredInvoices && filteredInvoices.length > 0"
                             class="bg-gray-50 dark:bg-gray-900/50 rounded-xl border border-gray-200 dark:border-gray-700 overflow-x-auto"
                         >
-                            <table class="min-w-full">
+                            <DataTable structured class="min-w-full">
                                 <thead>
                                     <tr class="bg-gray-100 dark:bg-gray-800">
                                         <th
@@ -1776,7 +1776,7 @@
                                         </td>
                                     </tr>
                                 </tbody>
-                            </table>
+                            </DataTable>
                         </div>
 
                         <!-- Empty State -->
@@ -1841,7 +1841,7 @@
                             v-if="filteredPayments && filteredPayments.length > 0"
                             class="bg-gray-50 dark:bg-gray-900/50 rounded-xl border border-gray-200 dark:border-gray-700 overflow-x-auto"
                         >
-                            <table class="min-w-full">
+                            <DataTable structured class="min-w-full">
                                 <thead>
                                     <tr class="bg-gray-100 dark:bg-gray-800">
                                         <th
@@ -1997,7 +1997,7 @@
                                         </td>
                                     </tr>
                                 </tbody>
-                            </table>
+                            </DataTable>
                         </div>
 
                         <!-- Empty State -->
@@ -2093,6 +2093,7 @@
 </template>
 
 <script setup>
+import DataTable from '@/Components/Common/DataTable.vue';
 import AppTabs from '@/Components/Common/AppTabs.vue';
 import { ref, computed, h, watch, onMounted } from 'vue';
 import { Head, Link, router } from '@inertiajs/vue3';

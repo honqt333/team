@@ -55,6 +55,9 @@ class TestingEnvironmentSeeder extends Seeder
         $this->command->info('👥 Seeding diverse customer profiles and vehicles...');
         $this->seedCustomersAndVehicles($activeTenant, $activeCenter);
 
+        $this->command->info('🧪 Seeding 1000 trial customers for load testing...');
+        $this->seedTrialCustomers($activeTenant, $activeCenter);
+
         $this->command->info('👔 Seeding employees and role-based staff members...');
         $this->seedEmployeesAndStaff($activeTenant, $activeCenter);
 
@@ -613,6 +616,62 @@ class TestingEnvironmentSeeder extends Seeder
             'vin' => 'JTJHY7AX8P4111111',
             'odometer' => 29300,
         ]);
+    }
+
+    /**
+     * Seed 1000 trial customers for load and concurrency testing.
+     *
+     * Bulk-inserted in batches of 200 to keep memory flat and the
+     * transaction size sane. Names follow a deterministic pattern so the
+     * generated rows are greppable and reproducible across re-seeds.
+     */
+    private function seedTrialCustomers(Tenant $tenant, Center $center): void
+    {
+        $cities = [
+            'الرياض' => ['الياسمين', 'النجر', 'الدرعية', 'القطيف', 'الحمراء'],
+            'جدة' => ['الشاطئ', 'الروابي', 'البلد', 'الكورنيش', 'البوم'],
+            'الدمام' => ['الفيصلية', 'السياحية', 'الеж', 'المنطقة', 'السعودية'],
+            'المدينة المنورة' => ['القديم', 'الجديد', 'المركز', 'الحرام', 'القآبت'],
+            'تibre' => ['الوادي', 'المنطقة', 'المنطقة', 'المنطقة', 'المنطقة'],
+        ];
+
+        $cityKeys = array_keys($cities);
+        $batch = [];
+        $now = now();
+
+        for ($i = 1; $i <= 1000; $i++) {
+            $city = $cityKeys[array_rand($cityKeys)];
+            $district = $cities[$city][array_rand($cities[$city])];
+            $type = $i % 10 === 0 ? Customer::TYPE_COMPANY : Customer::TYPE_INDIVIDUAL;
+
+            $batch[] = [
+                'tenant_id' => $tenant->id,
+                'center_id' => $center->id,
+                'type' => $type,
+                'name' => 'عميل تجريبي '.str_pad((string) $i, 4, '0', STR_PAD_LEFT),
+                'contact_name' => 'الاتصالات '.$i,
+                'phone' => '05'.str_pad((string) (100000000 + $i), 9, '0', STR_PAD_LEFT),
+                'whatsapp' => '05'.str_pad((string) (100000000 + $i), 9, '0', STR_PAD_LEFT),
+                'email' => 'trial.customer'.$i.'@example.test',
+                'city' => $city,
+                'district' => $district,
+                'address_line' => 'شارع تجريبي رقم '.$i,
+                'notes' => 'عميل تجريبي مُولَّد تلقائياً ل اختبار الأداء والحمولة',
+                'created_at' => $now,
+                'updated_at' => $now,
+            ];
+
+            if (count($batch) === 200) {
+                Customer::insert($batch);
+                $batch = [];
+            }
+        }
+
+        if (! empty($batch)) {
+            Customer::insert($batch);
+        }
+
+        $this->command->info('✅ Seeded 1000 trial customers.');
     }
 
     /**
@@ -1548,6 +1607,12 @@ class TestingEnvironmentSeeder extends Seeder
 
             for ($j = 0; $j < $itemCount; $j++) {
                 $service = $services->random();
+                $unitPrice = (float) ($service->default_price ?? 100);
+                $minPrice = (float) ($service->min_price ?? 0);
+
+                if ($minPrice > 0 && $unitPrice < $minPrice) {
+                    $unitPrice = $minPrice;
+                }
                 $item = WorkOrderItem::factory()->create([
                     'work_order_id' => $workOrder->id,
                     'service_id' => $service->id,
@@ -1555,8 +1620,17 @@ class TestingEnvironmentSeeder extends Seeder
                     'center_id' => $center->id,
                     'title' => $service->name_ar,
                     'qty' => 1,
-                    'unit_price' => $service->default_price ?? 100,
-                    'status' => $workOrder->status,
+                    'unit_price' => $unitPrice,
+                    'base_price_snapshot' => $unitPrice,
+                    'min_price_snapshot' => $minPrice,
+                    'discount_type' => 'none',
+                    'discount_value' => 0,
+                    'discount_amount' => 0,
+                    'final_unit_price' => $unitPrice,
+                    'line_total' => $unitPrice,
+                    'total' => $unitPrice,
+                    'price_locked' => false,
+                    'status' => 'pending',
                 ]);
 
                 // Assign random technician to this item

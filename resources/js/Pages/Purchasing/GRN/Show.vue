@@ -1,6 +1,6 @@
 <template>
     <AppLayout :title="$t('purchasing.grn.title')">
-        <div class="space-y-6">
+        <PrintEngine document-type="report" class="space-y-6">
             <!-- Header -->
             <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
                 <div class="flex items-center gap-4">
@@ -165,7 +165,7 @@
                             </span>
                         </div>
                         <div class="overflow-x-auto">
-                            <table class="w-full">
+                            <DataTable structured class="w-full">
                                 <thead class="bg-gray-50/50 dark:bg-gray-900/50">
                                     <tr>
                                         <th
@@ -221,7 +221,7 @@
                                         </td>
                                     </tr>
                                 </tbody>
-                            </table>
+                            </DataTable>
                         </div>
                         <div
                             class="px-6 py-4 bg-gray-50/30 dark:bg-gray-900/30 border-t border-gray-100 dark:border-gray-700 flex justify-end"
@@ -418,7 +418,7 @@
                     </div>
                 </div>
             </div>
-        </div>
+        </PrintEngine>
 
         <!-- Print Version -->
         <Teleport to="body">
@@ -466,7 +466,8 @@
                 </div>
 
                 <!-- Items Table -->
-                <table
+                <DataTable
+                    structured
                     class="w-full text-xs text-center border border-gray-300 border-collapse mb-6"
                 >
                     <thead>
@@ -504,7 +505,7 @@
                             </td>
                         </tr>
                     </tbody>
-                </table>
+                </DataTable>
 
                 <!-- Total -->
                 <div class="flex justify-end mb-6">
@@ -535,6 +536,9 @@
 </template>
 
 <script setup>
+import PrintEngine from '@/Components/Print/PrintEngine.vue';
+import DataTable from '@/Components/Common/DataTable.vue';
+import { printDocument } from '@/Composables/usePrint';
 import { useI18n } from 'vue-i18n';
 const { t } = useI18n();
 
@@ -646,7 +650,7 @@ const createInvoice = () => {
 };
 
 const printGrn = () => {
-    window.print();
+    printDocument();
 };
 </script>
 

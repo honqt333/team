@@ -50,12 +50,13 @@ export interface UseWorkOrderStatusReturn {
 export function useWorkOrderStatus(params: {
     workOrder: WorkOrderInput;
     workOrderBalance: Ref<number> | { value: number };
+    workOrderExcessPaid?: Ref<number> | { value: number };
 }): UseWorkOrderStatusReturn {
     const { t } = useI18n();
     const { success, error: errorToast } = useToast();
     const { confirm } = useConfirm();
 
-    const { workOrder, workOrderBalance } = params;
+    const { workOrder, workOrderBalance, workOrderExcessPaid } = params;
 
     const getWorkOrder = (): WorkOrderStatusLite =>
         typeof workOrder === 'function' ? (workOrder as () => WorkOrderStatusLite)() : workOrder;
@@ -179,7 +180,7 @@ export function useWorkOrderStatus(params: {
 
         // "complete" opens the vehicle exit modal; confirmExit() fires the POST
         if (action === 'complete') {
-            if (workOrderBalance.value < -0.01) {
+            if ((workOrderExcessPaid?.value ?? 0) > 0.01 || workOrderBalance.value < -0.01) {
                 errorToast(t('messages.cannot_complete_excess_payments'));
                 return;
             }

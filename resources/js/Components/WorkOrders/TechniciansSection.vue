@@ -334,7 +334,9 @@
                             <WorkOrderItemTimer
                                 :work-order="workOrder"
                                 :item="item"
-                                :labor-entries="entriesForItem(item.id)"
+                                :technician-id="tech.id"
+                                :labor-entries="entriesForItemAndTech(item.id, tech.id)"
+                                :server-now="serverNow"
                                 :read-only="readOnly"
                             />
 
@@ -506,6 +508,7 @@ const props = defineProps({
     // WorkOrderItemTimer uses this to render the per-item state
     // without each item having to carry its own array.
     laborEntries: { type: Array, default: () => [] },
+    serverNow: { type: String, default: null },
 });
 
 const emit = defineEmits(['click-service']);
@@ -521,9 +524,11 @@ const setViewMode = (mode) => {
     localStorage.setItem('work_orders_technicians_view_mode', mode);
 };
 
-// Lookup labor entries for a given item id from the flat list.
-const entriesForItem = (itemId) =>
-    (props.laborEntries || []).filter((e) => e.work_order_item_id === itemId);
+// Lookup labor entries for a given item id and technician id from the flat list.
+const entriesForItemAndTech = (itemId, techId) =>
+    (props.laborEntries || []).filter(
+        (e) => e.work_order_item_id === itemId && e.user_id === techId
+    );
 
 // Locally added technicians list (to allow rendering cards with 0 services)
 const locallyAddedTechs = ref([]);

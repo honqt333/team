@@ -513,7 +513,7 @@ class CustomerPortalAppointmentController extends Controller
             'tagline' => $website?->tagline,
             'logo_url' => $website?->logo_url,
             'has_logo' => ! empty($website?->logo_url),
-            'primary_color' => $website?->effective_primary_color ?? '#4f46e5',
+            'primary_color' => $website?->effective_primary_color ?? '#2563eb',
             'secondary_color' => $website?->effective_secondary_color ?? '#0ea5e9',
         ];
     }

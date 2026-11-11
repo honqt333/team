@@ -108,7 +108,11 @@
                         </h3>
                         <form @submit.prevent="addProvider" class="space-y-4">
                             <div class="grid grid-cols-1 gap-3">
-                                <label
+                                <SelectableCard
+                                    type="radio"
+                                    name="form.provider"
+                                    v-model="form.provider"
+                                    :value="key"
                                     v-for="(info, key) in availableProviders"
                                     :key="key"
                                     :class="[
@@ -118,12 +122,6 @@
                                             : 'border-gray-200 dark:border-gray-700 hover:border-gray-300',
                                     ]"
                                 >
-                                    <input
-                                        type="radio"
-                                        v-model="form.provider"
-                                        :value="key"
-                                        class="hidden"
-                                    />
                                     <div class="flex items-center gap-3">
                                         <span class="text-2xl">{{ info.icon }}</span>
                                         <div>
@@ -135,7 +133,7 @@
                                             </p>
                                         </div>
                                     </div>
-                                </label>
+                                </SelectableCard>
                             </div>
                             <div class="flex gap-3 pt-4">
                                 <button
@@ -162,6 +160,7 @@
 </template>
 
 <script setup>
+import SelectableCard from '@/Components/Common/SelectableCard.vue';
 import { ref, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useForm } from '@inertiajs/vue3';

@@ -387,7 +387,7 @@
                         v-if="form.warehouse_data.length > 0"
                         class="overflow-x-auto border border-gray-200 dark:border-gray-700 rounded-xl"
                     >
-                        <table class="min-w-full text-xs">
+                        <DataTable structured class="min-w-full text-xs">
                             <thead class="bg-gray-50 dark:bg-gray-800">
                                 <tr>
                                     <th
@@ -533,7 +533,7 @@
                                     </td>
                                 </tr>
                             </tbody>
-                        </table>
+                        </DataTable>
                     </div>
                     <div v-else class="text-center py-6 text-gray-500 dark:text-gray-400 text-sm">
                         {{ $t('common.no_records') }}
@@ -616,6 +616,7 @@
 </template>
 
 <script setup>
+import DataTable from '@/Components/Common/DataTable.vue';
 import { useForm, usePage } from '@inertiajs/vue3';
 import DialogModal from '@/Components/DialogModal.vue';
 import { ref, watch, computed } from 'vue';

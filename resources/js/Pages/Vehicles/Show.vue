@@ -706,7 +706,7 @@
                             "
                             class="bg-gray-50 dark:bg-gray-900/50 rounded-xl border border-gray-200 dark:border-gray-700 overflow-x-auto"
                         >
-                            <table class="min-w-full">
+                            <DataTable structured class="min-w-full">
                                 <thead>
                                     <tr class="bg-gray-100 dark:bg-gray-800">
                                         <th
@@ -824,7 +824,7 @@
                                         </td>
                                     </tr>
                                 </tbody>
-                            </table>
+                            </DataTable>
                         </div>
 
                         <AppEmptyState
@@ -987,7 +987,7 @@
                             v-else-if="quoteViewMode === 'list' && filteredQuotes.length > 0"
                             class="bg-gray-50 dark:bg-gray-900/50 rounded-xl border border-gray-200 dark:border-gray-700 overflow-x-auto"
                         >
-                            <table class="min-w-full">
+                            <DataTable structured class="min-w-full">
                                 <thead>
                                     <tr class="bg-gray-100 dark:bg-gray-800">
                                         <th
@@ -1066,7 +1066,7 @@
                                         </td>
                                     </tr>
                                 </tbody>
-                            </table>
+                            </DataTable>
                         </div>
 
                         <AppEmptyState
@@ -1232,7 +1232,7 @@
                             v-if="workOrderServices.length > 0"
                             class="bg-gray-50 dark:bg-gray-900/50 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden shadow-sm overflow-x-auto"
                         >
-                            <table class="min-w-full">
+                            <DataTable structured class="min-w-full">
                                 <thead>
                                     <tr class="bg-gray-100 dark:bg-gray-800">
                                         <th
@@ -1318,7 +1318,7 @@
                                         </td>
                                     </tr>
                                 </tbody>
-                            </table>
+                            </DataTable>
                         </div>
                         <AppEmptyState
                             v-else
@@ -1354,7 +1354,7 @@
                             v-if="parts.length > 0"
                             class="bg-gray-50 dark:bg-gray-900/50 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden shadow-sm overflow-x-auto"
                         >
-                            <table class="min-w-full">
+                            <DataTable structured class="min-w-full">
                                 <thead>
                                     <tr class="bg-gray-100 dark:bg-gray-800">
                                         <th
@@ -1504,7 +1504,7 @@
                                         </td>
                                     </tr>
                                 </tbody>
-                            </table>
+                            </DataTable>
                         </div>
                         <AppEmptyState v-else :title="$t('inventory.parts.empty')">
                             <template #icon>
@@ -1614,7 +1614,7 @@
                             v-if="vehicle.mileage_logs?.length > 0"
                             class="bg-gray-50 dark:bg-gray-900/50 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden shadow-sm overflow-x-auto"
                         >
-                            <table class="min-w-full">
+                            <DataTable structured class="min-w-full">
                                 <thead>
                                     <tr class="bg-gray-100 dark:bg-gray-800">
                                         <th
@@ -1717,7 +1717,7 @@
                                         </td>
                                     </tr>
                                 </tbody>
-                            </table>
+                            </DataTable>
                         </div>
                         <AppEmptyState v-else :title="$t('vehicles.mileage.no_history')">
                             <template #icon>
@@ -1789,6 +1789,7 @@
 </template>
 
 <script setup>
+import DataTable from '@/Components/Common/DataTable.vue';
 import { ref, computed, h, onMounted, watch } from 'vue';
 import { Link, router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';

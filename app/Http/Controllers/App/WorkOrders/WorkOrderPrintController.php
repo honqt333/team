@@ -95,18 +95,25 @@ class WorkOrderPrintController
         $technicianId = request('technician_id');
         $printedTechnician = null;
 
-        if ($technicianId !== null) {
-            $filteredItems = $workOrder->items->filter(function ($item) use ($technicianId) {
-                return $item->technicians->contains('id', $technicianId);
+        if ($technicianId !== null && $technicianId !== '') {
+            $techId = (int) $technicianId;
+            $filteredItems = $workOrder->items->filter(function ($item) use ($techId) {
+                return $item->technicians->contains('id', $techId);
             });
             $workOrder->setRelation('items', $filteredItems->values());
 
-            $user = User::with('employee')->find($technicianId);
+            $user = User::with('employee')
+                ->where('tenant_id', $workOrder->tenant_id)
+                ->find($techId);
 
             if ($user) {
+                $nameAr = $user->employee?->name_ar ?: $user->employee?->name_en ?: $user->name;
+                $nameEn = $user->employee?->name_en ?: $user->employee?->name_ar ?: $user->name;
+
                 $printedTechnician = [
-                    'name_ar' => $user->employee?->name_ar ?: $user->name,
-                    'name_en' => $user->employee?->name_en ?: $user->name,
+                    'id' => $user->id,
+                    'name_ar' => $nameAr,
+                    'name_en' => $nameEn,
                 ];
             }
         }

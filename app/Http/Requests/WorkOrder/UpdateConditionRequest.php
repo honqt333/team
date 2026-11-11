@@ -20,8 +20,8 @@ class UpdateConditionRequest extends FormRequest
         return [
             'fuel_level' => ['nullable', 'numeric', 'min:0', 'max:100'],
             'damage_marks' => ['nullable', 'array'],
-            'damage_marks.*.x' => ['required_with:damage_marks', 'numeric', 'between:0,100'],
-            'damage_marks.*.y' => ['required_with:damage_marks', 'numeric', 'between:0,100'],
+            'damage_marks.*.x' => ['required_with:damage_marks', 'numeric', 'between:0,400'],
+            'damage_marks.*.y' => ['required_with:damage_marks', 'numeric', 'between:0,300'],
             'damage_marks.*.color' => ['required_with:damage_marks', 'string', 'in:red,blue,gray'],
             'damage_marks.*.description' => ['nullable', 'string', 'max:500'],
         ];

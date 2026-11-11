@@ -17,8 +17,12 @@
                 </svg>
             </div>
             <input
+                ref="dateInput"
                 type="text"
-                :readonly="!disabled"
+                :readonly="!required && !minDate && !maxDate"
+                :required="required"
+                @beforeinput.prevent
+                @keydown.enter.prevent="isOpen = !isOpen"
                 :disabled="disabled"
                 :value="formattedDate"
                 @click="!disabled && (isOpen = !isOpen)"
@@ -108,14 +112,14 @@
                     @click="clearDate"
                     class="text-xs text-danger hover:underline font-medium px-2 py-1 rounded hover:bg-danger/10 transition-colors cursor-pointer"
                 >
-                    Clear
+                    {{ $t('common.clear') }}
                 </button>
                 <button
                     type="button"
                     @click="selectToday"
                     class="text-xs text-action-primary hover:underline font-medium px-2 py-1 rounded hover:bg-selection-bg transition-colors cursor-pointer"
                 >
-                    Today
+                    {{ $t('dashboard.today') }}
                 </button>
             </div>
         </div>
@@ -123,8 +127,11 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted, watch } from 'vue';
+import { ref, computed, onMounted, onUnmounted, watch, watchEffect } from 'vue';
 
+import { useI18n } from 'vue-i18n';
+
+const { t, locale } = useI18n();
 const props = defineProps({
     modelValue: {
         type: [String, Date, null],
@@ -142,6 +149,8 @@ const props = defineProps({
         type: Boolean,
         default: false,
     },
+    required: Boolean,
+    maxDate: [String, Date],
     minDate: {
         type: [String, Date, null],
         default: null,
@@ -151,31 +160,30 @@ const props = defineProps({
 const emit = defineEmits(['update:modelValue', 'change']);
 
 const container = ref(null);
+const dateInput = ref(null);
 const isOpen = ref(false);
 
 const currentDate = ref(new Date());
 
-const daysOfWeek = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
-const monthNames = [
-    'January',
-    'February',
-    'March',
-    'April',
-    'May',
-    'June',
-    'July',
-    'August',
-    'September',
-    'October',
-    'November',
-    'December',
-];
+const daysOfWeek = computed(() => {
+    const formatter = new Intl.DateTimeFormat(locale.value, {
+        weekday: 'short',
+        calendar: 'gregory',
+    });
+    return Array.from({ length: 7 }, (_, day) => formatter.format(new Date(2023, 0, 1 + day)));
+});
+
+function calendarDate(value) {
+    return typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value)
+        ? new Date(value + 'T00:00:00')
+        : new Date(value);
+}
 
 watch(
     () => props.modelValue,
     (newVal) => {
         if (newVal) {
-            const d = new Date(newVal);
+            const d = calendarDate(newVal);
             if (!isNaN(d.getTime())) {
                 currentDate.value = new Date(d.getFullYear(), d.getMonth(), 1);
             }
@@ -186,7 +194,11 @@ watch(
     { immediate: true }
 );
 
-const currentMonthName = computed(() => monthNames[currentDate.value.getMonth()]);
+const currentMonthName = computed(() =>
+    new Intl.DateTimeFormat(locale.value, { month: 'long', calendar: 'gregory' }).format(
+        currentDate.value
+    )
+);
 const currentYear = computed(() => currentDate.value.getFullYear());
 
 const calendarDays = computed(() => {
@@ -211,7 +223,7 @@ const calendarDays = computed(() => {
 
 const formattedDate = computed(() => {
     if (!props.modelValue) return '';
-    const d = new Date(props.modelValue);
+    const d = calendarDate(props.modelValue);
     if (isNaN(d.getTime())) return '';
 
     const day = String(d.getDate()).padStart(2, '0');
@@ -223,20 +235,22 @@ const formattedDate = computed(() => {
 
 const isDayDisabled = (date) => {
     if (!date) return true;
-    if (!props.minDate) return false;
-
-    const minD = new Date(props.minDate);
-    minD.setHours(0, 0, 0, 0);
-
-    const d = new Date(date);
-    d.setHours(0, 0, 0, 0);
-
-    return d.getTime() < minD.getTime();
+    const localDay = (value) => calendarDate(value).setHours(0, 0, 0, 0);
+    const day = localDay(date);
+    return (
+        (props.minDate && day < localDay(props.minDate)) ||
+        (props.maxDate && day > localDay(props.maxDate))
+    );
 };
+
+watchEffect(() => {
+    const outsideRange = props.modelValue && isDayDisabled(calendarDate(props.modelValue));
+    dateInput.value?.setCustomValidity(outsideRange ? t('common.date_outside_range') : '');
+});
 
 const isSelected = (date) => {
     if (!date || !props.modelValue) return false;
-    const modelDate = new Date(props.modelValue);
+    const modelDate = calendarDate(props.modelValue);
     if (isNaN(modelDate.getTime())) return false;
 
     return (
@@ -273,6 +287,7 @@ const nextMonth = () => {
 };
 
 const selectDate = (date) => {
+    if (isDayDisabled(date)) return;
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const day = String(date.getDate()).padStart(2, '0');

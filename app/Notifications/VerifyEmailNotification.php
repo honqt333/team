@@ -90,7 +90,7 @@ class VerifyEmailNotification extends Notification
                     '<div style="font-family: sans-serif; text-align: right; direction: rtl;">
                         <h2>مرحباً '.$notifiable->name.'!</h2>
                         <p>يرجى الضغط على الرابط أدناه لتفعيل حسابك:</p>
-                        <p><a href="'.$verificationUrl.'" style="background-color: #4f46e5; color: white; padding: 12px 30px; text-decoration: none; border-radius: 8px;">تفعيل الحساب</a></p>
+                        <p><a href="'.$verificationUrl.'" style="background-color: #2563eb; color: white; padding: 12px 30px; text-decoration: none; border-radius: 8px;">تفعيل الحساب</a></p>
                     </div>'
                 ));
             } catch (Exception $e) {

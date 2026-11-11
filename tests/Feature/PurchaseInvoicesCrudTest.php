@@ -13,6 +13,8 @@ use App\Models\User;
 use App\Models\Warehouse;
 use Database\Seeders\PermissionsSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Testing\AssertableInertia as Assert;
 use Spatie\Permission\PermissionRegistrar;
 use Tests\TestCase;
@@ -66,6 +68,49 @@ class PurchaseInvoicesCrudTest extends TestCase
             'name' => 'Al-Nasr Parts',
             'is_active' => true,
         ]);
+    }
+
+    public function test_purchase_and_return_attachments_are_independent_and_survive_invalid_replacement(): void
+    {
+        $disk = Storage::fake('public');
+        $this->actingAs($this->user);
+        $invoice = PurchaseInvoice::create([
+            'supplier_id' => $this->supplier->id, 'warehouse_id' => $this->warehouse->id,
+            'center_id' => $this->center->id, 'code' => 'ATT-INV', 'issue_date' => today(),
+            'subtotal' => 10, 'tax_amount' => 0, 'total' => 10, 'balance' => 10,
+        ]);
+        $return = PurchaseReturnInvoice::create([
+            'purchase_invoice_id' => $invoice->id, 'center_id' => $this->center->id,
+            'code' => 'ATT-RET', 'return_date' => today(), 'subtotal' => 10, 'tax_amount' => 0, 'total' => 10,
+        ]);
+
+        foreach ([[$invoice, 'purchases', 'purchasing.invoices.update'], [$return, 'purchases.returns', 'purchasing.returns.update']] as [$document, $prefix, $permission]) {
+            $url = route("app.invoices.{$prefix}.attachment.store", $document);
+            $pdf = fn () => UploadedFile::fake()->create('file.pdf', 10, 'application/pdf');
+            $this->post($url, ['attachment' => $pdf()])->assertForbidden();
+            $this->user->givePermissionTo($permission);
+            $this->post($url, ['attachment' => $pdf()])->assertSessionHasNoErrors();
+            $first = $document->refresh()->attachment_path;
+            $disk->assertExists($first);
+            $this->post($url, ['attachment' => UploadedFile::fake()->create('large.pdf', 1025, 'application/pdf')])
+                ->assertSessionHasErrors('attachment');
+            $this->assertSame($first, $document->refresh()->attachment_path);
+            $disk->assertExists($first);
+            $this->post($url, ['attachment' => $pdf()])->assertSessionHasNoErrors();
+            $disk->assertMissing($first);
+            $disk->assertExists($document->refresh()->attachment_path);
+        }
+
+        $otherCenter = Center::factory()->create(['tenant_id' => $this->tenant->id]);
+        $otherInvoice = $invoice->replicate(['code', 'attachment_path']);
+        $otherInvoice->fill(['code' => 'ATT-OTHER', 'center_id' => $otherCenter->id])->save();
+        $this->delete(route('app.invoices.purchases.attachment.destroy', $otherInvoice))->assertForbidden();
+
+        $path = $return->attachment_path;
+        $this->delete(route('app.invoices.purchases.returns.attachment.destroy', $return))->assertRedirect();
+        $this->assertNull($return->refresh()->attachment_path);
+        $disk->assertMissing($path);
+        $disk->assertExists($invoice->refresh()->attachment_path);
     }
 
     public function test_authorized_user_can_view_purchase_invoices_index(): void

@@ -55,7 +55,7 @@
             <div
                 class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden"
             >
-                <table class="w-full">
+                <DataTable structured class="w-full">
                     <thead class="bg-gray-50 dark:bg-gray-700/50">
                         <tr>
                             <th
@@ -208,13 +208,14 @@
                             </td>
                         </tr>
                     </tbody>
-                </table>
+                </DataTable>
             </div>
         </div>
     </SystemLayout>
 </template>
 
 <script setup>
+import DataTable from '@/Components/Common/DataTable.vue';
 import { ref, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { Head, Link, router } from '@inertiajs/vue3';

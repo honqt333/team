@@ -22,11 +22,23 @@ class QuotePolicy
     }
 
     /**
+     * The quote must belong to the user's tenant and to the branch they
+     * are currently working in. Multi-branch users switch their current
+     * center; EnsureCenterContext validates that the pivot allows it.
+     */
+    private function belongsToCurrentContext(User $user, Quote $quote): bool
+    {
+        return $quote->tenant_id === $user->tenant_id
+            && (int) $quote->center_id === (int) $user->current_center_id;
+    }
+
+    /**
      * Determine whether the user can view the quote.
      */
     public function view(User $user, Quote $quote): bool
     {
-        return $user->can(Permissions::QUOTES_VIEW);
+        return $user->can(Permissions::QUOTES_VIEW)
+            && $this->belongsToCurrentContext($user, $quote);
     }
 
     /**
@@ -46,8 +58,9 @@ class QuotePolicy
             return false;
         }
 
-        // Can only update draft or sent quotes
-        return $quote->canBeEdited();
+        // Can only update draft or sent quotes in the current branch
+        return $this->belongsToCurrentContext($user, $quote)
+            && $quote->canBeEdited();
     }
 
     /**
@@ -59,8 +72,9 @@ class QuotePolicy
             return false;
         }
 
-        // Can only delete draft quotes
-        return $quote->isDraft();
+        // Can only delete draft quotes in the current branch
+        return $this->belongsToCurrentContext($user, $quote)
+            && $quote->isDraft();
     }
 
     /**
@@ -72,7 +86,8 @@ class QuotePolicy
             return false;
         }
 
-        return $quote->canBeApproved();
+        return $this->belongsToCurrentContext($user, $quote)
+            && $quote->canBeApproved();
     }
 
     /**
@@ -84,6 +99,7 @@ class QuotePolicy
             return false;
         }
 
-        return $quote->canBeRejected();
+        return $this->belongsToCurrentContext($user, $quote)
+            && $quote->canBeRejected();
     }
 }

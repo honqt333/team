@@ -216,12 +216,6 @@ class TaxPeriodsController extends Controller
             'taxPeriod' => $taxPeriod,
             'summary' => $vatSummary,
             'transactions' => $taxPeriod->transactions,
-            'tenant' => [
-                'name' => $tenant?->legal_name ?: ($tenant?->trade_name ?: $tenant?->name),
-                'vat_number' => $tenant?->taxSettings->tax_number ?? $tenant?->vat_number,
-                'commercial_registration' => $tenant->cr_number ?? null,
-                'address' => $tenant?->address,
-            ],
         ]);
     }
 

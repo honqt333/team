@@ -52,10 +52,12 @@ select {
     color: inherit;
 }
 
-/* 7. Buttons reset */
+/* 7. Buttons reset (preserve border-style: solid so Tailwind border-* utilities work) */
 button {
-    background: none;
-    border: none;
+    background-color: transparent;
+    background-image: none;
+    border-width: 0;
+    border-style: solid;
     cursor: pointer;
 }
 

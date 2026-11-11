@@ -1,6 +1,6 @@
 <template>
     <AppLayout :title="$t('inventory.stock.title')">
-        <div class="space-y-6">
+        <PrintEngine document-type="report" class="space-y-6">
             <!-- Page Header -->
             <PageHeader
                 :title="$t('inventory.stock.title')"
@@ -560,7 +560,7 @@
                     </template>
                 </DataTable>
             </div>
-        </div>
+        </PrintEngine>
     </AppLayout>
 
     <!-- Print Section -->
@@ -573,7 +573,7 @@
             />
 
             <!-- Table -->
-            <table>
+            <DataTable structured>
                 <thead>
                     <tr>
                         <th style="width: 40px" class="align-middle text-center">#</th>
@@ -609,7 +609,7 @@
                         </td>
                     </tr>
                 </tbody>
-            </table>
+            </DataTable>
 
             <!-- Footer -->
             <StandardReportFooter class="mt-8 border-t pt-4" />
@@ -618,6 +618,8 @@
 </template>
 
 <script setup>
+import PrintEngine from '@/Components/Print/PrintEngine.vue';
+import { printDocument } from '@/Composables/usePrint';
 import { ref, computed, watch } from 'vue';
 import { Link } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
@@ -758,6 +760,6 @@ const getStockStatusBadgeClass = (balance) => {
 };
 
 const handlePrint = () => {
-    window.print();
+    printDocument();
 };
 </script>

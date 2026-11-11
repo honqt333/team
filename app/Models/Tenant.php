@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Models\Billing\Subscription;
+use App\Services\Billing\SubscriptionLifecycleService;
 use App\Services\TenantSetupService;
 use App\Services\TenantStorageService;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -84,7 +85,9 @@ class Tenant extends Model
 
     public function getLogoUrlAttribute(): string
     {
-        return $this->logo_path ? Storage::url($this->logo_path) : asset('images/logo.png');
+        // Falls back to the platform brandmark. The mark carries no baked-in
+        // wordmark, so the platform name stays dynamic (config('app.name')).
+        return $this->logo_path ? Storage::url($this->logo_path) : asset('images/brand/logo-256.png');
     }
 
     public function centers(): HasMany
@@ -139,6 +142,35 @@ class Tenant extends Model
     public function backups(): HasMany
     {
         return $this->hasMany(TenantBackup::class);
+    }
+
+    /**
+     * Resolve the full subscription lifecycle state array via SubscriptionLifecycleService.
+     */
+    public function getSubscriptionLifecycle(): array
+    {
+        return app(SubscriptionLifecycleService::class)
+            ->resolveTenantState($this);
+    }
+
+    public function getSubscriptionState(): string
+    {
+        return $this->getSubscriptionLifecycle()['state'];
+    }
+
+    public function isOnTrial(): bool
+    {
+        return $this->getSubscriptionLifecycle()['is_on_trial'];
+    }
+
+    public function isInSubscriptionGracePeriod(): bool
+    {
+        return $this->getSubscriptionLifecycle()['is_in_grace_period'];
+    }
+
+    public function canOperate(): bool
+    {
+        return $this->getSubscriptionLifecycle()['can_operate'];
     }
 
     /**
@@ -256,6 +288,87 @@ class Tenant extends Model
         return (bool) ($settings['channels'][$channel] ?? false);
     }
 
+    /**
+     * Map a notification TYPE to the EVENT KEY used by the settings matrix.
+     *
+     * The notification system writes dotted types onto the row
+     * (`work_order.created`, `invoice.created`, `quote.approved`), while
+     * the tenant settings matrix — and the settings page that renders it —
+     * use snake_case event keys (`work_order_created`, `invoice_issued`,
+     * `quote_approved`).
+     *
+     * Before this mapping existed, the two namespaces never met, so every
+     * per-event toggle on the settings page was a no-op: the tenant turned
+     * `work_order_created` off and kept receiving `work_order.created`
+     * notifications. Only the channel-level kill switch worked.
+     *
+     * The mapping is deliberately explicit rather than a generic
+     * dots-to-underscores transform, because the two sides do NOT always
+     * agree on the words:
+     *
+     *   work_order.created        → work_order_created
+     *   work_order.status_changed → work_order_status_changed
+     *   work_order.completed      → work_order_completed
+     *   invoice.created           → invoice_issued
+     *   invoice.issued            → invoice_issued
+     *   quote.created             → quote_shared
+     *   quote.shared              → quote_shared
+     *   quote.approved            → quote_approved
+     *   quote.rejected            → quote_approved
+     *   payment.received          → payment_received
+     *   payment.recorded          → payment_received
+     *   stock.low                 → low_stock_alert
+     *   low_stock_alert           → low_stock_alert
+     *   appointment.booked        → appointment_booked
+     *   appointment.reminder      → appointment_reminder
+     *   appointment.cancelled     → appointment_cancelled
+     *
+     * @return array<int, string> The event keys to consult, in priority order.
+     */
+    public static function notificationEventKeysFor(string $type): array
+    {
+        $normalized = str_replace(['.', '-'], '_', strtolower($type));
+
+        $map = [
+            'work_order_created' => 'work_order_created',
+            'work_order_status_changed' => 'work_order_status_changed',
+            'work_order_completed' => 'work_order_completed',
+            'invoice_created' => 'invoice_issued',
+            'invoice_issued' => 'invoice_issued',
+            'quote_created' => 'quote_shared',
+            'quote_shared' => 'quote_shared',
+            'quote_approved' => 'quote_approved',
+            'quote_rejected' => 'quote_approved',
+            'payment_received' => 'payment_received',
+            'payment_recorded' => 'payment_received',
+            'stock_low' => 'low_stock_alert',
+            'low_stock_alert' => 'low_stock_alert',
+            'appointment_booked' => 'appointment_booked',
+            'appointment_reminder' => 'appointment_reminder',
+            'appointment_cancelled' => 'appointment_cancelled',
+        ];
+
+        $keys = [];
+
+        // The exact key first, so a tenant that saved a dotted key (from an
+        // older payload) still wins over the normalized one.
+        if (array_key_exists($type, $map)) {
+            $keys[] = $type;
+        }
+
+        if (array_key_exists($normalized, $map)) {
+            $keys[] = $map[$normalized];
+        }
+
+        // Unknown type — fall back to the normalized key so a tenant can
+        // still toggle an event we have not mapped yet.
+        if ($keys === []) {
+            $keys[] = $normalized;
+        }
+
+        return array_values(array_unique($keys));
+    }
+
     public function isNotificationEventEnabled(string $event, string $channel = 'in_app'): bool
     {
         if (! $this->isNotificationChannelEnabled($channel)) {
@@ -264,7 +377,15 @@ class Tenant extends Model
 
         $settings = $this->getEffectiveNotificationSettings();
 
-        return (bool) ($settings['events'][$event][$channel] ?? false);
+        foreach (self::notificationEventKeysFor($event) as $key) {
+            if (array_key_exists($key, $settings['events'] ?? [])) {
+                return (bool) ($settings['events'][$key][$channel] ?? false);
+            }
+        }
+
+        // An event nobody configured stays enabled — a tenant must not
+        // silently lose notifications because the matrix has no row for it.
+        return true;
     }
 
     /**

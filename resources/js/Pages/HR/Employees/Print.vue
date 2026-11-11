@@ -110,6 +110,7 @@
 </template>
 
 <script setup>
+import { printDocument } from '@/Composables/usePrint';
 import { Head } from '@inertiajs/vue3';
 import StandardReportLayout from '@/Components/Print/StandardReportLayout.vue';
 
@@ -124,7 +125,7 @@ const props = defineProps({
 });
 
 function print() {
-    window.print();
+    printDocument();
 }
 
 function close() {

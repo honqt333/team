@@ -120,15 +120,13 @@
                 <template v-else>
                     <div class="space-y-6">
                         <div v-for="gateway in availableGateways" :key="gateway" class="space-y-4">
-                            <label
+                            <SelectableCard
+                                type="radio"
+                                name="selectedGateway"
+                                v-model="selectedGateway"
+                                :value="gateway"
                                 class="flex items-center gap-3 cursor-pointer p-4 rounded-xl border-2 border-gray-200 dark:border-gray-700 hover:border-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition-all"
                             >
-                                <input
-                                    type="radio"
-                                    :value="gateway"
-                                    v-model="selectedGateway"
-                                    class="w-5 h-5 text-indigo-600 border-gray-300 focus:ring-indigo-500"
-                                />
                                 <div class="flex items-center gap-3 flex-1">
                                     <div
                                         :class="[
@@ -186,7 +184,7 @@
                                         </p>
                                     </div>
                                 </div>
-                            </label>
+                            </SelectableCard>
                         </div>
 
                         <button
@@ -225,6 +223,7 @@
 </template>
 
 <script setup>
+import SelectableCard from '@/Components/Common/SelectableCard.vue';
 import { ref, computed } from 'vue';
 import { Head, useForm, router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';

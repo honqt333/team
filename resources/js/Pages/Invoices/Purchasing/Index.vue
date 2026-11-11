@@ -1,5 +1,6 @@
 <template>
-    <AppLayout :title="$t('invoices.purchases.title')">
+    <Head :title="$t('invoices.purchases.title')" />
+    <AppLayout>
         <div class="space-y-6">
             <!-- Header Section -->
             <PageHeader
@@ -11,6 +12,14 @@
                         ? $t('invoices.purchases.tab_returns')
                         : $t('invoices.purchases.tab_invoices')
                 "
+                gradientFrom="from-amber-600"
+                gradientTo="to-orange-600"
+                glowFrom="from-amber-500"
+                glowTo="to-orange-600"
+                badgeBg="bg-amber-50/70 dark:bg-amber-900/30"
+                badgeText="text-amber-600 dark:text-amber-400"
+                badgeBorder="border-amber-200/60 dark:border-amber-800/30"
+                badgeDot="bg-amber-500"
             >
                 <template #back>
                     <BackButton :href="route('app.invoices.hub')" />
@@ -654,7 +663,7 @@
 
 <script setup>
 import { ref, computed, watch } from 'vue';
-import { Link, router } from '@inertiajs/vue3';
+import { Head, Link, router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import PageHeader from '@/Components/PageHeader.vue';

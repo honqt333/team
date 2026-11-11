@@ -30,7 +30,7 @@
                           : 'bg-slate-50 text-slate-400'
                 "
                 :style="
-                    i === currentStep ? { backgroundColor: 'var(--tenant-primary, #4f46e5)' } : {}
+                    i === currentStep ? { backgroundColor: 'var(--tenant-primary, #2563eb)' } : {}
                 "
                 :aria-current="i === currentStep ? 'step' : undefined"
             >

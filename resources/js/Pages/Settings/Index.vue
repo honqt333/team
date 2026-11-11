@@ -4,17 +4,7 @@
 
         <div class="space-y-6">
             <!-- Header Section -->
-            <PageHeader
-                :title="$t('settings.title')"
-                :subtitle="$t('settings.subtitle')"
-                gradientFrom="from-slate-600"
-                gradientTo="to-gray-800"
-                glowFrom="from-slate-500"
-                badgeBg="bg-slate-50/50 dark:bg-slate-900/30"
-                badgeText="text-slate-600 dark:text-slate-400"
-                badgeBorder="border-slate-100/50 dark:border-slate-800/30"
-                badgeDot="bg-slate-500"
-            >
+            <PageHeader :title="$t('settings.title')" :subtitle="$t('settings.subtitle')">
                 <template #icon>
                     <svg
                         class="w-8 h-8 text-white"
@@ -40,288 +30,43 @@
 
             <!-- Settings Cards -->
             <div
-                class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-200 dark:border-gray-700 space-y-4"
+                class="bg-surface-primary rounded-2xl p-6 shadow-2xs border border-border-subtle space-y-4"
             >
-                <!-- Company Profile -->
                 <Link
-                    v-if="can('settings.company.manage')"
-                    :href="route('settings.company')"
-                    class="group flex items-center gap-5 p-4 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-emerald-400 dark:hover:border-emerald-600 hover:bg-emerald-50/50 dark:hover:bg-emerald-900/20 transition-all"
+                    v-for="card in visibleCards"
+                    :key="card.id"
+                    :href="card.href"
+                    class="group flex items-center gap-5 p-4 rounded-xl border border-border-subtle hover:border-action-primary/50 hover:bg-surface-secondary/50 transition-all"
                 >
                     <div
-                        class="w-14 h-14 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center group-hover:scale-110 transition-transform shadow-lg shadow-emerald-500/30"
+                        :class="[
+                            'w-12 h-12 rounded-xl flex items-center justify-center group-hover:scale-105 transition-transform shrink-0',
+                            card.iconBg,
+                        ]"
                     >
-                        <svg
-                            class="w-7 h-7 text-white"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                        >
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path
+                                v-for="(d, idx) in card.paths"
+                                :key="idx"
                                 stroke-linecap="round"
                                 stroke-linejoin="round"
                                 stroke-width="2"
-                                d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
+                                :d="d"
                             />
                         </svg>
                     </div>
-                    <div class="flex-1">
+                    <div class="flex-1 min-w-0">
                         <h3
-                            class="text-lg font-semibold text-gray-900 dark:text-white group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors"
+                            class="text-base font-bold text-content-primary group-hover:text-action-primary transition-colors"
                         >
-                            {{ $t('settings.cards.company.title') }}
+                            {{ card.title }}
                         </h3>
-                        <p class="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
-                            {{ $t('settings.cards.company.description') }}
+                        <p class="text-xs text-content-muted mt-0.5">
+                            {{ card.description }}
                         </p>
                     </div>
                     <svg
-                        class="w-5 h-5 text-gray-400 group-hover:text-emerald-500 group-hover:translate-x-1 rtl:group-hover:-translate-x-1 transition-all"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                    >
-                        <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            stroke-width="2"
-                            d="M9 5l7 7-7 7"
-                        />
-                    </svg>
-                </Link>
-
-                <!-- Branches -->
-                <Link
-                    v-if="can('settings.centers.view')"
-                    :href="route('settings.branches')"
-                    class="group flex items-center gap-5 p-4 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-blue-400 dark:hover:border-blue-600 hover:bg-blue-50/50 dark:hover:bg-blue-900/20 transition-all"
-                >
-                    <div
-                        class="w-14 h-14 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-600 flex items-center justify-center group-hover:scale-110 transition-transform shadow-lg shadow-blue-500/30"
-                    >
-                        <svg
-                            class="w-7 h-7 text-white"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                        >
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-                            />
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
-                            />
-                        </svg>
-                    </div>
-                    <div class="flex-1">
-                        <h3
-                            class="text-lg font-semibold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors"
-                        >
-                            {{ $t('settings.cards.branches.title') }}
-                        </h3>
-                        <p class="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
-                            {{ $t('settings.cards.branches.description') }}
-                        </p>
-                    </div>
-                    <svg
-                        class="w-5 h-5 text-gray-400 group-hover:text-blue-500 group-hover:translate-x-1 rtl:group-hover:-translate-x-1 transition-all"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                    >
-                        <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            stroke-width="2"
-                            d="M9 5l7 7-7 7"
-                        />
-                    </svg>
-                </Link>
-
-                <!-- Users & Roles -->
-                <Link
-                    v-if="can('users.view')"
-                    :href="route('settings.users.index')"
-                    class="group flex items-center gap-5 p-4 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-violet-400 dark:hover:border-violet-600 hover:bg-violet-50/50 dark:hover:bg-violet-900/20 transition-all"
-                >
-                    <div
-                        class="w-14 h-14 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center group-hover:scale-110 transition-transform shadow-lg shadow-violet-500/30"
-                    >
-                        <svg
-                            class="w-7 h-7 text-white"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                        >
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"
-                            />
-                        </svg>
-                    </div>
-                    <div class="flex-1">
-                        <h3
-                            class="text-lg font-semibold text-gray-900 dark:text-white group-hover:text-violet-600 dark:group-hover:text-violet-400 transition-colors"
-                        >
-                            {{ $t('users.management') }}
-                        </h3>
-                        <p class="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
-                            {{ $t('users.description') }}
-                        </p>
-                    </div>
-                    <svg
-                        class="w-5 h-5 text-gray-400 group-hover:text-violet-500 group-hover:translate-x-1 rtl:group-hover:-translate-x-1 transition-all"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                    >
-                        <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            stroke-width="2"
-                            d="M9 5l7 7-7 7"
-                        />
-                    </svg>
-                </Link>
-
-                <!-- System Settings -->
-                <Link
-                    v-if="can('crm.vehicles.settings.view')"
-                    :href="route('settings.system')"
-                    class="group flex items-center gap-5 p-4 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-indigo-400 dark:hover:border-indigo-600 hover:bg-indigo-50/50 dark:hover:bg-indigo-900/20 transition-all"
-                >
-                    <div
-                        class="w-14 h-14 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center group-hover:scale-110 transition-transform shadow-lg shadow-indigo-500/30"
-                    >
-                        <svg
-                            class="w-7 h-7 text-white"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                        >
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"
-                            />
-                        </svg>
-                    </div>
-                    <div class="flex-1">
-                        <h3
-                            class="text-lg font-semibold text-gray-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors"
-                        >
-                            {{ $t('settings.cards.system.title') }}
-                        </h3>
-                        <p class="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
-                            {{ $t('settings.cards.system.description') }}
-                        </p>
-                    </div>
-                    <svg
-                        class="w-5 h-5 text-gray-400 group-hover:text-indigo-500 group-hover:translate-x-1 rtl:group-hover:-translate-x-1 transition-all"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                    >
-                        <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            stroke-width="2"
-                            d="M9 5l7 7-7 7"
-                        />
-                    </svg>
-                </Link>
-
-                <!-- Notifications Settings -->
-                <Link
-                    v-if="can('settings.company.manage')"
-                    :href="route('settings.notifications.index')"
-                    class="group flex items-center gap-5 p-4 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-amber-400 dark:hover:border-amber-600 hover:bg-amber-50/50 dark:hover:bg-amber-900/20 transition-all"
-                >
-                    <div
-                        class="w-14 h-14 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center group-hover:scale-110 transition-transform shadow-lg shadow-amber-500/30"
-                    >
-                        <svg
-                            class="w-7 h-7 text-white"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                        >
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
-                            />
-                        </svg>
-                    </div>
-                    <div class="flex-1">
-                        <h3
-                            class="text-lg font-semibold text-gray-900 dark:text-white group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors"
-                        >
-                            {{ $t('settings.cards.notifications.title') }}
-                        </h3>
-                        <p class="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
-                            {{ $t('settings.cards.notifications.description') }}
-                        </p>
-                    </div>
-                    <svg
-                        class="w-5 h-5 text-gray-400 group-hover:text-amber-500 group-hover:translate-x-1 rtl:group-hover:-translate-x-1 transition-all"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                    >
-                        <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            stroke-width="2"
-                            d="M9 5l7 7-7 7"
-                        />
-                    </svg>
-                </Link>
-
-                <!-- Billing & Subscription (unified hub at /app/settings/billing) -->
-                <Link
-                    :href="route('app.billing.index')"
-                    class="group flex items-center gap-5 p-4 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-rose-400 dark:hover:border-rose-600 hover:bg-rose-50/50 dark:hover:bg-rose-900/20 transition-all"
-                >
-                    <div
-                        class="w-14 h-14 rounded-xl bg-gradient-to-br from-rose-500 to-pink-600 flex items-center justify-center group-hover:scale-110 transition-transform shadow-lg shadow-rose-500/30"
-                    >
-                        <svg
-                            class="w-7 h-7 text-white"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                        >
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"
-                            />
-                        </svg>
-                    </div>
-                    <div class="flex-1">
-                        <h3
-                            class="text-lg font-semibold text-gray-900 dark:text-white group-hover:text-rose-600 dark:group-hover:text-rose-400 transition-colors"
-                        >
-                            {{ $t('settings.cards.billing.title') }}
-                        </h3>
-                        <p class="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
-                            {{ $t('settings.cards.billing.description') }}
-                        </p>
-                    </div>
-                    <svg
-                        class="w-5 h-5 text-gray-400 group-hover:text-rose-500 group-hover:translate-x-1 rtl:group-hover:-translate-x-1 transition-all"
+                        class="w-5 h-5 text-content-muted group-hover:text-action-primary group-hover:translate-x-1 rtl:group-hover:-translate-x-1 transition-all shrink-0"
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
@@ -340,10 +85,85 @@
 </template>
 
 <script setup>
+import { computed } from 'vue';
 import { Head, Link } from '@inertiajs/vue3';
+import { useI18n } from 'vue-i18n';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import PageHeader from '@/Components/PageHeader.vue';
 import { usePermission } from '@/Composables/usePermission';
 
+const { t } = useI18n();
 const { can } = usePermission();
+
+const settingCards = computed(() => [
+    {
+        id: 'company',
+        visible: can('settings.company.manage'),
+        href: route('settings.company'),
+        title: t('settings.cards.company.title'),
+        description: t('settings.cards.company.description'),
+        iconBg: 'bg-success-soft text-success',
+        paths: [
+            'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4',
+        ],
+    },
+    {
+        id: 'branches',
+        visible: can('settings.centers.view'),
+        href: route('settings.branches'),
+        title: t('settings.cards.branches.title'),
+        description: t('settings.cards.branches.description'),
+        iconBg: 'bg-info-soft text-info',
+        paths: [
+            'M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z',
+            'M15 11a3 3 0 11-6 0 3 3 0 016 0z',
+        ],
+    },
+    {
+        id: 'users',
+        visible: can('users.view'),
+        href: route('settings.users.index'),
+        title: t('users.management'),
+        description: t('users.description'),
+        iconBg: 'bg-action-primary/10 text-action-primary',
+        paths: [
+            'M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z',
+        ],
+    },
+    {
+        id: 'system',
+        visible: can('crm.vehicles.settings.view'),
+        href: route('settings.system'),
+        title: t('settings.cards.system.title'),
+        description: t('settings.cards.system.description'),
+        iconBg: 'bg-action-primary/10 text-action-primary',
+        paths: [
+            'M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4',
+        ],
+    },
+    {
+        id: 'notifications',
+        visible: can('settings.company.manage'),
+        href: route('settings.notifications.index'),
+        title: t('settings.cards.notifications.title'),
+        description: t('settings.cards.notifications.description'),
+        iconBg: 'bg-warning-soft text-warning',
+        paths: [
+            'M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9',
+        ],
+    },
+    {
+        id: 'billing',
+        visible: true,
+        href: route('app.billing.index'),
+        title: t('settings.cards.billing.title'),
+        description: t('settings.cards.billing.description'),
+        iconBg: 'bg-danger-soft text-danger',
+        paths: [
+            'M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z',
+        ],
+    },
+]);
+
+const visibleCards = computed(() => settingCards.value.filter((card) => card.visible));
 </script>

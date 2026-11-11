@@ -836,7 +836,7 @@
 
                     <!-- Group Items Table -->
                     <div v-show="isGroupOpen(grp.group_key)" class="overflow-x-auto">
-                        <table class="w-full text-xs text-right">
+                        <DataTable structured class="w-full text-xs text-right">
                             <thead
                                 class="bg-gray-50/75 dark:bg-gray-800/60 text-gray-500 dark:text-gray-400 font-semibold border-b border-gray-100 dark:border-gray-700"
                             >
@@ -1008,7 +1008,7 @@
                                     </td>
                                 </tr>
                             </tbody>
-                        </table>
+                        </DataTable>
                     </div>
                 </div>
             </div>
@@ -1019,7 +1019,7 @@
                 class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200/80 dark:border-gray-700/80 overflow-hidden"
             >
                 <div class="overflow-x-auto">
-                    <table class="w-full text-xs text-right">
+                    <DataTable structured class="w-full text-xs text-right">
                         <thead
                             class="bg-gray-50/75 dark:bg-gray-750/50 text-gray-500 dark:text-gray-400 font-semibold border-b border-gray-200/80 dark:border-gray-700"
                         >
@@ -1251,7 +1251,7 @@
                                 </td>
                             </tr>
                         </tbody>
-                    </table>
+                    </DataTable>
                 </div>
 
                 <!-- Pagination -->
@@ -1314,9 +1314,10 @@
 </template>
 
 <script setup>
+import DataTable from '@/Components/Common/DataTable.vue';
 import PrintEngine from '@/Components/Print/PrintEngine.vue';
 import AppPrintButton from '@/Components/Common/AppPrintButton.vue';
-import { usePrint } from '@/Composables/usePrint';
+import { printDocument } from '@/Composables/usePrint';
 import { ref, reactive, computed, watch } from 'vue';
 import { router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
@@ -1641,7 +1642,6 @@ const exportUrl = computed(() => {
 });
 
 // Printing
-const { printDocument } = usePrint();
 
 // Badge helpers
 const getPaymentBadgeClasses = (status) => {

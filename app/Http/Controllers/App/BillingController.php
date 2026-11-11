@@ -10,6 +10,7 @@ use App\Models\Billing\Plan;
 use App\Models\Billing\Subscription;
 use App\Models\Billing\SubscriptionPayment;
 use App\Models\PaymentSettings;
+use App\Services\Billing\SubscriptionLifecycleService;
 use App\Services\Payment\PaymentManager;
 use App\Support\Permissions;
 use Illuminate\Http\Request;
@@ -131,7 +132,8 @@ class BillingController extends Controller
         // Priority 4: Build virtual trial if no real subscription
         if (! $currentSubscription && $tenant->created_at) {
             $trialStarts = $tenant->created_at;
-            $trialEnds = $tenant->trial_ends_at ?: $trialStarts->copy()->addDays(14);
+            $defaultTrialDays = app(SubscriptionLifecycleService::class)->getDefaultTrialDays();
+            $trialEnds = $tenant->trial_ends_at ?: $trialStarts->copy()->addDays($defaultTrialDays);
             $currentSubscription = [
                 'kind' => 'virtual_trial',
                 'id' => 'trial-virtual',
@@ -247,8 +249,22 @@ class BillingController extends Controller
             ->limit($perPage)
             ->get();
 
+        $lifecycle = $tenant->getSubscriptionLifecycle();
+        $lifecyclePayload = [
+            'state' => $lifecycle['state'],
+            'can_operate' => $lifecycle['can_operate'],
+            'is_on_trial' => $lifecycle['is_on_trial'],
+            'is_in_grace_period' => $lifecycle['is_in_grace_period'],
+            'grace_period_days' => $lifecycle['grace_period_days'],
+            'grace_days_remaining' => $lifecycle['grace_days_remaining'],
+            'days_remaining' => $lifecycle['days_remaining'],
+            'ends_at' => $lifecycle['ends_at']?->toIso8601String(),
+            'grace_ends_at' => $lifecycle['grace_ends_at']?->toIso8601String(),
+        ];
+
         return Inertia::render('Settings/Billing/Index', [
             'current_subscription' => $currentSubscription,
+            'subscription_lifecycle' => $lifecyclePayload,
             'storage_usage' => $tenant->storage_usage,
             'available_plans' => $plans,
             'subscription_history' => $subscriptionHistory,
@@ -262,33 +278,13 @@ class BillingController extends Controller
                 'per_page' => $perPage,
             ],
             'enabled_gateways' => $enabledGateways,
-            'payment_settings' => [
-                'default_gateway' => $paymentSettings->default_gateway,
-                'bank_transfer_enabled' => $paymentSettings->bank_transfer_enabled,
-                'bank_accounts' => $paymentSettings->bank_accounts ?? [],
-                'bank_transfer_instructions' => $paymentSettings->bank_transfer_instructions,
-                'mada_enabled' => $paymentSettings->mada_enabled,
-                'visa_enabled' => $paymentSettings->visa_enabled,
-                'mastercard_enabled' => $paymentSettings->mastercard_enabled,
-                'applepay_enabled' => $paymentSettings->applepay_enabled,
-                'stcpay_enabled' => $paymentSettings->stcpay_enabled,
-                'subscription_vat_enabled' => (bool) $paymentSettings->subscription_vat_enabled,
-                'subscription_vat_rate' => (float) $paymentSettings->getSubscriptionVatRate(),
-                'subscription_vat_inclusive' => (bool) $paymentSettings->subscription_vat_inclusive,
-            ],
+            'payment_settings' => $paymentSettings->checkoutSettings(),
             'company_info' => $paymentSettings->getCompanyInfo(),
             'vat_settings' => [
                 'enabled' => (bool) $paymentSettings->subscription_vat_enabled,
                 'rate' => (float) $paymentSettings->getSubscriptionVatRate(),
                 'inclusive' => (bool) $paymentSettings->subscription_vat_inclusive,
             ],
-            // Phase 6: tenant's dunning preferences (opt-out + lang).
-            // Used by DunningPreferencesCard in the Billing page.
-            'tenant' => $tenant ? [
-                'id' => $tenant->id,
-                'dunning_opted_out' => (bool) $tenant->dunning_opted_out,
-                'dunning_language' => $tenant->dunning_language,
-            ] : null,
         ]);
     }
 }

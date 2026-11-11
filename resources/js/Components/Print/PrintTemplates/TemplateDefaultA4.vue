@@ -97,6 +97,30 @@
                         {{ $t('work_orders.print_view.date') }}:
                         {{ printHelpers.formatDate(data.created_at || new Date()) }}
                     </p>
+                    <p
+                        v-if="data.printed_department"
+                        class="text-indigo-700 font-semibold mt-0.5 text-xs"
+                        :class="isRtl ? 'text-right' : 'text-left'"
+                    >
+                        {{ $t('work_orders.print_view.department') }}:
+                        {{
+                            isRtl
+                                ? data.printed_department.name_ar || data.printed_department.name_en
+                                : data.printed_department.name_en || data.printed_department.name_ar
+                        }}
+                    </p>
+                    <p
+                        v-if="data.printed_technician"
+                        class="text-indigo-800 font-bold mt-0.5 text-xs"
+                        :class="isRtl ? 'text-right' : 'text-left'"
+                    >
+                        {{ $t('work_orders.print_view.assigned_technician') }}:
+                        {{
+                            isRtl
+                                ? data.printed_technician.name_ar || data.printed_technician.name_en
+                                : data.printed_technician.name_en || data.printed_technician.name_ar
+                        }}
+                    </p>
                 </div>
             </div>
         </div>

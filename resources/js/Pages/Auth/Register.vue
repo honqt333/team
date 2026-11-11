@@ -1,4 +1,5 @@
 <script setup>
+import AppToggle from '@/Components/Common/AppToggle.vue';
 import AuthLayout from '@/Layouts/AuthLayout.vue';
 import InputError from '@/Components/InputError.vue';
 import { Head, Link, useForm, usePage } from '@inertiajs/vue3';
@@ -112,6 +113,7 @@ const verifyOtp = () => {
 };
 
 const submit = () => {
+    if (!form.terms) return;
     form.post(route('register'), {
         onFinish: () => form.reset('password', 'password_confirmation'),
     });
@@ -460,13 +462,7 @@ const submit = () => {
 
             <!-- Terms Checkbox -->
             <div class="flex items-start gap-2">
-                <input
-                    type="checkbox"
-                    id="terms"
-                    v-model="form.terms"
-                    required
-                    class="mt-1 w-4 h-4 text-violet-600 border-gray-300 rounded focus:ring-violet-500"
-                />
+                <AppToggle id="terms" v-model="form.terms" />
                 <label for="terms" class="text-sm text-gray-600 dark:text-gray-400">
                     {{ isRTL ? 'قرأت وأوافق على' : 'I have read and agree to the' }}
                     <button
@@ -491,7 +487,9 @@ const submit = () => {
             <!-- Submit Button -->
             <button
                 type="submit"
-                :disabled="form.processing || (phoneVerificationEnabled && !phoneVerified)"
+                :disabled="
+                    form.processing || !form.terms || (phoneVerificationEnabled && !phoneVerified)
+                "
                 class="w-full py-3 px-4 bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 text-white font-semibold rounded-xl shadow-lg shadow-violet-500/30 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
             >
                 <span v-if="form.processing" class="flex items-center justify-center gap-2">

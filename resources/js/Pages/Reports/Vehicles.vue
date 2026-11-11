@@ -1,6 +1,6 @@
 <template>
     <AppLayout>
-        <div class="space-y-6">
+        <PrintEngine document-type="report" class="space-y-6">
             <!-- Screen Only Header Section (AUDIT_STANDARDS.md compliant) -->
             <PageHeader
                 :title="$t('reports.vehicles_report.title')"
@@ -38,26 +38,10 @@
 
                 <template #actions>
                     <div class="flex items-center gap-2.5 shrink-0">
-                        <button
-                            type="button"
+                        <AppPrintButton
                             @click="handlePrint"
-                            class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 text-xs font-bold transition-all shadow-sm"
-                        >
-                            <svg
-                                class="w-4 h-4 text-gray-500"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                            >
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    stroke-width="2"
-                                    d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"
-                                />
-                            </svg>
-                            <span>{{ $t('reports.vehicles_report.print_report') }}</span>
-                        </button>
+                            :label="$t('reports.vehicles_report.print_report')"
+                        />
 
                         <a
                             :href="exportUrl"
@@ -170,7 +154,10 @@
                                 {{ $t('reports.vehicles_report.currency') }}
                             </span>
                         </div>
-                        <table class="w-full text-[10px] border-collapse border border-gray-300">
+                        <DataTable
+                            structured
+                            class="w-full text-[10px] border-collapse border border-gray-300"
+                        >
                             <thead>
                                 <tr class="bg-gray-50 border-b border-gray-300">
                                     <th class="border border-gray-300 p-1 text-center">#</th>
@@ -243,12 +230,15 @@
                                     </td>
                                 </tr>
                             </tbody>
-                        </table>
+                        </DataTable>
                     </div>
                 </div>
 
                 <div v-else>
-                    <table class="w-full text-[10px] border-collapse border border-gray-300">
+                    <DataTable
+                        structured
+                        class="w-full text-[10px] border-collapse border border-gray-300"
+                    >
                         <thead>
                             <tr class="bg-gray-50 border-b border-gray-300">
                                 <th class="border border-gray-300 p-1 text-center">#</th>
@@ -327,7 +317,7 @@
                                 </td>
                             </tr>
                         </tbody>
-                    </table>
+                    </DataTable>
                 </div>
 
                 <StandardReportFooter />
@@ -918,7 +908,7 @@
                             v-show="openGroups[group.group_key]"
                             class="border-t border-gray-100 dark:border-gray-700/60 overflow-x-auto"
                         >
-                            <table class="w-full text-xs text-start border-collapse">
+                            <DataTable structured class="w-full text-xs text-start border-collapse">
                                 <thead>
                                     <tr
                                         class="bg-gray-50/75 dark:bg-gray-700/30 text-gray-600 dark:text-gray-300 border-b border-gray-100 dark:border-gray-700/60"
@@ -1068,7 +1058,7 @@
                                         </td>
                                     </tr>
                                 </tbody>
-                            </table>
+                            </DataTable>
                         </div>
                     </div>
                 </div>
@@ -1080,7 +1070,7 @@
                 class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700/60 overflow-hidden shadow-sm print:hidden"
             >
                 <div class="overflow-x-auto">
-                    <table class="w-full text-xs text-start border-collapse">
+                    <DataTable structured class="w-full text-xs text-start border-collapse">
                         <thead>
                             <tr
                                 class="bg-gray-50/75 dark:bg-gray-700/30 text-gray-600 dark:text-gray-300 border-b border-gray-100 dark:border-gray-700/60"
@@ -1258,7 +1248,7 @@
                                 </td>
                             </tr>
                         </tbody>
-                    </table>
+                    </DataTable>
                 </div>
 
                 <!-- Flat Table Pagination Footer -->
@@ -1290,11 +1280,14 @@
                     </div>
                 </div>
             </div>
-        </div>
+        </PrintEngine>
     </AppLayout>
 </template>
 
 <script setup>
+import PrintEngine from '@/Components/Print/PrintEngine.vue';
+import DataTable from '@/Components/Common/DataTable.vue';
+import AppPrintButton from '@/Components/Common/AppPrintButton.vue';
 import { ref, computed } from 'vue';
 import { router } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
@@ -1306,7 +1299,7 @@ import SaudiPlateDisplay from '@/Components/Vehicles/SaudiPlateDisplay.vue';
 import CustomDatePicker from '@/Components/CustomDatePicker.vue';
 import StandardReportHeader from '@/Components/Print/StandardReportHeader.vue';
 import StandardReportFooter from '@/Components/Print/StandardReportFooter.vue';
-import { usePrint } from '@/Composables/usePrint';
+import { printDocument } from '@/Composables/usePrint';
 
 const props = defineProps({
     items: {
@@ -1332,7 +1325,6 @@ const props = defineProps({
 });
 
 // Print Setup
-const { printDocument } = usePrint();
 const handlePrint = () => {
     printDocument({
         title: 'Vehicles Report',

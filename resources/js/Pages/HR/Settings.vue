@@ -532,36 +532,22 @@
                                             }}
                                         </label>
                                         <div class="flex gap-2">
-                                            <label class="flex items-center gap-1 cursor-pointer">
-                                                <input
-                                                    type="radio"
-                                                    v-model="
-                                                        attendanceSettingsForm.absence_deduction_type
-                                                    "
-                                                    value="fixed"
-                                                    class="text-red-600 focus:ring-red-500"
-                                                />
-                                                <span
-                                                    class="text-xs text-red-800 dark:text-red-300"
-                                                >
-                                                    {{ $t('common.fixed_amount') }}
-                                                </span>
-                                            </label>
-                                            <label class="flex items-center gap-1 cursor-pointer">
-                                                <input
-                                                    type="radio"
-                                                    v-model="
-                                                        attendanceSettingsForm.absence_deduction_type
-                                                    "
-                                                    value="percentage"
-                                                    class="text-red-600 focus:ring-red-500"
-                                                />
-                                                <span
-                                                    class="text-xs text-red-800 dark:text-red-300"
-                                                >
-                                                    {{ $t('common.percentage') }}
-                                                </span>
-                                            </label>
+                                            <RadioGroup
+                                                v-model="
+                                                    attendanceSettingsForm.absence_deduction_type
+                                                "
+                                                direction="horizontal"
+                                                :options="[
+                                                    {
+                                                        value: 'fixed',
+                                                        label: $t('common.fixed_amount'),
+                                                    },
+                                                    {
+                                                        value: 'percentage',
+                                                        label: $t('common.percentage'),
+                                                    },
+                                                ]"
+                                            />
                                         </div>
                                     </div>
                                     <div class="flex items-center gap-2">
@@ -1047,6 +1033,7 @@
 </template>
 
 <script setup>
+import RadioGroup from '@/Components/Common/RadioGroup.vue';
 import { ref, computed } from 'vue';
 import { Link, router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';

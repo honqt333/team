@@ -229,18 +229,13 @@
                 </div>
 
                 <div class="overflow-x-auto">
-                    <table class="w-full text-right text-sm">
+                    <DataTable structured class="w-full text-right text-sm">
                         <thead
                             class="bg-gray-50 dark:bg-gray-900/40 text-gray-600 dark:text-gray-300 text-xs font-semibold uppercase"
                         >
                             <tr>
                                 <th class="p-4 w-12 text-center">
-                                    <input
-                                        type="checkbox"
-                                        :checked="allSelected"
-                                        @change="toggleAll"
-                                        class="w-4 h-4 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500"
-                                    />
+                                    <AppToggle :checked="allSelected" @change="toggleAll" />
                                 </th>
                                 <th class="px-3 py-3">#</th>
                                 <th class="px-3 py-3">
@@ -281,11 +276,7 @@
                                 ]"
                             >
                                 <td class="p-4 text-center">
-                                    <input
-                                        type="checkbox"
-                                        v-model="tx.is_selected"
-                                        class="w-4 h-4 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500"
-                                    />
+                                    <AppToggle v-model="tx.is_selected" />
                                 </td>
                                 <td class="px-3 py-3.5 text-xs text-gray-500">{{ idx + 1 }}</td>
                                 <td
@@ -340,7 +331,7 @@
                                 </td>
                             </tr>
                         </tbody>
-                    </table>
+                    </DataTable>
                 </div>
             </div>
         </div>
@@ -348,6 +339,8 @@
 </template>
 
 <script setup>
+import DataTable from '@/Components/Common/DataTable.vue';
+import AppToggle from '@/Components/Common/AppToggle.vue';
 import { ref, computed } from 'vue';
 import { Head, Link, router } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';

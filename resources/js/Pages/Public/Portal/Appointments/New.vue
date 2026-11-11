@@ -107,19 +107,13 @@
                         form.serviceIds.includes(s.id)
                             ? {
                                   backgroundColor:
-                                      'color-mix(in srgb, var(--tenant-primary, #4f46e5) 8%, transparent)',
-                                  '--tw-ring-color': 'var(--tenant-primary, #4f46e5)',
+                                      'color-mix(in srgb, var(--tenant-primary, #2563eb) 8%, transparent)',
+                                  '--tw-ring-color': 'var(--tenant-primary, #2563eb)',
                               }
                             : {}
                     "
                 >
-                    <input
-                        type="checkbox"
-                        :value="s.id"
-                        v-model="form.serviceIds"
-                        class="mt-1 w-4 h-4 rounded border-slate-300 focus:ring-2"
-                        :style="{ color: 'var(--tenant-primary, #4f46e5)' }"
-                    />
+                    <AppToggle :value="s.id" v-model="form.serviceIds" />
                     <div class="min-w-0 flex-1">
                         <div class="flex items-center justify-between gap-2">
                             <span class="font-bold text-sm">{{ s.name }}</span>
@@ -187,12 +181,10 @@
             </p>
 
             <div class="mb-4">
-                <input
-                    type="date"
-                    :min="minDateStr"
-                    :max="maxDateStr"
+                <CustomDatePicker
+                    :min-date="minDateStr"
+                    :max-date="maxDateStr"
                     v-model="form.date"
-                    class="rounded-lg border-slate-300 dark:border-slate-700 dark:bg-slate-950 text-sm"
                 />
             </div>
 
@@ -216,7 +208,7 @@
                     "
                     :style="
                         form.scheduledAt === slot
-                            ? { backgroundColor: 'var(--tenant-primary, #4f46e5)' }
+                            ? { backgroundColor: 'var(--tenant-primary, #2563eb)' }
                             : {}
                     "
                     dir="ltr"
@@ -332,7 +324,7 @@
                 @click="next"
                 :disabled="!canAdvance"
                 class="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-lg text-sm font-semibold text-white disabled:opacity-40"
-                :style="{ backgroundColor: 'var(--tenant-primary, #4f46e5)' }"
+                :style="{ backgroundColor: 'var(--tenant-primary, #2563eb)' }"
             >
                 {{ t('customer_portal.booking.btn_next') }}
             </button>
@@ -342,7 +334,7 @@
                 @click="submit"
                 :disabled="submitting || !canSubmit"
                 class="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-lg text-sm font-semibold text-white disabled:opacity-40"
-                :style="{ backgroundColor: 'var(--tenant-primary, #4f46e5)' }"
+                :style="{ backgroundColor: 'var(--tenant-primary, #2563eb)' }"
             >
                 {{
                     submitting
@@ -420,6 +412,8 @@
 </template>
 
 <script setup>
+import CustomDatePicker from '@/Components/CustomDatePicker.vue';
+import AppToggle from '@/Components/Common/AppToggle.vue';
 import { Head, router, usePage } from '@inertiajs/vue3';
 import { computed, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';

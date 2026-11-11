@@ -176,7 +176,7 @@
 <script setup>
 import PrintEngine from '@/Components/Print/PrintEngine.vue';
 import AppPrintButton from '@/Components/Common/AppPrintButton.vue';
-import { usePrint } from '@/Composables/usePrint';
+import { printDocument } from '@/Composables/usePrint';
 import { computed } from 'vue';
 import { Head, router } from '@inertiajs/vue3';
 import EmployeePortalLayout from '@/Layouts/EmployeePortalLayout.vue';
@@ -234,6 +234,4 @@ function formatPeriodLabel(payrollRun) {
     const end = new Date(payrollRun.period_end);
     return start.toLocaleDateString('en-SA', { month: 'long', year: 'numeric' });
 }
-
-const { printDocument } = usePrint();
 </script>

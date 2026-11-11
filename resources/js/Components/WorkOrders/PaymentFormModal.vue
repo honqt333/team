@@ -77,7 +77,10 @@
                                     {{ $t('payments.types.refund') }}
                                 </span>
                             </label>
-                            <label class="flex items-center gap-2 cursor-pointer">
+                            <label
+                                v-if="allowBadDebt"
+                                class="flex items-center gap-2 cursor-pointer"
+                            >
                                 <input
                                     type="radio"
                                     v-model="form.type"
@@ -279,8 +282,10 @@ const props = defineProps({
     show: { type: Boolean, default: false },
     workOrderId: { type: Number, required: true },
     balance: { type: Number, default: 0 },
+    excessPaid: { type: Number, default: 0 },
     payment: { type: Object, default: null }, // For editing
     allowRefund: { type: Boolean, default: false },
+    allowBadDebt: { type: Boolean, default: false },
     totalPaid: { type: Number, default: 0 },
     pendingMode: { type: Boolean, default: false },
 });
@@ -369,15 +374,32 @@ watch(
                     notes: props.payment.notes || '',
                 };
             } else {
+                const defaultRefund = props.allowRefund && props.excessPaid > 0.01;
                 form.value = {
-                    type: 'payment',
+                    type: defaultRefund ? 'refund' : 'payment',
                     payment_method: 'cash',
-                    amount: props.balance > 0 ? props.balance : '',
+                    amount: defaultRefund
+                        ? props.excessPaid
+                        : props.balance > 0
+                          ? props.balance
+                          : '',
                     payment_date: new Date().toISOString().split('T')[0],
                     reference: '',
                     notes: '',
                 };
             }
+        }
+    }
+);
+
+watch(
+    () => form.value.type,
+    (newType) => {
+        if (!props.show || isEditing.value) return;
+        if (newType === 'refund' && props.excessPaid > 0.01) {
+            form.value.amount = props.excessPaid;
+        } else if (newType === 'payment' && props.balance > 0.01) {
+            form.value.amount = props.balance;
         }
     }
 );
@@ -395,7 +417,7 @@ function validate() {
         errors.value.amount = t('common.validation.required', { field: t('payments.form.amount') });
     }
 
-    if (form.value.type === 'refund' && parseFloat(form.value.amount) > props.totalPaid) {
+    if (form.value.type === 'refund' && parseFloat(form.value.amount) > props.totalPaid + 0.001) {
         errors.value.amount = t('payments.amount_exceeds_paid');
     }
 

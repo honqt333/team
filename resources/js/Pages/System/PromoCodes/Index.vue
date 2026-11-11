@@ -42,7 +42,7 @@
                 class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden"
             >
                 <div class="overflow-x-auto">
-                    <table class="w-full">
+                    <DataTable structured class="w-full">
                         <thead class="bg-gray-50 dark:bg-gray-700/50">
                             <tr>
                                 <th
@@ -170,7 +170,7 @@
                                 </td>
                             </tr>
                         </tbody>
-                    </table>
+                    </DataTable>
                 </div>
 
                 <!-- Empty State -->
@@ -421,21 +421,13 @@
                             <!-- Status -->
                             <div class="flex gap-6">
                                 <label class="flex items-center gap-2 cursor-pointer">
-                                    <input
-                                        v-model="form.first_subscription_only"
-                                        type="checkbox"
-                                        class="w-5 h-5 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
-                                    />
+                                    <AppToggle v-model="form.first_subscription_only" />
                                     <span class="text-gray-700 dark:text-gray-300">
                                         {{ $t('system.promo_codes.form.first_subscription_only') }}
                                     </span>
                                 </label>
                                 <label class="flex items-center gap-2 cursor-pointer">
-                                    <input
-                                        v-model="form.is_active"
-                                        type="checkbox"
-                                        class="w-5 h-5 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
-                                    />
+                                    <AppToggle v-model="form.is_active" />
                                     <span class="text-gray-700 dark:text-gray-300">
                                         {{ $t('system.status.active') }}
                                     </span>
@@ -474,6 +466,8 @@
 </template>
 
 <script setup>
+import DataTable from '@/Components/Common/DataTable.vue';
+import AppToggle from '@/Components/Common/AppToggle.vue';
 import { ref, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { router, useForm } from '@inertiajs/vue3';

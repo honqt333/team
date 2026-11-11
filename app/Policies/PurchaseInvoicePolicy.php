@@ -8,6 +8,7 @@ use App\Models\PurchaseInvoice;
 use App\Models\PurchaseReturnInvoice;
 use App\Models\User;
 use App\Support\Permissions;
+use App\Support\TenancyContext;
 
 class PurchaseInvoicePolicy
 {
@@ -23,7 +24,7 @@ class PurchaseInvoicePolicy
     public function view(User $user, PurchaseInvoice $invoice): bool
     {
         return $user->can(Permissions::PURCHASE_INVOICES_VIEW)
-            && $user->tenant_id === $invoice->tenant_id;
+            && $this->sharesDocumentScope($user, $invoice);
     }
 
     public function create(User $user): bool
@@ -34,7 +35,7 @@ class PurchaseInvoicePolicy
     public function update(User $user, PurchaseInvoice $invoice): bool
     {
         return $user->can(Permissions::PURCHASE_INVOICES_UPDATE)
-            && $user->tenant_id === $invoice->tenant_id;
+            && $this->sharesDocumentScope($user, $invoice);
     }
 
     public function delete(User $user, PurchaseInvoice $invoice): bool
@@ -60,7 +61,7 @@ class PurchaseInvoicePolicy
     public function viewReturn(User $user, PurchaseReturnInvoice $return): bool
     {
         return $user->can(Permissions::RETURNS_VIEW)
-            && $user->tenant_id === $return->tenant_id;
+            && $this->sharesDocumentScope($user, $return);
     }
 
     public function createReturn(User $user, PurchaseInvoice $invoice): bool
@@ -72,12 +73,20 @@ class PurchaseInvoicePolicy
     public function updateReturn(User $user, PurchaseReturnInvoice $return): bool
     {
         return $user->can(Permissions::RETURNS_UPDATE)
-            && $user->tenant_id === $return->tenant_id;
+            && $this->sharesDocumentScope($user, $return);
     }
 
     public function deleteReturn(User $user, PurchaseReturnInvoice $return): bool
     {
         return $user->can(Permissions::RETURNS_DELETE)
             && $user->tenant_id === $return->tenant_id;
+    }
+
+    private function sharesDocumentScope(User $user, PurchaseInvoice|PurchaseReturnInvoice $document): bool
+    {
+        $center = TenancyContext::centerId() ?? $user->current_center_id;
+
+        return $user->tenant_id === $document->tenant_id
+            && (string) $center === (string) $document->center_id;
     }
 }

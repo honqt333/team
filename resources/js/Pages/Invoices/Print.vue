@@ -56,7 +56,6 @@ const goBack = () => {
         window.history.back();
     }
 };
-const printPage = () => window.print();
 
 const formatNumber = (num) =>
     new Intl.NumberFormat(isRtl.value ? 'ar-SA-u-nu-latn' : 'en-US').format(num || 0);
@@ -183,16 +182,33 @@ const mappedCenterData = computed(() => {
     const isCompany = !props.invoice.center_id;
     const center = isCompany ? {} : props.invoice.center || {};
     const tenant = props.invoice.tenant || page.props.tenant || {};
+    // Issuer identity frozen on the invoice at issuance. Reprints must
+    // keep showing it even after the tenant is renamed.
+    const sellerName = props.invoice.seller_name_snapshot;
+    const sellerNameEn = props.invoice.seller_name_en_snapshot;
+    const hasIssuer = sellerName != null || sellerNameEn != null;
     return {
+        // A null snapshot is a legacy row that never captured the issuer;
+        // only then may the live tenant data be used. Empty strings are
+        // historical values and must stay blank on reprints.
         name: isRtl.value
-            ? tenant.trade_name || tenant.legal_name || tenant.name || center.name_ar || center.name
-            : tenant.trade_name ||
-              tenant.legal_name ||
-              tenant.name ||
-              center.name_en ||
-              center.name,
-        tax_number: tenant.vat_number || center.vat_number,
-        cr_number: tenant.cr_number,
+            ? (sellerName ??
+              (tenant.trade_name ||
+                  tenant.legal_name ||
+                  tenant.name ||
+                  center.name_ar ||
+                  center.name))
+            : (sellerNameEn ??
+              sellerName ??
+              (tenant.trade_name ||
+                  tenant.legal_name ||
+                  tenant.name ||
+                  center.name_en ||
+                  center.name)),
+        tax_number:
+            props.invoice.seller_vat_snapshot ??
+            (hasIssuer ? null : tenant.vat_number || center.vat_number),
+        cr_number: props.invoice.seller_cr_snapshot ?? (hasIssuer ? null : tenant.cr_number),
         phone: tenant.phone || center.phone,
         logo: tenant.logo_url || center.logo_invoice_url || center.logo_light_url || '',
         iban: tenant.iban || '',

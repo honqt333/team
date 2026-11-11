@@ -159,295 +159,109 @@
 
             <!-- Top Cards Section: Customer Info & Financial Cost Card -->
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <!-- 1. Right Card: Customer & Invoice Details Info -->
-                <div
-                    class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden flex flex-col h-full relative group"
+                <!-- 1. Right Card: Unified Customer & Vehicle Card + Invoice Metadata Footer -->
+                <WorkOrderCustomerCard
+                    :vehicle="invoice.work_order?.vehicle || null"
+                    :customer="invoice.customer"
+                    :customer-name="invoice.customer_name_snapshot || invoice.customer?.name"
+                    :vat-number="
+                        invoice.tax_enabled_snapshot
+                            ? invoice.customer_vat_snapshot || invoice.customer?.tax_number || ''
+                            : ''
+                    "
+                    :address="
+                        invoice.customer_address_snapshot ||
+                        getCustomerAddress(invoice.customer) ||
+                        ''
+                    "
+                    :mileage="invoice.work_order?.mileage ?? invoice.work_order?.odometer"
+                    :colors="colors"
                 >
-                    <!-- Card Decoration -->
-                    <div
-                        class="absolute -top-12 -end-12 w-32 h-32 bg-blue-500/5 rounded-full blur-3xl group-hover:bg-blue-500/10 transition-colors"
-                    ></div>
-
-                    <!-- Main Content Container with Customer Info at Top, followed by Invoice Details -->
-                    <div class="p-5 flex-1 flex flex-col gap-5 relative z-10">
-                        <!-- Customer Info -->
-                        <div>
-                            <p
-                                class="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-2"
-                            >
-                                {{ $t('customers.customer') }}
-                            </p>
-                            <div class="flex items-center gap-4 mb-3">
-                                <div
-                                    class="w-12 h-12 rounded-xl bg-blue-50 dark:bg-blue-950/20 text-blue-600 flex items-center justify-center shrink-0"
-                                >
-                                    <svg
-                                        class="w-6 h-6"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        viewBox="0 0 24 24"
-                                    >
-                                        <path
-                                            stroke-linecap="round"
-                                            stroke-linejoin="round"
-                                            stroke-width="2"
-                                            d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                                        />
-                                    </svg>
-                                </div>
-                                <div class="flex-1 min-w-0">
-                                    <Link
-                                        v-if="invoice.customer_id"
-                                        :href="route('customers.show', invoice.customer_id)"
-                                        class="text-base font-black text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 hover:underline transition-colors flex items-center gap-1.5 w-fit group/sup"
-                                    >
-                                        <span>
-                                            {{
-                                                invoice.customer_name_snapshot ||
-                                                invoice.customer?.name
-                                            }}
-                                        </span>
-                                        <svg
-                                            class="w-4 h-4 opacity-60 group-hover/sup:opacity-100 transition-opacity shrink-0"
-                                            fill="none"
-                                            stroke="currentColor"
-                                            viewBox="0 0 24 24"
-                                        >
-                                            <path
-                                                stroke-linecap="round"
-                                                stroke-linejoin="round"
-                                                stroke-width="2.5"
-                                                d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
-                                            />
-                                        </svg>
-                                    </Link>
-                                    <h4
-                                        v-else
-                                        class="text-base font-bold text-gray-900 dark:text-white"
-                                    >
-                                        —
-                                    </h4>
-                                    <div
-                                        class="flex flex-wrap gap-x-4 gap-y-1 mt-1 text-xs text-gray-500 dark:text-gray-400"
-                                    >
-                                        <span
-                                            v-if="invoice.customer?.phone"
-                                            class="font-mono flex items-center gap-1"
-                                        >
-                                            <span>📞</span>
-                                            <span dir="ltr">{{ invoice.customer.phone }}</span>
-                                        </span>
-                                        <span
-                                            v-if="
-                                                (invoice.customer_vat_snapshot ||
-                                                    invoice.customer?.tax_number) &&
-                                                invoice.tax_enabled_snapshot
-                                            "
-                                            class="font-mono flex items-center gap-1"
-                                        >
-                                            <span>📋</span>
-                                            <span>
-                                                {{ $t('customers.tax_number') }}:
-                                                {{
-                                                    invoice.customer_vat_snapshot ||
-                                                    invoice.customer?.tax_number
-                                                }}
-                                            </span>
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Customer Address sub-block -->
-                            <div
-                                class="flex items-start gap-2.5 text-xs text-gray-600 dark:text-gray-400 bg-gray-50/50 dark:bg-gray-900/30 p-3 rounded-xl border border-gray-150/50 dark:border-gray-700/30 shadow-inner"
-                            >
-                                <svg
-                                    class="w-4 h-4 text-gray-400 shrink-0 mt-0.5"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        stroke-width="2"
-                                        d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-                                    />
-                                    <path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        stroke-width="2"
-                                        d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
-                                    />
-                                </svg>
-                                <div class="space-y-0.5">
-                                    <p
-                                        class="font-bold text-[10px] uppercase text-gray-400 dark:text-gray-500"
-                                    >
-                                        {{ $t('customers.address') }}
-                                    </p>
-                                    <p class="font-semibold leading-relaxed" dir="auto">
-                                        {{
-                                            invoice.customer_address_snapshot ||
-                                            getCustomerAddress(invoice.customer) ||
-                                            $t('customers.no_address')
-                                        }}
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Divider line -->
-                        <div class="border-t border-gray-100 dark:border-gray-700/65"></div>
-
-                        <!-- Invoice Dates & ZATCA QR Code -->
-                        <div>
-                            <p
-                                class="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-2"
-                            >
-                                {{ $t('invoices.details') }}
-                            </p>
+                    <template #footer>
+                        <div
+                            class="px-4 pb-4 pt-3 border-t border-gray-100 dark:border-gray-700/65 space-y-3"
+                        >
+                            <!-- Invoice Dates & ZATCA QR Code -->
                             <div
                                 class="flex justify-between items-center bg-gray-50/50 dark:bg-gray-900/30 p-3 rounded-xl border border-gray-150/50 dark:border-gray-700/30"
                             >
                                 <div
-                                    class="grid gap-x-6 gap-y-3 flex-1"
-                                    :class="invoice.work_order_id ? 'grid-cols-1' : 'grid-cols-2'"
+                                    class="grid gap-x-6 gap-y-2 flex-1"
+                                    :class="
+                                        invoice.work_order_id
+                                            ? 'grid-cols-1 sm:grid-cols-2'
+                                            : 'grid-cols-2'
+                                    "
                                 >
                                     <div>
                                         <p
-                                            class="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-1"
+                                            class="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-0.5"
                                         >
                                             {{ $t('invoices.date') }}
                                         </p>
                                         <div
                                             class="flex items-center gap-1.5 text-gray-700 dark:text-gray-300"
                                         >
-                                            <svg
-                                                class="w-4 h-4 text-gray-400"
-                                                fill="none"
-                                                stroke="currentColor"
-                                                viewBox="0 0 24 24"
-                                            >
-                                                <path
-                                                    stroke-linecap="round"
-                                                    stroke-linejoin="round"
-                                                    stroke-width="2"
-                                                    d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-                                                />
-                                            </svg>
-                                            <span class="text-sm font-bold font-mono">
+                                            <span class="text-xs font-bold font-mono">
                                                 {{ formatDate(invoice.issue_date) }}
                                             </span>
                                         </div>
                                     </div>
-                                    <!-- Supply date only for non-WO invoices -->
+
                                     <div v-if="!invoice.work_order_id">
                                         <p
-                                            class="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-1"
+                                            class="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-0.5"
                                         >
                                             {{ $t('invoices.supply_date') }}
                                         </p>
-                                        <div
-                                            class="flex items-center gap-1.5 text-gray-700 dark:text-gray-300"
+                                        <span
+                                            class="text-xs font-bold font-mono text-gray-700 dark:text-gray-300"
                                         >
-                                            <svg
-                                                class="w-4 h-4 text-gray-400"
-                                                fill="none"
-                                                stroke="currentColor"
-                                                viewBox="0 0 24 24"
-                                            >
-                                                <path
-                                                    stroke-linecap="round"
-                                                    stroke-linejoin="round"
-                                                    stroke-width="2"
-                                                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                                                />
-                                            </svg>
-                                            <span class="text-sm font-bold font-mono">
-                                                {{ formatDate(invoice.supply_date) }}
+                                            {{ formatDate(invoice.supply_date) }}
+                                        </span>
+                                    </div>
+
+                                    <div v-if="invoice.work_order">
+                                        <p
+                                            class="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-0.5"
+                                        >
+                                            {{ $t('work_orders.title_singular') }}
+                                        </p>
+                                        <Link
+                                            :href="route('work-orders.show', invoice.work_order_id)"
+                                            class="text-xs font-black text-blue-600 hover:text-blue-700 dark:text-blue-400 hover:underline inline-flex items-center gap-1"
+                                        >
+                                            <span dir="ltr">
+                                                #{{
+                                                    invoice.work_order?.code ||
+                                                    invoice.work_order?.id
+                                                }}
                                             </span>
-                                        </div>
+                                        </Link>
                                     </div>
                                 </div>
 
                                 <!-- QR Code block for ZATCA E-Invoice -->
                                 <div
                                     v-if="invoice.tax_enabled_snapshot && invoice.zatca_qr_tlv"
-                                    class="shrink-0 p-1.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-sm hover:shadow transition-all group-hover:scale-105 duration-300"
+                                    class="shrink-0 p-1.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-sm"
                                 >
                                     <img
                                         :src="generateQRCode(invoice.zatca_qr_tlv)"
                                         alt="ZATCA QR"
-                                        class="w-14 h-14 object-contain"
+                                        class="w-12 h-12 object-contain"
                                     />
                                 </div>
                             </div>
-                        </div>
 
-                        <!-- Optional Work Order & Vehicle Info Link -->
-                        <div
-                            v-if="invoice.work_order"
-                            class="mt-2 pt-4 border-t border-gray-100 dark:border-gray-700/65"
-                        >
-                            <p
-                                class="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-2"
-                            >
-                                {{ $t('work_orders.title_singular') }}
-                            </p>
+                            <!-- Credit Note Reference to Original Invoice -->
                             <div
-                                class="flex flex-col sm:flex-row sm:items-center justify-between gap-2"
-                            >
-                                <Link
-                                    :href="route('work-orders.show', invoice.work_order_id)"
-                                    class="text-sm font-black text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 hover:underline transition-colors flex items-center gap-1.5 group/wo"
-                                >
-                                    <span>
-                                        #{{ invoice.work_order?.code || invoice.work_order?.id }}
-                                    </span>
-                                    <svg
-                                        class="w-4 h-4 opacity-60 group-hover/wo:opacity-100 transition-opacity shrink-0"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        viewBox="0 0 24 24"
-                                    >
-                                        <path
-                                            stroke-linecap="round"
-                                            stroke-linejoin="round"
-                                            stroke-width="2.5"
-                                            d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
-                                        />
-                                    </svg>
-                                </Link>
-                                <span
-                                    v-if="invoice.work_order?.vehicle"
-                                    class="text-xs text-gray-500 dark:text-gray-400 font-semibold flex items-center gap-1.5"
-                                >
-                                    <span>🚗</span>
-                                    <span>
-                                        {{ invoice.work_order.vehicle.display_make }}
-                                        {{ invoice.work_order.vehicle.display_model }}
-                                    </span>
-                                    <SaudiPlateDisplay
-                                        :plate-number="invoice.work_order.vehicle.plate_number"
-                                        size="sm"
-                                    />
-                                </span>
-                            </div>
-                        </div>
-
-                        <!-- Credit Note Reference to Original Invoice -->
-                        <div
-                            v-if="invoice.type === 'credit_note' && invoice.original_invoice"
-                            class="mt-2 pt-4 border-t border-rose-200 dark:border-rose-900/40 bg-rose-50/50 dark:bg-rose-950/20 p-3 rounded-xl"
-                        >
-                            <div
-                                class="flex flex-col sm:flex-row sm:items-center justify-between gap-2"
+                                v-if="invoice.type === 'credit_note' && invoice.original_invoice"
+                                class="border border-rose-200 dark:border-rose-900/40 bg-rose-50/50 dark:bg-rose-950/20 p-3 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-2"
                             >
                                 <div>
                                     <p
-                                        class="text-[10px] font-black text-rose-600 dark:text-rose-400 uppercase tracking-widest mb-1"
+                                        class="text-[10px] font-black text-rose-600 dark:text-rose-400 uppercase tracking-widest mb-0.5"
                                     >
                                         {{ $t('invoices.credit_note.original_invoice') }}
                                     </p>
@@ -455,10 +269,10 @@
                                         :href="
                                             route('app.invoices.show', invoice.original_invoice.id)
                                         "
-                                        class="text-sm font-black text-rose-700 hover:text-rose-800 dark:text-rose-300 hover:underline flex items-center gap-1.5"
+                                        class="text-xs font-black text-rose-700 hover:text-rose-800 dark:text-rose-300 hover:underline flex items-center gap-1.5"
                                     >
                                         <span>#{{ invoice.original_invoice.invoice_number }}</span>
-                                        <span class="text-xs text-gray-500 font-normal">
+                                        <span class="text-gray-500 font-normal">
                                             ({{ formatDate(invoice.original_invoice.issue_date) }})
                                         </span>
                                     </Link>
@@ -476,412 +290,61 @@
                                     </span>
                                 </div>
                             </div>
-                        </div>
 
-                        <!-- Related Credit Notes if viewing original invoice -->
-                        <div
-                            v-if="invoice.credit_notes && invoice.credit_notes.length > 0"
-                            class="mt-2 pt-4 border-t border-amber-200 dark:border-amber-900/40 bg-amber-50/50 dark:bg-amber-950/20 p-3 rounded-xl"
-                        >
-                            <p
-                                class="text-[10px] font-black text-amber-700 dark:text-amber-400 uppercase tracking-widest mb-2"
+                            <!-- Related Credit Notes if viewing original invoice -->
+                            <div
+                                v-if="invoice.credit_notes && invoice.credit_notes.length > 0"
+                                class="border border-amber-200 dark:border-amber-900/40 bg-amber-50/50 dark:bg-amber-950/20 p-3 rounded-xl"
                             >
-                                {{ $t('invoices.credit_note.related_credit_notes') }}
-                            </p>
-                            <div class="space-y-1.5">
-                                <div
-                                    v-for="cn in invoice.credit_notes"
-                                    :key="cn.id"
-                                    class="flex items-center justify-between text-xs"
+                                <p
+                                    class="text-[10px] font-black text-amber-700 dark:text-amber-400 uppercase tracking-widest mb-1.5"
                                 >
-                                    <Link
-                                        :href="route('app.invoices.show', cn.id)"
-                                        class="font-mono font-bold text-amber-800 dark:text-amber-300 hover:underline flex items-center gap-1"
+                                    {{ $t('invoices.credit_note.related_credit_notes') }}
+                                </p>
+                                <div class="space-y-1">
+                                    <div
+                                        v-for="cn in invoice.credit_notes"
+                                        :key="cn.id"
+                                        class="flex items-center justify-between text-xs"
                                     >
-                                        <span>↩ #{{ cn.invoice_number }}</span>
-                                        <span class="text-gray-500 font-normal">
-                                            ({{ formatDate(cn.issue_date) }})
+                                        <Link
+                                            :href="route('app.invoices.show', cn.id)"
+                                            class="font-mono font-bold text-amber-800 dark:text-amber-300 hover:underline flex items-center gap-1"
+                                        >
+                                            <span>↩ #{{ cn.invoice_number }}</span>
+                                            <span class="text-gray-500 font-normal">
+                                                ({{ formatDate(cn.issue_date) }})
+                                            </span>
+                                        </Link>
+                                        <span
+                                            class="font-bold text-rose-600 dark:text-rose-400 font-mono"
+                                        >
+                                            -{{ formatCurrency(cn.total_incl_tax) }}
                                         </span>
-                                    </Link>
-                                    <span
-                                        class="font-bold text-rose-600 dark:text-rose-400 font-mono"
-                                    >
-                                        -{{ formatCurrency(cn.total_incl_tax) }}
-                                    </span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                </div>
+                    </template>
+                </WorkOrderCustomerCard>
 
-                <!-- 2. Left Card: Financial Cost and Payment Summary -->
-                <div
-                    class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-5 flex flex-col h-full"
-                >
-                    <h3
-                        class="text-base font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2"
-                    >
-                        <div class="w-2 h-5 bg-blue-500 rounded-full"></div>
-                        {{ $t('work_orders.cost_and_payment') }}
-                    </h3>
-
-                    <!-- Mobile Card Breakdown (Visible on mobile < sm) -->
-                    <div class="block sm:hidden space-y-3 mb-2">
-                        <!-- Services breakdown if present -->
-                        <div
-                            v-if="servicesSubtotal > 0"
-                            class="p-3 bg-gray-50 dark:bg-gray-900/40 rounded-xl space-y-1.5 border border-gray-100 dark:border-gray-700/50"
-                        >
-                            <div
-                                class="flex justify-between items-center text-xs font-bold text-gray-900 dark:text-white"
-                            >
-                                <span>{{ $t('work_orders.services') }}</span>
-                                <span class="font-mono">{{ formatCurrency(servicesTotal) }}</span>
-                            </div>
-                            <div
-                                class="flex justify-between items-center text-[11px] text-gray-500"
-                            >
-                                <span>
-                                    {{ $t('common.unit_price') }}:
-                                    {{ formatCurrency(servicesGross) }}
-                                </span>
-                                <span v-if="servicesDiscount > 0" class="text-red-500 italic">
-                                    -{{ formatCurrency(servicesDiscount) }}
-                                </span>
-                            </div>
-                        </div>
-
-                        <!-- Spare Parts breakdown if present -->
-                        <div
-                            v-if="partsSubtotal > 0"
-                            class="p-3 bg-gray-50 dark:bg-gray-900/40 rounded-xl space-y-1.5 border border-gray-100 dark:border-gray-700/50"
-                        >
-                            <div
-                                class="flex justify-between items-center text-xs font-bold text-gray-900 dark:text-white"
-                            >
-                                <span>{{ $t('quotes.show.tabs.spare_parts') }}</span>
-                                <span class="font-mono">{{ formatCurrency(partsTotal) }}</span>
-                            </div>
-                            <div
-                                class="flex justify-between items-center text-[11px] text-gray-500"
-                            >
-                                <span>
-                                    {{ $t('common.unit_price') }}: {{ formatCurrency(partsGross) }}
-                                </span>
-                                <span v-if="partsDiscountAmt > 0" class="text-red-500 italic">
-                                    -{{ formatCurrency(partsDiscountAmt) }}
-                                </span>
-                            </div>
-                        </div>
-
-                        <!-- Grand Total, Paid & Balance Summary Card -->
-                        <div
-                            class="p-3.5 bg-blue-50/70 dark:bg-blue-950/20 rounded-xl border border-blue-200/60 dark:border-blue-800/40 space-y-2"
-                        >
-                            <div
-                                class="flex justify-between items-center text-sm font-black text-blue-900 dark:text-blue-300"
-                            >
-                                <span>
-                                    {{
-                                        invoice.tax_enabled_snapshot
-                                            ? $t('invoices.grand_total')
-                                            : $t('invoices.total')
-                                    }}
-                                </span>
-                                <span class="font-mono text-base text-blue-600 dark:text-blue-400">
-                                    {{ formatCurrency(calculatedInvoiceTotal) }}
-                                </span>
-                            </div>
-                            <div
-                                class="flex justify-between items-center text-xs font-bold text-emerald-600 dark:text-emerald-400"
-                            >
-                                <span>{{ $t('invoices.paid') }}</span>
-                                <span class="font-mono">
-                                    {{ formatCurrency(invoiceActualPaid) }}
-                                </span>
-                            </div>
-                            <div
-                                v-if="invoiceBadDebt > 0"
-                                class="flex justify-between items-center text-xs font-bold text-amber-600 dark:text-amber-400"
-                            >
-                                <span>{{ $t('payments.types.bad_debt') }}</span>
-                                <span class="font-mono">{{ formatCurrency(invoiceBadDebt) }}</span>
-                            </div>
-                            <div
-                                class="pt-2 border-t border-blue-200/60 dark:border-blue-800/40 flex justify-between items-center text-sm font-black"
-                                :class="
-                                    balance > 0.01
-                                        ? 'text-red-600 dark:text-red-400'
-                                        : 'text-emerald-600 dark:text-emerald-400'
-                                "
-                            >
-                                <span>{{ $t('invoices.balance') }}</span>
-                                <span class="font-mono text-base">
-                                    {{ formatCurrency(balance) }}
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Desktop Table (Visible on sm and larger) -->
-                    <div class="hidden sm:block overflow-x-auto md:overflow-x-visible flex-1">
-                        <table class="w-full min-w-[550px] md:min-w-0 text-sm">
-                            <thead>
-                                <tr
-                                    class="text-gray-400 dark:text-gray-500 border-b border-gray-100 dark:border-gray-700/50 pb-2"
-                                >
-                                    <th
-                                        class="pb-2 text-center font-bold uppercase tracking-wider align-middle"
-                                    >
-                                        {{ $t('common.description') }}
-                                    </th>
-                                    <th
-                                        class="pb-2 text-center font-bold uppercase tracking-wider align-middle"
-                                    >
-                                        {{ $t('common.unit_price') }}
-                                    </th>
-                                    <th
-                                        class="pb-2 text-center font-bold uppercase tracking-wider text-red-500 italic align-middle"
-                                    >
-                                        {{ $t('common.discount') }}
-                                    </th>
-                                    <th
-                                        class="pb-2 text-center font-bold uppercase tracking-wider align-middle"
-                                    >
-                                        {{ $t('common.amount') }}
-                                    </th>
-                                    <th
-                                        v-if="invoice.tax_enabled_snapshot"
-                                        class="pb-2 text-center font-bold uppercase tracking-wider italic align-middle"
-                                    >
-                                        {{ $t('common.vat') }}
-                                    </th>
-                                    <th
-                                        class="pb-2 text-center font-bold uppercase tracking-wider text-gray-900 dark:text-white align-middle"
-                                    >
-                                        {{ $t('common.total') }}
-                                    </th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-gray-100 dark:divide-gray-700/30">
-                                <!-- Services Row -->
-                                <tr v-if="servicesSubtotal > 0" class="group">
-                                    <td
-                                        class="py-2.5 text-center font-bold text-gray-900 dark:text-white align-middle"
-                                    >
-                                        {{ $t('work_orders.services') }}
-                                    </td>
-                                    <td
-                                        class="py-2.5 text-center font-mono text-gray-500 align-middle"
-                                    >
-                                        {{ formatCurrency(servicesGross) }}
-                                    </td>
-                                    <td
-                                        class="py-2.5 text-center font-mono text-red-500 italic align-middle"
-                                    >
-                                        {{
-                                            servicesDiscount > 0
-                                                ? '-' + formatCurrency(servicesDiscount)
-                                                : '—'
-                                        }}
-                                    </td>
-                                    <td
-                                        class="py-2.5 text-center font-mono text-gray-500 align-middle"
-                                    >
-                                        {{ formatCurrency(servicesSubtotal) }}
-                                    </td>
-                                    <td
-                                        v-if="invoice.tax_enabled_snapshot"
-                                        class="py-2.5 text-center font-mono text-gray-500 align-middle"
-                                    >
-                                        {{ formatCurrency(servicesTax) }}
-                                    </td>
-                                    <td
-                                        class="py-2.5 text-center font-black text-gray-900 dark:text-white font-mono text-base align-middle"
-                                    >
-                                        {{ formatCurrency(servicesTotal) }}
-                                    </td>
-                                </tr>
-
-                                <!-- Spare Parts Row -->
-                                <tr v-if="partsSubtotal > 0" class="group">
-                                    <td
-                                        class="py-2.5 text-center font-bold text-gray-900 dark:text-white align-middle"
-                                    >
-                                        {{ $t('quotes.show.tabs.spare_parts') }}
-                                    </td>
-                                    <td
-                                        class="py-2.5 text-center font-mono text-gray-500 align-middle"
-                                    >
-                                        {{ formatCurrency(partsGross) }}
-                                    </td>
-                                    <td
-                                        class="py-2.5 text-center font-mono text-red-500 italic align-middle"
-                                    >
-                                        {{
-                                            partsDiscountAmt > 0
-                                                ? '-' + formatCurrency(partsDiscountAmt)
-                                                : '—'
-                                        }}
-                                    </td>
-                                    <td
-                                        class="py-2.5 text-center font-mono text-gray-500 align-middle"
-                                    >
-                                        {{ formatCurrency(partsSubtotal) }}
-                                    </td>
-                                    <td
-                                        v-if="invoice.tax_enabled_snapshot"
-                                        class="py-2.5 text-center font-mono text-gray-500 align-middle"
-                                    >
-                                        {{ formatCurrency(partsTax) }}
-                                    </td>
-                                    <td
-                                        class="py-2.5 text-center font-black text-gray-900 dark:text-white font-mono text-base align-middle"
-                                    >
-                                        {{ formatCurrency(partsTotal) }}
-                                    </td>
-                                </tr>
-
-                                <!-- Fallback row if no work_order lines breakdown -->
-                                <tr
-                                    v-if="servicesSubtotal === 0 && partsSubtotal === 0"
-                                    class="group"
-                                >
-                                    <td
-                                        class="py-2.5 text-center font-bold text-gray-900 dark:text-white align-middle"
-                                    >
-                                        {{ $t('invoices.invoice') }}
-                                    </td>
-                                    <td
-                                        class="py-2.5 text-center font-mono text-gray-500 align-middle"
-                                    >
-                                        {{ formatCurrency(grossTotal) }}
-                                    </td>
-                                    <td
-                                        class="py-2.5 text-center font-mono text-red-500 italic align-middle"
-                                    >
-                                        {{ discount > 0 ? '-' + formatCurrency(discount) : '—' }}
-                                    </td>
-                                    <td
-                                        class="py-2.5 text-center font-mono text-gray-500 align-middle"
-                                    >
-                                        {{ formatCurrency(calculatedInvoiceSubtotal) }}
-                                    </td>
-                                    <td
-                                        v-if="invoice.tax_enabled_snapshot"
-                                        class="py-2.5 text-center font-mono text-gray-500 align-middle"
-                                    >
-                                        {{ formatCurrency(calculatedInvoiceTaxAmount) }}
-                                    </td>
-                                    <td
-                                        class="py-2.5 text-center font-black text-gray-900 dark:text-white font-mono text-base align-middle"
-                                    >
-                                        {{ formatCurrency(calculatedInvoiceTotal) }}
-                                    </td>
-                                </tr>
-
-                                <!-- Grand Total Summary Row -->
-                                <tr
-                                    class="bg-blue-50 dark:bg-blue-900/10 font-black border-t-2 border-blue-200 dark:border-blue-800"
-                                >
-                                    <td
-                                        class="py-2.5 text-center text-blue-900 dark:text-blue-400 font-black uppercase align-middle"
-                                    >
-                                        {{
-                                            invoice.tax_enabled_snapshot
-                                                ? $t('invoices.grand_total')
-                                                : $t('invoices.total')
-                                        }}
-                                    </td>
-                                    <td
-                                        class="py-2.5 text-center font-mono text-blue-700 dark:text-blue-300 align-middle"
-                                    >
-                                        {{ formatCurrency(grossTotal) }}
-                                    </td>
-                                    <td
-                                        class="py-2.5 text-center font-mono text-red-600 italic align-middle"
-                                    >
-                                        {{ discount > 0 ? '-' + formatCurrency(discount) : '—' }}
-                                    </td>
-                                    <td
-                                        class="py-2.5 text-center font-mono text-blue-700 dark:text-blue-300 align-middle"
-                                    >
-                                        {{ formatCurrency(calculatedInvoiceSubtotal) }}
-                                    </td>
-                                    <td
-                                        v-if="invoice.tax_enabled_snapshot"
-                                        class="py-2.5 text-center font-mono text-blue-700 dark:text-blue-300 align-middle"
-                                    >
-                                        {{ formatCurrency(calculatedInvoiceTaxAmount) }}
-                                    </td>
-                                    <td
-                                        class="py-2.5 text-center font-black text-blue-600 dark:text-blue-400 font-mono text-xl align-middle"
-                                    >
-                                        {{ formatCurrency(calculatedInvoiceTotal) }}
-                                    </td>
-                                </tr>
-
-                                <!-- Paid Row -->
-                                <tr class="group text-emerald-600 dark:text-emerald-400">
-                                    <td class="py-2.5 text-center font-bold align-middle">
-                                        {{ $t('invoices.paid') }}
-                                    </td>
-                                    <td
-                                        :colspan="invoice.tax_enabled_snapshot ? 4 : 3"
-                                        class="py-2.5 align-middle"
-                                    ></td>
-                                    <td
-                                        class="py-2.5 text-center font-black font-mono text-base align-middle"
-                                    >
-                                        {{ formatCurrency(invoiceActualPaid) }}
-                                    </td>
-                                </tr>
-
-                                <!-- Bad Debt Row -->
-                                <tr
-                                    v-if="invoiceBadDebt > 0"
-                                    class="group text-amber-600 dark:text-amber-400"
-                                >
-                                    <td class="py-2.5 text-center font-bold align-middle">
-                                        {{ $t('payments.types.bad_debt') }}
-                                    </td>
-                                    <td
-                                        :colspan="invoice.tax_enabled_snapshot ? 4 : 3"
-                                        class="py-2.5 align-middle"
-                                    ></td>
-                                    <td
-                                        class="py-2.5 text-center font-black font-mono text-base align-middle"
-                                    >
-                                        {{ formatCurrency(invoiceBadDebt) }}
-                                    </td>
-                                </tr>
-
-                                <!-- Balance Row -->
-                                <tr
-                                    class="group"
-                                    :class="
-                                        balance > 0.01
-                                            ? 'text-red-600 dark:text-red-400'
-                                            : 'text-emerald-600 dark:text-emerald-400'
-                                    "
-                                >
-                                    <td class="py-2.5 text-center font-bold align-middle">
-                                        {{ $t('invoices.balance') }}
-                                    </td>
-                                    <td
-                                        :colspan="invoice.tax_enabled_snapshot ? 4 : 3"
-                                        class="py-2.5 align-middle"
-                                    ></td>
-                                    <td
-                                        class="py-2.5 text-center font-black font-mono text-base align-middle"
-                                    >
-                                        {{ formatCurrency(balance) }}
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
+                <!-- 2. Left Card: Unified Cost & Payment Summary -->
+                <WorkOrderFinancialSummary
+                    :totals="financialSummaryTotals"
+                    :has-tax="!!invoice.tax_enabled_snapshot"
+                    :tax-rate="Number(invoice.tax_rate_snapshot || 15)"
+                    :total-paid="invoiceActualPaid"
+                    :bad-debt="invoiceBadDebt"
+                    :balance="balance"
+                    :hide-zero-rows="true"
+                    :services-label="$t('work_orders.services')"
+                    :parts-label="$t('quotes.show.tabs.spare_parts')"
+                    :grand-label="
+                        invoice.tax_enabled_snapshot
+                            ? $t('invoices.grand_total')
+                            : $t('invoices.total')
+                    "
+                />
             </div>
 
             <!-- Notes Section (If Notes are present) -->
@@ -1073,7 +536,7 @@
 
                 <!-- Desktop Table (sm and larger) -->
                 <div class="hidden sm:block overflow-x-auto">
-                    <table class="w-full min-w-[640px]">
+                    <DataTable structured class="w-full min-w-[640px]">
                         <thead>
                             <tr
                                 class="bg-gray-50/50 dark:bg-gray-900/50 border-b border-gray-100 dark:border-gray-700/50"
@@ -1228,7 +691,7 @@
                                 </td>
                             </tr>
                         </tbody>
-                    </table>
+                    </DataTable>
                 </div>
             </div>
 
@@ -1295,7 +758,7 @@
 
                 <!-- Desktop Table (sm and larger) -->
                 <div class="hidden sm:block overflow-x-auto">
-                    <table class="w-full min-w-[640px]">
+                    <DataTable structured class="w-full min-w-[640px]">
                         <thead>
                             <tr
                                 class="bg-amber-50/50 dark:bg-amber-900/10 border-b border-amber-100 dark:border-amber-800/30"
@@ -1413,7 +876,7 @@
                                 </td>
                             </tr>
                         </tbody>
-                    </table>
+                    </DataTable>
                 </div>
             </div>
 
@@ -1542,7 +1005,7 @@
 
                 <!-- Desktop Table (sm and larger) -->
                 <div class="hidden sm:block overflow-x-auto">
-                    <table class="w-full text-sm">
+                    <DataTable structured class="w-full text-sm">
                         <thead>
                             <tr
                                 class="text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-gray-700 pb-3 bg-gray-50/50 dark:bg-gray-900/50"
@@ -1712,7 +1175,7 @@
                                 </td>
                             </tr>
                         </tbody>
-                    </table>
+                    </DataTable>
                 </div>
             </div>
 
@@ -1722,7 +1185,14 @@
                 :show="showPaymentModal"
                 :balance="balance"
                 :default-type="isCreditNote ? 'refund' : 'payment'"
-                :allow-bad-debt="!isCreditNote"
+                :allow-bad-debt="
+                    !isCreditNote &&
+                    invoice.status === 'valid' &&
+                    balance > 0.01 &&
+                    (Boolean(invoice.due_date) ||
+                        invoice.payment_status === 'unpaid' ||
+                        invoice.payment_status === 'partial')
+                "
                 @close="showPaymentModal = false"
                 @saved="onPaymentSaved"
             />
@@ -1741,6 +1211,7 @@
 </template>
 
 <script setup>
+import DataTable from '@/Components/Common/DataTable.vue';
 import { ref, computed } from 'vue';
 import { Head, Link, router, useForm, usePage } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
@@ -1752,10 +1223,12 @@ import WorkOrderCreditNoteModal from '@/Components/WorkOrders/WorkOrderCreditNot
 import { useConfirm } from '@/Composables/useConfirm';
 import { useNumberFormat } from '@/Composables/useNumberFormat';
 import Tooltip from '@/Components/Tooltip.vue';
-import SaudiPlateDisplay from '@/Components/Vehicles/SaudiPlateDisplay.vue';
+import WorkOrderCustomerCard from '@/Components/WorkOrders/WorkOrderCustomerCard.vue';
+import WorkOrderFinancialSummary from '@/Components/WorkOrders/WorkOrderFinancialSummary.vue';
 
 const props = defineProps({
     invoice: Object,
+    colors: { type: Array, default: () => [] },
 });
 
 const { t } = useI18n();
@@ -1991,6 +1464,30 @@ const partsTotal = computed(() => {
         .filter(filterFn)
         .reduce((sum, l) => sum + Number(l.line_total_incl_tax || 0), 0);
 });
+
+const financialSummaryTotals = computed(() => ({
+    services: {
+        price: servicesGross.value,
+        discount: servicesDiscount.value,
+        amount: servicesSubtotal.value,
+        tax: servicesTax.value,
+        total: servicesTotal.value,
+    },
+    parts: {
+        price: partsGross.value,
+        discount: partsDiscountAmt.value,
+        amount: partsSubtotal.value,
+        tax: partsTax.value,
+        total: partsTotal.value,
+    },
+    grand: {
+        price: grossTotal.value,
+        discount: discount.value,
+        amount: calculatedInvoiceSubtotal.value,
+        tax: calculatedInvoiceTaxAmount.value,
+        total: calculatedInvoiceTotal.value,
+    },
+}));
 
 const onPaymentSaved = (paymentData) => {
     router.post(route('app.invoices.payments.store', props.invoice.id), paymentData, {

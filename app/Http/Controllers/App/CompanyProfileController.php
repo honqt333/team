@@ -46,7 +46,7 @@ class CompanyProfileController extends Controller
                 'vat_number' => $tenant->vat_number,
                 'cr_number' => $tenant->cr_number,
                 'iban' => $tenant->iban,
-                'logo_url' => $tenant->logo_path ? Storage::url($tenant->logo_path) : asset('images/logo.png'),
+                'logo_url' => $tenant->logo_path ? Storage::url($tenant->logo_path) : asset('images/brand/logo-256.png'),
                 'country' => $tenant->country ?? config('app.default_country', 'SA'),
                 'currency' => $tenant->currency ?? config('app.default_currency', 'SAR'),
             ],
@@ -238,8 +238,8 @@ class CompanyProfileController extends Controller
                 return [];
             }),
             'payment_settings' => rescue(function () {
-                return PaymentSettings::first() ?? new PaymentSettings;
-            }),
+                return (PaymentSettings::first() ?? new PaymentSettings)->checkoutSettings();
+            }, []),
             'bank_accounts' => rescue(function () {
                 return PaymentSettings::first()?->bank_accounts ?? [];
             }),

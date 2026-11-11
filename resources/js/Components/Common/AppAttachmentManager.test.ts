@@ -1,4 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
+import { router } from '@inertiajs/vue3';
 import { mount } from '@vue/test-utils';
 import AppAttachmentManager from './AppAttachmentManager.vue';
 
@@ -48,6 +49,44 @@ describe('AppAttachmentManager', () => {
             user: { name: 'سارة' },
         },
     ];
+
+    it('sends one validated purchase file using the singular attachment field', async () => {
+        const post = vi.spyOn(router, 'post').mockImplementation(() => {});
+        const wrapper = mount(AppAttachmentManager, {
+            props: {
+                uploadUrl: '/upload',
+                uploadField: 'attachment',
+                maxSizeMb: 1,
+                allowMultiple: false,
+                acceptedTypes: 'application/pdf,image/png',
+            },
+            global: {
+                stubs: { BaseModal: { template: '<div><slot/><slot name="footer"/></div>' } },
+            },
+        });
+        const drop = async (file: File) => {
+            await wrapper
+                .get('input[type=file]')
+                .element.parentElement?.dispatchEvent(
+                    Object.assign(new Event('drop', { bubbles: true }), {
+                        dataTransfer: { files: [file] },
+                    })
+                );
+            await wrapper.vm.$nextTick();
+        };
+        const submit = wrapper.findAll('button').at(-1)!;
+        await drop(new File(['bad'], 'bad.txt', { type: 'text/plain' }));
+        expect(submit.element.disabled).toBe(true);
+        await drop(new File(['one'], 'first.pdf', { type: 'application/pdf' }));
+        await drop(new File(['two'], 'final.png', { type: 'image/png' }));
+        await submit.trigger('click');
+        const body = post.mock.calls[0]?.[1] as FormData;
+        expect(body.getAll('attachment')).toHaveLength(1);
+        expect((body.get('attachment') as File).name).toBe('final.png');
+        expect(body.has('files[]')).toBe(false);
+        post.mockRestore();
+        wrapper.unmount();
+    });
 
     it('renders empty state when no attachments provided', () => {
         const wrapper = mount(AppAttachmentManager, {

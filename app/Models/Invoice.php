@@ -46,6 +46,10 @@ class Invoice extends Model
         'customer_name_snapshot',
         'customer_vat_snapshot',
         'customer_address_snapshot',
+        'seller_name_snapshot',
+        'seller_name_en_snapshot',
+        'seller_vat_snapshot',
+        'seller_cr_snapshot',
 
         'tax_enabled_snapshot',
         'pricing_mode_snapshot',
@@ -82,6 +86,55 @@ class Invoice extends Model
         'total_paid' => 'decimal:2',
         'tax_breakdown' => 'array',
     ];
+
+    /**
+     * Freeze the seller identity when the invoice row is first created.
+     * Reprints then use the identity that was in force at issuance even
+     * if the tenant later changes its legal name or VAT number.
+     */
+    protected static function booted(): void
+    {
+        static::creating(function (Invoice $invoice): void {
+            if (! $invoice->tenant_id) {
+                return;
+            }
+
+            // Credit notes inherit the issuer on the original document, including absent numbers.
+            if ($invoice->seller_name_snapshot !== null || $invoice->seller_name_en_snapshot !== null) {
+                $invoice->seller_vat_snapshot ??= '';
+                $invoice->seller_cr_snapshot ??= '';
+
+                return;
+            }
+
+            $tenant = Tenant::with('taxSettings')->find($invoice->tenant_id);
+
+            if (! $tenant) {
+                return;
+            }
+
+            /*
+             * Empty values are frozen as empty strings, not as null.
+             * Null is reserved for legacy rows whose issuer identity
+             * was never captured, which may still fall back to the
+             * live tenant data on reprint. A new invoice issued while
+             * the tenant had no VAT/CR must keep that blank identity
+             * even after those numbers are added later.
+             */
+            $invoice->seller_name_snapshot ??= (string) (
+                $tenant->legal_name
+                ?: ($tenant->legal_name_en ?: ($tenant->trade_name ?: $tenant->name))
+            );
+            $invoice->seller_name_en_snapshot ??= (string) (
+                $tenant->legal_name_en
+                ?: ($tenant->legal_name ?: ($tenant->trade_name ?: $tenant->name))
+            );
+            $invoice->seller_vat_snapshot ??= (string) (
+                $tenant->taxSettings?->tax_number ?: $tenant->vat_number
+            );
+            $invoice->seller_cr_snapshot ??= (string) $tenant->cr_number;
+        });
+    }
 
     // ─────────────────────────────────────────────────────────────
     // Relationships

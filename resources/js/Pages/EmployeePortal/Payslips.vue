@@ -140,33 +140,17 @@
             </div>
 
             <!-- Pagination -->
-            <div v-if="payslips?.links?.length > 3" class="flex justify-center">
-                <nav class="flex gap-1">
-                    <template v-for="link in payslips.links" :key="link.label">
-                        <Link
-                            v-if="link.url"
-                            :href="link.url"
-                            class="px-4 py-2 rounded-xl text-sm font-medium transition-all"
-                            :class="
-                                link.active
-                                    ? 'bg-amber-600 text-white shadow-lg'
-                                    : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700'
-                            "
-                            v-safe-html="link.label"
-                        />
-                        <span
-                            v-else
-                            class="px-4 py-2 rounded-xl text-sm bg-gray-100 dark:bg-gray-900 text-gray-400 dark:text-gray-600 border border-gray-200 dark:border-gray-700 cursor-not-allowed"
-                            v-safe-html="link.label"
-                        />
-                    </template>
-                </nav>
-            </div>
+            <AppPagination
+                v-if="payslips?.links?.length > 3"
+                :links="payslips.links"
+                :show-summary="false"
+            />
         </div>
     </EmployeePortalLayout>
 </template>
 
 <script setup>
+import AppPagination from '@/Components/Common/AppPagination.vue';
 import EmployeePortalLayout from '@/Layouts/EmployeePortalLayout.vue';
 import { Link } from '@inertiajs/vue3';
 

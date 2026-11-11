@@ -51,7 +51,7 @@ const siteTitle = computed(() => {
         <div
             v-if="props.settings.announcement_enabled && props.settings.announcement_text_ar"
             :style="{
-                backgroundColor: props.settings.announcement_bg_color || '#4f46e5',
+                backgroundColor: props.settings.announcement_bg_color || '#2563eb',
                 color: props.settings.announcement_text_color || '#ffffff',
             }"
             class="text-xs sm:text-sm py-2 px-4 text-center font-medium shadow-sm transition-all"

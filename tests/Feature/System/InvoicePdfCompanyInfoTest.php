@@ -119,7 +119,7 @@ class InvoicePdfCompanyInfoTest extends TestCase
         $this->assertNotEmpty($text, 'PDF must not be empty even without settings');
     }
 
-    public function test_pdf_uses_settings_updated_after_initial_invoice(): void
+    public function test_updated_company_settings_apply_to_future_invoices(): void
     {
         $this->resetPaymentSettings();
 
@@ -128,12 +128,18 @@ class InvoicePdfCompanyInfoTest extends TestCase
         $service->generatePdf($invoice);
 
         // Admin updates the company name
-        $settings = PaymentSettings::create(['company_legal_name_en' => 'Updated Co']);
+        PaymentSettings::create(['company_legal_name_en' => 'Updated Co']);
         Cache::forget('payment_settings');
 
         $path = $service->generatePdf($invoice);
         $text = $this->extractPdfText($path);
-        $this->assertStringContainsString('Updated Co', $text);
+        $this->assertStringContainsString(config('app.name'), $text);
+        $this->assertStringNotContainsString('Updated Co', $text);
+
+        $newInvoice = $invoice->replicate(['seller_name_snapshot', 'seller_name_en_snapshot', 'seller_vat_snapshot', 'seller_cr_snapshot']);
+        $newInvoice->invoice_number = 'INV-PDF-'.uniqid();
+        $newInvoice->save();
+        $this->assertStringContainsString('Updated Co', $this->extractPdfText($service->generatePdf($newInvoice)));
     }
 
     private function makeInvoice(): SubscriptionInvoice

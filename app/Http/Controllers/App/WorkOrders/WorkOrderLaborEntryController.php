@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers\App\WorkOrders;
 
 use App\Http\Controllers\Controller;
+use App\Models\User;
 use App\Models\WorkOrder;
 use App\Models\WorkOrderItem;
 use App\Models\WorkOrderLaborEntry;
@@ -23,9 +24,10 @@ class WorkOrderLaborEntryController extends Controller
     public function __construct(private readonly WorkOrderLaborService $service) {}
 
     /**
-     * Start a labor session for the current user on the given item.
-     * The technician id is ALWAYS the current user — clients can
-     * never start a timer in someone else's name.
+     * Start a labor session on the given item. Technicians start in their
+     * own name; tenant admins/super_admins with `crm.work_orders.update`
+     * may also pass `technician_id` to start a session for an assigned
+     * technician on that item.
      */
     public function start(Request $request, WorkOrder $work_order, WorkOrderItem $item): RedirectResponse|JsonResponse
     {
@@ -33,13 +35,26 @@ class WorkOrderLaborEntryController extends Controller
 
         $validated = $request->validate([
             'notes' => 'nullable|string|max:1000',
+            'technician_id' => 'nullable|integer|exists:users,id',
         ]);
+
+        $targetUser = $request->user();
+
+        if (! empty($validated['technician_id']) && (int) $validated['technician_id'] !== $targetUser->id) {
+            abort_unless($this->isAdmin($targetUser), 403);
+
+            $targetUser = User::query()
+                ->where('tenant_id', $work_order->tenant_id)
+                ->find((int) $validated['technician_id']);
+
+            abort_if(! $targetUser, 404);
+        }
 
         try {
             $entry = $this->service->start(
                 $work_order,
                 $item,
-                $request->user(),
+                $targetUser,
                 $validated['notes'] ?? null,
             );
         } catch (RuntimeException $e) {
@@ -163,12 +178,15 @@ class WorkOrderLaborEntryController extends Controller
             return;
         }
 
-        // Admins are defined by the existing project convention:
-        // holding crm.work_orders.update AND being a system role.
-        $isAdmin = $user->can(Permissions::WORK_ORDERS_UPDATE)
-            && ($user->hasRole('super_admin') || $user->hasRole('admin'));
+        abort_unless($this->isAdmin($user), 403);
+    }
 
-        abort_unless($isAdmin, 403);
+    private function isAdmin(User $user): bool
+    {
+        // Admins are defined by the existing project convention:
+        // holding crm.work_orders.update AND being a tenant admin role.
+        return $user->can(Permissions::WORK_ORDERS_UPDATE)
+            && ($user->hasRole('super_admin') || $user->hasRole('admin'));
     }
 
     private function errorResponse(Request $request, string $messageKey, int $status): RedirectResponse|JsonResponse

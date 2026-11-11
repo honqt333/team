@@ -41,12 +41,6 @@ class ZatcaOnboardingController extends Controller
         );
 
         return Inertia::render('Settings/Zatca/Index', [
-            'tenant' => [
-                'id' => $tenant->id,
-                'name' => $tenant->name,
-                'legal_name' => $tenant->legal_name ?? $tenant->name,
-                'vat_number' => $tenant->taxSettings?->tax_number ?? $tenant->vat_number ?? '',
-            ],
             'setting' => [
                 'environment' => $setting->environment ?? 'simulation',
                 'onboarding_status' => $setting->onboarding_status ?? 'not_started',

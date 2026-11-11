@@ -21,7 +21,7 @@
         class="relative overflow-hidden rounded-[1.75rem] p-6 text-white shadow-[0_24px_70px_-30px_rgba(15,23,42,0.55)] sm:p-8"
         :style="{
             background:
-                'linear-gradient(135deg, var(--tenant-primary, #4f46e5) 0%, color-mix(in srgb, var(--tenant-primary, #4f46e5) 70%, var(--tenant-secondary, #0ea5e9)) 100%)',
+                'linear-gradient(135deg, var(--tenant-primary, #2563eb) 0%, color-mix(in srgb, var(--tenant-primary, #2563eb) 70%, var(--tenant-secondary, #0ea5e9)) 100%)',
         }"
     >
         <!--

@@ -10,9 +10,9 @@ use App\Models\Payment;
 use App\Models\PurchaseInvoice;
 use App\Models\Supplier;
 use App\Models\Warehouse;
+use App\Services\PurchaseAttachmentService;
 use App\Services\Purchasing\PurchasingService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 
 class PurchaseInvoicesController extends Controller
@@ -118,10 +118,11 @@ class PurchaseInvoicesController extends Controller
 
         return Inertia::render('Purchasing/Invoices/Show', [
             'invoice' => $purchaseInvoice,
+            'canManageAttachment' => request()->user()->can('update', $purchaseInvoice),
         ]);
     }
 
-    public function uploadAttachment(Request $request, PurchaseInvoice $purchaseInvoice)
+    public function uploadAttachment(Request $request, PurchaseInvoice $purchaseInvoice, PurchaseAttachmentService $attachments)
     {
         $this->authorize('update', $purchaseInvoice);
 
@@ -129,30 +130,16 @@ class PurchaseInvoicesController extends Controller
             'attachment' => 'required|file|mimes:pdf,jpg,png|max:1024', // max 1MB (1024KB)
         ]);
 
-        if ($purchaseInvoice->attachment_path) {
-            Storage::disk('public')->delete($purchaseInvoice->attachment_path);
-        }
-
-        $file = $request->file('attachment');
-        $path = $file->store('purchases/invoices/'.$purchaseInvoice->id, 'public');
-
-        $purchaseInvoice->update([
-            'attachment_path' => $path,
-        ]);
+        $attachments->replace($purchaseInvoice, $request->file('attachment'));
 
         return back()->with('success', __('messages.attachment_uploaded') ?? 'تم رفع المرفق بنجاح');
     }
 
-    public function destroyAttachment(PurchaseInvoice $purchaseInvoice)
+    public function destroyAttachment(PurchaseInvoice $purchaseInvoice, PurchaseAttachmentService $attachments)
     {
         $this->authorize('update', $purchaseInvoice);
 
-        if ($purchaseInvoice->attachment_path) {
-            Storage::disk('public')->delete($purchaseInvoice->attachment_path);
-            $purchaseInvoice->update([
-                'attachment_path' => null,
-            ]);
-        }
+        $attachments->replace($purchaseInvoice, null);
 
         return back()->with('success', __('messages.attachment_deleted') ?? 'تم حذف المرفق بنجاح');
     }

@@ -13,13 +13,9 @@
                     <form @submit.prevent="$emit('save-security')">
                         <div class="mb-4">
                             <label class="flex items-center gap-2 cursor-pointer mb-4">
-                                <input
-                                    type="checkbox"
+                                <AppToggle
                                     :checked="securityForm.two_factor_enabled"
-                                    @change="
-                                        securityForm.two_factor_enabled = $event.target.checked
-                                    "
-                                    class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                                    @change="securityForm.two_factor_enabled = $event"
                                 />
                                 <span class="text-sm font-medium text-gray-900 dark:text-white">
                                     {{ $t('system.tenants.modals.two_factor_label') }}
@@ -452,6 +448,7 @@
 </template>
 
 <script setup>
+import AppToggle from '@/Components/Common/AppToggle.vue';
 import Modal from '@/Components/Modal.vue';
 import { reactive, watch, computed } from 'vue';
 import { useI18n } from 'vue-i18n';

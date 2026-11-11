@@ -110,13 +110,13 @@ class SubscriptionInvoiceService
     {
         $invoice->loadMissing(['subscription.plan', 'tenant']);
 
-        // Pull company info from PaymentSettings so the PDF header
-        // and footer reflect the admin's edits at
-        // /system/settings/company (not a hardcoded "Khidma Pro"
-        // string in the view). Falls back to sensible defaults if
-        // the settings row is empty.
+        // Subscription invoices are issued by the platform, so the
+        // company info comes from PaymentSettings (the admin edits it
+        // at /system/settings/company). The invoice stores a snapshot
+        // of that identity at creation; reprints must keep it even if
+        // the platform is renamed later.
         $paymentSettings = PaymentSettings::first();
-        $companyInfo = $this->buildCompanyInfo($paymentSettings);
+        $companyInfo = $this->buildCompanyInfo($invoice, $paymentSettings);
 
         // The 2026_07_25_140000 migration collapsed vat_rate +
         // vat_amount into a single `vat` column. We compute the
@@ -159,17 +159,14 @@ class SubscriptionInvoiceService
 
     /**
      * Build the company info array passed to the PDF view.
-     * Falls back to a sensible default name if the admin hasn't
-     * configured company info yet (better to show "Khidma Pro"
-     * than a blank header).
+     *
+     * The issuer identity of a subscription invoice is the platform,
+     * configured in PaymentSettings. The values frozen on the invoice
+     * at creation win, so a reprint after a platform rename keeps
+     * showing the identity that was in force when it was issued.
      */
-    private function buildCompanyInfo(?PaymentSettings $settings): array
+    private function buildCompanyInfo(SubscriptionInvoice $invoice, ?PaymentSettings $settings): array
     {
-        $name = $settings?->company_legal_name
-            ?: ($settings?->company_legal_name_en ?: config('app.name_ar', 'خدمة برو'));
-        $nameEn = $settings?->company_legal_name_en
-            ?: ($settings?->company_legal_name ?: config('app.name', 'Khidmh Pro'));
-
         // Convert logo + stamp paths to data: URLs (base64-encoded).
         // DomPDF in a CLI / headless context can't reliably fetch
         // http://localhost/storage/... because the dev server may
@@ -195,11 +192,7 @@ class SubscriptionInvoiceService
             );
         }
 
-        return [
-            'name' => $name,
-            'name_en' => $nameEn,
-            'vat_number' => $settings?->company_vat_number,
-            'cr_number' => $settings?->company_cr_number,
+        return $invoice->issuerIdentity($settings) + [
             'phone' => $settings?->company_phone,
             'email' => $settings?->company_email,
             'website' => $settings?->company_website,

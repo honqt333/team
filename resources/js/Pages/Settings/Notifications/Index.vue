@@ -363,7 +363,8 @@
 
                     <!-- Desktop Matrix Table -->
                     <div class="hidden sm:block overflow-x-auto">
-                        <table
+                        <DataTable
+                            structured
                             class="w-full text-start divide-y divide-gray-200 dark:divide-gray-700"
                         >
                             <thead class="bg-gray-50 dark:bg-gray-900/50">
@@ -455,7 +456,7 @@
                                     </td>
                                 </tr>
                             </tbody>
-                        </table>
+                        </DataTable>
                     </div>
 
                     <!-- Mobile Event Cards List -->
@@ -719,6 +720,7 @@
 </template>
 
 <script setup>
+import DataTable from '@/Components/Common/DataTable.vue';
 import { ref } from 'vue';
 import { Head, router, useForm } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';

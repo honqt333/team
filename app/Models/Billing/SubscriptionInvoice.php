@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Models\Billing;
 
 use App\Models\Concerns\TenantScoped;
+use App\Models\PaymentSettings;
 use App\Models\Tenant;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -19,6 +20,10 @@ class SubscriptionInvoice extends Model
         'subscription_id',
         'tenant_id',
         'invoice_number',
+        'seller_name_snapshot',
+        'seller_name_en_snapshot',
+        'seller_vat_snapshot',
+        'seller_cr_snapshot',
         'subtotal',
         'vat',
         'discount',
@@ -40,6 +45,50 @@ class SubscriptionInvoice extends Model
             'issued_at' => 'datetime',
             'due_at' => 'datetime',
             'paid_at' => 'datetime',
+        ];
+    }
+
+    /**
+     * Freeze the platform issuer identity when the subscription invoice
+     * is created. Regenerating the PDF later must not rewrite history
+     * if the platform company settings change.
+     */
+    protected static function booted(): void
+    {
+        static::creating(function (SubscriptionInvoice $invoice): void {
+            $settings = PaymentSettings::first();
+
+            $invoice->seller_name_snapshot ??= (string) (
+                $settings?->company_legal_name
+                ?: ($settings?->company_legal_name_en ?: config('app.name_ar', 'خدمة برو'))
+            );
+            $invoice->seller_name_en_snapshot ??= (string) (
+                $settings?->company_legal_name_en
+                ?: ($settings?->company_legal_name ?: config('app.name', 'Khidmh Pro'))
+            );
+            $invoice->seller_vat_snapshot ??= (string) $settings?->company_vat_number;
+            $invoice->seller_cr_snapshot ??= (string) $settings?->company_cr_number;
+        });
+    }
+
+    /** @return array{name: string, name_en: string, vat_number: ?string, cr_number: ?string} */
+    public function issuerIdentity(?PaymentSettings $settings): array
+    {
+        $hasIssuer = $this->seller_name_snapshot !== null || $this->seller_name_en_snapshot !== null;
+        $name = $this->seller_name_snapshot
+            ?? ($settings?->company_legal_name
+                ?: ($settings?->company_legal_name_en ?: config('app.name_ar', 'خدمة برو')));
+        $nameEn = $this->seller_name_en_snapshot
+            ?? ($settings?->company_legal_name_en
+                ?: ($settings?->company_legal_name ?: config('app.name', 'Khidmh Pro')));
+        $vatNumber = $this->seller_vat_snapshot ?? ($hasIssuer ? null : $settings?->company_vat_number);
+        $crNumber = $this->seller_cr_snapshot ?? ($hasIssuer ? null : $settings?->company_cr_number);
+
+        return [
+            'name' => $name,
+            'name_en' => $nameEn,
+            'vat_number' => $vatNumber,
+            'cr_number' => $crNumber,
         ];
     }
 

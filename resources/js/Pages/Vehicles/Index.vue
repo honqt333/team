@@ -1,6 +1,6 @@
 <template>
     <AppLayout>
-        <div class="space-y-6">
+        <PrintEngine document-type="report" class="space-y-6">
             <!-- Header Section -->
             <PageHeader
                 :title="$t('vehicles.title')"
@@ -446,7 +446,7 @@
                     </template>
                 </DataTable>
             </div>
-        </div>
+        </PrintEngine>
 
         <!-- Vehicle Form Modal -->
         <VehicleFormModal
@@ -474,7 +474,7 @@
                 </StandardReportHeader>
 
                 <!-- Table -->
-                <table class="print-table">
+                <DataTable structured class="print-table">
                     <thead>
                         <tr>
                             <th style="width: 40px" class="align-middle text-center">#</th>
@@ -520,7 +520,7 @@
                             </td>
                         </tr>
                     </tbody>
-                </table>
+                </DataTable>
 
                 <!-- Footer -->
                 <StandardReportFooter />
@@ -530,6 +530,8 @@
 </template>
 
 <script setup>
+import PrintEngine from '@/Components/Print/PrintEngine.vue';
+import { printDocument } from '@/Composables/usePrint';
 import { ref, computed } from 'vue';
 import { router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
@@ -651,7 +653,7 @@ function exportVehicles() {
 }
 
 const printVehicles = () => {
-    window.print();
+    printDocument();
 };
 
 function visitShowPage(vehicle) {

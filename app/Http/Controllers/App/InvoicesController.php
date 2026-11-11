@@ -12,6 +12,7 @@ use App\Models\InvoiceTemplate;
 use App\Models\PurchaseInvoice;
 use App\Models\PurchaseReturnInvoice;
 use App\Models\Supplier;
+use App\Models\VehicleColor;
 use App\Models\Warehouse;
 use App\Models\WorkOrder;
 use App\Services\CreditNoteService;
@@ -58,6 +59,7 @@ class InvoicesController extends Controller
 
         return Inertia::render('Invoices/Show', [
             'invoice' => $invoice,
+            'colors' => VehicleColor::active()->ordered()->get(['id', 'name_ar', 'name_en', 'hex_code']),
         ]);
     }
 

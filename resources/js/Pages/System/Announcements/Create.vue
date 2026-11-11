@@ -105,12 +105,7 @@
                                 :key="tenant.id"
                                 class="flex items-center gap-2 p-2 hover:bg-gray-50 dark:hover:bg-gray-700 rounded cursor-pointer"
                             >
-                                <input
-                                    type="checkbox"
-                                    :value="tenant.id"
-                                    v-model="form.target_tenant_ids"
-                                    class="rounded border-gray-300 text-indigo-600"
-                                />
+                                <AppToggle :value="tenant.id" v-model="form.target_tenant_ids" />
                                 <span class="text-sm text-gray-700 dark:text-gray-300">
                                     {{ tenant.trade_name || tenant.name }}
                                 </span>
@@ -126,34 +121,19 @@
                         </label>
                         <div class="flex gap-4">
                             <label class="flex items-center gap-2 cursor-pointer">
-                                <input
-                                    type="checkbox"
-                                    value="in_app"
-                                    v-model="form.channels"
-                                    class="rounded border-gray-300 text-indigo-600"
-                                />
+                                <AppToggle value="in_app" v-model="form.channels" />
                                 <span class="text-sm text-gray-700 dark:text-gray-300">
                                     {{ $t('system.announcements.in_app') }}
                                 </span>
                             </label>
                             <label class="flex items-center gap-2 cursor-pointer">
-                                <input
-                                    type="checkbox"
-                                    value="email"
-                                    v-model="form.channels"
-                                    class="rounded border-gray-300 text-indigo-600"
-                                />
+                                <AppToggle value="email" v-model="form.channels" />
                                 <span class="text-sm text-gray-700 dark:text-gray-300">
                                     {{ $t('center_settings.contact.email') }}
                                 </span>
                             </label>
                             <label class="flex items-center gap-2 cursor-pointer">
-                                <input
-                                    type="checkbox"
-                                    value="sms"
-                                    v-model="form.channels"
-                                    class="rounded border-gray-300 text-indigo-600"
-                                />
+                                <AppToggle value="sms" v-model="form.channels" />
                                 <span class="text-sm text-gray-700 dark:text-gray-300">SMS</span>
                             </label>
                         </div>
@@ -165,12 +145,7 @@
                         >
                             {{ $t('system.announcements.expiry_date') }}
                         </label>
-                        <input
-                            type="date"
-                            v-model="form.expires_at"
-                            class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                            dir="ltr"
-                        />
+                        <CustomDatePicker v-model="form.expires_at" dir="ltr" />
                     </div>
 
                     <div class="flex gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
@@ -195,6 +170,8 @@
 </template>
 
 <script setup>
+import CustomDatePicker from '@/Components/CustomDatePicker.vue';
+import AppToggle from '@/Components/Common/AppToggle.vue';
 import { useI18n } from 'vue-i18n';
 const { t } = useI18n();
 

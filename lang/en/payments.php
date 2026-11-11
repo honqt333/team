@@ -9,6 +9,7 @@ return [
     'amount_exceeds_balance' => 'The amount cannot exceed the remaining balance',
     'amount_exceeds_paid' => 'Amount Exceeds Paid',
     'auto_payment_notes' => 'Automatic payment recorded upon receipt of invoice',
+    'bad_debt_credit_invoices_only' => 'Bad debt write-off is only permitted for credit/deferred invoices.',
     'cannot_refund_unpaid' => 'Cannot Refund Unpaid',
     'date' => 'Payment Date',
     'deleted' => 'Payment deleted',

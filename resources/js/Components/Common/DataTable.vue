@@ -6,9 +6,11 @@ import AppTableSkeleton from './AppTableSkeleton.vue';
 import AppPagination from './AppPagination.vue';
 
 const props = defineProps({
+    // Preserve caller-defined grouped headers, totals and editable cells.
+    structured: Boolean,
     columns: {
         type: Array,
-        required: true,
+        default: () => [],
         // Column shape: { key, label, sortable, align: 'start'|'center'|'end', width, class, headerClass }
     },
     data: {
@@ -117,7 +119,11 @@ const getAlignmentClass = (align) => {
 </script>
 
 <template>
+    <table v-if="structured" class="w-full text-start border-collapse">
+        <slot />
+    </table>
     <div
+        v-else
         class="w-full bg-surface rounded-2xl border border-border shadow-xs overflow-hidden transition-all flex flex-col"
     >
         <!-- Optional Top Header Slot -->

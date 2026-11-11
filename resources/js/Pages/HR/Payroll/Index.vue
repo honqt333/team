@@ -534,7 +534,7 @@ const props = defineProps({
 });
 
 const activeTab = ref('payroll');
-const viewMode = ref('table');
+const viewMode = ref('list');
 const showGenerateModal = ref(false);
 const generating = ref(false);
 

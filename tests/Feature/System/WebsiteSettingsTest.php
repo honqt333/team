@@ -83,6 +83,71 @@ class WebsiteSettingsTest extends TestCase
         );
     }
 
+    public function test_non_super_admin_cannot_read_or_preview_raw_scripts(): void
+    {
+        $admin = $this->createAdminUser('admin');
+
+        Setting::set('website.scripts.header', '<script>saved_header()</script>', 'website');
+        Setting::set('website.scripts.footer', '<script>saved_footer()</script>', 'website');
+        Setting::set('website.chatbot.script', '<script>saved_chatbot()</script>', 'website');
+        WebsiteSettingsController::flushSettingsCache();
+
+        // The settings screen must not hand raw script bodies to an
+        // actor who is not allowed to change them; the Integrations
+        // tab hides the fields and the preview pane strips them.
+        $this->actingAs($admin, 'admin')
+            ->get('/system/settings/website')
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page
+                ->component('System/Website/Index')
+                ->where('canManageScripts', false)
+                ->where('settings.website_scripts_header', '')
+                ->where('settings.website_scripts_footer', '')
+                ->where('settings.website_chatbot_script', '')
+            );
+
+        $this->get('/landing-preview?preview=1')
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page
+                ->where('isAdminPreview', true)
+                ->where('settings.scripts_header', '')
+                ->where('settings.scripts_footer', '')
+                ->where('settings.chatbot_script', '')
+            );
+
+        // The public page still receives the saved scripts — only the
+        // management surface is restricted, execution is unchanged.
+        $this->get('/')
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page
+                ->component('Public/LandingPreview')
+                ->where('settings.scripts_header', '<script>saved_header()</script>')
+                ->where('settings.scripts_footer', '<script>saved_footer()</script>')
+                ->where('settings.chatbot_script', '<script>saved_chatbot()</script>')
+            );
+    }
+
+    public function test_super_admin_can_read_raw_scripts_on_the_settings_screen(): void
+    {
+        $superAdmin = $this->createAdminUser('super_admin');
+
+        Setting::set('website.scripts.header', '<script>saved_header()</script>', 'website');
+        Setting::set('website.scripts.footer', '<script>saved_footer()</script>', 'website');
+        Setting::set('website.chatbot.script', '<script>saved_chatbot()</script>', 'website');
+        WebsiteSettingsController::flushSettingsCache();
+
+        $this->actingAs($superAdmin, 'admin')
+            ->get('/system/settings/website')
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page
+                ->component('System/Website/Index')
+                ->where('canManageScripts', true)
+                ->where('settings.website_scripts_header', '<script>saved_header()</script>')
+                ->where('settings.website_scripts_footer', '<script>saved_footer()</script>')
+                ->where('settings.website_chatbot_script', '<script>saved_chatbot()</script>')
+            );
+    }
+
     public function test_system_admin_can_update_website_settings(): void
     {
         $admin = $this->createSystemAdmin();

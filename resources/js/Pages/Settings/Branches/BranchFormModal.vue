@@ -56,14 +56,9 @@ const submit = () => {
         <template #title>
             <div class="flex items-center gap-3">
                 <div
-                    class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-600 to-cyan-600 flex items-center justify-center"
+                    class="w-10 h-10 rounded-xl bg-action-primary/10 text-action-primary flex items-center justify-center"
                 >
-                    <svg
-                        class="w-5 h-5 text-white"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                    >
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path
                             stroke-linecap="round"
                             stroke-linejoin="round"
@@ -73,10 +68,10 @@ const submit = () => {
                     </svg>
                 </div>
                 <div>
-                    <h3 class="font-semibold text-gray-900 dark:text-white">
+                    <h3 class="font-bold text-content-primary">
                         {{ t('company_profile.branches.add') }}
                     </h3>
-                    <p class="text-sm text-gray-500 dark:text-gray-400">
+                    <p class="text-xs text-content-muted">
                         {{ t('company_profile.branches.subtitle') }}
                     </p>
                 </div>
@@ -87,11 +82,9 @@ const submit = () => {
             <!-- Name AR + Name EN -->
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                    <label
-                        class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5"
-                    >
+                    <label class="block text-sm font-medium text-content-secondary mb-1.5">
                         {{ t('company_profile.branches.name_ar') }}
-                        <span class="text-red-500">*</span>
+                        <span class="text-danger">*</span>
                     </label>
                     <input
                         v-model="form.name_ar"
@@ -99,26 +92,19 @@ const submit = () => {
                         required
                         dir="rtl"
                         :class="[
-                            'w-full px-4 py-2.5 rounded-xl border bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all',
-                            form.errors.name_ar
-                                ? 'border-red-500'
-                                : 'border-gray-300 dark:border-gray-600',
+                            'w-full px-4 py-2.5 rounded-xl border bg-surface-secondary text-content-primary focus:ring-2 focus:ring-action-primary/20 focus:border-action-primary transition-all',
+                            form.errors.name_ar ? 'border-danger' : 'border-border-subtle',
                         ]"
                         :placeholder="t('company_profile.branches.name_ar_placeholder')"
                     />
-                    <p
-                        v-if="form.errors.name_ar"
-                        class="mt-1.5 text-sm text-red-600 dark:text-red-400"
-                    >
+                    <p v-if="form.errors.name_ar" class="mt-1.5 text-xs text-danger">
                         {{ form.errors.name_ar }}
                     </p>
                 </div>
                 <div>
-                    <label
-                        class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5"
-                    >
+                    <label class="block text-sm font-medium text-content-secondary mb-1.5">
                         {{ t('company_profile.branches.name_en') }}
-                        <span class="text-red-500">*</span>
+                        <span class="text-danger">*</span>
                     </label>
                     <input
                         v-model="form.name_en"
@@ -126,17 +112,12 @@ const submit = () => {
                         required
                         dir="ltr"
                         :class="[
-                            'w-full px-4 py-2.5 rounded-xl border bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all',
-                            form.errors.name_en
-                                ? 'border-red-500'
-                                : 'border-gray-300 dark:border-gray-600',
+                            'w-full px-4 py-2.5 rounded-xl border bg-surface-secondary text-content-primary focus:ring-2 focus:ring-action-primary/20 focus:border-action-primary transition-all',
+                            form.errors.name_en ? 'border-danger' : 'border-border-subtle',
                         ]"
                         :placeholder="t('company_profile.branches.name_en_placeholder')"
                     />
-                    <p
-                        v-if="form.errors.name_en"
-                        class="mt-1.5 text-sm text-red-600 dark:text-red-400"
-                    >
+                    <p v-if="form.errors.name_en" class="mt-1.5 text-xs text-danger">
                         {{ form.errors.name_en }}
                     </p>
                 </div>
@@ -159,32 +140,23 @@ const submit = () => {
             <!-- Manager + Phone -->
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                    <label
-                        class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5"
-                    >
+                    <label class="block text-sm font-medium text-content-secondary mb-1.5">
                         {{ t('company_profile.branches.manager_name') }}
                     </label>
                     <input
                         v-model="form.manager_name"
                         type="text"
                         :class="[
-                            'w-full px-4 py-2.5 rounded-xl border bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all',
-                            form.errors.manager_name
-                                ? 'border-red-500'
-                                : 'border-gray-300 dark:border-gray-600',
+                            'w-full px-4 py-2.5 rounded-xl border bg-surface-secondary text-content-primary focus:ring-2 focus:ring-action-primary/20 focus:border-action-primary transition-all',
+                            form.errors.manager_name ? 'border-danger' : 'border-border-subtle',
                         ]"
                     />
-                    <p
-                        v-if="form.errors.manager_name"
-                        class="mt-1.5 text-sm text-red-600 dark:text-red-400"
-                    >
+                    <p v-if="form.errors.manager_name" class="mt-1.5 text-xs text-danger">
                         {{ form.errors.manager_name }}
                     </p>
                 </div>
                 <div>
-                    <label
-                        class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5"
-                    >
+                    <label class="block text-sm font-medium text-content-secondary mb-1.5">
                         {{ t('company_profile.branches.phone') }}
                     </label>
                     <input
@@ -192,16 +164,11 @@ const submit = () => {
                         type="text"
                         dir="ltr"
                         :class="[
-                            'w-full px-4 py-2.5 rounded-xl border bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all',
-                            form.errors.phone
-                                ? 'border-red-500'
-                                : 'border-gray-300 dark:border-gray-600',
+                            'w-full px-4 py-2.5 rounded-xl border bg-surface-secondary text-content-primary focus:ring-2 focus:ring-action-primary/20 focus:border-action-primary transition-all',
+                            form.errors.phone ? 'border-danger' : 'border-border-subtle',
                         ]"
                     />
-                    <p
-                        v-if="form.errors.phone"
-                        class="mt-1.5 text-sm text-red-600 dark:text-red-400"
-                    >
+                    <p v-if="form.errors.phone" class="mt-1.5 text-xs text-danger">
                         {{ form.errors.phone }}
                     </p>
                 </div>
@@ -209,7 +176,7 @@ const submit = () => {
 
             <!-- Email -->
             <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                <label class="block text-sm font-medium text-content-secondary mb-1.5">
                     {{ t('company_profile.branches.email') }}
                 </label>
                 <input
@@ -217,30 +184,28 @@ const submit = () => {
                     type="email"
                     dir="ltr"
                     :class="[
-                        'w-full px-4 py-2.5 rounded-xl border bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all',
-                        form.errors.email
-                            ? 'border-red-500'
-                            : 'border-gray-300 dark:border-gray-600',
+                        'w-full px-4 py-2.5 rounded-xl border bg-surface-secondary text-content-primary focus:ring-2 focus:ring-action-primary/20 focus:border-action-primary transition-all',
+                        form.errors.email ? 'border-danger' : 'border-border-subtle',
                     ]"
                 />
-                <p v-if="form.errors.email" class="mt-1.5 text-sm text-red-600 dark:text-red-400">
+                <p v-if="form.errors.email" class="mt-1.5 text-xs text-danger">
                     {{ form.errors.email }}
                 </p>
             </div>
 
             <!-- Active Toggle -->
             <div
-                class="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900/50 rounded-xl border border-gray-200 dark:border-gray-700"
+                class="flex items-center justify-between p-4 bg-surface-secondary/70 rounded-xl border border-border-subtle"
             >
                 <div>
-                    <p class="text-sm font-medium text-gray-700 dark:text-gray-300">
+                    <p class="text-sm font-bold text-content-primary">
                         {{ t('common.active') }}
                     </p>
-                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                    <p class="text-xs text-content-muted mt-0.5">
                         {{ t('company_profile.branches.active_help') }}
                     </p>
                 </div>
-                <AppToggle v-model="form.is_active" color="blue" />
+                <AppToggle v-model="form.is_active" color="success" />
             </div>
         </form>
 
@@ -248,14 +213,14 @@ const submit = () => {
             <button
                 type="button"
                 @click="close"
-                class="px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white font-medium transition-colors"
+                class="px-4 py-2 text-content-secondary hover:text-content-primary font-bold transition-colors cursor-pointer"
             >
                 {{ t('common.cancel') }}
             </button>
             <button
                 @click="submit"
                 :disabled="form.processing"
-                class="px-5 py-2.5 bg-gradient-to-r from-blue-600 to-cyan-600 text-white rounded-xl font-medium shadow-lg shadow-blue-500/30 hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                class="px-5 py-2.5 bg-action-primary hover:bg-action-primary-hover text-white rounded-xl font-bold shadow-xs disabled:opacity-50 disabled:cursor-not-allowed transition-colors cursor-pointer"
             >
                 {{ form.processing ? t('common.loading') : t('common.save') }}
             </button>

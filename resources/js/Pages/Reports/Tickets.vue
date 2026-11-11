@@ -1,6 +1,6 @@
 <template>
     <AppLayout>
-        <div class="space-y-6">
+        <PrintEngine document-type="report" class="space-y-6">
             <!-- Screen Only Header Section -->
             <PageHeader
                 :title="$t('reports.tickets_report.title')"
@@ -32,26 +32,10 @@
 
                 <template #actions>
                     <div class="flex items-center gap-2.5 shrink-0">
-                        <button
-                            type="button"
+                        <AppPrintButton
                             @click="handlePrint"
-                            class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 text-xs font-bold transition-all shadow-sm"
-                        >
-                            <svg
-                                class="w-4 h-4 text-gray-500"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                            >
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    stroke-width="2"
-                                    d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"
-                                />
-                            </svg>
-                            <span>{{ $t('reports.tickets_report.print_report') }}</span>
-                        </button>
+                            :label="$t('reports.tickets_report.print_report')"
+                        />
 
                         <a
                             :href="exportUrl"
@@ -508,12 +492,7 @@
                     <label
                         class="inline-flex items-center gap-2 cursor-pointer text-xs font-bold text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/30 px-3 py-1.5 rounded-xl border border-amber-200 dark:border-amber-900/50"
                     >
-                        <input
-                            type="checkbox"
-                            v-model="filterForm.is_overdue"
-                            @change="applyFilters"
-                            class="rounded text-amber-600 focus:ring-amber-500"
-                        />
+                        <AppToggle v-model="filterForm.is_overdue" @change="applyFilters" />
                         <span>⚠️ {{ $t('reports.tickets_report.overdue_only') }}</span>
                     </label>
 
@@ -662,7 +641,7 @@
                         class="p-0 border-t border-gray-100 dark:border-gray-700"
                     >
                         <div class="overflow-x-auto">
-                            <table class="w-full text-xs text-start">
+                            <DataTable structured class="w-full text-xs text-start">
                                 <thead
                                     class="bg-gray-50 dark:bg-gray-850 text-gray-600 dark:text-gray-400 border-b border-gray-200 dark:border-gray-700"
                                 >
@@ -833,7 +812,7 @@
                                         </td>
                                     </tr>
                                 </tbody>
-                            </table>
+                            </DataTable>
                         </div>
                     </div>
                 </div>
@@ -845,7 +824,7 @@
                 class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden"
             >
                 <div class="overflow-x-auto">
-                    <table class="w-full text-xs text-start">
+                    <DataTable structured class="w-full text-xs text-start">
                         <thead
                             class="bg-gray-50 dark:bg-gray-850 text-gray-600 dark:text-gray-400 border-b border-gray-200 dark:border-gray-700"
                         >
@@ -1053,7 +1032,7 @@
                                 </td>
                             </tr>
                         </tbody>
-                    </table>
+                    </DataTable>
                 </div>
 
                 <!-- Pagination Footer -->
@@ -1097,11 +1076,16 @@
 
             <!-- Unified Print Footer (no signatures/stamps) -->
             <StandardReportFooter class="hidden print:block pt-8 mt-8 border-t-2 border-gray-300" />
-        </div>
+        </PrintEngine>
     </AppLayout>
 </template>
 
 <script setup>
+import PrintEngine from '@/Components/Print/PrintEngine.vue';
+import DataTable from '@/Components/Common/DataTable.vue';
+import AppPrintButton from '@/Components/Common/AppPrintButton.vue';
+import AppToggle from '@/Components/Common/AppToggle.vue';
+import { printDocument } from '@/Composables/usePrint';
 import { reactive, computed, watch } from 'vue';
 import { router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
@@ -1386,7 +1370,7 @@ const printDate = computed(() => {
 });
 
 const handlePrint = () => {
-    window.print();
+    printDocument();
 };
 
 const formatMoney = (val) => {

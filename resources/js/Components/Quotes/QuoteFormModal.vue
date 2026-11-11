@@ -135,78 +135,27 @@
                             v-if="showResults && searchResults.length > 0"
                             class="absolute z-50 mt-2 start-0 end-0 bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 max-h-60 overflow-y-auto"
                         >
-                            <div
+                            <VehicleSearchResult
                                 v-for="vehicle in searchResults"
                                 :key="vehicle.id"
-                                :class="[
-                                    'w-full px-4 py-3 text-start flex items-center gap-3 border-b border-gray-100 dark:border-gray-700 last:border-0',
-                                    vehicle.has_open_quote
-                                        ? 'bg-red-50 dark:bg-red-900/20 cursor-not-allowed opacity-75'
-                                        : 'hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer',
-                                ]"
-                                @click="!vehicle.has_open_quote && selectVehicle(vehicle)"
+                                :vehicle="vehicle"
+                                :blocked="vehicle.has_open_quote"
+                                :customer-name="vehicle.customer?.name"
+                                @select="selectVehicle"
                             >
                                 <div
-                                    :class="[
-                                        'w-10 h-10 rounded-lg flex items-center justify-center',
-                                        vehicle.has_open_quote
-                                            ? 'bg-red-200 dark:bg-red-800'
-                                            : 'bg-gray-200 dark:bg-gray-600',
-                                    ]"
+                                    v-if="vehicle.has_open_quote"
+                                    class="mt-1 flex items-center gap-2"
                                 >
-                                    <svg
-                                        class="w-5 h-5"
-                                        :class="
-                                            vehicle.has_open_quote
-                                                ? 'text-red-600'
-                                                : 'text-gray-500'
-                                        "
-                                        fill="none"
-                                        stroke="currentColor"
-                                        viewBox="0 0 24 24"
+                                    <span
+                                        class="text-xs text-red-600 dark:text-red-400 font-medium"
                                     >
-                                        <path
-                                            v-if="vehicle.has_open_quote"
-                                            stroke-linecap="round"
-                                            stroke-linejoin="round"
-                                            stroke-width="2"
-                                            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-                                        />
-                                        <path
-                                            v-else
-                                            stroke-linecap="round"
-                                            stroke-linejoin="round"
-                                            stroke-width="2"
-                                            d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0"
-                                        />
-                                    </svg>
+                                        {{ $t('quotes.has_open_quote') }} ({{
+                                            toEnglish(vehicle.open_quote?.code)
+                                        }})
+                                    </span>
                                 </div>
-                                <div class="flex-1">
-                                    <div class="mb-1">
-                                        <SaudiPlateDisplay
-                                            :plate-number="vehicle.plate_number"
-                                            size="sm"
-                                        />
-                                    </div>
-                                    <p class="text-sm text-gray-500 dark:text-gray-400">
-                                        {{ vehicle.customer?.name }} -
-                                        {{ toEnglish(vehicle.customer?.phone) }}
-                                    </p>
-                                    <!-- Open Quote Warning -->
-                                    <div
-                                        v-if="vehicle.has_open_quote"
-                                        class="mt-1 flex items-center gap-2"
-                                    >
-                                        <span
-                                            class="text-xs text-red-600 dark:text-red-400 font-medium"
-                                        >
-                                            {{ $t('quotes.has_open_quote') }} ({{
-                                                toEnglish(vehicle.open_quote?.code)
-                                            }})
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
+                            </VehicleSearchResult>
                         </div>
 
                         <p
@@ -414,120 +363,15 @@
                         </div>
                     </div>
 
-                    <!-- Odometer (Now inside main_info) -->
-                    <div
+                    <VehicleOdometerField
                         v-if="selectedVehicle"
-                        class="bg-gray-50 dark:bg-gray-900/50 rounded-xl p-4 border border-gray-200 dark:border-gray-700"
-                    >
-                        <div class="flex items-center justify-between mb-1.5">
-                            <label
-                                class="block text-sm font-medium text-gray-700 dark:text-gray-300"
-                            >
-                                {{ $t('work_orders.form.odometer') }}
-                            </label>
-                            <div class="flex items-center gap-3">
-                                <!-- Allow Lower Toggle -->
-                                <AppToggle
-                                    v-if="selectedVehicle && lastVehicleOdometer > 0"
-                                    v-model="form.allow_lower_odometer"
-                                    size="sm"
-                                    color="warning"
-                                    :label="$t('quotes.allow_lower_odometer')"
-                                />
-
-                                <button
-                                    type="button"
-                                    @click="showMileageModal = true"
-                                    class="text-xs text-amber-600 hover:text-amber-700 dark:text-amber-400 flex items-center gap-1"
-                                >
-                                    <svg
-                                        class="w-3 h-3"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        viewBox="0 0 24 24"
-                                    >
-                                        <path
-                                            stroke-linecap="round"
-                                            stroke-linejoin="round"
-                                            stroke-width="2"
-                                            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                                        />
-                                    </svg>
-                                    {{ $t('vehicles.mileage.history') }}
-                                </button>
-                            </div>
-                        </div>
-
-                        <div class="relative">
-                            <input
-                                v-model="form.odometer"
-                                type="text"
-                                inputmode="numeric"
-                                @input="
-                                    form.odometer = toEnglish($event.target.value).replace(
-                                        /[^0-9]/g,
-                                        ''
-                                    )
-                                "
-                                :placeholder="$t('work_orders.form.odometer_placeholder')"
-                                class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
-                            />
-                            <div
-                                class="absolute inset-y-0 end-0 pe-3 flex items-center pointer-events-none"
-                            >
-                                <span class="text-gray-500 dark:text-gray-400 text-sm">km</span>
-                            </div>
-                        </div>
-
-                        <!-- Odometer Conflict Warning -->
-                        <div
-                            v-if="showOdometerWarning"
-                            class="mt-2 flex items-start gap-2 text-[10px] font-bold text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 p-2 rounded-lg border border-red-100 dark:border-red-800/50"
-                        >
-                            <svg
-                                class="w-3.5 h-3.5 flex-shrink-0"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                            >
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    stroke-width="2"
-                                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-                                />
-                            </svg>
-                            <span>
-                                {{
-                                    $t('vehicles.mileage.lower_warning', {
-                                        last: toEnglish(lastVehicleOdometer),
-                                    })
-                                }}
-                            </span>
-                        </div>
-
-                        <!-- Hint for last known -->
-                        <div
-                            v-else-if="selectedVehicle && lastVehicleOdometer > 0"
-                            class="mt-1.5 px-1 flex items-center gap-1.5 text-[10px] text-gray-400 font-bold uppercase tracking-wider"
-                        >
-                            <svg
-                                class="w-3 h-3"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                            >
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    stroke-width="2"
-                                    d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                                />
-                            </svg>
-                            {{ $t('vehicles.mileage.last_recorded') }}:
-                            {{ toEnglish(lastVehicleOdometer) }} km
-                        </div>
-                    </div>
+                        v-model="form.odometer"
+                        v-model:allow-lower="form.allow_lower_odometer"
+                        :last-vehicle-odometer="lastVehicleOdometer"
+                        :show-odometer-warning="showOdometerWarning"
+                        :error="form.errors.odometer"
+                        @history="showMileageModal = true"
+                    />
 
                     <!-- Quote Validity Period / Expiry Date -->
                     <div
@@ -709,6 +553,9 @@
 </template>
 
 <script setup>
+import VehicleSearchResult from '@/Components/Vehicles/VehicleSearchResult.vue';
+import { isLowerOdometer } from '@/Utils/odometer';
+import VehicleOdometerField from '@/Components/Vehicles/VehicleOdometerField.vue';
 import { ref, computed, watch, nextTick, onMounted, h } from 'vue';
 import { useForm, router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
@@ -719,9 +566,7 @@ import VehicleFormModal from '@/Components/Vehicles/VehicleFormModal.vue';
 import VehicleMileageModal from '@/Components/Vehicles/VehicleMileageModal.vue';
 import Tooltip from '@/Components/Tooltip.vue';
 import SaudiPlateDisplay from '@/Components/Vehicles/SaudiPlateDisplay.vue';
-import AppToggle from '@/Components/Common/AppToggle.vue';
-import { useDebounce } from '@/Composables/useDebounce';
-import axios from 'axios';
+import { useVehicleSearch } from '@/Composables/useVehicleSearch';
 
 const props = defineProps({
     show: Boolean,
@@ -833,10 +678,10 @@ const availableDepartmentsList = computed(() => {
 });
 
 // Search
-const searchQuery = ref('');
-const searchResults = ref([]);
-const searching = ref(false);
-const showResults = ref(false);
+const { searchQuery, searchResults, searching, showResults, debouncedSearch } = useVehicleSearch(
+    '/app/quotes/search',
+    () => props.show
+);
 const selectedVehicle = ref(null);
 const lastVehicleOdometer = ref(0);
 
@@ -857,7 +702,7 @@ const form = useForm({
     department_id: props.quote?.department_id || '',
     customer_complaint: props.quote?.customer_complaint || '',
     initial_assessment: props.quote?.initial_assessment || '',
-    odometer: props.quote?.odometer || '',
+    odometer: props.quote?.odometer ?? '',
     valid_until: props.quote?.valid_until
         ? String(props.quote.valid_until).split('T')[0]
         : defaultValidity(),
@@ -896,7 +741,7 @@ watch(
             form.vehicle_id = props.quote.vehicle_id || '';
             form.customer_complaint = props.quote.customer_complaint || '';
             form.initial_assessment = props.quote.initial_assessment || '';
-            form.odometer = props.quote.odometer || '';
+            form.odometer = props.quote.odometer ?? '';
             form.valid_until = props.quote.valid_until
                 ? String(props.quote.valid_until).split('T')[0]
                 : defaultValidity();
@@ -919,32 +764,6 @@ watch(
     }
 );
 
-// Debounce search
-const debouncedSearch = useDebounce(() => {
-    searchQuery.value = toEnglish(searchQuery.value);
-    performSearch();
-}, 300);
-
-async function performSearch() {
-    if (searchQuery.value.length < 2) {
-        searchResults.value = [];
-        return;
-    }
-
-    searching.value = true;
-    try {
-        const response = await axios.get('/app/quotes/search', {
-            params: { q: searchQuery.value },
-        });
-        searchResults.value = response.data;
-        showResults.value = true;
-    } catch (error) {
-        console.error('Search error:', error);
-    } finally {
-        searching.value = false;
-    }
-}
-
 function selectVehicle(vehicle) {
     // Ensure customer data is populated
     let vehicleWithCustomer = { ...vehicle };
@@ -960,7 +779,7 @@ function selectVehicle(vehicle) {
     selectedVehicle.value = vehicleWithCustomer;
     form.customer_id = vehicleWithCustomer.customer_id;
     form.vehicle_id = vehicleWithCustomer.id;
-    form.odometer = vehicleWithCustomer.odometer || '';
+    form.odometer = vehicleWithCustomer.odometer ?? '';
     lastVehicleOdometer.value = vehicleWithCustomer.odometer || 0;
     searchQuery.value = vehicleWithCustomer.plate_number;
     showResults.value = false;
@@ -1080,7 +899,7 @@ watch(
             form.vehicle_id = newQuote.vehicle_id;
             form.customer_complaint = newQuote.customer_complaint || '';
             form.initial_assessment = newQuote.initial_assessment || '';
-            form.odometer = newQuote.odometer || '';
+            form.odometer = newQuote.odometer ?? '';
             form.notes = newQuote.notes || '';
             if (newQuote.vehicle) {
                 selectedVehicle.value = newQuote.vehicle;
@@ -1101,7 +920,7 @@ watch(
             selectedVehicle.value = val;
             form.vehicle_id = val.id;
             form.customer_id = val.customer_id;
-            form.odometer = val.odometer || '';
+            form.odometer = val.odometer ?? '';
             lastVehicleOdometer.value = val.odometer || 0;
         }
     },
@@ -1127,10 +946,10 @@ watch(
     { immediate: true }
 );
 
-const showOdometerWarning = computed(() => {
-    if (!selectedVehicle.value || !form.odometer || lastVehicleOdometer.value <= 0) return false;
-    return Number(form.odometer) < lastVehicleOdometer.value;
-});
+const showOdometerWarning = computed(
+    () =>
+        Boolean(selectedVehicle.value) && isLowerOdometer(form.odometer, lastVehicleOdometer.value)
+);
 
 // Initial Load for Edit Mode or Pre-selection
 onMounted(() => {

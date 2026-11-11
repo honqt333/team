@@ -81,7 +81,7 @@ class FeedbackController extends Controller
         ]);
 
         if (empty($validated['comments']) && ! $request->hasFile('video')) {
-            return back()->withErrors(['comments' => 'يرجى كتابة تفاصيل البلاغ أو إرفاق تسجيل فيديو للشاشة.']);
+            return back()->withErrors(['comments' => __('messages.feedback_comments_or_video_required')]);
         }
 
         $tenantId = TenancyContext::tenantId() ?? $request->user()->tenant_id;
@@ -105,7 +105,7 @@ class FeedbackController extends Controller
             'status' => Feedback::STATUS_PENDING,
         ]);
 
-        return back()->with('success', 'تم إرسال بلاغك بنجاح وسيقوم فريق الدعم بمراجعته.');
+        return back()->with('success', __('messages.feedback_submitted_successfully'));
     }
 
     /**

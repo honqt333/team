@@ -102,7 +102,7 @@
             <div
                 class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden"
             >
-                <table class="w-full">
+                <DataTable structured class="w-full">
                     <thead class="bg-gray-50 dark:bg-gray-700/50">
                         <tr>
                             <th
@@ -242,7 +242,7 @@
                             </td>
                         </tr>
                     </tbody>
-                </table>
+                </DataTable>
             </div>
         </div>
 
@@ -363,7 +363,11 @@
                                     {{ $t('system.admin_users.form.role') }} *
                                 </label>
                                 <div class="grid grid-cols-3 gap-3">
-                                    <label
+                                    <SelectableCard
+                                        type="radio"
+                                        name="form.role"
+                                        v-model="form.role"
+                                        :value="key"
                                         v-for="(label, key) in roleLabels"
                                         :key="key"
                                         :class="[
@@ -373,18 +377,12 @@
                                                 : 'border-gray-200 dark:border-gray-700',
                                         ]"
                                     >
-                                        <input
-                                            type="radio"
-                                            v-model="form.role"
-                                            :value="key"
-                                            class="hidden"
-                                        />
                                         <p
                                             class="font-medium text-gray-900 dark:text-white text-sm"
                                         >
                                             {{ label }}
                                         </p>
-                                    </label>
+                                    </SelectableCard>
                                 </div>
                             </div>
 
@@ -418,11 +416,9 @@
                                                 :key="key"
                                                 class="flex items-center gap-2 cursor-pointer"
                                             >
-                                                <input
-                                                    type="checkbox"
+                                                <AppToggle
                                                     :value="key"
                                                     v-model="form.permissions"
-                                                    class="rounded border-gray-300 text-indigo-600"
                                                 />
                                                 <span
                                                     class="text-sm text-gray-700 dark:text-gray-300"
@@ -437,11 +433,7 @@
 
                             <div class="flex items-center gap-4">
                                 <label class="flex items-center gap-2 cursor-pointer">
-                                    <input
-                                        v-model="form.is_active"
-                                        type="checkbox"
-                                        class="rounded border-gray-300 text-indigo-600"
-                                    />
+                                    <AppToggle v-model="form.is_active" />
                                     <span class="text-sm text-gray-700 dark:text-gray-300">
                                         {{ $t('system.admin_users.form.is_active') }}
                                     </span>
@@ -481,6 +473,9 @@
 </template>
 
 <script setup>
+import DataTable from '@/Components/Common/DataTable.vue';
+import SelectableCard from '@/Components/Common/SelectableCard.vue';
+import AppToggle from '@/Components/Common/AppToggle.vue';
 import { ref, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { Head, Link, router, useForm, usePage } from '@inertiajs/vue3';

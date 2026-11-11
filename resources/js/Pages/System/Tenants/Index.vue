@@ -90,7 +90,7 @@
                 class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden"
             >
                 <div class="overflow-x-auto">
-                    <table class="w-full">
+                    <DataTable structured class="w-full">
                         <thead class="bg-gray-50 dark:bg-gray-700/50">
                             <tr>
                                 <th
@@ -281,7 +281,7 @@
                                 </td>
                             </tr>
                         </tbody>
-                    </table>
+                    </DataTable>
                 </div>
 
                 <!-- Empty State -->
@@ -341,6 +341,7 @@
 </template>
 
 <script setup>
+import DataTable from '@/Components/Common/DataTable.vue';
 import { ref, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { Link, router } from '@inertiajs/vue3';

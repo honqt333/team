@@ -103,11 +103,7 @@
 
                     <div class="pt-3 border-t border-gray-100 dark:border-gray-700">
                         <label class="flex items-center gap-2 cursor-pointer">
-                            <input
-                                type="checkbox"
-                                v-model="form.is_active"
-                                class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
-                            />
+                            <AppToggle v-model="form.is_active" />
                             <span class="text-xs font-bold text-gray-700 dark:text-gray-300">
                                 {{
                                     isAr
@@ -283,6 +279,7 @@
 </template>
 
 <script setup>
+import AppToggle from '@/Components/Common/AppToggle.vue';
 import { useI18n } from 'vue-i18n';
 const { t } = useI18n();
 

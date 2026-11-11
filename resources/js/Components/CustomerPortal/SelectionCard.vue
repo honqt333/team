@@ -18,8 +18,8 @@
             selected
                 ? {
                       backgroundColor:
-                          'color-mix(in srgb, var(--tenant-primary, #4f46e5) 8%, transparent)',
-                      '--tw-ring-color': 'var(--tenant-primary, #4f46e5)',
+                          'color-mix(in srgb, var(--tenant-primary, #2563eb) 8%, transparent)',
+                      '--tw-ring-color': 'var(--tenant-primary, #2563eb)',
                   }
                 : {}
         "
@@ -30,7 +30,7 @@
                 v-if="icon"
                 class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
                 :class="selected ? 'text-white' : 'bg-slate-100 text-slate-500'"
-                :style="selected ? { backgroundColor: 'var(--tenant-primary, #4f46e5)' } : {}"
+                :style="selected ? { backgroundColor: 'var(--tenant-primary, #2563eb)' } : {}"
                 v-html="icon"
             />
             <div class="min-w-0 flex-1">
@@ -43,13 +43,13 @@
                             selected
                                 ? {
                                       backgroundColor:
-                                          'color-mix(in srgb, var(--tenant-primary, #4f46e5) 18%, transparent)',
-                                      color: 'var(--tenant-primary, #4f46e5)',
+                                          'color-mix(in srgb, var(--tenant-primary, #2563eb) 18%, transparent)',
+                                      color: 'var(--tenant-primary, #2563eb)',
                                   }
                                 : {
                                       backgroundColor:
-                                          'color-mix(in srgb, var(--tenant-primary, #4f46e5) 12%, transparent)',
-                                      color: 'var(--tenant-primary, #4f46e5)',
+                                          'color-mix(in srgb, var(--tenant-primary, #2563eb) 12%, transparent)',
+                                      color: 'var(--tenant-primary, #2563eb)',
                                   }
                         "
                     >

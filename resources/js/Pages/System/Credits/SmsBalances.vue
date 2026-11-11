@@ -136,7 +136,7 @@
             <div
                 class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden"
             >
-                <table class="w-full">
+                <DataTable structured class="w-full">
                     <thead class="bg-gray-50 dark:bg-gray-700/50">
                         <tr>
                             <th class="px-4 py-3 text-right text-xs font-medium text-gray-500">
@@ -196,7 +196,7 @@
                             </td>
                         </tr>
                     </tbody>
-                </table>
+                </DataTable>
             </div>
         </div>
 
@@ -283,6 +283,7 @@
 </template>
 
 <script setup>
+import DataTable from '@/Components/Common/DataTable.vue';
 import { ref } from 'vue';
 import { Head, Link, router, useForm } from '@inertiajs/vue3';
 import SystemLayout from '@/Layouts/SystemLayout.vue';

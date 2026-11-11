@@ -1,24 +1,24 @@
 <template>
     <AppLayout>
+        <Head :title="$t('settings.cards.print.title')" />
+
         <div class="space-y-6">
             <!-- Header -->
             <PageHeader
                 :title="$t('settings.cards.print.title')"
                 :subtitle="$t('settings.cards.print.description')"
-                gradientFrom="from-amber-500"
-                gradientTo="to-orange-600"
-                glowFrom="from-amber-500"
-                badgeBg="bg-amber-50/50 dark:bg-amber-900/30"
-                badgeText="text-amber-600 dark:text-amber-400"
-                badgeBorder="border-amber-100/50 dark:border-amber-800/30"
-                badgeDot="bg-amber-500"
             >
                 <template #back>
                     <BackButton href="/app/settings/integrations" />
                 </template>
 
                 <template #icon>
-                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg
+                        class="w-8 h-8 text-white"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                    >
                         <path
                             stroke-linecap="round"
                             stroke-linejoin="round"
@@ -30,16 +30,14 @@
 
                 <template #actions>
                     <button
+                        type="button"
                         @click="save()"
                         :disabled="form.processing"
-                        class="group relative inline-flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-amber-600 to-orange-600 text-white font-bold rounded-xl transition-all hover:scale-[1.02] hover:shadow-lg hover:shadow-amber-500/25 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed overflow-hidden"
+                        class="inline-flex items-center gap-2 px-5 py-2.5 bg-action-primary hover:bg-action-primary-hover text-white font-bold rounded-xl shadow-xs transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
                     >
-                        <div
-                            class="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"
-                        ></div>
                         <svg
                             v-if="form.processing"
-                            class="animate-spin h-4 w-4 relative"
+                            class="animate-spin h-4 w-4"
                             viewBox="0 0 24 24"
                         >
                             <circle
@@ -59,7 +57,7 @@
                         </svg>
                         <svg
                             v-else
-                            class="w-4 h-4 relative"
+                            class="w-4 h-4"
                             fill="none"
                             stroke="currentColor"
                             viewBox="0 0 24 24"
@@ -71,7 +69,7 @@
                                 d="M5 13l4 4L19 7"
                             />
                         </svg>
-                        <span class="relative">
+                        <span>
                             {{ form.processing ? $t('common.loading') : $t('common.save') }}
                         </span>
                     </button>
@@ -82,20 +80,11 @@
             <div class="flex flex-col xl:flex-row gap-6 items-start">
                 <!-- ═══════════ Settings Panel (left) ═══════════ -->
                 <div
-                    class="flex-1 min-w-0 bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden"
+                    class="flex-1 min-w-0 bg-surface rounded-2xl border border-border-subtle shadow-xs overflow-hidden"
                 >
                     <!-- Tab Bar -->
-                    <div class="flex border-b border-gray-100 dark:border-gray-700">
-                        <button
-                            type="button"
-                            @click="activeTab = 'appearance'"
-                            class="relative flex items-center gap-2 px-5 py-3.5 text-sm font-semibold transition-colors whitespace-nowrap"
-                            :class="
-                                activeTab === 'appearance'
-                                    ? 'text-amber-600 dark:text-amber-400'
-                                    : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'
-                            "
-                        >
+                    <AppTabs v-model="activeTab" :tabs="printTabs" variant="underline" class="px-5">
+                        <template #icon-appearance>
                             <svg
                                 class="w-4 h-4"
                                 fill="none"
@@ -109,23 +98,8 @@
                                     d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"
                                 />
                             </svg>
-                            {{ $t('print_settings.general_print_identity') }}
-                            <span
-                                v-if="activeTab === 'appearance'"
-                                class="absolute bottom-0 start-0 end-0 h-0.5 bg-gradient-to-r from-amber-500 to-orange-500 rounded-t-full"
-                            ></span>
-                        </button>
-
-                        <button
-                            type="button"
-                            @click="activeTab = 'documents'"
-                            class="relative flex items-center gap-2 px-5 py-3.5 text-sm font-semibold transition-colors whitespace-nowrap"
-                            :class="
-                                activeTab === 'documents'
-                                    ? 'text-amber-600 dark:text-amber-400'
-                                    : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'
-                            "
-                        >
+                        </template>
+                        <template #icon-documents>
                             <svg
                                 class="w-4 h-4"
                                 fill="none"
@@ -139,13 +113,8 @@
                                     d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
                                 />
                             </svg>
-                            {{ $t('print_settings.documents_title') }}
-                            <span
-                                v-if="activeTab === 'documents'"
-                                class="absolute bottom-0 start-0 end-0 h-0.5 bg-gradient-to-r from-amber-500 to-orange-500 rounded-t-full"
-                            ></span>
-                        </button>
-                    </div>
+                        </template>
+                    </AppTabs>
 
                     <!-- ─── Tab: Appearance ─────────────────────────────── -->
                     <div v-show="activeTab === 'appearance'" class="p-6 space-y-6">
@@ -476,25 +445,29 @@
                                     </label>
                                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                         <div>
-                                            <label class="block text-[10px] text-gray-400 mb-1">
-                                                العربية
+                                            <label
+                                                class="block text-[10px] text-content-muted mb-1"
+                                            >
+                                                {{ $t('print_settings.lang_ar') }}
                                             </label>
                                             <input
                                                 v-model="form.documents[selectedDocKey].title_ar"
                                                 type="text"
                                                 dir="rtl"
-                                                class="w-full px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-xs focus:ring-1 focus:ring-amber-400 focus:border-amber-400 outline-none transition"
+                                                class="w-full px-3 py-2 rounded-xl border border-border bg-surface text-content-primary text-xs focus:ring-1 focus:ring-action-primary focus:border-action-primary outline-none transition"
                                             />
                                         </div>
                                         <div>
-                                            <label class="block text-[10px] text-gray-400 mb-1">
-                                                English
+                                            <label
+                                                class="block text-[10px] text-content-muted mb-1"
+                                            >
+                                                {{ $t('print_settings.lang_en') }}
                                             </label>
                                             <input
                                                 v-model="form.documents[selectedDocKey].title_en"
                                                 type="text"
                                                 dir="ltr"
-                                                class="w-full px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-xs focus:ring-1 focus:ring-amber-400 focus:border-amber-400 outline-none transition"
+                                                class="w-full px-3 py-2 rounded-xl border border-border bg-surface text-content-primary text-xs focus:ring-1 focus:ring-action-primary focus:border-action-primary outline-none transition"
                                             />
                                         </div>
                                     </div>
@@ -513,10 +486,8 @@
                                             :key="optKey"
                                             class="flex items-center gap-2.5 p-3 rounded-xl bg-gray-50 dark:bg-gray-900/20 border border-gray-100 dark:border-gray-700 cursor-pointer hover:border-amber-200 dark:hover:border-amber-800 transition-all"
                                         >
-                                            <input
-                                                type="checkbox"
+                                            <AppToggle
                                                 v-model="form.documents[selectedDocKey][optKey]"
-                                                class="w-4 h-4 rounded border-gray-300 text-amber-600 focus:ring-amber-500 flex-shrink-0"
                                             />
                                             <span class="text-xs text-gray-600 dark:text-gray-300">
                                                 {{ $t('print_settings.' + labelKey) }}
@@ -703,12 +674,12 @@
 
 <script setup>
 import { ref, computed, watch } from 'vue';
-import { usePage, router } from '@inertiajs/vue3';
+import { Head, usePage, router, useForm } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
-import { useForm } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import PageHeader from '@/Components/PageHeader.vue';
 import BackButton from '@/Components/BackButton.vue';
+import AppTabs from '@/Components/Common/AppTabs.vue';
 import AppToggle from '@/Components/Common/AppToggle.vue';
 import { useToast } from '@/Composables/useToast';
 import TermsModal from './Modals/TermsModal.vue';
@@ -744,6 +715,11 @@ if (!form.visual.active_template) {
 
 // ─── Tabs ────────────────────────────────────────────────────────────────────
 const activeTab = ref('appearance');
+
+const printTabs = computed(() => [
+    { id: 'appearance', label: t('print_settings.general_print_identity') },
+    { id: 'documents', label: t('print_settings.documents_title') },
+]);
 
 // Document checkbox options: formKey → translation sub-key
 const docOptions = {
@@ -992,7 +968,7 @@ function save() {
 // ─── Center Preview Data ─────────────────────────────────────────────────────
 const dummyCenterData = computed(() => ({
     name: t('print_settings.sample_center_name'),
-    logo_url: page.props.tenant?.logo_url || '/images/logo.png',
+    logo_url: page.props.tenant?.logo_url || '/images/brand/logo-256.png',
     tax_number: '310298374200003',
     address: t('print_settings.sample_address'),
     phone: '+966 55 123 4567',
@@ -1030,14 +1006,14 @@ const dummyPrintData = computed(() => {
         expected_end_date: new Date(Date.now() + 86400000 * 2),
         customer: {
             name: ['purchase_invoice', 'purchase_return'].includes(docType)
-                ? 'شركة التوريدات العالمية لقطع الغيار'
+                ? t('print_settings.sample_supplier_name')
                 : ['payslip', 'employee', 'attendance'].includes(docType)
-                  ? 'سعد محمد الشهري (فني صيانة أول)'
+                  ? t('print_settings.sample_employee_name')
                   : ['payroll', 'customers', 'vehicles'].includes(docType)
-                    ? 'التقرير الدوري الشامل للمركز'
+                    ? t('print_settings.sample_report_name')
                     : t('print_settings.sample_name'),
             phone: '+966 50 123 4567',
-            address: 'الرياض، حي الملز، طريق صلاح الدين',
+            address: t('print_settings.sample_address'),
             tax_number: '310992384900003',
         },
         vehicle: {
@@ -1048,8 +1024,8 @@ const dummyPrintData = computed(() => {
             color: t('print_settings.pearl_white'),
         },
         damage_marks: [
-            { x: 120, y: 140, color: 'red', description: 'صدمة بالصدام الأمامي الأيمن' },
-            { x: 280, y: 190, color: 'blue', description: 'خدش سطحي بالباب الخلفي الأيسر' },
+            { x: 120, y: 140, color: 'red', description: t('print_settings.sample_damage_1') },
+            { x: 280, y: 190, color: 'blue', description: t('print_settings.sample_damage_2') },
         ],
         payments: [
             {
@@ -1057,7 +1033,7 @@ const dummyPrintData = computed(() => {
                 payment_date: new Date(),
                 payment_method: 'card',
                 reference: 'AUTH-99120',
-                notes: 'دفعة مقدمة - مدى',
+                notes: t('print_settings.sample_payment_1'),
                 amount: 500,
                 type: 'regular',
             },
@@ -1066,7 +1042,7 @@ const dummyPrintData = computed(() => {
                 payment_date: new Date(),
                 payment_method: 'cash',
                 reference: '-',
-                notes: 'دفعة ثانية نقداً',
+                notes: t('print_settings.sample_payment_2'),
                 amount: 490,
                 type: 'regular',
             },
@@ -1078,22 +1054,22 @@ const dummyPrintData = computed(() => {
     if (['parts_invoice', 'purchase_invoice', 'purchase_return'].includes(docType)) {
         base.items = [
             {
-                service_name: 'فحمات فرامل أمامية (أصلي)',
-                description: 'من المستودع الرئيسي - تويوتا أصلي',
+                service_name: t('print_settings.sample_part_1_name'),
+                description: t('print_settings.sample_part_1_desc'),
                 qty: 2,
                 unit_price: 240,
                 is_part: true,
             },
             {
-                service_name: 'فلتر زيت محرك تخليقي',
-                description: 'فلتر أصلي مع حلقات منع التسريب',
+                service_name: t('print_settings.sample_part_2_name'),
+                description: t('print_settings.sample_part_2_desc'),
                 qty: 1,
                 unit_price: 65,
                 is_part: true,
             },
             {
-                service_name: 'شمعات احتراق ليزر بلاتينيوم',
-                description: 'طقم 4 شمعات إشعال أصلية',
+                service_name: t('print_settings.sample_part_3_name'),
+                description: t('print_settings.sample_part_3_desc'),
                 qty: 4,
                 unit_price: 85,
                 is_part: true,
@@ -1102,22 +1078,22 @@ const dummyPrintData = computed(() => {
     } else if (docType === 'payslip') {
         base.items = [
             {
-                service_name: 'الراتب الأساسي',
-                description: 'راتب شهر محرم 1448هـ',
+                service_name: t('print_settings.sample_payslip_1_name'),
+                description: t('print_settings.sample_payslip_1_desc'),
                 qty: 1,
                 unit_price: 4500,
                 is_part: false,
             },
             {
-                service_name: 'بدل السكن والنقل',
-                description: 'بدل شهري ثابت',
+                service_name: t('print_settings.sample_payslip_2_name'),
+                description: t('print_settings.sample_payslip_2_desc'),
                 qty: 1,
                 unit_price: 1500,
                 is_part: false,
             },
             {
-                service_name: 'حافز إنجاز الورشة',
-                description: 'مكافأة تجاوز تارغت الفحص الدوري',
+                service_name: t('print_settings.sample_payslip_3_name'),
+                description: t('print_settings.sample_payslip_3_desc'),
                 qty: 1,
                 unit_price: 600,
                 is_part: false,

@@ -112,21 +112,13 @@
                         class="flex items-center gap-6 pt-4 border-t border-gray-200 dark:border-gray-700"
                     >
                         <label class="flex items-center gap-2 cursor-pointer">
-                            <input
-                                type="checkbox"
-                                v-model="form.is_active"
-                                class="rounded border-gray-300 text-indigo-600"
-                            />
+                            <AppToggle v-model="form.is_active" />
                             <span class="text-sm text-gray-700 dark:text-gray-300">
                                 {{ $t('integrations.enable') }}
                             </span>
                         </label>
                         <label class="flex items-center gap-2 cursor-pointer">
-                            <input
-                                type="checkbox"
-                                v-model="form.is_default"
-                                class="rounded border-gray-300 text-amber-600"
-                            />
+                            <AppToggle v-model="form.is_default" />
                             <span class="text-sm text-gray-700 dark:text-gray-300">
                                 {{ $t('integrations.set_as_default') }}
                             </span>
@@ -144,7 +136,11 @@
                             {{ $t('integrations.usage_purpose') }}
                         </label>
                         <div class="grid grid-cols-3 gap-3">
-                            <label
+                            <SelectableCard
+                                type="radio"
+                                name="form.purpose"
+                                v-model="form.purpose"
+                                :value="key"
                                 v-for="(purpose, key) in purposes"
                                 :key="key"
                                 class="relative flex items-start p-4 rounded-lg border-2 cursor-pointer transition-all"
@@ -154,12 +150,6 @@
                                         : 'border-gray-200 dark:border-gray-700 hover:border-gray-300'
                                 "
                             >
-                                <input
-                                    type="radio"
-                                    v-model="form.purpose"
-                                    :value="key"
-                                    class="sr-only"
-                                />
                                 <div>
                                     <p class="font-medium text-gray-900 dark:text-white text-sm">
                                         {{ purpose.label }}
@@ -181,7 +171,7 @@
                                         />
                                     </svg>
                                 </div>
-                            </label>
+                            </SelectableCard>
                         </div>
                     </div>
 
@@ -350,6 +340,8 @@
 </template>
 
 <script setup>
+import SelectableCard from '@/Components/Common/SelectableCard.vue';
+import AppToggle from '@/Components/Common/AppToggle.vue';
 import { useI18n } from 'vue-i18n';
 const { t } = useI18n();
 

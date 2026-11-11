@@ -31,6 +31,8 @@
 </template>
 
 <script setup>
+import { printDocument } from '@/Composables/usePrint';
+
 import { computed, onMounted, onBeforeUnmount } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { usePage, router } from '@inertiajs/vue3';
@@ -154,7 +156,7 @@ const resolvedDocumentSettings = computed(() => {
 
 // Actions
 function handlePrint() {
-    if (!props.onPrint) window.print();
+    if (!props.onPrint) printDocument();
     emit('print');
 }
 

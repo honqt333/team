@@ -63,6 +63,46 @@ trait HasWorkOrderOperations
     }
 
     /**
+     * Get net cash paid amount (payments minus refunds, excluding bad debt).
+     */
+    public function getNetCashPaidAttribute(): float
+    {
+        if ($this->relationLoaded('payments')) {
+            return (float) $this->payments->sum(function ($p) {
+                $type = $p->type instanceof PaymentType ? $p->type->value : $p->type;
+
+                return match ($type) {
+                    'payment' => (float) $p->amount,
+                    'refund' => -(float) $p->amount,
+                    default => 0.0,
+                };
+            });
+        }
+
+        return (float) $this->payments()
+            ->selectRaw('SUM(CASE WHEN type = "payment" THEN amount WHEN type = "refund" THEN -amount ELSE 0 END) as paid')
+            ->value('paid');
+    }
+
+    /**
+     * Get any overpayment amount exceeding the net work order total.
+     */
+    public function getExcessPaidAttribute(): float
+    {
+        $netTotal = max(0.0, (float) $this->total - $this->total_credit_notes);
+
+        return max(0.0, round($this->net_cash_paid - $netTotal, 2));
+    }
+
+    /**
+     * Determine whether paid amounts exceed the work order total.
+     */
+    public function hasExcessPayment(): bool
+    {
+        return $this->excess_paid > 0.01;
+    }
+
+    /**
      * Get remaining balance.
      */
     public function getBalanceAttribute(): float
@@ -234,7 +274,7 @@ trait HasWorkOrderOperations
      */
     public function markAsCompleted(?Carbon $exitDate = null, ?string $notes = null): bool
     {
-        if (! $this->canVehicleExit()) {
+        if (! $this->canVehicleExit() || $this->hasExcessPayment()) {
             return false;
         }
 

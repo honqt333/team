@@ -275,7 +275,10 @@
                     </h2>
                 </div>
                 <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                    <DataTable
+                        structured
+                        class="min-w-full divide-y divide-gray-200 dark:divide-gray-700"
+                    >
                         <thead class="bg-gray-50 dark:bg-gray-900">
                             <tr>
                                 <th
@@ -327,7 +330,7 @@
                                 </td>
                             </tr>
                         </tbody>
-                    </table>
+                    </DataTable>
                 </div>
             </div>
         </div>
@@ -335,6 +338,7 @@
 </template>
 
 <script setup>
+import DataTable from '@/Components/Common/DataTable.vue';
 import EmployeePortalLayout from '@/Layouts/EmployeePortalLayout.vue';
 import { Link } from '@inertiajs/vue3';
 

@@ -21,7 +21,6 @@ use App\Models\VehicleMake;
 use App\Models\VehicleModel;
 use App\Models\Warehouse;
 use App\Models\WorkOrder;
-use App\Services\NotificationService;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\JsonResponse;
@@ -105,8 +104,7 @@ class WorkOrderController
                 $query->where('status', WorkOrder::STATUS_DONE)
                     ->whereRaw('NOT ('.WorkOrder::outstandingBalanceSql().')');
             } else {
-                $query->where('status', WorkOrder::STATUS_DONE)
-                    ->whereRaw('NOT ('.WorkOrder::outstandingBalanceSql().')');
+                $this->applyClosedSectionScope($query);
             }
         }
 
@@ -135,6 +133,25 @@ class WorkOrderController
     }
 
     /**
+     * Scope query to all work orders belonging to the closed section
+     * (settled closed, credit invoices, bad debts, and cancelled).
+     */
+    protected function applyClosedSectionScope(Builder $query): Builder
+    {
+        return $query->where(function (Builder $q) {
+            $q->where('status', WorkOrder::STATUS_CANCELLED)
+                ->orWhere(function (Builder $done) {
+                    $done->where('status', WorkOrder::STATUS_DONE)
+                        ->where(function (Builder $doneSub) {
+                            $doneSub->whereHas('invoice')
+                                ->orWhereRaw('NOT ('.WorkOrder::outstandingBalanceSql().')');
+                        });
+                })
+                ->orWhereHas('payments', fn (Builder $p) => $p->where('type', 'bad_debt'));
+        });
+    }
+
+    /**
      * Calculate stats for multiple statuses in a single efficient query.
      */
     protected function getStatsForStatuses(string $tabType): array
@@ -151,17 +168,7 @@ class WorkOrderController
                     });
             });
         } else {
-            $baseQuery->whereIn('status', self::CLOSED_STATUSES)
-                ->where(function ($q) {
-                    $q->where('status', '!=', WorkOrder::STATUS_DONE)
-                        ->orWhere(function ($sub) {
-                            $sub->where('status', WorkOrder::STATUS_DONE)
-                                ->where(function ($sub2) {
-                                    $sub2->whereHas('invoice')
-                                        ->orWhereRaw('NOT ('.WorkOrder::outstandingBalanceSql().')');
-                                });
-                        });
-                });
+            $this->applyClosedSectionScope($baseQuery);
         }
 
         $count = (clone $baseQuery)->count();
@@ -248,6 +255,7 @@ class WorkOrderController
             ];
         } elseif ($status === 'closed') {
             $filterCounts = [
+                'all' => $this->applyClosedSectionScope(WorkOrder::query())->count(),
                 'closed' => WorkOrder::where('status', WorkOrder::STATUS_DONE)
                     ->whereRaw('NOT ('.WorkOrder::outstandingBalanceSql().')')
                     ->count(),
@@ -320,14 +328,18 @@ class WorkOrderController
         }
 
         $workOrder->load('customer');
-        NotificationService::notifyOwner(
-            tenantId: $request->user()->tenant_id,
-            type: 'work_order.created',
-            title: 'أمر عمل جديد #'.($workOrder->code ?? $workOrder->id),
-            body: 'تم إنشاء أمر عمل جديد'.($workOrder->customer ? ' للعميل '.$workOrder->customer->name : ''),
-            actionUrl: '/app/work-orders/'.$workOrder->id,
-            actorId: $request->user()->id,
-        );
+
+        // NO notifyOwner() HERE ON PURPOSE.
+        //
+        // Creating the work order already fired WorkOrderObserver::created()
+        // → WorkOrderCreated → NotifyOwnerOnCreation, which sends the
+        // 'work_order.created' notification to the tenant owner. Calling
+        // notifyOwner() again here produced a SECOND, identical notification
+        // row — the owner saw every new work order twice in their bell.
+        //
+        // The listener is the single source of truth for this event, and it
+        // also fires for work orders created outside this controller (API
+        // routes, imports, actions).
 
         return redirect()->route('work-orders.show', $workOrder)->with('success', __('messages.work_order_created'));
     }
@@ -472,6 +484,7 @@ class WorkOrderController
                     'paused_duration_seconds' => (int) $e->paused_duration_seconds,
                     'effective_duration_seconds' => $e->effectiveDurationSeconds(),
                 ]),
+            'serverNow' => now()->toIso8601String(),
             'warehouses' => $warehouses,
             'inventoryParts' => $inventoryParts,
             'inventoryUnits' => $inventoryUnits,

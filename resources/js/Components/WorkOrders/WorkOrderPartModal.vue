@@ -109,53 +109,11 @@
                         >
                             {{ $t('inventory.parts.search_label') }}
                         </label>
-                        <SearchableSelect
+                        <InventoryPartPicker
                             v-model="form.part_id"
-                            name="part_id"
-                            data-field="part_id"
-                            :options="searchResults"
-                            :async-search="true"
-                            @search="handleAsyncSearch"
-                            @change="handlePartSelectChange"
-                            :placeholder="$t('inventory.parts.search')"
-                            class="w-full text-xs"
-                        >
-                            <template #option="{ option }">
-                                <div class="flex items-center justify-between w-full py-0.5">
-                                    <div>
-                                        <div
-                                            class="font-bold text-gray-900 dark:text-white text-xs"
-                                        >
-                                            {{ toEnglish(getName(option)) }}
-                                        </div>
-                                        <div class="text-[10px] text-emerald-600 font-bold mt-0.5">
-                                            {{ formatCurrency(option.default_sale_price) }}
-                                        </div>
-                                    </div>
-                                    <div class="text-right flex flex-col items-end">
-                                        <span class="text-[10px] font-mono text-gray-500">
-                                            {{ toEnglish(option.sku || option.barcode || '---') }}
-                                        </span>
-                                        <span
-                                            class="text-[10px] font-bold mt-0.5"
-                                            :class="
-                                                Number(option.inventory_balances_sum_qty_on_hand) >
-                                                0
-                                                    ? 'text-emerald-600 dark:text-emerald-400'
-                                                    : 'text-red-500 dark:text-red-400'
-                                            "
-                                        >
-                                            {{ $t('inventory.stock.available') }}:
-                                            {{
-                                                formatQuantity(
-                                                    option.inventory_balances_sum_qty_on_hand || 0
-                                                )
-                                            }}
-                                        </span>
-                                    </div>
-                                </div>
-                            </template>
-                        </SearchableSelect>
+                            :warehouse-id="form.warehouse_id"
+                            @select="selectPart"
+                        />
                     </div>
                 </div>
 
@@ -652,6 +610,7 @@
 </template>
 
 <script setup>
+import InventoryPartPicker from '@/Components/Inventory/InventoryPartPicker.vue';
 import { ref, computed, watch, onMounted, onUnmounted } from 'vue';
 import { useForm } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
@@ -661,8 +620,6 @@ import { useFormScrollToError } from '@/Composables/useFormScrollToError';
 import BaseModal from '@/Components/BaseModal.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 import { useToast } from '@/Composables/useToast';
-import { useDebounce } from '@/Composables/useDebounce';
-import axios from 'axios';
 
 const { formatCurrency, formatQuantity, toEnglish } = useNumberFormat();
 const { scrollToError } = useFormScrollToError();
@@ -686,10 +643,7 @@ const { t } = useI18n();
 const { getName } = useLocalized();
 
 // State
-const partSearch = ref('');
-const searchResults = ref([]);
 const selectedPart = ref(null);
-const searchWrapper = ref(null);
 const isPopulating = ref(false);
 
 // Form
@@ -903,32 +857,6 @@ const availableStock = computed(() => {
 });
 
 // Methods
-const fetchParts = async (query = '') => {
-    try {
-        const response = await axios.get(route('app.inventory.parts.search'), {
-            params: {
-                q: query || '',
-                warehouse_id: form.warehouse_id || undefined,
-                hide_out_of_stock: true,
-            },
-        });
-        searchResults.value = response.data;
-    } catch (e) {
-        searchResults.value = [];
-    }
-};
-
-const handleAsyncSearch = useDebounce((query) => {
-    fetchParts(query);
-}, 300);
-
-const handlePartSelectChange = (partId) => {
-    if (!partId) return;
-    const part = searchResults.value.find((p) => p.id === partId);
-    if (part) selectPart(part);
-};
-
-// Methods
 function selectPart(part) {
     selectedPart.value = part;
     form.part_id = part.id;
@@ -948,8 +876,6 @@ function selectPart(part) {
     form.notes = part.description || '';
     form.discount_type = 'fixed';
     form.discount_value = 0;
-    partSearch.value = '';
-    searchResults.value = [];
 }
 
 function clearPartSelection() {
@@ -962,7 +888,6 @@ function clearPartSelection() {
     form.notes = '';
     form.discount_type = 'fixed';
     form.discount_value = 0;
-    if (form.source === 'warehouse') fetchParts(''); // Pre-fetch
 }
 
 function submitForm(shouldClose = true) {
@@ -1024,7 +949,6 @@ function submitForm(shouldClose = true) {
         form.warehouse_id = currentWarehouse;
         form.work_order_item_id = currentItem;
         selectedPart.value = null;
-        partSearch.value = '';
         return;
     }
 
@@ -1050,7 +974,6 @@ function submitForm(shouldClose = true) {
                 form.warehouse_id = currentWarehouse;
                 form.work_order_item_id = currentItem;
                 selectedPart.value = null;
-                partSearch.value = '';
             }
         },
         onError: (errors) => {
@@ -1074,7 +997,6 @@ watch(
             form.discount_value = 0;
         }
         if (newSource !== 'warehouse') clearPartSelection();
-        if (newSource === 'warehouse' && !selectedPart.value) fetchParts(''); // Pre-fetch
     }
 );
 
@@ -1082,10 +1004,7 @@ watch(
     () => form.warehouse_id,
     (newWarehouseId) => {
         if (isPopulating.value || form.source !== 'warehouse') return;
-        if (!selectedPart.value) {
-            fetchParts('');
-            return;
-        }
+        if (!selectedPart.value) return;
         const balances = selectedPart.value.inventory_balances || [];
         const balance = balances.find((b) => b.warehouse_id === newWarehouseId);
         if (balance && parseFloat(balance.sale_price) > 0) {
@@ -1138,9 +1057,7 @@ watch(
                 form.name = '';
                 form.part_id = null;
                 selectedPart.value = null;
-                partSearch.value = '';
                 if (props.suggestedPart) selectPart(props.suggestedPart);
-                else if (form.source === 'warehouse') fetchParts('');
             }
 
             // Use timeout to ensure reactivity settles before re-enabling watchers

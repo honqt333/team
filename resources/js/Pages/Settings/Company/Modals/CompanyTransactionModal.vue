@@ -65,12 +65,7 @@
                                 {{ $t('company_profile.transactions.form.date') }}
                                 <span class="text-red-500">*</span>
                             </label>
-                            <input
-                                v-model="form.transaction_date"
-                                type="date"
-                                required
-                                class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
-                            />
+                            <CustomDatePicker v-model="form.transaction_date" required />
                             <p
                                 v-if="form.errors.transaction_date"
                                 class="mt-1 text-sm text-red-500"
@@ -265,6 +260,7 @@
 </template>
 
 <script setup>
+import CustomDatePicker from '@/Components/CustomDatePicker.vue';
 import Modal from '@/Components/Modal.vue';
 import { ref, computed, watch, onMounted } from 'vue';
 import { useForm } from '@inertiajs/vue3';

@@ -82,21 +82,12 @@ const slots = useSlots();
 const isDisabled = computed(() => props.disabled || props.loading);
 const showLabel = computed(() => !!slots.default);
 
-const actionVariants = [
-    'action',
-    'action-lg',
-    'action-xl',
-    'action-sm',
-    'action-xs',
-    'action-bold',
-    'action-shadow-lg',
-    'action-shadow-md',
-];
+const sizedActionVariants = ['action-lg', 'action-xl', 'action-sm', 'action-xs'];
 
 const rootClass = computed(() => [
     'app-btn',
     `app-btn--${props.variant}`,
-    ...(actionVariants.includes(props.variant) ? [] : [`app-btn--${props.size}`]),
+    ...(sizedActionVariants.includes(props.variant) ? [] : [`app-btn--${props.size}`]),
     {
         'app-btn--block': props.block,
         'app-btn--loading': props.loading,
@@ -105,8 +96,7 @@ const rootClass = computed(() => [
 ]);
 
 const iconSize = computed(() => {
-    // Action variants use their own sizing, fallback to size prop
-    if (actionVariants.includes(props.variant)) {
+    if (sizedActionVariants.includes(props.variant)) {
         return 16;
     }
     switch (props.size) {
@@ -321,7 +311,7 @@ const iconSize = computed(() => {
 /* danger: red */
 .app-btn--danger {
     --app-btn-bg: var(--color-danger);
-    --app-btn-fg: var(--color-text-inverse);
+    --app-btn-fg: var(--color-action-on);
     --app-btn-border: var(--color-danger);
     --app-btn-bg-hover: color-mix(in srgb, var(--color-danger) 88%, black);
     --app-btn-bg-active: color-mix(in srgb, var(--color-danger) 78%, black);
@@ -354,7 +344,8 @@ const iconSize = computed(() => {
     --app-btn-bg-active: var(--color-action-primary-active);
     --app-btn-border-hover: var(--color-action-primary-hover);
     padding-inline: var(--space-6);
-    padding-block: var(--space-2.5);
+    padding-block: 0.625rem;
+    font-size: var(--font-size-base);
     box-shadow: var(--shadow-sm);
     border-radius: var(--radius-lg);
 }
@@ -371,7 +362,8 @@ const iconSize = computed(() => {
     --app-btn-bg-active: var(--color-action-primary-active);
     --app-btn-border-hover: var(--color-action-primary-hover);
     padding-inline: var(--space-6);
-    padding-block: var(--space-2.5);
+    padding-block: 0.625rem;
+    font-size: var(--font-size-base);
     box-shadow: var(--shadow-md);
     border-radius: var(--radius-xl);
 }

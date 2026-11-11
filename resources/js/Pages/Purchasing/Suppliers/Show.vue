@@ -1,6 +1,6 @@
 <template>
     <AppLayout>
-        <div class="space-y-8">
+        <PrintEngine document-type="report" class="space-y-8">
             <!-- Main Header Card -->
             <div class="relative group">
                 <div
@@ -544,11 +544,7 @@
                                     >
                                         {{ $t('common.from') }}:
                                     </label>
-                                    <input
-                                        type="date"
-                                        v-model="statementStartDate"
-                                        class="px-3 py-1.5 text-xs rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white font-mono"
-                                    />
+                                    <CustomDatePicker v-model="statementStartDate" />
                                 </div>
                                 <div class="flex items-center gap-2">
                                     <label
@@ -556,11 +552,7 @@
                                     >
                                         {{ $t('common.to') }}:
                                     </label>
-                                    <input
-                                        type="date"
-                                        v-model="statementEndDate"
-                                        class="px-3 py-1.5 text-xs rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white font-mono"
-                                    />
+                                    <CustomDatePicker v-model="statementEndDate" />
                                 </div>
 
                                 <!-- Presets -->
@@ -729,7 +721,7 @@
                         <div
                             class="overflow-x-auto bg-white dark:bg-gray-800 rounded-3xl border border-gray-100 dark:border-gray-700/50 shadow-sm"
                         >
-                            <table class="w-full text-sm">
+                            <DataTable structured class="w-full text-sm">
                                 <thead>
                                     <tr
                                         class="text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-gray-700 pb-3 bg-gray-50/50 dark:bg-gray-900/50"
@@ -885,7 +877,7 @@
                                         </td>
                                     </tr>
                                 </tbody>
-                            </table>
+                            </DataTable>
                         </div>
                     </div>
 
@@ -1180,7 +1172,7 @@
                                 v-else
                                 class="overflow-x-auto bg-white dark:bg-gray-800 rounded-3xl border border-gray-100 dark:border-gray-700/50 shadow-sm"
                             >
-                                <table class="w-full text-sm">
+                                <DataTable structured class="w-full text-sm">
                                     <thead>
                                         <tr
                                             class="text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-gray-700 pb-3 bg-gray-50/50 dark:bg-gray-900/50"
@@ -1325,7 +1317,7 @@
                                             </td>
                                         </tr>
                                     </tbody>
-                                </table>
+                                </DataTable>
                             </div>
                         </div>
                         <div
@@ -1361,7 +1353,7 @@
                             v-if="returnsList.length > 0"
                             class="overflow-x-auto bg-white dark:bg-gray-800 rounded-3xl border border-gray-100 dark:border-gray-700/50 shadow-sm"
                         >
-                            <table class="w-full text-sm">
+                            <DataTable structured class="w-full text-sm">
                                 <thead>
                                     <tr
                                         class="text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-gray-700 pb-3 bg-gray-50/50 dark:bg-gray-900/50"
@@ -1479,7 +1471,7 @@
                                         </td>
                                     </tr>
                                 </tbody>
-                            </table>
+                            </DataTable>
                         </div>
                         <div
                             v-else
@@ -1511,7 +1503,7 @@
                     <!-- ========== PAYMENTS TAB ========== -->
                     <div v-if="activeTab === 'payments'" class="space-y-4">
                         <div v-if="paymentsList.length > 0" class="overflow-x-auto">
-                            <table class="w-full text-sm">
+                            <DataTable structured class="w-full text-sm">
                                 <thead>
                                     <tr
                                         class="text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-gray-700 pb-3 bg-gray-50/50 dark:bg-gray-900/50"
@@ -1613,7 +1605,7 @@
                                         </td>
                                     </tr>
                                 </tbody>
-                            </table>
+                            </DataTable>
                         </div>
                         <div v-else class="text-center py-12">
                             <div
@@ -1640,7 +1632,7 @@
                     </div>
                 </div>
             </div>
-        </div>
+        </PrintEngine>
 
         <!-- Create Modal -->
         <CreateModal
@@ -1745,7 +1737,10 @@
                     </div>
 
                     <!-- Ledger Table -->
-                    <table class="w-full border-collapse border border-gray-400 text-[11px] mb-6">
+                    <DataTable
+                        structured
+                        class="w-full border-collapse border border-gray-400 text-[11px] mb-6"
+                    >
                         <thead>
                             <tr class="bg-gray-200">
                                 <th class="border border-gray-400 p-1.5 text-center">#</th>
@@ -1838,7 +1833,7 @@
                                 </td>
                             </tr>
                         </tbody>
-                    </table>
+                    </DataTable>
 
                     <!-- Unified Footer (NO stamps/signatures per instructions) -->
                     <StandardReportFooter />
@@ -1849,6 +1844,10 @@
 </template>
 
 <script setup>
+import PrintEngine from '@/Components/Print/PrintEngine.vue';
+import DataTable from '@/Components/Common/DataTable.vue';
+import CustomDatePicker from '@/Components/CustomDatePicker.vue';
+import { printDocument } from '@/Composables/usePrint';
 import { ref, computed, watch, h } from 'vue';
 import { Link, router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
@@ -2037,7 +2036,7 @@ const statementLedger = computed(() => {
 });
 
 function printStatement() {
-    window.print();
+    printDocument();
 }
 
 const invoiceSearchQuery = ref('');

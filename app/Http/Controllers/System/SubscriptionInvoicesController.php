@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Mail\SubscriptionInvoiceMail;
 use App\Models\BankTransferReceipt;
 use App\Models\Billing\SubscriptionInvoice;
+use App\Services\Billing\SubscriptionLifecycleService;
 use App\Services\Invoice\SubscriptionInvoiceService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -19,9 +20,14 @@ class SubscriptionInvoicesController extends Controller
 {
     protected SubscriptionInvoiceService $invoiceService;
 
-    public function __construct(SubscriptionInvoiceService $invoiceService)
-    {
+    protected SubscriptionLifecycleService $lifecycle;
+
+    public function __construct(
+        SubscriptionInvoiceService $invoiceService,
+        ?SubscriptionLifecycleService $lifecycle = null
+    ) {
         $this->invoiceService = $invoiceService;
+        $this->lifecycle = $lifecycle ?? app(SubscriptionLifecycleService::class);
     }
 
     /**
@@ -156,10 +162,9 @@ class SubscriptionInvoicesController extends Controller
             ['notes' => $validated['notes'] ?? null, 'marked_by' => $markedBy]
         );
 
-        // Activate subscription if pending
+        // Activate subscription if pending or inactive
         if ($invoice->subscription && $invoice->subscription->status !== 'active') {
-            $invoice->subscription->update(['status' => 'active']);
-            $invoice->tenant->update(['status' => 'active']);
+            $this->lifecycle->activateSubscription($invoice->subscription);
         }
 
         return back()->with('success', __('messages.system.invoices.paid'));

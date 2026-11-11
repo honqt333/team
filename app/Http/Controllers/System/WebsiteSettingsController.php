@@ -10,6 +10,7 @@ use App\Models\AdminUser;
 use App\Models\Setting;
 use App\Models\User;
 use App\Services\Media\ImageOptimizer;
+use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
@@ -164,9 +165,10 @@ class WebsiteSettingsController extends Controller
     /**
      * Display the CMS website settings form.
      */
-    public function index(): Response
+    public function index(Request $request): Response
     {
         $raw = self::getPlatformSettingsMap();
+        $canManageScripts = $this->actorCanManageScripts($request->user());
 
         $get = function (string $dbKey, $default = '') use ($raw) {
             $val = $raw[$dbKey] ?? null;
@@ -195,7 +197,7 @@ class WebsiteSettingsController extends Controller
                 'website_keywords' => $get('website.keywords', ''),
                 'website_logo' => $get('website.logo', ''),
                 'website_favicon' => $get('website.favicon', ''),
-                'website_primary_color' => $get('website.primary.color', '#4f46e5'),
+                'website_primary_color' => $get('website.primary.color', '#2563eb'),
 
                 'website_contact_email' => $get('website.contact.email', ''),
                 'website_contact_phone' => $get('website.contact.phone', ''),
@@ -204,9 +206,12 @@ class WebsiteSettingsController extends Controller
                 'website_whatsapp_floating_number' => $get('website.whatsapp.floating.number', ''),
 
                 'website_chatbot_enabled' => $get('website.chatbot.enabled', '0'),
-                'website_chatbot_script' => $get('website.chatbot.script', ''),
-                'website_scripts_header' => $get('website.scripts.header', ''),
-                'website_scripts_footer' => $get('website.scripts.footer', ''),
+                // Raw scripts execute on the public page, so only a
+                // super admin may read or edit them. Other system
+                // admins get empty values and the UI hides the fields.
+                'website_chatbot_script' => $canManageScripts ? $get('website.chatbot.script', '') : '',
+                'website_scripts_header' => $canManageScripts ? $get('website.scripts.header', '') : '',
+                'website_scripts_footer' => $canManageScripts ? $get('website.scripts.footer', '') : '',
 
                 'website_announcement_enabled' => $get('website.announcement.enabled', '0'),
                 'website_announcement_text_ar' => $get('website.announcement.text.ar', ''),
@@ -317,6 +322,7 @@ class WebsiteSettingsController extends Controller
                 'website_page_privacy_ar' => $get('website.page.privacy.ar', ''),
                 'website_page_privacy_en' => $get('website.page.privacy.en', ''),
             ],
+            'canManageScripts' => $canManageScripts,
         ]);
     }
 
@@ -329,8 +335,7 @@ class WebsiteSettingsController extends Controller
         $allowedLookup = array_flip(self::ALLOWED_KEYS);
 
         $user = $request->user();
-        $isSuperAdmin = ($user instanceof AdminUser && $user->isSuperAdmin())
-            || ($user instanceof User && (bool) ($user->is_system_admin ?? false));
+        $isSuperAdmin = $this->actorCanManageScripts($user);
 
         $restrictedScriptKeys = [
             'website_scripts_header',
@@ -454,5 +459,16 @@ class WebsiteSettingsController extends Controller
         }
 
         return response()->json(['url' => $url]);
+    }
+
+    /**
+     * Raw scripts may only be read, previewed or saved by the highest
+     * platform role. Everyone else can still manage the rest of the
+     * website settings.
+     */
+    public function actorCanManageScripts(?Authenticatable $user): bool
+    {
+        return ($user instanceof AdminUser && $user->isSuperAdmin())
+            || ($user instanceof User && (bool) ($user->is_system_admin ?? false));
     }
 }

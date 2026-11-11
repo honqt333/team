@@ -208,7 +208,7 @@
                         </div>
 
                         <div v-else class="overflow-x-auto">
-                            <table class="w-full text-start border-collapse">
+                            <DataTable structured class="w-full text-start border-collapse">
                                 <thead>
                                     <tr
                                         class="border-b border-gray-100 dark:border-gray-700 text-left text-xs uppercase text-gray-400 font-bold"
@@ -263,7 +263,7 @@
                                         </td>
                                     </tr>
                                 </tbody>
-                            </table>
+                            </DataTable>
                         </div>
                     </div>
 
@@ -517,6 +517,7 @@
 </template>
 
 <script setup>
+import DataTable from '@/Components/Common/DataTable.vue';
 import { ref, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { router } from '@inertiajs/vue3';

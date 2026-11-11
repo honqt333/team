@@ -521,21 +521,13 @@
                             <!-- Status -->
                             <div class="flex gap-6">
                                 <label class="flex items-center gap-2 cursor-pointer">
-                                    <input
-                                        v-model="form.is_active"
-                                        type="checkbox"
-                                        class="w-5 h-5 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
-                                    />
+                                    <AppToggle v-model="form.is_active" />
                                     <span class="text-gray-700 dark:text-gray-300">
                                         {{ $t('system.plans.active') }}
                                     </span>
                                 </label>
                                 <label class="flex items-center gap-2 cursor-pointer">
-                                    <input
-                                        v-model="form.is_featured"
-                                        type="checkbox"
-                                        class="w-5 h-5 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
-                                    />
+                                    <AppToggle v-model="form.is_featured" />
                                     <span class="text-gray-700 dark:text-gray-300">
                                         {{ $t('system.plans.featured') }}
                                     </span>
@@ -652,6 +644,7 @@
 </template>
 
 <script setup>
+import AppToggle from '@/Components/Common/AppToggle.vue';
 import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { router, useForm } from '@inertiajs/vue3';

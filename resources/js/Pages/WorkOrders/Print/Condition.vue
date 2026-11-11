@@ -36,7 +36,6 @@ const goBack = () => {
         window.history.back();
     }
 };
-const printPage = () => window.print();
 
 const formatNumber = (num) =>
     new Intl.NumberFormat(isRtl.value ? 'ar-SA-u-nu-latn' : 'en-US').format(num || 0);

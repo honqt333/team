@@ -1,4 +1,5 @@
 <script setup>
+import DataTable from '@/Components/Common/DataTable.vue';
 import { ref, computed, onMounted } from 'vue';
 import { Head, router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
@@ -17,6 +18,7 @@ const { t } = useI18n();
 
 const props = defineProps({
     current_subscription: { type: Object, default: null },
+    subscription_lifecycle: { type: Object, default: null },
     storage_usage: { type: Object, default: () => ({}) },
     available_plans: { type: Array, default: () => [] },
     subscription_history: { type: Array, default: () => [] },
@@ -197,6 +199,7 @@ const noPlanLabel = () => t('system.billing.page.no_plan');
                 </h2>
                 <SubscriptionCard
                     :subscription="current_subscription"
+                    :lifecycle="subscription_lifecycle"
                     @renew="handleRenewCurrent"
                 />
             </section>
@@ -469,7 +472,7 @@ const noPlanLabel = () => t('system.billing.page.no_plan');
                     <div
                         class="overflow-hidden rounded-xl border border-slate-200 dark:border-slate-700"
                     >
-                        <table class="w-full text-sm">
+                        <DataTable structured class="w-full text-sm">
                             <thead class="bg-slate-50 dark:bg-slate-900/50">
                                 <tr>
                                     <th
@@ -534,7 +537,7 @@ const noPlanLabel = () => t('system.billing.page.no_plan');
                                     </td>
                                 </tr>
                             </tbody>
-                        </table>
+                        </DataTable>
                     </div>
                 </div>
             </section>

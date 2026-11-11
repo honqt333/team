@@ -9,6 +9,7 @@ use App\Mail\SubscriptionInvoiceMail;
 use App\Mail\SubscriptionRenewalReminderMail;
 use App\Models\Billing\Subscription;
 use App\Models\Billing\SubscriptionInvoice;
+use App\Models\Tenant;
 use App\Services\Invoice\SubscriptionInvoiceService;
 use Carbon\Carbon;
 use Exception;
@@ -19,9 +20,14 @@ class SubscriptionRenewalService
 {
     protected SubscriptionInvoiceService $invoiceService;
 
-    public function __construct(SubscriptionInvoiceService $invoiceService)
-    {
+    protected SubscriptionLifecycleService $lifecycle;
+
+    public function __construct(
+        SubscriptionInvoiceService $invoiceService,
+        ?SubscriptionLifecycleService $lifecycle = null
+    ) {
         $this->invoiceService = $invoiceService;
+        $this->lifecycle = $lifecycle ?? app(SubscriptionLifecycleService::class);
     }
 
     /**
@@ -81,14 +87,17 @@ class SubscriptionRenewalService
      */
     public function renewSubscription(Subscription $subscription): SubscriptionInvoice
     {
-        // Calculate new dates
-        $startsAt = Carbon::now();
-        $endsAt = $subscription->billing_cycle === 'yearly'
-            ? $startsAt->copy()->addYear()
-            : $startsAt->copy()->addMonth();
+        // Preserve remaining time if active, otherwise start from current activation date
+        $dates = $this->lifecycle->calculateRenewalDates(
+            $subscription->tenant,
+            $subscription->billing_cycle ?: 'yearly'
+        );
+        $startsAt = $dates['starts_at'];
+        $endsAt = $dates['ends_at'];
 
-        // Update subscription dates
+        // Update subscription dates & reactivate
         $subscription->update([
+            'status' => 'active',
             'starts_at' => $startsAt,
             'ends_at' => $endsAt,
         ]);
@@ -152,27 +161,31 @@ class SubscriptionRenewalService
     }
 
     /**
-     * Expire subscriptions past their end date.
+     * Expire subscriptions past their configured grace period,
+     * expire ended trial periods, and auto-suspend long-unactivated tenants.
      */
     protected function expireSubscriptions(array &$results): void
     {
-        // Grace period in days
-        $gracePeriod = config('billing.grace_period', 3);
+        $gracePeriod = $this->lifecycle->getGracePeriodDays();
         $expireDate = now()->subDays($gracePeriod);
 
+        // 1. Expire active paid subscriptions whose grace period has elapsed
         $subscriptions = Subscription::where('status', 'active')
             ->where('auto_renew', false)
-            ->whereDate('ends_at', '<', $expireDate)
+            ->whereNotNull('ends_at')
+            ->where('ends_at', '<', $expireDate)
             ->with(['tenant', 'plan'])
             ->get();
 
         foreach ($subscriptions as $subscription) {
             try {
                 $subscription->update(['status' => 'expired']);
-                $subscription->tenant->update(['status' => 'suspended']);
 
-                // Send expiration notice
-                if ($subscription->tenant->email) {
+                if ($subscription->tenant && ! $subscription->tenant->subscriptions()->where('status', 'active')->where('ends_at', '>', now())->exists()) {
+                    $subscription->tenant->update(['status' => 'expired']);
+                }
+
+                if ($subscription->tenant?->email) {
                     Mail::to($subscription->tenant->email)->send(
                         new SubscriptionExpiredMail($subscription)
                     );
@@ -182,12 +195,70 @@ class SubscriptionRenewalService
 
                 Log::info('Subscription expired', [
                     'subscription_id' => $subscription->id,
-                    'tenant' => $subscription->tenant->trade_name,
+                    'tenant' => $subscription->tenant?->trade_name,
                 ]);
             } catch (Exception $e) {
                 Log::error('Subscription expiration failed', [
                     'subscription_id' => $subscription->id,
                     'error' => $e->getMessage(),
+                ]);
+            }
+        }
+
+        // 2. Expire trial subscriptions once trial end date passes
+        $expiredTrials = Subscription::whereIn('status', ['trial', 'trialing'])
+            ->where(function ($query) {
+                $query->where('trial_ends_at', '<', now())
+                    ->orWhere(function ($q) {
+                        $q->whereNull('trial_ends_at')->where('ends_at', '<', now());
+                    });
+            })
+            ->with('tenant')
+            ->get();
+
+        foreach ($expiredTrials as $trialSub) {
+            try {
+                $trialSub->update(['status' => 'expired']);
+
+                if ($trialSub->tenant && ! $trialSub->tenant->hasPaidSubscription()) {
+                    $trialSub->tenant->update(['status' => 'expired']);
+                }
+                $results['expired']++;
+            } catch (Exception $e) {
+                Log::error('Trial expiration failed', [
+                    'subscription_id' => $trialSub->id,
+                    'error' => $e->getMessage(),
+                ]);
+            }
+        }
+
+        // 3. Auto-suspend expired tenants once past existing DunningConfig auto_suspend_after_days
+        $staleTenants = Tenant::where('status', 'expired')
+            ->whereDoesntHave('subscriptions', function ($query) {
+                $query->whereIn('status', ['active', 'trial', 'trialing'])
+                    ->where(function ($q) {
+                        $q->whereNull('ends_at')->orWhere('ends_at', '>', now());
+                    });
+            })
+            ->get();
+
+        foreach ($staleTenants as $staleTenant) {
+            $autoSuspendDays = $this->lifecycle->getAutoSuspendDays($staleTenant->id);
+
+            if ($autoSuspendDays === null || $autoSuspendDays <= 0) {
+                continue;
+            }
+
+            $cutoff = now()->subDays($autoSuspendDays);
+            $latestSubEnd = $staleTenant->subscriptions()->max('ends_at');
+            $expiredAt = $latestSubEnd ? Carbon::parse($latestSubEnd) : $staleTenant->trial_ends_at;
+
+            if ($expiredAt && $expiredAt->lessThan($cutoff)) {
+                $staleTenant->update([
+                    'status' => 'suspended',
+                    'suspended_at' => now(),
+                    'auto_suspended_at' => now(),
+                    'suspension_reason' => 'unactivated_expired_auto_suspend',
                 ]);
             }
         }

@@ -1391,4 +1391,104 @@ class WorkOrdersCrudTest extends TestCase
 
         $responseWithOverride->assertStatus(201);
     }
+
+    public function test_closed_all_sub_filter_returns_all_closed_section_cards_and_count(): void
+    {
+        $user = $this->createUserWithPermissions(['crm.work_orders.view']);
+
+        [$customer, $vehicle] = $this->createCustomerAndVehicle($user);
+
+        // 1. Settled closed work order (total 0 -> not outstanding)
+        $settledClosed = WorkOrder::create([
+            'tenant_id' => $user->tenant_id,
+            'center_id' => $user->current_center_id,
+            'customer_id' => $customer->id,
+            'vehicle_id' => $vehicle->id,
+            'code' => 'WO-CL-001',
+            'status' => WorkOrder::STATUS_DONE,
+            'total_incl_tax' => 0,
+        ]);
+
+        // 2. Credit invoice work order (done, unpaid, has invoice)
+        $creditInvoiceOrder = WorkOrder::create([
+            'tenant_id' => $user->tenant_id,
+            'center_id' => $user->current_center_id,
+            'customer_id' => $customer->id,
+            'vehicle_id' => $vehicle->id,
+            'code' => 'WO-CL-002',
+            'status' => WorkOrder::STATUS_DONE,
+            'total_incl_tax' => 230,
+        ]);
+        WorkOrderItem::create([
+            'tenant_id' => $user->tenant_id,
+            'center_id' => $user->current_center_id,
+            'work_order_id' => $creditInvoiceOrder->id,
+            'title' => 'Credit Invoice Service',
+            'qty' => 1,
+            'unit_price' => 200,
+            'status' => WorkOrderItem::STATUS_COMPLETED,
+        ]);
+        Invoice::create([
+            'tenant_id' => $user->tenant_id,
+            'center_id' => $user->current_center_id,
+            'customer_id' => $customer->id,
+            'work_order_id' => $creditInvoiceOrder->id,
+            'invoice_number' => 'INV-CLOSED-ALL-01',
+            'issue_date' => now(),
+            'supply_date' => now(),
+            'status' => 'sent',
+            'total_incl_tax' => 230,
+            'total_paid' => 0,
+        ]);
+
+        // 3. Cancelled work order
+        $cancelledOrder = WorkOrder::create([
+            'tenant_id' => $user->tenant_id,
+            'center_id' => $user->current_center_id,
+            'customer_id' => $customer->id,
+            'vehicle_id' => $vehicle->id,
+            'code' => 'WO-CL-003',
+            'status' => WorkOrder::STATUS_CANCELLED,
+            'total_incl_tax' => 0,
+        ]);
+
+        // 4. Active open work order (should NOT appear in closed section 'all')
+        $openOrder = WorkOrder::create([
+            'tenant_id' => $user->tenant_id,
+            'center_id' => $user->current_center_id,
+            'customer_id' => $customer->id,
+            'vehicle_id' => $vehicle->id,
+            'code' => 'WO-CL-004',
+            'status' => WorkOrder::STATUS_IN_PROGRESS,
+            'total_incl_tax' => 100,
+        ]);
+
+        // Inertia closed page exposes filterCounts.all === 3 and includes all 3 cards
+        $pageResponse = $this->actingAs($user)->get(route('work-orders.index', [
+            'status' => 'closed',
+            'sub_filter' => 'all',
+        ]));
+
+        $pageResponse->assertOk()
+            ->assertInertia(fn ($page) => $page
+                ->component('WorkOrders/Index')
+                ->where('statusFilter', 'closed')
+                ->where('subFilter', 'all')
+                ->where('filterCounts.all', 3)
+                ->where('filterCounts.closed', 1)
+                ->where('filterCounts.credit_invoices', 1)
+                ->where('filterCounts.cancelled', 1)
+                ->has('workOrders.data', 3)
+            );
+
+        // JSON API endpoint with status=closed&sub_filter=all returns the 3 closed-section orders only
+        $apiResponse = $this->actingAs($user)->getJson('/app/api/work-orders-index?status=closed&sub_filter=all');
+        $apiResponse->assertOk();
+
+        $ids = collect($apiResponse->json('data'))->pluck('id')->all();
+        $this->assertContains($settledClosed->id, $ids);
+        $this->assertContains($creditInvoiceOrder->id, $ids);
+        $this->assertContains($cancelledOrder->id, $ids);
+        $this->assertNotContains($openOrder->id, $ids);
+    }
 }

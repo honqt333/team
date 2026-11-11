@@ -1,4 +1,5 @@
 <script setup>
+import SelectableCard from '@/Components/Common/SelectableCard.vue';
 import { useI18n } from 'vue-i18n';
 const { t } = useI18n();
 
@@ -388,15 +389,13 @@ const regenerateCodes = () =>
 
                             <!-- Method Selection -->
                             <div class="mb-6 space-y-3">
-                                <label
+                                <SelectableCard
+                                    type="radio"
+                                    name="selectedMethod"
+                                    v-model="selectedMethod"
+                                    value="email"
                                     class="flex items-center p-3 border border-gray-200 dark:border-gray-700 rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
                                 >
-                                    <input
-                                        type="radio"
-                                        v-model="selectedMethod"
-                                        value="email"
-                                        class="w-4 h-4 text-indigo-600 border-gray-300 focus:ring-indigo-500"
-                                    />
                                     <span class="ms-3 flex-1">
                                         <span
                                             class="block text-sm font-medium text-gray-900 dark:text-white"
@@ -407,18 +406,16 @@ const regenerateCodes = () =>
                                             {{ $t('security.send_code_to') }} {{ admin.email }}
                                         </span>
                                     </span>
-                                </label>
+                                </SelectableCard>
 
-                                <label
+                                <SelectableCard
+                                    type="radio"
+                                    name="selectedMethod"
+                                    v-model="selectedMethod"
+                                    value="sms"
                                     v-if="security.smsEnabled"
                                     class="flex items-center p-3 border border-gray-200 dark:border-gray-700 rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
                                 >
-                                    <input
-                                        type="radio"
-                                        v-model="selectedMethod"
-                                        value="sms"
-                                        class="w-4 h-4 text-indigo-600 border-gray-300 focus:ring-indigo-500"
-                                    />
                                     <span class="ms-3 flex-1">
                                         <span
                                             class="block text-sm font-medium text-gray-900 dark:text-white"
@@ -430,7 +427,7 @@ const regenerateCodes = () =>
                                             {{ admin.phone || $t('security.registered_phone') }}
                                         </span>
                                     </span>
-                                </label>
+                                </SelectableCard>
                             </div>
 
                             <button

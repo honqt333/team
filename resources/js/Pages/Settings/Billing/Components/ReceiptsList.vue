@@ -1,4 +1,5 @@
 <script setup>
+import DataTable from '@/Components/Common/DataTable.vue';
 import { computed, ref, watch } from 'vue';
 import { router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
@@ -195,7 +196,7 @@ const statusChips = computed(() => [
             v-if="receipts.length"
             class="overflow-hidden rounded-xl border border-slate-200 dark:border-slate-700"
         >
-            <table class="w-full text-sm">
+            <DataTable structured class="w-full text-sm">
                 <thead class="bg-slate-50 dark:bg-slate-900/50">
                     <tr>
                         <th
@@ -284,7 +285,7 @@ const statusChips = computed(() => [
                         </td>
                     </tr>
                 </tbody>
-            </table>
+            </DataTable>
         </div>
 
         <!-- Empty state when no rows match the filter -->

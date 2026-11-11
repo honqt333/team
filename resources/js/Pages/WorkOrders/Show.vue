@@ -29,6 +29,7 @@
                     :total-paid="workOrderTotalPaid"
                     :bad-debt="workOrderBadDebt"
                     :balance="workOrderBalance"
+                    :excess-paid="workOrderExcessPaid"
                     :credit-notes-total="workOrderTotalCreditNotes"
                 />
             </div>
@@ -68,7 +69,6 @@
                             @add-service="openAddServiceModal"
                             @edit-item="openEditServiceModal"
                             @assign-technician="openServiceTechniciansModal"
-                            @delete-item="deleteServiceItem"
                             @print-department="handlePrintDepartment"
                         />
                     </div>
@@ -108,6 +108,7 @@
                             :technicians="technicians"
                             :read-only="isReadOnly"
                             :labor-entries="laborEntries"
+                            :server-now="serverNow"
                             @click-service="openServiceTechniciansModal"
                         />
                     </div>
@@ -121,6 +122,7 @@
                             :total-paid="workOrderTotalPaid"
                             :bad-debt="workOrderBadDebt"
                             :balance="workOrderBalance"
+                            :excess-paid="workOrderExcessPaid"
                             :read-only="isReadOnly"
                             :has-invoice="!!workOrder.invoice"
                             :status="workOrder.status"
@@ -135,8 +137,9 @@
                         class="max-w-4xl mx-auto"
                     >
                         <VehicleConditionReport
-                            v-model:damageMarks="workOrder.damage_marks"
-                            v-model:fuelLevel="workOrder.fuel_level"
+                            v-model:damageMarks="conditionDamageMarks"
+                            v-model:fuelLevel="conditionFuelLevel"
+                            :readonly="isReadOnly"
                             :class="{ 'pointer-events-none': isReadOnly }"
                         />
                     </div>
@@ -264,6 +267,7 @@
             :total-paid="workOrderTotalPaid"
             :bad-debt="workOrderBadDebt"
             :balance="workOrderBalance"
+            :excess-paid="workOrderExcessPaid"
             :has-invoice="!!workOrder.invoice"
             :status="workOrder.status"
             @close="showPaymentsListModal = false"
@@ -411,12 +415,7 @@
                     >
                         {{ $t('work_orders.exit_date_label') }}
                     </label>
-                    <input
-                        type="date"
-                        v-model="exitDate"
-                        required
-                        class="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
-                    />
+                    <CustomDatePicker v-model="exitDate" required />
                 </div>
 
                 <!-- Remaining Balance -->
@@ -445,11 +444,7 @@
                     class="space-y-3 p-3 bg-amber-500/5 dark:bg-amber-500/10 rounded-xl border border-amber-500/20 text-right"
                 >
                     <label class="flex items-center gap-2 cursor-pointer select-none">
-                        <input
-                            type="checkbox"
-                            v-model="isDeferred"
-                            class="rounded border-gray-300 dark:border-gray-700 text-amber-500 focus:ring-amber-500 bg-white dark:bg-gray-900"
-                        />
+                        <AppToggle v-model="isDeferred" />
                         <span class="text-sm font-bold text-gray-700 dark:text-gray-300">
                             {{ $t('work_orders.is_deferred_label') }}
                         </span>
@@ -461,13 +456,7 @@
                         >
                             {{ $t('work_orders.due_date_label') }}
                         </label>
-                        <input
-                            type="date"
-                            v-model="dueDate"
-                            required
-                            :min="exitDate"
-                            class="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white px-3 py-2 text-sm focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
-                        />
+                        <CustomDatePicker v-model="dueDate" required :min-date="exitDate" />
                     </div>
                 </div>
 
@@ -555,13 +544,7 @@
                         {{ $t('invoices.due_date') }}
                         <span class="text-red-500 ms-0.5">*</span>
                     </label>
-                    <input
-                        v-model="deferredDueDate"
-                        type="date"
-                        required
-                        :min="todayDate"
-                        class="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white px-3 py-2.5 text-sm focus:ring-2 focus:ring-violet-500 focus:border-violet-500 transition-colors"
-                    />
+                    <CustomDatePicker v-model="deferredDueDate" required :min-date="todayDate" />
                 </div>
 
                 <!-- Notes -->
@@ -647,8 +630,10 @@
 //   - Type-safe child component props — requires each child to export its
 //     own prop types first (out of scope for Goal 2)
 
+import CustomDatePicker from '@/Components/CustomDatePicker.vue';
+import AppToggle from '@/Components/Common/AppToggle.vue';
 import BackButton from '@/Components/BackButton.vue';
-import { ref, computed, watch } from 'vue';
+import { ref, computed, watch, onBeforeUnmount } from 'vue';
 import { Head, Link, router, usePage } from '@inertiajs/vue3';
 import axios from 'axios';
 import { useI18n } from 'vue-i18n';
@@ -702,6 +687,7 @@ const props = defineProps({
     services: { type: Array, default: () => [] },
     technicians: { type: Array, default: () => [] },
     laborEntries: { type: Array, default: () => [] },
+    serverNow: { type: String, default: null },
     warehouses: { type: Array, default: () => [] },
     inventoryParts: { type: Array, default: () => [] },
     inventoryUnits: { type: Array, default: () => [] },
@@ -905,9 +891,16 @@ const workOrderTotalCreditNotes = computed(() => {
     );
 });
 
+const workOrderNetTotal = computed(() =>
+    Math.max(0, workOrderTotal.value - workOrderTotalCreditNotes.value)
+);
+
+const workOrderExcessPaid = computed(() =>
+    Math.max(0, Math.round((workOrderTotalPaid.value - workOrderNetTotal.value) * 100) / 100)
+);
+
 const workOrderBalance = computed(() => {
-    const netTotal = Math.max(0, workOrderTotal.value - workOrderTotalCreditNotes.value);
-    return Math.max(0, netTotal - workOrderTotalPaid.value - workOrderBadDebt.value);
+    return Math.max(0, workOrderNetTotal.value - workOrderTotalPaid.value - workOrderBadDebt.value);
 });
 
 // ─── Composable layer ──────────────────────────────────────────────────────────
@@ -921,6 +914,7 @@ const items = useWorkOrderItems({
 const status = useWorkOrderStatus({
     workOrder: () => props.workOrder,
     workOrderBalance,
+    workOrderExcessPaid,
 });
 
 const notes = useWorkOrderNotes({
@@ -1089,28 +1083,49 @@ function refreshWorkOrder() {
 // latest values are saved again when the in-flight request finishes. This
 // prevents the previous race where changes made during the request were
 // silently dropped by the `isSavingCondition` guard.
-const CONDITION_DEBOUNCE_MS = 1000;
+const CONDITION_DEBOUNCE_MS = 600;
 let conditionReportTimer = null;
 let conditionReportInFlight = false;
 let conditionReportPending = false;
 
+const normalizeDamageMarks = (marks) => (Array.isArray(marks) ? marks.map((m) => ({ ...m })) : []);
+
+const conditionFuelLevel = ref(props.workOrder?.fuel_level ?? 50);
+const conditionDamageMarks = ref(normalizeDamageMarks(props.workOrder?.damage_marks));
+
+function buildConditionSignature(fuel, marks) {
+    return JSON.stringify({
+        fuel_level: Number(fuel ?? 50),
+        damage_marks: normalizeDamageMarks(marks),
+    });
+}
+
+let lastSavedConditionSignature = buildConditionSignature(
+    props.workOrder?.fuel_level,
+    props.workOrder?.damage_marks
+);
+
 function getCurrentConditionPayload() {
     return {
-        fuel_level: props.workOrder.fuel_level,
-        damage_marks: props.workOrder.damage_marks,
+        fuel_level: Number(conditionFuelLevel.value ?? 50),
+        damage_marks: normalizeDamageMarks(conditionDamageMarks.value),
     };
 }
 
 function sendConditionReport() {
     if (isReadOnly.value) return;
 
+    const payload = getCurrentConditionPayload();
+    const payloadSignature = JSON.stringify(payload);
+    if (payloadSignature === lastSavedConditionSignature) {
+        return;
+    }
+
     conditionReportInFlight = true;
     axios
-        .put(
-            route('app.work-orders.update-condition', props.workOrder.id),
-            getCurrentConditionPayload()
-        )
+        .put(route('app.work-orders.update-condition', props.workOrder.id), payload)
         .then(() => {
+            lastSavedConditionSignature = payloadSignature;
             conditionReportInFlight = false;
             // If the user changed values while we were saving, persist
             // the latest snapshot now (single follow-up call).
@@ -1119,14 +1134,31 @@ function sendConditionReport() {
                 sendConditionReport();
             }
         })
-        .catch(() => {
+        .catch((err) => {
             conditionReportInFlight = false;
             conditionReportPending = false;
+            const message =
+                err?.response?.data?.message ||
+                t('messages.error_occurred', 'Error saving changes');
+            errorToast(message);
         });
+}
+
+function flushConditionReportSave() {
+    if (conditionReportTimer) {
+        clearTimeout(conditionReportTimer);
+        conditionReportTimer = null;
+        sendConditionReport();
+    }
 }
 
 function scheduleConditionReportSave() {
     if (isReadOnly.value) return;
+
+    const currentSignature = JSON.stringify(getCurrentConditionPayload());
+    if (currentSignature === lastSavedConditionSignature) {
+        return;
+    }
 
     // Always reset the debounce window so we wait for the user to settle.
     if (conditionReportTimer) clearTimeout(conditionReportTimer);
@@ -1139,30 +1171,44 @@ function scheduleConditionReportSave() {
     }
 
     conditionReportTimer = setTimeout(() => {
+        conditionReportTimer = null;
         sendConditionReport();
     }, CONDITION_DEBOUNCE_MS);
 }
 
-// Watch fuel level and damage marks changes (skip initial value).
-// The queueing logic in scheduleConditionReportSave makes the watcher
-// safe to fire on every change, even during an in-flight save.
 watch(
-    () => props.workOrder.fuel_level,
-    (newVal, oldVal) => {
-        if (oldVal !== undefined && newVal !== oldVal) {
-            scheduleConditionReportSave();
-        }
-    }
-);
-watch(
-    () => props.workOrder.damage_marks,
-    (newVal, oldVal) => {
-        if (oldVal !== undefined && JSON.stringify(newVal) !== JSON.stringify(oldVal)) {
-            scheduleConditionReportSave();
-        }
+    () => [props.workOrder?.id, props.workOrder?.fuel_level, props.workOrder?.damage_marks],
+    ([, newFuel, newMarks]) => {
+        if (conditionReportInFlight || conditionReportTimer) return;
+        const incomingSignature = buildConditionSignature(newFuel, newMarks);
+        lastSavedConditionSignature = incomingSignature;
+        conditionFuelLevel.value = Number(newFuel ?? 50);
+        conditionDamageMarks.value = normalizeDamageMarks(newMarks);
     },
     { deep: true }
 );
+
+watch(conditionFuelLevel, () => {
+    scheduleConditionReportSave();
+});
+
+watch(
+    conditionDamageMarks,
+    () => {
+        scheduleConditionReportSave();
+    },
+    { deep: true }
+);
+
+watch(activeTab, (newTab, oldTab) => {
+    if (oldTab === 'condition' && newTab !== 'condition') {
+        flushConditionReportSave();
+    }
+});
+
+onBeforeUnmount(() => {
+    flushConditionReportSave();
+});
 
 // Handle part saved
 function handlePartSaved(data, options = {}) {
@@ -1276,26 +1322,6 @@ function onPartSaved() {
     showReturnModal.value = false;
     editingIssueMorePart.value = null;
     editingReturnPart.value = null;
-}
-
-// Delete service item
-async function deleteServiceItem(item) {
-    const confirmed = await confirm({
-        title: t('common.confirm_delete_title'),
-        message: t('common.confirm_delete_message'),
-        confirmText: t('common.delete'),
-        cancelText: t('common.cancel'),
-        type: 'danger',
-    });
-
-    if (confirmed) {
-        router.delete(
-            route('work-orders.items.destroy', { work_order: props.workOrder.id, item: item.id }),
-            {
-                preserveScroll: true,
-            }
-        );
-    }
 }
 
 const tabs = computed(() => {

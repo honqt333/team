@@ -16,7 +16,10 @@ import SeoSocialTab from './Tabs/SeoSocialTab.vue';
 
 const { t } = useI18n();
 
-const props = defineProps({ settings: Object });
+const props = defineProps({
+    settings: Object,
+    canManageScripts: { type: Boolean, default: false },
+});
 const { success, error } = useToast();
 const activeTab = ref('general');
 const showPreview = ref(window.innerWidth >= 1024);
@@ -485,7 +488,11 @@ watch(
                                 :tab="activeTab"
                             />
 
-                            <IntegrationsTab v-if="activeTab === 'integrations'" :form="form" />
+                            <IntegrationsTab
+                                v-if="activeTab === 'integrations'"
+                                :form="form"
+                                :can-manage-scripts="props.canManageScripts"
+                            />
 
                             <SeoSocialTab
                                 v-if="activeTab === 'seo_social'"
@@ -502,7 +509,10 @@ watch(
                         class="flex-1 min-w-0 border-t md:border-t-0 md:border-l border-gray-200 dark:border-gray-700"
                         style="height: 75vh"
                     >
-                        <PreviewPane :settings="form.settings" />
+                        <PreviewPane
+                            :settings="form.settings"
+                            :can-manage-scripts="props.canManageScripts"
+                        />
                     </div>
                 </div>
             </div>

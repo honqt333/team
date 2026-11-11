@@ -89,7 +89,7 @@
             class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 overflow-hidden shadow-sm"
         >
             <div class="overflow-x-auto">
-                <table class="w-full text-right text-sm">
+                <DataTable structured class="w-full text-right text-sm">
                     <thead class="bg-gray-50 dark:bg-gray-700/50 text-gray-600 dark:text-gray-300">
                         <tr>
                             <th class="px-6 py-3.5 font-bold">{{ $t('system.credits.tenant') }}</th>
@@ -144,7 +144,7 @@
                             </td>
                         </tr>
                     </tbody>
-                </table>
+                </DataTable>
             </div>
         </div>
 
@@ -242,6 +242,7 @@
 </template>
 
 <script setup>
+import DataTable from '@/Components/Common/DataTable.vue';
 import { ref } from 'vue';
 import { useForm, router } from '@inertiajs/vue3';
 

@@ -82,6 +82,7 @@ const buttonClasses = computed(() => {
             type="button"
             :class="buttonClasses"
             :disabled="disabled || loading"
+            :aria-label="label || tooltip || t('common.print')"
             @click="emit('click', $event)"
         >
             <!-- Loading Spinner -->

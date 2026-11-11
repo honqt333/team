@@ -1,6 +1,6 @@
 <template>
     <AppLayout>
-        <div class="space-y-6">
+        <PrintEngine document-type="report" class="space-y-6">
             <!-- Header Section -->
             <PageHeader
                 :title="pageTitle"
@@ -236,73 +236,12 @@
                         </div>
 
                         <!-- Filter Tabs (for open and closed status) -->
-                        <div
+                        <AppTabs
                             v-if="statusFilter === 'open' || statusFilter === 'closed'"
-                            class="flex flex-wrap gap-3"
-                        >
-                            <button
-                                v-for="tab in filterTabs"
-                                :key="tab.key"
-                                type="button"
-                                @click="setSubFilter(tab.key)"
-                                :class="[
-                                    'relative flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-200 cursor-pointer',
-                                    currentSubFilter === tab.key
-                                        ? 'text-action-on bg-action-primary shadow-md'
-                                        : 'bg-surface hover:shadow-md border border-border text-text-secondary',
-                                ]"
-                            >
-                                <!-- Icon -->
-                                <div
-                                    :class="[
-                                        'w-8 h-8 rounded-lg flex items-center justify-center',
-                                        currentSubFilter === tab.key
-                                            ? 'bg-white/20 text-action-on'
-                                            : tab.bgColor + ' ' + tab.iconColor,
-                                    ]"
-                                >
-                                    <component :is="tab.icon" class="w-4 h-4" />
-                                </div>
-
-                                <!-- Label & Count -->
-                                <div class="flex items-center gap-2">
-                                    <span
-                                        :class="[
-                                            'font-medium text-sm',
-                                            currentSubFilter === tab.key
-                                                ? 'text-action-on'
-                                                : 'text-text-primary',
-                                        ]"
-                                    >
-                                        {{ tab.label }}
-                                    </span>
-                                    <span
-                                        :class="[
-                                            'px-2 py-0.5 rounded-full text-xs font-bold',
-                                            currentSubFilter === tab.key
-                                                ? 'bg-white/20 text-action-on'
-                                                : tab.bgColor + ' ' + tab.iconColor,
-                                        ]"
-                                    >
-                                        {{ toEnglish(tab.count) }}
-                                    </span>
-                                </div>
-
-                                <!-- Selected Check -->
-                                <svg
-                                    v-if="currentSubFilter === tab.key"
-                                    class="w-4 h-4 text-action-on"
-                                    fill="currentColor"
-                                    viewBox="0 0 20 20"
-                                >
-                                    <path
-                                        fill-rule="evenodd"
-                                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                                        clip-rule="evenodd"
-                                    />
-                                </svg>
-                            </button>
-                        </div>
+                            :model-value="currentSubFilter"
+                            :tabs="filterTabs"
+                            @change="setSubFilter"
+                        />
                     </div>
                 </template>
             </PageHeader>
@@ -951,7 +890,7 @@
                     </template>
                 </DataTable>
             </div>
-        </div>
+        </PrintEngine>
 
         <!-- Create Modal -->
         <WorkOrderFormModal
@@ -977,7 +916,7 @@
                 />
 
                 <!-- Table -->
-                <table class="print-table">
+                <DataTable structured class="print-table">
                     <thead>
                         <tr>
                             <th class="align-middle text-center">#</th>
@@ -1026,7 +965,7 @@
                             </td>
                         </tr>
                     </tbody>
-                </table>
+                </DataTable>
 
                 <StandardReportFooter class="mt-8 border-t pt-4" />
             </div>
@@ -1035,6 +974,9 @@
 </template>
 
 <script setup>
+import AppTabs from '@/Components/Common/AppTabs.vue';
+import PrintEngine from '@/Components/Print/PrintEngine.vue';
+import { printDocument } from '@/Composables/usePrint';
 import { ref, computed, watch, h } from 'vue';
 import { Head, Link, router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
@@ -1240,40 +1182,42 @@ const IconDone = createIcon('M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z', 2.5
 const IconBadDebt = createIcon(
     'M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z'
 );
+const IconAll = createIcon('M4 6h16M4 10h16M4 14h16M4 18h16');
 
 const filterTabs = computed(() => {
     if (props.statusFilter === 'closed') {
         return [
             {
-                key: 'closed',
+                id: 'all',
+                label: t('work_orders.filters.all_cards'),
+                icon: IconAll,
+                count: props.filterCounts.all || 0,
+            },
+            {
+                id: 'closed',
                 label: t('work_orders.filters.closed_cards'),
                 icon: IconDone,
-                iconColor: 'text-text-secondary',
-                bgColor: 'bg-surface-muted',
                 count: props.filterCounts.closed || 0,
             },
             {
-                key: 'credit_invoices',
+                id: 'credit_invoices',
                 label: t('work_orders.filters.credit_invoices'),
                 icon: IconPending,
-                iconColor: 'text-warning',
-                bgColor: 'bg-warning-soft',
+
                 count: props.filterCounts.credit_invoices || 0,
             },
             {
-                key: 'bad_debts',
+                id: 'bad_debts',
                 label: t('work_orders.filters.bad_debts'),
                 icon: IconBadDebt,
-                iconColor: 'text-danger',
-                bgColor: 'bg-danger-soft',
+
                 count: props.filterCounts.bad_debts || 0,
             },
             {
-                key: 'cancelled',
+                id: 'cancelled',
                 label: t('work_orders.filters.cancelled_cards'),
                 icon: IconDraft,
-                iconColor: 'text-text-muted',
-                bgColor: 'bg-surface-muted',
+
                 count: props.filterCounts.cancelled || 0,
             },
         ];
@@ -1281,43 +1225,38 @@ const filterTabs = computed(() => {
 
     return [
         {
-            key: 'in_progress',
+            id: 'in_progress',
             label: t('work_orders.filters.open'),
             icon: IconOpen,
-            iconColor: 'text-action-primary',
-            bgColor: 'bg-action-primary-soft',
+
             count: props.filterCounts.open || 0,
         },
         {
-            key: 'draft',
+            id: 'draft',
             label: t('work_orders.filters.draft'),
             icon: IconDraft,
-            iconColor: 'text-text-muted',
-            bgColor: 'bg-surface-muted',
+
             count: props.filterCounts.draft || 0,
         },
         {
-            key: 'overdue',
+            id: 'overdue',
             label: t('work_orders.filters.overdue'),
             icon: IconOverdue,
-            iconColor: 'text-danger',
-            bgColor: 'bg-danger-soft',
+
             count: props.filterCounts.overdue || 0,
         },
         {
-            key: 'pending_payment',
+            id: 'pending_payment',
             label: t('work_orders.filters.pending_payment'),
             icon: IconPending,
-            iconColor: 'text-warning',
-            bgColor: 'bg-warning-soft',
+
             count: props.filterCounts.pending_payment || 0,
         },
         {
-            key: 'completed',
+            id: 'completed',
             label: t('work_orders.filters.completed'),
             icon: IconDone,
-            iconColor: 'text-success',
-            bgColor: 'bg-success-soft',
+
             count: props.filterCounts.completed || 0,
         },
     ];
@@ -1326,7 +1265,7 @@ const filterTabs = computed(() => {
 const currentSubFilter = computed(() => {
     if (tableFilters.sub_filter) return tableFilters.sub_filter;
     if (props.subFilter) return props.subFilter;
-    return props.statusFilter === 'closed' ? 'closed' : 'in_progress';
+    return props.statusFilter === 'closed' ? 'all' : 'in_progress';
 });
 
 function setSubFilter(filter) {
@@ -1361,7 +1300,7 @@ const columns = computed(() => [
 
 // Print & Export
 function printWorkOrders() {
-    window.print();
+    printDocument();
 }
 
 async function exportWorkOrders() {

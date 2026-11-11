@@ -178,7 +178,7 @@ class EmployeePortalController extends Controller
         $leaves = Leave::where('employee_id', $employee->id)
             ->with(['approvedBy:id,name'])
             ->orderByDesc('created_at')
-            ->paginate(10);
+            ->paginate(10)->withQueryString();
 
         // Leave balance by type (simplified)
         $usedByType = Leave::where('employee_id', $employee->id)
@@ -243,7 +243,7 @@ class EmployeePortalController extends Controller
         $payslips = PayrollItem::where('employee_id', $employee->id)
             ->with(['payrollRun:id,period_start,period_end,status'])
             ->orderByDesc('created_at')
-            ->paginate(12);
+            ->paginate(12)->withQueryString();
 
         return Inertia::render('EmployeePortal/Payslips', [
             'payslips' => $payslips,
@@ -739,7 +739,13 @@ class EmployeePortalController extends Controller
         try {
             $entry = $laborService->pause($entry);
         } catch (RuntimeException $e) {
-            return response()->json(['error' => __("messages.{$e->getMessage()}")], 422);
+            $errorMsg = __("messages.{$e->getMessage()}");
+
+            if ($errorMsg === "messages.{$e->getMessage()}") {
+                $errorMsg = $e->getMessage();
+            }
+
+            return response()->json(['error' => $errorMsg], 422);
         }
 
         $item->update(['paused_at' => now()]);
@@ -781,7 +787,13 @@ class EmployeePortalController extends Controller
         try {
             $entry = $laborService->resume($entry);
         } catch (RuntimeException $e) {
-            return response()->json(['error' => __("messages.{$e->getMessage()}")], 422);
+            $errorMsg = __("messages.{$e->getMessage()}");
+
+            if ($errorMsg === "messages.{$e->getMessage()}") {
+                $errorMsg = $e->getMessage();
+            }
+
+            return response()->json(['error' => $errorMsg], 422);
         }
 
         $item->update(['paused_at' => null]);

@@ -105,7 +105,7 @@
                     <div
                         v-else
                         class="h-10 w-10 rounded-xl flex items-center justify-center text-white font-bold"
-                        :style="{ backgroundColor: 'var(--tenant-primary, #4f46e5)' }"
+                        :style="{ backgroundColor: 'var(--tenant-primary, #2563eb)' }"
                     >
                         {{ initial }}
                     </div>
@@ -883,7 +883,7 @@ const bookingUrl = computed(() => {
  * own colour is already readable it is used unchanged.
  */
 const cssVars = computed(() => {
-    const primary = props.site.primary_color || '#4f46e5';
+    const primary = props.site.primary_color || '#2563eb';
 
     // The surface the brand-coloured badges are drawn on.
     const surface = isDark.value ? '#0f172a' : '#ffffff';
@@ -922,7 +922,7 @@ const cssVars = computed(() => {
 });
 
 const heroGradient = computed(() => {
-    return `linear-gradient(135deg, ${props.site.primary_color || '#4f46e5'} 0%, ${props.site.secondary_color || '#0ea5e9'} 100%)`;
+    return `linear-gradient(135deg, ${props.site.primary_color || '#2563eb'} 0%, ${props.site.secondary_color || '#0ea5e9'} 100%)`;
 });
 
 const currentBannerIdx = ref(0);

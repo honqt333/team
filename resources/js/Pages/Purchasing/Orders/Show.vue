@@ -1,6 +1,6 @@
 <template>
     <AppLayout>
-        <div class="space-y-6">
+        <PrintEngine document-type="report" class="space-y-6">
             <!-- Header Actions Bar -->
             <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
                 <!-- Action Buttons (Left) -->
@@ -430,7 +430,7 @@
                 </div>
 
                 <div class="overflow-x-auto">
-                    <table class="w-full">
+                    <DataTable structured class="w-full">
                         <thead class="bg-gray-50 dark:bg-gray-700">
                             <tr>
                                 <th
@@ -529,7 +529,7 @@
                                 </td>
                             </tr>
                         </tbody>
-                    </table>
+                    </DataTable>
                 </div>
             </div>
 
@@ -591,7 +591,7 @@
                     </div>
                 </div>
             </div>
-        </div>
+        </PrintEngine>
 
         <ConfirmModal />
         <GrnModal :show="showGrnModal" :purchase-order="order" @close="showGrnModal = false" />
@@ -683,7 +683,7 @@
                 </div>
 
                 <!-- Items Table -->
-                <table class="w-full mb-8">
+                <DataTable structured class="w-full mb-8">
                     <thead>
                         <tr class="border-b-2">
                             <th
@@ -729,7 +729,7 @@
                             </td>
                         </tr>
                     </tbody>
-                </table>
+                </DataTable>
 
                 <!-- Financial Summary -->
                 <div class="flex justify-end mb-12">
@@ -762,6 +762,9 @@
 </template>
 
 <script setup>
+import PrintEngine from '@/Components/Print/PrintEngine.vue';
+import DataTable from '@/Components/Common/DataTable.vue';
+import { printDocument } from '@/Composables/usePrint';
 import { computed, ref } from 'vue';
 import { Link, router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
@@ -880,6 +883,6 @@ async function cancelOrder() {
 }
 
 function printOrder() {
-    window.print();
+    printDocument();
 }
 </script>

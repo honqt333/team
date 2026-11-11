@@ -155,7 +155,8 @@ class AppointmentController extends Controller
                 $bay,
                 $tech,
                 $data['service_ids'] ?? [],
-                ['status' => $data['status'] ?? Appointment::STATUS_SCHEDULED, 'notes' => $data['notes'] ?? null]
+                ['status' => $data['status'] ?? Appointment::STATUS_SCHEDULED, 'notes' => $data['notes'] ?? null],
+                centerIdOverride: $user->current_center_id,
             );
         } catch (RuntimeException $e) {
             return $this->errorResponse($request, $e->getMessage(), 422);

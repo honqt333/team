@@ -27,8 +27,12 @@ class WorkOrderPolicy
             return false;
         }
 
-        // Defense in depth: enforce tenant ownership
-        return $workOrder->tenant_id === $user->tenant_id;
+        // Defense in depth: enforce tenant and current-center ownership.
+        // The model's resolveRouteBinding() bypasses the center global
+        // scope so a work order from a sibling branch still binds; the
+        // policy is what stops it from being displayed.
+        return $workOrder->tenant_id === $user->tenant_id
+            && (int) $workOrder->center_id === (int) $user->current_center_id;
     }
 
     /**

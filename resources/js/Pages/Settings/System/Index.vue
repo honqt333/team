@@ -1,24 +1,25 @@
 <template>
     <AppLayout>
+        <Head :title="`${$t('system_settings.title')} — ${currentSectionTitle}`" />
+
         <div class="space-y-6">
-            <!-- Back Button & Header Section -->
+            <!-- Header Section -->
             <PageHeader
                 :title="$t('system_settings.title')"
                 :subtitle="currentSectionTitle"
-                gradientFrom="from-indigo-600"
-                gradientTo="to-purple-700"
-                glowFrom="from-indigo-500"
-                badgeBg="bg-indigo-50/50 dark:bg-indigo-900/30"
-                badgeText="text-indigo-600 dark:text-indigo-400"
-                badgeBorder="border-indigo-100/50 dark:border-indigo-800/30"
-                badgeDot="bg-indigo-500"
+                :total-count="toEnglish(currentTotalCount)"
             >
                 <template #back>
                     <BackButton href="/app/settings" />
                 </template>
 
                 <template #icon>
-                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg
+                        class="w-8 h-8 text-white"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                    >
                         <path
                             stroke-linecap="round"
                             stroke-linejoin="round"
@@ -29,26 +30,14 @@
                 </template>
 
                 <template #filters>
-                    <nav class="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
-                        <button
-                            v-for="section in [
-                                'makes',
-                                'models',
-                                'colors',
-                                'condition-items',
-                                'income-categories',
-                            ]"
-                            :key="section"
-                            @click="navigateToSection(section)"
-                            class="flex items-center gap-2 px-4 py-2 text-xs font-black uppercase tracking-widest transition-all relative group shrink-0"
-                            :class="
-                                activeSection === section
-                                    ? 'text-indigo-600 dark:text-indigo-400'
-                                    : 'text-gray-400 hover:text-gray-600 dark:text-gray-500'
-                            "
-                        >
+                    <AppTabs
+                        :model-value="activeSection"
+                        :tabs="sectionTabs"
+                        variant="underline"
+                        @update:model-value="navigateToSection"
+                    >
+                        <template #icon-makes>
                             <svg
-                                v-if="section === 'makes'"
                                 class="w-4 h-4"
                                 fill="none"
                                 stroke="currentColor"
@@ -61,8 +50,9 @@
                                     d="M19 9l-7 7-7-7"
                                 />
                             </svg>
+                        </template>
+                        <template #icon-models>
                             <svg
-                                v-if="section === 'models'"
                                 class="w-4 h-4"
                                 fill="none"
                                 stroke="currentColor"
@@ -75,8 +65,9 @@
                                     d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2"
                                 />
                             </svg>
+                        </template>
+                        <template #icon-colors>
                             <svg
-                                v-if="section === 'colors'"
                                 class="w-4 h-4"
                                 fill="none"
                                 stroke="currentColor"
@@ -89,8 +80,9 @@
                                     d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"
                                 />
                             </svg>
+                        </template>
+                        <template #icon-condition-items>
                             <svg
-                                v-if="section === 'condition-items'"
                                 class="w-4 h-4"
                                 fill="none"
                                 stroke="currentColor"
@@ -103,8 +95,9 @@
                                     d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
                                 />
                             </svg>
+                        </template>
+                        <template #icon-income-categories>
                             <svg
-                                v-if="section === 'income-categories'"
                                 class="w-4 h-4"
                                 fill="none"
                                 stroke="currentColor"
@@ -117,47 +110,37 @@
                                     d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
                                 />
                             </svg>
-                            {{ $t(`system_settings.sections.${section.replace('-', '_')}`) }}
-                            <div
-                                v-if="activeSection === section"
-                                class="absolute bottom-0 left-0 w-full h-1 bg-indigo-600 dark:bg-indigo-400 rounded-t-full shadow-[0_-2px_8px_rgba(79,70,229,0.4)]"
-                            ></div>
-                        </button>
-                    </nav>
+                        </template>
+                    </AppTabs>
                 </template>
 
                 <template #actions>
                     <button
+                        type="button"
                         @click="openAddModal"
-                        class="group relative inline-flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-bold rounded-xl transition-all hover:scale-[1.02] hover:shadow-lg hover:shadow-indigo-500/25 active:scale-95 overflow-hidden"
+                        class="inline-flex items-center gap-2 px-5 py-2.5 bg-action-primary hover:bg-action-primary-hover text-white font-bold rounded-xl shadow-xs transition-colors cursor-pointer"
                     >
-                        <div
-                            class="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"
-                        ></div>
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path
                                 stroke-linecap="round"
                                 stroke-linejoin="round"
-                                stroke-width="2"
+                                stroke-width="2.5"
                                 d="M12 4v16m8-8H4"
                             />
                         </svg>
-                        <span class="relative">{{ $t('common.add') }}</span>
+                        <span>{{ $t('common.add') }}</span>
                     </button>
                 </template>
             </PageHeader>
 
-            <!-- Makes/Models/Colors/Condition Items/Income Categories Section -->
-            <div
-                v-if="
-                    ['makes', 'models', 'colors', 'condition-items', 'income-categories'].includes(
-                        activeSection
-                    )
-                "
-                class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700"
+            <!-- Unified Section Table -->
+            <DataTable
+                v-if="isManagedSection"
+                :data="currentTableSource"
+                :columns="currentColumns"
+                :empty-title="$t('common.no_data')"
             >
-                <!-- Toolbar -->
-                <div class="p-4 border-b border-gray-200 dark:border-gray-700">
+                <template #header>
                     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                         <!-- Search -->
                         <div class="relative">
@@ -165,7 +148,7 @@
                                 class="absolute inset-y-0 start-0 ps-3 flex items-center pointer-events-none"
                             >
                                 <svg
-                                    class="w-4 h-4 text-gray-400"
+                                    class="w-4 h-4 text-content-muted"
                                     fill="none"
                                     stroke="currentColor"
                                     viewBox="0 0 24 24"
@@ -183,12 +166,12 @@
                                 v-model="search"
                                 :placeholder="$t('common.search')"
                                 @input="handleSearch"
-                                class="w-full sm:w-64 ps-10 pe-4 py-2 text-sm border border-gray-200 dark:border-gray-700 rounded-xl bg-gray-50/50 dark:bg-gray-900/50 text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                                class="w-full sm:w-64 ps-10 pe-4 py-2 text-sm border border-border rounded-xl bg-surface-secondary text-content-primary placeholder-content-muted focus:ring-2 focus:ring-action-primary/30 focus:border-action-primary transition-colors"
                             />
                         </div>
 
                         <!-- Make Filter (for models only) -->
-                        <div v-if="activeSection === 'models'" class="w-64">
+                        <div v-if="activeSection === 'models'" class="w-full sm:w-64">
                             <SearchableSelect
                                 v-model="selectedMake"
                                 :options="makeOptions"
@@ -202,7 +185,7 @@
                         </div>
 
                         <!-- Transaction Type Filter (for income categories only) -->
-                        <div v-if="activeSection === 'income-categories'" class="w-64">
+                        <div v-if="activeSection === 'income-categories'" class="w-full sm:w-64">
                             <SearchableSelect
                                 v-model="selectedType"
                                 :options="typeOptions"
@@ -215,911 +198,164 @@
                             />
                         </div>
                     </div>
-                </div>
+                </template>
 
-                <!-- Table -->
-                <div class="overflow-x-auto">
-                    <!-- Makes Table -->
-                    <table v-if="activeSection === 'makes'" class="w-full">
-                        <thead class="bg-gray-50 dark:bg-gray-700/50">
-                            <tr>
-                                <th
-                                    class="px-6 py-4 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle text-center"
-                                >
-                                    {{ $t('system_settings.columns.logo') }}
-                                </th>
-                                <th
-                                    class="px-6 py-4 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle text-center"
-                                >
-                                    {{ $t('system_settings.columns.name_ar') }}
-                                </th>
-                                <th
-                                    class="px-6 py-4 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle text-center"
-                                >
-                                    {{ $t('system_settings.columns.name_en') }}
-                                </th>
-                                <th
-                                    class="px-6 py-4 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle"
-                                >
-                                    {{ $t('system_settings.columns.is_active') }}
-                                </th>
-                                <th
-                                    class="px-6 py-4 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle text-center"
-                                >
-                                    {{ $t('system_settings.columns.updated_by') }}
-                                </th>
-                                <th
-                                    class="px-6 py-4 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle"
-                                >
-                                    {{ $t('common.actions') }}
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
-                            <tr
-                                v-for="make in makesData"
-                                :key="make.id"
-                                class="hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors"
-                            >
-                                <td class="px-6 py-4 align-middle">
-                                    <div
-                                        v-if="make.logo_url || make.logo_path"
-                                        class="w-10 h-10 rounded-xl bg-white dark:bg-gray-800 flex items-center justify-center p-1.5 border border-gray-200 dark:border-gray-700 shadow-sm"
-                                    >
-                                        <img
-                                            :src="
-                                                make.logo_url ||
-                                                (make.logo_path ? `/storage/${make.logo_path}` : '')
-                                            "
-                                            class="w-full h-full object-contain dark:invert"
-                                            :alt="make.name_ar"
-                                        />
-                                    </div>
-                                    <div
-                                        v-else
-                                        class="w-10 h-10 rounded-xl bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-gray-400 font-bold border border-gray-200 dark:border-gray-600"
-                                    >
-                                        {{
-                                            make.name_ar?.charAt(0) ||
-                                            make.name_en?.charAt(0) ||
-                                            '?'
-                                        }}
-                                    </div>
-                                </td>
-                                <td
-                                    class="px-6 py-4 text-sm font-medium text-gray-900 dark:text-white align-middle"
-                                >
-                                    {{ make.name_ar }}
-                                </td>
-                                <td
-                                    class="px-6 py-4 text-sm text-gray-600 dark:text-gray-400 align-middle"
-                                >
-                                    {{ make.name_en || '—' }}
-                                </td>
-                                <td class="px-6 py-4 text-center align-middle">
-                                    <button
-                                        v-if="make.source !== 'system'"
-                                        @click="toggleActive('makes', make)"
-                                        :class="[
-                                            'px-3 py-1 text-xs font-medium rounded-full transition-colors',
-                                            make.is_active
-                                                ? 'bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-300'
-                                                : 'bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-300',
-                                        ]"
-                                    >
-                                        {{
-                                            make.is_active
-                                                ? $t('common.active')
-                                                : $t('common.inactive')
-                                        }}
-                                    </button>
-                                    <span
-                                        v-else
-                                        :class="[
-                                            'px-3 py-1 text-xs font-medium rounded-full',
-                                            make.is_active
-                                                ? 'bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-300'
-                                                : 'bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-300',
-                                        ]"
-                                    >
-                                        {{
-                                            make.is_active
-                                                ? $t('common.active')
-                                                : $t('common.inactive')
-                                        }}
-                                    </span>
-                                </td>
-                                <td
-                                    class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400 align-middle"
-                                >
-                                    <span
-                                        v-if="make.source === 'system'"
-                                        class="inline-flex items-center px-2 py-1 text-xs font-medium rounded-full bg-purple-100 text-purple-700 dark:bg-purple-900/50 dark:text-purple-300"
-                                    >
-                                        {{ $t('common.system') }}
-                                    </span>
-                                    <div v-else class="flex flex-col">
-                                        <span>
-                                            {{ make.updated_by ? make.updated_by.name : '—' }}
-                                        </span>
-                                        <span v-if="make.updated_at" class="text-xs text-gray-400">
-                                            {{
-                                                new Date(make.updated_at).toLocaleDateString(
-                                                    'ar-SA-u-nu-latn'
-                                                )
-                                            }}
-                                        </span>
-                                    </div>
-                                </td>
-                                <td class="px-6 py-4 text-center align-middle">
-                                    <div
-                                        v-if="make.source !== 'system'"
-                                        class="flex items-center justify-center gap-2"
-                                    >
-                                        <button
-                                            @click="openEditModal('make', make)"
-                                            class="p-2 text-gray-500 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 rounded-lg transition-colors"
-                                        >
-                                            <svg
-                                                class="w-4 h-4"
-                                                fill="none"
-                                                stroke="currentColor"
-                                                viewBox="0 0 24 24"
-                                            >
-                                                <path
-                                                    stroke-linecap="round"
-                                                    stroke-linejoin="round"
-                                                    stroke-width="2"
-                                                    d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-                                                />
-                                            </svg>
-                                        </button>
-                                        <button
-                                            @click="handleDelete('makes', make)"
-                                            class="p-2 text-gray-500 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors"
-                                        >
-                                            <svg
-                                                class="w-4 h-4"
-                                                fill="none"
-                                                stroke="currentColor"
-                                                viewBox="0 0 24 24"
-                                            >
-                                                <path
-                                                    stroke-linecap="round"
-                                                    stroke-linejoin="round"
-                                                    stroke-width="2"
-                                                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                                                />
-                                            </svg>
-                                        </button>
-                                    </div>
-                                    <span v-else class="text-xs text-gray-400 dark:text-gray-500">
-                                        —
-                                    </span>
-                                </td>
-                            </tr>
-                            <tr v-if="!makesData?.length">
-                                <td
-                                    colspan="5"
-                                    class="px-6 py-12 text-center text-gray-500 dark:text-gray-400 align-middle"
-                                >
-                                    {{ $t('common.no_data') }}
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
+                <template #cell-index="{ index }">
+                    <span class="font-mono text-xs text-content-muted">
+                        {{ toEnglish(getRowNumber(index)) }}
+                    </span>
+                </template>
 
-                    <!-- Models Table -->
-                    <table v-else-if="activeSection === 'models'" class="w-full">
-                        <thead class="bg-gray-50 dark:bg-gray-700/50">
-                            <tr>
-                                <th
-                                    class="px-6 py-4 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle text-center"
-                                >
-                                    {{ $t('system_settings.columns.name_ar') }}
-                                </th>
-                                <th
-                                    class="px-6 py-4 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle text-center"
-                                >
-                                    {{ $t('system_settings.columns.name_en') }}
-                                </th>
-                                <th
-                                    class="px-6 py-4 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle text-center"
-                                >
-                                    {{ $t('system_settings.columns.make') }}
-                                </th>
-                                <th
-                                    class="px-6 py-4 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle"
-                                >
-                                    {{ $t('system_settings.columns.is_active') }}
-                                </th>
-                                <th
-                                    class="px-6 py-4 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle text-center"
-                                >
-                                    {{ $t('system_settings.columns.updated_by') }}
-                                </th>
-                                <th
-                                    class="px-6 py-4 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle"
-                                >
-                                    {{ $t('common.actions') }}
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
-                            <tr
-                                v-for="model in modelsData"
-                                :key="model.id"
-                                class="hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors"
-                            >
-                                <td
-                                    class="px-6 py-4 text-sm font-medium text-gray-900 dark:text-white align-middle"
-                                >
-                                    {{ model.name_ar }}
-                                </td>
-                                <td
-                                    class="px-6 py-4 text-sm text-gray-600 dark:text-gray-400 align-middle"
-                                >
-                                    {{ model.name_en || '—' }}
-                                </td>
-                                <td
-                                    class="px-6 py-4 text-sm text-gray-600 dark:text-gray-400 align-middle"
-                                >
-                                    {{ model.make ? getName(model.make) : '—' }}
-                                </td>
-                                <td class="px-6 py-4 text-center align-middle">
-                                    <button
-                                        v-if="model.source !== 'system'"
-                                        @click="toggleActive('models', model)"
-                                        :class="[
-                                            'px-3 py-1 text-xs font-medium rounded-full transition-colors',
-                                            model.is_active
-                                                ? 'bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-300'
-                                                : 'bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-300',
-                                        ]"
-                                    >
-                                        {{
-                                            model.is_active
-                                                ? $t('common.active')
-                                                : $t('common.inactive')
-                                        }}
-                                    </button>
-                                    <span
-                                        v-else
-                                        :class="[
-                                            'px-3 py-1 text-xs font-medium rounded-full',
-                                            model.is_active
-                                                ? 'bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-300'
-                                                : 'bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-300',
-                                        ]"
-                                    >
-                                        {{
-                                            model.is_active
-                                                ? $t('common.active')
-                                                : $t('common.inactive')
-                                        }}
-                                    </span>
-                                </td>
-                                <td
-                                    class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400 align-middle"
-                                >
-                                    <span
-                                        v-if="model.source === 'system'"
-                                        class="inline-flex items-center px-2 py-1 text-xs font-medium rounded-full bg-purple-100 text-purple-700 dark:bg-purple-900/50 dark:text-purple-300"
-                                    >
-                                        {{ $t('common.system') }}
-                                    </span>
-                                    <div v-else class="flex flex-col">
-                                        <span>
-                                            {{ model.updated_by ? model.updated_by.name : '—' }}
-                                        </span>
-                                        <span v-if="model.updated_at" class="text-xs text-gray-400">
-                                            {{
-                                                new Date(model.updated_at).toLocaleDateString(
-                                                    'ar-SA-u-nu-latn'
-                                                )
-                                            }}
-                                        </span>
-                                    </div>
-                                </td>
-                                <td class="px-6 py-4 text-center align-middle">
-                                    <div
-                                        v-if="model.source !== 'system'"
-                                        class="flex items-center justify-center gap-2"
-                                    >
-                                        <button
-                                            @click="openEditModal('model', model)"
-                                            class="p-2 text-gray-500 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 rounded-lg transition-colors"
-                                        >
-                                            <svg
-                                                class="w-4 h-4"
-                                                fill="none"
-                                                stroke="currentColor"
-                                                viewBox="0 0 24 24"
-                                            >
-                                                <path
-                                                    stroke-linecap="round"
-                                                    stroke-linejoin="round"
-                                                    stroke-width="2"
-                                                    d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-                                                />
-                                            </svg>
-                                        </button>
-                                        <button
-                                            @click="handleDelete('models', model)"
-                                            class="p-2 text-gray-500 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors"
-                                        >
-                                            <svg
-                                                class="w-4 h-4"
-                                                fill="none"
-                                                stroke="currentColor"
-                                                viewBox="0 0 24 24"
-                                            >
-                                                <path
-                                                    stroke-linecap="round"
-                                                    stroke-linejoin="round"
-                                                    stroke-width="2"
-                                                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                                                />
-                                            </svg>
-                                        </button>
-                                    </div>
-                                    <span v-else class="text-xs text-gray-400 dark:text-gray-500">
-                                        —
-                                    </span>
-                                </td>
-                            </tr>
-                            <tr v-if="!modelsData?.length">
-                                <td
-                                    colspan="6"
-                                    class="px-6 py-12 text-center text-gray-500 dark:text-gray-400 align-middle"
-                                >
-                                    {{ $t('common.no_data') }}
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-
-                    <!-- Colors Table -->
-                    <table v-else-if="activeSection === 'colors'" class="w-full">
-                        <thead class="bg-gray-50 dark:bg-gray-700/50">
-                            <tr>
-                                <th
-                                    class="px-6 py-4 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle text-center"
-                                >
-                                    {{ $t('system_settings.columns.color') }}
-                                </th>
-                                <th
-                                    class="px-6 py-4 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle text-center"
-                                >
-                                    {{ $t('system_settings.columns.name_ar') }}
-                                </th>
-                                <th
-                                    class="px-6 py-4 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle text-center"
-                                >
-                                    {{ $t('system_settings.columns.name_en') }}
-                                </th>
-                                <th
-                                    class="px-6 py-4 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle"
-                                >
-                                    {{ $t('system_settings.columns.is_active') }}
-                                </th>
-                                <th
-                                    class="px-6 py-4 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle text-center"
-                                >
-                                    {{ $t('system_settings.columns.updated_by') }}
-                                </th>
-                                <th
-                                    class="px-6 py-4 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle"
-                                >
-                                    {{ $t('common.actions') }}
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
-                            <tr
-                                v-for="color in colorsData"
-                                :key="color.id"
-                                class="hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors"
-                            >
-                                <td class="px-6 py-4 align-middle">
-                                    <div class="flex items-center gap-3">
-                                        <div
-                                            class="w-8 h-8 rounded-lg border-2 border-gray-200 dark:border-gray-600 shadow-inner"
-                                            :style="{
-                                                backgroundColor: color.hex_code || '#CCCCCC',
-                                            }"
-                                        ></div>
-                                        <span
-                                            class="text-xs text-gray-500 dark:text-gray-400 font-mono"
-                                        >
-                                            {{ color.hex_code || '—' }}
-                                        </span>
-                                    </div>
-                                </td>
-                                <td
-                                    class="px-6 py-4 text-sm font-medium text-gray-900 dark:text-white align-middle"
-                                >
-                                    {{ color.name_ar }}
-                                </td>
-                                <td
-                                    class="px-6 py-4 text-sm text-gray-600 dark:text-gray-400 align-middle"
-                                >
-                                    {{ color.name_en || '—' }}
-                                </td>
-                                <td class="px-6 py-4 text-center align-middle">
-                                    <button
-                                        v-if="color.source !== 'system'"
-                                        @click="toggleActive('colors', color)"
-                                        :class="[
-                                            'px-3 py-1 text-xs font-medium rounded-full transition-colors',
-                                            color.is_active
-                                                ? 'bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-300'
-                                                : 'bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-300',
-                                        ]"
-                                    >
-                                        {{
-                                            color.is_active
-                                                ? $t('common.active')
-                                                : $t('common.inactive')
-                                        }}
-                                    </button>
-                                    <span
-                                        v-else
-                                        :class="[
-                                            'px-3 py-1 text-xs font-medium rounded-full',
-                                            color.is_active
-                                                ? 'bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-300'
-                                                : 'bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-300',
-                                        ]"
-                                    >
-                                        {{
-                                            color.is_active
-                                                ? $t('common.active')
-                                                : $t('common.inactive')
-                                        }}
-                                    </span>
-                                </td>
-                                <td
-                                    class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400 align-middle"
-                                >
-                                    <span
-                                        v-if="color.source === 'system'"
-                                        class="inline-flex items-center px-2 py-1 text-xs font-medium rounded-full bg-purple-100 text-purple-700 dark:bg-purple-900/50 dark:text-purple-300"
-                                    >
-                                        {{ $t('common.system') }}
-                                    </span>
-                                    <div v-else class="flex flex-col">
-                                        <span>
-                                            {{ color.updated_by ? color.updated_by.name : '—' }}
-                                        </span>
-                                        <span v-if="color.updated_at" class="text-xs text-gray-400">
-                                            {{
-                                                new Date(color.updated_at).toLocaleDateString(
-                                                    'ar-SA-u-nu-latn'
-                                                )
-                                            }}
-                                        </span>
-                                    </div>
-                                </td>
-                                <td class="px-6 py-4 text-center align-middle">
-                                    <div
-                                        v-if="color.source !== 'system'"
-                                        class="flex items-center justify-center gap-2"
-                                    >
-                                        <button
-                                            @click="openEditModal('color', color)"
-                                            class="p-2 text-gray-500 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 rounded-lg transition-colors"
-                                        >
-                                            <svg
-                                                class="w-4 h-4"
-                                                fill="none"
-                                                stroke="currentColor"
-                                                viewBox="0 0 24 24"
-                                            >
-                                                <path
-                                                    stroke-linecap="round"
-                                                    stroke-linejoin="round"
-                                                    stroke-width="2"
-                                                    d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-                                                />
-                                            </svg>
-                                        </button>
-                                        <button
-                                            @click="handleDelete('colors', color)"
-                                            class="p-2 text-gray-500 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors"
-                                        >
-                                            <svg
-                                                class="w-4 h-4"
-                                                fill="none"
-                                                stroke="currentColor"
-                                                viewBox="0 0 24 24"
-                                            >
-                                                <path
-                                                    stroke-linecap="round"
-                                                    stroke-linejoin="round"
-                                                    stroke-width="2"
-                                                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                                                />
-                                            </svg>
-                                        </button>
-                                    </div>
-                                    <span v-else class="text-xs text-gray-400 dark:text-gray-500">
-                                        —
-                                    </span>
-                                </td>
-                            </tr>
-                            <tr v-if="!colorsData?.length">
-                                <td
-                                    colspan="6"
-                                    class="px-6 py-12 text-center text-gray-500 dark:text-gray-400 align-middle"
-                                >
-                                    {{ $t('common.no_data') }}
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-
-                <!-- Condition Items Table -->
-                <div v-if="activeSection === 'condition-items'" class="overflow-x-auto">
-                    <table class="w-full">
-                        <thead class="bg-gray-50 dark:bg-gray-700/50">
-                            <tr>
-                                <th
-                                    class="px-6 py-4 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle text-center"
-                                >
-                                    {{ $t('system_settings.columns.name_ar') }}
-                                </th>
-                                <th
-                                    class="px-6 py-4 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle text-center"
-                                >
-                                    {{ $t('system_settings.columns.name_en') }}
-                                </th>
-                                <th
-                                    class="px-6 py-4 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle"
-                                >
-                                    {{ $t('system_settings.columns.is_active') }}
-                                </th>
-                                <th
-                                    class="px-6 py-4 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle text-center"
-                                >
-                                    {{ $t('system_settings.columns.updated_by') }}
-                                </th>
-                                <th
-                                    class="px-6 py-4 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle"
-                                >
-                                    {{ $t('common.actions') }}
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
-                            <tr
-                                v-for="item in conditionItemsData"
-                                :key="item.id"
-                                class="hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors"
-                            >
-                                <td
-                                    class="px-6 py-4 text-sm font-medium text-gray-900 dark:text-white align-middle"
-                                >
-                                    {{ item.name_ar }}
-                                </td>
-                                <td
-                                    class="px-6 py-4 text-sm text-gray-600 dark:text-gray-400 align-middle"
-                                >
-                                    {{ item.name_en || '—' }}
-                                </td>
-                                <td class="px-6 py-4 text-center align-middle">
-                                    <button
-                                        v-if="item.source !== 'system'"
-                                        @click="toggleActive('condition-items', item)"
-                                        :class="[
-                                            'px-3 py-1 text-xs font-medium rounded-full transition-colors',
-                                            item.is_active
-                                                ? 'bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-300'
-                                                : 'bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-300',
-                                        ]"
-                                    >
-                                        {{
-                                            item.is_active
-                                                ? $t('common.active')
-                                                : $t('common.inactive')
-                                        }}
-                                    </button>
-                                    <span
-                                        v-else
-                                        :class="[
-                                            'px-3 py-1 text-xs font-medium rounded-full',
-                                            item.is_active
-                                                ? 'bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-300'
-                                                : 'bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-300',
-                                        ]"
-                                    >
-                                        {{
-                                            item.is_active
-                                                ? $t('common.active')
-                                                : $t('common.inactive')
-                                        }}
-                                    </span>
-                                </td>
-                                <td
-                                    class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400 align-middle"
-                                >
-                                    <span
-                                        v-if="item.source === 'system'"
-                                        class="inline-flex items-center px-2 py-1 text-xs font-medium rounded-full bg-purple-100 text-purple-700 dark:bg-purple-900/50 dark:text-purple-300"
-                                    >
-                                        {{ $t('common.system') }}
-                                    </span>
-                                    <div v-else class="flex flex-col">
-                                        <span>
-                                            {{ item.updated_by ? item.updated_by.name : '—' }}
-                                        </span>
-                                        <span v-if="item.updated_at" class="text-xs text-gray-400">
-                                            {{
-                                                new Date(item.updated_at).toLocaleDateString(
-                                                    'ar-SA-u-nu-latn'
-                                                )
-                                            }}
-                                        </span>
-                                    </div>
-                                </td>
-                                <td class="px-6 py-4 text-center align-middle">
-                                    <div
-                                        v-if="item.source !== 'system'"
-                                        class="flex items-center justify-center gap-2"
-                                    >
-                                        <button
-                                            @click="openEditModal('condition_item', item)"
-                                            class="p-2 text-gray-500 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 rounded-lg transition-colors"
-                                        >
-                                            <svg
-                                                class="w-4 h-4"
-                                                fill="none"
-                                                stroke="currentColor"
-                                                viewBox="0 0 24 24"
-                                            >
-                                                <path
-                                                    stroke-linecap="round"
-                                                    stroke-linejoin="round"
-                                                    stroke-width="2"
-                                                    d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-                                                />
-                                            </svg>
-                                        </button>
-                                        <button
-                                            @click="handleDelete('condition-items', item)"
-                                            class="p-2 text-gray-500 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors"
-                                        >
-                                            <svg
-                                                class="w-4 h-4"
-                                                fill="none"
-                                                stroke="currentColor"
-                                                viewBox="0 0 24 24"
-                                            >
-                                                <path
-                                                    stroke-linecap="round"
-                                                    stroke-linejoin="round"
-                                                    stroke-width="2"
-                                                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                                                />
-                                            </svg>
-                                        </button>
-                                    </div>
-                                    <span v-else class="text-xs text-gray-400 dark:text-gray-500">
-                                        —
-                                    </span>
-                                </td>
-                            </tr>
-                            <tr v-if="!conditionItemsData?.length">
-                                <td
-                                    colspan="5"
-                                    class="px-6 py-12 text-center text-gray-500 dark:text-gray-400 align-middle"
-                                >
-                                    {{ $t('common.no_data') }}
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-
-                <!-- Income Categories Table -->
-                <div v-if="activeSection === 'income-categories'" class="overflow-x-auto">
-                    <table class="w-full">
-                        <thead class="bg-gray-50 dark:bg-gray-700/50">
-                            <tr>
-                                <th
-                                    class="px-6 py-4 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle"
-                                >
-                                    #
-                                </th>
-                                <th
-                                    class="px-6 py-4 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle"
-                                >
-                                    {{ $t('system_settings.columns.name_ar') }}
-                                </th>
-                                <th
-                                    class="px-6 py-4 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle"
-                                >
-                                    {{ $t('system_settings.columns.name_en') }}
-                                </th>
-                                <th
-                                    class="px-6 py-4 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle"
-                                >
-                                    {{ $t('system_settings.columns.transaction_type') }}
-                                </th>
-                                <th
-                                    class="px-6 py-4 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle"
-                                >
-                                    {{ $t('system_settings.columns.is_active') }}
-                                </th>
-                                <th
-                                    class="px-6 py-4 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle"
-                                >
-                                    {{ $t('system_settings.columns.updated_by') }}
-                                </th>
-                                <th
-                                    class="px-6 py-4 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle"
-                                >
-                                    {{ $t('common.actions') }}
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
-                            <tr
-                                v-for="(item, index) in incomeCategoriesData"
-                                :key="item.id"
-                                class="hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors"
-                            >
-                                <td
-                                    class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400 text-center align-middle"
-                                >
-                                    {{
-                                        (currentPagination.current_page - 1) *
-                                            currentPagination.per_page +
-                                        index +
-                                        1
-                                    }}
-                                </td>
-                                <td
-                                    class="px-6 py-4 text-sm font-medium text-gray-900 dark:text-white align-middle"
-                                >
-                                    {{ item.name_ar }}
-                                </td>
-                                <td
-                                    class="px-6 py-4 text-sm text-gray-600 dark:text-gray-400 align-middle"
-                                >
-                                    {{ item.name_en || '—' }}
-                                </td>
-                                <td
-                                    class="px-6 py-4 text-sm text-gray-600 dark:text-gray-400 align-middle"
-                                >
-                                    <span
-                                        :class="[
-                                            'px-2.5 py-1 text-xs font-black rounded-lg',
-                                            item.transaction_type === 'revenue'
-                                                ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-300'
-                                                : 'bg-rose-50 text-rose-700 dark:bg-rose-900/20 dark:text-rose-300',
-                                        ]"
-                                    >
-                                        {{
-                                            item.transaction_type === 'revenue'
-                                                ? $t(
-                                                      'system_settings.form.transaction_type_revenue'
-                                                  )
-                                                : $t(
-                                                      'system_settings.form.transaction_type_expense'
-                                                  )
-                                        }}
-                                    </span>
-                                </td>
-                                <td class="px-6 py-4 text-center align-middle">
-                                    <button
-                                        @click="toggleActive('income-categories', item)"
-                                        :class="[
-                                            'px-3 py-1 text-xs font-medium rounded-full transition-colors',
-                                            item.is_active
-                                                ? 'bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-300'
-                                                : 'bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-300',
-                                        ]"
-                                    >
-                                        {{
-                                            item.is_active
-                                                ? $t('common.active')
-                                                : $t('common.inactive')
-                                        }}
-                                    </button>
-                                </td>
-                                <td
-                                    class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400 align-middle"
-                                >
-                                    <div class="flex flex-col">
-                                        <span>
-                                            {{ item.updated_by ? item.updated_by.name : '—' }}
-                                        </span>
-                                        <span v-if="item.updated_at" class="text-xs text-gray-400">
-                                            {{
-                                                new Date(item.updated_at).toLocaleDateString(
-                                                    'ar-SA-u-nu-latn'
-                                                )
-                                            }}
-                                        </span>
-                                    </div>
-                                </td>
-                                <td class="px-6 py-4 text-center align-middle">
-                                    <div class="flex items-center justify-center gap-2">
-                                        <button
-                                            @click="openEditModal('income_category', item)"
-                                            class="p-2 text-gray-500 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 rounded-lg transition-colors"
-                                        >
-                                            <svg
-                                                class="w-4 h-4"
-                                                fill="none"
-                                                stroke="currentColor"
-                                                viewBox="0 0 24 24"
-                                            >
-                                                <path
-                                                    stroke-linecap="round"
-                                                    stroke-linejoin="round"
-                                                    stroke-width="2"
-                                                    d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-                                                />
-                                            </svg>
-                                        </button>
-                                        <button
-                                            @click="handleDelete('income-categories', item)"
-                                            class="p-2 text-gray-500 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors"
-                                        >
-                                            <svg
-                                                class="w-4 h-4"
-                                                fill="none"
-                                                stroke="currentColor"
-                                                viewBox="0 0 24 24"
-                                            >
-                                                <path
-                                                    stroke-linecap="round"
-                                                    stroke-linejoin="round"
-                                                    stroke-width="2"
-                                                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                                                />
-                                            </svg>
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
-                            <tr v-if="!incomeCategoriesData?.length">
-                                <td
-                                    colspan="7"
-                                    class="px-6 py-12 text-center text-gray-500 dark:text-gray-400 align-middle"
-                                >
-                                    {{ $t('common.no_data') }}
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-
-                <!-- Pagination -->
-                <div
-                    v-if="currentPagination?.links"
-                    class="px-6 py-4 border-t border-gray-200 dark:border-gray-700"
-                >
-                    <div class="flex justify-center gap-1">
-                        <template v-for="link in currentPagination.links" :key="link.label">
-                            <a
-                                v-if="link.url"
-                                :href="link.url"
-                                :class="[
-                                    'px-3 py-1.5 text-sm rounded-lg transition-colors',
-                                    link.active
-                                        ? 'bg-indigo-600 text-white'
-                                        : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600',
-                                ]"
-                                v-safe-html="link.label"
-                            />
-                        </template>
+                <template #cell-logo="{ item }">
+                    <div
+                        v-if="item.logo_url || item.logo_path"
+                        class="w-10 h-10 rounded-xl bg-surface flex items-center justify-center p-1.5 border border-border-subtle shadow-xs"
+                    >
+                        <img
+                            :src="
+                                item.logo_url ||
+                                (item.logo_path ? `/storage/${item.logo_path}` : '')
+                            "
+                            class="w-full h-full object-contain dark:invert"
+                            :alt="item.name_ar"
+                        />
                     </div>
-                </div>
-            </div>
+                    <div
+                        v-else
+                        class="w-10 h-10 rounded-xl bg-surface-secondary flex items-center justify-center text-content-muted font-bold border border-border-subtle"
+                    >
+                        {{ item.name_ar?.charAt(0) || item.name_en?.charAt(0) || '?' }}
+                    </div>
+                </template>
+
+                <template #cell-color="{ item }">
+                    <div class="flex items-center gap-3">
+                        <div
+                            class="w-8 h-8 rounded-lg border border-border shadow-inner shrink-0"
+                            :style="{ backgroundColor: item.hex_code || '#CCCCCC' }"
+                        ></div>
+                        <span class="text-xs text-content-muted font-mono">
+                            {{ item.hex_code || '—' }}
+                        </span>
+                    </div>
+                </template>
+
+                <template #cell-name_ar="{ item }">
+                    <span class="font-medium text-content-primary">
+                        {{ item.name_ar }}
+                    </span>
+                </template>
+
+                <template #cell-name_en="{ item }">
+                    <span class="text-content-secondary">
+                        {{ item.name_en || '—' }}
+                    </span>
+                </template>
+
+                <template #cell-make="{ item }">
+                    <span class="text-content-secondary">
+                        {{ item.make ? getName(item.make) : '—' }}
+                    </span>
+                </template>
+
+                <template #cell-transaction_type="{ item }">
+                    <span
+                        :class="[
+                            'px-2.5 py-1 text-xs font-bold rounded-lg',
+                            item.transaction_type === 'revenue'
+                                ? 'bg-success-soft text-success'
+                                : 'bg-danger-soft text-danger',
+                        ]"
+                    >
+                        {{
+                            item.transaction_type === 'revenue'
+                                ? $t('system_settings.form.transaction_type_revenue')
+                                : $t('system_settings.form.transaction_type_expense')
+                        }}
+                    </span>
+                </template>
+
+                <template #cell-is_active="{ item }">
+                    <div class="flex items-center justify-center">
+                        <AppToggle
+                            :model-value="Boolean(item.is_active)"
+                            :disabled="item.source === 'system'"
+                            color="success"
+                            size="sm"
+                            :aria-label="
+                                item.is_active ? $t('common.active') : $t('common.inactive')
+                            "
+                            @update:model-value="toggleActive(activeSection, item)"
+                        />
+                    </div>
+                </template>
+
+                <template #cell-updated_by="{ item }">
+                    <span
+                        v-if="item.source === 'system'"
+                        class="inline-flex items-center px-2.5 py-1 text-xs font-semibold rounded-full bg-info-soft text-info"
+                    >
+                        {{ $t('common.system') }}
+                    </span>
+                    <div v-else class="flex flex-col">
+                        <span class="text-content-primary">
+                            {{ item.updated_by ? item.updated_by.name : '—' }}
+                        </span>
+                        <span v-if="item.updated_at" class="text-xs text-content-muted">
+                            {{ toEnglish(formatDate(item.updated_at)) }}
+                        </span>
+                    </div>
+                </template>
+
+                <template #cell-actions="{ item }">
+                    <div
+                        v-if="item.source !== 'system'"
+                        class="flex items-center justify-center gap-1.5"
+                    >
+                        <button
+                            type="button"
+                            @click="openEditModal(currentEditType, item)"
+                            :title="$t('common.edit')"
+                            class="p-2 text-content-secondary hover:text-action-primary hover:bg-action-primary/10 rounded-lg transition-colors cursor-pointer"
+                        >
+                            <svg
+                                class="w-4 h-4"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                                />
+                            </svg>
+                        </button>
+                        <button
+                            type="button"
+                            @click="handleDelete(activeSection, item)"
+                            :title="$t('common.delete')"
+                            class="p-2 text-content-secondary hover:text-danger hover:bg-danger-soft rounded-lg transition-colors cursor-pointer"
+                        >
+                            <svg
+                                class="w-4 h-4"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                                />
+                            </svg>
+                        </button>
+                    </div>
+                    <span v-else class="text-xs text-content-muted">—</span>
+                </template>
+            </DataTable>
         </div>
 
         <!-- Modals -->
@@ -1163,11 +399,15 @@
 
 <script setup>
 import { ref, computed, watch } from 'vue';
+import { Head, router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
-import { Link, router, useForm } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import PageHeader from '@/Components/PageHeader.vue';
 import BackButton from '@/Components/BackButton.vue';
+import AppTabs from '@/Components/Common/AppTabs.vue';
+import AppToggle from '@/Components/Common/AppToggle.vue';
+import DataTable from '@/Components/Common/DataTable.vue';
+import SearchableSelect from '@/Components/SearchableSelect.vue';
 import MakeFormModal from './Modals/MakeFormModal.vue';
 import ModelFormModal from './Modals/ModelFormModal.vue';
 import ColorFormModal from './Modals/ColorFormModal.vue';
@@ -1176,12 +416,15 @@ import IncomeCategoryFormModal from './Modals/IncomeCategoryFormModal.vue';
 import { useToast } from '@/Composables/useToast';
 import { useConfirm } from '@/Composables/useConfirm';
 import { useLocalized } from '@/Composables/useLocalized';
-import SearchableSelect from '@/Components/SearchableSelect.vue';
+import { useNumberFormat } from '@/Composables/useNumberFormat';
 
 const { t } = useI18n();
 const { success } = useToast();
 const { confirm } = useConfirm();
 const { getName } = useLocalized();
+const { toEnglish } = useNumberFormat();
+
+const MANAGED_SECTIONS = ['makes', 'models', 'colors', 'condition-items', 'income-categories'];
 
 const props = defineProps({
     makes: [Object, Array],
@@ -1191,7 +434,6 @@ const props = defineProps({
     income_categories: Object,
     settings: Object,
     global_sms_enabled: Boolean,
-
     activeSection: {
         type: String,
         default: 'makes',
@@ -1202,8 +444,8 @@ const props = defineProps({
 // Search & Filters
 const search = ref(props.filters?.search || '');
 const selectedMake = ref(props.filters?.make_id ? Number(props.filters.make_id) : '');
+const selectedType = ref(props.filters?.transaction_type || '');
 
-// Sync local state with props (e.g. browser back/forward)
 watch(
     () => props.filters?.make_id,
     (newVal) => {
@@ -1211,26 +453,29 @@ watch(
     }
 );
 
-const globalSmsEnabled = computed(() => props.global_sms_enabled);
-
 // Modal state
 const showMakeModal = ref(false);
 const showModelModal = ref(false);
 const showColorModal = ref(false);
+const showConditionItemModal = ref(false);
+const showIncomeCategoryModal = ref(false);
 const editingMake = ref(null);
 const editingModel = ref(null);
 const editingColor = ref(null);
-const showConditionItemModal = ref(false);
 const editingConditionItem = ref(null);
-const showIncomeCategoryModal = ref(false);
 const editingIncomeCategory = ref(null);
 
-// Computed data
-const makesData = computed(() => props.makes?.data || props.makes || []);
-const modelsData = computed(() => props.models?.data || []);
-const colorsData = computed(() => props.colors?.data || []);
-const conditionItemsData = computed(() => props.condition_items?.data || []);
-const incomeCategoriesData = computed(() => props.income_categories?.data || []);
+// Navigation Tabs
+const sectionTabs = computed(() =>
+    MANAGED_SECTIONS.map((id) => ({
+        id,
+        label: t(`system_settings.sections.${id.replace('-', '_')}`),
+    }))
+);
+
+const isManagedSection = computed(() => MANAGED_SECTIONS.includes(props.activeSection));
+
+// Computed Data Sources
 const makesForFilter = computed(() => props.makes?.data || props.makes || []);
 
 const makeOptions = computed(() => {
@@ -1242,31 +487,118 @@ const makeOptions = computed(() => {
     return [allOption, ...mappedMakes];
 });
 
+const typeOptions = computed(() => [
+    { value: '', label: t('settings.all_transaction_types') },
+    { value: 'revenue', label: t('system_settings.form.transaction_type_revenue') },
+    { value: 'expense', label: t('system_settings.form.transaction_type_expense') },
+]);
+
 const currentSectionTitle = computed(() => {
     const section = props.activeSection || 'makes';
-    // Mapping for general
     if (section === 'general') return t('permissions_modules.settings_general');
     if (section === 'condition-items') return t('system_settings.sections.condition_items');
     if (section === 'income-categories') return t('system_settings.income_categories.subtitle');
     return t(`system_settings.${section}.subtitle`) || t(`system_settings.sections.${section}`);
 });
 
-const currentPagination = computed(() => {
-    if (props.activeSection === 'models') return props.models;
-    if (props.activeSection === 'colors') return props.colors;
-    if (props.activeSection === 'condition-items') return props.condition_items;
-    if (props.activeSection === 'income-categories') return props.income_categories;
-    return props.makes;
+const currentTableSource = computed(() => {
+    switch (props.activeSection) {
+        case 'models':
+            return props.models || [];
+        case 'colors':
+            return props.colors || [];
+        case 'condition-items':
+            return props.condition_items || [];
+        case 'income-categories':
+            return props.income_categories || [];
+        case 'makes':
+        default:
+            return props.makes || [];
+    }
 });
 
-// Handlers
+const currentPagination = computed(() => {
+    const src = currentTableSource.value;
+    return Array.isArray(src) ? null : src;
+});
 
-const selectedType = ref(props.filters?.transaction_type || '');
-const typeOptions = computed(() => [
-    { value: '', label: t('settings.all_transaction_types') },
-    { value: 'revenue', label: t('system_settings.form.transaction_type_revenue') },
-    { value: 'expense', label: t('system_settings.form.transaction_type_expense') },
-]);
+const currentTotalCount = computed(() => {
+    const src = currentTableSource.value;
+    if (Array.isArray(src)) return src.length;
+    return src?.total ?? src?.data?.length ?? 0;
+});
+
+const currentEditType = computed(() => {
+    const map = {
+        makes: 'make',
+        models: 'model',
+        colors: 'color',
+        'condition-items': 'condition_item',
+        'income-categories': 'income_category',
+    };
+    return map[props.activeSection] || 'make';
+});
+
+const currentColumns = computed(() => {
+    const sharedEnd = [
+        { key: 'is_active', label: t('system_settings.columns.is_active'), align: 'center' },
+        { key: 'updated_by', label: t('system_settings.columns.updated_by') },
+        { key: 'actions', label: t('common.actions'), align: 'center' },
+    ];
+
+    switch (props.activeSection) {
+        case 'makes':
+            return [
+                { key: 'logo', label: t('system_settings.columns.logo') },
+                { key: 'name_ar', label: t('system_settings.columns.name_ar') },
+                { key: 'name_en', label: t('system_settings.columns.name_en') },
+                ...sharedEnd,
+            ];
+        case 'models':
+            return [
+                { key: 'name_ar', label: t('system_settings.columns.name_ar') },
+                { key: 'name_en', label: t('system_settings.columns.name_en') },
+                { key: 'make', label: t('system_settings.columns.make') },
+                ...sharedEnd,
+            ];
+        case 'colors':
+            return [
+                { key: 'color', label: t('system_settings.columns.color') },
+                { key: 'name_ar', label: t('system_settings.columns.name_ar') },
+                { key: 'name_en', label: t('system_settings.columns.name_en') },
+                ...sharedEnd,
+            ];
+        case 'income-categories':
+            return [
+                { key: 'index', label: '#', align: 'center', width: 'w-16' },
+                { key: 'name_ar', label: t('system_settings.columns.name_ar') },
+                { key: 'name_en', label: t('system_settings.columns.name_en') },
+                {
+                    key: 'transaction_type',
+                    label: t('system_settings.columns.transaction_type'),
+                },
+                ...sharedEnd,
+            ];
+        case 'condition-items':
+        default:
+            return [
+                { key: 'name_ar', label: t('system_settings.columns.name_ar') },
+                { key: 'name_en', label: t('system_settings.columns.name_en') },
+                ...sharedEnd,
+            ];
+    }
+});
+
+// Helpers & Handlers
+function getRowNumber(index) {
+    const page = currentPagination.value?.current_page || 1;
+    const perPage = currentPagination.value?.per_page || 15;
+    return (page - 1) * perPage + index + 1;
+}
+
+function formatDate(dateString) {
+    return new Date(dateString).toLocaleDateString('ar-SA-u-nu-latn');
+}
 
 function handleTypeFilter() {
     handleSearch();
@@ -1367,6 +699,7 @@ function handleSaved() {
 }
 
 function toggleActive(section, item) {
+    if (item.source === 'system') return;
     router.patch(`/app/settings/${section}/${item.id}/toggle-active`);
 }
 

@@ -180,21 +180,13 @@
                                 <label
                                     class="flex items-center gap-2 cursor-pointer text-gray-700 dark:text-gray-300 text-sm"
                                 >
-                                    <input
-                                        v-model="form.is_active"
-                                        type="checkbox"
-                                        class="rounded text-indigo-600"
-                                    />
+                                    <AppToggle v-model="form.is_active" />
                                     {{ $t('common.enabled') }}
                                 </label>
                                 <label
                                     class="flex items-center gap-2 cursor-pointer text-gray-700 dark:text-gray-300 text-sm"
                                 >
-                                    <input
-                                        v-model="form.is_popular"
-                                        type="checkbox"
-                                        class="rounded text-indigo-600"
-                                    />
+                                    <AppToggle v-model="form.is_popular" />
                                     {{ $t('system.credits.popular') }}
                                 </label>
                             </div>
@@ -226,6 +218,7 @@
 </template>
 
 <script setup>
+import AppToggle from '@/Components/Common/AppToggle.vue';
 import { ref } from 'vue';
 import { router, useForm } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';

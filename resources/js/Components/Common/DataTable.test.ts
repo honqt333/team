@@ -14,6 +14,19 @@ describe('DataTable', () => {
         { id: 2, sku: 'SKU-002', name: 'Brake Pad', price: '80.00' },
     ];
 
+    it('preserves table semantics for grouped headers and totals', () => {
+        const wrapper = mount(DataTable, {
+            props: { structured: true },
+            slots: {
+                default:
+                    '<thead><tr><th colspan="2">Total</th></tr></thead><tbody><tr><td>1</td><td>2</td></tr></tbody>',
+            },
+        });
+        expect(wrapper.element.tagName).toBe('TABLE');
+        expect(wrapper.get('thead th').attributes('colspan')).toBe('2');
+        expect(wrapper.findAll('tbody td')).toHaveLength(2);
+    });
+
     it('renders table columns and rows correctly', () => {
         const wrapper = mount(DataTable, {
             props: {

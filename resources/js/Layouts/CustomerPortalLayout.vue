@@ -161,7 +161,7 @@
                         :class="
                             item.href
                                 ? item.active
-                                    ? 'text-[color:var(--tenant-primary,#4f46e5)]'
+                                    ? 'text-[color:var(--tenant-primary,#2563eb)]'
                                     : 'text-slate-500 dark:text-slate-400'
                                 : 'cursor-not-allowed text-slate-300'
                         "
@@ -235,7 +235,7 @@ const isRtl = computed(
 const isDark = ref(false);
 
 const cssVars = computed(() => ({
-    '--tenant-primary': props.tenant?.primary_color || '#4f46e5',
+    '--tenant-primary': props.tenant?.primary_color || '#2563eb',
     '--tenant-secondary': props.tenant?.secondary_color || '#0ea5e9',
 }));
 

@@ -9,6 +9,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
+use Inertia\Inertia;
 
 class ProfileController extends Controller
 {
@@ -74,6 +75,8 @@ class ProfileController extends Controller
         }
 
         $user->update(['current_center_id' => $validated['center_id']]);
+
+        Inertia::clearHistory();
 
         return back()->with('success', __('messages.updated_successfully'));
     }

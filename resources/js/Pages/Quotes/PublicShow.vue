@@ -341,31 +341,7 @@
                         </span>
                     </a>
                     <!-- Print -->
-                    <button
-                        @click="printPage"
-                        class="flex flex-col items-center gap-2 p-3 bg-gray-50 dark:bg-gray-700/50 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl transition-all active:scale-95 border border-gray-100 dark:border-gray-700"
-                    >
-                        <div
-                            class="w-10 h-10 bg-gray-700 dark:bg-gray-600 rounded-xl flex items-center justify-center shadow-md shadow-gray-200 dark:shadow-none"
-                        >
-                            <svg
-                                class="w-5 h-5 text-white"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                            >
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    stroke-width="2"
-                                    d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"
-                                />
-                            </svg>
-                        </div>
-                        <span class="text-xs font-black text-gray-700 dark:text-gray-300">
-                            {{ t('common.print') }}
-                        </span>
-                    </button>
+                    <AppPrintButton @click="printPage" :label="t('common.print')" />
                 </div>
             </div>
 
@@ -533,6 +509,8 @@
 </template>
 
 <script setup>
+import AppPrintButton from '@/Components/Common/AppPrintButton.vue';
+import { printDocument } from '@/Composables/usePrint';
 import { ref, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { router, usePage } from '@inertiajs/vue3';
@@ -553,7 +531,7 @@ const customerSignature = ref('');
 const rejectionReason = ref('');
 const submitting = ref(false);
 
-const printPage = () => window.print();
+const printPage = () => printDocument();
 
 function formatCurrency(val) {
     const num = Number(val) || 0;

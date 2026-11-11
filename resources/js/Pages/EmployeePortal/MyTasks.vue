@@ -1,4 +1,5 @@
 <script setup>
+import AppToggle from '@/Components/Common/AppToggle.vue';
 import AppPagination from '@/Components/Common/AppPagination.vue';
 import { ref, reactive, computed, onMounted, onUnmounted } from 'vue';
 import { useI18n } from 'vue-i18n';
@@ -1579,11 +1580,9 @@ const saveChecklist = async () => {
                         class="flex items-center justify-between p-2.5 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 gap-3"
                     >
                         <label class="flex items-center gap-2.5 flex-1 cursor-pointer">
-                            <input
-                                type="checkbox"
+                            <AppToggle
                                 :checked="checkItem.completed"
                                 @change="toggleChecklistItem(idx)"
-                                class="w-4 h-4 text-purple-600 rounded border-gray-300 focus:ring-purple-500"
                             />
                             <span
                                 :class="[

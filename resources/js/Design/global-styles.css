@@ -71,7 +71,7 @@
     padding: var(--space-2) var(--space-4);
     border-radius: var(--radius-lg);
     background: var(--color-danger);
-    color: var(--color-text-inverse);
+    color: var(--color-action-on);
     font-size: var(--font-size-sm);
     font-weight: var(--font-weight-semibold);
     border: none;

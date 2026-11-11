@@ -6,6 +6,7 @@ const { t } = useI18n();
 
 const props = defineProps({
     subscription: { type: Object, default: null },
+    lifecycle: { type: Object, default: null },
 });
 
 const emit = defineEmits(['renew']);
@@ -15,6 +16,9 @@ const locale = computed(() => document.documentElement.lang || 'ar');
 const statusConfig = {
     active: {
         class: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300',
+    },
+    grace_period: {
+        class: 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300',
     },
     trialing: {
         class: 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300',
@@ -38,16 +42,30 @@ const statusConfig = {
         class: 'bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-300',
     },
     expired: {
-        class: 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300',
+        class: 'bg-rose-100 text-rose-800 dark:bg-rose-900/30 dark:text-rose-300',
     },
     refunded: {
         class: 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300',
     },
 };
 
-const status = computed(() => statusConfig[props.subscription?.status] || statusConfig.pending);
+const effectiveStatus = computed(() => {
+    if (props.lifecycle?.is_in_grace_period) {
+        return 'grace_period';
+    }
+    if (
+        props.subscription?.status === 'active' &&
+        props.lifecycle &&
+        ['expired', 'suspended'].includes(props.lifecycle.state)
+    ) {
+        return 'expired';
+    }
+    return props.subscription?.status || 'pending';
+});
+
+const status = computed(() => statusConfig[effectiveStatus.value] || statusConfig.pending);
 const statusLabel = computed(() => {
-    const key = `system.company_subscription.status.${props.subscription?.status || 'pending'}`;
+    const key = `system.company_subscription.status.${effectiveStatus.value}`;
     return t(key);
 });
 
@@ -99,7 +117,8 @@ const formatCurrency = (amount) => {
 
 const canRenew = computed(() => {
     if (!props.subscription) return false;
-    const s = props.subscription.status;
+    if (props.lifecycle?.is_in_grace_period) return true;
+    const s = effectiveStatus.value;
     if (['expired', 'cancelled', 'failed', 'trial', 'trialing'].includes(s)) {
         return true;
     }
@@ -172,7 +191,7 @@ const canRenew = computed(() => {
             </div>
         </div>
 
-        <!-- Expired / Expiring Soon / Renewal Action Banner -->
+        <!-- Grace Period / Expired / Expiring Soon / Renewal Action Banner -->
         <div
             v-if="canRenew"
             class="relative mt-4 flex flex-col sm:flex-row items-center justify-between gap-3 rounded-xl border border-amber-200 bg-amber-50/80 p-3.5 dark:border-amber-800/60 dark:bg-amber-900/20"
@@ -192,14 +211,21 @@ const canRenew = computed(() => {
                     />
                 </svg>
                 <span>
-                    <strong v-if="subscription.status === 'expired'">
+                    <strong v-if="lifecycle?.is_in_grace_period">
+                        {{
+                            $t('system.company_subscription.banners.grace_period', {
+                                days: lifecycle.grace_days_remaining,
+                            })
+                        }}
+                    </strong>
+                    <strong v-else-if="effectiveStatus === 'expired'">
                         {{ $t('subscription.expired_notice') }}
                     </strong>
                     <strong v-else-if="daysLeft !== null && daysLeft <= 30">
                         {{ $t('subscription.expiring_soon') }} {{ daysLeft }}
                         {{ $t('subscription.days_suffix') }}
                     </strong>
-                    <strong v-else-if="['trial', 'trialing'].includes(subscription.status)">
+                    <strong v-else-if="['trial', 'trialing'].includes(effectiveStatus)">
                         {{ $t('subscription.on_trial_notice') }}
                     </strong>
                     {{ $t('subscription.renew_now_hint') }}

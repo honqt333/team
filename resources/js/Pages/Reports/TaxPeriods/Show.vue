@@ -134,21 +134,10 @@
                     </a>
 
                     <!-- Print Button (uses usePrint composable per Constitution) -->
-                    <button
-                        type="button"
+                    <AppPrintButton
                         @click="handlePrint"
-                        class="inline-flex items-center gap-1.5 px-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-50 text-xs font-bold rounded-xl transition-all"
-                    >
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"
-                            />
-                        </svg>
-                        <span>{{ $t('reports.tax_periods_report.print_declaration') }}</span>
-                    </button>
+                        :label="$t('reports.tax_periods_report.print_declaration')"
+                    />
                 </div>
             </div>
 
@@ -254,7 +243,7 @@
                     <div
                         class="overflow-x-auto rounded-2xl border border-gray-200 dark:border-gray-700"
                     >
-                        <table class="w-full text-right text-xs">
+                        <DataTable structured class="w-full text-right text-xs">
                             <thead
                                 class="bg-gray-50 dark:bg-gray-900/50 text-gray-700 dark:text-gray-300 font-bold"
                             >
@@ -404,7 +393,7 @@
                                     </td>
                                 </tr>
                             </tbody>
-                        </table>
+                        </DataTable>
                     </div>
                 </div>
 
@@ -415,9 +404,7 @@
                     >
                         <div>
                             <h3 class="text-base font-bold text-gray-900 dark:text-white">
-                                {{
-                                    $t('reports.tax_periods_report.detailed_transactions_title')
-                                }}
+                                {{ $t('reports.tax_periods_report.detailed_transactions_title') }}
                                 ({{ filteredTransactions.length }})
                             </h3>
                             <p class="text-xs text-gray-500 dark:text-gray-400">
@@ -450,7 +437,7 @@
                     <div
                         class="overflow-x-auto rounded-2xl border border-gray-200 dark:border-gray-700"
                     >
-                        <table class="w-full text-right text-xs">
+                        <DataTable structured class="w-full text-right text-xs">
                             <thead
                                 class="bg-gray-50 dark:bg-gray-900/40 text-gray-600 dark:text-gray-300 font-semibold uppercase"
                             >
@@ -545,7 +532,7 @@
                                     </td>
                                 </tr>
                             </tbody>
-                        </table>
+                        </DataTable>
                     </div>
 
                     <!-- Client-Side Pagination -->
@@ -597,6 +584,8 @@
 </template>
 
 <script setup>
+import DataTable from '@/Components/Common/DataTable.vue';
+import AppPrintButton from '@/Components/Common/AppPrintButton.vue';
 import { ref, computed } from 'vue';
 import { Head, Link, router } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';

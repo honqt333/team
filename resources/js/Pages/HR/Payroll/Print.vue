@@ -99,6 +99,7 @@
 </template>
 
 <script setup>
+import { printDocument } from '@/Composables/usePrint';
 import { computed } from 'vue';
 import { Head } from '@inertiajs/vue3';
 import StandardReportLayout from '@/Components/Print/StandardReportLayout.vue';
@@ -126,7 +127,7 @@ const totalNet = computed(
 );
 
 function print() {
-    window.print();
+    printDocument();
 }
 
 function close() {

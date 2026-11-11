@@ -90,7 +90,10 @@
                 class="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm overflow-hidden"
             >
                 <div class="overflow-x-auto">
-                    <table class="w-full text-start text-xs text-gray-700 dark:text-gray-300">
+                    <DataTable
+                        structured
+                        class="w-full text-start text-xs text-gray-700 dark:text-gray-300"
+                    >
                         <thead
                             class="bg-gray-50 dark:bg-gray-900/60 text-gray-500 dark:text-gray-400 font-semibold border-b border-gray-100 dark:border-gray-700"
                         >
@@ -221,7 +224,7 @@
                                 </td>
                             </tr>
                         </tbody>
-                    </table>
+                    </DataTable>
                 </div>
             </div>
 
@@ -350,6 +353,7 @@
 </template>
 
 <script setup>
+import DataTable from '@/Components/Common/DataTable.vue';
 import { ref, watch, computed } from 'vue';
 import { Link, router, useForm } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';

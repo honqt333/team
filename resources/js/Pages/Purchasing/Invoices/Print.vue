@@ -10,6 +10,7 @@
 </template>
 
 <script setup>
+import { printDocument } from '@/Composables/usePrint';
 import { computed, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { usePage, router } from '@inertiajs/vue3';
@@ -35,12 +36,11 @@ const goBack = () => {
         window.history.back();
     }
 };
-const printPage = () => window.print();
 
 onMounted(() => {
     // Automatically trigger print dialog
     setTimeout(() => {
-        window.print();
+        printDocument();
     }, 500);
 });
 

@@ -23,13 +23,11 @@ onMounted(() => {
             <div
                 class="lg:hidden bg-gradient-to-br from-violet-600 via-indigo-600 to-blue-600 p-8 text-center"
             >
-                <div
-                    class="inline-flex items-center justify-center w-20 h-20 bg-white rounded-full shadow-xl mb-4"
-                >
+                <div class="inline-flex items-center justify-center w-20 h-20 mb-4">
                     <img
-                        src="/images/logo.png"
+                        src="/images/brand/logo-128.png"
                         :alt="$t('common.app_name')"
-                        class="w-12 h-12 object-contain"
+                        class="w-20 h-20 object-contain"
                     />
                 </div>
                 <h1 class="text-2xl font-bold text-white">
@@ -76,13 +74,11 @@ onMounted(() => {
 
             <!-- Logo & Text -->
             <div class="relative z-10 text-center">
-                <div
-                    class="inline-flex items-center justify-center w-32 h-32 bg-white rounded-full shadow-2xl mb-8"
-                >
+                <div class="inline-flex items-center justify-center w-32 h-32 mb-8">
                     <img
-                        src="/images/logo.png"
+                        src="/images/brand/logo-256.png"
                         :alt="$t('common.app_name')"
-                        class="w-20 h-20 object-contain"
+                        class="w-32 h-32 object-contain"
                     />
                 </div>
                 <h1 class="text-4xl font-bold text-white mb-4">

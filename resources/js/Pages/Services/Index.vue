@@ -394,7 +394,7 @@
                                 {{ $t('services_management.no_services') }}
                             </div>
                             <div v-else class="overflow-x-auto">
-                                <table class="w-full min-w-[720px] text-sm">
+                                <DataTable structured class="w-full min-w-[720px] text-sm">
                                     <thead class="bg-gray-50 dark:bg-gray-900/50">
                                         <tr>
                                             <th
@@ -634,7 +634,7 @@
                                             </td>
                                         </tr>
                                     </tbody>
-                                </table>
+                                </DataTable>
                             </div>
                         </div>
                     </div>
@@ -699,7 +699,7 @@
                             class="border-t border-gray-200 dark:border-gray-700"
                         >
                             <div class="overflow-x-auto">
-                                <table class="w-full min-w-[720px] text-sm">
+                                <DataTable structured class="w-full min-w-[720px] text-sm">
                                     <thead class="bg-gray-50 dark:bg-gray-900/50">
                                         <tr>
                                             <th
@@ -939,7 +939,7 @@
                                             </td>
                                         </tr>
                                     </tbody>
-                                </table>
+                                </DataTable>
                             </div>
                         </div>
                     </div>
@@ -979,14 +979,14 @@
                 <div v-else>
                     <!-- Table View -->
                     <DataTable
-                        v-if="packagesViewMode === 'table'"
+                        v-if="packagesViewMode === 'list'"
                         :items="filteredPackages"
                         :columns="packageColumns"
                     >
-                        <template #cell(number)="{ index }">
+                        <template #cell-number="{ index }">
                             <span class="text-content-muted">{{ index + 1 }}</span>
                         </template>
-                        <template #cell(name)="{ item }">
+                        <template #cell-name="{ item }">
                             <button
                                 v-if="can('services.update')"
                                 @click="openEditPackageModal(item)"
@@ -999,23 +999,23 @@
                                 {{ getName(item) }}
                             </span>
                         </template>
-                        <template #cell(base_price)="{ item }">
+                        <template #cell-base_price="{ item }">
                             <span class="font-bold text-action-primary">
                                 {{ toEnglish(item.base_price) }} {{ $t('common.currency_sar') }}
                             </span>
                         </template>
-                        <template #cell(items)="{ item }">
+                        <template #cell-items="{ item }">
                             <span class="text-content-muted">
                                 {{ item.items?.length || 0 }}
                                 {{ $t('services_management.services') }}
                             </span>
                         </template>
-                        <template #cell(updated_by)="{ item }">
+                        <template #cell-updated_by="{ item }">
                             <span class="text-content-muted">
                                 {{ item.updater?.name || $t('services_management.not_set') }}
                             </span>
                         </template>
-                        <template #cell(is_active)="{ item }">
+                        <template #cell-is_active="{ item }">
                             <div class="flex items-center justify-center">
                                 <AppToggle
                                     :model-value="Boolean(item.is_active)"
@@ -1025,7 +1025,7 @@
                                 />
                             </div>
                         </template>
-                        <template #cell(actions)="{ item }">
+                        <template #cell-actions="{ item }">
                             <div class="flex items-center justify-center gap-1">
                                 <button
                                     @click.stop="openEditPackageModal(item)"
@@ -1339,7 +1339,7 @@
                             class="overflow-x-auto"
                             v-if="category.items && category.items.length > 0"
                         >
-                            <table class="w-full text-sm">
+                            <DataTable structured class="w-full text-sm">
                                 <thead
                                     class="bg-white dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700/50"
                                 >
@@ -1463,7 +1463,7 @@
                                         </td>
                                     </tr>
                                 </tbody>
-                            </table>
+                            </DataTable>
                         </div>
                     </div>
                 </div>
@@ -1613,7 +1613,7 @@ const props = defineProps({
 });
 
 const activeTab = ref(new URLSearchParams(window.location.search).get('tab') || 'services');
-const packagesViewMode = ref('table');
+const packagesViewMode = ref('list');
 
 watch(activeTab, (newTab) => {
     const url = new URL(window.location);
@@ -1790,7 +1790,7 @@ const tabs = computed(() => [
         iconColor: 'text-indigo-500',
         bgColor: 'bg-indigo-100 dark:bg-indigo-900/30',
         gradientFrom: '#6366f1', // indigo-500
-        gradientTo: '#4f46e5', // indigo-600
+        gradientTo: '#2563eb', // indigo-600
         count: props.packages?.length || 0,
     },
     {

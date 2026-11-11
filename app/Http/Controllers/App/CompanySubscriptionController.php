@@ -15,6 +15,7 @@ use App\Models\Billing\SubscriptionPayment;
 use App\Models\PaymentSettings;
 use App\Services\Billing\PaymentCompletionService;
 use App\Services\Billing\PromoCodeValidator;
+use App\Services\Billing\SubscriptionLifecycleService;
 use App\Services\Payment\PaymentManager;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -29,7 +30,8 @@ class CompanySubscriptionController extends Controller
     public function __construct(
         protected PaymentManager $paymentManager,
         protected PaymentCompletionService $paymentCompletion,
-        protected PromoCodeValidator $promoValidator
+        protected PromoCodeValidator $promoValidator,
+        protected SubscriptionLifecycleService $lifecycle
     ) {}
 
     /**
@@ -208,16 +210,9 @@ class CompanySubscriptionController extends Controller
         $vatAmount = $vatCalc['vat'];
         $total = $vatCalc['total'];
 
-        // Calculate subscription dates (preserving any remaining active days)
-        $previousActive = Subscription::where('tenant_id', $tenant->id)
-            ->where('status', 'active')
-            ->where('ends_at', '>', now())
-            ->orderByDesc('ends_at')
-            ->first();
-
-        $startDate = now();
-        $baseEndDate = ($previousActive && $previousActive->ends_at) ? $previousActive->ends_at : $startDate;
-        $endDate = $baseEndDate->copy()->addYear();
+        $dates = $this->lifecycle->calculateRenewalDates($tenant, $billingCycle);
+        $startDate = $dates['starts_at'];
+        $endDate = $dates['ends_at'];
 
         DB::beginTransaction();
 
@@ -802,17 +797,9 @@ class CompanySubscriptionController extends Controller
 
         try {
             return DB::transaction(function () use ($request, $tenant, $plan, $validated, $basePrice, $discount, $subtotal, $total, $promo) {
-                // 1. Subscription (status=pending_payment, awaiting admin
-                //    approval of the receipt)
-                $previousActive = Subscription::where('tenant_id', $tenant->id)
-                    ->where('status', 'active')
-                    ->where('ends_at', '>', now())
-                    ->orderByDesc('ends_at')
-                    ->first();
-
-                $startDate = now();
-                $baseEndDate = ($previousActive && $previousActive->ends_at) ? $previousActive->ends_at : $startDate;
-                $endDate = $baseEndDate->copy()->addYear();
+                $dates = $this->lifecycle->calculateRenewalDates($tenant, 'yearly');
+                $startDate = $dates['starts_at'];
+                $endDate = $dates['ends_at'];
 
                 $subscription = Subscription::create([
                     'tenant_id' => $tenant->id,

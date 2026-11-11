@@ -417,7 +417,7 @@ class CustomerPortalAuthController extends Controller
             'logo_url' => $logoUrl,
             'cover_url' => $coverUrl,
             'has_logo' => ! empty($logoUrl),
-            'primary_color' => $website?->effective_primary_color ?? '#4f46e5',
+            'primary_color' => $website?->effective_primary_color ?? '#2563eb',
             'secondary_color' => $website?->effective_secondary_color ?? '#0ea5e9',
         ];
     }

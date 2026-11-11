@@ -35,8 +35,15 @@ class NotificationService
                     return null;
                 }
 
-                if (isset($settings['events'][$type]['in_app']) && ! $settings['events'][$type]['in_app']) {
-                    return null;
+                // The notification TYPE (`work_order.created`) and the settings
+                // EVENT KEY (`work_order_created`) live in two different
+                // namespaces. Tenant::notificationEventKeysFor() maps between
+                // them, so a per-event toggle on the settings page actually
+                // applies to the notifications this service writes.
+                foreach (Tenant::notificationEventKeysFor($type) as $eventKey) {
+                    if (isset($settings['events'][$eventKey]['in_app']) && ! $settings['events'][$eventKey]['in_app']) {
+                        return null;
+                    }
                 }
             }
         }

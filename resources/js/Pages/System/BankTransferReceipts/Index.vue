@@ -1,4 +1,5 @@
 <script setup>
+import DataTable from '@/Components/Common/DataTable.vue';
 import { ref, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { Head, router, Link } from '@inertiajs/vue3';
@@ -259,7 +260,7 @@ function getAmountBadge(receipt) {
 
             <!-- Receipts table -->
             <div class="overflow-hidden rounded-xl border border-gray-200 dark:border-gray-700">
-                <table class="w-full text-sm">
+                <DataTable structured class="w-full text-sm">
                     <thead class="bg-gray-50 dark:bg-gray-900/50">
                         <tr>
                             <th
@@ -449,7 +450,7 @@ function getAmountBadge(receipt) {
                             </td>
                         </tr>
                     </tbody>
-                </table>
+                </DataTable>
             </div>
 
             <!-- Pagination -->

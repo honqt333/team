@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\App\WorkOrders;
 
+use App\Enums\PaymentType;
 use App\Models\Payment;
 use App\Models\WorkOrder;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 
 class WorkOrderPaymentController
@@ -21,7 +23,7 @@ class WorkOrderPaymentController
         $this->authorize('update', $workOrder);
 
         $validated = $request->validate([
-            'payment_method' => 'required|in:'.implode(',', Payment::METHODS),
+            'payment_method' => 'required_unless:type,bad_debt|nullable|in:'.implode(',', Payment::METHODS),
             'type' => 'required|in:'.implode(',', Payment::TYPES),
             'amount' => 'required|numeric|min:0.01',
             'payment_date' => 'required|date',
@@ -29,9 +31,11 @@ class WorkOrderPaymentController
             'notes' => 'nullable|string|max:1000',
         ]);
 
-        if ($validated['type'] === 'refund' && $workOrder->status === WorkOrder::STATUS_DONE) {
-            return back()->with('error', __('payments.refund_not_allowed_for_exited'));
+        if ($error = $this->validatePaymentOperation($workOrder, $validated)) {
+            return $error;
         }
+
+        $validated['payment_method'] = $validated['payment_method'] ?? ($validated['type'] === 'bad_debt' ? 'credit' : 'cash');
 
         $linkedInvoiceId = $workOrder->invoice?->id;
 
@@ -69,7 +73,7 @@ class WorkOrderPaymentController
         }
 
         $validated = $request->validate([
-            'payment_method' => 'required|in:'.implode(',', Payment::METHODS),
+            'payment_method' => 'required_unless:type,bad_debt|nullable|in:'.implode(',', Payment::METHODS),
             'type' => 'required|in:'.implode(',', Payment::TYPES),
             'amount' => 'required|numeric|min:0.01',
             'payment_date' => 'required|date',
@@ -77,9 +81,11 @@ class WorkOrderPaymentController
             'notes' => 'nullable|string|max:1000',
         ]);
 
-        if ($validated['type'] === 'refund' && $workOrder->status === WorkOrder::STATUS_DONE) {
-            return back()->with('error', __('payments.refund_not_allowed_for_exited'));
+        if ($error = $this->validatePaymentOperation($workOrder, $validated, $payment)) {
+            return $error;
         }
+
+        $validated['payment_method'] = $validated['payment_method'] ?? ($validated['type'] === 'bad_debt' ? 'credit' : 'cash');
 
         $payment->update($validated);
 
@@ -100,5 +106,41 @@ class WorkOrderPaymentController
         $payment->delete();
 
         return back()->with('success', __('payments.deleted_successfully'));
+    }
+
+    /**
+     * Validate business rules shared by creating and updating work-order payments.
+     */
+    private function validatePaymentOperation(WorkOrder $workOrder, array $validated, ?Payment $existingPayment = null): ?RedirectResponse
+    {
+        if ($validated['type'] === 'refund') {
+            if ($workOrder->status === WorkOrder::STATUS_DONE) {
+                return back()->with('error', __('payments.refund_not_allowed_for_exited'));
+            }
+
+            $availablePaid = $workOrder->net_cash_paid;
+
+            if ($existingPayment !== null) {
+                $existingType = $existingPayment->type instanceof PaymentType
+                    ? $existingPayment->type->value
+                    : $existingPayment->type;
+
+                if ($existingType === 'payment') {
+                    $availablePaid -= (float) $existingPayment->amount;
+                } elseif ($existingType === 'refund') {
+                    $availablePaid += (float) $existingPayment->amount;
+                }
+            }
+
+            if ((float) $validated['amount'] > round($availablePaid, 2) + 0.01) {
+                return back()->with('error', __('payments.amount_exceeds_paid'));
+            }
+        }
+
+        if ($validated['type'] === 'bad_debt' && ! ($workOrder->status === WorkOrder::STATUS_DONE && $workOrder->invoice()->exists())) {
+            return back()->with('error', __('payments.bad_debt_credit_invoices_only'));
+        }
+
+        return null;
     }
 }

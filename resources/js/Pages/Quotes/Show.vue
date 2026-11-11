@@ -276,546 +276,101 @@
 
             <!-- Top Section: Financial Summary & Customer Info -->
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <!-- 1. Right Card: Vehicle & Customer Info -->
-                <div
-                    class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 flex flex-col h-full overflow-hidden transition-all hover:shadow-md"
+                <!-- 1. Right Card: Unified Vehicle & Customer Info -->
+                <WorkOrderCustomerCard
+                    :vehicle="quote.vehicle"
+                    :customer="quote.customer"
+                    :mileage="quote.odometer"
+                    :colors="colors"
+                />
+
+                <!-- 2. Left Card: Unified Cost & Payment Summary -->
+                <WorkOrderFinancialSummary
+                    :totals="totals"
+                    :has-tax="hasTax"
+                    :tax-rate="Number(quote.tax_rate_snapshot || 15)"
+                    :show-payments="false"
+                    :services-label="$t('quotes.show.tabs.services')"
+                    :parts-label="$t('quotes.show.tabs.spare_parts')"
+                    :grand-label="$t('common.total')"
                 >
-                    <!-- 1. Header: Vehicle Section (Make Logo, Model/Year, Plate, Color) -->
-                    <component
-                        :is="quote.vehicle?.id ? Link : 'div'"
-                        :href="
-                            quote.vehicle?.id ? route('vehicles.show', quote.vehicle.id) : undefined
-                        "
-                        class="flex items-center justify-between bg-white dark:bg-gray-800/90 border-b border-gray-100 dark:border-gray-700/80 px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700/40 transition-colors group"
-                    >
-                        <!-- Right side (RTL): Make Logo + Model Name -->
-                        <div class="flex items-center gap-3 min-w-0">
-                            <div
-                                class="w-11 h-11 rounded-full border border-gray-200 dark:border-gray-700 p-1 bg-gray-50 dark:bg-gray-900 flex items-center justify-center shrink-0 shadow-inner"
-                            >
+                    <template #footer>
+                        <!-- Customer Signature Badge (if signed) -->
+                        <div
+                            v-if="quote.signature_url"
+                            class="mt-3 p-3 bg-emerald-50/60 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-800 rounded-xl flex items-center justify-between"
+                        >
+                            <div class="flex items-center gap-2.5">
+                                <div
+                                    class="w-7 h-7 rounded-lg bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 flex items-center justify-center shrink-0"
+                                >
+                                    <svg
+                                        class="w-4 h-4"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2.5"
+                                            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                                        />
+                                    </svg>
+                                </div>
+                                <div>
+                                    <p
+                                        class="text-xs font-bold text-emerald-900 dark:text-emerald-300"
+                                    >
+                                        {{ $t('quotes.customer_signed') }}
+                                    </p>
+                                    <p
+                                        v-if="quote.approved_at"
+                                        class="text-[10px] text-emerald-600/70 dark:text-emerald-400/70"
+                                    >
+                                        {{ formatDate(quote.approved_at) }}
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-2">
                                 <img
-                                    v-if="quote.vehicle?.make?.logo_path"
-                                    :src="`/storage/${quote.vehicle.make.logo_path}`"
-                                    :alt="getName(quote.vehicle?.make)"
-                                    class="w-full h-full object-contain"
+                                    :src="quote.signature_url"
+                                    alt="Customer Signature"
+                                    class="h-9 max-w-[130px] object-contain bg-white rounded-lg border border-emerald-100 p-1 shadow-xs shrink-0 cursor-pointer"
+                                    @click="openSignatureModal"
+                                    :title="$t('common.change')"
                                 />
-                                <svg
-                                    v-else
-                                    class="w-6 h-6 text-gray-400"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
+                                <button
+                                    v-if="quote.status !== 'converted'"
+                                    type="button"
+                                    @click="openSignatureModal"
+                                    class="text-[11px] text-emerald-700 hover:text-emerald-800 dark:text-emerald-300 underline font-medium"
                                 >
-                                    <path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        stroke-width="1.5"
-                                        d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z"
-                                    />
-                                    <path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        stroke-width="1.5"
-                                        d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10l3 1h6z"
-                                    />
-                                </svg>
-                            </div>
-                            <div class="min-w-0">
-                                <h4
-                                    class="text-sm font-bold text-gray-900 dark:text-white truncate group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors"
-                                >
-                                    {{ getName(quote.vehicle?.make) }}
-                                    {{
-                                        getName(quote.vehicle?.model) ||
-                                        quote.vehicle?.model_other ||
-                                        ''
-                                    }}
-                                </h4>
-                                <p class="text-[11px] font-medium text-gray-500 dark:text-gray-400">
-                                    {{ quote.vehicle?.year || '—' }}
-                                </p>
+                                    {{ $t('common.change') }}
+                                </button>
                             </div>
                         </div>
-
-                        <!-- Left side (RTL): Plate Display + Color Badge -->
-                        <div class="flex items-center gap-3 shrink-0">
-                            <SaudiPlateDisplay
-                                :plate-number="quote.vehicle?.plate_number"
-                                size="md"
-                            />
-
-                            <div v-if="quote.vehicle?.color" class="relative group/color">
-                                <Tooltip :text="quote.vehicle.color">
-                                    <div
-                                        class="w-6 h-6 rounded-full border-2 border-white dark:border-gray-700 shadow-md ring-1 ring-gray-300 dark:ring-gray-600"
-                                        :style="{
-                                            backgroundColor: getColorHex(quote.vehicle.color),
-                                        }"
-                                    ></div>
-                                </Tooltip>
-                            </div>
-                        </div>
-                    </component>
-
-                    <!-- 2. Middle: Customer Section with colored side-strip -->
-                    <div class="p-4 flex-1 flex flex-col justify-center">
+                        <!-- Customer Signature Button (if NOT signed yet) -->
                         <div
-                            class="flex items-center justify-between border-r-[3.5px] border-teal-500 pr-3.5 pl-2 py-1.5 bg-teal-50/20 dark:bg-teal-950/10 rounded-l-lg"
+                            v-else
+                            class="mt-3 p-3 bg-gray-50 dark:bg-gray-700/30 border border-dashed border-gray-200 dark:border-gray-700 rounded-xl flex items-center justify-between"
                         >
-                            <div class="min-w-0">
-                                <div class="flex items-center gap-2 mb-1">
-                                    <span
-                                        class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-teal-100 dark:bg-teal-900/60 text-teal-700 dark:text-teal-300"
-                                    >
-                                        {{
-                                            quote.customer?.type === 'company'
-                                                ? $t('customers.type.company')
-                                                : $t('customers.type.individual')
-                                        }}
-                                    </span>
-                                    <component
-                                        :is="quote.customer?.id ? Link : 'span'"
-                                        :href="
-                                            quote.customer?.id
-                                                ? route('customers.show', quote.customer.id)
-                                                : undefined
-                                        "
-                                        class="text-sm font-bold text-gray-900 dark:text-gray-100 hover:text-teal-600 dark:hover:text-teal-400 transition-colors truncate"
-                                    >
-                                        {{ quote.customer?.name || '—' }}
-                                    </component>
-                                </div>
-
-                                <!-- Phone / WhatsApp number -->
-                                <div class="flex items-center gap-2">
-                                    <span
-                                        class="text-xs font-mono font-medium text-gray-500 dark:text-gray-400"
-                                        dir="ltr"
-                                    >
-                                        {{ quote.customer?.phone || '—' }}
-                                    </span>
-                                </div>
-                            </div>
-
-                            <!-- Direct WhatsApp button -->
-                            <a
-                                v-if="quote.customer?.phone"
-                                :href="`https://wa.me/${String(quote.customer.phone).replace(/[^0-9]/g, '')}`"
-                                target="_blank"
-                                class="p-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950/40 dark:hover:bg-emerald-900/50 text-emerald-600 dark:text-emerald-400 transition-all shadow-sm flex items-center justify-center shrink-0"
-                                :title="$t('common.open_in_whatsapp')"
-                            >
-                                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                                    <path
-                                        d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"
-                                    />
-                                </svg>
-                            </a>
-                        </div>
-                    </div>
-
-                    <!-- 3. Bottom Data Section: Odometer & VIN with vertical divider -->
-                    <div
-                        class="flex items-center justify-between h-10 px-4 border-t border-gray-100 dark:border-gray-700/80 bg-gray-50/70 dark:bg-gray-900/50"
-                    >
-                        <!-- Odometer item -->
-                        <div
-                            class="flex items-center gap-2 flex-1 min-w-0"
-                            :title="$t('work_orders.form.odometer')"
-                        >
-                            <svg
-                                class="w-4 h-4 text-gray-400 shrink-0"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                            >
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    stroke-width="2"
-                                    d="M13 10V3L4 14h7v7l9-11h-7z"
-                                />
-                            </svg>
-                            <span
-                                class="text-xs font-mono font-semibold text-gray-700 dark:text-gray-300 truncate"
-                                dir="ltr"
-                            >
-                                {{ Number(quote.odometer || 0).toLocaleString() }}
-                                {{ $t('common.km') }}
-                            </span>
-                        </div>
-
-                        <!-- Divider -->
-                        <div class="w-px h-4 bg-gray-200 dark:bg-gray-700 shrink-0 mx-2"></div>
-
-                        <!-- VIN item -->
-                        <div
-                            class="flex items-center gap-2 flex-1 min-w-0 justify-end"
-                            :title="$t('vehicles.form.vin')"
-                        >
-                            <svg
-                                class="w-4 h-4 text-gray-400 shrink-0"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                            >
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    stroke-width="2"
-                                    d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"
-                                />
-                            </svg>
-                            <span
-                                class="text-xs font-mono font-medium text-gray-600 dark:text-gray-400 truncate"
-                                dir="ltr"
-                            >
-                                {{ quote.vehicle?.vin || '—' }}
-                            </span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 2. Left Card: Financial Summary -->
-                <div
-                    class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-4 flex flex-col h-full"
-                >
-                    <h3
-                        class="text-sm font-bold text-gray-900 dark:text-white mb-3 flex items-center gap-2"
-                    >
-                        <div class="w-1.5 h-4 bg-amber-500 rounded-full"></div>
-                        {{ $t('work_orders.cost_and_payment') }}
-                    </h3>
-
-                    <!-- Mobile Card Breakdown (Visible on mobile < sm) -->
-                    <div class="block sm:hidden space-y-3 mb-2">
-                        <!-- Services breakdown if present -->
-                        <div
-                            v-if="totals.services.total > 0"
-                            class="p-3 bg-gray-50 dark:bg-gray-900/40 rounded-xl space-y-1.5 border border-gray-100 dark:border-gray-700/50"
-                        >
-                            <div
-                                class="flex justify-between items-center text-xs font-bold text-gray-900 dark:text-white"
-                            >
-                                <span>{{ $t('quotes.show.tabs.services') }}</span>
-                                <span class="font-mono">
-                                    {{ formatCurrency(totals.services.total) }}
+                            <div class="flex items-center gap-2">
+                                <span class="text-xs text-gray-500 dark:text-gray-400">
+                                    {{ $t('quotes.not_signed_yet') }}
                                 </span>
                             </div>
-                            <div
-                                class="flex justify-between items-center text-[11px] text-gray-500"
-                            >
-                                <span>
-                                    {{ $t('work_orders.price') }}:
-                                    {{ formatCurrency(totals.services.price) }}
-                                </span>
-                                <span
-                                    v-if="totals.services.discount > 0"
-                                    class="text-red-500 italic"
-                                >
-                                    -{{ formatCurrency(totals.services.discount) }}
-                                </span>
-                            </div>
-                        </div>
-
-                        <!-- Spare Parts breakdown if present -->
-                        <div
-                            v-if="totals.parts.total > 0"
-                            class="p-3 bg-gray-50 dark:bg-gray-900/40 rounded-xl space-y-1.5 border border-gray-100 dark:border-gray-700/50"
-                        >
-                            <div
-                                class="flex justify-between items-center text-xs font-bold text-gray-900 dark:text-white"
-                            >
-                                <span>{{ $t('quotes.show.tabs.spare_parts') }}</span>
-                                <span class="font-mono">
-                                    {{ formatCurrency(totals.parts.total) }}
-                                </span>
-                            </div>
-                            <div
-                                class="flex justify-between items-center text-[11px] text-gray-500"
-                            >
-                                <span>
-                                    {{ $t('work_orders.price') }}:
-                                    {{ formatCurrency(totals.parts.price) }}
-                                </span>
-                                <span v-if="totals.parts.discount > 0" class="text-red-500 italic">
-                                    -{{ formatCurrency(totals.parts.discount) }}
-                                </span>
-                            </div>
-                        </div>
-
-                        <!-- Grand Total Card -->
-                        <div
-                            class="p-3.5 bg-amber-50/70 dark:bg-amber-950/20 rounded-xl border border-amber-200/60 dark:border-amber-800/40 space-y-2"
-                        >
-                            <div
-                                class="flex justify-between items-center text-sm font-black text-amber-900 dark:text-amber-300"
-                            >
-                                <span>{{ $t('common.total') }}</span>
-                                <span
-                                    class="font-mono text-base text-amber-600 dark:text-amber-400"
-                                >
-                                    {{ formatCurrency(totals.grand.total) }}
-                                </span>
-                            </div>
-                            <div
-                                v-if="hasTax"
-                                class="flex justify-between items-center text-xs text-gray-500"
-                            >
-                                <span>
-                                    {{
-                                        $t('common.vat_with_rate', {
-                                            rate: quote.tax_rate_snapshot || 15,
-                                        })
-                                    }}
-                                </span>
-                                <span class="font-mono">
-                                    {{ formatCurrency(totals.grand.tax) }}
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Desktop Table (Visible on sm and larger) -->
-                    <div class="hidden sm:block overflow-x-auto flex-1">
-                        <table class="w-full text-xs">
-                            <thead>
-                                <tr
-                                    class="text-gray-400 dark:text-gray-500 border-b border-gray-100 dark:border-gray-700/60"
-                                >
-                                    <th
-                                        class="pb-2 text-start font-bold uppercase tracking-wider align-middle text-[11px]"
-                                    >
-                                        {{ $t('common.type') }}
-                                    </th>
-                                    <th
-                                        class="pb-2 text-center font-bold uppercase tracking-wider align-middle text-[11px]"
-                                    >
-                                        {{ $t('work_orders.price') }}
-                                    </th>
-                                    <th
-                                        class="pb-2 text-center font-bold uppercase tracking-wider text-red-500 italic align-middle text-[11px]"
-                                    >
-                                        {{ $t('work_orders.discount') }}
-                                    </th>
-                                    <th
-                                        class="pb-2 text-center font-bold uppercase tracking-wider align-middle text-[11px]"
-                                    >
-                                        {{ $t('common.amount') }}
-                                    </th>
-                                    <th
-                                        v-if="hasTax"
-                                        class="pb-2 text-center font-bold uppercase tracking-wider italic align-middle text-[11px]"
-                                    >
-                                        {{
-                                            $t('common.vat_with_rate', {
-                                                rate: quote.tax_rate_snapshot || 15,
-                                            })
-                                        }}
-                                    </th>
-                                    <th
-                                        class="pb-2 text-end font-bold uppercase tracking-wider tracking-widest text-gray-900 dark:text-white align-middle text-[11px]"
-                                    >
-                                        {{ $t('common.total') }}
-                                    </th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-gray-50 dark:divide-gray-700/30">
-                                <!-- Services Row -->
-                                <tr class="group">
-                                    <td
-                                        class="py-2 text-start font-bold text-gray-900 dark:text-white align-middle"
-                                    >
-                                        {{ $t('quotes.show.tabs.services') }}
-                                    </td>
-                                    <td
-                                        class="py-2 text-center font-mono text-gray-500 align-middle"
-                                    >
-                                        {{ formatCurrency(totals.services.price) }}
-                                    </td>
-                                    <td
-                                        class="py-2 text-center font-mono text-red-500 italic align-middle"
-                                    >
-                                        {{
-                                            totals.services.discount > 0
-                                                ? '-' + formatCurrency(totals.services.discount)
-                                                : '0.00'
-                                        }}
-                                    </td>
-                                    <td
-                                        class="py-2 text-center font-mono text-gray-500 align-middle"
-                                    >
-                                        {{ formatCurrency(totals.services.amount) }}
-                                    </td>
-                                    <td
-                                        v-if="hasTax"
-                                        class="py-2 text-center font-mono text-gray-500 align-middle"
-                                    >
-                                        {{ formatCurrency(totals.services.tax) }}
-                                    </td>
-                                    <td
-                                        class="py-2 text-end font-bold text-gray-900 dark:text-white font-mono text-sm align-middle"
-                                    >
-                                        {{ formatCurrency(totals.services.total) }}
-                                    </td>
-                                </tr>
-
-                                <!-- Parts Row -->
-                                <tr class="group">
-                                    <td
-                                        class="py-2 text-start font-bold text-gray-900 dark:text-white align-middle"
-                                    >
-                                        {{ $t('quotes.show.tabs.spare_parts') }}
-                                    </td>
-                                    <td
-                                        class="py-2 text-center font-mono text-gray-500 align-middle"
-                                    >
-                                        {{ formatCurrency(totals.parts.price) }}
-                                    </td>
-                                    <td
-                                        class="py-2 text-center font-mono text-red-500 italic align-middle"
-                                    >
-                                        {{
-                                            totals.parts.discount > 0
-                                                ? '-' + formatCurrency(totals.parts.discount)
-                                                : '0.00'
-                                        }}
-                                    </td>
-                                    <td
-                                        class="py-2 text-center font-mono text-gray-500 align-middle"
-                                    >
-                                        {{ formatCurrency(totals.parts.amount) }}
-                                    </td>
-                                    <td
-                                        v-if="hasTax"
-                                        class="py-2 text-center font-mono text-gray-500 align-middle"
-                                    >
-                                        {{ formatCurrency(totals.parts.tax) }}
-                                    </td>
-                                    <td
-                                        class="py-2 text-end font-bold text-gray-900 dark:text-white font-mono text-sm align-middle"
-                                    >
-                                        {{ formatCurrency(totals.parts.total) }}
-                                    </td>
-                                </tr>
-
-                                <!-- Grand Total Row -->
-                                <tr
-                                    class="bg-amber-50/60 dark:bg-amber-900/10 font-bold border-t-2 border-amber-200 dark:border-amber-800"
-                                >
-                                    <td
-                                        class="py-2 text-start text-amber-900 dark:text-amber-400 font-bold uppercase align-middle text-xs"
-                                    >
-                                        {{ $t('common.total') }}
-                                    </td>
-                                    <td
-                                        class="py-2 text-center font-mono text-amber-700 dark:text-amber-300 align-middle"
-                                    >
-                                        {{ formatCurrency(totals.grand.price) }}
-                                    </td>
-                                    <td
-                                        class="py-2 text-center font-mono text-red-600 italic align-middle"
-                                    >
-                                        {{
-                                            totals.grand.discount > 0
-                                                ? '-' + formatCurrency(totals.grand.discount)
-                                                : '0.00'
-                                        }}
-                                    </td>
-                                    <td
-                                        class="py-2 text-center font-mono text-amber-700 dark:text-amber-300 align-middle"
-                                    >
-                                        {{ formatCurrency(totals.grand.amount) }}
-                                    </td>
-                                    <td
-                                        v-if="hasTax"
-                                        class="py-2 text-center font-mono text-amber-700 dark:text-amber-300 align-middle"
-                                    >
-                                        {{ formatCurrency(totals.grand.tax) }}
-                                    </td>
-                                    <td
-                                        class="py-2 text-end font-black text-amber-600 dark:text-amber-400 font-mono text-sm align-middle"
-                                    >
-                                        {{ formatCurrency(totals.grand.total) }}
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-
-                    <!-- Customer Signature Badge (if signed) -->
-                    <div
-                        v-if="quote.signature_url"
-                        class="mt-3 p-3 bg-emerald-50/60 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-800 rounded-xl flex items-center justify-between"
-                    >
-                        <div class="flex items-center gap-2.5">
-                            <div
-                                class="w-7 h-7 rounded-lg bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 flex items-center justify-center shrink-0"
-                            >
-                                <svg
-                                    class="w-4 h-4"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        stroke-width="2.5"
-                                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                                    />
-                                </svg>
-                            </div>
-                            <div>
-                                <p class="text-xs font-bold text-emerald-900 dark:text-emerald-300">
-                                    {{ $t('quotes.customer_signed') }}
-                                </p>
-                                <p
-                                    v-if="quote.approved_at"
-                                    class="text-[10px] text-emerald-600/70 dark:text-emerald-400/70"
-                                >
-                                    {{ formatDate(quote.approved_at) }}
-                                </p>
-                            </div>
-                        </div>
-                        <div class="flex items-center gap-2">
-                            <img
-                                :src="quote.signature_url"
-                                alt="Customer Signature"
-                                class="h-9 max-w-[130px] object-contain bg-white rounded-lg border border-emerald-100 p-1 shadow-xs shrink-0 cursor-pointer"
-                                @click="openSignatureModal"
-                                title="انقر لتعديل التوقيع"
-                            />
                             <button
-                                v-if="quote.status !== 'converted'"
                                 type="button"
                                 @click="openSignatureModal"
-                                class="text-[11px] text-emerald-700 hover:text-emerald-800 dark:text-emerald-300 underline font-medium"
+                                class="px-3 py-1.5 text-xs font-bold bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-900/30 dark:hover:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400 rounded-lg transition-all flex items-center gap-1.5"
                             >
-                                {{ $t('common.change') }}
+                                <span>✍️</span>
+                                <span>{{ $t('work_orders.print_view.customer_signature') }}</span>
                             </button>
                         </div>
-                    </div>
-                    <!-- Customer Signature Button (if NOT signed yet) -->
-                    <div
-                        v-else
-                        class="mt-3 p-3 bg-gray-50 dark:bg-gray-700/30 border border-dashed border-gray-200 dark:border-gray-700 rounded-xl flex items-center justify-between"
-                    >
-                        <div class="flex items-center gap-2">
-                            <span class="text-xs text-gray-500 dark:text-gray-400">
-                                {{ $t('quotes.not_signed_yet') }}
-                            </span>
-                        </div>
-                        <button
-                            type="button"
-                            @click="openSignatureModal"
-                            class="px-3 py-1.5 text-xs font-bold bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-900/30 dark:hover:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400 rounded-lg transition-all flex items-center gap-1.5"
-                        >
-                            <span>✍️</span>
-                            <span>{{ $t('work_orders.print_view.customer_signature') }}</span>
-                        </button>
-                    </div>
-                </div>
+                    </template>
+                </WorkOrderFinancialSummary>
             </div>
 
             <!-- Customer Complaint & Initial Assessment -->
@@ -1336,6 +891,7 @@
 </template>
 
 <script setup>
+import DataTable from '@/Components/Common/DataTable.vue';
 import { ref, computed } from 'vue';
 import { Link, router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
@@ -1361,7 +917,8 @@ import SignaturePad from '@/Components/Common/SignaturePad.vue';
 import PartsDisplay from '@/Components/Common/PartsDisplay.vue';
 import AppPrintButton from '@/Components/Common/AppPrintButton.vue';
 import Tooltip from '@/Components/Tooltip.vue';
-import SaudiPlateDisplay from '@/Components/Vehicles/SaudiPlateDisplay.vue';
+import WorkOrderCustomerCard from '@/Components/WorkOrders/WorkOrderCustomerCard.vue';
+import WorkOrderFinancialSummary from '@/Components/WorkOrders/WorkOrderFinancialSummary.vue';
 
 const props = defineProps({
     quote: Object,
@@ -1382,45 +939,6 @@ const { formatCurrency } = useNumberFormat();
 const { can } = usePermission();
 const { confirm } = useConfirm();
 const { formatDate, formatDateTime } = useFormatters();
-
-function getColorHex(colorName) {
-    if (!colorName) return '#9ca3af';
-    const trimmedColor = colorName.trim();
-    if (props.colors && props.colors.length > 0) {
-        const found = props.colors.find(
-            (c) =>
-                c.name_ar === trimmedColor ||
-                (c.name_en && c.name_en.toLowerCase() === trimmedColor.toLowerCase()) ||
-                c.name === trimmedColor
-        );
-        if (found && found.hex_code) {
-            return found.hex_code.startsWith('#') ? found.hex_code : `#${found.hex_code}`;
-        }
-    }
-    const colorMap = {
-        أبيض: '#ffffff',
-        أسود: '#111827',
-        فضي: '#9ca3af',
-        رمادي: '#4b5563',
-        أحمر: '#dc2626',
-        أزرق: '#2563eb',
-        أخضر: '#16a34a',
-        ذهبي: '#ca8a04',
-        بني: '#78350f',
-        برتقالي: '#ea580c',
-        white: '#ffffff',
-        black: '#111827',
-        silver: '#9ca3af',
-        gray: '#4b5563',
-        red: '#dc2626',
-        blue: '#2563eb',
-        green: '#16a34a',
-        gold: '#ca8a04',
-        brown: '#78350f',
-        orange: '#ea580c',
-    };
-    return colorMap[trimmedColor.toLowerCase()] || colorMap[trimmedColor] || '#9ca3af';
-}
 
 // State
 const showServiceModal = ref(false);

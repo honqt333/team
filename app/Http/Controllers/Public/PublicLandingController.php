@@ -40,6 +40,21 @@ class PublicLandingController extends Controller
 
         $settings = $this->getWebsiteSettings();
 
+        /*
+         * The CMS preview iframe loads this response directly, so the
+         * script restriction applied to the settings screen must also
+         * happen here — before the iframe executes anything. Super
+         * administrators and public visitors keep the saved script
+         * bodies; only a non-privileged admin preview is stripped.
+         */
+        $actor = auth('admin')->user() ?? $request->user();
+
+        if ($isAdminPreview && ! app(WebsiteSettingsController::class)->actorCanManageScripts($actor)) {
+            $settings['chatbot_script'] = '';
+            $settings['scripts_header'] = '';
+            $settings['scripts_footer'] = '';
+        }
+
         return Inertia::render('Public/LandingPreview', [
             'settings' => $settings,
             'plans' => Plan::where('is_active', true)->orderBy('sort_order')->get(),
@@ -226,7 +241,7 @@ class PublicLandingController extends Controller
             'keywords' => $get('website.keywords', ''),
             'logo' => $get('website.logo', ''),
             'favicon' => $get('website.favicon', ''),
-            'primary_color' => $get('website.primary.color', '#4f46e5'),
+            'primary_color' => $get('website.primary.color', '#2563eb'),
 
             'contact_email' => $get('website.contact.email', ''),
             'contact_phone' => $get('website.contact.phone', ''),

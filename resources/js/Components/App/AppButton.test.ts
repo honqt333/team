@@ -25,4 +25,13 @@ describe('AppButton', () => {
         });
         expect(wrapper.find('button').attributes('disabled')).toBeDefined();
     });
+
+    it('applies size class to action variant so PrimaryButton keeps padding and height', () => {
+        const wrapper = mount(AppButton, {
+            props: { variant: 'action' },
+            slots: { default: 'Save' },
+        });
+        expect(wrapper.find('button').classes()).toContain('app-btn--action');
+        expect(wrapper.find('button').classes()).toContain('app-btn--md');
+    });
 });
