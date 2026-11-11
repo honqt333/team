@@ -896,6 +896,7 @@
         <WorkOrderFormModal
             :show="showCreateModal"
             :customers="customers"
+            :dealers="dealers"
             :departments="departments"
             :makes="makes"
             :colors="colors"
@@ -1012,6 +1013,10 @@ const props = defineProps({
         default: null,
     },
     customers: {
+        type: Array,
+        default: () => [],
+    },
+    dealers: {
         type: Array,
         default: () => [],
     },

@@ -10,6 +10,7 @@ use App\Exports\WorkOrdersExport;
 use App\Http\Requests\WorkOrderStoreRequest;
 use App\Http\Requests\WorkOrderUpdateRequest;
 use App\Models\Customer;
+use App\Models\Dealer;
 use App\Models\Department;
 use App\Models\HR\Employee;
 use App\Models\InventoryUnit;
@@ -228,6 +229,10 @@ class WorkOrderController
         $subFilter = request('sub_filter');
 
         $customers = Customer::select('id', 'name', 'phone')->get();
+        $dealers = Dealer::where('tenant_id', auth()->user()->tenant_id)
+            ->active()
+            ->orderBy('name')
+            ->get(['id', 'name', 'name_en', 'type']);
         $makes = VehicleMake::ordered()->get();
         $colors = VehicleColor::active()->ordered()->get();
         $departments = Department::active()->ordered()->get();
@@ -292,6 +297,7 @@ class WorkOrderController
             'statusFilter' => $status,
             'subFilter' => $subFilter,
             'customers' => $customers,
+            'dealers' => $dealers,
             'makes' => $makes,
             'colors' => $colors,
             'modelsByMake' => $modelsByMake,
@@ -357,6 +363,7 @@ class WorkOrderController
 
         $workOrder->load([
             'customer',
+            'dealer:id,name,name_en,type,phone,tax_number',
             'vehicle.make',
             'items' => fn ($q) => $q->withoutGlobalScope('center_scoped')->with([
                 'service' => fn ($q) => $q->withoutGlobalScope('center_scoped')->with(['department' => fn ($q) => $q->withoutGlobalScope('center_scoped')]),
@@ -395,6 +402,10 @@ class WorkOrderController
         });
 
         $customers = Customer::select('id', 'name', 'phone')->get();
+        $dealers = Dealer::where('tenant_id', $workOrder->tenant_id)
+            ->active()
+            ->orderBy('name')
+            ->get(['id', 'name', 'name_en', 'type']);
 
         $makes = VehicleMake::withoutGlobalScope('center_scoped')
             ->where('center_id', $workOrder->center_id)
@@ -487,6 +498,7 @@ class WorkOrderController
             'workOrder' => $workOrder,
             'itemsByDepartment' => $itemsByDepartment,
             'customers' => $customers,
+            'dealers' => $dealers,
             'makes' => $makes,
             'colors' => $colors,
             'modelsByMake' => $modelsByMake,

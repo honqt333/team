@@ -385,6 +385,7 @@
             :show="showEditModal"
             :work-order="workOrder"
             :customers="customers"
+            :dealers="dealers"
             :departments="departments"
             :makes="makes"
             :colors="colors"
@@ -891,6 +892,7 @@ const props = defineProps({
     workOrder: Object,
     itemsByDepartment: { type: Object, default: () => ({}) },
     customers: { type: Array, default: () => [] },
+    dealers: { type: Array, default: () => [] },
     makes: { type: Array, default: () => [] },
     colors: { type: Array, default: () => [] },
     modelsByMake: { type: Object, default: () => ({}) },

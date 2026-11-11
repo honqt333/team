@@ -31,6 +31,7 @@ class Vehicle extends Model
         'tenant_id',
         'center_id',
         'customer_id',
+        'dealer_id',
         'plate_number',
         'make_id',
         'model_id',

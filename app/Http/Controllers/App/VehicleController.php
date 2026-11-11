@@ -8,6 +8,7 @@ use App\Exports\VehiclesExport;
 use App\Http\Requests\VehicleStoreRequest;
 use App\Http\Requests\VehicleUpdateRequest;
 use App\Models\Customer;
+use App\Models\Dealer;
 use App\Models\Department;
 use App\Models\Invoice;
 use App\Models\Service;
@@ -61,7 +62,7 @@ class VehicleController
 
         $vehicles = Vehicle::query()
             ->where('tenant_id', $user->tenant_id)
-            ->with(['customer', 'make', 'model'])
+            ->with(['customer', 'dealer:id,name,name_en,type', 'make', 'model'])
             // Compute the customer's outstanding balance as a correlated
             // subquery in the MAIN query instead of calling
             // Customer::getOutstandingBalance() once per vehicle inside
@@ -165,7 +166,7 @@ class VehicleController
 
         $vehicles = Vehicle::query()
             ->where('tenant_id', $user->tenant_id)
-            ->with(['customer', 'make', 'model'])
+            ->with(['customer', 'dealer:id,name,name_en,type', 'make', 'model'])
             ->when($request->search, function ($query, $search) {
                 $arabicToEnglish = [
                     'أ' => 'A', 'ب' => 'B', 'ح' => 'J', 'د' => 'D', 'ر' => 'R', 'س' => 'S',
@@ -238,9 +239,16 @@ class VehicleController
             ->get()
             ->groupBy('make_id');
 
+        $dealers = Dealer::query()
+            ->where('tenant_id', $user->tenant_id)
+            ->active()
+            ->orderBy('name')
+            ->get(['id', 'name', 'name_en', 'type', 'phone']);
+
         return Inertia::render('Vehicles/Index', [
             'vehicles' => $vehicles,
             'customers' => $customers,
+            'dealers' => $dealers,
             'makes' => $makes,
             'colors' => $colors,
             'modelsByMake' => $modelsByMake,
@@ -299,6 +307,7 @@ class VehicleController
         // Load relationships
         $vehicle->load([
             'customer',
+            'dealer:id,name,name_en,type,phone',
             'make',
             'model',
             'mileageLogs' => fn ($q) => $q->with('creator')->latest(),
@@ -364,6 +373,11 @@ class VehicleController
         return Inertia::render('Vehicles/Show', [
             'vehicle' => $vehicle,
             'customer' => $vehicle->customer,
+            'dealers' => Dealer::query()
+                ->where('tenant_id', $vehicle->tenant_id)
+                ->active()
+                ->orderBy('name')
+                ->get(['id', 'name', 'name_en', 'type']),
             'counts' => $counts,
             'canDelete' => $canDelete,
             'workOrders' => $workOrders,

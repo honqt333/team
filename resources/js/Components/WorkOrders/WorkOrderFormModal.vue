@@ -494,6 +494,46 @@
                                 </div>
                             </div>
                         </div>
+
+                        <!-- Partner / Third-Party Payer -->
+                        <div
+                            v-if="dealers && dealers.length > 0"
+                            class="mt-4 pt-4 border-t border-gray-200/70 dark:border-gray-700/70 space-y-3"
+                            data-field="dealer_id"
+                        >
+                            <div>
+                                <label
+                                    class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1.5"
+                                >
+                                    {{ $t('work_orders.dealer') }}
+                                </label>
+                                <SearchableSelect
+                                    v-model="form.dealer_id"
+                                    :options="dealers"
+                                    :placeholder="$t('work_orders.dealer_placeholder')"
+                                    :option-label="
+                                        (d) =>
+                                            `${d.name}${d.type ? ' — ' + $t(`dealers.types.${d.type}`) : ''}`
+                                    "
+                                    option-value="id"
+                                    teleport
+                                    :error="form.errors.dealer_id"
+                                    @update:modelValue="
+                                        (val) => {
+                                            if (!val) form.is_paid_by_dealer = false;
+                                        }
+                                    "
+                                />
+                            </div>
+                            <div v-if="form.dealer_id" class="pt-1">
+                                <AppToggle
+                                    v-model="form.is_paid_by_dealer"
+                                    :label="$t('work_orders.is_paid_by_dealer')"
+                                    :description="$t('work_orders.is_paid_by_dealer_hint')"
+                                    color="primary"
+                                />
+                            </div>
+                        </div>
                     </div>
 
                     <VehicleOdometerField
@@ -687,6 +727,7 @@
         v-if="showVehicleModal"
         :show="showVehicleModal"
         :customers="customers"
+        :dealers="dealers"
         :makes="makes"
         :colors="colors"
         :modelsByMake="modelsByMake"
@@ -715,6 +756,8 @@ import { useLocalized } from '@/Composables/useLocalized';
 import { useNumberFormat } from '@/Composables/useNumberFormat';
 import SaudiPlateDisplay from '@/Components/Vehicles/SaudiPlateDisplay.vue';
 import BaseModal from '@/Components/BaseModal.vue';
+import SearchableSelect from '@/Components/SearchableSelect.vue';
+import AppToggle from '@/Components/Common/AppToggle.vue';
 import SelectableCard from '@/Components/Common/SelectableCard.vue';
 import VehicleFormModal from '@/Components/Vehicles/VehicleFormModal.vue';
 import VehicleMileageModal from '@/Components/Vehicles/VehicleMileageModal.vue';
@@ -730,6 +773,10 @@ const props = defineProps({
     workOrder: Object,
     vehicle: Object, // Pre-selected vehicle for creation
     customers: Array,
+    dealers: {
+        type: Array,
+        default: () => [],
+    },
     departments: Array,
     makes: Array,
     colors: Array,
@@ -855,6 +902,8 @@ const lastVehicleOdometer = ref(0);
 const form = useForm({
     customer_id: props.workOrder?.customer_id || props.vehicle?.customer_id || '',
     vehicle_id: props.workOrder?.vehicle_id || props.vehicle?.id || '',
+    dealer_id: props.workOrder?.dealer_id || props.vehicle?.dealer_id || '',
+    is_paid_by_dealer: Boolean(props.workOrder?.is_paid_by_dealer || false),
     customer_complaint: props.workOrder?.customer_complaint || '',
     initial_assessment: props.workOrder?.initial_assessment || '',
     odometer: props.workOrder?.odometer ?? props.workOrder?.mileage ?? '',
@@ -913,6 +962,8 @@ watch(
         if (newVal && props.workOrder) {
             form.customer_id = props.workOrder.customer_id || '';
             form.vehicle_id = props.workOrder.vehicle_id || '';
+            form.dealer_id = props.workOrder.dealer_id || '';
+            form.is_paid_by_dealer = Boolean(props.workOrder.is_paid_by_dealer || false);
             form.customer_complaint = props.workOrder.customer_complaint || '';
             form.initial_assessment = props.workOrder.initial_assessment || '';
             form.odometer = props.workOrder.odometer ?? props.workOrder.mileage ?? '';
@@ -960,6 +1011,7 @@ watch(
             selectedVehicle.value = val;
             form.vehicle_id = val.id;
             form.customer_id = val.customer_id;
+            form.dealer_id = val.dealer_id || '';
             form.odometer = val.odometer ?? '';
             lastVehicleOdometer.value = val.odometer || 0;
         }
@@ -1072,6 +1124,7 @@ function selectVehicle(vehicle) {
     selectedVehicle.value = vehicle;
     form.customer_id = vehicle.customer_id || (vehicle.customer ? vehicle.customer.id : '');
     form.vehicle_id = vehicle.id;
+    form.dealer_id = vehicle.dealer_id || '';
     form.odometer = vehicle.odometer ?? '';
     lastVehicleOdometer.value = vehicle.odometer || 0;
 
@@ -1090,6 +1143,8 @@ function clearSelection() {
     lastVehicleOdometer.value = 0;
     form.customer_id = '';
     form.vehicle_id = '';
+    form.dealer_id = '';
+    form.is_paid_by_dealer = false;
     form.contact_name = '';
     form.contact_phone = '';
     searchQuery.value = '';
@@ -1147,6 +1202,8 @@ function resetForm() {
     const today = new Date().toISOString().split('T')[0];
     form.customer_id = '';
     form.vehicle_id = '';
+    form.dealer_id = '';
+    form.is_paid_by_dealer = false;
     form.customer_complaint = '';
     form.initial_assessment = '';
     form.odometer = '';

@@ -29,6 +29,8 @@ class Invoice extends Model
         'tenant_id',
         'center_id',
         'customer_id',
+        'dealer_id',
+        'is_paid_by_dealer',
         'work_order_id',
         'original_invoice_id',
         'invoice_number',
@@ -73,6 +75,7 @@ class Invoice extends Model
     ];
 
     protected $casts = [
+        'is_paid_by_dealer' => 'boolean',
         'issue_date' => 'datetime',
         'supply_date' => 'date',
         'due_date' => 'date',

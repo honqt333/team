@@ -16,6 +16,38 @@
             :color-hex="getColorHex(resolvedVehicle?.color)"
         />
 
+        <!-- Partner / Third-Party Payer Banner -->
+        <div
+            v-if="workOrder?.dealer"
+            class="flex items-center justify-between gap-2 px-4 py-2 border-t border-indigo-100 dark:border-indigo-900/40 bg-indigo-50/70 dark:bg-indigo-950/30 text-xs"
+        >
+            <div class="flex items-center gap-2 min-w-0">
+                <span class="font-bold text-indigo-800 dark:text-indigo-300 truncate">
+                    {{ workOrder.dealer.name }}
+                </span>
+                <span
+                    v-if="workOrder.dealer.type"
+                    class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-white/80 dark:bg-gray-800 text-indigo-700 dark:text-indigo-300"
+                >
+                    {{ $t(`dealers.types.${workOrder.dealer.type}`) }}
+                </span>
+            </div>
+            <span
+                class="shrink-0 px-2 py-0.5 rounded-full text-[10px] font-bold"
+                :class="
+                    workOrder.is_paid_by_dealer
+                        ? 'bg-indigo-600 text-white'
+                        : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200'
+                "
+            >
+                {{
+                    workOrder.is_paid_by_dealer
+                        ? $t('work_orders.billed_to_dealer')
+                        : $t('work_orders.billed_to_customer')
+                }}
+            </span>
+        </div>
+
         <!-- 3. Bottom Data Section: Odometer & VIN with vertical divider -->
         <div
             v-if="resolvedVehicle"

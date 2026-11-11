@@ -29,6 +29,13 @@ class VehicleUpdateRequest extends FormRequest
                 Rule::exists('customers', 'id')
                     ->where('tenant_id', $tenantId),
             ],
+            'dealer_id' => [
+                'nullable',
+                'integer',
+                Rule::exists('dealers', 'id')
+                    ->where('tenant_id', $tenantId)
+                    ->whereNull('deleted_at'),
+            ],
             'plate_number' => [
                 'required',
                 'string',

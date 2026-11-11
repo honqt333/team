@@ -502,7 +502,8 @@
         "voucher_label": "Voucher: {reference}",
         "yes": "Yes",
         "yes_close": "Yes, Close",
-        "page": "Page"
+        "page": "Page",
+        "available_now": "Available Now"
     },
     "communications": {
         "appointment_messages": {
@@ -1733,7 +1734,8 @@
         "welcome": "Welcome, Admin",
         "work_orders_status": "Work Orders by Status",
         "work_orders_this_month": "Work Orders This Month",
-        "workshop_board": "Workshop Board"
+        "workshop_board": "Workshop Board",
+        "new_dealer": "New Partner / Fleet"
     },
     "departments": {
         "add": "Add section",
@@ -3406,7 +3408,8 @@
         "vehicles": "Vehicles",
         "website": "Website",
         "work_orders": "Business cards",
-        "year_suffix": "y"
+        "year_suffix": "y",
+        "dealers": "Partners & Fleet"
     },
     "notifications": {
         "days_ago": "{count} days ago",
@@ -5640,6 +5643,90 @@
             "view_vehicle": "View Vehicle",
             "warehouse_parts_only": "Warehouse Spare Parts Only",
             "yesterday": "Yesterday"
+        },
+        "dealers_report": {
+            "title": "Partners & Third-Party Payers Report",
+            "subtitle": "Analyze work orders, invoices, and receivables across insurance, fleet, and corporate partners",
+            "card_desc": "Receivables and billing breakdown for insurance companies, fleets, and corporate partners.",
+            "print_report": "Print Report",
+            "export_excel": "Export CSV / Excel",
+            "total_summary": "Partners Billing Summary",
+            "total_records": "Total Records",
+            "total_payment_due": "Total Due",
+            "total_amount_paid": "Total Collected",
+            "total_amount_adjusted": "Total Discounts",
+            "total_payment_remaining": "Total Remaining",
+            "total_bad_debt": "Bad Debt",
+            "dealer_billed_total": "Billed to Partners",
+            "customer_billed_total": "Billed to Customers",
+            "currency": "SAR",
+            "search_placeholder": "Search by work order #, partner, customer, plate, or invoice...",
+            "date_from": "From Date",
+            "date_to": "To Date",
+            "date_type": "Date Basis",
+            "date_entry": "Entry Date",
+            "date_closed": "Closed Date",
+            "date_created": "Created Date",
+            "center": "Branch",
+            "all_centers": "All Branches",
+            "dealer": "Partner",
+            "all_dealers": "All Partners",
+            "dealer_type": "Partner Type",
+            "all_types": "All Types",
+            "billing_mode": "Billing Party",
+            "all_billing": "All",
+            "billing_dealer": "Billed to Partner",
+            "billing_customer": "Billed to Customer",
+            "make": "Make",
+            "all_makes": "All Makes",
+            "model": "Model",
+            "all_models": "All Models",
+            "payment_status": "Payment Status",
+            "all_statuses": "All Statuses",
+            "paid": "Paid",
+            "partial": "Partial",
+            "unpaid": "Unpaid",
+            "group_by": "Group By",
+            "group_none": "No Grouping",
+            "group_dealer": "Partner",
+            "group_dealer_type": "Partner Type",
+            "group_billing_mode": "Billing Party",
+            "group_center": "Branch",
+            "expand_all": "Expand All",
+            "collapse_all": "Collapse All",
+            "no_records": "No partner records found matching the selected filters",
+            "no_records_hint": "Try expanding the date range or changing the partner or billing filters",
+            "today": "Today",
+            "yesterday": "Yesterday",
+            "this_week": "This Week",
+            "this_month": "This Month",
+            "this_quarter": "This Quarter",
+            "this_year": "This Year",
+            "all_time": "All Time",
+            "custom_date": "Custom Range",
+            "records_count": "records",
+            "due": "Due",
+            "paid_short": "Collected",
+            "adjusted": "Discounts",
+            "remaining": "Remaining",
+            "col_code": "Work Order / Invoice",
+            "col_dealer": "Partner",
+            "col_billing": "Billing Party",
+            "col_customer": "Customer / Driver",
+            "col_vehicle": "Vehicle",
+            "col_center": "Branch",
+            "col_entry_date": "Entry Date",
+            "col_due": "Total Due",
+            "col_paid": "Paid",
+            "col_adjusted": "Discount",
+            "col_remaining": "Remaining",
+            "col_status": "Status",
+            "types": {
+                "insurance": "Insurance Company",
+                "fleet": "Fleet Management",
+                "rental": "Car Rental",
+                "corporate": "Corporate Partner"
+            }
         }
     },
     "roles": {
@@ -8574,7 +8661,10 @@
             "plate_placeholder": "A B C 1234",
             "vin": "Chassis number",
             "vin_placeholder": "VIN",
-            "year": "Year of manufacture"
+            "year": "Year of manufacture",
+            "dealer": "Partner (Insurance / Fleet / Corporate)",
+            "dealer_placeholder": "Select partner (optional)",
+            "dealer_hint": "Partner is inherited automatically when creating a work order for this vehicle"
         },
         "loading_all_printing": "Loading All Printing",
         "merge": {
@@ -8640,7 +8730,10 @@
             "plate_taken_desc": "The vehicle with this plate number is already registered. You can click on the card below to go directly to its profile:",
             "plate_taken_title": "Plate number already exists!"
         },
-        "view_details": "View Details"
+        "view_details": "View Details",
+        "show": {
+            "dealer": "Linked Partner"
+        }
     },
     "work_orders": {
         "actions": {
@@ -9161,7 +9254,13 @@
             "on_hold": "On Hold",
             "open": "Open",
             "ready_for_qc": "Ready for QC"
-        }
+        },
+        "dealer": "Partner / Third-Party Payer",
+        "dealer_placeholder": "Select partner (Insurance, Fleet, Corporate...)",
+        "is_paid_by_dealer": "Bill Invoice to Partner",
+        "is_paid_by_dealer_hint": "When enabled, tax invoices use the partner legal name and VAT number instead of the customer",
+        "billed_to_dealer": "Billed to Partner",
+        "billed_to_customer": "Billed to Customer"
     },
     "workshop": {
         "board": {
@@ -9277,5 +9376,86 @@
         "with_your_account": ") with your establishment account.",
         "wizard_subtitle": "Connect the system to the Fatoora portal and issue e-invoicing certificates (Phase 2)",
         "wizard_title": "ZATCA Self-Onboarding Wizard"
+    },
+    "dealers": {
+        "title": "Partners & Third-Party Payers",
+        "subtitle": "Manage insurance companies, fleet operators, rental agencies, and corporate partners",
+        "total_count": "partners",
+        "add": "Add New Partner",
+        "edit": "Edit Partner",
+        "search_placeholder": "Search by partner name, phone, email, or VAT number...",
+        "all_types": "All Types",
+        "all_statuses": "All Statuses",
+        "status_active": "Active",
+        "status_inactive": "Inactive",
+        "no_type": "Unspecified",
+        "no_balance": "No balance due",
+        "credit_limit_label": "Credit Limit",
+        "payment_terms_label": "Payment Terms",
+        "types": {
+            "insurance": "Insurance Company",
+            "fleet": "Fleet Management",
+            "rental": "Car Rental",
+            "corporate": "Corporate Partner"
+        },
+        "fields": {
+            "name": "Partner Name (Arabic)",
+            "name_en": "Partner Name (English)",
+            "type": "Partner Type",
+            "contact_name": "Contact Person",
+            "phone": "Phone Number",
+            "whatsapp": "WhatsApp Number",
+            "email": "Email Address",
+            "tax_number": "VAT / Tax Number",
+            "credit_limit": "Credit Limit",
+            "payment_terms_days": "Payment Terms (Days)",
+            "city": "City",
+            "district": "District",
+            "address_line": "Address Line",
+            "building_number": "Building Number",
+            "postal_code": "Postal Code",
+            "region": "Region",
+            "country": "Country",
+            "notes": "Notes",
+            "is_active": "Active Status",
+            "is_active_hint": "Enable partner so it can be linked to vehicles and work orders"
+        },
+        "sections": {
+            "basic_info": "Basic Information",
+            "contact_info": "Contact & Billing Details",
+            "address_info": "National Address"
+        },
+        "columns": {
+            "name": "Partner",
+            "type": "Type",
+            "contact": "Contact",
+            "tax_number": "VAT Number",
+            "vehicles_count": "Vehicles",
+            "work_orders_count": "Work Orders",
+            "outstanding_balance": "Outstanding Balance",
+            "status": "Status",
+            "actions": "Actions"
+        },
+        "show": {
+            "back_to_list": "Back to Partners",
+            "statement_title": "Partner Account Summary",
+            "outstanding_balance": "Outstanding Balance",
+            "credit_limit": "Credit Limit",
+            "payment_terms": "Payment Terms",
+            "days_unit": "days",
+            "vehicles_tab": "Linked Vehicles",
+            "work_orders_tab": "Work Orders",
+            "invoices_tab": "Invoices",
+            "no_vehicles": "No vehicles linked to this partner",
+            "no_work_orders": "No work orders linked to this partner",
+            "no_invoices": "No invoices linked to this partner",
+            "billed_to_dealer": "Billed to Partner",
+            "billed_to_customer": "Billed to Customer",
+            "confirm_delete_title": "Delete Partner",
+            "confirm_delete_message": "Are you sure you want to delete this partner? Deletion is blocked if linked to work orders or invoices.",
+            "cannot_delete_hint": "Cannot delete partner with linked work orders or invoices"
+        },
+        "empty_title": "No partners found",
+        "empty_hint": "Add insurance, fleet, rental, or corporate partners to link them with vehicles and invoices"
     }
 }

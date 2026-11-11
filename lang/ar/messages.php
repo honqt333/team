@@ -354,4 +354,12 @@ return [
         'purchase_invoice_linked_activity' => 'تم ربط فاتورة الشراء :code بكرت العمل',
         'purchase_invoice_unlinked_activity' => 'تم فك ارتباط فاتورة الشراء :code عن كرت العمل',
     ],
+    'dealers' => [
+        'created' => 'تمت إضافة الشريك بنجاح',
+        'updated' => 'تم تحديث بيانات الشريك بنجاح',
+        'activated' => 'تم تفعيل الشريك بنجاح',
+        'deactivated' => 'تم تعطيل الشريك بنجاح',
+        'deleted' => 'تم حذف الشريك بنجاح',
+        'cannot_delete_has_relations' => 'لا يمكن حذف الشريك لوجود كروت عمل أو فواتير مرتبطة به',
+    ],
 ];

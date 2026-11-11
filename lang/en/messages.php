@@ -354,4 +354,12 @@ return [
         'purchase_invoice_linked_activity' => 'Linked purchase invoice :code to work order',
         'purchase_invoice_unlinked_activity' => 'Unlinked purchase invoice :code from work order',
     ],
+    'dealers' => [
+        'created' => 'Partner created successfully',
+        'updated' => 'Partner updated successfully',
+        'activated' => 'Partner activated successfully',
+        'deactivated' => 'Partner deactivated successfully',
+        'deleted' => 'Partner deleted successfully',
+        'cannot_delete_has_relations' => 'Cannot delete partner with linked work orders or invoices',
+    ],
 ];

@@ -48,6 +48,14 @@ class WorkOrderStoreRequest extends FormRequest
                     }
                 },
             ],
+            'dealer_id' => [
+                'nullable',
+                'integer',
+                Rule::exists('dealers', 'id')
+                    ->where('tenant_id', $tenantId)
+                    ->whereNull('deleted_at'),
+            ],
+            'is_paid_by_dealer' => ['nullable', 'boolean'],
             'vehicle_id' => [
                 'required',
                 'integer',

@@ -229,6 +229,31 @@
                 />
             </div>
 
+            <!-- Partner / Dealer Section (Optional) -->
+            <div
+                v-if="dealers && dealers.length > 0"
+                data-field="dealer_id"
+                class="bg-gray-50 dark:bg-gray-900/50 rounded-xl p-4 border border-gray-200 dark:border-gray-700"
+            >
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                    {{ $t('vehicles.form.dealer') }}
+                </label>
+                <SearchableSelect
+                    v-model="form.dealer_id"
+                    :options="dealers"
+                    :placeholder="$t('vehicles.form.dealer_placeholder')"
+                    :option-label="
+                        (d) => `${d.name}${d.type ? ' — ' + $t(`dealers.types.${d.type}`) : ''}`
+                    "
+                    option-value="id"
+                    :label="''"
+                    :error="form.errors.dealer_id"
+                />
+                <p class="mt-1.5 text-xs text-gray-500 dark:text-gray-400">
+                    {{ $t('vehicles.form.dealer_hint') }}
+                </p>
+            </div>
+
             <!-- Vehicle Details Section -->
             <div
                 class="bg-gray-50 dark:bg-gray-900/50 rounded-xl p-4 border border-gray-200 dark:border-gray-700"
@@ -607,6 +632,10 @@ const props = defineProps({
         type: Array,
         default: () => [],
     },
+    dealers: {
+        type: Array,
+        default: () => [],
+    },
     makes: {
         type: Array,
         default: () => [],
@@ -706,6 +735,7 @@ const availableModels = computed(() => {
 
 const form = useForm({
     customer_id: '',
+    dealer_id: '',
     plate_number: '',
     make_id: '',
     model_id: '',
@@ -724,6 +754,7 @@ watch(
     (newVehicle) => {
         if (newVehicle) {
             form.customer_id = newVehicle.customer_id || '';
+            form.dealer_id = newVehicle.dealer_id || '';
             form.plate_number = newVehicle.plate_number || '';
             form.make_id = newVehicle.make_id || (newVehicle.make_other ? '__other__' : '');
             form.model_id = newVehicle.model_id || (newVehicle.model_other ? '__other__' : '');
@@ -942,6 +973,7 @@ function submitForm() {
     // Transform data before sending - convert empty strings to null for optional fields
     form.transform((data) => ({
         ...data,
+        dealer_id: data.dealer_id || null,
         make_id: data.make_id === '__other__' ? null : data.make_id || null,
         model_id: data.model_id === '__other__' ? null : data.model_id || null,
         year: data.year || null,

@@ -19,6 +19,7 @@ use App\Http\Controllers\App\CustomerController;
 use App\Http\Controllers\App\CustomerImportExportController;
 use App\Http\Controllers\App\CustomerMergeController;
 use App\Http\Controllers\App\DashboardController;
+use App\Http\Controllers\App\DealerController;
 use App\Http\Controllers\App\DepartmentController;
 use App\Http\Controllers\App\EmployeePortalController;
 use App\Http\Controllers\App\FeedbackController;
@@ -440,6 +441,14 @@ Route::prefix('app')->middleware(['auth', 'verified', 'tenant.active', 'center.c
     // Customer merge routes
     Route::get('/customers/{customer}/merge', [CustomerMergeController::class, 'mergeData'])->name('customers.merge-data');
     Route::post('/customers/{source}/merge/{target}', [CustomerMergeController::class, 'executeMerge'])->name('customers.execute-merge');
+
+    // Dealers (Fleet, Insurance & Corporate Partners)
+    Route::get('/dealers', [DealerController::class, 'index'])->name('app.dealers.index');
+    Route::post('/dealers', [DealerController::class, 'store'])->name('app.dealers.store');
+    Route::get('/dealers/{dealer}', [DealerController::class, 'show'])->name('app.dealers.show');
+    Route::put('/dealers/{dealer}', [DealerController::class, 'update'])->name('app.dealers.update');
+    Route::patch('/dealers/{dealer}/toggle', [DealerController::class, 'toggleActive'])->name('app.dealers.toggle');
+    Route::delete('/dealers/{dealer}', [DealerController::class, 'destroy'])->name('app.dealers.destroy');
 
     // Vehicle export/print routes
     Route::get('/vehicles/export', [VehicleController::class, 'export'])->name('vehicles.export');
@@ -1101,6 +1110,8 @@ Route::prefix('app')->middleware(['auth', 'verified', 'tenant.active', 'center.c
         Route::get('/services/export', [ReportsController::class, 'exportServices'])->name('services.export');
         Route::get('/customers', [ReportsController::class, 'customers'])->name('customers');
         Route::get('/customers/export', [ReportsController::class, 'exportCustomers'])->name('customers.export');
+        Route::get('/dealers', [ReportsController::class, 'dealers'])->name('dealers');
+        Route::get('/dealers/export', [ReportsController::class, 'exportDealers'])->name('dealers.export');
         Route::get('/suppliers', [ReportsController::class, 'suppliers'])->name('suppliers');
         Route::get('/suppliers/export', [ReportsController::class, 'exportSuppliers'])->name('suppliers.export');
         Route::get('/employees', [ReportsController::class, 'employees'])->name('employees');

@@ -148,7 +148,7 @@ class WorkOrder extends Model
     ];
 
     protected $fillable = [
-        'tenant_id', 'center_id', 'customer_id', 'vehicle_id', 'quote_id', 'code', 'status', 'odometer',
+        'tenant_id', 'center_id', 'customer_id', 'dealer_id', 'is_paid_by_dealer', 'vehicle_id', 'quote_id', 'code', 'status', 'odometer',
         'opened_at', 'closed_at', 'notes', 'hold_reason', 'entry_date', 'expected_end_date', 'customer_complaint',
         'initial_assessment', 'mileage', 'fuel_level', 'contact_name', 'contact_phone', 'tax_enabled_snapshot',
         'pricing_mode_snapshot', 'tax_rate_snapshot', 'currency_code', 'total_excl_tax', 'total_tax', 'total_incl_tax',
@@ -157,6 +157,7 @@ class WorkOrder extends Model
     ];
 
     protected $casts = [
+        'is_paid_by_dealer' => 'boolean',
         'opened_at' => 'datetime', 'closed_at' => 'datetime', 'entry_date' => 'date:Y-m-d',
         'expected_end_date' => 'date:Y-m-d', 'mileage' => 'integer', 'fuel_level' => 'float',
         'tax_breakdown' => 'array', 'reception_signed_at' => 'datetime', 'delivery_signed_at' => 'datetime',

@@ -502,7 +502,8 @@
         "voucher_label": "سند: {reference}",
         "yes": "نعم",
         "yes_close": "نعم، إغلاق",
-        "page": "صفحة"
+        "page": "صفحة",
+        "available_now": "متاح الآن"
     },
     "communications": {
         "appointment_messages": {
@@ -1733,7 +1734,8 @@
         "welcome": "مرحباً أيها المُشرف",
         "work_orders_status": "حالات كروت العمل",
         "work_orders_this_month": "كروت عمل الشهر",
-        "workshop_board": "لوحة المركز"
+        "workshop_board": "لوحة المركز",
+        "new_dealer": "شريك / جهة دفع جديدة"
     },
     "departments": {
         "add": "إضافة قسم",
@@ -3406,7 +3408,8 @@
         "vehicles": "المركبات",
         "website": "الموقع",
         "work_orders": "كروت العمل",
-        "year_suffix": "س"
+        "year_suffix": "س",
+        "dealers": "الشركاء والجهات"
     },
     "notifications": {
         "days_ago": "قبل {count} يوم",
@@ -5640,6 +5643,90 @@
             "view_vehicle": "عرض المركبة",
             "warehouse_parts_only": "قطع الغيار من المستودع فقط",
             "yesterday": "أمس"
+        },
+        "dealers_report": {
+            "title": "تقرير الشركاء وجهات الفوترة",
+            "subtitle": "تحليل كروت العمل والفواتير والأرصدة المستحقة حسب شركات التأمين والأساطيل والشركات",
+            "card_desc": "كشف أرصدة وفواتير شركات التأمين والأساطيل والشركات المتعاقدة مع تفصيل جهة الفوترة.",
+            "print_report": "طباعة التقرير",
+            "export_excel": "تصدير CSV / Excel",
+            "total_summary": "ملخص الشركاء والفوترة",
+            "total_records": "عدد السجلات",
+            "total_payment_due": "إجمالي المستحق",
+            "total_amount_paid": "إجمالي المحصّل",
+            "total_amount_adjusted": "إجمالي الخصومات",
+            "total_payment_remaining": "المتبقي المستحق",
+            "total_bad_debt": "الديون المعدومة",
+            "dealer_billed_total": "مفوتر على الشركاء",
+            "customer_billed_total": "مفوتر على العملاء",
+            "currency": "ر.س",
+            "search_placeholder": "ابحث برقم الكرت، اسم الشريك، العميل، اللوحة، أو الفاتورة...",
+            "date_from": "من تاريخ",
+            "date_to": "إلى تاريخ",
+            "date_type": "تاريخ التصفية",
+            "date_entry": "تاريخ الدخول",
+            "date_closed": "تاريخ الإغلاق",
+            "date_created": "تاريخ الإنشاء",
+            "center": "الفرع",
+            "all_centers": "جميع الفروع",
+            "dealer": "الشريك / الجهة",
+            "all_dealers": "جميع الشركاء",
+            "dealer_type": "تصنيف الشريك",
+            "all_types": "جميع التصنيفات",
+            "billing_mode": "جهة الفوترة",
+            "all_billing": "الكل",
+            "billing_dealer": "الفوترة على الشريك",
+            "billing_customer": "الفوترة على العميل",
+            "make": "الماركة",
+            "all_makes": "جميع الماركات",
+            "model": "الموديل",
+            "all_models": "جميع الموديلات",
+            "payment_status": "حالة السداد",
+            "all_statuses": "جميع الحالات",
+            "paid": "مسدد",
+            "partial": "جزئي",
+            "unpaid": "غير مسدد",
+            "group_by": "تجميع حسب",
+            "group_none": "بدون تجميع",
+            "group_dealer": "الشريك",
+            "group_dealer_type": "تصنيف الشريك",
+            "group_billing_mode": "جهة الفوترة",
+            "group_center": "الفرع",
+            "expand_all": "توسيع الكل",
+            "collapse_all": "طي الكل",
+            "no_records": "لا توجد سجلات مرتبطة بشركاء ضمن الفلتر المحدد",
+            "no_records_hint": "جرّب توسيع النطاق الزمني أو تغيير الشريك أو جهة الفوترة",
+            "today": "اليوم",
+            "yesterday": "أمس",
+            "this_week": "هذا الأسبوع",
+            "this_month": "هذا الشهر",
+            "this_quarter": "هذا الربع",
+            "this_year": "هذه السنة",
+            "all_time": "الكل",
+            "custom_date": "فترة مخصصة",
+            "records_count": "سجل",
+            "due": "المستحق",
+            "paid_short": "المحصّل",
+            "adjusted": "الخصومات",
+            "remaining": "المتبقي",
+            "col_code": "كرت العمل / الفاتورة",
+            "col_dealer": "الشريك",
+            "col_billing": "جهة الفوترة",
+            "col_customer": "العميل / السائق",
+            "col_vehicle": "المركبة",
+            "col_center": "الفرع",
+            "col_entry_date": "تاريخ الدخول",
+            "col_due": "المستحق",
+            "col_paid": "المحصّل",
+            "col_adjusted": "الخصم",
+            "col_remaining": "المتبقي",
+            "col_status": "الحالة",
+            "types": {
+                "insurance": "شركة تأمين",
+                "fleet": "إدارة أسطول",
+                "rental": "تأجير سيارات",
+                "corporate": "شركة / جهة اعتبارية"
+            }
         }
     },
     "roles": {
@@ -8574,7 +8661,10 @@
             "plate_placeholder": "أ ب ج 1234",
             "vin": "رقم الهيكل",
             "vin_placeholder": "VIN",
-            "year": "سنة الصنع"
+            "year": "سنة الصنع",
+            "dealer": "الشريك / جهة التأمين أو الأسطول",
+            "dealer_placeholder": "اختر الشريك (اختياري)",
+            "dealer_hint": "يُورّث الشريك تلقائياً عند فتح كرت عمل جديد لهذه المركبة"
         },
         "loading_all_printing": "جاري تحميل كل المطبوعات...",
         "merge": {
@@ -8640,7 +8730,10 @@
             "plate_taken_desc": "المركبة التي تحمل رقم اللوحة هذا مسجلة مسبقاً بالنظام. يمكنك الضغط على بطاقة المركبة أدناه للانتقال لملفها مباشرة:",
             "plate_taken_title": "رقم اللوحة موجود مسبقاً!"
         },
-        "view_details": "عرض التفاصيل"
+        "view_details": "عرض التفاصيل",
+        "show": {
+            "dealer": "الشريك / الجهة التابع لها"
+        }
     },
     "work_orders": {
         "actions": {
@@ -9161,7 +9254,13 @@
             "on_hold": "متوقف مؤقتاً",
             "open": "مفتوح",
             "ready_for_qc": "بانتظار الفحص"
-        }
+        },
+        "dealer": "الشريك / جهة الدفع الثالثة",
+        "dealer_placeholder": "اختر الشريك (تأمين، أسطول، شركة...)",
+        "is_paid_by_dealer": "إصدار الفاتورة باسم الشريك (الدفع عبر الشريك)",
+        "is_paid_by_dealer_hint": "عند التفعيل ستُصدر الفاتورة الضريبية بالاسم والرقم الضريبي للشريك بدلاً من العميل",
+        "billed_to_dealer": "الفاتورة على الشريك",
+        "billed_to_customer": "الفاتورة على العميل"
     },
     "workshop": {
         "board": {
@@ -9277,5 +9376,86 @@
         "with_your_account": ") بحساب منشأتك.",
         "wizard_subtitle": "ربط المنظومة بمنصة فاتورة وإصدار شهادات الفوترة الإلكترونية (المرحلة الثانية)",
         "wizard_title": "معالج الربط الذاتي مع هيئة الزكاة (ZATCA)"
+    },
+    "dealers": {
+        "title": "الشركاء وجهات الفوترة",
+        "subtitle": "إدارة شركات التأمين والأساطيل والتأجير والشركات المرتبطة بالفوترة الآجلة",
+        "total_count": "شريك",
+        "add": "إضافة شريك جديد",
+        "edit": "تعديل بيانات الشريك",
+        "search_placeholder": "ابحث باسم الشريك، الهاتف، البريد، أو الرقم الضريبي...",
+        "all_types": "جميع التصنيفات",
+        "all_statuses": "جميع الحالات",
+        "status_active": "نشط",
+        "status_inactive": "معطل",
+        "no_type": "بدون تصنيف",
+        "no_balance": "لا يوجد رصيد قائم",
+        "credit_limit_label": "الحد الائتماني",
+        "payment_terms_label": "مهلة السداد",
+        "types": {
+            "insurance": "شركة تأمين",
+            "fleet": "إدارة أسطول",
+            "rental": "تأجير سيارات",
+            "corporate": "شركة / جهة اعتبارية"
+        },
+        "fields": {
+            "name": "اسم الشريك (عربي)",
+            "name_en": "الاسم بالإنجليزية",
+            "type": "تصنيف الشريك",
+            "contact_name": "مسؤول التواصل",
+            "phone": "رقم الهاتف",
+            "whatsapp": "رقم الواتساب",
+            "email": "البريد الإلكتروني",
+            "tax_number": "الرقم الضريبي (VAT)",
+            "credit_limit": "الحد الائتماني",
+            "payment_terms_days": "مهلة السداد (بالأيام)",
+            "city": "المدينة",
+            "district": "الحي",
+            "address_line": "العنوان التفصيلي",
+            "building_number": "رقم المبنى",
+            "postal_code": "الرمز البريدي",
+            "region": "المنطقة",
+            "country": "الدولة",
+            "notes": "ملاحظات",
+            "is_active": "حالة التفعيل",
+            "is_active_hint": "تفعيل الشريك لإتاحة ربطه بالمركبات وكروت العمل"
+        },
+        "sections": {
+            "basic_info": "البيانات الأساسية",
+            "contact_info": "بيانات التواصل والفوترة",
+            "address_info": "العنوان الوطني"
+        },
+        "columns": {
+            "name": "الشريك",
+            "type": "التصنيف",
+            "contact": "التواصل",
+            "tax_number": "الرقم الضريبي",
+            "vehicles_count": "المركبات",
+            "work_orders_count": "كروت العمل",
+            "outstanding_balance": "الرصيد المستحق",
+            "status": "الحالة",
+            "actions": "الإجراءات"
+        },
+        "show": {
+            "back_to_list": "العودة لقائمة الشركاء",
+            "statement_title": "ملخص حساب الشريك",
+            "outstanding_balance": "الرصيد القائم على الشريك",
+            "credit_limit": "الحد الائتماني",
+            "payment_terms": "مهلة السداد",
+            "days_unit": "يوم",
+            "vehicles_tab": "المركبات المرتبطة",
+            "work_orders_tab": "كروت العمل",
+            "invoices_tab": "الفواتير",
+            "no_vehicles": "لا توجد مركبات مرتبطة بهذا الشريك",
+            "no_work_orders": "لا توجد كروت عمل مرتبطة بهذا الشريك",
+            "no_invoices": "لا توجد فواتير مرتبطة بهذا الشريك",
+            "billed_to_dealer": "مفوتر على الشريك",
+            "billed_to_customer": "مفوتر على العميل",
+            "confirm_delete_title": "حذف الشريك",
+            "confirm_delete_message": "هل أنت متأكد من حذف هذا الشريك؟ لا يمكن التراجع إذا لم يكن مرتبطاً بفواتير أو كروت عمل.",
+            "cannot_delete_hint": "لا يمكن حذف شريك مرتبط بكروت عمل أو فواتير"
+        },
+        "empty_title": "لا يوجد شركاء مسجلون",
+        "empty_hint": "أضف شركات التأمين والأساطيل والتأجير لربطها بالمركبات والفوترة"
     }
 }

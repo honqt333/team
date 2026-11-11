@@ -11,6 +11,7 @@ use App\Http\Controllers\App\Reports\FinancialReportsController;
 use App\Http\Controllers\Controller;
 use App\Models\Center;
 use App\Models\Customer;
+use App\Models\Dealer;
 use App\Models\Department;
 use App\Models\GrnItem;
 use App\Models\HR\Employee;
@@ -3947,6 +3948,415 @@ class ReportsController extends Controller
             'bad_debt' => $badDebt,
             'payment_status' => $paymentStatus,
         ];
+    }
+
+    /**
+     * Dedicated Dealers / Partners (Insurance, Fleet & Corporate) Report unit.
+     */
+    public function dealers(Request $request): Response
+    {
+        $this->authorize('viewAny', Dealer::class);
+
+        $tenantId = auth()->user()->tenant_id;
+        $centerId = TenancyContext::centerId();
+
+        $range = (string) ($request->input('range') ?: 'this_month');
+        $startDate = $request->input('start_date');
+        $endDate = $request->input('end_date');
+        $dateType = (string) ($request->input('date_type') ?: 'entry_date');
+        $centerFilter = (string) ($request->input('center_id') ?: 'all');
+        $dealerId = (string) ($request->input('dealer_id') ?: 'all');
+        $dealerType = (string) ($request->input('dealer_type') ?: 'all');
+        $billingMode = (string) ($request->input('billing_mode') ?: 'all');
+        $makeId = (string) ($request->input('make_id') ?: 'all');
+        $modelId = (string) ($request->input('model_id') ?: 'all');
+        $paymentStatus = (string) ($request->input('payment_status') ?: 'all');
+        $groupBy = (string) ($request->input('group_by') ?: 'none');
+        $search = trim((string) ($request->input('search') ?? ''));
+
+        [$from, $to] = $this->resolveDateRange($range, $startDate, $endDate);
+
+        $query = $this->buildDealersQuery(
+            $tenantId,
+            $centerId,
+            $from,
+            $to,
+            $dateType,
+            $centerFilter,
+            $dealerId,
+            $dealerType,
+            $billingMode,
+            $makeId,
+            $modelId,
+            $paymentStatus,
+            $search
+        );
+
+        $kpiQuery = clone $query;
+        $totalRecords = (int) (clone $kpiQuery)->count();
+        $totalPaymentDue = (float) (clone $kpiQuery)->sum('total_incl_tax');
+        $dealerBilledTotal = (float) (clone $kpiQuery)->where('is_paid_by_dealer', true)->sum('total_incl_tax');
+        $customerBilledTotal = max(0, $totalPaymentDue - $dealerBilledTotal);
+
+        $woIdsQuery = (clone $kpiQuery)->select('work_orders.id');
+
+        $totalPaidCollected = (float) DB::table('payments')
+            ->whereIn('work_order_id', $woIdsQuery)
+            ->whereNull('deleted_at')
+            ->whereIn('type', ['payment', 'bad_debt'])
+            ->sum('amount');
+
+        $totalRefunded = (float) DB::table('payments')
+            ->whereIn('work_order_id', $woIdsQuery)
+            ->whereNull('deleted_at')
+            ->where('type', 'refund')
+            ->sum('amount');
+
+        $totalAmountPaid = $totalPaidCollected - $totalRefunded;
+
+        $totalBadDebt = (float) DB::table('payments')
+            ->whereIn('work_order_id', $woIdsQuery)
+            ->whereNull('deleted_at')
+            ->where('type', 'bad_debt')
+            ->sum('amount');
+
+        $itemsDiscount = (float) DB::table('work_order_items')
+            ->whereIn('work_order_id', $woIdsQuery)
+            ->sum('discount_amount');
+
+        $partsDiscount = (float) DB::table('work_order_item_parts')
+            ->whereIn('work_order_id', $woIdsQuery)
+            ->whereNull('deleted_at')
+            ->sum('discount');
+
+        $totalAmountAdjusted = $itemsDiscount + $partsDiscount;
+        $totalPaymentRemaining = max(0, $totalPaymentDue - $totalAmountPaid);
+
+        $relations = [
+            'center:id,name',
+            'dealer:id,name,name_en,type,phone,tax_number',
+            'customer:id,name,phone,type,tax_number',
+            'vehicle:id,plate_number,make_id,model_id,make_other,model_other,year,odometer',
+            'vehicle.make:id,name_ar,name_en',
+            'vehicle.model:id,name_ar,name_en',
+            'invoice:id,work_order_id,invoice_number,status,total_incl_tax,total_paid,is_paid_by_dealer',
+            'payments:id,work_order_id,amount,type,payment_method,payment_date',
+            'items:id,work_order_id,discount_amount,status',
+            'parts:id,work_order_id,discount,status,deleted_at',
+        ];
+
+        $records = null;
+        $groupedRecords = null;
+
+        if ($groupBy !== 'none') {
+            $allRecords = (clone $query)->with($relations)->orderByDesc('id')->get();
+
+            $grouped = match ($groupBy) {
+                'dealer' => $allRecords->groupBy(fn ($wo) => (string) ($wo->dealer_id ?: 'unassigned')),
+                'dealer_type' => $allRecords->groupBy(fn ($wo) => $wo->dealer?->type ?: 'corporate'),
+                'billing_mode' => $allRecords->groupBy(fn ($wo) => $wo->is_paid_by_dealer ? 'dealer_billed' : 'customer_billed'),
+                'center' => $allRecords->groupBy(fn ($wo) => $wo->center_id ? (string) $wo->center_id : 'default'),
+                default => collect([$allRecords]),
+            };
+
+            $groupedRecords = $grouped->map(function ($items, $key) use ($groupBy) {
+                $groupDue = (float) $items->sum('total_incl_tax');
+                $groupPaid = (float) $items->sum(fn ($wo) => $wo->total_paid);
+                $groupAdjusted = (float) $items->sum(fn ($wo) => $wo->total_discount);
+                $groupRemaining = max(0, $groupDue - $groupPaid);
+                $groupBadDebt = (float) $items->sum(fn ($wo) => $wo->bad_debt);
+
+                $label = match ($groupBy) {
+                    'dealer_type' => __('reports.dealers_report.types.'.$key),
+                    'billing_mode' => $key === 'dealer_billed'
+                        ? __('reports.dealers_report.billing_dealer')
+                        : __('reports.dealers_report.billing_customer'),
+                    'dealer' => $items->first()?->dealer?->name ?? __('reports.dealers_report.unassigned'),
+                    'center' => $items->first()?->center?->name ?? __('reports.dealers_report.default_center'),
+                    default => (string) $key,
+                };
+
+                return [
+                    'group_key' => (string) $key,
+                    'group_label' => $label,
+                    'total_records' => $items->count(),
+                    'total_payment_due' => $groupDue,
+                    'total_amount_paid' => $groupPaid,
+                    'total_amount_adjusted' => $groupAdjusted,
+                    'total_payment_remaining' => $groupRemaining,
+                    'total_bad_debt' => $groupBadDebt,
+                    'items' => $items->map(fn ($wo) => $this->transformDealerReportRow($wo))->values(),
+                ];
+            })->values();
+        } else {
+            $paginated = (clone $query)->with($relations)->orderByDesc('id')->paginate(25)->withQueryString();
+            $paginated->getCollection()->transform(fn ($wo) => $this->transformDealerReportRow($wo));
+            $records = $paginated;
+        }
+
+        $centers = Center::where('tenant_id', $tenantId)->select('id', 'name')->orderBy('name')->get();
+        $dealers = Dealer::where('tenant_id', $tenantId)->select('id', 'name', 'name_en', 'type')->orderBy('name')->get();
+        $makes = VehicleMake::select('id', 'name_ar', 'name_en')->orderBy('name_ar')->get();
+        $models = ($makeId !== 'all')
+            ? VehicleModel::where('make_id', (int) $makeId)->select('id', 'make_id', 'name_ar', 'name_en')->orderBy('name_ar')->get()
+            : collect();
+
+        $tenant = Tenant::find($tenantId);
+        $currentCenter = $centerId ? Center::find($centerId) : null;
+
+        return Inertia::render('Reports/Dealers', [
+            'filters' => [
+                'range' => $range,
+                'start_date' => $from?->format('Y-m-d') ?? $startDate,
+                'end_date' => $to?->format('Y-m-d') ?? $endDate,
+                'date_type' => $dateType,
+                'center_id' => $centerFilter,
+                'dealer_id' => $dealerId,
+                'dealer_type' => $dealerType,
+                'billing_mode' => $billingMode,
+                'make_id' => $makeId,
+                'model_id' => $modelId,
+                'payment_status' => $paymentStatus,
+                'group_by' => $groupBy,
+                'search' => $search,
+            ],
+            'kpis' => [
+                'total_records' => $totalRecords,
+                'total_payment_due' => $totalPaymentDue,
+                'total_amount_paid' => $totalAmountPaid,
+                'total_amount_adjusted' => $totalAmountAdjusted,
+                'total_payment_remaining' => $totalPaymentRemaining,
+                'total_bad_debt' => $totalBadDebt,
+                'dealer_billed_total' => $dealerBilledTotal,
+                'customer_billed_total' => $customerBilledTotal,
+            ],
+            'records' => $records,
+            'groupedRecords' => $groupedRecords,
+            'centers' => $centers,
+            'dealers' => $dealers,
+            'dealerTypes' => Dealer::TYPES,
+            'makes' => $makes,
+            'models' => $models,
+            'companyInfo' => [
+                'name' => $tenant->name ?? config('app.name_ar', 'خدمة برو'),
+                'commercial_register' => $tenant->cr_number ?? null,
+                'tax_number' => null,
+                'address' => $tenant->address ?? null,
+                'phone' => $tenant->phone ?? null,
+                'center_name' => $currentCenter->name ?? null,
+            ],
+        ]);
+    }
+
+    /**
+     * Export Dealers Report as CSV.
+     */
+    public function exportDealers(Request $request): StreamedResponse
+    {
+        $this->authorize('viewAny', Dealer::class);
+
+        $tenantId = auth()->user()->tenant_id;
+        $centerId = TenancyContext::centerId();
+
+        $range = (string) ($request->input('range') ?: 'this_month');
+        $startDate = $request->input('start_date');
+        $endDate = $request->input('end_date');
+        $dateType = (string) ($request->input('date_type') ?: 'entry_date');
+        $centerFilter = (string) ($request->input('center_id') ?: 'all');
+        $dealerId = (string) ($request->input('dealer_id') ?: 'all');
+        $dealerType = (string) ($request->input('dealer_type') ?: 'all');
+        $billingMode = (string) ($request->input('billing_mode') ?: 'all');
+        $makeId = (string) ($request->input('make_id') ?: 'all');
+        $modelId = (string) ($request->input('model_id') ?: 'all');
+        $paymentStatus = (string) ($request->input('payment_status') ?: 'all');
+        $search = trim((string) ($request->input('search') ?? ''));
+
+        [$from, $to] = $this->resolveDateRange($range, $startDate, $endDate);
+
+        $query = $this->buildDealersQuery(
+            $tenantId,
+            $centerId,
+            $from,
+            $to,
+            $dateType,
+            $centerFilter,
+            $dealerId,
+            $dealerType,
+            $billingMode,
+            $makeId,
+            $modelId,
+            $paymentStatus,
+            $search
+        );
+
+        $relations = [
+            'center:id,name',
+            'dealer:id,name,name_en,type,phone,tax_number',
+            'customer:id,name,phone,type,tax_number',
+            'vehicle:id,plate_number,make_id,model_id,make_other,model_other,year,odometer',
+            'vehicle.make:id,name_ar,name_en',
+            'vehicle.model:id,name_ar,name_en',
+            'invoice:id,work_order_id,invoice_number,status,total_incl_tax,total_paid,is_paid_by_dealer',
+            'payments:id,work_order_id,amount,type,payment_method,payment_date',
+            'items:id,work_order_id,discount_amount,status',
+            'parts:id,work_order_id,discount,status,deleted_at',
+        ];
+
+        $filename = 'dealers_report_'.Carbon::now()->format('Y-m-d_His').'.csv';
+
+        return response()->streamDownload(function () use ($query, $relations) {
+            $handle = fopen('php://output', 'w');
+            fwrite($handle, "\xEF\xBB\xBF");
+
+            fputcsv($handle, [
+                __('reports.dealers_report.col_code'),
+                __('reports.dealers_report.col_center'),
+                __('reports.dealers_report.col_entry_date'),
+                __('reports.dealers_report.col_dealer'),
+                __('reports.dealers_report.col_dealer_type'),
+                __('reports.dealers_report.col_billing_party'),
+                __('reports.dealers_report.col_customer'),
+                __('reports.dealers_report.col_vehicle'),
+                __('reports.dealers_report.col_plate'),
+                __('reports.dealers_report.col_invoice'),
+                __('reports.dealers_report.col_due'),
+                __('reports.dealers_report.col_paid'),
+                __('reports.dealers_report.col_adjusted'),
+                __('reports.dealers_report.col_remaining'),
+                __('reports.dealers_report.col_status'),
+            ]);
+
+            (clone $query)
+                ->with($relations)
+                ->orderByDesc('id')
+                ->chunk(250, function ($records) use ($handle) {
+                    foreach ($records as $wo) {
+                        $row = $this->transformDealerReportRow($wo);
+                        $statusLabel = __('reports.dealers_report.status_'.$row['payment_status']);
+                        $billingParty = $row['is_paid_by_dealer']
+                            ? __('reports.dealers_report.billing_dealer')
+                            : __('reports.dealers_report.billing_customer');
+                        $typeLabel = $row['dealer']['type']
+                            ? __('reports.dealers_report.types.'.$row['dealer']['type'])
+                            : '';
+
+                        fputcsv($handle, [
+                            $row['code'],
+                            $row['center_name'],
+                            $row['entry_date'],
+                            $row['dealer']['name'],
+                            $typeLabel,
+                            $billingParty,
+                            $row['customer']['name'],
+                            $row['vehicle']['name'],
+                            $row['vehicle']['plate_number'],
+                            $row['invoice']['invoice_number'] ?? '',
+                            number_format($row['payment_due'], 2, '.', ''),
+                            number_format($row['amount_paid'], 2, '.', ''),
+                            number_format($row['amount_adjusted'], 2, '.', ''),
+                            number_format($row['payment_remaining'], 2, '.', ''),
+                            $statusLabel,
+                        ]);
+                    }
+                });
+
+            fclose($handle);
+        }, $filename, [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+        ]);
+    }
+
+    /**
+     * Build the filtered WorkOrder query for Dealers Report.
+     */
+    private function buildDealersQuery(
+        int $tenantId,
+        ?int $centerId,
+        ?Carbon $from,
+        ?Carbon $to,
+        string $dateType,
+        string $centerFilter,
+        string $dealerId,
+        string $dealerType,
+        string $billingMode,
+        string $makeId,
+        string $modelId,
+        string $paymentStatus,
+        string $search
+    ): Builder {
+        $query = $this->buildCustomersQuery(
+            $tenantId,
+            $centerId,
+            $from,
+            $to,
+            $dateType,
+            $centerFilter,
+            'all',
+            'all',
+            $makeId,
+            $modelId,
+            $paymentStatus,
+            ''
+        )->whereNotNull('dealer_id');
+
+        if ($dealerId !== 'all' && $dealerId !== '') {
+            $query->where('dealer_id', (int) $dealerId);
+        }
+
+        if ($dealerType !== 'all' && $dealerType !== '') {
+            $query->whereHas('dealer', function (Builder $dq) use ($dealerType) {
+                $dq->where('type', $dealerType);
+            });
+        }
+
+        if ($billingMode === 'dealer_billed') {
+            $query->where('is_paid_by_dealer', true);
+        } elseif ($billingMode === 'customer_billed') {
+            $query->where('is_paid_by_dealer', false);
+        }
+
+        if ($search !== '') {
+            $query->where(function (Builder $sq) use ($search) {
+                $sq->where('code', 'like', "%{$search}%")
+                    ->orWhereHas('dealer', function (Builder $dq) use ($search) {
+                        $dq->where('name', 'like', "%{$search}%")
+                            ->orWhere('name_en', 'like', "%{$search}%")
+                            ->orWhere('phone', 'like', "%{$search}%")
+                            ->orWhere('tax_number', 'like', "%{$search}%");
+                    })
+                    ->orWhereHas('customer', function (Builder $cq) use ($search) {
+                        $cq->where('name', 'like', "%{$search}%")
+                            ->orWhere('phone', 'like', "%{$search}%");
+                    })
+                    ->orWhereHas('vehicle', function (Builder $vq) use ($search) {
+                        $vq->where('plate_number', 'like', "%{$search}%");
+                    })
+                    ->orWhereHas('invoice', function (Builder $iq) use ($search) {
+                        $iq->where('invoice_number', 'like', "%{$search}%");
+                    });
+            });
+        }
+
+        return $query;
+    }
+
+    /**
+     * Transform a WorkOrder into a Dealer Report row array.
+     */
+    private function transformDealerReportRow(WorkOrder $wo): array
+    {
+        $row = $this->transformCustomerReportRow($wo);
+        $row['is_paid_by_dealer'] = (bool) $wo->is_paid_by_dealer;
+        $row['dealer'] = [
+            'id' => $wo->dealer?->id,
+            'name' => $wo->dealer?->name ?? '',
+            'name_en' => $wo->dealer?->name_en ?? '',
+            'type' => $wo->dealer?->type ?? '',
+            'phone' => $wo->dealer?->phone ?? '',
+            'tax_number' => $wo->dealer?->tax_number ?? '',
+        ];
+
+        return $row;
     }
 
     /**

@@ -235,6 +235,33 @@
                         {{ $t('nav.customers') }}
                     </a>
 
+                    <!-- 5b. الشركاء -->
+                    <Link
+                        v-if="can('crm.customers.view')"
+                        :href="route('app.dealers.index')"
+                        :class="[
+                            'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors',
+                            isActive('/app/dealers')
+                                ? 'bg-indigo-50 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300'
+                                : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700',
+                        ]"
+                    >
+                        <svg
+                            class="w-5 h-5 flex-shrink-0"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
+                            />
+                        </svg>
+                        {{ $t('nav.dealers') }}
+                    </Link>
+
                     <!-- 6. المركبات -->
                     <a
                         v-if="can('crm.vehicles.view')"
@@ -1718,7 +1745,7 @@
                             @click="toggleTopNavDropdown('crm')"
                             :class="[
                                 'flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors',
-                                isAnyActive(['/app/customers', '/app/vehicles'])
+                                isAnyActive(['/app/customers', '/app/dealers', '/app/vehicles'])
                                     ? 'bg-indigo-50 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300 font-semibold'
                                     : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700',
                             ]"
@@ -1787,6 +1814,32 @@
                                     </svg>
                                     <span>{{ $t('nav.customers') }}</span>
                                 </a>
+                                <Link
+                                    v-if="can('crm.customers.view')"
+                                    :href="route('app.dealers.index')"
+                                    @click="closeTopNavDropdown"
+                                    :class="[
+                                        'flex items-center gap-2.5 px-3 py-2 text-xs font-medium transition-colors',
+                                        isActive('/app/dealers')
+                                            ? 'bg-indigo-50 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300'
+                                            : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-750',
+                                    ]"
+                                >
+                                    <svg
+                                        class="w-4 h-4 flex-shrink-0"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
+                                        />
+                                    </svg>
+                                    <span>{{ $t('nav.dealers') }}</span>
+                                </Link>
                                 <a
                                     v-if="can('crm.vehicles.view')"
                                     href="/app/vehicles"
@@ -2818,6 +2871,33 @@
                         {{ $t('nav.customers') }}
                     </a>
 
+                    <!-- 5b. الشركاء -->
+                    <Link
+                        v-if="can('crm.customers.view')"
+                        :href="route('app.dealers.index')"
+                        :class="[
+                            'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors',
+                            isActive('/app/dealers')
+                                ? 'bg-indigo-50 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300'
+                                : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700',
+                        ]"
+                    >
+                        <svg
+                            class="w-5 h-5 flex-shrink-0"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
+                            />
+                        </svg>
+                        {{ $t('nav.dealers') }}
+                    </Link>
+
                     <!-- 6. المركبات -->
                     <a
                         v-if="can('crm.vehicles.view')"
@@ -3623,6 +3703,7 @@ const quickCreateItems = computed(() => {
     }
     if (can('crm.customers.create') || isAnyAdmin()) {
         items.push({ label: t('dashboard.new_customer'), href: '/app/customers' });
+        items.push({ label: t('dashboard.new_dealer'), href: '/app/dealers' });
     }
     if (can('crm.vehicles.create') || isAnyAdmin()) {
         items.push({ label: t('dashboard.new_vehicle'), href: '/app/vehicles' });

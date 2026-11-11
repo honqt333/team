@@ -19,7 +19,7 @@ class UpdateWorkOrderAction
         return DB::transaction(function () use ($workOrder, $user, $data) {
             // Update main work order fields
             $fields = [
-                'customer_id', 'vehicle_id', 'status', 'notes',
+                'customer_id', 'dealer_id', 'is_paid_by_dealer', 'vehicle_id', 'status', 'notes',
                 'customer_complaint', 'initial_assessment', 'odometer', 'fuel_level',
                 'contact_name', 'contact_phone', 'entry_date', 'expected_end_date',
             ];
@@ -28,6 +28,10 @@ class UpdateWorkOrderAction
                 if (array_key_exists($field, $data)) {
                     $workOrder->{$field} = $data[$field];
                 }
+            }
+
+            if (empty($workOrder->dealer_id)) {
+                $workOrder->is_paid_by_dealer = false;
             }
             $workOrder->save();
 

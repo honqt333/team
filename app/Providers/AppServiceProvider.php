@@ -10,6 +10,7 @@ use App\Models\AppointmentMessageDelivery;
 use App\Models\Center;
 use App\Models\CompanyTransaction;
 use App\Models\Customer;
+use App\Models\Dealer;
 use App\Models\Department;
 use App\Models\HR\Attendance;
 use App\Models\HR\Employee;
@@ -45,6 +46,7 @@ use App\Observers\WorkOrderObserver;
 use App\Policies\AppointmentMessageDeliveryPolicy;
 use App\Policies\CompanyTransactionPolicy;
 use App\Policies\CustomerPolicy;
+use App\Policies\DealerPolicy;
 use App\Policies\DepartmentPolicy;
 use App\Policies\EmployeeContractPolicy;
 use App\Policies\HR\AttendancePolicy;
@@ -214,6 +216,7 @@ class AppServiceProvider extends ServiceProvider
 
         // Register policies
         Gate::policy(Customer::class, CustomerPolicy::class);
+        Gate::policy(Dealer::class, DealerPolicy::class);
         Gate::policy(CompanyTransaction::class, CompanyTransactionPolicy::class);
         Gate::policy(Vehicle::class, VehiclePolicy::class);
         Gate::policy(WorkOrder::class, WorkOrderPolicy::class);

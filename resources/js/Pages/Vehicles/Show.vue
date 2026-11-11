@@ -1743,6 +1743,7 @@
             :show="showEditModal"
             :vehicle="vehicle"
             :customers="[vehicle.customer]"
+            :dealers="dealers"
             :makes="makes"
             :colors="colors"
             :modelsByMake="modelsByMake"
@@ -1759,6 +1760,7 @@
             v-if="showWorkOrderModal"
             :show="showWorkOrderModal"
             :customers="[vehicle.customer]"
+            :dealers="dealers"
             :makes="makes"
             :colors="colors"
             :modelsByMake="modelsByMake"
@@ -1814,6 +1816,7 @@ const props = defineProps({
     quotes: Array,
     invoices: { type: Array, default: () => [] },
     makes: { type: Array, default: () => [] },
+    dealers: { type: Array, default: () => [] },
     colors: { type: Array, default: () => [] },
     modelsByMake: { type: Object, default: () => ({}) },
     departments: { type: Array, default: () => [] },

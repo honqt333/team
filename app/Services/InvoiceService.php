@@ -45,15 +45,17 @@ class InvoiceService
             $activeItemIds = $activeItems->pluck('id')->all();
 
             $customer = $workOrder->customer;
+            $dealer = ($workOrder->is_paid_by_dealer && $workOrder->dealer_id) ? $workOrder->dealer : null;
+            $billedParty = $dealer ?? $customer;
             $customerAddress = null;
 
-            if ($customer) {
+            if ($billedParty) {
                 $addressParts = array_filter([
-                    $customer->building_number ? __('common.building').' '.$customer->building_number : null,
-                    $customer->address_line ?: null,
-                    $customer->district ? __('common.district').' '.$customer->district : null,
-                    $customer->city ?: null,
-                    $customer->postal_code ? __('common.postal_code').' '.$customer->postal_code : null,
+                    $billedParty->building_number ? __('common.building').' '.$billedParty->building_number : null,
+                    $billedParty->address_line ?: null,
+                    $billedParty->district ? __('common.district').' '.$billedParty->district : null,
+                    $billedParty->city ?: null,
+                    $billedParty->postal_code ? __('common.postal_code').' '.$billedParty->postal_code : null,
                 ]);
                 $customerAddress = ! empty($addressParts) ? implode('، ', $addressParts) : null;
             }
@@ -63,6 +65,8 @@ class InvoiceService
                 'tenant_id' => $workOrder->tenant_id,
                 'center_id' => $workOrder->center_id,
                 'customer_id' => $workOrder->customer_id,
+                'dealer_id' => $workOrder->dealer_id,
+                'is_paid_by_dealer' => (bool) ($workOrder->dealer_id && $workOrder->is_paid_by_dealer),
                 'work_order_id' => $workOrder->id,
                 'invoice_number' => 'DRAFT-'.$workOrder->code, // Temporary
                 'issue_date' => now(),
@@ -71,9 +75,9 @@ class InvoiceService
                 'notes' => $additionalData['notes'] ?? null,
                 'status' => 'draft',
                 'payment_status' => 'unpaid',
-                // Snapshots
-                'customer_name_snapshot' => $customer?->name,
-                'customer_vat_snapshot' => $customer?->tax_number,
+                // Snapshots (bills Dealer when is_paid_by_dealer is true)
+                'customer_name_snapshot' => $billedParty?->name,
+                'customer_vat_snapshot' => $billedParty?->tax_number,
                 'customer_address_snapshot' => $customerAddress,
 
                 // Tax settings

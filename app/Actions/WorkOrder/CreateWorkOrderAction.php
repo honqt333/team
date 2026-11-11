@@ -19,11 +19,16 @@ class CreateWorkOrderAction
             // Generate sequential code with locking
             $code = WorkOrder::generateCode($user->tenant_id, $user->current_center_id);
 
+            $dealerId = $data['dealer_id'] ?? Vehicle::where('id', $data['vehicle_id'])->value('dealer_id');
+            $isPaidByDealer = ! empty($dealerId) && (bool) ($data['is_paid_by_dealer'] ?? false);
+
             // Create work order
             $workOrder = WorkOrder::create([
                 'tenant_id' => $user->tenant_id,
                 'center_id' => $user->current_center_id,
                 'customer_id' => $data['customer_id'],
+                'dealer_id' => $dealerId,
+                'is_paid_by_dealer' => $isPaidByDealer,
                 'vehicle_id' => $data['vehicle_id'],
                 'code' => $code,
                 'status' => $data['status'] ?? WorkOrder::STATUS_OPEN,

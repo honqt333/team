@@ -453,6 +453,7 @@
             :show="showModal"
             :vehicle="selectedVehicle"
             :customers="customers"
+            :dealers="dealers"
             :makes="makes"
             :colors="colors"
             :modelsByMake="modelsByMake"
@@ -560,6 +561,10 @@ const props = defineProps({
         default: null,
     },
     customers: {
+        type: Array,
+        default: () => [],
+    },
+    dealers: {
         type: Array,
         default: () => [],
     },

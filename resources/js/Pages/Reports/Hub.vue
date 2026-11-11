@@ -269,8 +269,40 @@
                     <span
                         class="mt-2 inline-block px-2.5 py-0.5 text-[10px] font-semibold rounded-full bg-sky-100 dark:bg-sky-900/60 text-sky-700 dark:text-sky-300"
                     >
-                        متاح الآن
+                        {{ $t('common.available_now') }}
                     </span>
+                </Link>
+
+                <!-- Dealers / Partners -->
+                <Link
+                    :href="route('app.reports.dealers')"
+                    class="group relative bg-gradient-to-br from-indigo-50 to-violet-50 dark:from-indigo-900/20 dark:to-violet-900/20 rounded-2xl p-7 border border-indigo-200 dark:border-indigo-800 hover:border-indigo-400 dark:hover:border-indigo-600 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 text-center"
+                >
+                    <div
+                        class="w-16 h-16 mx-auto rounded-2xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center shadow-lg shadow-indigo-500/30 group-hover:scale-110 transition-all duration-300"
+                    >
+                        <svg
+                            class="w-8 h-8 text-white"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
+                            />
+                        </svg>
+                    </div>
+                    <h3
+                        class="mt-4 text-base font-bold text-gray-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors"
+                    >
+                        {{ $t('reports.partners') }}
+                    </h3>
+                    <p class="mt-1.5 text-xs text-gray-500 dark:text-gray-400">
+                        {{ $t('reports.dealers_report.card_desc') }}
+                    </p>
                 </Link>
 
                 <!-- Partners -->

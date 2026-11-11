@@ -6,6 +6,7 @@ namespace App\Traits;
 
 use App\Models\Center;
 use App\Models\Customer;
+use App\Models\Dealer;
 use App\Models\Quote;
 use App\Models\Tenant;
 use App\Models\VehicleMake;
@@ -34,6 +35,12 @@ trait HasVehicleRelations
     public function customer(): BelongsTo
     {
         return $this->belongsTo(Customer::class);
+    }
+
+    /** @return BelongsTo<Dealer, $this> */
+    public function dealer(): BelongsTo
+    {
+        return $this->belongsTo(Dealer::class);
     }
 
     /** @return BelongsTo<VehicleMake, $this> */
