@@ -136,6 +136,65 @@
                 </template>
             </PageHeader>
 
+            <!-- Unified Linked Documents Bar (Returns, Linked Work Orders, GRN) -->
+            <div
+                v-if="
+                    invoice.grn ||
+                    (invoice.return_invoices && invoice.return_invoices.length > 0) ||
+                    linkedWorkOrdersList.length > 0
+                "
+                class="flex flex-wrap items-center justify-between gap-3 bg-white dark:bg-gray-800 px-4 py-3 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-xs"
+            >
+                <div class="flex flex-wrap items-center gap-2">
+                    <span
+                        v-if="invoice.is_deferred"
+                        class="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-black bg-amber-50 text-amber-700 border border-amber-200 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-800/60"
+                    >
+                        <svg
+                            class="w-3.5 h-3.5 text-amber-600 dark:text-amber-400"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                            />
+                        </svg>
+                        <span>{{ $t('invoices.deferred_invoice') }}</span>
+                    </span>
+                </div>
+
+                <div class="flex flex-wrap items-center gap-2">
+                    <LinkedInvoiceBadge
+                        v-if="invoice.grn"
+                        :href="route('purchasing.grn.show', invoice.grn.id)"
+                        kind="standard"
+                        :number="invoice.grn.code || String(invoice.grn.id)"
+                        :tooltip="`${$t('purchasing.grn.title')} #${invoice.grn.code || invoice.grn.id}`"
+                    />
+
+                    <LinkedInvoiceBadge
+                        v-for="row in linkedWorkOrdersList"
+                        :key="`wo-${row.work_order_id || row.id}`"
+                        :href="route('work-orders.show', row.work_order_id || row.id)"
+                        kind="work_order"
+                        :number="row.code || String(row.work_order_id || row.id)"
+                    />
+
+                    <LinkedInvoiceBadge
+                        v-for="ret in invoice.return_invoices || []"
+                        :key="`ret-${ret.id}`"
+                        :href="route('app.invoices.purchases.returns.show', ret.id)"
+                        kind="credit_note"
+                        :number="ret.code || String(ret.id)"
+                        :tooltip="`${$t('invoices.return_invoice')} #${ret.code} (${formatDate(ret.return_date)}) - ${formatCurrency(ret.total)}`"
+                    />
+                </div>
+            </div>
+
             <!-- Top Cards Section: Center/Supplier Info & Financial Cost Card -->
             <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
                 <!-- 1. Right Card: Unified Center & Contact/Supplier Card -->
@@ -333,6 +392,36 @@
                         v-if="invoice.attachment_path"
                         class="w-2 h-2 rounded-full bg-red-500"
                     ></span>
+                </button>
+
+                <button
+                    @click="activeTab = 'linked_work_orders'"
+                    :class="[
+                        'px-5 py-2.5 text-sm font-black rounded-xl transition-all flex items-center gap-2 shrink-0',
+                        activeTab === 'linked_work_orders'
+                            ? 'bg-amber-500 text-white shadow-md shadow-amber-500/20'
+                            : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700/50',
+                    ]"
+                >
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                        />
+                    </svg>
+                    <span>{{ $t('invoices.linked_work_orders') }}</span>
+                    <span
+                        :class="[
+                            'px-2 py-0.5 text-xs rounded-full font-bold',
+                            activeTab === 'linked_work_orders'
+                                ? 'bg-white/20 text-white'
+                                : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300',
+                        ]"
+                    >
+                        {{ linkedWorkOrdersList.length }}
+                    </span>
                 </button>
 
                 <button
@@ -895,6 +984,114 @@
                                     dir="ltr"
                                 >
                                     {{ formatCurrency(ret.total) }}
+                                </td>
+                            </tr>
+                        </tbody>
+                    </DataTable>
+                </div>
+            </div>
+
+            <!-- Linked Work Orders Tab Content -->
+            <div
+                v-show="activeTab === 'linked_work_orders'"
+                class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700/50 p-6"
+            >
+                <div
+                    class="flex items-center justify-between mb-4 pb-2 border-b border-gray-100 dark:border-gray-700/50"
+                >
+                    <h3
+                        class="text-sm font-bold text-gray-900 dark:text-white flex items-center gap-2"
+                    >
+                        <div class="w-1.5 h-4 bg-amber-500 rounded-full"></div>
+                        {{ $t('invoices.linked_work_orders') }}
+                    </h3>
+                </div>
+
+                <div
+                    v-if="linkedWorkOrdersList.length === 0"
+                    class="py-12 text-center bg-gray-50/50 dark:bg-gray-900/20 rounded-xl border border-dashed border-gray-200 dark:border-gray-700/50"
+                >
+                    <p class="text-sm font-semibold text-gray-600 dark:text-gray-300">
+                        {{ $t('invoices.no_linked_work_orders') }}
+                    </p>
+                </div>
+
+                <div v-else class="overflow-x-auto">
+                    <DataTable structured class="w-full text-sm">
+                        <thead>
+                            <tr
+                                class="bg-gray-50/50 dark:bg-gray-900/50 text-gray-400 dark:text-gray-500 border-b border-gray-100 dark:border-gray-700/50 text-xs font-bold uppercase tracking-wider"
+                            >
+                                <th class="py-4 px-6 text-center font-bold align-middle">
+                                    {{ $t('common.index') }}
+                                </th>
+                                <th class="py-4 px-6 text-center font-bold align-middle">
+                                    {{ $t('invoices.linked_work_order_code') }}
+                                </th>
+                                <th class="py-4 px-6 text-center font-bold align-middle">
+                                    {{ $t('invoices.vehicle_and_customer') }}
+                                </th>
+                                <th class="py-4 px-6 text-center font-bold align-middle">
+                                    {{ $t('invoices.allocated_qty_amount') }}
+                                </th>
+                                <th class="py-4 px-6 text-center font-bold align-middle">
+                                    {{ $t('common.date') }}
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100 dark:divide-gray-700/30">
+                            <tr
+                                v-for="(row, index) in linkedWorkOrdersList"
+                                :key="row.work_order_id || row.id || index"
+                                class="hover:bg-amber-50/30 dark:hover:bg-amber-900/10 transition-colors"
+                            >
+                                <td
+                                    class="py-4 px-6 text-center text-gray-500 font-bold font-mono align-middle"
+                                >
+                                    {{ toEnglish(index + 1) }}
+                                </td>
+                                <td class="py-4 px-6 text-center align-middle">
+                                    <Link
+                                        :href="
+                                            route('work-orders.show', row.work_order_id || row.id)
+                                        "
+                                        class="px-3 py-1 rounded-lg text-xs font-bold bg-amber-50 text-amber-700 hover:bg-amber-100 dark:bg-amber-950/30 dark:text-amber-400 font-mono transition-all"
+                                    >
+                                        {{ row.code }}
+                                    </Link>
+                                </td>
+                                <td
+                                    class="py-4 px-6 text-center text-gray-800 dark:text-gray-200 font-semibold align-middle"
+                                >
+                                    <div>
+                                        {{ row.vehicle_label || row.plate_number || '—' }}
+                                    </div>
+                                    <div
+                                        v-if="row.customer_name"
+                                        class="text-xs text-gray-500 dark:text-gray-400 mt-0.5"
+                                    >
+                                        {{ row.customer_name }}
+                                    </div>
+                                </td>
+                                <td
+                                    class="py-4 px-6 text-center font-bold font-mono align-middle"
+                                    dir="ltr"
+                                >
+                                    <span
+                                        v-if="row.allocated_qty"
+                                        class="text-xs text-gray-500 dark:text-gray-400 me-1.5"
+                                    >
+                                        ({{ toEnglish(row.allocated_qty) }})
+                                    </span>
+                                    <span class="text-gray-900 dark:text-white font-black">
+                                        {{ formatCurrency(row.allocated_amount ?? invoice.total) }}
+                                    </span>
+                                </td>
+                                <td
+                                    class="py-4 px-6 text-center text-gray-600 dark:text-gray-300 font-mono align-middle"
+                                    dir="ltr"
+                                >
+                                    {{ formatDate(row.date || invoice.issue_date) }}
                                 </td>
                             </tr>
                         </tbody>
@@ -1991,12 +2188,43 @@ import PurchaseOrderPaymentModal from '@/Components/Purchasing/PurchaseOrderPaym
 import CustomDatePicker from '@/Components/CustomDatePicker.vue';
 import Tooltip from '@/Components/Tooltip.vue';
 import WorkOrderCustomerCard from '@/Components/WorkOrders/WorkOrderCustomerCard.vue';
+import LinkedInvoiceBadge from '@/Components/Common/LinkedInvoiceBadge.vue';
 import WorkOrderFinancialSummary from '@/Components/WorkOrders/WorkOrderFinancialSummary.vue';
 import { useNumberFormat } from '@/Composables/useNumberFormat';
 
 const props = defineProps({
     canManageAttachment: Boolean,
     invoice: Object,
+    linkedWorkOrders: {
+        type: Array,
+        default: () => [],
+    },
+});
+
+const linkedWorkOrdersList = computed(() => {
+    if (props.linkedWorkOrders && props.linkedWorkOrders.length > 0) {
+        return props.linkedWorkOrders;
+    }
+    if (props.invoice?.linked_work_orders && props.invoice.linked_work_orders.length > 0) {
+        return props.invoice.linked_work_orders;
+    }
+    if (props.invoice?.work_order) {
+        return [
+            {
+                id: props.invoice.work_order.id,
+                work_order_id: props.invoice.work_order.id,
+                code: props.invoice.work_order.code,
+                status: props.invoice.work_order.status,
+                customer_name: props.invoice.work_order.customer?.name || null,
+                vehicle_label: props.invoice.work_order.vehicle?.plate_number || null,
+                allocated_qty:
+                    props.invoice.lines?.reduce((s, l) => s + Number(l.qty || 0), 0) || 1,
+                allocated_amount: Number(props.invoice.total || 0),
+                date: props.invoice.issue_date,
+            },
+        ];
+    }
+    return [];
 });
 
 const { t, locale } = useI18n();

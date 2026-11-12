@@ -400,118 +400,30 @@
             class="mt-4"
             dir="rtl"
         >
-            <!-- Case 1: Has invoice and it is NOT overdue/due yet and NOT fully paid -->
             <div
-                v-if="
-                    workOrder.invoice &&
-                    workOrder.invoice.payment_status !== 'paid' &&
-                    !isInvoiceOverdue
-                "
-                class="p-3 rounded-xl bg-selection-bg border border-action-primary/25 flex items-center justify-between text-selection-text"
+                class="p-3 rounded-xl bg-amber-50 dark:bg-amber-950/20 border border-amber-200/60 dark:border-amber-800/50 flex items-center gap-3 text-amber-800 dark:text-amber-200"
             >
-                <div class="flex items-center gap-2">
-                    <svg
-                        class="w-5 h-5 text-action-primary shrink-0"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                    >
-                        <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            stroke-width="2"
-                            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                        />
-                    </svg>
-                    <div class="text-xs text-right">
-                        <span class="font-bold block text-sm mb-0.5">
-                            {{ $t('invoices.deferred_invoice') }}
-                            <span class="text-xs font-normal font-mono" dir="ltr">
-                                #{{ workOrder.invoice.invoice_number }}
-                            </span>
-                        </span>
-                        <span
-                            v-if="workOrder.invoice.due_date"
-                            class="text-gray-500 dark:text-gray-400"
-                        >
-                            {{ $t('invoices.due_date') }}:
-                            {{ formatDate(workOrder.invoice.due_date) }}
-                        </span>
-                    </div>
-                </div>
-                <Link
-                    :href="route('app.invoices.show', workOrder.invoice.id)"
-                    class="text-xs font-bold px-2.5 py-1.5 bg-selection-bg hover:bg-selection-bg text-selection-text rounded-lg transition-colors flex items-center gap-1"
+                <svg
+                    class="w-5 h-5 text-amber-600 dark:text-amber-400 shrink-0"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
                 >
-                    {{ $t('common.view') }}
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            stroke-width="2"
-                            d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
-                        />
-                    </svg>
-                </Link>
-            </div>
-
-            <!-- Case 2: Either no invoice, or the invoice is due/overdue -->
-            <div
-                v-else
-                class="p-3 rounded-xl bg-red-50 dark:bg-red-950/20 border border-red-100 dark:border-red-800/50 flex items-center justify-between text-red-700 dark:text-red-300"
-            >
-                <div class="flex items-center gap-3">
-                    <svg
-                        class="w-5 h-5 text-red-600 dark:text-red-400 shrink-0"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                    >
-                        <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            stroke-width="2"
-                            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-                        />
-                    </svg>
-                    <div class="text-xs text-right">
-                        <span class="font-bold block text-sm mb-0.5">
-                            {{ $t('work_orders.remaining_dues_alert') }}
-                        </span>
-                        <span
-                            v-if="workOrder.invoice"
-                            class="text-gray-500 dark:text-gray-400 text-[11px] block mt-0.5"
-                        >
-                            {{ $t('work_orders.financial.overdue_invoice_prefix') }}
-                            <span class="font-mono" dir="ltr">
-                                #{{ workOrder.invoice.invoice_number }}
-                            </span>
-                            {{ $t('common.due_date_label') }}
-                            {{ formatDate(workOrder.invoice.due_date) }})
-                        </span>
-                        <span
-                            v-else
-                            class="text-gray-500 dark:text-gray-400 text-[11px] block mt-0.5"
-                        >
-                            {{ $t('work_orders.financial.settle_balance_hint') }}
-                        </span>
-                    </div>
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                    />
+                </svg>
+                <div class="text-xs text-right">
+                    <span class="font-bold block text-sm mb-0.5">
+                        {{ $t('work_orders.remaining_dues_alert') }}
+                    </span>
+                    <span class="text-gray-500 dark:text-gray-400 text-[11px] block mt-0.5">
+                        {{ $t('work_orders.financial.settle_balance_hint') }}
+                    </span>
                 </div>
-                <Link
-                    v-if="workOrder.invoice"
-                    :href="route('app.invoices.show', workOrder.invoice.id)"
-                    class="text-xs font-bold px-2.5 py-1.5 bg-red-100 hover:bg-red-200 dark:bg-red-900/50 dark:hover:bg-red-900 text-red-700 dark:text-red-300 rounded-lg transition-colors flex items-center gap-1"
-                >
-                    {{ $t('common.view') }}
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            stroke-width="2"
-                            d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
-                        />
-                    </svg>
-                </Link>
             </div>
         </div>
         <slot name="footer" />
@@ -556,14 +468,4 @@ const showFallbackRow = computed(() => !showServicesRow.value && !showPartsRow.v
 
 const { formatCurrency } = useNumberFormat();
 const { formatDate } = useFormatters();
-
-const isInvoiceOverdue = computed(() => {
-    if (!props.workOrder?.invoice?.due_date) return false;
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const dueDateStr = props.workOrder.invoice.due_date.split('T')[0];
-    const dueDate = new Date(dueDateStr);
-    dueDate.setHours(0, 0, 0, 0);
-    return today >= dueDate;
-});
 </script>

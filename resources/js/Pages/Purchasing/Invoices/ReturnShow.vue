@@ -37,36 +37,6 @@
 
                 <template #actions>
                     <div class="flex items-center gap-3">
-                        <!-- Original Invoice Link -->
-                        <Tooltip :content="$t('invoices.original_invoice')">
-                            <Link
-                                :href="
-                                    route(
-                                        'app.invoices.purchases.show',
-                                        returnInvoice.purchase_invoice_id
-                                    )
-                                "
-                                class="flex items-center gap-2 px-4 py-2 bg-amber-50 dark:bg-amber-950/20 text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300 rounded-xl border border-amber-200/50 dark:border-amber-800/30 transition-all font-bold text-xs shadow-sm hover:shadow-md"
-                            >
-                                <svg
-                                    class="w-4 h-4"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        stroke-width="2.5"
-                                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                                    />
-                                </svg>
-                                <span>#{{ returnInvoice.purchase_invoice?.code }}</span>
-                            </Link>
-                        </Tooltip>
-
-                        <div class="w-px h-6 bg-gray-200 dark:bg-gray-700 mx-1"></div>
-
                         <!-- Print Button -->
                         <Tooltip :content="$t('common.print')">
                             <a
@@ -104,6 +74,47 @@
                     </div>
                 </template>
             </PageHeader>
+
+            <!-- Unified Linked Documents Bar (Original Purchase Invoice) -->
+            <div
+                v-if="returnInvoice.purchase_invoice_id"
+                class="flex flex-wrap items-center justify-between gap-3 bg-white dark:bg-gray-800 px-4 py-3 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-xs"
+            >
+                <div class="flex flex-wrap items-center gap-2">
+                    <span
+                        class="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-black bg-rose-50 text-rose-700 border border-rose-200 dark:bg-rose-950/40 dark:text-rose-300 dark:border-rose-800/60"
+                    >
+                        <svg
+                            class="w-3.5 h-3.5 text-rose-600 dark:text-rose-400"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"
+                            />
+                        </svg>
+                        <span>{{ $t('invoices.return_invoice') }}</span>
+                    </span>
+                </div>
+
+                <div class="flex flex-wrap items-center gap-2">
+                    <LinkedInvoiceBadge
+                        :href="
+                            route('app.invoices.purchases.show', returnInvoice.purchase_invoice_id)
+                        "
+                        kind="standard"
+                        :number="
+                            returnInvoice.purchase_invoice?.code ||
+                            String(returnInvoice.purchase_invoice_id)
+                        "
+                        :tooltip="`${$t('invoices.original_invoice')}: #${returnInvoice.purchase_invoice?.code || returnInvoice.purchase_invoice_id}`"
+                    />
+                </div>
+            </div>
 
             <!-- Top Cards Section: Center/Supplier Info & Financial Cost Card -->
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -800,6 +811,7 @@ import PageHeader from '@/Components/PageHeader.vue';
 import BackButton from '@/Components/BackButton.vue';
 import Tooltip from '@/Components/Tooltip.vue';
 import WorkOrderCustomerCard from '@/Components/WorkOrders/WorkOrderCustomerCard.vue';
+import LinkedInvoiceBadge from '@/Components/Common/LinkedInvoiceBadge.vue';
 import PurchaseOrderPaymentModal from '@/Components/Purchasing/PurchaseOrderPaymentModal.vue';
 import { useNumberFormat } from '@/Composables/useNumberFormat';
 

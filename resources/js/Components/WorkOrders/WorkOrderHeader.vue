@@ -249,50 +249,6 @@
                     </div>
                 </div>
 
-                <!-- Linked invoice (when work order has been invoiced). Sits
-                     directly under the WO code so the operator can jump to
-                     the invoice in one click. -->
-                <div
-                    v-if="workOrder.invoice && workOrder.invoice.id"
-                    class="mt-2 flex items-center justify-end gap-2"
-                >
-                    <Link
-                        :href="route('app.invoices.show', workOrder.invoice.id)"
-                        class="inline-flex items-center gap-1.5 text-xs font-black text-emerald-700 dark:text-emerald-400 hover:text-emerald-800 dark:hover:text-emerald-300 hover:underline transition-colors group/inv"
-                        :title="$t('invoices.title')"
-                    >
-                        <svg
-                            class="w-3.5 h-3.5"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                        >
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2.5"
-                                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                            />
-                        </svg>
-                        <span>
-                            {{ $t('invoices.invoice') }} #{{ workOrder.invoice.invoice_number }}
-                        </span>
-                        <svg
-                            class="w-3 h-3 opacity-60 group-hover/inv:opacity-100 transition-opacity"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                        >
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2.5"
-                                d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
-                            />
-                        </svg>
-                    </Link>
-                </div>
-
                 <!-- Hold reason display -->
                 <div
                     v-if="workOrder.status === 'on_hold' && workOrder.hold_reason"

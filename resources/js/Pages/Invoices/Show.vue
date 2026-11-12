@@ -157,6 +157,81 @@
                 </template>
             </PageHeader>
 
+            <!-- Unified Linked Documents Bar (Work Order, Original Invoice, Credit Notes, Partner) -->
+            <div
+                v-if="
+                    invoice.is_paid_by_dealer ||
+                    invoice.dealer ||
+                    invoice.work_order ||
+                    (invoice.type === 'credit_note' && invoice.original_invoice) ||
+                    (invoice.credit_notes && invoice.credit_notes.length > 0)
+                "
+                class="flex flex-wrap items-center justify-between gap-3 bg-white dark:bg-gray-800 px-4 py-3 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-xs"
+            >
+                <div class="flex flex-wrap items-center gap-2">
+                    <span
+                        v-if="invoice.is_paid_by_dealer || invoice.dealer"
+                        class="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-black bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800/60"
+                    >
+                        <svg
+                            class="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                            />
+                        </svg>
+                        <span>{{ $t('work_orders.paid_by_partner') }}</span>
+                        <span v-if="invoice.dealer?.name" class="font-bold">
+                            ({{ invoice.dealer.name }})
+                        </span>
+                    </span>
+
+                    <span
+                        v-if="invoice.type === 'credit_note' && invoice.return_reason"
+                        class="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-semibold bg-gray-50 text-gray-700 border border-gray-200 dark:bg-gray-900/50 dark:text-gray-300 dark:border-gray-700"
+                    >
+                        <span class="text-gray-400 dark:text-gray-500 font-bold">
+                            {{ $t('invoices.credit_note.reason') }}:
+                        </span>
+                        <span>{{ invoice.return_reason }}</span>
+                    </span>
+                </div>
+
+                <div class="flex flex-wrap items-center gap-2">
+                    <LinkedInvoiceBadge
+                        v-if="invoice.work_order"
+                        :href="route('work-orders.show', invoice.work_order_id)"
+                        kind="work_order"
+                        :number="
+                            invoice.work_order?.work_order_number ||
+                            invoice.work_order?.code ||
+                            String(invoice.work_order_id)
+                        "
+                    />
+
+                    <LinkedInvoiceBadge
+                        v-if="invoice.type === 'credit_note' && invoice.original_invoice"
+                        :href="route('app.invoices.show', invoice.original_invoice.id)"
+                        :invoice="invoice.original_invoice"
+                        :tooltip="`${$t('invoices.credit_note.original_invoice')}: #${invoice.original_invoice.invoice_number} (${formatDate(invoice.original_invoice.issue_date)})`"
+                    />
+
+                    <LinkedInvoiceBadge
+                        v-for="cn in invoice.credit_notes || []"
+                        :key="cn.id"
+                        :href="route('app.invoices.show', cn.id)"
+                        :invoice="cn"
+                        :tooltip="`${$t('invoices.credit_note.title')} #${cn.invoice_number} (${formatDate(cn.issue_date)}) - ${formatCurrency(cn.total_incl_tax)}`"
+                    />
+                </div>
+            </div>
+
             <!-- Top Cards Section: Customer Info & Financial Cost Card -->
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <!-- 1. Right Card: Unified Customer & Vehicle Card + Invoice Metadata Footer -->
@@ -220,25 +295,6 @@
                                             {{ formatDate(invoice.supply_date) }}
                                         </span>
                                     </div>
-
-                                    <div v-if="invoice.work_order">
-                                        <p
-                                            class="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-0.5"
-                                        >
-                                            {{ $t('work_orders.title_singular') }}
-                                        </p>
-                                        <Link
-                                            :href="route('work-orders.show', invoice.work_order_id)"
-                                            class="text-xs font-black text-blue-600 hover:text-blue-700 dark:text-blue-400 hover:underline inline-flex items-center gap-1"
-                                        >
-                                            <span dir="ltr">
-                                                #{{
-                                                    invoice.work_order?.code ||
-                                                    invoice.work_order?.id
-                                                }}
-                                            </span>
-                                        </Link>
-                                    </div>
                                 </div>
 
                                 <!-- QR Code block for ZATCA E-Invoice -->
@@ -255,77 +311,6 @@
                                         alt="ZATCA QR"
                                         class="w-12 h-12 object-contain"
                                     />
-                                </div>
-                            </div>
-
-                            <!-- Credit Note Reference to Original Invoice -->
-                            <div
-                                v-if="invoice.type === 'credit_note' && invoice.original_invoice"
-                                class="border border-rose-200 dark:border-rose-900/40 bg-rose-50/50 dark:bg-rose-950/20 p-3 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-2"
-                            >
-                                <div>
-                                    <p
-                                        class="text-[10px] font-black text-rose-600 dark:text-rose-400 uppercase tracking-widest mb-0.5"
-                                    >
-                                        {{ $t('invoices.credit_note.original_invoice') }}
-                                    </p>
-                                    <Link
-                                        :href="
-                                            route('app.invoices.show', invoice.original_invoice.id)
-                                        "
-                                        class="text-xs font-black text-rose-700 hover:text-rose-800 dark:text-rose-300 hover:underline flex items-center gap-1.5"
-                                    >
-                                        <span>#{{ invoice.original_invoice.invoice_number }}</span>
-                                        <span class="text-gray-500 font-normal">
-                                            ({{ formatDate(invoice.original_invoice.issue_date) }})
-                                        </span>
-                                    </Link>
-                                </div>
-                                <div v-if="invoice.return_reason" class="text-start sm:text-end">
-                                    <p
-                                        class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-0.5"
-                                    >
-                                        {{ $t('invoices.credit_note.reason') }}
-                                    </p>
-                                    <span
-                                        class="text-xs font-semibold text-gray-700 dark:text-gray-300"
-                                    >
-                                        {{ invoice.return_reason }}
-                                    </span>
-                                </div>
-                            </div>
-
-                            <!-- Related Credit Notes if viewing original invoice -->
-                            <div
-                                v-if="invoice.credit_notes && invoice.credit_notes.length > 0"
-                                class="border border-amber-200 dark:border-amber-900/40 bg-amber-50/50 dark:bg-amber-950/20 p-3 rounded-xl"
-                            >
-                                <p
-                                    class="text-[10px] font-black text-amber-700 dark:text-amber-400 uppercase tracking-widest mb-1.5"
-                                >
-                                    {{ $t('invoices.credit_note.related_credit_notes') }}
-                                </p>
-                                <div class="space-y-1">
-                                    <div
-                                        v-for="cn in invoice.credit_notes"
-                                        :key="cn.id"
-                                        class="flex items-center justify-between text-xs"
-                                    >
-                                        <Link
-                                            :href="route('app.invoices.show', cn.id)"
-                                            class="font-mono font-bold text-amber-800 dark:text-amber-300 hover:underline flex items-center gap-1"
-                                        >
-                                            <span>↩ #{{ cn.invoice_number }}</span>
-                                            <span class="text-gray-500 font-normal">
-                                                ({{ formatDate(cn.issue_date) }})
-                                            </span>
-                                        </Link>
-                                        <span
-                                            class="font-bold text-rose-600 dark:text-rose-400 font-mono"
-                                        >
-                                            -{{ formatCurrency(cn.total_incl_tax) }}
-                                        </span>
-                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -1229,6 +1214,7 @@ import { useNumberFormat } from '@/Composables/useNumberFormat';
 import Tooltip from '@/Components/Tooltip.vue';
 import WorkOrderCustomerCard from '@/Components/WorkOrders/WorkOrderCustomerCard.vue';
 import WorkOrderFinancialSummary from '@/Components/WorkOrders/WorkOrderFinancialSummary.vue';
+import LinkedInvoiceBadge from '@/Components/Common/LinkedInvoiceBadge.vue';
 
 const props = defineProps({
     invoice: Object,

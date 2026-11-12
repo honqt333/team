@@ -67,29 +67,64 @@
                 </div>
             </div>
 
+            <!-- Unified Linked Documents Bar (Purchase Order & Purchase Invoice) -->
+            <div
+                v-if="grn?.purchase_order_id || grn?.purchase_invoice"
+                class="flex flex-wrap items-center justify-between gap-3 bg-white dark:bg-gray-800 px-4 py-3 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-xs"
+            >
+                <div class="flex flex-wrap items-center gap-2">
+                    <span
+                        class="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-black bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800/60"
+                    >
+                        <svg
+                            class="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
+                            />
+                        </svg>
+                        <span>{{ $t('purchasing.grn.title') }}</span>
+                    </span>
+                </div>
+
+                <div class="flex flex-wrap items-center gap-2">
+                    <LinkedInvoiceBadge
+                        v-if="grn?.purchase_order_id"
+                        :href="route('app.purchasing.orders.show', grn.purchase_order_id)"
+                        kind="work_order"
+                        :number="grn.purchase_order?.code || String(grn.purchase_order_id)"
+                        :tooltip="`${$t('purchasing.orders.title')} #${grn.purchase_order?.code || grn.purchase_order_id}`"
+                    />
+
+                    <LinkedInvoiceBadge
+                        v-if="grn?.purchase_invoice"
+                        :href="route('app.invoices.purchases.show', grn.purchase_invoice.id)"
+                        :kind="grn.purchase_invoice.is_deferred ? 'deferred' : 'paid'"
+                        :number="grn.purchase_invoice.code || String(grn.purchase_invoice.id)"
+                        :tooltip="`${$t('invoices.purchases.invoice')} #${grn.purchase_invoice.code}`"
+                    />
+                </div>
+            </div>
+
             <!-- Content Grid -->
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <!-- Main Content -->
                 <div class="lg:col-span-2 space-y-6">
-                    <!-- Invoice Banner (Integrated) -->
+                    <!-- Create Invoice Prompt (Only when posted without an invoice yet) -->
                     <div
-                        v-if="grn?.purchase_invoice || grn?.status === 'posted'"
-                        class="p-5 rounded-3xl border transition-all"
-                        :class="
-                            grn?.purchase_invoice
-                                ? 'bg-blue-50/50 border-blue-100 dark:bg-blue-900/20 dark:border-blue-800/30'
-                                : 'bg-amber-50/50 border-amber-100 dark:bg-amber-900/20 dark:border-amber-800/30'
-                        "
+                        v-if="!grn?.purchase_invoice && grn?.status === 'posted'"
+                        class="p-5 rounded-3xl border transition-all bg-amber-50/50 border-amber-100 dark:bg-amber-900/20 dark:border-amber-800/30"
                     >
                         <div class="flex items-center justify-between gap-4">
                             <div class="flex items-center gap-4">
                                 <div
-                                    class="w-12 h-12 rounded-2xl flex items-center justify-center shrink-0"
-                                    :class="
-                                        grn?.purchase_invoice
-                                            ? 'bg-blue-600 text-white'
-                                            : 'bg-amber-600 text-white'
-                                    "
+                                    class="w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 bg-amber-600 text-white"
                                 >
                                     <svg
                                         class="w-6 h-6"
@@ -111,32 +146,13 @@
                                     >
                                         {{ $t('invoices.title') }}
                                     </p>
-                                    <h4
-                                        v-if="grn?.purchase_invoice"
-                                        class="text-lg font-black font-mono"
-                                    >
-                                        {{ grn.purchase_invoice.code }}
-                                    </h4>
-                                    <h4 v-else class="text-lg font-black">
+                                    <h4 class="text-lg font-black">
                                         {{ $t('purchasing.grn.no_invoice_yet') }}
                                     </h4>
                                 </div>
                             </div>
                             <div class="flex items-center gap-2">
-                                <Link
-                                    v-if="grn?.purchase_invoice"
-                                    :href="
-                                        route(
-                                            'app.invoices.purchases.show',
-                                            grn.purchase_invoice.id
-                                        )
-                                    "
-                                    class="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-black rounded-xl shadow-lg shadow-blue-600/20 transition-all hover:-translate-y-0.5"
-                                >
-                                    {{ $t('common.view') }}
-                                </Link>
                                 <button
-                                    v-else
                                     @click="createInvoice"
                                     class="px-5 py-2 bg-amber-600 hover:bg-amber-700 text-white text-xs font-black rounded-xl shadow-lg shadow-amber-600/20 transition-all hover:-translate-y-0.5"
                                 >
@@ -549,6 +565,7 @@ import { useConfirm } from '@/Composables/useConfirm';
 import { useToast } from '@/Composables/useToast';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import BackButton from '@/Components/BackButton.vue';
+import LinkedInvoiceBadge from '@/Components/Common/LinkedInvoiceBadge.vue';
 import StandardReportHeader from '@/Components/Print/StandardReportHeader.vue';
 import StandardReportFooter from '@/Components/Print/StandardReportFooter.vue';
 

@@ -145,6 +145,24 @@
             </div>
         </section>
 
+        <!-- Unified Linked Invoice Bar -->
+        <div
+            v-if="workOrder.linked_invoice"
+            class="mt-6 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow-xs"
+        >
+            <div class="flex items-center gap-2">
+                <span class="text-xs font-extrabold text-slate-600">
+                    {{ t('invoices.title') }}
+                </span>
+            </div>
+            <div class="flex flex-wrap items-center gap-2">
+                <LinkedInvoiceBadge
+                    :href="`/${tenant.slug}/portal/invoice/${workOrder.linked_invoice.id}`"
+                    :invoice="workOrder.linked_invoice"
+                />
+            </div>
+        </div>
+
         <!-- Complaint & Technical Assessment -->
         <section
             v-if="workOrder.customer_complaint || workOrder.initial_assessment"
@@ -309,20 +327,6 @@
                             </span>
                         </div>
                     </div>
-
-                    <div v-if="workOrder.linked_invoice" class="mt-5">
-                        <a
-                            :href="`/${tenant.slug}/portal/invoice/${workOrder.linked_invoice.id}`"
-                            class="flex w-full items-center justify-center gap-2 rounded-2xl px-4 py-3 text-xs font-extrabold text-white shadow-sm transition hover:opacity-95"
-                            :style="{ backgroundColor: 'var(--tenant-primary, #2563eb)' }"
-                        >
-                            {{
-                                t('customer_portal.portal_work_orders.linked_invoice_btn', {
-                                    number: workOrder.linked_invoice.invoice_number,
-                                })
-                            }}
-                        </a>
-                    </div>
                 </section>
             </div>
         </div>
@@ -336,6 +340,7 @@ import { useI18n } from 'vue-i18n';
 import CustomerPortalLayout from '@/Layouts/CustomerPortalLayout.vue';
 import StatusBadge from '@/Components/CustomerPortal/StatusBadge.vue';
 import SaudiPlateDisplay from '@/Components/Vehicles/SaudiPlateDisplay.vue';
+import LinkedInvoiceBadge from '@/Components/Common/LinkedInvoiceBadge.vue';
 
 const props = defineProps({
     tenant: { type: Object, required: true },

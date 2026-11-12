@@ -15,6 +15,47 @@
                 @create-credit-note="showCreditNoteModal = true"
             />
 
+            <!-- Partner Payment Badge & Multi-Invoice / Return Pipe Header -->
+            <div
+                v-if="workOrder.dealer_id || workOrder.dealer || allLinkedInvoices.length > 0"
+                class="flex flex-wrap items-center justify-between gap-3 bg-white dark:bg-gray-800 px-4 py-3 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-xs"
+            >
+                <div class="flex flex-wrap items-center gap-2">
+                    <span
+                        v-if="workOrder.dealer_id || workOrder.dealer"
+                        class="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-black bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800/60"
+                    >
+                        <svg
+                            class="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                            />
+                        </svg>
+                        <span>{{ $t('work_orders.paid_by_partner') }}</span>
+                        <span v-if="workOrder.dealer?.name" class="font-bold">
+                            ({{ workOrder.dealer.name }})
+                        </span>
+                    </span>
+                </div>
+
+                <!-- Linked Invoices Badges -->
+                <div v-if="allLinkedInvoices.length > 0" class="flex flex-wrap items-center gap-2">
+                    <LinkedInvoiceBadge
+                        v-for="inv in allLinkedInvoices"
+                        :key="inv.id"
+                        :href="route('app.invoices.show', inv.id)"
+                        :invoice="inv"
+                    />
+                </div>
+            </div>
+
             <!-- Top Section: Financial Summary & Customer Info -->
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <!-- 1. Right Card: Vehicle & Customer Info (extracted to WorkOrderCustomerCard) -->
@@ -64,6 +105,8 @@
                             :available-departments="availableDepartments"
                             :departments="departments"
                             :is-read-only="isReadOnly"
+                            :supplier-service-allocations="linkedServiceAllocations"
+                            @unlink-supplier-service="unlinkSupplierServiceMapping"
                             @add-department="addDepartment"
                             @remove-department="removeDepartment"
                             @add-service="openAddServiceModal"
@@ -86,10 +129,37 @@
 
                     <!-- Spare Parts Tab -->
                     <div v-if="activeTab === 'parts'" key="tab-parts" class="space-y-4">
+                        <div
+                            v-if="externalPartsList.length > 0"
+                            class="flex flex-wrap items-center gap-2 bg-amber-50/60 dark:bg-amber-950/20 px-4 py-3 rounded-2xl border border-amber-200/70 dark:border-amber-800/40"
+                        >
+                            <span
+                                class="px-2.5 py-1 rounded-lg text-xs font-black bg-amber-500 text-white"
+                            >
+                                {{ $t('work_orders.parts.external_purchase') }}
+                            </span>
+                            <div class="flex flex-wrap items-center gap-2">
+                                <span
+                                    v-for="extPart in externalPartsList"
+                                    :key="extPart.id"
+                                    class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 border border-amber-200 dark:border-amber-800/50"
+                                >
+                                    <span>{{ extPart.name }}</span>
+                                    <span
+                                        class="px-1.5 py-0.5 rounded text-[10px] font-black bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300"
+                                    >
+                                        {{ $t('work_orders.parts.external_purchase') }}
+                                    </span>
+                                </span>
+                            </div>
+                        </div>
+
                         <!-- Parts Display Component -->
                         <PartsDisplay
                             :parts="normalizedPartsForDisplay"
                             :read-only="isReadOnly"
+                            :part-allocations="linkedPartAllocations"
+                            @unlink-part-allocation="unlinkPartAllocationMapping"
                             storage-key="work_orders_parts_view_mode"
                             :empty-message="$t('work_orders.show.no_parts')"
                             :add-button-text="$t('inventory.parts.add_to_wo')"
@@ -179,146 +249,512 @@
                     </div>
 
                     <!-- Purchase Invoices Tab -->
-                    <div v-if="activeTab === 'purchase_invoices'" key="tab-purchase-invoices">
-                        <div class="space-y-4">
+                    <div
+                        v-if="activeTab === 'purchase_invoices'"
+                        id="ticketPurchaseInvoices"
+                        key="tab-purchase-invoices"
+                        class="space-y-6"
+                    >
+                        <!-- A. Informative Alert Notice & Profitability / Cost vs Revenue Banner -->
+                        <div class="space-y-3">
+                            <!-- Informative Alert Notice -->
                             <div
-                                class="flex flex-wrap items-center justify-between gap-3 bg-surface-secondary/50 dark:bg-gray-800/60 p-4 rounded-2xl border border-border-subtle"
+                                class="flex items-start gap-3 p-4 rounded-2xl border border-sky-200/80 dark:border-sky-800/60 bg-sky-50/70 dark:bg-sky-950/30 text-sky-900 dark:text-sky-200"
                             >
-                                <div>
-                                    <h3 class="text-sm font-bold text-text-primary">
-                                        {{ $t('work_orders.purchase_invoices.title') }}
-                                    </h3>
-                                </div>
-
-                                <div v-if="!isReadOnly" class="flex flex-wrap items-center gap-2">
-                                    <div
-                                        v-if="linkablePurchaseInvoiceOptions.length > 0"
-                                        class="flex items-center gap-2"
-                                    >
-                                        <div class="w-64">
-                                            <SearchableSelect
-                                                v-model="selectedPurchaseInvoiceId"
-                                                :options="linkablePurchaseInvoiceOptions"
-                                                option-label="label"
-                                                option-value="value"
-                                                :placeholder="
-                                                    $t(
-                                                        'work_orders.purchase_invoices.select_invoice'
-                                                    )
-                                                "
-                                                compact
-                                            />
-                                        </div>
-                                        <button
-                                            type="button"
-                                            :disabled="
-                                                !selectedPurchaseInvoiceId ||
-                                                isLinkingPurchaseInvoice
-                                            "
-                                            @click="linkSelectedPurchaseInvoice"
-                                            class="px-3 py-2 bg-action-primary hover:bg-action-primary-hover disabled:opacity-50 text-white text-xs font-bold rounded-xl transition-colors cursor-pointer"
-                                        >
-                                            {{ $t('work_orders.purchase_invoices.link_btn') }}
-                                        </button>
-                                    </div>
-
-                                    <button
-                                        type="button"
-                                        @click="showNewPurchaseInvoiceModal = true"
-                                        class="px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl flex items-center gap-1.5 transition-colors cursor-pointer"
-                                    >
-                                        <svg
-                                            class="w-3.5 h-3.5"
-                                            fill="none"
-                                            stroke="currentColor"
-                                            viewBox="0 0 24 24"
-                                        >
-                                            <path
-                                                stroke-linecap="round"
-                                                stroke-linejoin="round"
-                                                stroke-width="2.5"
-                                                d="M12 4v16m8-8H4"
-                                            />
-                                        </svg>
-                                        {{ $t('invoices.purchases.add') }}
-                                    </button>
+                                <span class="text-xl shrink-0 mt-0.5">ℹ️</span>
+                                <div class="text-xs sm:text-sm font-medium leading-relaxed">
+                                    {{ $t('work_orders.purchases.profitability_notice') }}
                                 </div>
                             </div>
 
+                            <!-- Profitability / Cost vs Revenue Banner -->
+                            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+                                <!-- 1. External Parts Cost -->
+                                <div
+                                    class="p-3.5 rounded-2xl border border-amber-200/70 dark:border-amber-800/50 bg-amber-50/50 dark:bg-amber-950/20 flex flex-col justify-between"
+                                >
+                                    <div
+                                        class="flex items-center gap-1.5 text-amber-800 dark:text-amber-300"
+                                    >
+                                        <span
+                                            class="w-2 h-2 rounded-full bg-amber-500 shrink-0"
+                                        ></span>
+                                        <span class="text-[11px] font-bold leading-tight truncate">
+                                            {{ $t('work_orders.purchases.external_parts_cost') }}
+                                        </span>
+                                    </div>
+                                    <p
+                                        class="text-sm font-black font-mono mt-2 text-amber-950 dark:text-amber-100"
+                                        dir="ltr"
+                                    >
+                                        {{ formatPrice(externalPartsCost) }}
+                                    </p>
+                                </div>
+
+                                <!-- 2. Warehouse Parts Cost -->
+                                <div
+                                    class="p-3.5 rounded-2xl border border-sky-200/70 dark:border-sky-800/50 bg-sky-50/50 dark:bg-sky-950/20 flex flex-col justify-between"
+                                >
+                                    <div
+                                        class="flex items-center gap-1.5 text-sky-800 dark:text-sky-300"
+                                    >
+                                        <span
+                                            class="w-2 h-2 rounded-full bg-sky-500 shrink-0"
+                                        ></span>
+                                        <span class="text-[11px] font-bold leading-tight truncate">
+                                            {{ $t('work_orders.purchases.warehouse_parts_cost') }}
+                                        </span>
+                                    </div>
+                                    <p
+                                        class="text-sm font-black font-mono mt-2 text-sky-950 dark:text-sky-100"
+                                        dir="ltr"
+                                    >
+                                        {{ formatPrice(warehousePartsCost) }}
+                                    </p>
+                                </div>
+
+                                <!-- 3. Supplier Services Cost -->
+                                <div
+                                    class="p-3.5 rounded-2xl border border-purple-200/70 dark:border-purple-800/50 bg-purple-50/50 dark:bg-purple-950/20 flex flex-col justify-between"
+                                >
+                                    <div
+                                        class="flex items-center gap-1.5 text-purple-800 dark:text-purple-300"
+                                    >
+                                        <span
+                                            class="w-2 h-2 rounded-full bg-purple-500 shrink-0"
+                                        ></span>
+                                        <span class="text-[11px] font-bold leading-tight truncate">
+                                            {{ $t('work_orders.purchases.supplier_services_cost') }}
+                                        </span>
+                                    </div>
+                                    <p
+                                        class="text-sm font-black font-mono mt-2 text-purple-950 dark:text-purple-100"
+                                        dir="ltr"
+                                    >
+                                        {{ formatPrice(supplierServicesCost) }}
+                                    </p>
+                                </div>
+
+                                <!-- 4. Total Purchases Cost -->
+                                <div
+                                    class="p-3.5 rounded-2xl border border-rose-200/70 dark:border-rose-800/50 bg-rose-50/50 dark:bg-rose-950/20 flex flex-col justify-between"
+                                >
+                                    <div
+                                        class="flex items-center gap-1.5 text-rose-800 dark:text-rose-300"
+                                    >
+                                        <span
+                                            class="w-2 h-2 rounded-full bg-rose-500 shrink-0"
+                                        ></span>
+                                        <span class="text-[11px] font-bold leading-tight truncate">
+                                            {{ $t('work_orders.purchases.total_purchases_cost') }}
+                                        </span>
+                                    </div>
+                                    <p
+                                        class="text-sm font-black font-mono mt-2 text-rose-950 dark:text-rose-100"
+                                        dir="ltr"
+                                    >
+                                        {{ formatPrice(totalPurchasesCost) }}
+                                    </p>
+                                </div>
+
+                                <!-- 5. Work Order Revenue -->
+                                <div
+                                    class="p-3.5 rounded-2xl border border-blue-200/70 dark:border-blue-800/50 bg-blue-50/50 dark:bg-blue-950/20 flex flex-col justify-between"
+                                >
+                                    <div
+                                        class="flex items-center gap-1.5 text-blue-800 dark:text-blue-300"
+                                    >
+                                        <span
+                                            class="w-2 h-2 rounded-full bg-blue-500 shrink-0"
+                                        ></span>
+                                        <span class="text-[11px] font-bold leading-tight truncate">
+                                            {{ $t('work_orders.purchases.work_order_revenue') }}
+                                        </span>
+                                    </div>
+                                    <p
+                                        class="text-sm font-black font-mono mt-2 text-blue-950 dark:text-blue-100"
+                                        dir="ltr"
+                                    >
+                                        {{ formatPrice(workOrderRevenue) }}
+                                    </p>
+                                </div>
+
+                                <!-- 6. Net Margin / Profit -->
+                                <div
+                                    :class="[
+                                        'p-3.5 rounded-2xl border flex flex-col justify-between transition-colors',
+                                        isNetMarginNegative
+                                            ? 'border-rose-300 bg-rose-100/70 dark:bg-rose-950/50 dark:border-rose-800 text-rose-900 dark:text-rose-200'
+                                            : 'border-emerald-300 bg-emerald-50 dark:bg-emerald-950/50 dark:border-emerald-800 text-emerald-900 dark:text-emerald-200',
+                                    ]"
+                                >
+                                    <div class="flex items-center gap-1.5 font-bold">
+                                        <span
+                                            :class="[
+                                                'w-2 h-2 rounded-full shrink-0',
+                                                isNetMarginNegative
+                                                    ? 'bg-rose-600'
+                                                    : 'bg-emerald-600',
+                                            ]"
+                                        ></span>
+                                        <span class="text-[11px] font-bold leading-tight truncate">
+                                            {{ $t('work_orders.purchases.net_margin') }}
+                                        </span>
+                                    </div>
+                                    <p
+                                        :class="[
+                                            'text-sm font-black font-mono mt-2',
+                                            isNetMarginNegative
+                                                ? 'text-rose-700 dark:text-rose-300 font-extrabold'
+                                                : 'text-emerald-700 dark:text-emerald-300',
+                                        ]"
+                                        dir="ltr"
+                                    >
+                                        {{ formatNetMargin(netProfitMargin) }}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Action Toolbar -->
+                        <div
+                            class="flex flex-wrap items-center justify-between gap-3 bg-surface-secondary/50 dark:bg-gray-800/60 p-4 rounded-2xl border border-border-subtle"
+                        >
+                            <div>
+                                <h3 class="text-sm font-bold text-text-primary">
+                                    {{ $t('work_orders.purchases.title') }}
+                                </h3>
+                            </div>
+                            <div v-if="!isReadOnly" class="flex flex-wrap items-center gap-2">
+                                <button
+                                    type="button"
+                                    @click="openAllocationModal"
+                                    class="px-3.5 py-2 bg-action-primary hover:bg-action-primary-hover text-white text-xs font-bold rounded-xl flex items-center gap-1.5 transition-all shadow-sm cursor-pointer"
+                                >
+                                    <svg
+                                        class="w-3.5 h-3.5"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2.5"
+                                            d="M12 4v16m8-8H4"
+                                        />
+                                    </svg>
+                                    {{ $t('work_orders.purchases.select_to_add') }}
+                                </button>
+                                <button
+                                    type="button"
+                                    @click="openQuickPurchaseModal"
+                                    class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl flex items-center gap-1.5 transition-all shadow-sm cursor-pointer"
+                                >
+                                    <svg
+                                        class="w-3.5 h-3.5"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2.5"
+                                            d="M12 4v16m8-8H4"
+                                        />
+                                    </svg>
+                                    {{ $t('work_orders.purchases.quick_create_invoice') }}
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- B. Three Dedicated Tables/Sections for Allocations -->
+
+                        <!-- 1. External Parts Purchases Table -->
+                        <div
+                            class="rounded-2xl border border-border-subtle bg-surface overflow-hidden shadow-xs"
+                        >
                             <div
-                                v-if="workOrder.purchase_invoices?.length"
-                                class="overflow-x-auto rounded-2xl border border-border-subtle bg-surface"
+                                class="flex items-center justify-between px-4 py-3 bg-amber-500/10 border-b border-border-subtle"
+                            >
+                                <div class="flex items-center gap-2">
+                                    <span class="text-lg">🛒</span>
+                                    <h4 class="text-xs font-bold text-text-primary">
+                                        {{ $t('work_orders.purchases.external_parts_purchases') }}
+                                    </h4>
+                                    <span
+                                        class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300 font-mono"
+                                    >
+                                        {{ externalPartAllocationsList.length }}
+                                    </span>
+                                </div>
+                                <span
+                                    class="text-xs font-black font-mono text-amber-700 dark:text-amber-300"
+                                    dir="ltr"
+                                >
+                                    {{ formatPrice(externalPartsCost) }}
+                                </span>
+                            </div>
+
+                            <div
+                                v-if="externalPartAllocationsList.length > 0"
+                                class="overflow-x-auto"
                             >
                                 <DataTable structured class="min-w-full text-xs">
                                     <thead
                                         class="bg-surface-secondary/70 dark:bg-gray-800 text-text-secondary"
                                     >
                                         <tr>
-                                            <th class="px-4 py-3 text-start font-semibold">
-                                                {{ $t('common.code') }}
+                                            <th class="px-4 py-2.5 text-start font-semibold">#</th>
+                                            <th class="px-4 py-2.5 text-start font-semibold">
+                                                {{ $t('work_orders.purchases.purchased_part') }}
                                             </th>
-                                            <th class="px-4 py-3 text-start font-semibold">
+                                            <th class="px-4 py-2.5 text-start font-semibold">
                                                 {{ $t('invoices.purchases.invoice_number') }}
                                             </th>
-                                            <th class="px-4 py-3 text-start font-semibold">
+                                            <th class="px-4 py-2.5 text-start font-semibold">
                                                 {{ $t('purchasing.orders.supplier') }}
                                             </th>
-                                            <th class="px-4 py-3 text-center font-semibold">
-                                                {{ $t('invoices.issue_date') }}
+                                            <th class="px-4 py-2.5 text-end font-semibold">
+                                                {{ $t('work_orders.purchases.cost_price') }}
                                             </th>
-                                            <th class="px-4 py-3 text-end font-semibold">
-                                                {{ $t('invoices.subtotal') }}
+                                            <th class="px-4 py-2.5 text-start font-semibold">
+                                                {{ $t('work_orders.purchases.linked_part') }}
                                             </th>
-                                            <th class="px-4 py-3 text-end font-semibold">
-                                                {{ $t('invoices.tax') }}
+                                            <th class="px-4 py-2.5 text-center font-semibold">
+                                                {{ $t('common.quantity') }}
                                             </th>
-                                            <th class="px-4 py-3 text-end font-semibold">
+                                            <th class="px-4 py-2.5 text-end font-semibold">
                                                 {{ $t('common.total') }}
                                             </th>
-                                            <th class="px-4 py-3 text-center font-semibold">
-                                                {{ $t('common.status') }}
-                                            </th>
-                                            <th class="px-4 py-3 text-center font-semibold">
+                                            <th class="px-4 py-2.5 text-center font-semibold">
                                                 {{ $t('common.actions') }}
                                             </th>
                                         </tr>
                                     </thead>
                                     <tbody class="divide-y divide-border-subtle">
                                         <tr
-                                            v-for="pinv in workOrder.purchase_invoices"
-                                            :key="pinv.id"
+                                            v-for="(alloc, idx) in externalPartAllocationsList"
+                                            :key="'ext-' + alloc.id"
                                             class="hover:bg-surface-secondary/40 transition-colors"
                                         >
-                                            <td class="px-4 py-3 font-mono font-bold">
+                                            <td class="px-4 py-3 font-mono text-text-secondary">
+                                                {{ idx + 1 }}
+                                            </td>
+                                            <td class="px-4 py-3 font-bold text-text-primary">
+                                                {{ alloc.description }}
+                                            </td>
+                                            <td class="px-4 py-3 font-mono">
                                                 <Link
                                                     :href="
                                                         route(
                                                             'app.invoices.purchases.show',
-                                                            pinv.id
+                                                            alloc.invoice_id
                                                         )
                                                     "
-                                                    class="text-action-primary hover:underline"
+                                                    class="text-action-primary hover:underline font-bold"
                                                 >
-                                                    {{ pinv.code }}
+                                                    {{ alloc.invoice_code || alloc.invoice_number }}
                                                 </Link>
                                             </td>
-                                            <td class="px-4 py-3 font-mono">
-                                                {{ pinv.invoice_number || '—' }}
+                                            <td class="px-4 py-3">
+                                                {{ alloc.supplier_name || '—' }}
                                             </td>
-                                            <td class="px-4 py-3 font-medium">
-                                                {{ pinv.supplier?.name || '—' }}
+                                            <td class="px-4 py-3 text-end font-mono" dir="ltr">
+                                                {{ formatPrice(alloc.unit_cost) }}
+                                            </td>
+                                            <td class="px-4 py-3">
+                                                <!-- If linked to an external part -->
+                                                <div
+                                                    v-if="alloc.linked_part"
+                                                    class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-xs font-bold text-emerald-800 dark:text-emerald-300"
+                                                >
+                                                    <span>🔗 {{ alloc.linked_part.name }}</span>
+                                                    <button
+                                                        v-if="!isReadOnly"
+                                                        type="button"
+                                                        @click="unlinkPartFromAllocation(alloc.id)"
+                                                        class="text-rose-500 hover:text-rose-700 p-0.5 rounded cursor-pointer"
+                                                        :title="
+                                                            $t('work_orders.purchases.unlink_btn')
+                                                        "
+                                                    >
+                                                        🗑️
+                                                    </button>
+                                                </div>
+                                                <!-- If not linked: dropdown + link button -->
+                                                <div
+                                                    v-else-if="
+                                                        !isReadOnly &&
+                                                        externalPartsOptions.length > 0
+                                                    "
+                                                    class="flex items-center gap-1.5"
+                                                >
+                                                    <div class="w-44">
+                                                        <SearchableSelect
+                                                            v-model="pendingPartLinks[alloc.id]"
+                                                            :options="externalPartsOptions"
+                                                            option-label="label"
+                                                            option-value="value"
+                                                            :placeholder="
+                                                                $t(
+                                                                    'work_orders.purchases.select_part_to_link'
+                                                                )
+                                                            "
+                                                            compact
+                                                        />
+                                                    </div>
+                                                    <button
+                                                        type="button"
+                                                        :disabled="!pendingPartLinks[alloc.id]"
+                                                        @click="
+                                                            linkPartToAllocation(
+                                                                alloc.id,
+                                                                pendingPartLinks[alloc.id],
+                                                                alloc
+                                                            )
+                                                        "
+                                                        class="px-2.5 py-1.5 bg-amber-500 hover:bg-amber-600 disabled:opacity-40 text-white rounded-lg text-xs font-bold transition-colors cursor-pointer"
+                                                    >
+                                                        {{
+                                                            $t('work_orders.purchases.link_action')
+                                                        }}
+                                                    </button>
+                                                </div>
+                                                <span v-else class="text-text-muted text-xs">
+                                                    —
+                                                </span>
                                             </td>
                                             <td class="px-4 py-3 text-center font-mono">
-                                                {{ formatDate(pinv.issue_date) }}
+                                                {{ alloc.qty }}
                                             </td>
-                                            <td class="px-4 py-3 text-end font-mono">
-                                                {{ formatPrice(pinv.subtotal) }}
+                                            <td
+                                                class="px-4 py-3 text-end font-mono font-bold"
+                                                dir="ltr"
+                                            >
+                                                {{ formatPrice(alloc.total) }}
                                             </td>
-                                            <td class="px-4 py-3 text-end font-mono">
-                                                {{ formatPrice(pinv.tax_amount) }}
+                                            <td class="px-4 py-3 text-center">
+                                                <button
+                                                    v-if="!isReadOnly"
+                                                    type="button"
+                                                    @click="deleteAllocation(alloc)"
+                                                    class="text-rose-500 hover:text-rose-700 p-1 rounded transition-colors cursor-pointer"
+                                                    :title="$t('common.delete')"
+                                                >
+                                                    🗑️
+                                                </button>
                                             </td>
-                                            <td class="px-4 py-3 text-end font-mono font-bold">
-                                                {{ formatPrice(pinv.total) }}
+                                        </tr>
+                                    </tbody>
+                                </DataTable>
+                            </div>
+                            <div v-else class="text-center py-6 px-4 text-xs text-text-secondary">
+                                {{ $t('work_orders.purchases.empty_external') }}
+                            </div>
+                        </div>
+
+                        <!-- 2. Warehouse Stock Purchases Table -->
+                        <div
+                            class="rounded-2xl border border-border-subtle bg-surface overflow-hidden shadow-xs"
+                        >
+                            <div
+                                class="flex items-center justify-between px-4 py-3 bg-sky-500/10 border-b border-border-subtle"
+                            >
+                                <div class="flex items-center gap-2">
+                                    <span class="text-lg">🏭</span>
+                                    <h4 class="text-xs font-bold text-text-primary">
+                                        {{ $t('work_orders.purchases.warehouse_stock_purchases') }}
+                                    </h4>
+                                    <span
+                                        class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-sky-100 text-sky-800 dark:bg-sky-900/40 dark:text-sky-300 font-mono"
+                                    >
+                                        {{ warehouseInvoicesList.length }}
+                                    </span>
+                                </div>
+                                <span
+                                    class="text-xs font-black font-mono text-sky-700 dark:text-sky-300"
+                                    dir="ltr"
+                                >
+                                    {{ formatPrice(warehousePartsCost) }}
+                                </span>
+                            </div>
+
+                            <div v-if="warehouseInvoicesList.length > 0" class="overflow-x-auto">
+                                <DataTable structured class="min-w-full text-xs">
+                                    <thead
+                                        class="bg-surface-secondary/70 dark:bg-gray-800 text-text-secondary"
+                                    >
+                                        <tr>
+                                            <th class="px-4 py-2.5 text-start font-semibold">#</th>
+                                            <th class="px-4 py-2.5 text-start font-semibold">
+                                                {{
+                                                    $t('work_orders.purchases.part_or_description')
+                                                }}
+                                            </th>
+                                            <th class="px-4 py-2.5 text-start font-semibold">
+                                                {{ $t('invoices.purchases.invoice_number') }}
+                                            </th>
+                                            <th class="px-4 py-2.5 text-start font-semibold">
+                                                {{ $t('purchasing.orders.supplier') }}
+                                            </th>
+                                            <th class="px-4 py-2.5 text-end font-semibold">
+                                                {{ $t('work_orders.purchases.cost_price') }}
+                                            </th>
+                                            <th class="px-4 py-2.5 text-center font-semibold">
+                                                {{ $t('common.quantity') }}
+                                            </th>
+                                            <th class="px-4 py-2.5 text-end font-semibold">
+                                                {{ $t('common.total') }}
+                                            </th>
+                                            <th class="px-4 py-2.5 text-center font-semibold">
+                                                {{ $t('common.status') }}
+                                            </th>
+                                            <th class="px-4 py-2.5 text-center font-semibold">
+                                                {{ $t('common.actions') }}
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-border-subtle">
+                                        <tr
+                                            v-for="(winv, idx) in warehouseInvoicesList"
+                                            :key="'wh-' + winv.id"
+                                            class="hover:bg-surface-secondary/40 transition-colors"
+                                        >
+                                            <td class="px-4 py-3 font-mono text-text-secondary">
+                                                {{ idx + 1 }}
+                                            </td>
+                                            <td class="px-4 py-3 font-bold text-text-primary">
+                                                {{ winv.description }}
+                                            </td>
+                                            <td class="px-4 py-3 font-mono">
+                                                <Link
+                                                    :href="
+                                                        route(
+                                                            'app.invoices.purchases.show',
+                                                            winv.id
+                                                        )
+                                                    "
+                                                    class="text-action-primary hover:underline font-bold"
+                                                >
+                                                    {{ winv.code || winv.invoice_number }}
+                                                </Link>
+                                            </td>
+                                            <td class="px-4 py-3">
+                                                {{ winv.supplier?.name || '—' }}
+                                            </td>
+                                            <td class="px-4 py-3 text-end font-mono" dir="ltr">
+                                                {{ formatPrice(winv.subtotal) }}
+                                            </td>
+                                            <td class="px-4 py-3 text-center font-mono">
+                                                {{ winv.qty || 1 }}
+                                            </td>
+                                            <td
+                                                class="px-4 py-3 text-end font-mono font-bold"
+                                                dir="ltr"
+                                            >
+                                                {{ formatPrice(winv.total) }}
                                             </td>
                                             <td class="px-4 py-3 text-center">
                                                 <span
@@ -326,53 +762,208 @@
                                                 >
                                                     {{
                                                         $t(
-                                                            `invoices.purchases.statuses.${pinv.status}`,
-                                                            pinv.status
+                                                            `invoices.purchases.statuses.${winv.status}`,
+                                                            winv.status
                                                         )
                                                     }}
                                                 </span>
                                             </td>
                                             <td class="px-4 py-3 text-center">
-                                                <div class="flex items-center justify-center gap-2">
-                                                    <Link
-                                                        :href="
-                                                            route(
-                                                                'app.invoices.purchases.show',
-                                                                pinv.id
-                                                            )
-                                                        "
-                                                        class="text-action-primary hover:underline font-semibold"
-                                                    >
-                                                        {{ $t('common.view') }}
-                                                    </Link>
-                                                    <button
-                                                        v-if="!isReadOnly"
-                                                        type="button"
-                                                        @click="unlinkPurchaseInvoice(pinv)"
-                                                        class="text-danger hover:underline font-semibold cursor-pointer"
-                                                    >
-                                                        {{
-                                                            $t(
-                                                                'work_orders.purchase_invoices.unlink_btn'
-                                                            )
-                                                        }}
-                                                    </button>
-                                                </div>
+                                                <button
+                                                    v-if="!isReadOnly"
+                                                    type="button"
+                                                    @click="unlinkPurchaseInvoice(winv)"
+                                                    class="text-rose-500 hover:text-rose-700 p-1 rounded transition-colors cursor-pointer"
+                                                    :title="$t('work_orders.purchases.unlink_btn')"
+                                                >
+                                                    🗑️
+                                                </button>
                                             </td>
                                         </tr>
                                     </tbody>
                                 </DataTable>
                             </div>
+                            <div v-else class="text-center py-6 px-4 text-xs text-text-secondary">
+                                {{ $t('work_orders.purchases.empty_warehouse') }}
+                            </div>
+                        </div>
+
+                        <!-- 3. Supplier Services Table -->
+                        <div
+                            class="rounded-2xl border border-border-subtle bg-surface overflow-hidden shadow-xs"
+                        >
                             <div
-                                v-else
-                                class="text-center py-8 px-4 rounded-2xl border border-dashed border-border-subtle bg-surface-secondary/20"
+                                class="flex items-center justify-between px-4 py-3 bg-purple-500/10 border-b border-border-subtle"
                             >
-                                <p class="text-sm font-bold text-text-primary">
-                                    {{ $t('work_orders.purchase_invoices.empty') }}
-                                </p>
-                                <p class="text-xs text-text-secondary mt-1">
-                                    {{ $t('work_orders.purchase_invoices.empty_hint') }}
-                                </p>
+                                <div class="flex items-center gap-2">
+                                    <span class="text-lg">🤝</span>
+                                    <h4 class="text-xs font-bold text-text-primary">
+                                        {{ $t('work_orders.purchases.supplier_services') }}
+                                    </h4>
+                                    <span
+                                        class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-purple-100 text-purple-800 dark:bg-purple-900/40 dark:text-purple-300 font-mono"
+                                    >
+                                        {{ supplierServiceAllocationsList.length }}
+                                    </span>
+                                </div>
+                                <span
+                                    class="text-xs font-black font-mono text-purple-700 dark:text-purple-300"
+                                    dir="ltr"
+                                >
+                                    {{ formatPrice(supplierServicesCost) }}
+                                </span>
+                            </div>
+
+                            <div
+                                v-if="supplierServiceAllocationsList.length > 0"
+                                class="overflow-x-auto"
+                            >
+                                <DataTable structured class="min-w-full text-xs">
+                                    <thead
+                                        class="bg-surface-secondary/70 dark:bg-gray-800 text-text-secondary"
+                                    >
+                                        <tr>
+                                            <th class="px-4 py-2.5 text-start font-semibold">#</th>
+                                            <th class="px-4 py-2.5 text-start font-semibold">
+                                                {{ $t('work_orders.purchases.external_service') }}
+                                            </th>
+                                            <th class="px-4 py-2.5 text-start font-semibold">
+                                                {{ $t('invoices.purchases.invoice_number') }}
+                                            </th>
+                                            <th class="px-4 py-2.5 text-start font-semibold">
+                                                {{ $t('work_orders.purchases.service_supplier') }}
+                                            </th>
+                                            <th class="px-4 py-2.5 text-end font-semibold">
+                                                {{ $t('work_orders.purchases.cost_price') }}
+                                            </th>
+                                            <th class="px-4 py-2.5 text-start font-semibold">
+                                                {{ $t('work_orders.purchases.linked_service') }}
+                                            </th>
+                                            <th class="px-4 py-2.5 text-end font-semibold">
+                                                {{ $t('common.total') }}
+                                            </th>
+                                            <th class="px-4 py-2.5 text-center font-semibold">
+                                                {{ $t('common.actions') }}
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-border-subtle">
+                                        <tr
+                                            v-for="(alloc, idx) in supplierServiceAllocationsList"
+                                            :key="'srv-' + alloc.id"
+                                            class="hover:bg-surface-secondary/40 transition-colors"
+                                        >
+                                            <td class="px-4 py-3 font-mono text-text-secondary">
+                                                {{ idx + 1 }}
+                                            </td>
+                                            <td class="px-4 py-3 font-bold text-text-primary">
+                                                {{ alloc.description }}
+                                            </td>
+                                            <td class="px-4 py-3 font-mono">
+                                                <Link
+                                                    :href="
+                                                        route(
+                                                            'app.invoices.purchases.show',
+                                                            alloc.invoice_id
+                                                        )
+                                                    "
+                                                    class="text-action-primary hover:underline font-bold"
+                                                >
+                                                    {{ alloc.invoice_code || alloc.invoice_number }}
+                                                </Link>
+                                            </td>
+                                            <td class="px-4 py-3">
+                                                {{ alloc.supplier_name || '—' }}
+                                            </td>
+                                            <td class="px-4 py-3 text-end font-mono" dir="ltr">
+                                                {{ formatPrice(alloc.unit_cost) }}
+                                            </td>
+                                            <td class="px-4 py-3">
+                                                <!-- If linked to a work order service -->
+                                                <div
+                                                    v-if="alloc.linked_service"
+                                                    class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-xs font-bold text-emerald-800 dark:text-emerald-300"
+                                                >
+                                                    <span>🔗 {{ alloc.linked_service.title }}</span>
+                                                    <button
+                                                        v-if="!isReadOnly"
+                                                        type="button"
+                                                        @click="
+                                                            unlinkServiceFromAllocation(alloc.id)
+                                                        "
+                                                        class="text-rose-500 hover:text-rose-700 p-0.5 rounded cursor-pointer"
+                                                        :title="
+                                                            $t('work_orders.purchases.unlink_btn')
+                                                        "
+                                                    >
+                                                        🗑️
+                                                    </button>
+                                                </div>
+                                                <!-- If not linked: dropdown + link button -->
+                                                <div
+                                                    v-else-if="
+                                                        !isReadOnly && serviceOptions.length > 0
+                                                    "
+                                                    class="flex items-center gap-1.5"
+                                                >
+                                                    <div class="w-44">
+                                                        <SearchableSelect
+                                                            v-model="pendingServiceLinks[alloc.id]"
+                                                            :options="serviceOptions"
+                                                            option-label="label"
+                                                            option-value="value"
+                                                            :placeholder="
+                                                                $t(
+                                                                    'work_orders.purchases.select_service_to_link'
+                                                                )
+                                                            "
+                                                            compact
+                                                        />
+                                                    </div>
+                                                    <button
+                                                        type="button"
+                                                        :disabled="!pendingServiceLinks[alloc.id]"
+                                                        @click="
+                                                            linkServiceToAllocation(
+                                                                alloc.id,
+                                                                pendingServiceLinks[alloc.id],
+                                                                alloc
+                                                            )
+                                                        "
+                                                        class="px-2.5 py-1.5 bg-purple-600 hover:bg-purple-700 disabled:opacity-40 text-white rounded-lg text-xs font-bold transition-colors cursor-pointer"
+                                                    >
+                                                        {{
+                                                            $t('work_orders.purchases.link_action')
+                                                        }}
+                                                    </button>
+                                                </div>
+                                                <span v-else class="text-text-muted text-xs">
+                                                    —
+                                                </span>
+                                            </td>
+                                            <td
+                                                class="px-4 py-3 text-end font-mono font-bold"
+                                                dir="ltr"
+                                            >
+                                                {{ formatPrice(alloc.total) }}
+                                            </td>
+                                            <td class="px-4 py-3 text-center">
+                                                <button
+                                                    v-if="!isReadOnly"
+                                                    type="button"
+                                                    @click="deleteAllocation(alloc)"
+                                                    class="text-rose-500 hover:text-rose-700 p-1 rounded transition-colors cursor-pointer"
+                                                    :title="$t('common.delete')"
+                                                >
+                                                    🗑️
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </DataTable>
+                            </div>
+                            <div v-else class="text-center py-6 px-4 text-xs text-text-secondary">
+                                {{ $t('work_orders.purchases.empty_services') }}
                             </div>
                         </div>
                     </div>
@@ -815,9 +1406,309 @@
             :default-warehouse="warehouses?.[0] || null"
             :work-orders="[workOrder]"
             :default-work-order-id="workOrder.id"
+            :purpose="purchaseInvoicePurpose"
             @close="showNewPurchaseInvoiceModal = false"
             @saved="onNewPurchaseInvoiceSaved"
         />
+
+        <!-- Allocation Modal ("اختر للإضافة") -->
+        <BaseModal :show="showAllocationModal" @close="showAllocationModal = false" size="xl">
+            <template #title>
+                <div class="flex items-center justify-between w-full">
+                    <div class="flex items-center gap-2">
+                        <span class="text-lg">🧾</span>
+                        <h3 class="text-base font-bold text-text-primary">
+                            {{ $t('work_orders.purchases.select_to_add') }}
+                        </h3>
+                    </div>
+                    <button
+                        type="button"
+                        @click="openQuickPurchaseFromAllocation"
+                        class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl flex items-center gap-1 transition-colors cursor-pointer"
+                    >
+                        <span>+</span>
+                        <span>{{ $t('work_orders.purchases.quick_create_invoice') }}</span>
+                    </button>
+                </div>
+            </template>
+
+            <div class="space-y-4 py-2">
+                <!-- Search & Filters -->
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div class="relative flex-1">
+                        <input
+                            v-model="allocationSearchQuery"
+                            type="text"
+                            :placeholder="$t('work_orders.purchases.search_invoices_placeholder')"
+                            class="w-full px-3 py-2 text-xs rounded-xl border border-border-subtle bg-surface text-text-primary focus:outline-none focus:ring-2 focus:ring-action-primary/30"
+                        />
+                    </div>
+                    <!-- Category Filter Tabs -->
+                    <div
+                        class="flex items-center gap-1 bg-surface-secondary/60 p-1 rounded-xl border border-border-subtle text-xs"
+                    >
+                        <button
+                            v-for="cat in [
+                                'all',
+                                'external_parts',
+                                'supplier_service',
+                                'warehouse',
+                            ]"
+                            :key="cat"
+                            type="button"
+                            @click="allocationCategoryFilter = cat"
+                            :class="[
+                                'px-2.5 py-1 rounded-lg font-bold transition-all cursor-pointer',
+                                allocationCategoryFilter === cat
+                                    ? 'bg-surface text-action-primary shadow-xs'
+                                    : 'text-text-secondary hover:text-text-primary',
+                            ]"
+                        >
+                            {{
+                                cat === 'all'
+                                    ? $t('work_orders.purchases.filter_all')
+                                    : cat === 'external_parts'
+                                      ? $t('work_orders.purchases.external_parts_purchases')
+                                      : cat === 'supplier_service'
+                                        ? $t('work_orders.purchases.supplier_services')
+                                        : $t('work_orders.purchases.warehouse_stock_purchases')
+                            }}
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Available Invoices List -->
+                <div
+                    v-if="filteredAvailableInvoices.length > 0"
+                    class="space-y-3 max-h-[50vh] overflow-y-auto pr-1"
+                >
+                    <div
+                        v-for="inv in filteredAvailableInvoices"
+                        :key="inv.id"
+                        class="p-3.5 rounded-2xl border border-border-subtle bg-surface hover:border-action-primary/40 transition-colors"
+                    >
+                        <div class="flex items-center justify-between gap-3">
+                            <div class="flex items-center gap-3">
+                                <input
+                                    type="checkbox"
+                                    :checked="isInvoiceSelected(inv.id)"
+                                    @change="toggleInvoiceSelection(inv)"
+                                    class="w-4 h-4 rounded text-action-primary focus:ring-action-primary/30 cursor-pointer"
+                                />
+                                <div>
+                                    <div class="flex items-center gap-2">
+                                        <span class="font-bold text-xs text-text-primary">
+                                            {{ inv.invoice_number || inv.code }}
+                                        </span>
+                                        <span class="font-mono text-[11px] text-text-secondary">
+                                            ({{ inv.code }})
+                                        </span>
+                                        <span
+                                            :class="[
+                                                'px-2 py-0.5 rounded-full text-[10px] font-bold',
+                                                getInvoiceCategory(inv) === 'warehouse'
+                                                    ? 'bg-sky-50 text-sky-700 border border-sky-200'
+                                                    : getInvoiceCategory(inv) === 'supplier_service'
+                                                      ? 'bg-purple-50 text-purple-700 border border-purple-200'
+                                                      : 'bg-amber-50 text-amber-700 border border-amber-200',
+                                            ]"
+                                        >
+                                            {{
+                                                getInvoiceCategory(inv) === 'warehouse'
+                                                    ? $t(
+                                                          'work_orders.purchases.warehouse_stock_purchases'
+                                                      )
+                                                    : getInvoiceCategory(inv) === 'supplier_service'
+                                                      ? $t(
+                                                            'work_orders.purchases.supplier_services'
+                                                        )
+                                                      : $t(
+                                                            'work_orders.purchases.external_parts_purchases'
+                                                        )
+                                            }}
+                                        </span>
+                                    </div>
+                                    <p class="text-[11px] text-text-secondary mt-0.5">
+                                        {{ inv.supplier?.name || '—' }} •
+                                        {{ formatDate(inv.issue_date) }}
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="text-end">
+                                <p class="text-xs font-black font-mono text-text-primary" dir="ltr">
+                                    {{ formatPrice(inv.total) }}
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- Invoice Lines (if expanded or available) -->
+                        <div
+                            v-if="inv.lines && inv.lines.length > 0"
+                            class="mt-3 pt-3 border-t border-border-subtle"
+                        >
+                            <p class="text-[11px] font-bold text-text-secondary mb-2">
+                                {{ $t('work_orders.purchases.lines_title') }}:
+                            </p>
+                            <table class="min-w-full text-xs">
+                                <thead
+                                    class="text-text-muted text-[10px] border-b border-border-subtle"
+                                >
+                                    <tr>
+                                        <th class="pb-1 text-start">
+                                            {{ $t('work_orders.purchases.item_description') }}
+                                        </th>
+                                        <th class="pb-1 text-end">
+                                            {{ $t('work_orders.purchases.cost_price') }}
+                                        </th>
+                                        <th class="pb-1 text-center">
+                                            {{ $t('work_orders.purchases.total_qty') }}
+                                        </th>
+                                        <th class="pb-1 text-end">{{ $t('common.total') }}</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr
+                                        v-for="line in inv.lines"
+                                        :key="line.id"
+                                        class="border-b border-border-subtle/50"
+                                    >
+                                        <td class="py-1.5">
+                                            {{ line.part?.name || line.description || '—' }}
+                                        </td>
+                                        <td class="py-1.5 text-end font-mono" dir="ltr">
+                                            {{ formatPrice(line.unit_cost) }}
+                                        </td>
+                                        <td class="py-1.5 text-center font-mono">{{ line.qty }}</td>
+                                        <td class="py-1.5 text-end font-mono font-bold" dir="ltr">
+                                            {{ formatPrice(line.total) }}
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Allocation inputs when selected -->
+                        <div
+                            v-if="isInvoiceSelected(inv.id)"
+                            class="mt-3 pt-3 border-t border-border-subtle bg-surface-secondary/40 p-3 rounded-xl flex flex-wrap items-center gap-3"
+                        >
+                            <div class="flex items-center gap-2">
+                                <label class="text-xs font-semibold text-text-secondary">
+                                    {{ $t('work_orders.purchases.allocated_qty') }}:
+                                </label>
+                                <div class="inline-flex items-center gap-1">
+                                    <input
+                                        v-model.number="allocationForms[inv.id].qty"
+                                        type="number"
+                                        min="1"
+                                        step="1"
+                                        class="w-20 px-2.5 py-1 text-xs font-mono font-bold text-center rounded-lg border border-border-subtle bg-surface text-text-primary"
+                                    />
+                                    <span class="text-[10px] text-text-muted font-bold">
+                                        {{ $t('common.piece') }}
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <label class="text-xs font-semibold text-text-secondary">
+                                    {{ $t('work_orders.purchases.allocated_amount') }}:
+                                </label>
+                                <input
+                                    v-model="allocationForms[inv.id].amount"
+                                    type="number"
+                                    min="0"
+                                    step="0.01"
+                                    class="w-28 px-2.5 py-1 text-xs font-mono rounded-lg border border-border-subtle bg-surface text-text-primary"
+                                />
+                            </div>
+
+                            <!-- Optional Link to External Part (if external) -->
+                            <div
+                                v-if="
+                                    getInvoiceCategory(inv) === 'external_parts' &&
+                                    externalPartsOptions.length > 0
+                                "
+                                class="flex items-center gap-2"
+                            >
+                                <label class="text-xs font-semibold text-text-secondary">
+                                    {{ $t('work_orders.purchases.linked_part') }}:
+                                </label>
+                                <div class="w-44">
+                                    <SearchableSelect
+                                        v-model="allocationForms[inv.id].linked_part_id"
+                                        :options="externalPartsOptions"
+                                        option-label="label"
+                                        option-value="value"
+                                        :placeholder="
+                                            $t('work_orders.purchases.select_part_to_link')
+                                        "
+                                        compact
+                                    />
+                                </div>
+                            </div>
+
+                            <!-- Optional Link to Service (if supplier service) -->
+                            <div
+                                v-if="
+                                    getInvoiceCategory(inv) === 'supplier_service' &&
+                                    serviceOptions.length > 0
+                                "
+                                class="flex items-center gap-2"
+                            >
+                                <label class="text-xs font-semibold text-text-secondary">
+                                    {{ $t('work_orders.purchases.linked_service') }}:
+                                </label>
+                                <div class="w-44">
+                                    <SearchableSelect
+                                        v-model="allocationForms[inv.id].linked_service_id"
+                                        :options="serviceOptions"
+                                        option-label="label"
+                                        option-value="value"
+                                        :placeholder="
+                                            $t('work_orders.purchases.select_service_to_link')
+                                        "
+                                        compact
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div
+                    v-else
+                    class="text-center py-8 px-4 border border-dashed border-border-subtle rounded-2xl bg-surface-secondary/20"
+                >
+                    <p class="text-xs text-text-secondary">
+                        {{ $t('work_orders.purchases.no_available_invoices') }}
+                    </p>
+                </div>
+            </div>
+
+            <template #footer>
+                <div class="flex items-center justify-end gap-2">
+                    <button
+                        type="button"
+                        @click="showAllocationModal = false"
+                        class="px-4 py-2 text-xs font-bold text-text-secondary hover:bg-surface-secondary rounded-xl transition-colors cursor-pointer"
+                    >
+                        {{ $t('common.cancel') }}
+                    </button>
+                    <button
+                        type="button"
+                        :disabled="
+                            selectedAllocationInvoiceIds.length === 0 || isSubmittingAllocation
+                        "
+                        @click="submitAllocationsToOrder"
+                        class="px-5 py-2 bg-action-primary hover:bg-action-primary-hover disabled:opacity-50 text-white text-xs font-bold rounded-xl transition-colors cursor-pointer flex items-center gap-1.5"
+                    >
+                        <span>{{ $t('work_orders.purchases.add_to_order') }}</span>
+                        <span v-if="selectedAllocationInvoiceIds.length > 0">
+                            ({{ selectedAllocationInvoiceIds.length }})
+                        </span>
+                    </button>
+                </div>
+            </template>
+        </BaseModal>
     </AppLayout>
 </template>
 
@@ -854,6 +1745,7 @@ import { useToast } from '@/Composables/useToast';
 import { useConfirm } from '@/Composables/useConfirm';
 import VehicleConditionReport from '@/Components/WorkOrders/VehicleConditionReport.vue';
 import WorkOrderHeader from '@/Components/WorkOrders/WorkOrderHeader.vue';
+import LinkedInvoiceBadge from '@/Components/Common/LinkedInvoiceBadge.vue';
 import WorkOrderFormModal from '@/Components/WorkOrders/WorkOrderFormModal.vue';
 import WorkOrderServiceModal from '@/Components/WorkOrders/WorkOrderServiceModal.vue';
 import WorkOrderPartModal from '@/Components/WorkOrders/WorkOrderPartModal.vue';
@@ -933,13 +1825,524 @@ const showReturnModal = ref(false);
 const editingReturnPart = ref(null);
 const showCreditNoteModal = ref(false);
 const selectedPurchaseInvoiceId = ref('');
+const allocatedAmountInput = ref('');
 const isLinkingPurchaseInvoice = ref(false);
 const showNewPurchaseInvoiceModal = ref(false);
+const purchaseInvoicePurpose = ref('external_part');
+
+// ─── Purchase Allocations & Supplier Services State ───────────────────────────
+const showAllocationModal = ref(false);
+const isSubmittingAllocation = ref(false);
+const allocationSearchQuery = ref('');
+const allocationCategoryFilter = ref('all');
+const selectedAllocationInvoiceIds = ref([]);
+const allocationForms = ref({});
+const pendingPartLinks = ref({});
+const pendingServiceLinks = ref({});
+
+// Load persistent mappings from localStorage
+const partStorageKey = computed(() => `wo_part_allocations_${props.workOrder?.id}`);
+const serviceStorageKey = computed(() => `wo_service_allocations_${props.workOrder?.id}`);
+
+const linkedPartAllocations = ref({});
+const linkedServiceAllocations = ref({});
+
+function loadAllocationsFromStorage() {
+    try {
+        const savedParts = localStorage.getItem(partStorageKey.value);
+        if (savedParts) {
+            linkedPartAllocations.value = JSON.parse(savedParts);
+        }
+        const savedServices = localStorage.getItem(serviceStorageKey.value);
+        if (savedServices) {
+            linkedServiceAllocations.value = JSON.parse(savedServices);
+        }
+    } catch (e) {
+        // ignore parse error
+    }
+}
+
+function savePartAllocationsToStorage() {
+    try {
+        localStorage.setItem(partStorageKey.value, JSON.stringify(linkedPartAllocations.value));
+    } catch (e) {
+        // ignore
+    }
+}
+
+function saveServiceAllocationsToStorage() {
+    try {
+        localStorage.setItem(
+            serviceStorageKey.value,
+            JSON.stringify(linkedServiceAllocations.value)
+        );
+    } catch (e) {
+        // ignore
+    }
+}
+
+loadAllocationsFromStorage();
+
+function openAllocationModal() {
+    selectedAllocationInvoiceIds.value = [];
+    allocationForms.value = {};
+    allocationSearchQuery.value = '';
+    allocationCategoryFilter.value = 'all';
+    showAllocationModal.value = true;
+}
+
+function openQuickPurchaseModal() {
+    purchaseInvoicePurpose.value = 'external_part';
+    showNewPurchaseInvoiceModal.value = true;
+}
+
+function openQuickPurchaseFromAllocation() {
+    showAllocationModal.value = false;
+    purchaseInvoicePurpose.value = 'external_part';
+    showNewPurchaseInvoiceModal.value = true;
+}
+
+const allLinkedPurchaseInvoices = computed(() => props.workOrder?.purchase_invoices || []);
+
+function isInvoiceSupplierService(inv) {
+    if (inv.source_type === 'supplier_service' || inv.type === 'supplier_service') return true;
+    const notes = String(inv.notes || '');
+    if (
+        notes.includes('[خدمات المورد]') ||
+        notes.includes('supplier_service') ||
+        notes.includes('خدمة') ||
+        notes.includes('مخرطة')
+    )
+        return true;
+    return Object.values(linkedServiceAllocations.value).some(
+        (alloc) => alloc.invoice_id === inv.id || alloc.allocationId === inv.id
+    );
+}
+
+const warehouseInvoicesList = computed(() => {
+    return allLinkedPurchaseInvoices.value.filter(
+        (inv) => inv.source_type === 'warehouse' || inv.purchase_order_id !== null
+    );
+});
+
+const supplierServiceAllocationsList = computed(() => {
+    return allLinkedPurchaseInvoices.value
+        .filter((inv) => inv.source_type !== 'warehouse' && isInvoiceSupplierService(inv))
+        .map((inv) => {
+            const linkedService = Object.entries(linkedServiceAllocations.value).find(
+                ([_, alloc]) => alloc.invoice_id === inv.id || alloc.allocationId === inv.id
+            );
+            const serviceItem = linkedService
+                ? (props.workOrder?.items || []).find((it) => it.id === Number(linkedService[0]))
+                : null;
+            return {
+                id: inv.id,
+                invoice_id: inv.id,
+                invoice_code: inv.code,
+                invoice_number: inv.invoice_number,
+                supplier_name: inv.supplier?.name,
+                description:
+                    inv.notes?.replace(/^\[.*?\]\s*/, '') || inv.invoice_number || inv.code,
+                unit_cost: Number(inv.subtotal || inv.total || 0),
+                total: Number(inv.total || 0),
+                linked_service: serviceItem,
+            };
+        });
+});
+
+const externalPartAllocationsList = computed(() => {
+    return allLinkedPurchaseInvoices.value
+        .filter((inv) => inv.source_type !== 'warehouse' && !isInvoiceSupplierService(inv))
+        .map((inv) => {
+            const linkedPart = Object.entries(linkedPartAllocations.value).find(
+                ([_, alloc]) => alloc.invoice_id === inv.id || alloc.allocationId === inv.id
+            );
+            const partObj = linkedPart
+                ? (props.workOrder?.parts || []).find((p) => p.id === Number(linkedPart[0]))
+                : null;
+            return {
+                id: inv.id,
+                invoice_id: inv.id,
+                invoice_code: inv.code,
+                invoice_number: inv.invoice_number,
+                supplier_name: inv.supplier?.name,
+                description:
+                    inv.notes?.replace(/^\[.*?\]\s*/, '') || inv.invoice_number || inv.code,
+                unit_cost: Number(inv.subtotal || inv.total || 0),
+                qty: Number(inv.allocated_qty || 1),
+                total: Number(inv.total || 0),
+                linked_part: partObj,
+            };
+        });
+});
+
+const externalPartsCost = computed(() =>
+    externalPartAllocationsList.value.reduce((sum, item) => sum + Number(item.total || 0), 0)
+);
+
+const warehousePartsCost = computed(() =>
+    warehouseInvoicesList.value.reduce((sum, inv) => sum + Number(inv.total || 0), 0)
+);
+
+const supplierServicesCost = computed(() =>
+    supplierServiceAllocationsList.value.reduce((sum, item) => sum + Number(item.total || 0), 0)
+);
+
+const totalPurchasesCost = computed(
+    () => externalPartsCost.value + warehousePartsCost.value + supplierServicesCost.value
+);
+
+const workOrderRevenue = computed(() => workOrderTotal.value);
+
+const netProfitMargin = computed(() => workOrderRevenue.value - totalPurchasesCost.value);
+
+const isNetMarginNegative = computed(() => netProfitMargin.value < 0);
+
+function formatNetMargin(val) {
+    const num = Number(val || 0);
+    if (num < 0) {
+        return `( ${formatPrice(Math.abs(num))} )`;
+    }
+    return formatPrice(num);
+}
+
+const externalPartsOptions = computed(() => {
+    return (props.workOrder?.parts || [])
+        .filter((part) => part.source === 'external')
+        .map((part) => ({
+            value: part.id,
+            label: `${part.part?.name_ar || part.part?.name_en || part.name || 'قطعة'} (${part.part?.sku || part.part_number || '—'})`,
+        }));
+});
+
+const serviceOptions = computed(() => {
+    return (props.workOrder?.items || [])
+        .filter((item) => item.status !== 'cancelled')
+        .map((item) => ({
+            value: item.id,
+            label: item.service
+                ? item.service.name_ar || item.service.name || item.title
+                : item.title,
+        }));
+});
+
+function getInvoiceCategory(inv) {
+    if (inv.source_type === 'warehouse' || inv.purchase_order_id !== null) {
+        return 'warehouse';
+    }
+    const notes = String(inv.notes || '');
+    if (
+        notes.includes('[خدمات المورد]') ||
+        notes.includes('supplier_service') ||
+        notes.includes('خدمة') ||
+        notes.includes('مخرطة')
+    ) {
+        return 'supplier_service';
+    }
+    const hasServiceLink = Object.values(linkedServiceAllocations.value).some(
+        (alloc) => alloc.invoice_id === inv.id || alloc.allocationId === inv.id
+    );
+    if (hasServiceLink) return 'supplier_service';
+    return 'external_parts';
+}
+
+const filteredAvailableInvoices = computed(() => {
+    let list = props.availablePurchaseInvoices || [];
+    const query = allocationSearchQuery.value.trim().toLowerCase();
+    if (query) {
+        list = list.filter(
+            (inv) =>
+                (inv.code && inv.code.toLowerCase().includes(query)) ||
+                (inv.invoice_number && inv.invoice_number.toLowerCase().includes(query)) ||
+                (inv.supplier?.name && inv.supplier.name.toLowerCase().includes(query))
+        );
+    }
+    if (allocationCategoryFilter.value !== 'all') {
+        list = list.filter((inv) => getInvoiceCategory(inv) === allocationCategoryFilter.value);
+    }
+    return list;
+});
+
+function isInvoiceSelected(invId) {
+    return selectedAllocationInvoiceIds.value.includes(invId);
+}
+
+function toggleInvoiceSelection(inv) {
+    const idx = selectedAllocationInvoiceIds.value.indexOf(inv.id);
+    if (idx > -1) {
+        selectedAllocationInvoiceIds.value.splice(idx, 1);
+        delete allocationForms.value[inv.id];
+    } else {
+        selectedAllocationInvoiceIds.value.push(inv.id);
+        const defaultQty = inv.lines?.length
+            ? inv.lines.reduce((s, l) => s + Math.max(1, Math.floor(Number(l.qty || 1))), 0)
+            : 1;
+        allocationForms.value[inv.id] = {
+            qty: defaultQty,
+            amount: Number(inv.total || 0),
+            linked_part_id: null,
+            linked_service_id: null,
+        };
+    }
+}
+
+function linkPartToAllocation(allocationId, partId, alloc) {
+    if (!partId) return;
+    const part = (props.workOrder?.parts || []).find((p) => p.id === Number(partId));
+    if (!part) return;
+    linkedPartAllocations.value[partId] = {
+        allocationId: allocationId,
+        invoice_id: alloc.invoice_id || allocationId,
+        name: alloc.description || alloc.invoice_number || alloc.invoice_code,
+        unit_cost: alloc.unit_cost,
+        qty: alloc.qty,
+        total: alloc.total,
+    };
+    savePartAllocationsToStorage();
+    delete pendingPartLinks.value[allocationId];
+    success(t('work_orders.purchases.link_success'));
+}
+
+function unlinkPartFromAllocation(allocationId) {
+    const entry = Object.entries(linkedPartAllocations.value).find(
+        ([_, a]) => a.allocationId === allocationId || a.invoice_id === allocationId
+    );
+    if (entry) {
+        delete linkedPartAllocations.value[entry[0]];
+        savePartAllocationsToStorage();
+        success(t('work_orders.purchases.unlink_success'));
+    }
+}
+
+function unlinkPartAllocationMapping(partId) {
+    if (linkedPartAllocations.value[partId]) {
+        delete linkedPartAllocations.value[partId];
+        savePartAllocationsToStorage();
+        success(t('work_orders.purchases.unlink_success'));
+    }
+}
+
+function linkServiceToAllocation(allocationId, serviceId, alloc) {
+    if (!serviceId) return;
+    const item = (props.workOrder?.items || []).find((i) => i.id === Number(serviceId));
+    if (!item) return;
+    linkedServiceAllocations.value[serviceId] = {
+        allocationId: allocationId,
+        invoice_id: alloc.invoice_id || allocationId,
+        name: alloc.description || alloc.invoice_number || alloc.invoice_code,
+        cost: alloc.unit_cost,
+    };
+    saveServiceAllocationsToStorage();
+    delete pendingServiceLinks.value[allocationId];
+    success(t('work_orders.purchases.link_success'));
+}
+
+function unlinkServiceFromAllocation(allocationId) {
+    const entry = Object.entries(linkedServiceAllocations.value).find(
+        ([_, a]) => a.allocationId === allocationId || a.invoice_id === allocationId
+    );
+    if (entry) {
+        delete linkedServiceAllocations.value[entry[0]];
+        saveServiceAllocationsToStorage();
+        success(t('work_orders.purchases.unlink_success'));
+    }
+}
+
+function unlinkSupplierServiceMapping(serviceId) {
+    if (linkedServiceAllocations.value[serviceId]) {
+        delete linkedServiceAllocations.value[serviceId];
+        saveServiceAllocationsToStorage();
+        success(t('work_orders.purchases.unlink_success'));
+    }
+}
+
+async function submitAllocationsToOrder() {
+    if (selectedAllocationInvoiceIds.value.length === 0 || isSubmittingAllocation.value) return;
+    isSubmittingAllocation.value = true;
+
+    const targetUrl = route().has('app.work-orders.purchase-allocations.store')
+        ? route('app.work-orders.purchase-allocations.store', props.workOrder.id)
+        : route('work-orders.purchase-invoices.link', props.workOrder.id);
+
+    try {
+        for (const invoiceId of selectedAllocationInvoiceIds.value) {
+            const form = allocationForms.value[invoiceId] || {};
+            const inv = (props.availablePurchaseInvoices || []).find((i) => i.id === invoiceId);
+            const cat = inv ? getInvoiceCategory(inv) : 'external_parts';
+            const allocType =
+                cat === 'supplier_service'
+                    ? 'supplier_service'
+                    : cat === 'warehouse'
+                      ? 'warehouse_part'
+                      : 'external_part';
+
+            const qty = Math.max(1, Math.floor(Number(form.qty || 1)));
+            const amount = Number(
+                form.amount !== undefined && form.amount !== null && form.amount !== ''
+                    ? form.amount
+                    : inv?.total || 0
+            );
+
+            const payload = {
+                purchase_invoice_id: invoiceId,
+                type: allocType,
+                item_description: inv?.invoice_number || inv?.code || 'بند مشتريات',
+                allocated_qty: qty,
+                unit_cost: qty > 0 ? Math.round((amount / qty) * 100) / 100 : amount,
+                total_cost: amount,
+                allocated_amount: amount,
+                work_order_item_part_id: form.linked_part_id || null,
+                work_order_item_id: form.linked_service_id || null,
+            };
+
+            await axios.post(targetUrl, payload);
+
+            if (form.linked_part_id) {
+                linkedPartAllocations.value[form.linked_part_id] = {
+                    allocationId: invoiceId,
+                    invoice_id: invoiceId,
+                    name: inv?.invoice_number || inv?.code || 'قطعة شراء',
+                    unit_cost: form.amount || inv?.total || 0,
+                    qty: qty,
+                    total: form.amount || inv?.total || 0,
+                };
+                savePartAllocationsToStorage();
+            }
+
+            if (form.linked_service_id) {
+                linkedServiceAllocations.value[form.linked_service_id] = {
+                    allocationId: invoiceId,
+                    invoice_id: invoiceId,
+                    name: inv?.invoice_number || inv?.code || 'خدمة مورد',
+                    cost: form.amount || inv?.total || 0,
+                };
+                saveServiceAllocationsToStorage();
+            }
+        }
+
+        showAllocationModal.value = false;
+        selectedAllocationInvoiceIds.value = [];
+        success(t('work_orders.purchases.link_success'));
+        router.reload({ only: ['workOrder', 'availablePurchaseInvoices'] });
+    } catch (err) {
+        errorToast(err?.response?.data?.message || t('common.error_occurred'));
+    } finally {
+        isSubmittingAllocation.value = false;
+    }
+}
+
+const warehousePurchaseInvoices = computed(() =>
+    (props.workOrder?.purchase_invoices || []).filter((pinv) => pinv.source_type === 'warehouse')
+);
+
+const externalPurchaseInvoices = computed(() =>
+    (props.workOrder?.purchase_invoices || []).filter((pinv) => pinv.source_type !== 'warehouse')
+);
+
+const warehousePurchaseTotal = computed(() =>
+    warehousePurchaseInvoices.value.reduce((sum, pinv) => sum + Number(pinv.total || 0), 0)
+);
+
+const externalPurchaseTotal = computed(() =>
+    externalPurchaseInvoices.value.reduce((sum, pinv) => sum + Number(pinv.total || 0), 0)
+);
+
+const allLinkedInvoices = computed(() => {
+    const list = [];
+    const seen = new Set();
+
+    if (Array.isArray(props.workOrder?.invoices) && props.workOrder.invoices.length > 0) {
+        for (const inv of props.workOrder.invoices) {
+            if (inv && inv.id && !seen.has(inv.id)) {
+                seen.add(inv.id);
+                list.push(inv);
+            }
+        }
+    }
+
+    if (props.workOrder?.invoice?.id && !seen.has(props.workOrder.invoice.id)) {
+        seen.add(props.workOrder.invoice.id);
+        list.push(props.workOrder.invoice);
+    }
+
+    if (Array.isArray(props.workOrder?.credit_notes)) {
+        for (const cn of props.workOrder.credit_notes) {
+            if (cn && cn.id && !seen.has(cn.id)) {
+                seen.add(cn.id);
+                list.push(cn);
+            }
+        }
+    }
+
+    return list;
+});
+
+function getInvoiceBadgeMeta(inv) {
+    if (!inv) return null;
+
+    if (inv.type === 'credit_note') {
+        const num = inv.invoice_number || inv.code || '';
+        const titleText = `${t('invoices.types.credit_note')} #${num}`;
+        return {
+            type: 'credit_note',
+            number: num,
+            title: titleText,
+            tooltip: `${t('invoices.credit_note.title')} #${num}`,
+            badgeClass:
+                'bg-rose-50 text-rose-700 border-rose-200/80 dark:bg-rose-950/40 dark:text-rose-300 dark:border-rose-800/60 hover:bg-rose-100 dark:hover:bg-rose-900/60 hover:border-rose-300',
+            icon: 'credit_note',
+        };
+    }
+
+    const isDeferred =
+        !!(inv.due_date && inv.payment_status !== 'paid') ||
+        inv.payment_status === 'unpaid' ||
+        inv.payment_status === 'partial';
+
+    if (isDeferred) {
+        const num = inv.invoice_number || inv.code || '';
+        const dueText = inv.due_date
+            ? ` (${t('invoices.due_date')}: ${formatDate(inv.due_date)})`
+            : '';
+        return {
+            type: 'deferred',
+            number: num,
+            title: `${t('invoices.deferred_invoice')} #${num}${dueText}`,
+            tooltip: `${t('invoices.deferred_invoice')} #${num}${dueText}`,
+            badgeClass:
+                'bg-amber-50 text-amber-700 border-amber-200/80 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-800/60 hover:bg-amber-100 dark:hover:bg-amber-900/60 hover:border-amber-300',
+            icon: 'clock',
+        };
+    }
+
+    const isPaid = inv.payment_status === 'paid';
+    const num = inv.invoice_number || inv.code || '';
+    const statusText = isPaid ? t('invoices.status_paid') : t('invoices.types.invoice');
+
+    return {
+        type: isPaid ? 'paid' : 'standard',
+        number: num,
+        title: `${t('invoices.types.invoice')} #${num} (${statusText})`,
+        tooltip: `${t('invoices.types.invoice')} #${num} - ${statusText}`,
+        badgeClass: isPaid
+            ? 'bg-emerald-50 text-emerald-700 border-emerald-200/80 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800/60 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 hover:border-emerald-300'
+            : 'bg-sky-50 text-sky-700 border-sky-200/80 dark:bg-sky-950/40 dark:text-sky-300 dark:border-sky-800/60 hover:bg-sky-100 dark:hover:bg-sky-900/60 hover:border-sky-300',
+        icon: isPaid ? 'check' : 'document',
+    };
+}
 
 const linkablePurchaseInvoiceOptions = computed(() =>
     (props.availablePurchaseInvoices || []).map((inv) => ({
         value: inv.id,
-        label: [inv.code, inv.invoice_number, inv.supplier?.name, formatPrice(inv.total)]
+        label: [
+            inv.code,
+            inv.invoice_number,
+            inv.supplier?.name,
+            formatPrice(inv.total),
+            inv.source_type === 'warehouse'
+                ? t('work_orders.purchase_invoices.warehouse_purchase')
+                : t('work_orders.purchase_invoices.external_purchase'),
+        ]
             .filter(Boolean)
             .join(' • '),
     }))
@@ -948,20 +2351,23 @@ const linkablePurchaseInvoiceOptions = computed(() =>
 function linkSelectedPurchaseInvoice() {
     if (!selectedPurchaseInvoiceId.value || isLinkingPurchaseInvoice.value) return;
     isLinkingPurchaseInvoice.value = true;
-    router.post(
-        route('work-orders.purchase-invoices.link', props.workOrder.id),
-        { purchase_invoice_id: selectedPurchaseInvoiceId.value },
-        {
-            preserveScroll: true,
-            onSuccess: () => {
-                selectedPurchaseInvoiceId.value = '';
-                success(t('common.saved_success'));
-            },
-            onFinish: () => {
-                isLinkingPurchaseInvoice.value = false;
-            },
-        }
-    );
+    const payload = {
+        purchase_invoice_id: selectedPurchaseInvoiceId.value,
+    };
+    if (allocatedAmountInput.value !== '' && allocatedAmountInput.value !== null) {
+        payload.allocated_amount = Number(allocatedAmountInput.value);
+    }
+    router.post(route('work-orders.purchase-invoices.link', props.workOrder.id), payload, {
+        preserveScroll: true,
+        onSuccess: () => {
+            selectedPurchaseInvoiceId.value = '';
+            allocatedAmountInput.value = '';
+            success(t('common.saved_success'));
+        },
+        onFinish: () => {
+            isLinkingPurchaseInvoice.value = false;
+        },
+    });
 }
 
 async function unlinkPurchaseInvoice(pinv) {
@@ -976,13 +2382,32 @@ async function unlinkPurchaseInvoice(pinv) {
     router.delete(
         route('work-orders.purchase-invoices.unlink', {
             workOrder: props.workOrder.id,
-            purchaseInvoice: pinv.id,
+            purchaseInvoice: pinv.id || pinv.invoice_id,
         }),
         {
             preserveScroll: true,
-            onSuccess: () => success(t('common.deleted_success')),
+            onSuccess: () => {
+                const invId = pinv.id || pinv.invoice_id;
+                for (const [pId, a] of Object.entries(linkedPartAllocations.value)) {
+                    if (a.invoice_id === invId || a.allocationId === invId) {
+                        delete linkedPartAllocations.value[pId];
+                    }
+                }
+                savePartAllocationsToStorage();
+                for (const [sId, a] of Object.entries(linkedServiceAllocations.value)) {
+                    if (a.invoice_id === invId || a.allocationId === invId) {
+                        delete linkedServiceAllocations.value[sId];
+                    }
+                }
+                saveServiceAllocationsToStorage();
+                success(t('common.deleted_success'));
+            },
         }
     );
+}
+
+function deleteAllocation(alloc) {
+    unlinkPurchaseInvoice(alloc);
 }
 
 function onNewPurchaseInvoiceSaved() {
@@ -1324,11 +2749,18 @@ const normalizedPartsForDisplay = computed(() => {
             }
         }
 
+        const resolvedSource =
+            part.source === 'external' || (!part.part_id && part.source !== 'customer')
+                ? 'external'
+                : part.source || 'warehouse';
+
         return {
             ...part,
             name: part.part?.name_ar || part.part?.name_en || part.name || '',
-            part_number: part.part?.sku || '',
-            source: part.source || 'warehouse',
+            part_number: part.part?.sku || part.part_number || '',
+            source: resolvedSource,
+            is_external: resolvedSource === 'external',
+            mapped_allocation: linkedPartAllocations.value[part.id] || null,
             total: net,
             discount: discount,
             tax_amount: taxAmount,
@@ -1336,6 +2768,10 @@ const normalizedPartsForDisplay = computed(() => {
         };
     });
 });
+
+const externalPartsList = computed(() =>
+    normalizedPartsForDisplay.value.filter((part) => part.source === 'external')
+);
 
 // Payment computed properties
 const hasTax = computed(() => {

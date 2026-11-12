@@ -126,6 +126,51 @@
                 </div>
             </div>
 
+            <!-- Unified Linked Documents Bar (GRNs & Linked Purchase Invoices) -->
+            <div
+                v-if="order.goods_received_notes && order.goods_received_notes.length > 0"
+                class="flex flex-wrap items-center justify-between gap-3 bg-white dark:bg-gray-800 px-4 py-3 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-xs"
+            >
+                <div class="flex flex-wrap items-center gap-2">
+                    <span
+                        class="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-black bg-indigo-50 text-indigo-700 border border-indigo-200 dark:bg-indigo-950/40 dark:text-indigo-300 dark:border-indigo-800/60"
+                    >
+                        <svg
+                            class="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
+                            />
+                        </svg>
+                        <span>{{ $t('purchasing.grn.title') }}</span>
+                    </span>
+                </div>
+
+                <div class="flex flex-wrap items-center gap-2">
+                    <template v-for="grn in order.goods_received_notes" :key="`grn-${grn.id}`">
+                        <LinkedInvoiceBadge
+                            :href="route('app.purchasing.grn.show', grn.id)"
+                            :kind="grn.status === 'posted' ? 'paid' : 'deferred'"
+                            :number="grn.code || String(grn.id)"
+                            :tooltip="`${$t('purchasing.grn.title')} #${grn.code} (${formatDate(grn.received_at || grn.received_date)})`"
+                        />
+                        <LinkedInvoiceBadge
+                            v-if="grn.purchase_invoice"
+                            :href="route('app.invoices.purchases.show', grn.purchase_invoice.id)"
+                            kind="standard"
+                            :number="grn.purchase_invoice.code || String(grn.purchase_invoice.id)"
+                            :tooltip="`${$t('invoices.purchases.invoice')} #${grn.purchase_invoice.code}`"
+                        />
+                    </template>
+                </div>
+            </div>
+
             <!-- Top Section: Supplier Card -->
             <div>
                 <!-- Supplier Info -->
@@ -771,6 +816,7 @@ import { useI18n } from 'vue-i18n';
 import { useNumberFormat } from '@/Composables/useNumberFormat';
 import { useConfirm } from '@/Composables/useConfirm';
 import BackButton from '@/Components/BackButton.vue';
+import LinkedInvoiceBadge from '@/Components/Common/LinkedInvoiceBadge.vue';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import ConfirmModal from '@/Components/ConfirmModal.vue';
 import GrnModal from '@/Components/Purchasing/GrnModal.vue';
