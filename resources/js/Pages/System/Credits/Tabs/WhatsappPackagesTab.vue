@@ -94,121 +94,115 @@
         </div>
 
         <!-- Add / Edit Modal -->
-        <Transition name="modal">
-            <div v-if="showAddModal" class="fixed inset-0 z-50 overflow-y-auto">
-                <div class="flex min-h-full items-center justify-center p-4">
-                    <div class="fixed inset-0 bg-black/50" @click="showAddModal = false"></div>
-                    <div
-                        class="relative bg-white dark:bg-gray-800 rounded-2xl p-6 w-full max-w-md shadow-xl"
-                    >
-                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                            {{
-                                editingPackage
-                                    ? $t('system.credits.edit_package_2')
-                                    : $t('system.credits.add_new_package_2')
-                            }}
-                        </h3>
-                        <form @submit.prevent="submitPackage" class="space-y-4">
-                            <div class="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label
-                                        class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-                                    >
-                                        {{ $t('system.credits.name_arabic_2') }}
-                                    </label>
-                                    <input
-                                        type="text"
-                                        v-model="form.name_ar"
-                                        required
-                                        class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                                    />
-                                </div>
-                                <div>
-                                    <label
-                                        class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-                                    >
-                                        {{ $t('system.credits.name_english_2') }}
-                                    </label>
-                                    <input
-                                        type="text"
-                                        v-model="form.name"
-                                        required
-                                        class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                                        dir="ltr"
-                                    />
-                                </div>
-                            </div>
-                            <div class="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label
-                                        class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-                                    >
-                                        {{ $t('system.credits.message_count_4') }}
-                                    </label>
-                                    <input
-                                        type="number"
-                                        v-model="form.credits"
-                                        required
-                                        min="1"
-                                        class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                                    />
-                                </div>
-                                <div>
-                                    <label
-                                        class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-                                    >
-                                        {{ $t('system.credits.price_sar_2') }}
-                                    </label>
-                                    <input
-                                        type="number"
-                                        v-model="form.price"
-                                        required
-                                        min="0"
-                                        step="0.01"
-                                        class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                                    />
-                                </div>
-                            </div>
-                            <div class="flex gap-4">
-                                <label class="flex items-center gap-2 cursor-pointer">
-                                    <AppToggle v-model="form.is_active" />
-                                    <span class="text-sm text-gray-700 dark:text-gray-300">
-                                        {{ $t('common.enabled') }}
-                                    </span>
-                                </label>
-                                <label class="flex items-center gap-2 cursor-pointer">
-                                    <AppToggle v-model="form.is_popular" />
-                                    <span class="text-sm text-gray-700 dark:text-gray-300">
-                                        {{ $t('system.credits.best_seller_2') }}
-                                    </span>
-                                </label>
-                            </div>
-                            <div class="flex gap-3 pt-4">
-                                <button
-                                    type="submit"
-                                    :disabled="form.processing"
-                                    class="flex-1 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-medium disabled:opacity-50"
-                                >
-                                    {{ editingPackage ? $t('common.save') : $t('common.add') }}
-                                </button>
-                                <button
-                                    type="button"
-                                    @click="showAddModal = false"
-                                    class="px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg"
-                                >
-                                    {{ $t('common.cancel') }}
-                                </button>
-                            </div>
-                        </form>
+        <BaseModal
+            :show="showAddModal"
+            :title="
+                editingPackage
+                    ? $t('system.credits.edit_package_2')
+                    : $t('system.credits.add_new_package_2')
+            "
+            size="sm"
+            @close="showAddModal = false"
+        >
+            <form @submit.prevent="submitPackage" class="space-y-4">
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label
+                            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                        >
+                            {{ $t('system.credits.name_arabic_2') }}
+                        </label>
+                        <input
+                            type="text"
+                            v-model="form.name_ar"
+                            required
+                            class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                        />
+                    </div>
+                    <div>
+                        <label
+                            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                        >
+                            {{ $t('system.credits.name_english_2') }}
+                        </label>
+                        <input
+                            type="text"
+                            v-model="form.name"
+                            required
+                            class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                            dir="ltr"
+                        />
                     </div>
                 </div>
-            </div>
-        </Transition>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label
+                            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                        >
+                            {{ $t('system.credits.message_count_4') }}
+                        </label>
+                        <input
+                            type="number"
+                            v-model="form.credits"
+                            required
+                            min="1"
+                            class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                        />
+                    </div>
+                    <div>
+                        <label
+                            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                        >
+                            {{ $t('system.credits.price_sar_2') }}
+                        </label>
+                        <input
+                            type="number"
+                            v-model="form.price"
+                            required
+                            min="0"
+                            step="0.01"
+                            class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                        />
+                    </div>
+                </div>
+                <div class="flex gap-4">
+                    <label class="flex items-center gap-2 cursor-pointer">
+                        <AppToggle v-model="form.is_active" />
+                        <span class="text-sm text-gray-700 dark:text-gray-300">
+                            {{ $t('common.enabled') }}
+                        </span>
+                    </label>
+                    <label class="flex items-center gap-2 cursor-pointer">
+                        <AppToggle v-model="form.is_popular" />
+                        <span class="text-sm text-gray-700 dark:text-gray-300">
+                            {{ $t('system.credits.best_seller_2') }}
+                        </span>
+                    </label>
+                </div>
+                <div class="flex gap-3 pt-4">
+                    <button
+                        type="submit"
+                        :disabled="form.processing"
+                        class="flex-1 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-medium disabled:opacity-50"
+                    >
+                        {{ editingPackage ? $t('common.save') : $t('common.add') }}
+                    </button>
+                    <button
+                        type="button"
+                        @click="showAddModal = false"
+                        class="px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg"
+                    >
+                        {{ $t('common.cancel') }}
+                    </button>
+                </div>
+            </form>
+        </BaseModal>
     </div>
 </template>
 
 <script setup>
 import AppToggle from '@/Components/Common/AppToggle.vue';
+import BaseModal from '@/Components/BaseModal.vue';
 import { ref } from 'vue';
 import { useForm, router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';

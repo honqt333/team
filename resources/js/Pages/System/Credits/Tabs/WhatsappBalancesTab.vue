@@ -149,100 +149,86 @@
         </div>
 
         <!-- Add Credits Modal -->
-        <Transition name="modal">
-            <div v-if="showModal" class="fixed inset-0 z-50 overflow-y-auto">
-                <div class="flex min-h-full items-center justify-center p-4">
-                    <div class="fixed inset-0 bg-black/50" @click="showModal = false"></div>
-                    <div
-                        class="relative bg-white dark:bg-gray-800 rounded-2xl p-6 w-full max-w-md shadow-xl"
-                    >
-                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                            {{ $t('system.credits.add_whatsapp_credit') }}
-                        </h3>
-                        <form @submit.prevent="addCredits" class="space-y-4">
-                            <div
-                                v-if="selectedItem"
-                                class="bg-emerald-50 dark:bg-emerald-950/40 rounded-xl p-3 border border-emerald-100 dark:border-emerald-800"
-                            >
-                                <p class="text-xs text-gray-600 dark:text-gray-400 font-medium">
-                                    {{ $t('system.credits.tenant_4') }}
-                                </p>
-                                <p class="font-bold text-gray-900 dark:text-white mt-0.5">
-                                    {{
-                                        selectedItem.tenant?.trade_name || selectedItem.tenant?.name
-                                    }}
-                                </p>
-                            </div>
-                            <div v-else>
-                                <label
-                                    class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-                                >
-                                    {{ $t('system.credits.tenant') }} ID
-                                </label>
-                                <input
-                                    type="number"
-                                    v-model="form.tenant_id"
-                                    required
-                                    placeholder="Tenant ID"
-                                    class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                                />
-                            </div>
-
-                            <div>
-                                <label
-                                    class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-                                >
-                                    {{ $t('system.credits.message_count_3') }}
-                                </label>
-                                <input
-                                    type="number"
-                                    v-model="form.credits"
-                                    required
-                                    min="1"
-                                    class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                                />
-                            </div>
-
-                            <div>
-                                <label
-                                    class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-                                >
-                                    {{ $t('system.credits.reason') }}
-                                </label>
-                                <input
-                                    type="text"
-                                    v-model="form.reason"
-                                    :placeholder="$t('common.optional')"
-                                    class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                                />
-                            </div>
-
-                            <div class="flex gap-3 pt-3">
-                                <button
-                                    type="submit"
-                                    :disabled="form.processing"
-                                    class="flex-1 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-medium disabled:opacity-50"
-                                >
-                                    {{ $t('common.add') }}
-                                </button>
-                                <button
-                                    type="button"
-                                    @click="showModal = false"
-                                    class="px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-xl"
-                                >
-                                    {{ $t('common.cancel') }}
-                                </button>
-                            </div>
-                        </form>
-                    </div>
+        <BaseModal
+            :show="showModal"
+            :title="$t('system.credits.add_whatsapp_credit')"
+            size="sm"
+            @close="showModal = false"
+        >
+            <form @submit.prevent="addCredits" class="space-y-4">
+                <div
+                    v-if="selectedItem"
+                    class="bg-emerald-50 dark:bg-emerald-950/40 rounded-xl p-3 border border-emerald-100 dark:border-emerald-800"
+                >
+                    <p class="text-xs text-gray-600 dark:text-gray-400 font-medium">
+                        {{ $t('system.credits.tenant_4') }}
+                    </p>
+                    <p class="font-bold text-gray-900 dark:text-white mt-0.5">
+                        {{ selectedItem.tenant?.trade_name || selectedItem.tenant?.name }}
+                    </p>
                 </div>
-            </div>
-        </Transition>
+                <div v-else>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        {{ $t('system.credits.tenant') }} ID
+                    </label>
+                    <input
+                        type="number"
+                        v-model="form.tenant_id"
+                        required
+                        placeholder="Tenant ID"
+                        class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                    />
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        {{ $t('system.credits.message_count_3') }}
+                    </label>
+                    <input
+                        type="number"
+                        v-model="form.credits"
+                        required
+                        min="1"
+                        class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                    />
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        {{ $t('system.credits.reason') }}
+                    </label>
+                    <input
+                        type="text"
+                        v-model="form.reason"
+                        :placeholder="$t('common.optional')"
+                        class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                    />
+                </div>
+
+                <div class="flex gap-3 pt-3">
+                    <button
+                        type="submit"
+                        :disabled="form.processing"
+                        class="flex-1 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-medium disabled:opacity-50"
+                    >
+                        {{ $t('common.add') }}
+                    </button>
+                    <button
+                        type="button"
+                        @click="showModal = false"
+                        class="px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-xl"
+                    >
+                        {{ $t('common.cancel') }}
+                    </button>
+                </div>
+            </form>
+        </BaseModal>
     </div>
 </template>
 
 <script setup>
 import DataTable from '@/Components/Common/DataTable.vue';
+import BaseModal from '@/Components/BaseModal.vue';
 import { ref } from 'vue';
 import { useForm, router } from '@inertiajs/vue3';
 

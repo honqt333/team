@@ -45,7 +45,7 @@
                                 {{ $t('help.admin.type.video') }}
                             </span>
                         </div>
-                        <div class="w-px h-8 bg-gray-200 dark:border-gray-700"></div>
+                        <div class="w-px h-8 bg-gray-200 dark:bg-gray-700"></div>
                         <div class="text-center px-2">
                             <span
                                 class="block text-lg font-black text-emerald-600 dark:text-emerald-400"
@@ -774,590 +774,467 @@
         <!-- ============================================================ -->
 
         <!-- Video Modal -->
-        <Teleport to="body">
-            <div
-                v-if="videoModal.open"
-                class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
-            >
-                <div
-                    class="bg-white dark:bg-gray-800 rounded-3xl max-w-lg w-full border border-gray-200 dark:border-gray-700 shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200"
-                >
-                    <div
-                        class="p-6 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between"
-                    >
-                        <h4 class="text-base font-bold text-gray-900 dark:text-white">
-                            {{
-                                videoModal.isEditing
-                                    ? $t('help.admin.videos.edit')
-                                    : $t('help.admin.videos.add')
-                            }}
-                        </h4>
-                        <button
-                            type="button"
-                            @click="videoModal.open = false"
-                            class="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 rounded-lg"
+        <BaseModal
+            :show="videoModal.open"
+            :title="
+                videoModal.isEditing ? $t('help.admin.videos.edit') : $t('help.admin.videos.add')
+            "
+            size="md"
+            @close="videoModal.open = false"
+        >
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">
+                        {{ $t('help.admin.videos.video_title') }}
+                    </label>
+                    <input
+                        v-model="videoModal.form.title"
+                        type="text"
+                        :placeholder="
+                            $t('system.help.e.g._the_work_order_lifecycle_from_entry_to_exit')
+                        "
+                        class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
+                    />
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label
+                            class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1"
                         >
-                            ✕
-                        </button>
+                            {{ $t('help.admin.category') }}
+                        </label>
+                        <input
+                            v-model="videoModal.form.category"
+                            type="text"
+                            :placeholder="$t('system.help.e.g._work_orders')"
+                            class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
+                        />
                     </div>
 
-                    <div class="p-6 space-y-4">
-                        <div>
-                            <label
-                                class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1"
-                            >
-                                {{ $t('help.admin.videos.video_title') }}
+                    <div>
+                        <div class="flex items-center justify-between mb-1">
+                            <label class="block text-xs font-bold text-gray-700 dark:text-gray-300">
+                                {{ $t('help.admin.videos.duration_auto') }}
                             </label>
+                            <span
+                                v-if="fetchingDuration"
+                                class="text-[11px] text-action-primary font-medium flex items-center gap-1"
+                            >
+                                <svg class="w-3 h-3 animate-spin" fill="none" viewBox="0 0 24 24">
+                                    <circle
+                                        class="opacity-25"
+                                        cx="12"
+                                        cy="12"
+                                        r="10"
+                                        stroke="currentColor"
+                                        stroke-width="4"
+                                    ></circle>
+                                    <path
+                                        class="opacity-75"
+                                        fill="currentColor"
+                                        d="M4 12a8 8 0 018-8v8H4z"
+                                    ></path>
+                                </svg>
+                                {{ $t('help.admin.videos.fetching') }}
+                            </span>
+                        </div>
+                        <div class="relative">
                             <input
-                                v-model="videoModal.form.title"
+                                v-model="videoModal.form.duration"
                                 type="text"
-                                :placeholder="
-                                    $t(
-                                        'system.help.e.g._the_work_order_lifecycle_from_entry_to_exit'
-                                    )
-                                "
-                                class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
-                            />
-                        </div>
-
-                        <div class="grid grid-cols-2 gap-4">
-                            <div>
-                                <label
-                                    class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1"
-                                >
-                                    {{ $t('help.admin.category') }}
-                                </label>
-                                <input
-                                    v-model="videoModal.form.category"
-                                    type="text"
-                                    :placeholder="$t('system.help.e.g._work_orders')"
-                                    class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
-                                />
-                            </div>
-
-                            <div>
-                                <div class="flex items-center justify-between mb-1">
-                                    <label
-                                        class="block text-xs font-bold text-gray-700 dark:text-gray-300"
-                                    >
-                                        {{ $t('help.admin.videos.duration_auto') }}
-                                    </label>
-                                    <span
-                                        v-if="fetchingDuration"
-                                        class="text-[11px] text-action-primary font-medium flex items-center gap-1"
-                                    >
-                                        <svg
-                                            class="w-3 h-3 animate-spin"
-                                            fill="none"
-                                            viewBox="0 0 24 24"
-                                        >
-                                            <circle
-                                                class="opacity-25"
-                                                cx="12"
-                                                cy="12"
-                                                r="10"
-                                                stroke="currentColor"
-                                                stroke-width="4"
-                                            ></circle>
-                                            <path
-                                                class="opacity-75"
-                                                fill="currentColor"
-                                                d="M4 12a8 8 0 018-8v8H4z"
-                                            ></path>
-                                        </svg>
-                                        {{ $t('help.admin.videos.fetching') }}
-                                    </span>
-                                </div>
-                                <div class="relative">
-                                    <input
-                                        v-model="videoModal.form.duration"
-                                        type="text"
-                                        dir="ltr"
-                                        placeholder="05:20"
-                                        class="w-full px-4 py-2.5 pe-28 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm font-mono"
-                                    />
-                                    <button
-                                        v-if="videoModal.form.video_url"
-                                        type="button"
-                                        @click="autoFetchVideoDuration"
-                                        :disabled="fetchingDuration"
-                                        class="absolute inset-y-1 end-1 px-2.5 bg-selection-bg hover:bg-selection-bg text-action-primary rounded-lg text-[11px] font-bold transition-colors flex items-center gap-1"
-                                        :title="
-                                            $t(
-                                                'system.help.recalculate_the_duration_automatically_from_the_'
-                                            )
-                                        "
-                                    >
-                                        <span>{{ $t('help.admin.videos.calculate') }}</span>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div>
-                            <label
-                                class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1"
-                            >
-                                {{ $t('help.admin.videos.url') }}
-                            </label>
-                            <input
-                                v-model="videoModal.form.video_url"
-                                @change="autoFetchVideoDuration"
-                                @paste="onVideoUrlPaste"
-                                type="url"
                                 dir="ltr"
-                                :placeholder="$t('system.help.video_url_example')"
-                                class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm font-mono"
+                                placeholder="05:20"
+                                class="w-full px-4 py-2.5 pe-28 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm font-mono"
                             />
-                            <p
-                                class="text-[11px] text-gray-500 dark:text-gray-400 mt-1.5 leading-relaxed"
-                            >
-                                {{ $t('help.admin.videos.url_hint') }}
-                            </p>
-
-                            <!-- Live preview in modal -->
-                            <div
-                                v-if="getVideoEmbed(videoModal.form.video_url)"
-                                class="mt-3 rounded-xl overflow-hidden border border-gray-200 dark:border-gray-700 aspect-video bg-black max-h-52"
-                            >
-                                <iframe
-                                    v-if="
-                                        ['youtube', 'vimeo', 'iframe'].includes(
-                                            getVideoEmbed(videoModal.form.video_url).type
-                                        )
-                                    "
-                                    :src="getVideoEmbed(videoModal.form.video_url).src"
-                                    class="w-full h-full border-0"
-                                    allow="
-                                        accelerometer;
-                                        autoplay;
-                                        clipboard-write;
-                                        encrypted-media;
-                                        gyroscope;
-                                        picture-in-picture;
-                                    "
-                                    allowfullscreen
-                                ></iframe>
-                                <video
-                                    v-else-if="
-                                        getVideoEmbed(videoModal.form.video_url).type === 'video'
-                                    "
-                                    controls
-                                    class="w-full h-full"
-                                    :src="getVideoEmbed(videoModal.form.video_url).src"
-                                ></video>
-                            </div>
-                        </div>
-
-                        <div>
-                            <label
-                                class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1"
-                            >
-                                {{ $t('help.admin.videos.guide_description') }}
-                            </label>
-                            <textarea
-                                v-model="videoModal.form.description"
-                                rows="3"
-                                :placeholder="
+                            <button
+                                v-if="videoModal.form.video_url"
+                                type="button"
+                                @click="autoFetchVideoDuration"
+                                :disabled="fetchingDuration"
+                                class="absolute inset-y-1 end-1 px-2.5 bg-selection-bg hover:bg-selection-bg text-action-primary rounded-lg text-[11px] font-bold transition-colors flex items-center gap-1"
+                                :title="
                                     $t(
-                                        'system.help.a_simple_explanation_of_what_the_training_video_'
+                                        'system.help.recalculate_the_duration_automatically_from_the_'
                                     )
                                 "
-                                class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
-                            ></textarea>
+                            >
+                                <span>{{ $t('help.admin.videos.calculate') }}</span>
+                            </button>
                         </div>
-                    </div>
-
-                    <div
-                        class="p-4 bg-gray-50 dark:bg-gray-900/50 border-t border-gray-100 dark:border-gray-700 flex justify-end gap-2.5"
-                    >
-                        <button
-                            type="button"
-                            @click="videoModal.open = false"
-                            class="px-4 py-2 rounded-xl border border-gray-200 dark:border-gray-700 text-xs font-bold text-gray-600 dark:text-gray-300"
-                        >
-                            {{ $t('common.cancel') }}
-                        </button>
-                        <button
-                            type="button"
-                            @click="saveVideoModal"
-                            class="px-5 py-2 rounded-xl bg-action-primary hover:bg-action-primary-hover text-white text-xs font-bold shadow-md shadow-focus-ring-soft"
-                        >
-                            {{ $t('help.admin.videos.save') }}
-                        </button>
                     </div>
                 </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">
+                        {{ $t('help.admin.videos.url') }}
+                    </label>
+                    <input
+                        v-model="videoModal.form.video_url"
+                        @change="autoFetchVideoDuration"
+                        @paste="onVideoUrlPaste"
+                        type="url"
+                        dir="ltr"
+                        :placeholder="$t('system.help.video_url_example')"
+                        class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm font-mono"
+                    />
+                    <p class="text-[11px] text-gray-500 dark:text-gray-400 mt-1.5 leading-relaxed">
+                        {{ $t('help.admin.videos.url_hint') }}
+                    </p>
+
+                    <!-- Live preview in modal -->
+                    <div
+                        v-if="getVideoEmbed(videoModal.form.video_url)"
+                        class="mt-3 rounded-xl overflow-hidden border border-gray-200 dark:border-gray-700 aspect-video bg-black max-h-52"
+                    >
+                        <iframe
+                            v-if="
+                                ['youtube', 'vimeo', 'iframe'].includes(
+                                    getVideoEmbed(videoModal.form.video_url).type
+                                )
+                            "
+                            :src="getVideoEmbed(videoModal.form.video_url).src"
+                            class="w-full h-full border-0"
+                            allow="
+                                accelerometer;
+                                autoplay;
+                                clipboard-write;
+                                encrypted-media;
+                                gyroscope;
+                                picture-in-picture;
+                            "
+                            allowfullscreen
+                        ></iframe>
+                        <video
+                            v-else-if="getVideoEmbed(videoModal.form.video_url).type === 'video'"
+                            controls
+                            class="w-full h-full"
+                            :src="getVideoEmbed(videoModal.form.video_url).src"
+                        ></video>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">
+                        {{ $t('help.admin.videos.guide_description') }}
+                    </label>
+                    <textarea
+                        v-model="videoModal.form.description"
+                        rows="3"
+                        :placeholder="
+                            $t('system.help.a_simple_explanation_of_what_the_training_video_')
+                        "
+                        class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
+                    ></textarea>
+                </div>
             </div>
-        </Teleport>
+
+            <template #footer>
+                <div class="flex justify-end gap-2.5 w-full">
+                    <button
+                        type="button"
+                        @click="videoModal.open = false"
+                        class="px-4 py-2 rounded-xl border border-gray-200 dark:border-gray-700 text-xs font-bold text-gray-600 dark:text-gray-300"
+                    >
+                        {{ $t('common.cancel') }}
+                    </button>
+                    <button
+                        type="button"
+                        @click="saveVideoModal"
+                        class="px-5 py-2 rounded-xl bg-action-primary hover:bg-action-primary-hover text-white text-xs font-bold shadow-md shadow-focus-ring-soft"
+                    >
+                        {{ $t('help.admin.videos.save') }}
+                    </button>
+                </div>
+            </template>
+        </BaseModal>
 
         <!-- Topic Modal -->
-        <Teleport to="body">
-            <div
-                v-if="topicModal.open"
-                class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
-            >
-                <div
-                    class="bg-white dark:bg-gray-800 rounded-3xl max-w-2xl w-full border border-gray-200 dark:border-gray-700 shadow-2xl overflow-hidden max-h-[90vh] flex flex-col animate-in fade-in zoom-in-95 duration-200"
-                >
-                    <div
-                        class="p-6 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between shrink-0"
-                    >
-                        <h4 class="text-base font-bold text-gray-900 dark:text-white">
-                            {{
-                                topicModal.isEditing
-                                    ? $t('help.admin.topics.edit')
-                                    : $t('help.admin.topics.add_modal')
-                            }}
-                        </h4>
+        <BaseModal
+            :show="topicModal.open"
+            :title="
+                topicModal.isEditing
+                    ? $t('help.admin.topics.edit')
+                    : $t('help.admin.topics.add_modal')
+            "
+            size="lg"
+            @close="topicModal.open = false"
+        >
+            <div class="space-y-4">
+                <div class="grid grid-cols-3 gap-4">
+                    <div class="col-span-2">
+                        <label
+                            class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1"
+                        >
+                            {{ $t('help.admin.topics.parent_section') }}
+                        </label>
+                        <SearchableSelect
+                            v-model="topicModal.form.category"
+                            :options="categoryFormOptions"
+                            option-label="label"
+                            option-value="value"
+                            :placeholder="$t('system.help.select_the_section')"
+                        />
+                    </div>
+
+                    <div>
+                        <label
+                            class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1"
+                        >
+                            {{ $t('help.admin.topics.step_number') }}
+                        </label>
+                        <input
+                            v-model="topicModal.form.stepNumber"
+                            type="text"
+                            placeholder="01"
+                            class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm font-mono text-center"
+                        />
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">
+                        {{ $t('help.admin.topics.topic_title') }}
+                    </label>
+                    <input
+                        v-model="topicModal.form.title"
+                        type="text"
+                        :placeholder="
+                            $t('system.help.e.g._how_do_you_create_a_new_work_order_for_a_ve')
+                        "
+                        class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
+                    />
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">
+                        {{ $t('help.admin.topics.summary') }}
+                    </label>
+                    <input
+                        v-model="topicModal.form.summary"
+                        type="text"
+                        :placeholder="$t('system.help.a_short_description_of_this_guide')"
+                        class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
+                    />
+                </div>
+
+                <!-- Steps list manager -->
+                <div class="space-y-2">
+                    <div class="flex items-center justify-between">
+                        <label class="block text-xs font-bold text-gray-700 dark:text-gray-300">
+                            {{ $t('help.admin.topics.steps') }}{{ topicModal.form.steps.length }})
+                        </label>
                         <button
                             type="button"
-                            @click="topicModal.open = false"
-                            class="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 rounded-lg"
+                            @click="addTopicStep"
+                            class="text-xs text-action-primary font-bold hover:underline"
                         >
-                            ✕
+                            {{ $t('help.admin.topics.add_step') }}
                         </button>
                     </div>
 
-                    <div class="p-6 space-y-4 overflow-y-auto flex-1">
-                        <div class="grid grid-cols-3 gap-4">
-                            <div class="col-span-2">
-                                <label
-                                    class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1"
-                                >
-                                    {{ $t('help.admin.topics.parent_section') }}
-                                </label>
-                                <SearchableSelect
-                                    v-model="topicModal.form.category"
-                                    :options="categoryFormOptions"
-                                    option-label="label"
-                                    option-value="value"
-                                    :placeholder="$t('system.help.select_the_section')"
-                                />
-                            </div>
-
-                            <div>
-                                <label
-                                    class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1"
-                                >
-                                    {{ $t('help.admin.topics.step_number') }}
-                                </label>
-                                <input
-                                    v-model="topicModal.form.stepNumber"
-                                    type="text"
-                                    placeholder="01"
-                                    class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm font-mono text-center"
-                                />
-                            </div>
-                        </div>
-
-                        <div>
-                            <label
-                                class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1"
-                            >
-                                {{ $t('help.admin.topics.topic_title') }}
-                            </label>
+                    <div class="space-y-2">
+                        <div
+                            v-for="(st, sIdx) in topicModal.form.steps"
+                            :key="sIdx"
+                            class="flex items-center gap-2"
+                        >
+                            <span class="w-6 text-xs font-mono text-gray-400 text-center">
+                                {{ sIdx + 1 }}.
+                            </span>
                             <input
-                                v-model="topicModal.form.title"
+                                v-model="topicModal.form.steps[sIdx]"
                                 type="text"
-                                :placeholder="
-                                    $t(
-                                        'system.help.e.g._how_do_you_create_a_new_work_order_for_a_ve'
-                                    )
-                                "
-                                class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
+                                :placeholder="$t('system.help.write_the_step_here')"
+                                class="flex-1 px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-xs"
                             />
-                        </div>
-
-                        <div>
-                            <label
-                                class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1"
+                            <button
+                                type="button"
+                                @click="removeTopicStep(sIdx)"
+                                class="p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 rounded-lg"
+                                :title="$t('system.help.delete_this_step')"
                             >
-                                {{ $t('help.admin.topics.summary') }}
-                            </label>
-                            <input
-                                v-model="topicModal.form.summary"
-                                type="text"
-                                :placeholder="$t('system.help.a_short_description_of_this_guide')"
-                                class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
-                            />
-                        </div>
-
-                        <!-- Steps list manager -->
-                        <div class="space-y-2">
-                            <div class="flex items-center justify-between">
-                                <label
-                                    class="block text-xs font-bold text-gray-700 dark:text-gray-300"
-                                >
-                                    {{ $t('help.admin.topics.steps')
-                                    }}{{ topicModal.form.steps.length }})
-                                </label>
-                                <button
-                                    type="button"
-                                    @click="addTopicStep"
-                                    class="text-xs text-action-primary font-bold hover:underline"
-                                >
-                                    {{ $t('help.admin.topics.add_step') }}
-                                </button>
-                            </div>
-
-                            <div class="space-y-2">
-                                <div
-                                    v-for="(st, sIdx) in topicModal.form.steps"
-                                    :key="sIdx"
-                                    class="flex items-center gap-2"
-                                >
-                                    <span class="w-6 text-xs font-mono text-gray-400 text-center">
-                                        {{ sIdx + 1 }}.
-                                    </span>
-                                    <input
-                                        v-model="topicModal.form.steps[sIdx]"
-                                        type="text"
-                                        :placeholder="$t('system.help.write_the_step_here')"
-                                        class="flex-1 px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-xs"
-                                    />
-                                    <button
-                                        type="button"
-                                        @click="removeTopicStep(sIdx)"
-                                        class="p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 rounded-lg"
-                                        :title="$t('system.help.delete_this_step')"
-                                    >
-                                        ✕
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div>
-                            <label
-                                class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1"
-                            >
-                                {{ $t('help.admin.topics.tip_placeholder') }}
-                            </label>
-                            <input
-                                v-model="topicModal.form.tip"
-                                type="text"
-                                :placeholder="
-                                    $t(
-                                        'system.help.e.g._you_can_attach_photos_of_the_vehicle_damage'
-                                    )
-                                "
-                                class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
-                            />
-                        </div>
-
-                        <div class="grid grid-cols-2 gap-4">
-                            <div>
-                                <label
-                                    class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1"
-                                >
-                                    {{ $t('help.admin.topics.link_title') }}
-                                </label>
-                                <input
-                                    v-model="topicModal.form.linkLabel"
-                                    type="text"
-                                    :placeholder="$t('system.help.go_to_work_orders')"
-                                    class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
-                                />
-                            </div>
-                            <div>
-                                <label
-                                    class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1"
-                                >
-                                    {{ $t('help.admin.topics.link_url') }}
-                                </label>
-                                <input
-                                    v-model="topicModal.form.linkUrl"
-                                    type="text"
-                                    dir="ltr"
-                                    placeholder="/app/work-orders"
-                                    class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm font-mono"
-                                />
-                            </div>
+                                ✕
+                            </button>
                         </div>
                     </div>
+                </div>
 
-                    <div
-                        class="p-4 bg-gray-50 dark:bg-gray-900/50 border-t border-gray-100 dark:border-gray-700 flex justify-end gap-2.5 shrink-0"
-                    >
-                        <button
-                            type="button"
-                            @click="topicModal.open = false"
-                            class="px-4 py-2 rounded-xl border border-gray-200 dark:border-gray-700 text-xs font-bold text-gray-600 dark:text-gray-300"
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">
+                        {{ $t('help.admin.topics.tip_placeholder') }}
+                    </label>
+                    <input
+                        v-model="topicModal.form.tip"
+                        type="text"
+                        :placeholder="
+                            $t('system.help.e.g._you_can_attach_photos_of_the_vehicle_damage')
+                        "
+                        class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
+                    />
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label
+                            class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1"
                         >
-                            {{ $t('common.cancel') }}
-                        </button>
-                        <button
-                            type="button"
-                            @click="saveTopicModal"
-                            class="px-5 py-2 rounded-xl bg-action-primary hover:bg-action-primary-hover text-white text-xs font-bold shadow-md shadow-focus-ring-soft"
+                            {{ $t('help.admin.topics.link_title') }}
+                        </label>
+                        <input
+                            v-model="topicModal.form.linkLabel"
+                            type="text"
+                            :placeholder="$t('system.help.go_to_work_orders')"
+                            class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
+                        />
+                    </div>
+                    <div>
+                        <label
+                            class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1"
                         >
-                            {{ $t('help.admin.topics.save') }}
-                        </button>
+                            {{ $t('help.admin.topics.link_url') }}
+                        </label>
+                        <input
+                            v-model="topicModal.form.linkUrl"
+                            type="text"
+                            dir="ltr"
+                            placeholder="/app/work-orders"
+                            class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm font-mono"
+                        />
                     </div>
                 </div>
             </div>
-        </Teleport>
+
+            <template #footer>
+                <div class="flex justify-end gap-2.5 w-full">
+                    <button
+                        type="button"
+                        @click="topicModal.open = false"
+                        class="px-4 py-2 rounded-xl border border-gray-200 dark:border-gray-700 text-xs font-bold text-gray-600 dark:text-gray-300"
+                    >
+                        {{ $t('common.cancel') }}
+                    </button>
+                    <button
+                        type="button"
+                        @click="saveTopicModal"
+                        class="px-5 py-2 rounded-xl bg-action-primary hover:bg-action-primary-hover text-white text-xs font-bold shadow-md shadow-focus-ring-soft"
+                    >
+                        {{ $t('help.admin.topics.save') }}
+                    </button>
+                </div>
+            </template>
+        </BaseModal>
 
         <!-- Category Modal -->
-        <Teleport to="body">
-            <div
-                v-if="categoryModal.open"
-                class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
-            >
-                <div
-                    class="bg-white dark:bg-gray-800 rounded-3xl max-w-md w-full border border-gray-200 dark:border-gray-700 shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200"
-                >
-                    <div
-                        class="p-6 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between"
-                    >
-                        <h4 class="text-base font-bold text-gray-900 dark:text-white">
-                            {{
-                                categoryModal.isEditing
-                                    ? $t('help.admin.categories.edit')
-                                    : $t('help.admin.categories.add_modal')
-                            }}
-                        </h4>
-                        <button
-                            type="button"
-                            @click="categoryModal.open = false"
-                            class="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 rounded-lg"
-                        >
-                            ✕
-                        </button>
-                    </div>
+        <BaseModal
+            :show="categoryModal.open"
+            :title="
+                categoryModal.isEditing
+                    ? $t('help.admin.categories.edit')
+                    : $t('help.admin.categories.add_modal')
+            "
+            size="sm"
+            @close="categoryModal.open = false"
+        >
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">
+                        {{ $t('help.admin.categories.slug') }}
+                    </label>
+                    <input
+                        v-model="categoryModal.form.id"
+                        type="text"
+                        dir="ltr"
+                        placeholder="work_orders"
+                        class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm font-mono"
+                    />
+                </div>
 
-                    <div class="p-6 space-y-4">
-                        <div>
-                            <label
-                                class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1"
-                            >
-                                {{ $t('help.admin.categories.slug') }}
-                            </label>
-                            <input
-                                v-model="categoryModal.form.id"
-                                type="text"
-                                dir="ltr"
-                                placeholder="work_orders"
-                                class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm font-mono"
-                            />
-                        </div>
-
-                        <div>
-                            <label
-                                class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1"
-                            >
-                                {{ $t('help.admin.categories.name') }}
-                            </label>
-                            <input
-                                v-model="categoryModal.form.name"
-                                type="text"
-                                :placeholder="$t('system.help.work_orders_and_services')"
-                                class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
-                            />
-                        </div>
-                    </div>
-
-                    <div
-                        class="p-4 bg-gray-50 dark:bg-gray-900/50 border-t border-gray-100 dark:border-gray-700 flex justify-end gap-2.5"
-                    >
-                        <button
-                            type="button"
-                            @click="categoryModal.open = false"
-                            class="px-4 py-2 rounded-xl border border-gray-200 dark:border-gray-700 text-xs font-bold text-gray-600 dark:text-gray-300"
-                        >
-                            {{ $t('common.cancel') }}
-                        </button>
-                        <button
-                            type="button"
-                            @click="saveCategoryModal"
-                            class="px-5 py-2 rounded-xl bg-action-primary hover:bg-action-primary-hover text-white text-xs font-bold shadow-md shadow-focus-ring-soft"
-                        >
-                            {{ $t('help.admin.categories.save') }}
-                        </button>
-                    </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">
+                        {{ $t('help.admin.categories.name') }}
+                    </label>
+                    <input
+                        v-model="categoryModal.form.name"
+                        type="text"
+                        :placeholder="$t('system.help.work_orders_and_services')"
+                        class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
+                    />
                 </div>
             </div>
-        </Teleport>
+
+            <template #footer>
+                <div class="flex justify-end gap-2.5 w-full">
+                    <button
+                        type="button"
+                        @click="categoryModal.open = false"
+                        class="px-4 py-2 rounded-xl border border-gray-200 dark:border-gray-700 text-xs font-bold text-gray-600 dark:text-gray-300"
+                    >
+                        {{ $t('common.cancel') }}
+                    </button>
+                    <button
+                        type="button"
+                        @click="saveCategoryModal"
+                        class="px-5 py-2 rounded-xl bg-action-primary hover:bg-action-primary-hover text-white text-xs font-bold shadow-md shadow-focus-ring-soft"
+                    >
+                        {{ $t('help.admin.categories.save') }}
+                    </button>
+                </div>
+            </template>
+        </BaseModal>
 
         <!-- FAQ Modal -->
-        <Teleport to="body">
-            <div
-                v-if="faqModal.open"
-                class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
-            >
-                <div
-                    class="bg-white dark:bg-gray-800 rounded-3xl max-w-lg w-full border border-gray-200 dark:border-gray-700 shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200"
-                >
-                    <div
-                        class="p-6 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between"
-                    >
-                        <h4 class="text-base font-bold text-gray-900 dark:text-white">
-                            {{
-                                faqModal.isEditing
-                                    ? $t('help.admin.faq.edit')
-                                    : $t('help.admin.faq.add')
-                            }}
-                        </h4>
-                        <button
-                            type="button"
-                            @click="faqModal.open = false"
-                            class="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 rounded-lg"
-                        >
-                            ✕
-                        </button>
-                    </div>
+        <BaseModal
+            :show="faqModal.open"
+            :title="faqModal.isEditing ? $t('help.admin.faq.edit') : $t('help.admin.faq.add')"
+            size="md"
+            @close="faqModal.open = false"
+        >
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">
+                        {{ $t('help.admin.faq.question') }}
+                    </label>
+                    <input
+                        v-model="faqModal.form.q"
+                        type="text"
+                        :placeholder="$t('system.help.write_the_question_here')"
+                        class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
+                    />
+                </div>
 
-                    <div class="p-6 space-y-4">
-                        <div>
-                            <label
-                                class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1"
-                            >
-                                {{ $t('help.admin.faq.question') }}
-                            </label>
-                            <input
-                                v-model="faqModal.form.q"
-                                type="text"
-                                :placeholder="$t('system.help.write_the_question_here')"
-                                class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
-                            />
-                        </div>
-
-                        <div>
-                            <label
-                                class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1"
-                            >
-                                {{ $t('help.admin.faq.answer') }}
-                            </label>
-                            <textarea
-                                v-model="faqModal.form.a"
-                                rows="4"
-                                :placeholder="$t('system.help.write_the_detailed_answer_here')"
-                                class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
-                            ></textarea>
-                        </div>
-                    </div>
-
-                    <div
-                        class="p-4 bg-gray-50 dark:bg-gray-900/50 border-t border-gray-100 dark:border-gray-700 flex justify-end gap-2.5"
-                    >
-                        <button
-                            type="button"
-                            @click="faqModal.open = false"
-                            class="px-4 py-2 rounded-xl border border-gray-200 dark:border-gray-700 text-xs font-bold text-gray-600 dark:text-gray-300"
-                        >
-                            {{ $t('common.cancel') }}
-                        </button>
-                        <button
-                            type="button"
-                            @click="saveFaqModal"
-                            class="px-5 py-2 rounded-xl bg-action-primary hover:bg-action-primary-hover text-white text-xs font-bold shadow-md shadow-focus-ring-soft"
-                        >
-                            {{ $t('help.admin.faq.save') }}
-                        </button>
-                    </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">
+                        {{ $t('help.admin.faq.answer') }}
+                    </label>
+                    <textarea
+                        v-model="faqModal.form.a"
+                        rows="4"
+                        :placeholder="$t('system.help.write_the_detailed_answer_here')"
+                        class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
+                    ></textarea>
                 </div>
             </div>
-        </Teleport>
+
+            <template #footer>
+                <div class="flex justify-end gap-2.5 w-full">
+                    <button
+                        type="button"
+                        @click="faqModal.open = false"
+                        class="px-4 py-2 rounded-xl border border-gray-200 dark:border-gray-700 text-xs font-bold text-gray-600 dark:text-gray-300"
+                    >
+                        {{ $t('common.cancel') }}
+                    </button>
+                    <button
+                        type="button"
+                        @click="saveFaqModal"
+                        class="px-5 py-2 rounded-xl bg-action-primary hover:bg-action-primary-hover text-white text-xs font-bold shadow-md shadow-focus-ring-soft"
+                    >
+                        {{ $t('help.admin.faq.save') }}
+                    </button>
+                </div>
+            </template>
+        </BaseModal>
     </SystemLayout>
 </template>
 
@@ -1373,6 +1250,7 @@ import PageHeader from '@/Components/PageHeader.vue';
 import AppTabs from '@/Components/Common/AppTabs.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 import AppToggle from '@/Components/Common/AppToggle.vue';
+import BaseModal from '@/Components/BaseModal.vue';
 import { useToast } from '@/Composables/useToast';
 import { useConfirm } from '@/Composables/useConfirm';
 import { useVideoEmbed } from '@/Composables/useVideoEmbed';

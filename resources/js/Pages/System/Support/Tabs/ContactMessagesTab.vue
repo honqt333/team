@@ -182,141 +182,101 @@
     </div>
 
     <!-- Message Detail Modal -->
-    <div v-if="selectedMessage" class="fixed inset-0 z-50 overflow-y-auto" @click="closeMessage">
-        <div class="flex items-center justify-center min-h-screen px-4">
-            <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
-
-            <div
-                class="bg-white dark:bg-gray-800 rounded-2xl overflow-hidden shadow-xl transform transition-all sm:max-w-lg sm:w-full"
-                @click.stop
-            >
+    <BaseModal
+        :show="!!selectedMessage"
+        :title="t('system.contact_messages.detail_title')"
+        size="md"
+        @close="closeMessage"
+    >
+        <div v-if="selectedMessage" class="space-y-4">
+            <div>
+                <label class="text-xs text-gray-500 block">
+                    {{ t('system.contact_messages.col.sender') }}
+                </label>
+                <div class="text-sm font-bold text-gray-900 dark:text-white">
+                    {{ selectedMessage.name }}
+                </div>
+                <div class="text-sm text-action-primary">
+                    {{ selectedMessage.email }}
+                </div>
+                <div v-if="selectedMessage.phone" class="text-sm text-gray-500 font-mono">
+                    {{ selectedMessage.phone }}
+                </div>
+            </div>
+            <div>
+                <label class="text-xs text-gray-500 block">
+                    {{ t('system.contact_messages.col.subject') }}
+                </label>
+                <div class="text-sm font-bold text-gray-900 dark:text-white">
+                    {{ selectedMessage.subject || t('system.contact_messages.no_subject') }}
+                </div>
+            </div>
+            <div>
+                <label class="text-xs text-gray-500 block">
+                    {{ t('system.contact_messages.body_label') }}
+                </label>
                 <div
-                    class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center"
+                    class="mt-1 p-4 bg-gray-50 dark:bg-gray-900 rounded-xl text-sm text-gray-800 dark:text-gray-200 whitespace-pre-wrap leading-relaxed"
                 >
-                    <h3 class="text-lg font-bold text-gray-900 dark:text-white">
-                        {{ t('system.contact_messages.detail_title') }}
-                    </h3>
-                    <button @click="closeMessage" class="text-gray-400 hover:text-gray-500">
-                        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    {{ selectedMessage.message }}
+                </div>
+            </div>
+            <div class="text-xs text-gray-400">
+                {{
+                    t('system.contact_messages.sent_at', {
+                        date: new Date(selectedMessage.created_at).toLocaleString('ar-EG'),
+                    })
+                }}
+            </div>
+        </div>
+        <template v-if="selectedMessage" #footer>
+            <div class="flex justify-between items-center gap-4 w-full">
+                <div class="flex gap-2">
+                    <a
+                        :href="`mailto:${selectedMessage.email}`"
+                        class="inline-flex items-center gap-2 px-4 py-2 bg-action-primary text-white rounded-lg text-sm font-bold hover:bg-action-primary-hover transition-all"
+                    >
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path
                                 stroke-linecap="round"
                                 stroke-linejoin="round"
                                 stroke-width="2"
-                                d="M6 18L18 6M6 6l12 12"
+                                d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
                             />
                         </svg>
-                    </button>
-                </div>
-                <div class="p-6">
-                    <div class="space-y-4">
-                        <div>
-                            <label class="text-xs text-gray-500 block">
-                                {{ t('system.contact_messages.col.sender') }}
-                            </label>
-                            <div class="text-sm font-bold text-gray-900 dark:text-white">
-                                {{ selectedMessage.name }}
-                            </div>
-                            <div class="text-sm text-action-primary">
-                                {{ selectedMessage.email }}
-                            </div>
-                            <div
-                                v-if="selectedMessage.phone"
-                                class="text-sm text-gray-500 font-mono"
-                            >
-                                {{ selectedMessage.phone }}
-                            </div>
-                        </div>
-                        <div>
-                            <label class="text-xs text-gray-500 block">
-                                {{ t('system.contact_messages.col.subject') }}
-                            </label>
-                            <div class="text-sm font-bold text-gray-900 dark:text-white">
-                                {{
-                                    selectedMessage.subject ||
-                                    t('system.contact_messages.no_subject')
-                                }}
-                            </div>
-                        </div>
-                        <div>
-                            <label class="text-xs text-gray-500 block">
-                                {{ t('system.contact_messages.body_label') }}
-                            </label>
-                            <div
-                                class="mt-1 p-4 bg-gray-50 dark:bg-gray-900 rounded-xl text-sm text-gray-800 dark:text-gray-200 whitespace-pre-wrap leading-relaxed"
-                            >
-                                {{ selectedMessage.message }}
-                            </div>
-                        </div>
-                        <div class="text-xs text-gray-400">
-                            {{
-                                t('system.contact_messages.sent_at', {
-                                    date: new Date(selectedMessage.created_at).toLocaleString(
-                                        'ar-EG'
-                                    ),
-                                })
-                            }}
-                        </div>
-                    </div>
-                </div>
-                <div
-                    class="px-6 py-4 bg-gray-50 dark:bg-gray-900 flex justify-between items-center gap-4"
-                >
-                    <div class="flex gap-2">
-                        <a
-                            :href="`mailto:${selectedMessage.email}`"
-                            class="inline-flex items-center gap-2 px-4 py-2 bg-action-primary text-white rounded-lg text-sm font-bold hover:bg-action-primary-hover transition-all"
-                        >
-                            <svg
-                                class="w-4 h-4"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                            >
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    stroke-width="2"
-                                    d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
-                                />
-                            </svg>
-                            {{ t('system.contact_messages.reply_email') }}
-                        </a>
-                        <a
-                            v-if="selectedMessage.phone"
-                            :href="`tel:${selectedMessage.phone}`"
-                            class="inline-flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-bold hover:bg-green-700 transition-all"
-                        >
-                            <svg
-                                class="w-4 h-4"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                            >
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    stroke-width="2"
-                                    d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
-                                />
-                            </svg>
-                            {{ t('system.contact_messages.call_action') }}
-                        </a>
-                    </div>
-                    <button
-                        @click="deleteMessage(selectedMessage.id)"
-                        class="text-sm font-medium text-red-600 hover:text-red-700"
+                        {{ t('system.contact_messages.reply_email') }}
+                    </a>
+                    <a
+                        v-if="selectedMessage.phone"
+                        :href="`tel:${selectedMessage.phone}`"
+                        class="inline-flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-bold hover:bg-green-700 transition-all"
                     >
-                        {{ t('system.contact_messages.delete_message') }}
-                    </button>
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
+                            />
+                        </svg>
+                        {{ t('system.contact_messages.call_action') }}
+                    </a>
                 </div>
+                <button
+                    @click="deleteMessage(selectedMessage.id)"
+                    class="text-sm font-medium text-red-600 hover:text-red-700"
+                >
+                    {{ t('system.contact_messages.delete_message') }}
+                </button>
             </div>
-        </div>
-    </div>
+        </template>
+    </BaseModal>
 </template>
 
 <script setup>
 import DataTable from '@/Components/Common/DataTable.vue';
 import AppPagination from '@/Components/Common/AppPagination.vue';
+import BaseModal from '@/Components/BaseModal.vue';
 import { router } from '@inertiajs/vue3';
 import { ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
