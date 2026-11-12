@@ -1,207 +1,149 @@
 <template>
-    <Modal :show="!!show" unstyled @close="$emit('close')">
-        <div v-if="show" class="fixed inset-0 z-50 overflow-y-auto">
-            <div
-                class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0"
-            >
-                <div
-                    @click="$emit('close')"
-                    class="fixed inset-0 bg-gray-500/75 dark:bg-gray-900/80 transition-opacity backdrop-blur-sm"
-                    aria-hidden="true"
-                ></div>
-
-                <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">
-                    &#8203;
-                </span>
-
-                <div
-                    class="inline-block align-bottom bg-white dark:bg-gray-800 rounded-3xl text-start overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full border border-gray-200 dark:border-gray-700"
-                >
-                    <!-- Header -->
-                    <div
-                        class="bg-white dark:bg-gray-800 px-8 py-5 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between"
+    <BaseModal :show="!!show" size="md" @close="$emit('close')">
+        <template #title>
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-selection-bg flex items-center justify-center">
+                    <svg
+                        class="w-6 h-6 text-action-primary"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
                     >
-                        <div class="flex items-center gap-3">
-                            <div
-                                class="w-10 h-10 rounded-xl bg-selection-bg flex items-center justify-center"
-                            >
-                                <svg
-                                    class="w-6 h-6 text-action-primary"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        stroke-width="2"
-                                        d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
-                                    />
-                                </svg>
-                            </div>
-                            <div>
-                                <h3 class="text-lg font-bold text-gray-900 dark:text-white">
-                                    {{ $t('print_settings.official_signatures') }}
-                                </h3>
-                                <p class="text-xs text-gray-400">
-                                    {{ $t('print_settings.' + docKey) }}
-                                </p>
-                            </div>
-                        </div>
-                        <button
-                            @click="$emit('close')"
-                            class="w-8 h-8 rounded-full flex items-center justify-center text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all"
-                        >
-                            <svg
-                                class="w-5 h-5"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                            >
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    stroke-width="2"
-                                    d="M6 18L18 6M6 6l12 12"
-                                />
-                            </svg>
-                        </button>
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
+                        />
+                    </svg>
+                </div>
+                <div>
+                    <div class="text-lg font-bold text-gray-900 dark:text-white">
+                        {{ $t('print_settings.official_signatures') }}
                     </div>
-
-                    <div class="px-8 py-6 space-y-3 max-h-[60vh] overflow-y-auto custom-scrollbar">
-                        <!-- Column headers -->
-                        <div
-                            class="grid grid-cols-[1.5rem_1fr_1fr_2rem_2rem] gap-2 px-1 text-[9px] font-black text-gray-400 uppercase tracking-widest"
-                        >
-                            <span></span>
-                            <span>{{ $t('print_settings.name_arabic') }}</span>
-                            <span>Name (English)</span>
-                            <span class="text-center">{{ $t('print_settings.visible') }}</span>
-                            <span></span>
-                        </div>
-
-                        <!-- Signatures List -->
-                        <div
-                            v-for="(sig, index) in localSignatures"
-                            :key="index"
-                            class="grid grid-cols-[1.5rem_1fr_1fr_2rem_2rem] items-center gap-2 p-2.5 rounded-xl border border-gray-100 dark:border-gray-700 bg-gray-50/40 dark:bg-gray-900/30 group hover:border-action-primary/25 transition-all"
-                        >
-                            <span
-                                class="w-6 h-6 rounded-lg bg-selection-bg text-action-primary text-[10px] font-black flex items-center justify-center"
-                            >
-                                {{ index + 1 }}
-                            </span>
-
-                            <input
-                                v-model="sig.name_ar"
-                                type="text"
-                                placeholder="الاسم بالعربي"
-                                class="px-2.5 py-1.5 text-xs rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 dark:text-white focus:ring-1 focus:ring-focus-ring focus:border-action-primary outline-none text-end w-full"
-                            />
-
-                            <input
-                                v-model="sig.name_en"
-                                type="text"
-                                placeholder="English name"
-                                class="px-2.5 py-1.5 text-xs rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 dark:text-white focus:ring-1 focus:ring-focus-ring focus:border-action-primary outline-none w-full"
-                                dir="ltr"
-                            />
-
-                            <AppToggle
-                                v-model="sig.show"
-                                size="sm"
-                                :title="sig.show ? 'مرئي' : 'مخفي'"
-                            />
-
-                            <button
-                                @click="deleteSignature(index)"
-                                class="w-6 h-6 rounded-lg text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 hover:text-red-600 transition-all flex items-center justify-center opacity-0 group-hover:opacity-100"
-                                title="حذف"
-                            >
-                                <svg
-                                    class="w-3.5 h-3.5"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        stroke-width="2"
-                                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                                    />
-                                </svg>
-                            </button>
-                        </div>
-
-                        <!-- Empty state -->
-                        <div
-                            v-if="localSignatures.length === 0"
-                            class="py-8 flex flex-col items-center gap-2 text-gray-400"
-                        >
-                            <svg
-                                class="w-10 h-10 opacity-20"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                            >
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    stroke-width="2"
-                                    d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
-                                />
-                            </svg>
-                            <span class="text-sm">{{ $t('print_settings.no_signatures') }}</span>
-                        </div>
-
-                        <!-- Add Button -->
-                        <button
-                            @click="addSignature"
-                            class="w-full flex items-center justify-center gap-2 py-2.5 px-4 border-2 border-dashed border-action-primary/25 rounded-xl text-action-primary text-xs font-bold hover:bg-selection-bg hover:border-action-primary transition-all"
-                        >
-                            <svg
-                                class="w-4 h-4"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                            >
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    stroke-width="2"
-                                    d="M12 6v6m0 0v6m0-6h6m-6 0H6"
-                                />
-                            </svg>
-                            {{ $t('print_settings.add_signature_new') }}
-                        </button>
-                    </div>
-
-                    <!-- Footer -->
-                    <div
-                        class="bg-gray-50 dark:bg-gray-900/50 px-8 py-5 flex items-center justify-end gap-3 border-t border-gray-100 dark:border-gray-700"
-                    >
-                        <button
-                            @click="$emit('close')"
-                            class="px-6 py-2.5 rounded-2xl bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 font-bold hover:bg-gray-100 dark:hover:bg-gray-600 transition-all border border-gray-200 dark:border-gray-600 text-sm"
-                        >
-                            {{ $t('common.cancel') }}
-                        </button>
-                        <button
-                            @click="handleSave"
-                            class="px-8 py-2.5 rounded-2xl bg-action-primary hover:bg-action-primary-hover text-white font-bold transition-all shadow-lg shadow-focus-ring-soft hover:scale-[1.02] active:scale-[0.98] text-sm"
-                        >
-                            {{ $t('common.save') }}
-                        </button>
-                    </div>
+                    <p class="text-xs font-normal text-gray-400">
+                        {{ $t('print_settings.' + docKey) }}
+                    </p>
                 </div>
             </div>
+        </template>
+
+        <div class="space-y-3">
+            <!-- Column headers -->
+            <div
+                class="grid grid-cols-[1.5rem_1fr_1fr_2rem_2rem] gap-2 px-1 text-[9px] font-black text-gray-400 uppercase tracking-widest"
+            >
+                <span></span>
+                <span>{{ $t('print_settings.name_arabic') }}</span>
+                <span>Name (English)</span>
+                <span class="text-center">{{ $t('print_settings.visible') }}</span>
+                <span></span>
+            </div>
+
+            <!-- Signatures List -->
+            <div
+                v-for="(sig, index) in localSignatures"
+                :key="index"
+                class="grid grid-cols-[1.5rem_1fr_1fr_2rem_2rem] items-center gap-2 p-2.5 rounded-xl border border-gray-100 dark:border-gray-700 bg-gray-50/40 dark:bg-gray-900/30 group hover:border-action-primary/25 transition-all"
+            >
+                <span
+                    class="w-6 h-6 rounded-lg bg-selection-bg text-action-primary text-[10px] font-black flex items-center justify-center"
+                >
+                    {{ index + 1 }}
+                </span>
+
+                <input
+                    v-model="sig.name_ar"
+                    type="text"
+                    placeholder="الاسم بالعربي"
+                    class="px-2.5 py-1.5 text-xs rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 dark:text-white focus:ring-1 focus:ring-focus-ring focus:border-action-primary outline-none text-end w-full"
+                />
+
+                <input
+                    v-model="sig.name_en"
+                    type="text"
+                    placeholder="English name"
+                    class="px-2.5 py-1.5 text-xs rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 dark:text-white focus:ring-1 focus:ring-focus-ring focus:border-action-primary outline-none w-full"
+                    dir="ltr"
+                />
+
+                <AppToggle v-model="sig.show" size="sm" :title="sig.show ? 'مرئي' : 'مخفي'" />
+
+                <button
+                    @click="deleteSignature(index)"
+                    class="w-6 h-6 rounded-lg text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 hover:text-red-600 transition-all flex items-center justify-center opacity-0 group-hover:opacity-100"
+                    title="حذف"
+                >
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                        />
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Empty state -->
+            <div
+                v-if="localSignatures.length === 0"
+                class="py-8 flex flex-col items-center gap-2 text-gray-400"
+            >
+                <svg
+                    class="w-10 h-10 opacity-20"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                >
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
+                    />
+                </svg>
+                <span class="text-sm">{{ $t('print_settings.no_signatures') }}</span>
+            </div>
+
+            <!-- Add Button -->
+            <button
+                @click="addSignature"
+                class="w-full flex items-center justify-center gap-2 py-2.5 px-4 border-2 border-dashed border-action-primary/25 rounded-xl text-action-primary text-xs font-bold hover:bg-selection-bg hover:border-action-primary transition-all"
+            >
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                    />
+                </svg>
+                {{ $t('print_settings.add_signature_new') }}
+            </button>
         </div>
-    </Modal>
+
+        <template #footer>
+            <div class="flex items-center justify-end gap-3 w-full">
+                <button
+                    @click="$emit('close')"
+                    class="px-5 py-2.5 text-xs font-bold text-text-secondary hover:bg-surface-secondary border border-border rounded-xl transition-colors cursor-pointer"
+                >
+                    {{ $t('common.cancel') }}
+                </button>
+                <button
+                    @click="handleSave"
+                    class="inline-flex items-center justify-center gap-2 px-6 py-2.5 text-xs font-bold text-white bg-action-primary hover:bg-action-primary-hover rounded-xl shadow-xs transition-all disabled:opacity-50 cursor-pointer"
+                >
+                    {{ $t('common.save') }}
+                </button>
+            </div>
+        </template>
+    </BaseModal>
 </template>
 
 <script setup>
-import Modal from '@/Components/Modal.vue';
+import BaseModal from '@/Components/BaseModal.vue';
 import { ref, watch } from 'vue';
 import AppToggle from '@/Components/Common/AppToggle.vue';
 

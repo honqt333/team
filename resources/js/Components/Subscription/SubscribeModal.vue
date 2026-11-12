@@ -2,6 +2,7 @@
 import { ref, computed, watch } from 'vue';
 import { router, usePage } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
+import BaseModal from '@/Components/BaseModal.vue';
 import PaymentMethodSelector from './PaymentMethodSelector.vue';
 import PromoCodeInput from './PromoCodeInput.vue';
 import BankTransferReceiptUpload from './BankTransferReceiptUpload.vue';
@@ -277,50 +278,115 @@ const formatCurrency = (amount) => {
 </script>
 
 <template>
-    <Teleport to="body">
-        <div
-            v-if="open"
-            class="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/50 p-4"
-            @click.self="close"
-        >
-            <div
-                class="relative w-full max-w-2xl rounded-2xl bg-white shadow-2xl dark:bg-slate-800 max-h-[90vh] overflow-y-auto"
-            >
-                <!-- Header -->
-                <div
-                    class="sticky top-0 z-10 flex items-center justify-between border-b border-slate-200 bg-white px-6 py-4 dark:border-slate-700 dark:bg-slate-800"
-                >
-                    <div>
-                        <h2 class="text-lg font-bold text-slate-900 dark:text-white">
-                            {{ t('subscription.subscribe_now', 'اشترك الآن') }}
-                        </h2>
-                        <p class="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
-                            {{ planName }}
-                        </p>
-                    </div>
-                    <button
-                        @click="close"
-                        :disabled="loading"
-                        class="rounded-full p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600 disabled:opacity-50 dark:hover:bg-slate-700"
-                    >
-                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M6 18L18 6M6 6l12 12"
-                            />
-                        </svg>
-                    </button>
+    <BaseModal :show="!!open" size="lg" :closeable="!loading" @close="close">
+        <template #title>
+            <div>
+                <div class="text-lg font-bold text-slate-900 dark:text-white">
+                    {{ t('subscription.subscribe_now', 'اشترك الآن') }}
                 </div>
+                <p class="mt-0.5 text-xs font-normal text-slate-500 dark:text-slate-400">
+                    {{ planName }}
+                </p>
+            </div>
+        </template>
 
-                <div v-if="bankTransferResult" class="space-y-4 p-6">
-                    <div class="text-center">
+        <div v-if="bankTransferResult" class="space-y-4">
+            <div class="text-center">
+                <div
+                    class="mx-auto mb-3 inline-flex h-14 w-14 items-center justify-center rounded-full bg-selection-bg text-action-primary"
+                >
+                    <svg class="h-7 w-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                        />
+                    </svg>
+                </div>
+                <h3 class="text-base font-bold text-slate-900 dark:text-white">
+                    {{
+                        t(
+                            'subscription.bank_transfer_title',
+                            'تم استلام طلبك — ارفع الإيصال لتفعيل الاشتراك'
+                        )
+                    }}
+                </h3>
+                <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                    {{
+                        t(
+                            'subscription.bank_transfer_hint',
+                            'حوّل المبلغ على أحد الحسابات أعلاه، ثم ارفع الإيصال هنا'
+                        )
+                    }}
+                </p>
+            </div>
+
+            <BankTransferReceiptUpload
+                :setup="bankTransferResult"
+                :pending-invoices="bankTransferResult?.pending_invoices || []"
+                :payment-settings="paymentSettings"
+                :vat-settings="vatSettings"
+                @success="onReceiptUploaded"
+                @close="emit('close')"
+            />
+        </div>
+
+        <!-- Gateway client-side form (Moyasar) -->
+        <div v-else-if="gatewayFormData" class="p-6">
+            <div class="mb-4">
+                <h3 class="text-lg font-semibold text-slate-900 dark:text-white">
+                    {{ t('subscription.enter_card_details') }}
+                </h3>
+                <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                    {{ t('subscription.auto_activate_notice') }}
+                </p>
+            </div>
+            <MoyasarPaymentForm :form-data="gatewayFormData" @completed="onGatewayCompleted" />
+            <div class="mt-4 text-center">
+                <button
+                    type="button"
+                    class="text-sm text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200"
+                    @click="cancelGatewayForm"
+                >
+                    {{ t('subscription.cancel_and_go_back') }}
+                </button>
+            </div>
+        </div>
+
+        <div v-else-if="success" class="p-8 text-center">
+            <div
+                class="mx-auto mb-4 inline-flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-300"
+            >
+                <svg class="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M5 13l4 4L19 7"
+                    />
+                </svg>
+            </div>
+            <p class="text-base font-semibold text-slate-900 dark:text-white">
+                {{ success }}
+            </p>
+        </div>
+
+        <div v-else class="space-y-6 p-6">
+            <!-- Billing cycle: Annual only -->
+            <div>
+                <label class="mb-2 block text-sm font-semibold text-slate-900 dark:text-white">
+                    {{ t('subscription.billing_cycle', 'فترة الاشتراك') }}
+                </label>
+                <div
+                    class="rounded-xl border-2 border-action-primary bg-selection-bg p-4 flex items-center justify-between"
+                >
+                    <div class="flex items-center gap-3">
                         <div
-                            class="mx-auto mb-3 inline-flex h-14 w-14 items-center justify-center rounded-full bg-selection-bg text-action-primary"
+                            class="w-10 h-10 rounded-lg bg-action-primary text-white flex items-center justify-center"
                         >
                             <svg
-                                class="h-7 w-7"
+                                class="w-5 h-5"
                                 fill="none"
                                 stroke="currentColor"
                                 viewBox="0 0 24 24"
@@ -329,285 +395,177 @@ const formatCurrency = (amount) => {
                                     stroke-linecap="round"
                                     stroke-linejoin="round"
                                     stroke-width="2"
-                                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                                    d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
                                 />
                             </svg>
                         </div>
-                        <h3 class="text-base font-bold text-slate-900 dark:text-white">
-                            {{
-                                t(
-                                    'subscription.bank_transfer_title',
-                                    'تم استلام طلبك — ارفع الإيصال لتفعيل الاشتراك'
-                                )
-                            }}
-                        </h3>
-                        <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">
-                            {{
-                                t(
-                                    'subscription.bank_transfer_hint',
-                                    'حوّل المبلغ على أحد الحسابات أعلاه، ثم ارفع الإيصال هنا'
-                                )
-                            }}
-                        </p>
-                    </div>
-
-                    <BankTransferReceiptUpload
-                        :setup="bankTransferResult"
-                        :pending-invoices="bankTransferResult?.pending_invoices || []"
-                        :payment-settings="paymentSettings"
-                        :vat-settings="vatSettings"
-                        @success="onReceiptUploaded"
-                        @close="emit('close')"
-                    />
-                </div>
-
-                <!-- Gateway client-side form (Moyasar) -->
-                <div v-else-if="gatewayFormData" class="p-6">
-                    <div class="mb-4">
-                        <h3 class="text-lg font-semibold text-slate-900 dark:text-white">
-                            {{ t('subscription.enter_card_details') }}
-                        </h3>
-                        <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">
-                            {{ t('subscription.auto_activate_notice') }}
-                        </p>
-                    </div>
-                    <MoyasarPaymentForm
-                        :form-data="gatewayFormData"
-                        @completed="onGatewayCompleted"
-                    />
-                    <div class="mt-4 text-center">
-                        <button
-                            type="button"
-                            class="text-sm text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200"
-                            @click="cancelGatewayForm"
-                        >
-                            {{ t('subscription.cancel_and_go_back') }}
-                        </button>
-                    </div>
-                </div>
-
-                <div v-else-if="success" class="p-8 text-center">
-                    <div
-                        class="mx-auto mb-4 inline-flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-300"
-                    >
-                        <svg class="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M5 13l4 4L19 7"
-                            />
-                        </svg>
-                    </div>
-                    <p class="text-base font-semibold text-slate-900 dark:text-white">
-                        {{ success }}
-                    </p>
-                </div>
-
-                <div v-else class="space-y-6 p-6">
-                    <!-- Billing cycle: Annual only -->
-                    <div>
-                        <label
-                            class="mb-2 block text-sm font-semibold text-slate-900 dark:text-white"
-                        >
-                            {{ t('subscription.billing_cycle', 'فترة الاشتراك') }}
-                        </label>
-                        <div
-                            class="rounded-xl border-2 border-action-primary bg-selection-bg p-4 flex items-center justify-between"
-                        >
-                            <div class="flex items-center gap-3">
-                                <div
-                                    class="w-10 h-10 rounded-lg bg-action-primary text-white flex items-center justify-center"
-                                >
-                                    <svg
-                                        class="w-5 h-5"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        viewBox="0 0 24 24"
-                                    >
-                                        <path
-                                            stroke-linecap="round"
-                                            stroke-linejoin="round"
-                                            stroke-width="2"
-                                            d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-                                        />
-                                    </svg>
-                                </div>
-                                <div>
-                                    <p class="text-sm font-bold text-slate-900 dark:text-white">
-                                        {{ $t('subscription.annual_subscription_12_months') }}
-                                    </p>
-                                    <p class="text-xs text-slate-500 dark:text-slate-400">
-                                        {{ $t('subscription.annual_cycle_desc') }}
-                                    </p>
-                                </div>
-                            </div>
-                            <span class="text-lg font-black text-action-primary">
-                                {{ formatCurrency(plan?.price_yearly) }} SAR
-                            </span>
+                        <div>
+                            <p class="text-sm font-bold text-slate-900 dark:text-white">
+                                {{ $t('subscription.annual_subscription_12_months') }}
+                            </p>
+                            <p class="text-xs text-slate-500 dark:text-slate-400">
+                                {{ $t('subscription.annual_cycle_desc') }}
+                            </p>
                         </div>
                     </div>
-
-                    <!-- Promo code -->
-                    <PromoCodeInput
-                        v-model="promoInput"
-                        :valid-promo="validPromo"
-                        @applied="onPromoApplied"
-                        @cleared="onPromoCleared"
-                    />
-
-                    <!-- Price summary -->
-                    <div
-                        v-if="pricing"
-                        class="rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-900/50"
-                    >
-                        <p class="mb-3 text-sm font-semibold text-slate-900 dark:text-white">
-                            {{ t('subscription.order_summary', 'ملخص الطلب') }}
-                        </p>
-                        <div class="space-y-2 text-sm">
-                            <div class="flex justify-between">
-                                <span class="text-slate-600 dark:text-slate-400">
-                                    {{ t('subscription.subtotal', 'السعر الأساسي') }}
-                                </span>
-                                <span class="font-mono text-slate-900 dark:text-white">
-                                    {{ formatCurrency(pricing.base_price) }} SAR
-                                </span>
-                            </div>
-                            <div
-                                v-if="pricing.discount > 0"
-                                class="flex justify-between text-emerald-600 dark:text-emerald-400"
-                            >
-                                <span>{{ t('subscription.discount', 'الخصم') }}</span>
-                                <span class="font-mono">
-                                    - {{ formatCurrency(pricing.discount) }} SAR
-                                </span>
-                            </div>
-                            <div
-                                v-if="vatSettings.enabled && pricing.vat_amount > 0"
-                                class="flex justify-between text-slate-500 dark:text-slate-400"
-                            >
-                                <span>
-                                    {{
-                                        t(
-                                            'subscription.vat_label',
-                                            `ضريبة القيمة المضافة (${vatSettings.rate}%)`,
-                                            { rate: vatSettings.rate }
-                                        )
-                                    }}
-                                </span>
-                                <span class="font-mono">
-                                    {{ formatCurrency(pricing.vat_amount) }} SAR
-                                </span>
-                            </div>
-                            <div
-                                class="flex justify-between border-t border-slate-200 pt-2 text-base font-bold dark:border-slate-700"
-                            >
-                                <span class="text-slate-900 dark:text-white">
-                                    {{ t('subscription.total', 'الإجمالي') }}
-                                </span>
-                                <span class="font-mono text-action-primary">
-                                    {{ formatCurrency(pricing.total) }} SAR
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Payment methods -->
-                    <PaymentMethodSelector
-                        v-model="selectedGateway"
-                        :enabled-gateways="enabledGateways"
-                        :payment-methods="paymentSettings"
-                        :bank-transfer-enabled="paymentSettings.bank_transfer_enabled"
-                    />
-
-                    <!-- Bank transfer details (if selected) -->
-                    <div
-                        v-if="selectedGateway === 'bank_transfer' && bankAccounts.length"
-                        class="rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-900/50"
-                    >
-                        <p class="mb-3 text-sm font-semibold text-slate-900 dark:text-white">
-                            {{ t('subscription.bank_accounts', 'الحسابات البنكية') }}
-                        </p>
-                        <div class="space-y-3">
-                            <div
-                                v-for="(acc, idx) in bankAccounts"
-                                :key="idx"
-                                class="rounded-lg border border-slate-200 bg-white p-3 dark:border-slate-700 dark:bg-slate-800"
-                            >
-                                <p class="text-sm font-semibold text-slate-900 dark:text-white">
-                                    {{ acc.bank_name }}
-                                </p>
-                                <p class="mt-0.5 text-xs text-slate-600 dark:text-slate-400">
-                                    {{ acc.account_name }}
-                                </p>
-                                <p
-                                    class="mt-1 font-mono text-xs text-slate-700 dark:text-slate-300"
-                                    dir="ltr"
-                                >
-                                    {{ acc.iban || acc.account_number }}
-                                </p>
-                            </div>
-                        </div>
-                        <p
-                            v-if="bankInstructions"
-                            class="mt-3 whitespace-pre-line text-xs text-slate-500 dark:text-slate-400"
-                        >
-                            {{ bankInstructions }}
-                        </p>
-                    </div>
-
-                    <!-- Error -->
-                    <p
-                        v-if="error"
-                        class="rounded-lg border border-rose-200 bg-rose-50 p-3 text-sm text-rose-700 dark:border-rose-800/50 dark:bg-rose-900/10 dark:text-rose-300"
-                    >
-                        {{ error }}
-                    </p>
-                </div>
-
-                <!-- Footer -->
-                <div
-                    v-if="!success && !bankTransferResult"
-                    class="sticky bottom-0 flex items-center justify-end gap-2 border-t border-slate-200 bg-slate-50 px-6 py-4 dark:border-slate-700 dark:bg-slate-900/50"
-                >
-                    <button
-                        type="button"
-                        @click="close"
-                        :disabled="loading"
-                        class="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
-                    >
-                        {{ t('common.cancel', 'إلغاء') }}
-                    </button>
-                    <button
-                        type="button"
-                        @click="subscribe"
-                        :disabled="loading || !pricing"
-                        class="inline-flex items-center gap-2 rounded-lg bg-action-primary px-5 py-2 text-sm font-semibold text-white hover:bg-action-primary-hover disabled:cursor-not-allowed disabled:opacity-50"
-                    >
-                        <svg
-                            v-if="loading"
-                            class="h-4 w-4 animate-spin"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                        >
-                            <circle
-                                class="opacity-25"
-                                cx="12"
-                                cy="12"
-                                r="10"
-                                stroke="currentColor"
-                                stroke-width="4"
-                            />
-                            <path
-                                class="opacity-75"
-                                fill="currentColor"
-                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                            />
-                        </svg>
-                        <span>{{ t('subscription.continue_to_payment', 'متابعة الدفع') }}</span>
-                    </button>
+                    <span class="text-lg font-black text-action-primary">
+                        {{ formatCurrency(plan?.price_yearly) }} SAR
+                    </span>
                 </div>
             </div>
+
+            <!-- Promo code -->
+            <PromoCodeInput
+                v-model="promoInput"
+                :valid-promo="validPromo"
+                @applied="onPromoApplied"
+                @cleared="onPromoCleared"
+            />
+
+            <!-- Price summary -->
+            <div
+                v-if="pricing"
+                class="rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-900/50"
+            >
+                <p class="mb-3 text-sm font-semibold text-slate-900 dark:text-white">
+                    {{ t('subscription.order_summary', 'ملخص الطلب') }}
+                </p>
+                <div class="space-y-2 text-sm">
+                    <div class="flex justify-between">
+                        <span class="text-slate-600 dark:text-slate-400">
+                            {{ t('subscription.subtotal', 'السعر الأساسي') }}
+                        </span>
+                        <span class="font-mono text-slate-900 dark:text-white">
+                            {{ formatCurrency(pricing.base_price) }} SAR
+                        </span>
+                    </div>
+                    <div
+                        v-if="pricing.discount > 0"
+                        class="flex justify-between text-emerald-600 dark:text-emerald-400"
+                    >
+                        <span>{{ t('subscription.discount', 'الخصم') }}</span>
+                        <span class="font-mono">- {{ formatCurrency(pricing.discount) }} SAR</span>
+                    </div>
+                    <div
+                        v-if="vatSettings.enabled && pricing.vat_amount > 0"
+                        class="flex justify-between text-slate-500 dark:text-slate-400"
+                    >
+                        <span>
+                            {{
+                                t(
+                                    'subscription.vat_label',
+                                    `ضريبة القيمة المضافة (${vatSettings.rate}%)`,
+                                    { rate: vatSettings.rate }
+                                )
+                            }}
+                        </span>
+                        <span class="font-mono">{{ formatCurrency(pricing.vat_amount) }} SAR</span>
+                    </div>
+                    <div
+                        class="flex justify-between border-t border-slate-200 pt-2 text-base font-bold dark:border-slate-700"
+                    >
+                        <span class="text-slate-900 dark:text-white">
+                            {{ t('subscription.total', 'الإجمالي') }}
+                        </span>
+                        <span class="font-mono text-action-primary">
+                            {{ formatCurrency(pricing.total) }} SAR
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Payment methods -->
+            <PaymentMethodSelector
+                v-model="selectedGateway"
+                :enabled-gateways="enabledGateways"
+                :payment-methods="paymentSettings"
+                :bank-transfer-enabled="paymentSettings.bank_transfer_enabled"
+            />
+
+            <!-- Bank transfer details (if selected) -->
+            <div
+                v-if="selectedGateway === 'bank_transfer' && bankAccounts.length"
+                class="rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-900/50"
+            >
+                <p class="mb-3 text-sm font-semibold text-slate-900 dark:text-white">
+                    {{ t('subscription.bank_accounts', 'الحسابات البنكية') }}
+                </p>
+                <div class="space-y-3">
+                    <div
+                        v-for="(acc, idx) in bankAccounts"
+                        :key="idx"
+                        class="rounded-lg border border-slate-200 bg-white p-3 dark:border-slate-700 dark:bg-slate-800"
+                    >
+                        <p class="text-sm font-semibold text-slate-900 dark:text-white">
+                            {{ acc.bank_name }}
+                        </p>
+                        <p class="mt-0.5 text-xs text-slate-600 dark:text-slate-400">
+                            {{ acc.account_name }}
+                        </p>
+                        <p
+                            class="mt-1 font-mono text-xs text-slate-700 dark:text-slate-300"
+                            dir="ltr"
+                        >
+                            {{ acc.iban || acc.account_number }}
+                        </p>
+                    </div>
+                </div>
+                <p
+                    v-if="bankInstructions"
+                    class="mt-3 whitespace-pre-line text-xs text-slate-500 dark:text-slate-400"
+                >
+                    {{ bankInstructions }}
+                </p>
+            </div>
+
+            <!-- Error -->
+            <p
+                v-if="error"
+                class="rounded-lg border border-rose-200 bg-rose-50 p-3 text-sm text-rose-700 dark:border-rose-800/50 dark:bg-rose-900/10 dark:text-rose-300"
+            >
+                {{ error }}
+            </p>
         </div>
-    </Teleport>
+
+        <template v-if="!success && !bankTransferResult" #footer>
+            <div class="flex items-center justify-end gap-2 w-full">
+                <button
+                    type="button"
+                    @click="close"
+                    :disabled="loading"
+                    class="px-5 py-2.5 text-xs font-bold text-text-secondary hover:bg-surface-secondary border border-border rounded-xl transition-colors cursor-pointer"
+                >
+                    {{ t('common.cancel', 'إلغاء') }}
+                </button>
+                <button
+                    type="button"
+                    @click="subscribe"
+                    :disabled="loading || !pricing"
+                    class="inline-flex items-center justify-center gap-2 px-6 py-2.5 text-xs font-bold text-white bg-action-primary hover:bg-action-primary-hover rounded-xl shadow-xs transition-all disabled:opacity-50 cursor-pointer"
+                >
+                    <svg
+                        v-if="loading"
+                        class="h-4 w-4 animate-spin"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                    >
+                        <circle
+                            class="opacity-25"
+                            cx="12"
+                            cy="12"
+                            r="10"
+                            stroke="currentColor"
+                            stroke-width="4"
+                        />
+                        <path
+                            class="opacity-75"
+                            fill="currentColor"
+                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                        />
+                    </svg>
+                    <span>{{ t('subscription.continue_to_payment', 'متابعة الدفع') }}</span>
+                </button>
+            </div>
+        </template>
+    </BaseModal>
 </template>
