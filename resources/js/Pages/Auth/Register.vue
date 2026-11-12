@@ -1,6 +1,7 @@
 <script setup>
 import AppToggle from '@/Components/Common/AppToggle.vue';
 import AuthLayout from '@/Layouts/AuthLayout.vue';
+import BaseModal from '@/Components/BaseModal.vue';
 import InputError from '@/Components/InputError.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 import { Head, Link, useForm, usePage } from '@inertiajs/vue3';
@@ -573,132 +574,70 @@ const submit = () => {
         </form>
 
         <!-- Terms Modal -->
-        <Teleport to="body">
-            <div v-if="showTermsModal" class="fixed inset-0 z-50 overflow-y-auto">
-                <div class="flex min-h-screen items-center justify-center p-4">
-                    <div class="fixed inset-0 bg-black/50" @click="showTermsModal = false"></div>
-                    <div
-                        class="relative bg-white dark:bg-gray-800 rounded-2xl shadow-xl max-w-2xl w-full max-h-[80vh] overflow-hidden"
-                    >
-                        <div
-                            class="bg-action-primary hover:bg-action-primary-hover px-6 py-4 flex items-center justify-between"
-                        >
-                            <h3 class="text-lg font-bold text-white">
-                                {{ isRTL ? 'سياسة الاستخدام' : 'Terms of Service' }}
-                            </h3>
-                            <button
-                                @click="showTermsModal = false"
-                                class="text-white/80 hover:text-white"
-                            >
-                                <svg
-                                    class="w-6 h-6"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        stroke-width="2"
-                                        d="M6 18L18 6M6 6l12 12"
-                                    ></path>
-                                </svg>
-                            </button>
-                        </div>
-                        <div
-                            class="p-6 overflow-y-auto max-h-[60vh] text-gray-700 dark:text-gray-300 text-sm leading-relaxed"
-                        >
-                            <p class="mb-4">
-                                {{
-                                    isRTL
-                                        ? `مرحباً بك في ${appName}. باستخدامك لهذه الخدمة، فإنك توافق على الالتزام بهذه الشروط والأحكام.`
-                                        : `Welcome to ${appName}. By using this service, you agree to be bound by these terms and conditions.`
-                                }}
-                            </p>
-                            <p class="mb-4">
-                                {{
-                                    isRTL
-                                        ? 'يرجى قراءة هذه الشروط بعناية قبل استخدام النظام. إذا كنت لا توافق على جميع الشروط، فلا يجوز لك استخدام الخدمة.'
-                                        : 'Please read these terms carefully before using the system. If you do not agree to all terms, you may not use the service.'
-                                }}
-                            </p>
-                            <p class="text-gray-500 dark:text-gray-400 italic">
-                                {{
-                                    isRTL
-                                        ? '(سيتم تحديث هذا المحتوى من لوحة تحكم النظام)'
-                                        : '(This content will be updated from the system admin panel)'
-                                }}
-                            </p>
-                        </div>
-                    </div>
-                </div>
+        <BaseModal
+            :show="showTermsModal"
+            :title="isRTL ? 'سياسة الاستخدام' : 'Terms of Service'"
+            size="lg"
+            @close="showTermsModal = false"
+        >
+            <div class="text-gray-700 dark:text-gray-300 text-sm leading-relaxed">
+                <p class="mb-4">
+                    {{
+                        isRTL
+                            ? `مرحباً بك في ${appName}. باستخدامك لهذه الخدمة، فإنك توافق على الالتزام بهذه الشروط والأحكام.`
+                            : `Welcome to ${appName}. By using this service, you agree to be bound by these terms and conditions.`
+                    }}
+                </p>
+                <p class="mb-4">
+                    {{
+                        isRTL
+                            ? 'يرجى قراءة هذه الشروط بعناية قبل استخدام النظام. إذا كنت لا توافق على جميع الشروط، فلا يجوز لك استخدام الخدمة.'
+                            : 'Please read these terms carefully before using the system. If you do not agree to all terms, you may not use the service.'
+                    }}
+                </p>
+                <p class="text-gray-500 dark:text-gray-400 italic">
+                    {{
+                        isRTL
+                            ? '(سيتم تحديث هذا المحتوى من لوحة تحكم النظام)'
+                            : '(This content will be updated from the system admin panel)'
+                    }}
+                </p>
             </div>
-        </Teleport>
+        </BaseModal>
 
         <!-- Privacy Modal -->
-        <Teleport to="body">
-            <div v-if="showPrivacyModal" class="fixed inset-0 z-50 overflow-y-auto">
-                <div class="flex min-h-screen items-center justify-center p-4">
-                    <div class="fixed inset-0 bg-black/50" @click="showPrivacyModal = false"></div>
-                    <div
-                        class="relative bg-white dark:bg-gray-800 rounded-2xl shadow-xl max-w-2xl w-full max-h-[80vh] overflow-hidden"
-                    >
-                        <div
-                            class="bg-action-primary hover:bg-action-primary-hover px-6 py-4 flex items-center justify-between"
-                        >
-                            <h3 class="text-lg font-bold text-white">
-                                {{ isRTL ? 'سياسة الخصوصية' : 'Privacy Policy' }}
-                            </h3>
-                            <button
-                                @click="showPrivacyModal = false"
-                                class="text-white/80 hover:text-white"
-                            >
-                                <svg
-                                    class="w-6 h-6"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        stroke-width="2"
-                                        d="M6 18L18 6M6 6l12 12"
-                                    ></path>
-                                </svg>
-                            </button>
-                        </div>
-                        <div
-                            class="p-6 overflow-y-auto max-h-[60vh] text-gray-700 dark:text-gray-300 text-sm leading-relaxed"
-                        >
-                            <h4 class="font-bold mb-2">
-                                {{ isRTL ? 'سياسة الخصوصية' : 'Privacy Policy' }}
-                            </h4>
-                            <p class="mb-4">
-                                {{
-                                    isRTL
-                                        ? 'نحن نحترم خصوصيتك ونلتزم بحماية بياناتك الشخصية. توضح هذه السياسة كيفية جمع واستخدام وحماية معلوماتك.'
-                                        : 'We respect your privacy and are committed to protecting your personal data. This policy explains how we collect, use, and protect your information.'
-                                }}
-                            </p>
-                            <p class="mb-4">
-                                {{
-                                    isRTL
-                                        ? 'نستخدم بياناتك لتقديم الخدمة وتحسينها. لن نشارك معلوماتك مع أطراف ثالثة دون موافقتك.'
-                                        : 'We use your data to provide and improve the service. We will not share your information with third parties without your consent.'
-                                }}
-                            </p>
-                            <p class="text-gray-500 dark:text-gray-400 italic">
-                                {{
-                                    isRTL
-                                        ? '(سيتم تحديث هذا المحتوى من لوحة تحكم النظام)'
-                                        : '(This content will be updated from the system admin panel)'
-                                }}
-                            </p>
-                        </div>
-                    </div>
-                </div>
+        <BaseModal
+            :show="showPrivacyModal"
+            :title="isRTL ? 'سياسة الخصوصية' : 'Privacy Policy'"
+            size="lg"
+            @close="showPrivacyModal = false"
+        >
+            <div class="text-gray-700 dark:text-gray-300 text-sm leading-relaxed">
+                <h4 class="font-bold mb-2">
+                    {{ isRTL ? 'سياسة الخصوصية' : 'Privacy Policy' }}
+                </h4>
+                <p class="mb-4">
+                    {{
+                        isRTL
+                            ? 'نحن نحترم خصوصيتك ونلتزم بحماية بياناتك الشخصية. توضح هذه السياسة كيفية جمع واستخدام وحماية معلوماتك.'
+                            : 'We respect your privacy and are committed to protecting your personal data. This policy explains how we collect, use, and protect your information.'
+                    }}
+                </p>
+                <p class="mb-4">
+                    {{
+                        isRTL
+                            ? 'نستخدم بياناتك لتقديم الخدمة وتحسينها. لن نشارك معلوماتك مع أطراف ثالثة دون موافقتك.'
+                            : 'We use your data to provide and improve the service. We will not share your information with third parties without your consent.'
+                    }}
+                </p>
+                <p class="text-gray-500 dark:text-gray-400 italic">
+                    {{
+                        isRTL
+                            ? '(سيتم تحديث هذا المحتوى من لوحة تحكم النظام)'
+                            : '(This content will be updated from the system admin panel)'
+                    }}
+                </p>
             </div>
-        </Teleport>
+        </BaseModal>
     </AuthLayout>
 </template>

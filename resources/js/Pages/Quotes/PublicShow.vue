@@ -348,119 +348,96 @@
         </main>
 
         <!-- Rejection Modal -->
-        <div
-            v-if="showRejectModal"
-            class="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-end sm:items-center justify-center p-4 print:hidden"
-            @click.self="showRejectModal = false"
-        >
-            <div
-                class="bg-white dark:bg-gray-800 rounded-2xl w-full max-w-md shadow-2xl overflow-hidden"
-            >
-                <div class="px-6 py-5 border-b border-gray-100 dark:border-gray-700">
+        <BaseModal :show="showRejectModal" size="sm" @close="showRejectModal = false">
+            <template #title>
+                <div>
                     <h3 class="font-black text-gray-900 dark:text-white text-lg">
                         {{ t('quotes.public.reject_title') }}
                     </h3>
-                    <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                    <p class="text-sm text-gray-500 dark:text-gray-400 mt-0.5 font-normal">
                         {{ t('quotes.public.reject_subtitle') }}
                     </p>
                 </div>
-                <div class="p-6">
-                    <textarea
-                        v-model="rejectionReason"
-                        rows="4"
-                        :placeholder="t('quotes.public.rejection_reason_placeholder')"
-                        class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 rounded-xl text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-danger resize-none"
-                    ></textarea>
-                    <div class="flex gap-3 mt-4">
-                        <button
-                            @click="showRejectModal = false"
-                            class="flex-1 py-3 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 font-black text-sm rounded-xl transition-all"
-                        >
-                            {{ t('common.cancel') }}
-                        </button>
-                        <button
-                            @click="handleReject"
-                            :disabled="!rejectionReason.trim() || submitting"
-                            class="flex-1 py-3 bg-red-500 hover:bg-red-600 disabled:opacity-50 text-white font-black text-sm rounded-xl transition-all"
-                        >
-                            {{ t('quotes.public.confirm_reject') }}
-                        </button>
+            </template>
+
+            <div>
+                <textarea
+                    v-model="rejectionReason"
+                    rows="4"
+                    :placeholder="t('quotes.public.rejection_reason_placeholder')"
+                    class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 rounded-xl text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-danger resize-none"
+                ></textarea>
+            </div>
+
+            <template #footer>
+                <div class="flex gap-3 w-full">
+                    <button
+                        @click="showRejectModal = false"
+                        class="flex-1 py-3 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 font-black text-sm rounded-xl transition-all"
+                    >
+                        {{ t('common.cancel') }}
+                    </button>
+                    <button
+                        @click="handleReject"
+                        :disabled="!rejectionReason.trim() || submitting"
+                        class="flex-1 py-3 bg-red-500 hover:bg-red-600 disabled:opacity-50 text-white font-black text-sm rounded-xl transition-all"
+                    >
+                        {{ t('quotes.public.confirm_reject') }}
+                    </button>
+                </div>
+            </template>
+        </BaseModal>
+
+        <!-- Approval Modal with Signature Pad -->
+        <BaseModal :show="showApproveModal" size="md" @close="showApproveModal = false">
+            <template #title>
+                <div class="flex items-center gap-3">
+                    <div
+                        class="w-10 h-10 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 flex items-center justify-center"
+                    >
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2.5"
+                                d="M5 13l4 4L19 7"
+                            />
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="font-black text-gray-900 dark:text-white text-base">
+                            {{ t('quotes.public.approve_confirm_title') }}
+                        </h3>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 font-normal">
+                            {{ $t('common.total_label') }}
+                            <strong class="font-mono text-gray-900 dark:text-white">
+                                {{ formatCurrency(quote.total) }}
+                            </strong>
+                        </p>
+                    </div>
+                </div>
+            </template>
+
+            <div class="space-y-4">
+                <p class="text-xs text-gray-600 dark:text-gray-300 leading-relaxed">
+                    {{ t('quotes.public.approve_notice') }}
+                </p>
+
+                <!-- Signature Pad -->
+                <div class="space-y-1.5">
+                    <label class="block text-xs font-bold text-gray-700 dark:text-gray-300">
+                        {{ t('quotes.public.signature_label') }}
+                    </label>
+                    <div
+                        class="rounded-2xl border-2 border-dashed border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-900/50 p-2 overflow-hidden"
+                    >
+                        <SignaturePad v-model="customerSignature" />
                     </div>
                 </div>
             </div>
-        </div>
 
-        <!-- Approval Modal with Signature Pad -->
-        <div
-            v-if="showApproveModal"
-            class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-end sm:items-center justify-center p-4 print:hidden"
-            @click.self="showApproveModal = false"
-        >
-            <div
-                class="bg-white dark:bg-gray-800 rounded-3xl w-full max-w-lg shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200"
-            >
-                <div
-                    class="px-6 py-5 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between"
-                >
-                    <div class="flex items-center gap-3">
-                        <div
-                            class="w-10 h-10 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 flex items-center justify-center"
-                        >
-                            <svg
-                                class="w-5 h-5"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                            >
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    stroke-width="2.5"
-                                    d="M5 13l4 4L19 7"
-                                />
-                            </svg>
-                        </div>
-                        <div>
-                            <h3 class="font-black text-gray-900 dark:text-white text-base">
-                                {{ t('quotes.public.approve_confirm_title') }}
-                            </h3>
-                            <p class="text-xs text-gray-500 dark:text-gray-400">
-                                {{ $t('common.total_label') }}
-                                <strong class="font-mono text-gray-900 dark:text-white">
-                                    {{ formatCurrency(quote.total) }}
-                                </strong>
-                            </p>
-                        </div>
-                    </div>
-                    <button
-                        @click="showApproveModal = false"
-                        class="text-gray-400 hover:text-gray-600 text-sm font-bold"
-                    >
-                        ✕
-                    </button>
-                </div>
-
-                <div class="p-6 space-y-4">
-                    <p class="text-xs text-gray-600 dark:text-gray-300 leading-relaxed">
-                        {{ t('quotes.public.approve_notice') }}
-                    </p>
-
-                    <!-- Signature Pad -->
-                    <div class="space-y-1.5">
-                        <label class="block text-xs font-bold text-gray-700 dark:text-gray-300">
-                            {{ t('quotes.public.signature_label') }}
-                        </label>
-                        <div
-                            class="rounded-2xl border-2 border-dashed border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-900/50 p-2 overflow-hidden"
-                        >
-                            <SignaturePad v-model="customerSignature" />
-                        </div>
-                    </div>
-                </div>
-
-                <div
-                    class="px-6 py-4 bg-gray-50 dark:bg-gray-900/50 border-t border-gray-100 dark:border-gray-700 flex items-center justify-end gap-3"
-                >
+            <template #footer>
+                <div class="flex items-center justify-end gap-3 w-full">
                     <button
                         @click="showApproveModal = false"
                         class="px-4 py-2.5 text-xs font-bold text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-xl transition-all"
@@ -499,13 +476,14 @@
                         </span>
                     </button>
                 </div>
-            </div>
-        </div>
+            </template>
+        </BaseModal>
     </div>
 </template>
 
 <script setup>
 import AppPrintButton from '@/Components/Common/AppPrintButton.vue';
+import BaseModal from '@/Components/BaseModal.vue';
 import {
     printDocument,
     resolveDocumentSettings,

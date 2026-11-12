@@ -1642,106 +1642,79 @@ const regenerateCodes = () =>
             </BaseModal>
 
             <!-- Disable 2FA Modal -->
-            <Transition name="modal">
-                <div v-if="showDisableModal" class="fixed inset-0 z-50 overflow-y-auto">
-                    <div class="flex min-h-full items-center justify-center p-4">
-                        <div
-                            class="fixed inset-0 bg-black/60 backdrop-blur-sm"
-                            @click="showDisableModal = false"
-                        ></div>
-                        <div
-                            class="relative bg-white dark:bg-gray-800 rounded-3xl p-6 w-full max-w-md shadow-2xl border border-gray-100 dark:border-gray-700"
+            <BaseModal
+                :show="showDisableModal"
+                :title="$t('security.confirm_disable_two_factor')"
+                size="sm"
+                @close="showDisableModal = false"
+            >
+                <form @submit.prevent="disable2FA">
+                    <div class="mb-4">
+                        <label
+                            class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1.5"
                         >
-                            <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4">
-                                {{ $t('security.confirm_disable_two_factor') }}
-                            </h3>
-                            <form @submit.prevent="disable2FA">
-                                <div class="mb-4">
-                                    <label
-                                        class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1.5"
-                                    >
-                                        {{ $t('security.enter_password_to_confirm') }}
-                                    </label>
-                                    <input
-                                        type="password"
-                                        v-model="disableForm.password"
-                                        required
-                                        class="w-full rounded-xl border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-sm"
-                                    />
-                                </div>
-                                <div class="flex gap-3">
-                                    <DangerButton
-                                        type="submit"
-                                        :disabled="disableForm.processing"
-                                        class="flex-1"
-                                    >
-                                        {{ $t('security.deactivate') }}
-                                    </DangerButton>
-                                    <SecondaryButton
-                                        type="button"
-                                        @click="showDisableModal = false"
-                                    >
-                                        {{
-                                            $t(
-                                                'system.company_subscription.history.confirm_modal.go_back'
-                                            )
-                                        }}
-                                    </SecondaryButton>
-                                </div>
-                            </form>
-                        </div>
+                            {{ $t('security.enter_password_to_confirm') }}
+                        </label>
+                        <input
+                            type="password"
+                            v-model="disableForm.password"
+                            required
+                            class="w-full rounded-xl border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-sm"
+                        />
                     </div>
-                </div>
-            </Transition>
+                    <div class="flex gap-3">
+                        <DangerButton
+                            type="submit"
+                            :disabled="disableForm.processing"
+                            class="flex-1"
+                        >
+                            {{ $t('security.deactivate') }}
+                        </DangerButton>
+                        <SecondaryButton type="button" @click="showDisableModal = false">
+                            {{ $t('system.company_subscription.history.confirm_modal.go_back') }}
+                        </SecondaryButton>
+                    </div>
+                </form>
+            </BaseModal>
 
             <!-- Regenerate Codes Modal -->
-            <Transition name="modal">
-                <div v-if="showRegenModal" class="fixed inset-0 z-50 overflow-y-auto">
-                    <div class="flex min-h-full items-center justify-center p-4">
-                        <div
-                            class="fixed inset-0 bg-black/60 backdrop-blur-sm"
-                            @click="showRegenModal = false"
-                        ></div>
-                        <div
-                            class="relative bg-white dark:bg-gray-800 rounded-3xl p-6 w-full max-w-md shadow-2xl border border-gray-100 dark:border-gray-700"
+            <BaseModal
+                :show="showRegenModal"
+                :title="$t('security.new_recovery_codes')"
+                size="sm"
+                @close="showRegenModal = false"
+            >
+                <p class="text-xs text-gray-500 mb-4">
+                    {{ $t('security.old_codes_cancelled') }}
+                </p>
+                <form @submit.prevent="regenerateCodes">
+                    <div class="mb-4">
+                        <label
+                            class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1.5"
                         >
-                            <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2">
-                                {{ $t('security.new_recovery_codes') }}
-                            </h3>
-                            <p class="text-xs text-gray-500 mb-4">
-                                {{ $t('security.old_codes_cancelled') }}
-                            </p>
-                            <form @submit.prevent="regenerateCodes">
-                                <div class="mb-4">
-                                    <label
-                                        class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1.5"
-                                    >
-                                        {{ $t('security.enter_password') }}
-                                    </label>
-                                    <input
-                                        type="password"
-                                        v-model="regenForm.password"
-                                        required
-                                        class="w-full rounded-xl border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-sm"
-                                    />
-                                </div>
-                                <div class="flex gap-3">
-                                    <PrimaryButton
-                                        type="submit"
-                                        :disabled="regenForm.processing"
-                                        class="flex-1"
-                                    >
-                                        {{ $t('security.new_codes') }}
-                                    </PrimaryButton>
-                                    <SecondaryButton type="button" @click="showRegenModal = false">
-                                        {{ $t('common.cancel') }}
-                                    </SecondaryButton>
-                                </div>
-                            </form>
-                        </div>
+                            {{ $t('security.enter_password') }}
+                        </label>
+                        <input
+                            type="password"
+                            v-model="regenForm.password"
+                            required
+                            class="w-full rounded-xl border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-sm"
+                        />
                     </div>
-                </div>
-            </Transition>
+                    <div class="flex gap-3">
+                        <PrimaryButton
+                            type="submit"
+                            :disabled="regenForm.processing"
+                            class="flex-1"
+                        >
+                            {{ $t('security.new_codes') }}
+                        </PrimaryButton>
+                        <SecondaryButton type="button" @click="showRegenModal = false">
+                            {{ $t('common.cancel') }}
+                        </SecondaryButton>
+                    </div>
+                </form>
+            </BaseModal>
         </div>
     </AppLayout>
 </template>

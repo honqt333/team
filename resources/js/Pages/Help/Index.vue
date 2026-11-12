@@ -484,45 +484,21 @@
             </div>
 
             <!-- Video Modal Preview -->
-            <div
-                v-if="activeVideo"
-                class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
-                @click.self="activeVideo = null"
-            >
-                <div
-                    class="relative bg-gray-900 rounded-3xl max-w-3xl w-full overflow-hidden shadow-2xl border border-gray-800"
-                >
-                    <div class="p-4 flex items-center justify-between border-b border-gray-800">
-                        <div class="flex items-center gap-2">
-                            <span
-                                class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-sky-500/20 text-sky-400"
-                            >
-                                {{ activeVideo.category }}
-                            </span>
-                            <h4 class="text-sm font-bold text-white">
-                                {{ activeVideo.title }}
-                            </h4>
-                        </div>
-                        <button
-                            @click="activeVideo = null"
-                            class="p-1.5 text-gray-400 hover:text-white rounded-lg hover:bg-gray-800 transition-colors"
+            <BaseModal :show="Boolean(activeVideo)" size="lg" @close="activeVideo = null">
+                <template #title>
+                    <div v-if="activeVideo" class="flex items-center gap-2">
+                        <span
+                            class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-sky-500/20 text-sky-600 dark:text-sky-400"
                         >
-                            <svg
-                                class="w-5 h-5"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                            >
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    stroke-width="2"
-                                    d="M6 18L18 6M6 6l12 12"
-                                />
-                            </svg>
-                        </button>
+                            {{ activeVideo.category }}
+                        </span>
+                        <span class="text-sm font-bold text-gray-900 dark:text-white">
+                            {{ activeVideo.title }}
+                        </span>
                     </div>
+                </template>
 
+                <div v-if="activeVideo" class="rounded-2xl overflow-hidden bg-gray-900">
                     <!-- Video Player or Placeholder -->
                     <div
                         v-if="activeVideoEmbed"
@@ -627,7 +603,7 @@
                         </div>
                     </div>
                 </div>
-            </div>
+            </BaseModal>
         </div>
     </AppLayout>
 </template>
@@ -638,6 +614,7 @@ import { Head } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import PageHeader from '@/Components/PageHeader.vue';
+import BaseModal from '@/Components/BaseModal.vue';
 import { useVideoEmbed } from '@/Composables/useVideoEmbed';
 
 const props = defineProps({

@@ -195,52 +195,46 @@
             only; we never echo it back to anyone but
             the audit log.
         -->
-        <div
-            v-if="showCancelModal"
-            class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm"
-            @click.self="showCancelModal = false"
+        <BaseModal
+            :show="showCancelModal"
+            :title="t('customer_portal.actions.cancel_title')"
+            size="sm"
+            @close="showCancelModal = false"
         >
-            <div
-                class="w-full max-w-md rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 shadow-xl"
-            >
-                <h3 class="text-lg font-bold mb-2">
-                    {{ t('customer_portal.actions.cancel_title') }}
-                </h3>
-                <p class="text-sm text-slate-500 dark:text-slate-400 mb-4">
-                    {{ t('customer_portal.actions.cancel_body') }}
-                </p>
-                <form @submit.prevent="submitCancel" class="space-y-4">
-                    <div>
-                        <label class="block text-sm font-medium mb-1.5">
-                            {{ t('customer_portal.actions.cancel_reason_label') }}
-                        </label>
-                        <textarea
-                            v-model="cancelReason"
-                            :placeholder="t('customer_portal.actions.cancel_reason_placeholder')"
-                            rows="3"
-                            maxlength="255"
-                            class="w-full rounded-lg border-slate-300 dark:border-slate-700 dark:bg-slate-950 text-sm"
-                        ></textarea>
-                    </div>
-                    <div class="flex gap-3">
-                        <button
-                            type="button"
-                            @click="showCancelModal = false"
-                            class="flex-1 px-4 py-2.5 rounded-lg text-sm font-semibold border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800"
-                        >
-                            {{ t('customer_portal.actions.cancel_keep') }}
-                        </button>
-                        <button
-                            type="submit"
-                            :disabled="cancelSubmitting"
-                            class="flex-1 px-4 py-2.5 rounded-lg text-sm font-semibold text-white bg-rose-600 hover:bg-rose-700 disabled:opacity-50"
-                        >
-                            {{ t('customer_portal.actions.cancel_confirm') }}
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
+            <p class="text-sm text-slate-500 dark:text-slate-400 mb-4">
+                {{ t('customer_portal.actions.cancel_body') }}
+            </p>
+            <form @submit.prevent="submitCancel" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium mb-1.5">
+                        {{ t('customer_portal.actions.cancel_reason_label') }}
+                    </label>
+                    <textarea
+                        v-model="cancelReason"
+                        :placeholder="t('customer_portal.actions.cancel_reason_placeholder')"
+                        rows="3"
+                        maxlength="255"
+                        class="w-full rounded-lg border-slate-300 dark:border-slate-700 dark:bg-slate-950 text-sm"
+                    ></textarea>
+                </div>
+                <div class="flex gap-3">
+                    <button
+                        type="button"
+                        @click="showCancelModal = false"
+                        class="flex-1 px-4 py-2.5 rounded-lg text-sm font-semibold border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800"
+                    >
+                        {{ t('customer_portal.actions.cancel_keep') }}
+                    </button>
+                    <button
+                        type="submit"
+                        :disabled="cancelSubmitting"
+                        class="flex-1 px-4 py-2.5 rounded-lg text-sm font-semibold text-white bg-rose-600 hover:bg-rose-700 disabled:opacity-50"
+                    >
+                        {{ t('customer_portal.actions.cancel_confirm') }}
+                    </button>
+                </div>
+            </form>
+        </BaseModal>
     </CustomerPortalLayout>
 </template>
 
@@ -250,6 +244,7 @@ import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import CustomerPortalLayout from '@/Layouts/CustomerPortalLayout.vue';
 import SaudiPlateDisplay from '@/Components/Vehicles/SaudiPlateDisplay.vue';
+import BaseModal from '@/Components/BaseModal.vue';
 
 const props = defineProps({
     tenant: { type: Object, required: true },

@@ -403,30 +403,24 @@
         </section>
 
         <!-- Approve modal -->
-        <div
-            v-if="showApproveModal"
-            class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm"
-            @click.self="showApproveModal = false"
+        <BaseModal
+            :show="showApproveModal"
+            :title="t('customer_portal.portal_quotes.approve_modal_title')"
+            size="md"
+            @close="showApproveModal = false"
         >
-            <div
-                role="dialog"
-                aria-modal="true"
-                class="w-full max-w-lg rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 shadow-2xl"
-            >
-                <h3 class="text-base font-extrabold text-slate-900 dark:text-white">
-                    {{ t('customer_portal.portal_quotes.approve_modal_title') }}
-                </h3>
-                <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 mb-4">
-                    {{ t('customer_portal.portal_quotes.approve_modal_subtitle') }}
-                </p>
-                <SignaturePad
-                    v-model="signatureData"
-                    :label="t('customer_portal.portal_quotes.signature_label')"
-                />
-                <p v-if="approveError" class="mt-2 text-xs font-semibold text-rose-600">
-                    {{ approveError }}
-                </p>
-                <div class="mt-5 flex items-center justify-end gap-2.5">
+            <p class="text-xs text-slate-500 dark:text-slate-400 mb-4">
+                {{ t('customer_portal.portal_quotes.approve_modal_subtitle') }}
+            </p>
+            <SignaturePad
+                v-model="signatureData"
+                :label="t('customer_portal.portal_quotes.signature_label')"
+            />
+            <p v-if="approveError" class="mt-2 text-xs font-semibold text-rose-600">
+                {{ approveError }}
+            </p>
+            <template #footer>
+                <div class="flex items-center justify-end gap-2.5 w-full">
                     <button
                         type="button"
                         @click="showApproveModal = false"
@@ -443,42 +437,36 @@
                         {{ t('customer_portal.portal_quotes.approve_confirm_btn') }}
                     </button>
                 </div>
-            </div>
-        </div>
+            </template>
+        </BaseModal>
 
         <!-- Reject modal -->
-        <div
-            v-if="showRejectModal"
-            class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm"
-            @click.self="showRejectModal = false"
+        <BaseModal
+            :show="showRejectModal"
+            :title="t('customer_portal.portal_quotes.reject_modal_title')"
+            size="sm"
+            @close="showRejectModal = false"
         >
-            <div
-                role="dialog"
-                aria-modal="true"
-                class="w-full max-w-md rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 shadow-2xl"
+            <label
+                for="rejection_reason"
+                class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5"
             >
-                <h3 class="text-base font-extrabold text-slate-900 dark:text-white mb-4">
-                    {{ t('customer_portal.portal_quotes.reject_modal_title') }}
-                </h3>
-                <label
-                    for="rejection_reason"
-                    class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5"
-                >
-                    {{ t('customer_portal.portal_quotes.reject_reason_label') }}
-                    <span class="text-rose-500">*</span>
-                </label>
-                <textarea
-                    id="rejection_reason"
-                    v-model="rejectionReason"
-                    rows="4"
-                    maxlength="1000"
-                    :placeholder="t('customer_portal.portal_quotes.reject_reason_placeholder')"
-                    class="w-full rounded-xl border-slate-300 dark:border-slate-700 dark:bg-slate-950 text-sm"
-                ></textarea>
-                <p v-if="rejectError" class="mt-1.5 text-xs font-semibold text-rose-600">
-                    {{ rejectError }}
-                </p>
-                <div class="mt-5 flex items-center justify-end gap-2.5">
+                {{ t('customer_portal.portal_quotes.reject_reason_label') }}
+                <span class="text-rose-500">*</span>
+            </label>
+            <textarea
+                id="rejection_reason"
+                v-model="rejectionReason"
+                rows="4"
+                maxlength="1000"
+                :placeholder="t('customer_portal.portal_quotes.reject_reason_placeholder')"
+                class="w-full rounded-xl border-slate-300 dark:border-slate-700 dark:bg-slate-950 text-sm"
+            ></textarea>
+            <p v-if="rejectError" class="mt-1.5 text-xs font-semibold text-rose-600">
+                {{ rejectError }}
+            </p>
+            <template #footer>
+                <div class="flex items-center justify-end gap-2.5 w-full">
                     <button
                         type="button"
                         @click="showRejectModal = false"
@@ -495,8 +483,8 @@
                         {{ t('customer_portal.portal_quotes.reject_confirm_btn') }}
                     </button>
                 </div>
-            </div>
-        </div>
+            </template>
+        </BaseModal>
     </CustomerPortalLayout>
 </template>
 
@@ -506,6 +494,7 @@ import { computed, ref } from 'vue';
 import CustomerPortalLayout from '@/Layouts/CustomerPortalLayout.vue';
 import SaudiPlateDisplay from '@/Components/Vehicles/SaudiPlateDisplay.vue';
 import SignaturePad from '@/Components/Common/SignaturePad.vue';
+import BaseModal from '@/Components/BaseModal.vue';
 import { usePortalFormat, quoteStatusClass } from '@/Composables/usePortalFormat';
 
 const props = defineProps({
