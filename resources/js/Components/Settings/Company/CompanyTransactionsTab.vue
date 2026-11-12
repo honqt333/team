@@ -206,7 +206,7 @@
 
         <!-- Top Financial Summary Bar (Matching Wrshah + Enhanced) -->
         <div
-            class="p-3.5 rounded-2xl bg-white dark:bg-gray-850 border border-gray-200/80 dark:border-gray-700/70 shadow-sm flex flex-wrap items-center justify-center sm:justify-between gap-4 text-xs"
+            class="p-3.5 rounded-2xl bg-white dark:bg-gray-800 border border-gray-200/80 dark:border-gray-700/70 shadow-sm flex flex-wrap items-center justify-center sm:justify-between gap-4 text-xs"
         >
             <div class="flex flex-wrap items-center gap-x-4 gap-y-2">
                 <span class="font-black text-gray-900 dark:text-white">
@@ -276,7 +276,7 @@
 
         <!-- Transactions Table -->
         <div
-            class="bg-white dark:bg-gray-850 rounded-2xl border border-gray-200/80 dark:border-gray-700/70 overflow-hidden shadow-sm"
+            class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200/80 dark:border-gray-700/70 overflow-hidden shadow-sm"
         >
             <div class="overflow-x-auto">
                 <DataTable structured class="w-full text-right border-collapse">
@@ -751,7 +751,7 @@
 
         <!-- Bottom Financial Summary Bar (Matching Wrshah) -->
         <div
-            class="p-3.5 rounded-2xl bg-white dark:bg-gray-850 border border-gray-200/80 dark:border-gray-700/70 shadow-sm flex flex-wrap items-center justify-center sm:justify-between gap-4 text-xs"
+            class="p-3.5 rounded-2xl bg-white dark:bg-gray-800 border border-gray-200/80 dark:border-gray-700/70 shadow-sm flex flex-wrap items-center justify-center sm:justify-between gap-4 text-xs"
         >
             <div class="flex flex-wrap items-center gap-x-4 gap-y-2">
                 <span class="font-black text-gray-900 dark:text-white">
@@ -811,93 +811,72 @@
         </div>
 
         <!-- Approve / Post Confirmation Modal with Approval Date Picker -->
-        <Modal :show="!!approvingTransaction" unstyled @close="approvingTransaction = null">
-            <div
-                v-if="approvingTransaction"
-                class="fixed inset-0 z-50 flex items-center justify-center p-4"
-            >
+        <BaseModal
+            :show="!!approvingTransaction"
+            :title="$t('company_profile.transactions.approval_modal.title')"
+            size="sm"
+            @close="approvingTransaction = null"
+        >
+            <div v-if="approvingTransaction" class="space-y-4">
+                <p class="text-xs text-gray-600 dark:text-gray-300 leading-relaxed">
+                    {{ $t('company_profile.transactions.approve_confirm') }}
+                </p>
+
                 <div
-                    class="absolute inset-0 bg-black/50 backdrop-blur-sm"
-                    @click="approvingTransaction = null"
-                ></div>
-                <div
-                    class="relative bg-white dark:bg-gray-850 rounded-2xl shadow-2xl w-full max-w-md border border-gray-100 dark:border-gray-800 p-6 space-y-4"
+                    v-if="approvingTransaction.is_taxable"
+                    class="p-3 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/60 text-xs text-amber-800 dark:text-amber-300"
                 >
-                    <div
-                        class="flex items-center justify-between border-b border-gray-100 dark:border-gray-800 pb-3"
-                    >
-                        <h3 class="text-base font-bold text-gray-900 dark:text-white">
-                            {{ $t('company_profile.transactions.approval_modal.title') }}
-                        </h3>
-                        <button
-                            type="button"
-                            @click="approvingTransaction = null"
-                            class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
-                        >
-                            ✕
-                        </button>
+                    {{
+                        approvingTransaction.transaction_type === 'revenue'
+                            ? $t('company_profile.transactions.form.sales_invoice_notice')
+                            : $t('company_profile.transactions.form.purchase_invoice_notice')
+                    }}
+                </div>
+
+                <div class="grid grid-cols-2 gap-3 text-xs">
+                    <div>
+                        <label class="block font-bold text-gray-600 dark:text-gray-400 mb-1">
+                            {{ $t('company_profile.transactions.table.date') }}
+                        </label>
+                        <input
+                            type="text"
+                            :value="approvingTransaction.transaction_date"
+                            disabled
+                            class="w-full px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 text-gray-500 font-mono"
+                        />
                     </div>
-
-                    <p class="text-xs text-gray-600 dark:text-gray-300 leading-relaxed">
-                        {{ $t('company_profile.transactions.approve_confirm') }}
-                    </p>
-
-                    <div
-                        v-if="approvingTransaction.is_taxable"
-                        class="p-3 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/60 text-xs text-amber-800 dark:text-amber-300"
-                    >
-                        {{
-                            approvingTransaction.transaction_type === 'revenue'
-                                ? $t('company_profile.transactions.form.sales_invoice_notice')
-                                : $t('company_profile.transactions.form.purchase_invoice_notice')
-                        }}
-                    </div>
-
-                    <div class="grid grid-cols-2 gap-3 text-xs">
-                        <div>
-                            <label class="block font-bold text-gray-600 dark:text-gray-400 mb-1">
-                                {{ $t('company_profile.transactions.table.date') }}
-                            </label>
-                            <input
-                                type="text"
-                                :value="approvingTransaction.transaction_date"
-                                disabled
-                                class="w-full px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 text-gray-500 font-mono"
-                            />
-                        </div>
-                        <div>
-                            <label class="block font-bold text-gray-700 dark:text-gray-300 mb-1">
-                                {{ $t('company_profile.transactions.approval_modal.approved_at') }}
-                            </label>
-                            <CustomDatePicker
-                                v-model="approvalDate"
-                                :disabled="approvingTransaction.transaction_type === 'revenue'"
-                            />
-                        </div>
-                    </div>
-
-                    <div
-                        class="flex items-center justify-end gap-2 pt-3 border-t border-gray-100 dark:border-gray-800"
-                    >
-                        <button
-                            type="button"
-                            @click="approvingTransaction = null"
-                            class="px-4 py-2 text-xs font-bold text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl"
-                        >
-                            {{ $t('common.cancel') }}
-                        </button>
-                        <button
-                            type="button"
-                            :disabled="submittingApprove"
-                            @click="confirmApproveTransaction"
-                            class="px-5 py-2 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl shadow-md disabled:opacity-50"
-                        >
-                            {{ $t('hr.payroll.approve') }}
-                        </button>
+                    <div>
+                        <label class="block font-bold text-gray-700 dark:text-gray-300 mb-1">
+                            {{ $t('company_profile.transactions.approval_modal.approved_at') }}
+                        </label>
+                        <CustomDatePicker
+                            v-model="approvalDate"
+                            :disabled="approvingTransaction.transaction_type === 'revenue'"
+                        />
                     </div>
                 </div>
             </div>
-        </Modal>
+
+            <template #footer>
+                <div class="flex items-center justify-end gap-2 w-full">
+                    <button
+                        type="button"
+                        @click="approvingTransaction = null"
+                        class="px-4 py-2 text-xs font-bold text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl"
+                    >
+                        {{ $t('common.cancel') }}
+                    </button>
+                    <button
+                        type="button"
+                        :disabled="submittingApprove"
+                        @click="confirmApproveTransaction"
+                        class="px-5 py-2 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl shadow-md disabled:opacity-50"
+                    >
+                        {{ $t('hr.payroll.approve') }}
+                    </button>
+                </div>
+            </template>
+        </BaseModal>
     </div>
 </template>
 
@@ -909,7 +888,7 @@ import DataTable from '@/Components/Common/DataTable.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 import CustomDatePicker from '@/Components/CustomDatePicker.vue';
 import AppPrintButton from '@/Components/Common/AppPrintButton.vue';
-import Modal from '@/Components/Modal.vue';
+import BaseModal from '@/Components/BaseModal.vue';
 import { useToast } from '@/Composables/useToast';
 import { useNumberFormat } from '@/Composables/useNumberFormat';
 

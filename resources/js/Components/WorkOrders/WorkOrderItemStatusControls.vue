@@ -120,25 +120,23 @@
         </div>
 
         <!-- Hold modal -->
-        <div
-            v-if="showHoldModal"
-            class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40"
-            @click.self="showHoldModal = false"
+        <BaseModal
+            :show="showHoldModal"
+            :title="labels.hold_title"
+            size="sm"
+            @close="showHoldModal = false"
         >
-            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-md p-5">
-                <h3 class="text-base font-bold text-gray-900 dark:text-gray-100">
-                    {{ labels.hold_title }}
-                </h3>
-                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                    {{ labels.hold_hint }}
-                </p>
-                <textarea
-                    v-model="holdReason"
-                    rows="3"
-                    class="mt-3 w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-sm p-2 text-gray-900 dark:text-gray-100"
-                    :placeholder="labels.hold_placeholder"
-                ></textarea>
-                <div class="mt-3 flex items-center justify-end gap-2">
+            <p class="text-xs text-gray-500 dark:text-gray-400">
+                {{ labels.hold_hint }}
+            </p>
+            <textarea
+                v-model="holdReason"
+                rows="3"
+                class="mt-3 w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-sm p-2 text-gray-900 dark:text-gray-100"
+                :placeholder="labels.hold_placeholder"
+            ></textarea>
+            <template #footer>
+                <div class="flex items-center justify-end gap-2 w-full">
                     <button
                         type="button"
                         @click="showHoldModal = false"
@@ -155,29 +153,27 @@
                         {{ labels.hold }}
                     </button>
                 </div>
-            </div>
-        </div>
+            </template>
+        </BaseModal>
 
         <!-- Reject modal -->
-        <div
-            v-if="showRejectModal"
-            class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40"
-            @click.self="showRejectModal = false"
+        <BaseModal
+            :show="showRejectModal"
+            :title="labels.reject_title"
+            size="sm"
+            @close="showRejectModal = false"
         >
-            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-md p-5">
-                <h3 class="text-base font-bold text-gray-900 dark:text-gray-100">
-                    {{ labels.reject_title }}
-                </h3>
-                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                    {{ labels.reject_hint }}
-                </p>
-                <textarea
-                    v-model="rejectNotes"
-                    rows="3"
-                    class="mt-3 w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-sm p-2 text-gray-900 dark:text-gray-100"
-                    :placeholder="labels.reject_placeholder"
-                ></textarea>
-                <div class="mt-3 flex items-center justify-end gap-2">
+            <p class="text-xs text-gray-500 dark:text-gray-400">
+                {{ labels.reject_hint }}
+            </p>
+            <textarea
+                v-model="rejectNotes"
+                rows="3"
+                class="mt-3 w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-sm p-2 text-gray-900 dark:text-gray-100"
+                :placeholder="labels.reject_placeholder"
+            ></textarea>
+            <template #footer>
+                <div class="flex items-center justify-end gap-2 w-full">
                     <button
                         type="button"
                         @click="showRejectModal = false"
@@ -194,8 +190,8 @@
                         {{ labels.reject_quality }}
                     </button>
                 </div>
-            </div>
-        </div>
+            </template>
+        </BaseModal>
     </div>
 </template>
 
@@ -204,6 +200,7 @@ import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { router } from '@inertiajs/vue3';
 import axios from 'axios';
+import BaseModal from '@/Components/BaseModal.vue';
 
 const props = defineProps({
     workOrder: { type: Object, required: true },

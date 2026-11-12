@@ -124,167 +124,125 @@
         </div>
 
         <!-- Contract Modal -->
-        <Transition name="modal">
-            <div v-if="showModal" class="fixed inset-0 z-50 overflow-y-auto">
-                <div class="flex min-h-full items-center justify-center p-4">
-                    <div class="fixed inset-0 bg-black/50" @click="showModal = false"></div>
-                    <div
-                        class="relative bg-white dark:bg-gray-800 rounded-2xl p-6 w-full max-w-4xl shadow-xl border border-gray-200 dark:border-gray-700"
-                    >
-                        <div class="flex items-center justify-between mb-6">
-                            <h3 class="text-lg font-bold text-gray-900 dark:text-white">
-                                {{ editingId ? $t('common.update') : $t('hr.contracts.add') }}
-                            </h3>
-                            <button
-                                @click="showModal = false"
-                                class="text-gray-400 hover:text-gray-600"
-                            >
-                                <svg
-                                    class="w-6 h-6"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        stroke-width="2"
-                                        d="M6 18L18 6M6 6l18 18"
-                                    />
-                                </svg>
-                            </button>
-                        </div>
-
-                        <form
-                            @submit.prevent="submit"
-                            class="grid grid-cols-1 lg:grid-cols-3 gap-6"
+        <BaseModal
+            :show="showModal"
+            :title="editingId ? $t('common.update') : $t('hr.contracts.add')"
+            size="xl"
+            @close="showModal = false"
+        >
+            <form @submit.prevent="submit" class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Sidebar -->
+                <div class="lg:col-span-1 space-y-4">
+                    <div>
+                        <label
+                            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
                         >
-                            <!-- Sidebar -->
-                            <div class="lg:col-span-1 space-y-4">
-                                <div>
-                                    <label
-                                        class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-                                    >
-                                        {{ $t('hr.contracts.number') }}
-                                    </label>
-                                    <input
-                                        v-model="form.contract_number"
-                                        type="text"
-                                        placeholder="CONT-2024-XXXX"
-                                        class="w-full rounded-xl border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                                        required
-                                    />
-                                    <p
-                                        v-if="form.errors.contract_number"
-                                        class="text-xs text-red-500 mt-1"
-                                    >
-                                        {{ form.errors.contract_number }}
-                                    </p>
-                                </div>
+                            {{ $t('hr.contracts.number') }}
+                        </label>
+                        <input
+                            v-model="form.contract_number"
+                            type="text"
+                            placeholder="CONT-2024-XXXX"
+                            class="w-full rounded-xl border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                            required
+                        />
+                        <p v-if="form.errors.contract_number" class="text-xs text-red-500 mt-1">
+                            {{ form.errors.contract_number }}
+                        </p>
+                    </div>
 
-                                <div class="grid grid-cols-1 gap-4">
-                                    <div>
-                                        <label
-                                            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-                                        >
-                                            {{ $t('hr.contracts.start_date') }}
-                                        </label>
-                                        <input
-                                            v-model="form.start_date"
-                                            type="date"
-                                            class="w-full rounded-xl border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                                            required
-                                        />
-                                    </div>
-                                    <div>
-                                        <label
-                                            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-                                        >
-                                            {{ $t('hr.contracts.end_date') }}
-                                        </label>
-                                        <input
-                                            v-model="form.end_date"
-                                            type="date"
-                                            class="w-full rounded-xl border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                                        />
-                                    </div>
-                                </div>
+                    <div class="grid grid-cols-1 gap-4">
+                        <div>
+                            <label
+                                class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                            >
+                                {{ $t('hr.contracts.start_date') }}
+                            </label>
+                            <CustomDatePicker
+                                v-model="form.start_date"
+                                :placeholder="$t('hr.contracts.start_date')"
+                                :required="true"
+                            />
+                        </div>
+                        <div>
+                            <label
+                                class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                            >
+                                {{ $t('hr.contracts.end_date') }}
+                            </label>
+                            <CustomDatePicker
+                                v-model="form.end_date"
+                                :placeholder="$t('hr.contracts.end_date')"
+                            />
+                        </div>
+                    </div>
 
-                                <div>
-                                    <SearchableSelect
-                                        v-model="form.status"
-                                        :options="statusOptions"
-                                        option-label="label"
-                                        option-value="value"
-                                        :label="$t('common.status')"
-                                        required
-                                    />
-                                </div>
+                    <div>
+                        <SearchableSelect
+                            v-model="form.status"
+                            :options="statusOptions"
+                            option-label="label"
+                            option-value="value"
+                            :label="$t('common.status')"
+                            required
+                        />
+                    </div>
 
-                                <div
-                                    class="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-2xl border border-gray-100 dark:border-gray-700"
-                                >
-                                    <h5
-                                        class="text-xs font-bold text-gray-400 uppercase mb-3 tracking-wider"
-                                    >
-                                        {{ $t('hr.employees.base_salary') }}
-                                    </h5>
-                                    <div class="flex items-center justify-between">
-                                        <span
-                                            class="text-xl font-bold text-gray-900 dark:text-white"
-                                        >
-                                            {{ employee.base_salary }}
-                                        </span>
-                                        <span class="text-xs text-gray-500">
-                                            {{ activeCurrencySymbol }}
-                                        </span>
-                                    </div>
-                                </div>
+                    <div
+                        class="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-2xl border border-gray-100 dark:border-gray-700"
+                    >
+                        <h5 class="text-xs font-bold text-gray-400 uppercase mb-3 tracking-wider">
+                            {{ $t('hr.employees.base_salary') }}
+                        </h5>
+                        <div class="flex items-center justify-between">
+                            <span class="text-xl font-bold text-gray-900 dark:text-white">
+                                {{ employee.base_salary }}
+                            </span>
+                            <span class="text-xs text-gray-500">
+                                {{ activeCurrencySymbol }}
+                            </span>
+                        </div>
+                    </div>
 
-                                <button
-                                    type="button"
-                                    @click="generateDraft"
-                                    class="w-full py-2.5 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-xl font-medium hover:bg-gray-200 transition-colors"
-                                >
-                                    {{ $t('hr.contracts.draft_contract') }}
-                                </button>
-                            </div>
+                    <button
+                        type="button"
+                        @click="generateDraft"
+                        class="w-full py-2.5 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-xl font-medium hover:bg-gray-200 transition-colors"
+                    >
+                        {{ $t('hr.contracts.draft_contract') }}
+                    </button>
+                </div>
 
-                            <!-- Content -->
-                            <div class="lg:col-span-2 flex flex-col h-full">
-                                <label
-                                    class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-                                >
-                                    {{ $t('hr.contracts.content') }}
-                                </label>
-                                <textarea
-                                    v-model="form.content"
-                                    class="flex-1 w-full rounded-2xl border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white font-mono text-sm p-4 min-h-[400px]"
-                                    placeholder="اكتب بنود العقد هنا..."
-                                ></textarea>
+                <!-- Content -->
+                <div class="lg:col-span-2 flex flex-col h-full">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        {{ $t('hr.contracts.content') }}
+                    </label>
+                    <textarea
+                        v-model="form.content"
+                        class="flex-1 w-full rounded-2xl border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white font-mono text-sm p-4 min-h-[400px]"
+                        placeholder="اكتب بنود العقد هنا..."
+                    ></textarea>
 
-                                <div class="flex justify-end gap-3 mt-6">
-                                    <button
-                                        type="button"
-                                        @click="showModal = false"
-                                        class="px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-xl"
-                                    >
-                                        {{ $t('common.cancel') }}
-                                    </button>
-                                    <button
-                                        type="submit"
-                                        :disabled="form.processing"
-                                        class="px-8 py-2 bg-emerald-600 text-white rounded-xl font-medium disabled:opacity-50 shadow-sm shadow-emerald-200 dark:shadow-none"
-                                    >
-                                        {{ $t('common.save') }}
-                                    </button>
-                                </div>
-                            </div>
-                        </form>
+                    <div class="flex justify-end gap-3 mt-6">
+                        <button
+                            type="button"
+                            @click="showModal = false"
+                            class="px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-xl"
+                        >
+                            {{ $t('common.cancel') }}
+                        </button>
+                        <button
+                            type="submit"
+                            :disabled="form.processing"
+                            class="px-8 py-2 bg-emerald-600 text-white rounded-xl font-medium disabled:opacity-50 shadow-sm shadow-emerald-200 dark:shadow-none"
+                        >
+                            {{ $t('common.save') }}
+                        </button>
                     </div>
                 </div>
-            </div>
-        </Transition>
+            </form>
+        </BaseModal>
     </div>
 </template>
 
@@ -295,6 +253,8 @@ import { useNumberFormat } from '@/Composables/useNumberFormat';
 import { useForm, router } from '@inertiajs/vue3';
 import { useToast } from '@/Composables/useToast';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
+import CustomDatePicker from '@/Components/CustomDatePicker.vue';
+import BaseModal from '@/Components/BaseModal.vue';
 
 const props = defineProps({
     employee: Object,

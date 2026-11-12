@@ -42,24 +42,74 @@
         </div>
 
         <!-- Allowances Modal -->
-        <Teleport to="body">
-            <div
-                v-if="showAllowancesModal"
-                class="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
-                @click.self="showAllowancesModal = false"
-            >
+        <BaseModal
+            :show="showAllowancesModal"
+            :title="'💰 ' + $t('hr.financial.manage_allowances')"
+            size="lg"
+            overflow-visible
+            @close="showAllowancesModal = false"
+        >
+            <div class="space-y-4">
+                <!-- Existing Allowances -->
                 <div
-                    class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto"
+                    v-for="(item, index) in selectedAllowances"
+                    :key="index"
+                    class="bg-gray-50 dark:bg-gray-900 rounded-xl p-4"
                 >
-                    <div
-                        class="p-5 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between"
-                    >
-                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
-                            💰 {{ $t('hr.financial.manage_allowances') }}
-                        </h3>
+                    <div class="flex items-start justify-between gap-4 mb-3">
+                        <div class="flex-1">
+                            <label
+                                class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                            >
+                                {{ $t('hr.financial.allowance_type') }}
+                            </label>
+                            <!-- Searchable Select -->
+                            <div class="relative">
+                                <input
+                                    v-model="item.search"
+                                    type="text"
+                                    :placeholder="$t('common.search')"
+                                    @focus="item.showDropdown = true"
+                                    class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800"
+                                />
+                                <div
+                                    v-if="item.id"
+                                    class="absolute start-3 top-2 bg-selection-bg text-selection-text text-xs px-2 py-0.5 rounded"
+                                >
+                                    {{ getAllowanceById(item.id)?.name_ar }}
+                                </div>
+                                <!-- Dropdown -->
+                                <div
+                                    v-if="item.showDropdown"
+                                    class="absolute z-10 mt-1 w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg shadow-lg max-h-48 overflow-y-auto"
+                                >
+                                    <div
+                                        v-for="a in getAvailableAllowances(item.id, item.search)"
+                                        :key="a.id"
+                                        @click="selectAllowance(index, a)"
+                                        class="px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer text-sm"
+                                    >
+                                        {{ a.name_ar }}
+                                        <span class="text-gray-500 text-xs ms-2">
+                                            ({{
+                                                a.is_flexible
+                                                    ? $t('hr.financial.flexible')
+                                                    : `${a.amount} ${a.type === 'percentage' ? '%' : activeCurrencySymbol}`
+                                            }})
+                                        </span>
+                                    </div>
+                                    <div
+                                        v-if="!getAvailableAllowances(item.id, item.search).length"
+                                        class="px-3 py-2 text-gray-500 text-sm"
+                                    >
+                                        {{ $t('common.no_results') }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                         <button
-                            @click="showAllowancesModal = false"
-                            class="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
+                            @click="removeAllowance(index)"
+                            class="mt-6 p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg"
                         >
                             <svg
                                 class="w-5 h-5"
@@ -71,233 +121,196 @@
                                     stroke-linecap="round"
                                     stroke-linejoin="round"
                                     stroke-width="2"
-                                    d="M6 18L18 6M6 6l12 12"
+                                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
                                 />
                             </svg>
                         </button>
                     </div>
-                    <div class="p-5 space-y-4">
-                        <!-- Existing Allowances -->
-                        <div
-                            v-for="(item, index) in selectedAllowances"
-                            :key="index"
-                            class="bg-gray-50 dark:bg-gray-900 rounded-xl p-4"
-                        >
-                            <div class="flex items-start justify-between gap-4 mb-3">
-                                <div class="flex-1">
-                                    <label
-                                        class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-                                    >
-                                        {{ $t('hr.financial.allowance_type') }}
-                                    </label>
-                                    <!-- Searchable Select -->
-                                    <div class="relative">
-                                        <input
-                                            v-model="item.search"
-                                            type="text"
-                                            :placeholder="$t('common.search')"
-                                            @focus="item.showDropdown = true"
-                                            class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800"
-                                        />
-                                        <div
-                                            v-if="item.id"
-                                            class="absolute start-3 top-2 bg-selection-bg text-selection-text text-xs px-2 py-0.5 rounded"
-                                        >
-                                            {{ getAllowanceById(item.id)?.name_ar }}
-                                        </div>
-                                        <!-- Dropdown -->
-                                        <div
-                                            v-if="item.showDropdown"
-                                            class="absolute z-10 mt-1 w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg shadow-lg max-h-48 overflow-y-auto"
-                                        >
-                                            <div
-                                                v-for="a in getAvailableAllowances(
-                                                    item.id,
-                                                    item.search
-                                                )"
-                                                :key="a.id"
-                                                @click="selectAllowance(index, a)"
-                                                class="px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer text-sm"
-                                            >
-                                                {{ a.name_ar }}
-                                                <span class="text-gray-500 text-xs ms-2">
-                                                    ({{
-                                                        a.is_flexible
-                                                            ? $t('hr.financial.flexible')
-                                                            : `${a.amount} ${a.type === 'percentage' ? '%' : activeCurrencySymbol}`
-                                                    }})
-                                                </span>
-                                            </div>
-                                            <div
-                                                v-if="
-                                                    !getAvailableAllowances(item.id, item.search)
-                                                        .length
-                                                "
-                                                class="px-3 py-2 text-gray-500 text-sm"
-                                            >
-                                                {{ $t('common.no_results') }}
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <button
-                                    @click="removeAllowance(index)"
-                                    class="mt-6 p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg"
-                                >
-                                    <svg
-                                        class="w-5 h-5"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        viewBox="0 0 24 24"
-                                    >
-                                        <path
-                                            stroke-linecap="round"
-                                            stroke-linejoin="round"
-                                            stroke-width="2"
-                                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                                        />
-                                    </svg>
-                                </button>
-                            </div>
-                            <div v-if="item.id" class="grid grid-cols-1 md:grid-cols-3 gap-3">
-                                <!-- Period Type -->
-                                <div>
-                                    <SearchableSelect
-                                        v-model="item.period_type"
-                                        :options="periodTypeOptions"
-                                        option-label="label"
-                                        option-value="value"
-                                        :label="$t('hr.financial.period_type')"
-                                        compact
-                                    />
-                                </div>
-                                <!-- Start Month -->
-                                <div v-if="item.period_type !== 'indefinite'">
-                                    <label
-                                        class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1"
-                                    >
-                                        {{ $t('hr.financial.start_month') }}
-                                        <span class="text-red-500">*</span>
-                                    </label>
-                                    <input
-                                        v-model="item.start_date"
-                                        type="month"
-                                        required
-                                        class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800"
-                                        :class="{
-                                            'border-red-500':
-                                                !item.start_date &&
-                                                item.period_type !== 'indefinite',
-                                        }"
-                                    />
-                                </div>
-                                <!-- End Month -->
-                                <div v-if="item.period_type === 'fixed_period'">
-                                    <label
-                                        class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1"
-                                    >
-                                        {{ $t('hr.financial.end_month') }}
-                                        <span class="text-red-500">*</span>
-                                    </label>
-                                    <input
-                                        v-model="item.end_date"
-                                        type="month"
-                                        required
-                                        class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800"
-                                        :class="{
-                                            'border-red-500':
-                                                !item.end_date &&
-                                                item.period_type === 'fixed_period',
-                                        }"
-                                    />
-                                </div>
-                                <!-- Custom Amount (only if flexible) -->
-                                <div v-if="getAllowanceById(item.id)?.is_flexible">
-                                    <label
-                                        class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1"
-                                    >
-                                        {{ $t('common.amount') }}
-                                        <span class="text-red-500">*</span>
-                                    </label>
-                                    <input
-                                        v-model="item.custom_amount"
-                                        type="number"
-                                        step="0.01"
-                                        min="0"
-                                        required
-                                        class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800"
-                                        :class="{ 'border-red-500': !item.custom_amount }"
-                                    />
-                                </div>
-                                <!-- Show fixed amount -->
-                                <div v-else-if="getAllowanceById(item.id)">
-                                    <label
-                                        class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1"
-                                    >
-                                        {{ $t('common.amount') }}
-                                    </label>
-                                    <div
-                                        class="px-3 py-2 text-sm bg-gray-100 dark:bg-gray-700 rounded-lg text-gray-600 dark:text-gray-400"
-                                    >
-                                        {{ getAllowanceById(item.id)?.amount }}
-                                        {{
-                                            getAllowanceById(item.id)?.type === 'percentage'
-                                                ? '%'
-                                                : activeCurrencySymbol
-                                        }}
-                                    </div>
-                                </div>
+                    <div v-if="item.id" class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                        <!-- Period Type -->
+                        <div>
+                            <SearchableSelect
+                                v-model="item.period_type"
+                                :options="periodTypeOptions"
+                                option-label="label"
+                                option-value="value"
+                                :label="$t('hr.financial.period_type')"
+                                compact
+                            />
+                        </div>
+                        <!-- Start Month -->
+                        <div v-if="item.period_type !== 'indefinite'">
+                            <label
+                                class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1"
+                            >
+                                {{ $t('hr.financial.start_month') }}
+                                <span class="text-red-500">*</span>
+                            </label>
+                            <input
+                                v-model="item.start_date"
+                                type="month"
+                                required
+                                class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800"
+                                :class="{
+                                    'border-red-500':
+                                        !item.start_date && item.period_type !== 'indefinite',
+                                }"
+                            />
+                        </div>
+                        <!-- End Month -->
+                        <div v-if="item.period_type === 'fixed_period'">
+                            <label
+                                class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1"
+                            >
+                                {{ $t('hr.financial.end_month') }}
+                                <span class="text-red-500">*</span>
+                            </label>
+                            <input
+                                v-model="item.end_date"
+                                type="month"
+                                required
+                                class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800"
+                                :class="{
+                                    'border-red-500':
+                                        !item.end_date && item.period_type === 'fixed_period',
+                                }"
+                            />
+                        </div>
+                        <!-- Custom Amount (only if flexible) -->
+                        <div v-if="getAllowanceById(item.id)?.is_flexible">
+                            <label
+                                class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1"
+                            >
+                                {{ $t('common.amount') }}
+                                <span class="text-red-500">*</span>
+                            </label>
+                            <input
+                                v-model="item.custom_amount"
+                                type="number"
+                                step="0.01"
+                                min="0"
+                                required
+                                class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800"
+                                :class="{ 'border-red-500': !item.custom_amount }"
+                            />
+                        </div>
+                        <!-- Show fixed amount -->
+                        <div v-else-if="getAllowanceById(item.id)">
+                            <label
+                                class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1"
+                            >
+                                {{ $t('common.amount') }}
+                            </label>
+                            <div
+                                class="px-3 py-2 text-sm bg-gray-100 dark:bg-gray-700 rounded-lg text-gray-600 dark:text-gray-400"
+                            >
+                                {{ getAllowanceById(item.id)?.amount }}
+                                {{
+                                    getAllowanceById(item.id)?.type === 'percentage'
+                                        ? '%'
+                                        : activeCurrencySymbol
+                                }}
                             </div>
                         </div>
-
-                        <!-- Add Button -->
-                        <button
-                            @click="addAllowance"
-                            class="w-full py-3 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl text-gray-500 hover:border-action-primary hover:text-action-primary transition-colors"
-                        >
-                            + {{ $t('hr.financial.add_allowance') }}
-                        </button>
-                    </div>
-                    <div
-                        class="p-4 border-t border-gray-200 dark:border-gray-700 flex justify-end gap-3"
-                    >
-                        <button
-                            @click="showAllowancesModal = false"
-                            class="px-4 py-2 text-gray-700 dark:text-gray-300"
-                        >
-                            {{ $t('common.cancel') }}
-                        </button>
-                        <button
-                            @click="saveAllowances"
-                            :disabled="savingAllowances"
-                            class="px-5 py-2.5 bg-action-primary text-white rounded-xl font-medium disabled:opacity-50"
-                        >
-                            {{ savingAllowances ? $t('common.saving') : $t('common.save') }}
-                        </button>
                     </div>
                 </div>
+
+                <!-- Add Button -->
+                <button
+                    @click="addAllowance"
+                    class="w-full py-3 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl text-gray-500 hover:border-action-primary hover:text-action-primary transition-colors"
+                >
+                    + {{ $t('hr.financial.add_allowance') }}
+                </button>
             </div>
-        </Teleport>
+            <template #footer>
+                <div class="flex justify-end gap-3 w-full">
+                    <button
+                        @click="showAllowancesModal = false"
+                        class="px-4 py-2 text-gray-700 dark:text-gray-300"
+                    >
+                        {{ $t('common.cancel') }}
+                    </button>
+                    <button
+                        @click="saveAllowances"
+                        :disabled="savingAllowances"
+                        class="px-5 py-2.5 bg-action-primary text-white rounded-xl font-medium disabled:opacity-50"
+                    >
+                        {{ savingAllowances ? $t('common.saving') : $t('common.save') }}
+                    </button>
+                </div>
+            </template>
+        </BaseModal>
 
         <!-- Deductions Modal -->
-        <Teleport to="body">
-            <div
-                v-if="showDeductionsModal"
-                class="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
-                @click.self="showDeductionsModal = false"
-            >
+        <BaseModal
+            :show="showDeductionsModal"
+            :title="'📉 ' + $t('hr.financial.manage_deductions')"
+            size="lg"
+            overflow-visible
+            @close="showDeductionsModal = false"
+        >
+            <div class="space-y-4">
+                <!-- Existing Deductions -->
                 <div
-                    class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto"
+                    v-for="(item, index) in selectedDeductions"
+                    :key="index"
+                    class="bg-gray-50 dark:bg-gray-900 rounded-xl p-4"
                 >
-                    <div
-                        class="p-5 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between"
-                    >
-                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
-                            📉 {{ $t('hr.financial.manage_deductions') }}
-                        </h3>
+                    <div class="flex items-start justify-between gap-4 mb-3">
+                        <div class="flex-1">
+                            <label
+                                class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                            >
+                                {{ $t('hr.financial.deduction_type') }}
+                            </label>
+                            <!-- Searchable Select -->
+                            <div class="relative">
+                                <input
+                                    v-model="item.search"
+                                    type="text"
+                                    :placeholder="$t('common.search')"
+                                    @focus="item.showDropdown = true"
+                                    class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800"
+                                />
+                                <div
+                                    v-if="item.id"
+                                    class="absolute start-3 top-2 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 text-xs px-2 py-0.5 rounded"
+                                >
+                                    {{ getDeductionById(item.id)?.name_ar }}
+                                </div>
+                                <!-- Dropdown -->
+                                <div
+                                    v-if="item.showDropdown"
+                                    class="absolute z-10 mt-1 w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg shadow-lg max-h-48 overflow-y-auto"
+                                >
+                                    <div
+                                        v-for="d in getAvailableDeductions(item.id, item.search)"
+                                        :key="d.id"
+                                        @click="selectDeduction(index, d)"
+                                        class="px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer text-sm"
+                                    >
+                                        {{ d.name_ar }}
+                                        <span class="text-gray-500 text-xs ms-2">
+                                            ({{
+                                                d.is_flexible
+                                                    ? $t('hr.financial.flexible')
+                                                    : `${d.amount} ${d.type === 'percentage' ? '%' : activeCurrencySymbol}`
+                                            }})
+                                        </span>
+                                    </div>
+                                    <div
+                                        v-if="!getAvailableDeductions(item.id, item.search).length"
+                                        class="px-3 py-2 text-gray-500 text-sm"
+                                    >
+                                        {{ $t('common.no_results') }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                         <button
-                            @click="showDeductionsModal = false"
-                            class="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
+                            @click="removeDeduction(index)"
+                            class="mt-6 p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg"
                         >
                             <svg
                                 class="w-5 h-5"
@@ -309,213 +322,126 @@
                                     stroke-linecap="round"
                                     stroke-linejoin="round"
                                     stroke-width="2"
-                                    d="M6 18L18 6M6 6l12 12"
+                                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
                                 />
                             </svg>
                         </button>
                     </div>
-                    <div class="p-5 space-y-4">
-                        <!-- Existing Deductions -->
-                        <div
-                            v-for="(item, index) in selectedDeductions"
-                            :key="index"
-                            class="bg-gray-50 dark:bg-gray-900 rounded-xl p-4"
-                        >
-                            <div class="flex items-start justify-between gap-4 mb-3">
-                                <div class="flex-1">
-                                    <label
-                                        class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-                                    >
-                                        {{ $t('hr.financial.deduction_type') }}
-                                    </label>
-                                    <!-- Searchable Select -->
-                                    <div class="relative">
-                                        <input
-                                            v-model="item.search"
-                                            type="text"
-                                            :placeholder="$t('common.search')"
-                                            @focus="item.showDropdown = true"
-                                            class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800"
-                                        />
-                                        <div
-                                            v-if="item.id"
-                                            class="absolute start-3 top-2 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 text-xs px-2 py-0.5 rounded"
-                                        >
-                                            {{ getDeductionById(item.id)?.name_ar }}
-                                        </div>
-                                        <!-- Dropdown -->
-                                        <div
-                                            v-if="item.showDropdown"
-                                            class="absolute z-10 mt-1 w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg shadow-lg max-h-48 overflow-y-auto"
-                                        >
-                                            <div
-                                                v-for="d in getAvailableDeductions(
-                                                    item.id,
-                                                    item.search
-                                                )"
-                                                :key="d.id"
-                                                @click="selectDeduction(index, d)"
-                                                class="px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer text-sm"
-                                            >
-                                                {{ d.name_ar }}
-                                                <span class="text-gray-500 text-xs ms-2">
-                                                    ({{
-                                                        d.is_flexible
-                                                            ? $t('hr.financial.flexible')
-                                                            : `${d.amount} ${d.type === 'percentage' ? '%' : activeCurrencySymbol}`
-                                                    }})
-                                                </span>
-                                            </div>
-                                            <div
-                                                v-if="
-                                                    !getAvailableDeductions(item.id, item.search)
-                                                        .length
-                                                "
-                                                class="px-3 py-2 text-gray-500 text-sm"
-                                            >
-                                                {{ $t('common.no_results') }}
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <button
-                                    @click="removeDeduction(index)"
-                                    class="mt-6 p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg"
-                                >
-                                    <svg
-                                        class="w-5 h-5"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        viewBox="0 0 24 24"
-                                    >
-                                        <path
-                                            stroke-linecap="round"
-                                            stroke-linejoin="round"
-                                            stroke-width="2"
-                                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                                        />
-                                    </svg>
-                                </button>
-                            </div>
-                            <div v-if="item.id" class="grid grid-cols-1 md:grid-cols-3 gap-3">
-                                <!-- Period Type -->
-                                <div>
-                                    <SearchableSelect
-                                        v-model="item.period_type"
-                                        :options="periodTypeOptions"
-                                        option-label="label"
-                                        option-value="value"
-                                        :label="$t('hr.financial.period_type')"
-                                        compact
-                                    />
-                                </div>
-                                <!-- Start Month -->
-                                <div v-if="item.period_type !== 'indefinite'">
-                                    <label
-                                        class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1"
-                                    >
-                                        {{ $t('hr.financial.start_month') }}
-                                        <span class="text-red-500">*</span>
-                                    </label>
-                                    <input
-                                        v-model="item.start_date"
-                                        type="month"
-                                        required
-                                        class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800"
-                                        :class="{
-                                            'border-red-500':
-                                                !item.start_date &&
-                                                item.period_type !== 'indefinite',
-                                        }"
-                                    />
-                                </div>
-                                <!-- End Month -->
-                                <div v-if="item.period_type === 'fixed_period'">
-                                    <label
-                                        class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1"
-                                    >
-                                        {{ $t('hr.financial.end_month') }}
-                                        <span class="text-red-500">*</span>
-                                    </label>
-                                    <input
-                                        v-model="item.end_date"
-                                        type="month"
-                                        required
-                                        class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800"
-                                        :class="{
-                                            'border-red-500':
-                                                !item.end_date &&
-                                                item.period_type === 'fixed_period',
-                                        }"
-                                    />
-                                </div>
-                                <!-- Custom Amount (only if flexible) -->
-                                <div v-if="getDeductionById(item.id)?.is_flexible">
-                                    <label
-                                        class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1"
-                                    >
-                                        {{ $t('common.amount') }}
-                                        <span class="text-red-500">*</span>
-                                    </label>
-                                    <input
-                                        v-model="item.custom_amount"
-                                        type="number"
-                                        step="0.01"
-                                        min="0"
-                                        required
-                                        class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800"
-                                        :class="{ 'border-red-500': !item.custom_amount }"
-                                    />
-                                </div>
-                                <!-- Show fixed amount -->
-                                <div v-else-if="getDeductionById(item.id)">
-                                    <label
-                                        class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1"
-                                    >
-                                        {{ $t('common.amount') }}
-                                    </label>
-                                    <div
-                                        class="px-3 py-2 text-sm bg-gray-100 dark:bg-gray-700 rounded-lg text-gray-600 dark:text-gray-400"
-                                    >
-                                        {{ getDeductionById(item.id)?.amount }}
-                                        {{
-                                            getDeductionById(item.id)?.type === 'percentage'
-                                                ? '%'
-                                                : activeCurrencySymbol
-                                        }}
-                                    </div>
-                                </div>
+                    <div v-if="item.id" class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                        <!-- Period Type -->
+                        <div>
+                            <SearchableSelect
+                                v-model="item.period_type"
+                                :options="periodTypeOptions"
+                                option-label="label"
+                                option-value="value"
+                                :label="$t('hr.financial.period_type')"
+                                compact
+                            />
+                        </div>
+                        <!-- Start Month -->
+                        <div v-if="item.period_type !== 'indefinite'">
+                            <label
+                                class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1"
+                            >
+                                {{ $t('hr.financial.start_month') }}
+                                <span class="text-red-500">*</span>
+                            </label>
+                            <input
+                                v-model="item.start_date"
+                                type="month"
+                                required
+                                class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800"
+                                :class="{
+                                    'border-red-500':
+                                        !item.start_date && item.period_type !== 'indefinite',
+                                }"
+                            />
+                        </div>
+                        <!-- End Month -->
+                        <div v-if="item.period_type === 'fixed_period'">
+                            <label
+                                class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1"
+                            >
+                                {{ $t('hr.financial.end_month') }}
+                                <span class="text-red-500">*</span>
+                            </label>
+                            <input
+                                v-model="item.end_date"
+                                type="month"
+                                required
+                                class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800"
+                                :class="{
+                                    'border-red-500':
+                                        !item.end_date && item.period_type === 'fixed_period',
+                                }"
+                            />
+                        </div>
+                        <!-- Custom Amount (only if flexible) -->
+                        <div v-if="getDeductionById(item.id)?.is_flexible">
+                            <label
+                                class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1"
+                            >
+                                {{ $t('common.amount') }}
+                                <span class="text-red-500">*</span>
+                            </label>
+                            <input
+                                v-model="item.custom_amount"
+                                type="number"
+                                step="0.01"
+                                min="0"
+                                required
+                                class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800"
+                                :class="{ 'border-red-500': !item.custom_amount }"
+                            />
+                        </div>
+                        <!-- Show fixed amount -->
+                        <div v-else-if="getDeductionById(item.id)">
+                            <label
+                                class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1"
+                            >
+                                {{ $t('common.amount') }}
+                            </label>
+                            <div
+                                class="px-3 py-2 text-sm bg-gray-100 dark:bg-gray-700 rounded-lg text-gray-600 dark:text-gray-400"
+                            >
+                                {{ getDeductionById(item.id)?.amount }}
+                                {{
+                                    getDeductionById(item.id)?.type === 'percentage'
+                                        ? '%'
+                                        : activeCurrencySymbol
+                                }}
                             </div>
                         </div>
-
-                        <!-- Add Button -->
-                        <button
-                            @click="addDeduction"
-                            class="w-full py-3 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl text-gray-500 hover:border-action-primary hover:text-action-primary transition-colors"
-                        >
-                            + {{ $t('hr.financial.add_deduction') }}
-                        </button>
-                    </div>
-                    <div
-                        class="p-4 border-t border-gray-200 dark:border-gray-700 flex justify-end gap-3"
-                    >
-                        <button
-                            @click="showDeductionsModal = false"
-                            class="px-4 py-2 text-gray-700 dark:text-gray-300"
-                        >
-                            {{ $t('common.cancel') }}
-                        </button>
-                        <button
-                            @click="saveDeductions"
-                            :disabled="savingDeductions"
-                            class="px-5 py-2.5 bg-action-primary text-white rounded-xl font-medium disabled:opacity-50"
-                        >
-                            {{ savingDeductions ? $t('common.saving') : $t('common.save') }}
-                        </button>
                     </div>
                 </div>
+
+                <!-- Add Button -->
+                <button
+                    @click="addDeduction"
+                    class="w-full py-3 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl text-gray-500 hover:border-action-primary hover:text-action-primary transition-colors"
+                >
+                    + {{ $t('hr.financial.add_deduction') }}
+                </button>
             </div>
-        </Teleport>
+            <template #footer>
+                <div class="flex justify-end gap-3 w-full">
+                    <button
+                        @click="showDeductionsModal = false"
+                        class="px-4 py-2 text-gray-700 dark:text-gray-300"
+                    >
+                        {{ $t('common.cancel') }}
+                    </button>
+                    <button
+                        @click="saveDeductions"
+                        :disabled="savingDeductions"
+                        class="px-5 py-2.5 bg-action-primary text-white rounded-xl font-medium disabled:opacity-50"
+                    >
+                        {{ savingDeductions ? $t('common.saving') : $t('common.save') }}
+                    </button>
+                </div>
+            </template>
+        </BaseModal>
     </div>
 </template>
 
@@ -525,6 +451,7 @@ import { useI18n } from 'vue-i18n';
 import { useNumberFormat } from '@/Composables/useNumberFormat';
 import { router } from '@inertiajs/vue3';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
+import BaseModal from '@/Components/BaseModal.vue';
 import BankInfoTab from '@/Components/HR/Tabs/Financial/BankInfoTab.vue';
 import SalariesTab from '@/Components/HR/Tabs/Financial/SalariesTab.vue';
 import PaymentHistoryTab from '@/Components/HR/Tabs/Financial/PaymentHistoryTab.vue';

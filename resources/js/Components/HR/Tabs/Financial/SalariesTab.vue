@@ -223,72 +223,64 @@
         </div>
 
         <!-- Edit Salary Modal -->
-        <Teleport to="body">
-            <div
-                v-if="showEditSalary"
-                class="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
-                @click.self="showEditSalary = false"
-            >
-                <div
-                    class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl w-full max-w-md mx-4 p-6"
-                >
-                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                        {{ $t('hr.financial.payroll.base_salary') }}
-                    </h3>
-                    <form @submit.prevent="submitSalary">
-                        <div class="space-y-4">
-                            <div>
-                                <label
-                                    class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-                                >
-                                    {{ $t('hr.financial.payroll.base_salary') }} ({{
-                                        activeCurrencySymbol
-                                    }})
-                                </label>
-                                <input
-                                    v-model="salaryForm.base_salary"
-                                    type="number"
-                                    step="0.01"
-                                    min="0"
-                                    class="w-full px-4 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white"
-                                />
-                            </div>
-                            <div>
-                                <label
-                                    class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-                                >
-                                    {{ $t('hr.financial.payroll.gosi_rate') }} (%)
-                                </label>
-                                <input
-                                    v-model="salaryForm.gosi_rate"
-                                    type="number"
-                                    step="0.01"
-                                    min="0"
-                                    max="100"
-                                    class="w-full px-4 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white"
-                                />
-                            </div>
-                        </div>
-                        <div class="flex justify-end gap-3 mt-6">
-                            <button
-                                type="button"
-                                @click="showEditSalary = false"
-                                class="px-4 py-2 text-gray-700 dark:text-gray-300"
-                            >
-                                {{ $t('common.cancel') }}
-                            </button>
-                            <button
-                                type="submit"
-                                :disabled="salaryForm.processing"
-                                class="px-5 py-2.5 bg-action-primary text-white rounded-xl font-medium disabled:opacity-50"
-                            >
-                                {{ $t('common.save') }}
-                            </button>
-                        </div>
-                    </form>
+        <BaseModal
+            :show="showEditSalary"
+            :title="$t('hr.financial.payroll.base_salary')"
+            size="sm"
+            @close="showEditSalary = false"
+        >
+            <form @submit.prevent="submitSalary">
+                <div class="space-y-4">
+                    <div>
+                        <label
+                            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                        >
+                            {{ $t('hr.financial.payroll.base_salary') }} ({{
+                                activeCurrencySymbol
+                            }})
+                        </label>
+                        <input
+                            v-model="salaryForm.base_salary"
+                            type="number"
+                            step="0.01"
+                            min="0"
+                            class="w-full px-4 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white"
+                        />
+                    </div>
+                    <div>
+                        <label
+                            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                        >
+                            {{ $t('hr.financial.payroll.gosi_rate') }} (%)
+                        </label>
+                        <input
+                            v-model="salaryForm.gosi_rate"
+                            type="number"
+                            step="0.01"
+                            min="0"
+                            max="100"
+                            class="w-full px-4 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white"
+                        />
+                    </div>
                 </div>
-            </div>
-        </Teleport>
+                <div class="flex justify-end gap-3 mt-6">
+                    <button
+                        type="button"
+                        @click="showEditSalary = false"
+                        class="px-4 py-2 text-gray-700 dark:text-gray-300"
+                    >
+                        {{ $t('common.cancel') }}
+                    </button>
+                    <button
+                        type="submit"
+                        :disabled="salaryForm.processing"
+                        class="px-5 py-2.5 bg-action-primary text-white rounded-xl font-medium disabled:opacity-50"
+                    >
+                        {{ $t('common.save') }}
+                    </button>
+                </div>
+            </form>
+        </BaseModal>
     </div>
 </template>
 
@@ -296,6 +288,7 @@
 import { ref, computed, watch } from 'vue';
 import { useForm } from '@inertiajs/vue3';
 import { useNumberFormat } from '@/Composables/useNumberFormat';
+import BaseModal from '@/Components/BaseModal.vue';
 
 const { activeCurrencySymbol } = useNumberFormat();
 

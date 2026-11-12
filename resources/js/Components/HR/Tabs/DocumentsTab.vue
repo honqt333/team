@@ -141,113 +141,80 @@
         </div>
 
         <!-- Upload Modal -->
-        <Transition name="modal">
-            <div v-if="showUploadModal" class="fixed inset-0 z-50 overflow-y-auto">
-                <div class="flex min-h-full items-center justify-center p-4">
-                    <div class="fixed inset-0 bg-black/50" @click="showUploadModal = false"></div>
-                    <div
-                        class="relative bg-white dark:bg-gray-800 rounded-2xl p-6 w-full max-w-lg shadow-xl border border-gray-200 dark:border-gray-700"
-                    >
-                        <div class="flex items-center justify-between mb-6">
-                            <h3 class="text-lg font-bold text-gray-900 dark:text-white">
-                                {{ $t('hr.documents.add') }}
-                            </h3>
-                            <button
-                                @click="showUploadModal = false"
-                                class="text-gray-400 hover:text-gray-600"
-                            >
-                                <svg
-                                    class="w-6 h-6"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        stroke-width="2"
-                                        d="M6 18L18 6M6 6l18 18"
-                                    />
-                                </svg>
-                            </button>
-                        </div>
+        <BaseModal
+            :show="showUploadModal"
+            :title="$t('hr.documents.add')"
+            size="md"
+            @close="showUploadModal = false"
+        >
+            <form @submit.prevent="submit" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        {{ $t('hr.documents.title_label') }}
+                    </label>
+                    <input
+                        v-model="form.title"
+                        type="text"
+                        class="w-full rounded-xl border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                        required
+                    />
+                </div>
 
-                        <form @submit.prevent="submit" class="space-y-4">
-                            <div>
-                                <label
-                                    class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-                                >
-                                    {{ $t('hr.documents.title_label') }}
-                                </label>
-                                <input
-                                    v-model="form.title"
-                                    type="text"
-                                    class="w-full rounded-xl border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                                    required
-                                />
-                            </div>
-
-                            <div class="grid grid-cols-2 gap-4">
-                                <div>
-                                    <SearchableSelect
-                                        v-model="form.type"
-                                        :options="typeOptions"
-                                        option-label="label"
-                                        option-value="value"
-                                        :label="$t('hr.documents.type')"
-                                        required
-                                    />
-                                </div>
-                                <div>
-                                    <label
-                                        class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-                                    >
-                                        {{ $t('hr.documents.expiry') }}
-                                    </label>
-                                    <input
-                                        v-model="form.expiry_date"
-                                        type="date"
-                                        class="w-full rounded-xl border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                                    />
-                                </div>
-                            </div>
-
-                            <div>
-                                <label
-                                    class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-                                >
-                                    {{ $t('hr.documents.file') }}
-                                </label>
-                                <input
-                                    type="file"
-                                    @input="form.file = $event.target.files[0]"
-                                    accept=".pdf,.jpg,.jpeg,.png,.webp"
-                                    class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-selection-bg file:text-selection-text hover:file:bg-selection-bg"
-                                    required
-                                />
-                            </div>
-
-                            <div class="flex justify-end gap-3 mt-6">
-                                <button
-                                    type="button"
-                                    @click="showUploadModal = false"
-                                    class="px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-xl"
-                                >
-                                    {{ $t('common.cancel') }}
-                                </button>
-                                <button
-                                    type="submit"
-                                    :disabled="form.processing"
-                                    class="px-6 py-2 bg-action-primary text-white rounded-xl font-medium disabled:opacity-50"
-                                >
-                                    {{ $t('common.save') }}
-                                </button>
-                            </div>
-                        </form>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <SearchableSelect
+                            v-model="form.type"
+                            :options="typeOptions"
+                            option-label="label"
+                            option-value="value"
+                            :label="$t('hr.documents.type')"
+                            required
+                        />
+                    </div>
+                    <div>
+                        <label
+                            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                        >
+                            {{ $t('hr.documents.expiry') }}
+                        </label>
+                        <CustomDatePicker
+                            v-model="form.expiry_date"
+                            :placeholder="$t('hr.documents.expiry')"
+                        />
                     </div>
                 </div>
-            </div>
-        </Transition>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        {{ $t('hr.documents.file') }}
+                    </label>
+                    <input
+                        type="file"
+                        @input="form.file = $event.target.files[0]"
+                        accept=".pdf,.jpg,.jpeg,.png,.webp"
+                        class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-selection-bg file:text-selection-text hover:file:bg-selection-bg"
+                        required
+                    />
+                </div>
+
+                <div class="flex justify-end gap-3 mt-6">
+                    <button
+                        type="button"
+                        @click="showUploadModal = false"
+                        class="px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-xl"
+                    >
+                        {{ $t('common.cancel') }}
+                    </button>
+                    <button
+                        type="submit"
+                        :disabled="form.processing"
+                        class="px-6 py-2 bg-action-primary text-white rounded-xl font-medium disabled:opacity-50"
+                    >
+                        {{ $t('common.save') }}
+                    </button>
+                </div>
+            </form>
+        </BaseModal>
     </div>
 </template>
 
@@ -257,6 +224,8 @@ import { useI18n } from 'vue-i18n';
 import { useForm, router } from '@inertiajs/vue3';
 import { useToast } from '@/Composables/useToast';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
+import CustomDatePicker from '@/Components/CustomDatePicker.vue';
+import BaseModal from '@/Components/BaseModal.vue';
 
 const props = defineProps({
     employee: Object,
