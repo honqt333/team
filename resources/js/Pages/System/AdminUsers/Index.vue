@@ -254,228 +254,183 @@
         </div>
 
         <!-- Create/Edit Modal -->
-        <Transition name="modal">
-            <div v-if="showModal" class="fixed inset-0 z-50 overflow-y-auto">
-                <div class="flex min-h-full items-center justify-center p-4">
-                    <div class="fixed inset-0 bg-black/50" @click="closeModal"></div>
-                    <div
-                        class="relative bg-white dark:bg-gray-800 rounded-2xl p-6 w-full max-w-2xl shadow-xl max-h-[90vh] overflow-y-auto"
-                    >
-                        <div class="flex items-center justify-between mb-6">
-                            <h3 class="text-xl font-bold text-gray-900 dark:text-white">
-                                {{
-                                    editingAdmin
-                                        ? $t('system.admin_users.edit_title')
-                                        : $t('system.admin_users.create_title')
-                                }}
-                            </h3>
-                            <button
-                                @click="closeModal"
-                                class="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300"
-                            >
-                                <svg
-                                    class="w-6 h-6"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        stroke-width="2"
-                                        d="M6 18L18 6M6 6l12 12"
-                                    />
-                                </svg>
-                            </button>
-                        </div>
+        <BaseModal
+            :show="showModal"
+            :title="
+                editingAdmin
+                    ? $t('system.admin_users.edit_title')
+                    : $t('system.admin_users.create_title')
+            "
+            size="lg"
+            @close="closeModal"
+        >
+            <form @submit.prevent="submitForm" class="space-y-6">
+                <!-- Basic Info -->
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label
+                            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                        >
+                            {{ $t('system.admin_users.form.name') }} *
+                        </label>
+                        <input
+                            v-model="form.name"
+                            type="text"
+                            required
+                            class="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                        />
+                        <p v-if="form.errors.name" class="mt-1 text-xs text-red-500">
+                            {{ form.errors.name }}
+                        </p>
+                    </div>
+                    <div>
+                        <label
+                            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                        >
+                            {{ $t('system.admin_users.form.email') }} *
+                        </label>
+                        <input
+                            v-model="form.email"
+                            type="email"
+                            required
+                            dir="ltr"
+                            class="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                        />
+                        <p v-if="form.errors.email" class="mt-1 text-xs text-red-500">
+                            {{ form.errors.email }}
+                        </p>
+                    </div>
+                </div>
 
-                        <form @submit.prevent="submitForm" class="space-y-6">
-                            <!-- Basic Info -->
-                            <div class="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label
-                                        class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-                                    >
-                                        {{ $t('system.admin_users.form.name') }} *
-                                    </label>
-                                    <input
-                                        v-model="form.name"
-                                        type="text"
-                                        required
-                                        class="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                                    />
-                                    <p v-if="form.errors.name" class="mt-1 text-xs text-red-500">
-                                        {{ form.errors.name }}
-                                    </p>
-                                </div>
-                                <div>
-                                    <label
-                                        class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-                                    >
-                                        {{ $t('system.admin_users.form.email') }} *
-                                    </label>
-                                    <input
-                                        v-model="form.email"
-                                        type="email"
-                                        required
-                                        dir="ltr"
-                                        class="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                                    />
-                                    <p v-if="form.errors.email" class="mt-1 text-xs text-red-500">
-                                        {{ form.errors.email }}
-                                    </p>
-                                </div>
-                            </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label
+                            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                        >
+                            {{ $t('system.admin_users.form.phone') }}
+                        </label>
+                        <input
+                            v-model="form.phone"
+                            type="text"
+                            dir="ltr"
+                            class="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                        />
+                    </div>
+                    <div>
+                        <label
+                            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                        >
+                            {{ $t('system.admin_users.form.password') }}
+                            {{ editingAdmin ? $t('system.admin_users.form.password_keep') : ' *' }}
+                        </label>
+                        <input
+                            v-model="form.password"
+                            type="password"
+                            :required="!editingAdmin"
+                            dir="ltr"
+                            class="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                        />
+                    </div>
+                </div>
 
-                            <div class="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label
-                                        class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-                                    >
-                                        {{ $t('system.admin_users.form.phone') }}
-                                    </label>
-                                    <input
-                                        v-model="form.phone"
-                                        type="text"
-                                        dir="ltr"
-                                        class="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                                    />
-                                </div>
-                                <div>
-                                    <label
-                                        class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-                                    >
-                                        {{ $t('system.admin_users.form.password') }}
-                                        {{
-                                            editingAdmin
-                                                ? $t('system.admin_users.form.password_keep')
-                                                : ' *'
-                                        }}
-                                    </label>
-                                    <input
-                                        v-model="form.password"
-                                        type="password"
-                                        :required="!editingAdmin"
-                                        dir="ltr"
-                                        class="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                                    />
-                                </div>
-                            </div>
+                <!-- Role -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        {{ $t('system.admin_users.form.role') }} *
+                    </label>
+                    <div class="grid grid-cols-3 gap-3">
+                        <SelectableCard
+                            type="radio"
+                            name="form.role"
+                            v-model="form.role"
+                            :value="key"
+                            v-for="(label, key) in roleLabels"
+                            :key="key"
+                            :class="[
+                                'border rounded-lg p-3 cursor-pointer transition',
+                                form.role === key
+                                    ? 'border-action-primary bg-selection-bg'
+                                    : 'border-gray-200 dark:border-gray-700',
+                            ]"
+                        >
+                            <p class="font-medium text-gray-900 dark:text-white text-sm">
+                                {{ label }}
+                            </p>
+                        </SelectableCard>
+                    </div>
+                </div>
 
-                            <!-- Role -->
-                            <div>
-                                <label
-                                    class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
-                                >
-                                    {{ $t('system.admin_users.form.role') }} *
-                                </label>
-                                <div class="grid grid-cols-3 gap-3">
-                                    <SelectableCard
-                                        type="radio"
-                                        name="form.role"
-                                        v-model="form.role"
-                                        :value="key"
-                                        v-for="(label, key) in roleLabels"
-                                        :key="key"
-                                        :class="[
-                                            'border rounded-lg p-3 cursor-pointer transition',
-                                            form.role === key
-                                                ? 'border-action-primary bg-selection-bg'
-                                                : 'border-gray-200 dark:border-gray-700',
-                                        ]"
-                                    >
-                                        <p
-                                            class="font-medium text-gray-900 dark:text-white text-sm"
-                                        >
-                                            {{ label }}
-                                        </p>
-                                    </SelectableCard>
-                                </div>
-                            </div>
-
-                            <!-- Permissions (if not super_admin) -->
-                            <div v-if="form.role !== 'super_admin'">
-                                <label
-                                    class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
-                                >
-                                    {{ $t('system.admin_users.form.permissions') }}
-                                </label>
-                                <!-- The list is an OVERRIDE: leaving it empty
+                <!-- Permissions (if not super_admin) -->
+                <div v-if="form.role !== 'super_admin'">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        {{ $t('system.admin_users.form.permissions') }}
+                    </label>
+                    <!-- The list is an OVERRIDE: leaving it empty
                                      keeps the role's own abilities, and
                                      selecting any replaces them. The hint
                                      says so, because the difference is
                                      invisible otherwise. -->
-                                <p class="text-xs text-gray-500 dark:text-gray-400 mb-3">
-                                    {{ $t('system.admin_users.form.permissions_hint') }}
-                                </p>
-                                <div class="space-y-4">
-                                    <div
-                                        v-for="(perms, group) in permissions"
-                                        :key="group"
-                                        class="border border-gray-200 dark:border-gray-700 rounded-lg p-4"
-                                    >
-                                        <p class="font-medium text-gray-900 dark:text-white mb-2">
-                                            {{ groupLabels[group] }}
-                                        </p>
-                                        <div class="grid grid-cols-2 gap-2">
-                                            <label
-                                                v-for="(label, key) in perms"
-                                                :key="key"
-                                                class="flex items-center gap-2 cursor-pointer"
-                                            >
-                                                <AppToggle
-                                                    :value="key"
-                                                    v-model="form.permissions"
-                                                />
-                                                <span
-                                                    class="text-sm text-gray-700 dark:text-gray-300"
-                                                >
-                                                    {{ label }}
-                                                </span>
-                                            </label>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="flex items-center gap-4">
-                                <label class="flex items-center gap-2 cursor-pointer">
-                                    <AppToggle v-model="form.is_active" />
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mb-3">
+                        {{ $t('system.admin_users.form.permissions_hint') }}
+                    </p>
+                    <div class="space-y-4">
+                        <div
+                            v-for="(perms, group) in permissions"
+                            :key="group"
+                            class="border border-gray-200 dark:border-gray-700 rounded-lg p-4"
+                        >
+                            <p class="font-medium text-gray-900 dark:text-white mb-2">
+                                {{ groupLabels[group] }}
+                            </p>
+                            <div class="grid grid-cols-2 gap-2">
+                                <label
+                                    v-for="(label, key) in perms"
+                                    :key="key"
+                                    class="flex items-center gap-2 cursor-pointer"
+                                >
+                                    <AppToggle :value="key" v-model="form.permissions" />
                                     <span class="text-sm text-gray-700 dark:text-gray-300">
-                                        {{ $t('system.admin_users.form.is_active') }}
+                                        {{ label }}
                                     </span>
                                 </label>
                             </div>
-
-                            <div
-                                class="flex gap-3 pt-4 border-t border-gray-200 dark:border-gray-700"
-                            >
-                                <button
-                                    type="submit"
-                                    :disabled="form.processing"
-                                    class="inline-flex items-center px-6 py-2.5 bg-action-primary hover:bg-action-primary-hover text-white rounded-lg font-medium disabled:opacity-50 transition-colors"
-                                >
-                                    {{
-                                        form.processing
-                                            ? $t('system.admin_users.form.saving')
-                                            : editingAdmin
-                                              ? $t('system.actions.save')
-                                              : $t('system.admin_users.form.create_action')
-                                    }}
-                                </button>
-                                <button
-                                    type="button"
-                                    @click="closeModal"
-                                    class="px-6 py-2.5 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
-                                >
-                                    {{ $t('system.actions.cancel') }}
-                                </button>
-                            </div>
-                        </form>
+                        </div>
                     </div>
                 </div>
-            </div>
-        </Transition>
+
+                <div class="flex items-center gap-4">
+                    <label class="flex items-center gap-2 cursor-pointer">
+                        <AppToggle v-model="form.is_active" />
+                        <span class="text-sm text-gray-700 dark:text-gray-300">
+                            {{ $t('system.admin_users.form.is_active') }}
+                        </span>
+                    </label>
+                </div>
+
+                <div class="flex gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
+                    <button
+                        type="submit"
+                        :disabled="form.processing"
+                        class="inline-flex items-center px-6 py-2.5 bg-action-primary hover:bg-action-primary-hover text-white rounded-lg font-medium disabled:opacity-50 transition-colors"
+                    >
+                        {{
+                            form.processing
+                                ? $t('system.admin_users.form.saving')
+                                : editingAdmin
+                                  ? $t('system.actions.save')
+                                  : $t('system.admin_users.form.create_action')
+                        }}
+                    </button>
+                    <button
+                        type="button"
+                        @click="closeModal"
+                        class="px-6 py-2.5 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+                    >
+                        {{ $t('system.actions.cancel') }}
+                    </button>
+                </div>
+            </form>
+        </BaseModal>
     </SystemLayout>
 </template>
 
@@ -490,6 +445,7 @@ import { Head, Link, router, useForm, usePage } from '@inertiajs/vue3';
 import SystemLayout from '@/Layouts/SystemLayout.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 import PageHeader from '@/Components/PageHeader.vue';
+import BaseModal from '@/Components/BaseModal.vue';
 import { useNumberFormat } from '@/Composables/useNumberFormat';
 import { useConfirm } from '@/Composables/useConfirm';
 import { useServerTable } from '@/Composables/useServerTable';

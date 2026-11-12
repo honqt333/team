@@ -222,106 +222,89 @@
         </div>
 
         <!-- Mark Paid Modal -->
-        <Transition name="modal">
-            <div v-if="showMarkPaidModal" class="fixed inset-0 z-50 overflow-y-auto">
-                <div class="flex min-h-full items-center justify-center p-4">
-                    <div class="fixed inset-0 bg-black/50" @click="showMarkPaidModal = false" />
-                    <div
-                        class="relative w-full max-w-md rounded-2xl bg-white p-6 shadow-xl dark:bg-gray-800"
-                    >
-                        <h3 class="mb-4 text-lg font-semibold text-gray-900 dark:text-white">
-                            {{
-                                isAr
-                                    ? $t('system.invoices.confirm_payment_manually')
-                                    : 'Confirm payment manually'
-                            }}
-                        </h3>
-                        <div class="space-y-4">
-                            <div>
-                                <SearchableSelect
-                                    v-model="markPaidForm.payment_method"
-                                    :options="paymentMethodOptions"
-                                    option-label="label"
-                                    option-value="value"
-                                    :label="$t('system.invoices.payment_method')"
-                                />
-                            </div>
-                            <div>
-                                <label
-                                    class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300"
-                                >
-                                    {{ $t('system.invoices.paid_amount') }}
-                                </label>
-                                <input
-                                    type="number"
-                                    step="0.01"
-                                    min="0.01"
-                                    v-model.number="markPaidForm.paid_amount"
-                                    class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                                    dir="ltr"
-                                />
-                            </div>
-                            <div>
-                                <label
-                                    class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300"
-                                >
-                                    {{
-                                        isAr
-                                            ? $t('system.invoices.reference_number')
-                                            : 'Reference number'
-                                    }}
-                                </label>
-                                <input
-                                    type="text"
-                                    v-model="markPaidForm.reference"
-                                    :placeholder="
-                                        isAr
-                                            ? $t('system.invoices.transfer_or_receipt_number')
-                                            : 'Transfer or receipt number'
-                                    "
-                                    class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                                />
-                            </div>
-                            <div>
-                                <label
-                                    class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300"
-                                >
-                                    {{ isAr ? $t('common.notes') : 'Notes' }}
-                                </label>
-                                <textarea
-                                    v-model="markPaidForm.notes"
-                                    rows="2"
-                                    class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                                />
-                            </div>
-                        </div>
-                        <div class="mt-6 flex gap-3">
-                            <button
-                                @click="markAsPaid"
-                                :disabled="markingPaid"
-                                class="flex-1 rounded-lg bg-emerald-600 px-4 py-2 font-medium text-white hover:bg-emerald-700 disabled:opacity-50"
-                            >
-                                {{
-                                    markingPaid
-                                        ? isAr
-                                            ? $t('system.invoices.confirming')
-                                            : 'Confirming...'
-                                        : isAr
-                                          ? $t('system.invoices.mark_as_paid')
-                                          : 'Confirm payment'
-                                }}
-                            </button>
-                            <button
-                                @click="showMarkPaidModal = false"
-                                class="rounded-lg bg-gray-100 px-4 py-2 font-medium text-gray-700 dark:bg-gray-700 dark:text-gray-300"
-                            >
-                                {{ isAr ? $t('common.cancel') : 'Cancel' }}
-                            </button>
-                        </div>
-                    </div>
+        <BaseModal
+            :show="showMarkPaidModal"
+            :title="
+                isAr ? $t('system.invoices.confirm_payment_manually') : 'Confirm payment manually'
+            "
+            size="sm"
+            @close="showMarkPaidModal = false"
+        >
+            <div class="space-y-4">
+                <div>
+                    <SearchableSelect
+                        v-model="markPaidForm.payment_method"
+                        :options="paymentMethodOptions"
+                        option-label="label"
+                        option-value="value"
+                        :label="$t('system.invoices.payment_method')"
+                    />
+                </div>
+                <div>
+                    <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                        {{ $t('system.invoices.paid_amount') }}
+                    </label>
+                    <input
+                        type="number"
+                        step="0.01"
+                        min="0.01"
+                        v-model.number="markPaidForm.paid_amount"
+                        class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                        dir="ltr"
+                    />
+                </div>
+                <div>
+                    <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                        {{ isAr ? $t('system.invoices.reference_number') : 'Reference number' }}
+                    </label>
+                    <input
+                        type="text"
+                        v-model="markPaidForm.reference"
+                        :placeholder="
+                            isAr
+                                ? $t('system.invoices.transfer_or_receipt_number')
+                                : 'Transfer or receipt number'
+                        "
+                        class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                    />
+                </div>
+                <div>
+                    <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                        {{ isAr ? $t('common.notes') : 'Notes' }}
+                    </label>
+                    <textarea
+                        v-model="markPaidForm.notes"
+                        rows="2"
+                        class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                    />
                 </div>
             </div>
-        </Transition>
+            <template #footer>
+                <div class="flex gap-3 w-full">
+                    <button
+                        @click="markAsPaid"
+                        :disabled="markingPaid"
+                        class="flex-1 rounded-lg bg-emerald-600 px-4 py-2 font-medium text-white hover:bg-emerald-700 disabled:opacity-50"
+                    >
+                        {{
+                            markingPaid
+                                ? isAr
+                                    ? $t('system.invoices.confirming')
+                                    : 'Confirming...'
+                                : isAr
+                                  ? $t('system.invoices.mark_as_paid')
+                                  : 'Confirm payment'
+                        }}
+                    </button>
+                    <button
+                        @click="showMarkPaidModal = false"
+                        class="rounded-lg bg-gray-100 px-4 py-2 font-medium text-gray-700 dark:bg-gray-700 dark:text-gray-300"
+                    >
+                        {{ isAr ? $t('common.cancel') : 'Cancel' }}
+                    </button>
+                </div>
+            </template>
+        </BaseModal>
     </SystemLayout>
 </template>
 
@@ -334,6 +317,7 @@ import { Head, Link, router } from '@inertiajs/vue3';
 import SystemLayout from '@/Layouts/SystemLayout.vue';
 import PageHeader from '@/Components/PageHeader.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
+import BaseModal from '@/Components/BaseModal.vue';
 import { useConfirm } from '@/Composables/useConfirm';
 import StatusBadge from '@/Components/Billing/StatusBadge.vue';
 import InvoiceTimeline from '@/Components/Billing/InvoiceTimeline.vue';

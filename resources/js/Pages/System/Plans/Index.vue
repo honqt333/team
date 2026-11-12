@@ -273,350 +273,289 @@
         </div>
 
         <!-- Plan Form Modal -->
-        <Transition name="modal">
-            <div v-if="showModal" class="fixed inset-0 z-50 overflow-y-auto">
-                <div
-                    class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:p-0"
-                >
-                    <!-- Backdrop -->
-                    <div
-                        class="fixed inset-0 bg-black/50 transition-opacity"
-                        @click="closeModal"
-                    ></div>
-
-                    <!-- Modal Panel -->
-                    <div
-                        class="relative bg-white dark:bg-gray-800 rounded-2xl text-start overflow-hidden shadow-xl transform transition-all sm:my-8 sm:max-w-2xl sm:w-full"
-                    >
-                        <!-- Header -->
-                        <div
-                            class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between"
+        <BaseModal
+            :show="showModal"
+            :title="editingPlan ? $t('system.plans.edit_title') : $t('system.plans.create_title')"
+            size="lg"
+            @close="closeModal"
+        >
+            <!-- Form Body -->
+            <form @submit.prevent="submit" class="p-6 space-y-5 max-h-[70vh] overflow-y-auto">
+                <!-- Basic Info -->
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label
+                            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
                         >
-                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
-                                {{
-                                    editingPlan
-                                        ? $t('system.plans.edit_title')
-                                        : $t('system.plans.create_title')
-                                }}
-                            </h3>
-                            <button
-                                @click="closeModal"
-                                class="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300"
+                            {{ $t('system.plans.form.name_ar') }}
+                        </label>
+                        <input
+                            v-model="form.name_ar"
+                            type="text"
+                            required
+                            class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                        />
+                    </div>
+                    <div>
+                        <label
+                            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                        >
+                            {{ $t('system.plans.form.name_en') }}
+                        </label>
+                        <input
+                            v-model="form.name_en"
+                            type="text"
+                            required
+                            dir="ltr"
+                            class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                        />
+                    </div>
+                    <div>
+                        <label
+                            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                        >
+                            {{ $t('system.plans.form.slug') }}
+                        </label>
+                        <input
+                            v-model="form.slug"
+                            type="text"
+                            required
+                            dir="ltr"
+                            :placeholder="$t('system.plans.form.slug_placeholder')"
+                            class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                        />
+                    </div>
+                    <div>
+                        <label
+                            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                        >
+                            {{ $t('system.plans.form.sort_order') }}
+                        </label>
+                        <input
+                            v-model.number="form.sort_order"
+                            type="number"
+                            min="0"
+                            class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                        />
+                    </div>
+                    <div class="col-span-2">
+                        <label
+                            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                        >
+                            {{ $t('system.plans.form.description_ar') }}
+                        </label>
+                        <textarea
+                            v-model="form.description_ar"
+                            rows="2"
+                            class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                        ></textarea>
+                    </div>
+                    <div class="col-span-2">
+                        <label
+                            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                            dir="ltr"
+                        >
+                            {{ $t('system.plans.form.description_en') }}
+                        </label>
+                        <textarea
+                            v-model="form.description_en"
+                            rows="2"
+                            dir="ltr"
+                            class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                        ></textarea>
+                    </div>
+                </div>
+
+                <!-- Pricing -->
+                <div>
+                    <h4 class="text-sm font-medium text-gray-900 dark:text-white mb-3">
+                        {{ $t('system.plans.form.pricing') }}
+                    </h4>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm text-gray-600 dark:text-gray-400 mb-1">
+                                {{ $t('system.plans.form.price_yearly') }}
+                            </label>
+                            <input
+                                v-model.number="form.price_yearly"
+                                type="number"
+                                min="0"
+                                step="0.01"
+                                required
+                                class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                            />
+                        </div>
+                        <div>
+                            <label class="block text-sm text-gray-600 dark:text-gray-400 mb-1">
+                                {{ $t('system.plans.form.trial_days') }}
+                            </label>
+                            <input
+                                v-model.number="form.trial_days"
+                                type="number"
+                                min="0"
+                                required
+                                class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                            />
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Limits -->
+                <div>
+                    <h4 class="text-sm font-medium text-gray-900 dark:text-white mb-3">
+                        {{ $t('system.plans.form.limits') }}
+                    </h4>
+                    <div class="grid grid-cols-3 gap-4">
+                        <div>
+                            <label class="block text-sm text-gray-600 dark:text-gray-400 mb-1">
+                                {{ $t('system.plans.form.max_users') }}
+                            </label>
+                            <input
+                                v-model.number="form.limits.max_users"
+                                type="number"
+                                min="1"
+                                class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                            />
+                        </div>
+                        <div>
+                            <label class="block text-sm text-gray-600 dark:text-gray-400 mb-1">
+                                {{ $t('system.plans.form.max_centers') }}
+                            </label>
+                            <input
+                                v-model.number="form.limits.max_centers"
+                                type="number"
+                                min="1"
+                                class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                            />
+                        </div>
+                        <div>
+                            <label class="block text-sm text-gray-600 dark:text-gray-400 mb-1">
+                                {{ $t('system.plans.form.storage_gb') }}
+                            </label>
+                            <input
+                                v-model.number="form.limits.storage_gb"
+                                type="number"
+                                min="1"
+                                class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                            />
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Status -->
+                <div class="flex gap-6">
+                    <label class="flex items-center gap-2 cursor-pointer">
+                        <AppToggle v-model="form.is_active" />
+                        <span class="text-gray-700 dark:text-gray-300">
+                            {{ $t('system.plans.active') }}
+                        </span>
+                    </label>
+                    <label class="flex items-center gap-2 cursor-pointer">
+                        <AppToggle v-model="form.is_featured" />
+                        <span class="text-gray-700 dark:text-gray-300">
+                            {{ $t('system.plans.featured') }}
+                        </span>
+                    </label>
+                </div>
+
+                <!-- Features (Arabic & English) -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <h4 class="text-sm font-medium text-gray-900 dark:text-white mb-3">
+                            {{ $t('system.plans.form.features_ar_title') }}
+                        </h4>
+                        <div class="space-y-2">
+                            <div
+                                v-for="(feature, index) in form.features_ar"
+                                :key="'ar-' + index"
+                                class="flex gap-2"
                             >
-                                <svg
-                                    class="w-5 h-5"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
+                                <input
+                                    v-model="form.features_ar[index]"
+                                    type="text"
+                                    class="flex-1 px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-950 dark:text-white"
+                                    :placeholder="
+                                        $t('system.plans.form.feature_placeholder_ar', {
+                                            n: index + 1,
+                                        })
+                                    "
+                                />
+                                <button
+                                    @click="form.features_ar.splice(index, 1)"
+                                    type="button"
+                                    class="px-3 py-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg"
                                 >
-                                    <path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        stroke-width="2"
-                                        d="M6 18L18 6M6 6l12 12"
-                                    />
-                                </svg>
+                                    ✕
+                                </button>
+                            </div>
+                            <button
+                                @click="form.features_ar.push('')"
+                                type="button"
+                                class="text-sm text-action-primary hover:text-selection-text"
+                            >
+                                {{ $t('system.plans.form.add_feature_ar') }}
                             </button>
                         </div>
-
-                        <!-- Form Body -->
-                        <form
-                            @submit.prevent="submit"
-                            class="p-6 space-y-5 max-h-[70vh] overflow-y-auto"
-                        >
-                            <!-- Basic Info -->
-                            <div class="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label
-                                        class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-                                    >
-                                        {{ $t('system.plans.form.name_ar') }}
-                                    </label>
-                                    <input
-                                        v-model="form.name_ar"
-                                        type="text"
-                                        required
-                                        class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                                    />
-                                </div>
-                                <div>
-                                    <label
-                                        class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-                                    >
-                                        {{ $t('system.plans.form.name_en') }}
-                                    </label>
-                                    <input
-                                        v-model="form.name_en"
-                                        type="text"
-                                        required
-                                        dir="ltr"
-                                        class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                                    />
-                                </div>
-                                <div>
-                                    <label
-                                        class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-                                    >
-                                        {{ $t('system.plans.form.slug') }}
-                                    </label>
-                                    <input
-                                        v-model="form.slug"
-                                        type="text"
-                                        required
-                                        dir="ltr"
-                                        :placeholder="$t('system.plans.form.slug_placeholder')"
-                                        class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                                    />
-                                </div>
-                                <div>
-                                    <label
-                                        class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-                                    >
-                                        {{ $t('system.plans.form.sort_order') }}
-                                    </label>
-                                    <input
-                                        v-model.number="form.sort_order"
-                                        type="number"
-                                        min="0"
-                                        class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                                    />
-                                </div>
-                                <div class="col-span-2">
-                                    <label
-                                        class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-                                    >
-                                        {{ $t('system.plans.form.description_ar') }}
-                                    </label>
-                                    <textarea
-                                        v-model="form.description_ar"
-                                        rows="2"
-                                        class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                                    ></textarea>
-                                </div>
-                                <div class="col-span-2">
-                                    <label
-                                        class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-                                        dir="ltr"
-                                    >
-                                        {{ $t('system.plans.form.description_en') }}
-                                    </label>
-                                    <textarea
-                                        v-model="form.description_en"
-                                        rows="2"
-                                        dir="ltr"
-                                        class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                                    ></textarea>
-                                </div>
-                            </div>
-
-                            <!-- Pricing -->
-                            <div>
-                                <h4 class="text-sm font-medium text-gray-900 dark:text-white mb-3">
-                                    {{ $t('system.plans.form.pricing') }}
-                                </h4>
-                                <div class="grid grid-cols-2 gap-4">
-                                    <div>
-                                        <label
-                                            class="block text-sm text-gray-600 dark:text-gray-400 mb-1"
-                                        >
-                                            {{ $t('system.plans.form.price_yearly') }}
-                                        </label>
-                                        <input
-                                            v-model.number="form.price_yearly"
-                                            type="number"
-                                            min="0"
-                                            step="0.01"
-                                            required
-                                            class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                                        />
-                                    </div>
-                                    <div>
-                                        <label
-                                            class="block text-sm text-gray-600 dark:text-gray-400 mb-1"
-                                        >
-                                            {{ $t('system.plans.form.trial_days') }}
-                                        </label>
-                                        <input
-                                            v-model.number="form.trial_days"
-                                            type="number"
-                                            min="0"
-                                            required
-                                            class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                                        />
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Limits -->
-                            <div>
-                                <h4 class="text-sm font-medium text-gray-900 dark:text-white mb-3">
-                                    {{ $t('system.plans.form.limits') }}
-                                </h4>
-                                <div class="grid grid-cols-3 gap-4">
-                                    <div>
-                                        <label
-                                            class="block text-sm text-gray-600 dark:text-gray-400 mb-1"
-                                        >
-                                            {{ $t('system.plans.form.max_users') }}
-                                        </label>
-                                        <input
-                                            v-model.number="form.limits.max_users"
-                                            type="number"
-                                            min="1"
-                                            class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                                        />
-                                    </div>
-                                    <div>
-                                        <label
-                                            class="block text-sm text-gray-600 dark:text-gray-400 mb-1"
-                                        >
-                                            {{ $t('system.plans.form.max_centers') }}
-                                        </label>
-                                        <input
-                                            v-model.number="form.limits.max_centers"
-                                            type="number"
-                                            min="1"
-                                            class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                                        />
-                                    </div>
-                                    <div>
-                                        <label
-                                            class="block text-sm text-gray-600 dark:text-gray-400 mb-1"
-                                        >
-                                            {{ $t('system.plans.form.storage_gb') }}
-                                        </label>
-                                        <input
-                                            v-model.number="form.limits.storage_gb"
-                                            type="number"
-                                            min="1"
-                                            class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                                        />
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Status -->
-                            <div class="flex gap-6">
-                                <label class="flex items-center gap-2 cursor-pointer">
-                                    <AppToggle v-model="form.is_active" />
-                                    <span class="text-gray-700 dark:text-gray-300">
-                                        {{ $t('system.plans.active') }}
-                                    </span>
-                                </label>
-                                <label class="flex items-center gap-2 cursor-pointer">
-                                    <AppToggle v-model="form.is_featured" />
-                                    <span class="text-gray-700 dark:text-gray-300">
-                                        {{ $t('system.plans.featured') }}
-                                    </span>
-                                </label>
-                            </div>
-
-                            <!-- Features (Arabic & English) -->
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div>
-                                    <h4
-                                        class="text-sm font-medium text-gray-900 dark:text-white mb-3"
-                                    >
-                                        {{ $t('system.plans.form.features_ar_title') }}
-                                    </h4>
-                                    <div class="space-y-2">
-                                        <div
-                                            v-for="(feature, index) in form.features_ar"
-                                            :key="'ar-' + index"
-                                            class="flex gap-2"
-                                        >
-                                            <input
-                                                v-model="form.features_ar[index]"
-                                                type="text"
-                                                class="flex-1 px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-950 dark:text-white"
-                                                :placeholder="
-                                                    $t('system.plans.form.feature_placeholder_ar', {
-                                                        n: index + 1,
-                                                    })
-                                                "
-                                            />
-                                            <button
-                                                @click="form.features_ar.splice(index, 1)"
-                                                type="button"
-                                                class="px-3 py-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg"
-                                            >
-                                                ✕
-                                            </button>
-                                        </div>
-                                        <button
-                                            @click="form.features_ar.push('')"
-                                            type="button"
-                                            class="text-sm text-action-primary hover:text-selection-text"
-                                        >
-                                            {{ $t('system.plans.form.add_feature_ar') }}
-                                        </button>
-                                    </div>
-                                </div>
-                                <div>
-                                    <h4
-                                        class="text-sm font-medium text-gray-900 dark:text-white mb-3"
-                                    >
-                                        {{ $t('system.plans.form.features_en_title') }}
-                                    </h4>
-                                    <div class="space-y-2">
-                                        <div
-                                            v-for="(feature, index) in form.features_en"
-                                            :key="'en-' + index"
-                                            class="flex gap-2"
-                                        >
-                                            <input
-                                                v-model="form.features_en[index]"
-                                                type="text"
-                                                class="flex-1 px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-950 dark:text-white"
-                                                :placeholder="
-                                                    $t('system.plans.form.feature_placeholder_en', {
-                                                        n: index + 1,
-                                                    })
-                                                "
-                                            />
-                                            <button
-                                                @click="form.features_en.splice(index, 1)"
-                                                type="button"
-                                                class="px-3 py-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg"
-                                            >
-                                                ✕
-                                            </button>
-                                        </div>
-                                        <button
-                                            @click="form.features_en.push('')"
-                                            type="button"
-                                            class="text-sm text-action-primary hover:text-selection-text"
-                                        >
-                                            {{ $t('system.plans.form.add_feature_en') }}
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </form>
-
-                        <!-- Footer -->
-                        <div
-                            class="px-6 py-4 border-t border-gray-200 dark:border-gray-700 flex justify-end gap-3"
-                        >
-                            <button
-                                @click="closeModal"
-                                type="button"
-                                class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
+                    </div>
+                    <div>
+                        <h4 class="text-sm font-medium text-gray-900 dark:text-white mb-3">
+                            {{ $t('system.plans.form.features_en_title') }}
+                        </h4>
+                        <div class="space-y-2">
+                            <div
+                                v-for="(feature, index) in form.features_en"
+                                :key="'en-' + index"
+                                class="flex gap-2"
                             >
-                                {{ $t('system.actions.cancel') }}
-                            </button>
-                            <button @click="submit" :disabled="form.processing" class="btn-primary">
-                                {{
-                                    editingPlan
-                                        ? $t('system.plans.save_changes')
-                                        : $t('system.plans.create')
-                                }}
+                                <input
+                                    v-model="form.features_en[index]"
+                                    type="text"
+                                    class="flex-1 px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-950 dark:text-white"
+                                    :placeholder="
+                                        $t('system.plans.form.feature_placeholder_en', {
+                                            n: index + 1,
+                                        })
+                                    "
+                                />
+                                <button
+                                    @click="form.features_en.splice(index, 1)"
+                                    type="button"
+                                    class="px-3 py-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg"
+                                >
+                                    ✕
+                                </button>
+                            </div>
+                            <button
+                                @click="form.features_en.push('')"
+                                type="button"
+                                class="text-sm text-action-primary hover:text-selection-text"
+                            >
+                                {{ $t('system.plans.form.add_feature_en') }}
                             </button>
                         </div>
                     </div>
                 </div>
-            </div>
-        </Transition>
+            </form>
+
+            <template #footer>
+                <div class="flex justify-end gap-3 w-full">
+                    <button
+                        @click="closeModal"
+                        type="button"
+                        class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
+                    >
+                        {{ $t('system.actions.cancel') }}
+                    </button>
+                    <button @click="submit" :disabled="form.processing" class="btn-primary">
+                        {{
+                            editingPlan
+                                ? $t('system.plans.save_changes')
+                                : $t('system.plans.create')
+                        }}
+                    </button>
+                </div>
+            </template>
+        </BaseModal>
     </SystemLayout>
 </template>
 
@@ -627,6 +566,7 @@ import { useI18n } from 'vue-i18n';
 import { router, useForm } from '@inertiajs/vue3';
 import SystemLayout from '@/Layouts/SystemLayout.vue';
 import PageHeader from '@/Components/PageHeader.vue';
+import BaseModal from '@/Components/BaseModal.vue';
 import { useNumberFormat } from '@/Composables/useNumberFormat';
 
 const { t } = useI18n();

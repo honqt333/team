@@ -92,70 +92,63 @@
         </div>
 
         <!-- Add Provider Modal -->
-        <Transition name="modal">
-            <div v-if="showAddModal" class="fixed inset-0 z-50 overflow-y-auto">
-                <div class="flex min-h-full items-center justify-center p-4">
-                    <div class="fixed inset-0 bg-black/50" @click="showAddModal = false"></div>
-                    <div
-                        class="relative bg-white dark:bg-gray-800 rounded-2xl p-6 w-full max-w-md shadow-xl"
+        <BaseModal
+            :show="showAddModal"
+            :title="
+                $t('system.integrations.add_provider_title', {
+                    type: $t(`system.integrations.sections.${selectedType}`),
+                })
+            "
+            size="sm"
+            @close="showAddModal = false"
+        >
+            <form @submit.prevent="addProvider" class="space-y-4">
+                <div class="grid grid-cols-1 gap-3">
+                    <SelectableCard
+                        type="radio"
+                        name="form.provider"
+                        v-model="form.provider"
+                        :value="key"
+                        v-for="(info, key) in availableProviders"
+                        :key="key"
+                        :class="[
+                            'border rounded-lg p-4 cursor-pointer transition-colors',
+                            form.provider === key
+                                ? 'border-action-primary bg-selection-bg'
+                                : 'border-gray-200 dark:border-gray-700 hover:border-gray-300',
+                        ]"
                     >
-                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                            {{
-                                $t('system.integrations.add_provider_title', {
-                                    type: $t(`system.integrations.sections.${selectedType}`),
-                                })
-                            }}
-                        </h3>
-                        <form @submit.prevent="addProvider" class="space-y-4">
-                            <div class="grid grid-cols-1 gap-3">
-                                <SelectableCard
-                                    type="radio"
-                                    name="form.provider"
-                                    v-model="form.provider"
-                                    :value="key"
-                                    v-for="(info, key) in availableProviders"
-                                    :key="key"
-                                    :class="[
-                                        'border rounded-lg p-4 cursor-pointer transition-colors',
-                                        form.provider === key
-                                            ? 'border-action-primary bg-selection-bg'
-                                            : 'border-gray-200 dark:border-gray-700 hover:border-gray-300',
-                                    ]"
-                                >
-                                    <div class="flex items-center gap-3">
-                                        <span class="text-2xl">{{ info.icon }}</span>
-                                        <div>
-                                            <p class="font-medium text-gray-900 dark:text-white">
-                                                {{ info.name_ar }}
-                                            </p>
-                                            <p class="text-xs text-gray-500 dark:text-gray-400">
-                                                {{ info.name }}
-                                            </p>
-                                        </div>
-                                    </div>
-                                </SelectableCard>
+                        <div class="flex items-center gap-3">
+                            <span class="text-2xl">{{ info.icon }}</span>
+                            <div>
+                                <p class="font-medium text-gray-900 dark:text-white">
+                                    {{ info.name_ar }}
+                                </p>
+                                <p class="text-xs text-gray-500 dark:text-gray-400">
+                                    {{ info.name }}
+                                </p>
                             </div>
-                            <div class="flex gap-3 pt-4">
-                                <button
-                                    type="submit"
-                                    :disabled="!form.provider || form.processing"
-                                    class="flex-1 px-4 py-2 bg-action-primary hover:bg-action-primary-hover text-white rounded-lg font-medium disabled:opacity-50 transition-colors"
-                                >
-                                    {{ $t('system.integrations.add_and_enable') }}
-                                </button>
-                                <button
-                                    type="button"
-                                    @click="showAddModal = false"
-                                    class="px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
-                                >
-                                    {{ $t('system.actions.cancel') }}
-                                </button>
-                            </div>
-                        </form>
-                    </div>
+                        </div>
+                    </SelectableCard>
                 </div>
-            </div>
-        </Transition>
+                <div class="flex gap-3 pt-4">
+                    <button
+                        type="submit"
+                        :disabled="!form.provider || form.processing"
+                        class="flex-1 px-4 py-2 bg-action-primary hover:bg-action-primary-hover text-white rounded-lg font-medium disabled:opacity-50 transition-colors"
+                    >
+                        {{ $t('system.integrations.add_and_enable') }}
+                    </button>
+                    <button
+                        type="button"
+                        @click="showAddModal = false"
+                        class="px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+                    >
+                        {{ $t('system.actions.cancel') }}
+                    </button>
+                </div>
+            </form>
+        </BaseModal>
     </SystemLayout>
 </template>
 
@@ -166,6 +159,7 @@ import { useI18n } from 'vue-i18n';
 import { useForm } from '@inertiajs/vue3';
 import SystemLayout from '@/Layouts/SystemLayout.vue';
 import PageHeader from '@/Components/PageHeader.vue';
+import BaseModal from '@/Components/BaseModal.vue';
 
 const { t } = useI18n();
 

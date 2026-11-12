@@ -5,6 +5,7 @@ import { Head, router, Link } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import SystemLayout from '@/Layouts/SystemLayout.vue';
 import PageHeader from '@/Components/PageHeader.vue';
+import BaseModal from '@/Components/BaseModal.vue';
 
 const { t } = useI18n();
 
@@ -637,7 +638,7 @@ const amountState = computed(() => {
 
                     <div
                         v-if="isImage"
-                        class="overflow-hidden rounded-lg border border-gray-200 bg-gray-50 dark:border-gray-700"
+                        class="overflow-hidden rounded-lg border border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-900/50"
                     >
                         <img
                             :src="receipt.receipt_url"
@@ -686,287 +687,259 @@ const amountState = computed(() => {
         </div>
 
         <!-- Reject modal -->
-        <Teleport to="body">
-            <div
-                v-if="showRejectModal"
-                class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
-                @click.self="showRejectModal = false"
-            >
-                <div class="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl dark:bg-gray-800">
-                    <h3 class="text-lg font-bold text-gray-900 dark:text-white">
+        <BaseModal
+            :show="showRejectModal"
+            :title="
+                locale === 'ar'
+                    ? $t('system.bank_transfer_receipts.reject_receipt_2')
+                    : 'Reject receipt'
+            "
+            size="sm"
+            @close="showRejectModal = false"
+        >
+            <p class="text-sm text-gray-600 dark:text-gray-400">
+                {{
+                    locale === 'ar'
+                        ? $t(
+                              'system.bank_transfer_receipts.please_provide_a_rejection_reason._the_tenant_wi'
+                          )
+                        : 'Please provide a rejection reason. The tenant will be notified.'
+                }}
+            </p>
+            <textarea
+                v-model="rejectNotes"
+                rows="4"
+                :placeholder="
+                    locale === 'ar'
+                        ? $t(
+                              'system.bank_transfer_receipts.examples._amount_mismatch_receipt_unclear'
+                          )
+                        : 'e.g. Amount mismatch, receipt unclear...'
+                "
+                class="mt-4 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-danger focus:ring-1 focus:ring-danger dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+            ></textarea>
+            <template #footer>
+                <div class="flex justify-end gap-2 w-full">
+                    <button
+                        type="button"
+                        @click="showRejectModal = false"
+                        class="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300"
+                    >
+                        {{
+                            locale === 'ar' ? $t('system.bank_transfer_receipts.cancel') : 'Cancel'
+                        }}
+                    </button>
+                    <button
+                        type="button"
+                        @click="reject"
+                        :disabled="!rejectNotes.trim() || processing"
+                        class="rounded-lg bg-rose-600 px-4 py-2 text-sm font-semibold text-white hover:bg-rose-700 disabled:opacity-50"
+                    >
                         {{
                             locale === 'ar'
-                                ? $t('system.bank_transfer_receipts.reject_receipt_2')
-                                : 'Reject receipt'
+                                ? $t('system.bank_transfer_receipts.confirm_reject_2')
+                                : 'Confirm reject'
                         }}
-                    </h3>
-                    <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
-                        {{
-                            locale === 'ar'
-                                ? $t(
-                                      'system.bank_transfer_receipts.please_provide_a_rejection_reason._the_tenant_wi'
-                                  )
-                                : 'Please provide a rejection reason. The tenant will be notified.'
-                        }}
-                    </p>
-                    <textarea
-                        v-model="rejectNotes"
-                        rows="4"
-                        :placeholder="
-                            locale === 'ar'
-                                ? $t(
-                                      'system.bank_transfer_receipts.examples._amount_mismatch_receipt_unclear'
-                                  )
-                                : 'e.g. Amount mismatch, receipt unclear...'
-                        "
-                        class="mt-4 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-danger focus:ring-1 focus:ring-danger dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                    ></textarea>
-                    <div class="mt-6 flex justify-end gap-2">
-                        <button
-                            type="button"
-                            @click="showRejectModal = false"
-                            class="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300"
-                        >
-                            {{
-                                locale === 'ar'
-                                    ? $t('system.bank_transfer_receipts.cancel')
-                                    : 'Cancel'
-                            }}
-                        </button>
-                        <button
-                            type="button"
-                            @click="reject"
-                            :disabled="!rejectNotes.trim() || processing"
-                            class="rounded-lg bg-rose-600 px-4 py-2 text-sm font-semibold text-white hover:bg-rose-700 disabled:opacity-50"
-                        >
-                            {{
-                                locale === 'ar'
-                                    ? $t('system.bank_transfer_receipts.confirm_reject_2')
-                                    : 'Confirm reject'
-                            }}
-                        </button>
-                    </div>
+                    </button>
                 </div>
-            </div>
-        </Teleport>
+            </template>
+        </BaseModal>
 
         <!-- Approval confirmation modal. Surfaces the amount comparison
              and forces the admin to opt-in via force_approve when there
              is a mismatch. Lives next to the reject modal for visual
              parity between approve and reject flows. -->
-        <Teleport to="body">
+        <BaseModal
+            :show="showApproveModal"
+            :title="
+                locale === 'ar'
+                    ? $t('system.bank_transfer_receipts.confirm_receipt_approval')
+                    : 'Confirm receipt approval'
+            "
+            size="sm"
+            @close="showApproveModal = false"
+        >
+            <!-- Compact amount summary, mirrors the card on the
+                         page so the admin sees the same numbers at a glance -->
             <div
-                v-if="showApproveModal"
-                class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
-                @click.self="showApproveModal = false"
+                v-if="amountState.type !== 'unknown'"
+                class="mt-4 rounded-lg border p-3 text-sm"
+                :class="{
+                    'border-emerald-200 bg-emerald-50 dark:border-emerald-800/50 dark:bg-emerald-900/10':
+                        amountState.type === 'match',
+                    'border-amber-200 bg-amber-50 dark:border-amber-800/50 dark:bg-amber-900/10':
+                        amountState.type === 'short',
+                    'border-orange-200 bg-orange-50 dark:border-orange-800/50 dark:bg-orange-900/10':
+                        amountState.type === 'over',
+                }"
             >
-                <div class="w-full max-w-md rounded-xl bg-white p-6 shadow-xl dark:bg-gray-800">
-                    <h2 class="text-lg font-bold text-gray-900 dark:text-white">
+                <div class="flex justify-between">
+                    <span class="text-gray-600 dark:text-gray-300">
+                        {{ locale === 'ar' ? $t('system.bank_transfer_receipts.due') : 'Due' }}
+                    </span>
+                    <span class="font-mono font-bold">
+                        {{ formatCurrency(amountState.expected) }} SAR
+                    </span>
+                </div>
+                <div class="mt-1 flex justify-between">
+                    <span class="text-gray-600 dark:text-gray-300">
                         {{
                             locale === 'ar'
-                                ? $t('system.bank_transfer_receipts.confirm_receipt_approval')
-                                : 'Confirm receipt approval'
+                                ? $t('system.bank_transfer_receipts.transferred')
+                                : 'Transferred'
                         }}
-                    </h2>
-
-                    <!-- Compact amount summary, mirrors the card on the
-                         page so the admin sees the same numbers at a glance -->
-                    <div
-                        v-if="amountState.type !== 'unknown'"
-                        class="mt-4 rounded-lg border p-3 text-sm"
+                    </span>
+                    <span class="font-mono font-bold">
+                        {{ formatCurrency(receipt.transfer_amount) }} SAR
+                    </span>
+                </div>
+                <div class="mt-2 flex justify-between border-t border-current/10 pt-2">
+                    <span class="font-semibold">
+                        {{
+                            locale === 'ar'
+                                ? $t('system.bank_transfer_receipts.difference')
+                                : 'Difference'
+                        }}
+                    </span>
+                    <span
+                        v-if="amountState.type === 'match'"
+                        class="font-mono font-bold text-emerald-600 dark:text-emerald-400"
+                    >
+                        ✓
+                        {{ locale === 'ar' ? $t('system.bank_transfer_receipts.match') : 'Match' }}
+                    </span>
+                    <span
+                        v-else
+                        class="font-mono font-bold"
                         :class="{
-                            'border-emerald-200 bg-emerald-50 dark:border-emerald-800/50 dark:bg-emerald-900/10':
-                                amountState.type === 'match',
-                            'border-amber-200 bg-amber-50 dark:border-amber-800/50 dark:bg-amber-900/10':
-                                amountState.type === 'short',
-                            'border-orange-200 bg-orange-50 dark:border-orange-800/50 dark:bg-orange-900/10':
-                                amountState.type === 'over',
+                            'text-amber-700 dark:text-amber-300': amountState.type === 'short',
+                            'text-orange-700 dark:text-orange-300': amountState.type === 'over',
                         }"
                     >
-                        <div class="flex justify-between">
-                            <span class="text-gray-600 dark:text-gray-300">
-                                {{
-                                    locale === 'ar'
-                                        ? $t('system.bank_transfer_receipts.due')
-                                        : 'Due'
-                                }}
-                            </span>
-                            <span class="font-mono font-bold">
-                                {{ formatCurrency(amountState.expected) }} SAR
-                            </span>
-                        </div>
-                        <div class="mt-1 flex justify-between">
-                            <span class="text-gray-600 dark:text-gray-300">
-                                {{
-                                    locale === 'ar'
-                                        ? $t('system.bank_transfer_receipts.transferred')
-                                        : 'Transferred'
-                                }}
-                            </span>
-                            <span class="font-mono font-bold">
-                                {{ formatCurrency(receipt.transfer_amount) }} SAR
-                            </span>
-                        </div>
-                        <div class="mt-2 flex justify-between border-t border-current/10 pt-2">
-                            <span class="font-semibold">
-                                {{
-                                    locale === 'ar'
-                                        ? $t('system.bank_transfer_receipts.difference')
-                                        : 'Difference'
-                                }}
-                            </span>
-                            <span
-                                v-if="amountState.type === 'match'"
-                                class="font-mono font-bold text-emerald-600 dark:text-emerald-400"
-                            >
-                                ✓
-                                {{
-                                    locale === 'ar'
-                                        ? $t('system.bank_transfer_receipts.match')
-                                        : 'Match'
-                                }}
-                            </span>
-                            <span
-                                v-else
-                                class="font-mono font-bold"
-                                :class="{
-                                    'text-amber-700 dark:text-amber-300':
-                                        amountState.type === 'short',
-                                    'text-orange-700 dark:text-orange-300':
-                                        amountState.type === 'over',
-                                }"
-                            >
-                                {{ amountState.diff > 0 ? '+' : ''
-                                }}{{ formatCurrency(amountState.diff) }} SAR
-                            </span>
-                        </div>
-                    </div>
+                        {{ amountState.diff > 0 ? '+' : ''
+                        }}{{ formatCurrency(amountState.diff) }} SAR
+                    </span>
+                </div>
+            </div>
 
-                    <!-- Mismatch override — only shows when there's a diff.
+            <!-- Mismatch override — only shows when there's a diff.
                          The checkbox is the explicit "I know what I'm doing"
                          signal that gates the confirm button. -->
-                    <label
-                        v-if="hasMismatch"
-                        class="mt-4 flex items-start gap-2 rounded-lg border border-amber-300 bg-amber-50 p-3 text-sm dark:border-amber-700 dark:bg-amber-900/20"
-                    >
-                        <AppToggle v-model="forceApprove" />
-                        <span class="text-amber-800 dark:text-amber-200">
-                            {{
-                                locale === 'ar'
-                                    ? $t(
-                                          'system.bank_transfer_receipts.approve_despite_the_amount_mismatch_will_be_reco'
-                                      )
-                                    : 'Approve despite the amount mismatch (will be recorded in the audit log)'
-                            }}
-                        </span>
-                    </label>
+            <label
+                v-if="hasMismatch"
+                class="mt-4 flex items-start gap-2 rounded-lg border border-amber-300 bg-amber-50 p-3 text-sm dark:border-amber-700 dark:bg-amber-900/20"
+            >
+                <AppToggle v-model="forceApprove" />
+                <span class="text-amber-800 dark:text-amber-200">
+                    {{
+                        locale === 'ar'
+                            ? $t(
+                                  'system.bank_transfer_receipts.approve_despite_the_amount_mismatch_will_be_reco'
+                              )
+                            : 'Approve despite the amount mismatch (will be recorded in the audit log)'
+                    }}
+                </span>
+            </label>
 
-                    <!-- Partial approval — admin can choose to credit only
+            <!-- Partial approval — admin can choose to credit only
                          part of what the tenant transferred. The shortfall
                          is logged and the invoice stays open for the
                          remaining balance. Useful when a tenant pays
                          most of an invoice but the admin is writing off
                          the rest as a goodwill gesture. -->
-                    <div
-                        v-if="receipt.transfer_amount"
-                        class="mt-4 rounded-lg border border-slate-200 bg-slate-50 p-3 dark:border-slate-700 dark:bg-slate-800"
-                    >
-                        <label class="flex items-center gap-2 text-sm">
-                            <AppToggle v-model="partialApproval" />
-                            <span class="font-medium text-slate-700 dark:text-slate-200">
-                                {{
-                                    locale === 'ar'
-                                        ? $t(
-                                              'system.bank_transfer_receipts.partial_approval_credit_a_different_amount_than_'
-                                          )
-                                        : 'Partial approval (credit a different amount than received)'
-                                }}
-                            </span>
-                        </label>
-                        <div v-if="partialApproval" class="mt-2 space-y-2 pl-6">
-                            <label
-                                class="block text-xs font-semibold text-slate-700 dark:text-slate-200"
-                            >
-                                {{
-                                    locale === 'ar'
-                                        ? $t('system.bank_transfer_receipts.approved_amount')
-                                        : 'Approved amount (SAR)'
-                                }}
-                            </label>
-                            <input
-                                v-model.number="approvedAmount"
-                                type="number"
-                                step="0.01"
-                                min="0.01"
-                                :max="Number(receipt.transfer_amount)"
-                                dir="ltr"
-                                class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-mono dark:border-slate-600 dark:bg-slate-700 dark:text-white"
-                            />
-                            <p
-                                v-if="partialShortfall > 0"
-                                class="text-xs text-amber-700 dark:text-amber-300"
-                            >
-                                {{
-                                    locale === 'ar'
-                                        ? $t(
-                                              'system.bank_transfer_receipts.shortfall_recorded_as_credit',
-                                              { amount: formatCurrency(partialShortfall) }
-                                          )
-                                        : `Shortfall of ${formatCurrency(partialShortfall)} SAR will be recorded as credit (invoice stays open)`
-                                }}
-                            </p>
-                        </div>
-                    </div>
-
-                    <label
-                        class="mt-4 block text-sm font-semibold text-gray-700 dark:text-gray-200"
+            <div
+                v-if="receipt.transfer_amount"
+                class="mt-4 rounded-lg border border-slate-200 bg-slate-50 p-3 dark:border-slate-700 dark:bg-slate-800"
+            >
+                <label class="flex items-center gap-2 text-sm">
+                    <AppToggle v-model="partialApproval" />
+                    <span class="font-medium text-slate-700 dark:text-slate-200">
+                        {{
+                            locale === 'ar'
+                                ? $t(
+                                      'system.bank_transfer_receipts.partial_approval_credit_a_different_amount_than_'
+                                  )
+                                : 'Partial approval (credit a different amount than received)'
+                        }}
+                    </span>
+                </label>
+                <div v-if="partialApproval" class="mt-2 space-y-2 pl-6">
+                    <label class="block text-xs font-semibold text-slate-700 dark:text-slate-200">
+                        {{
+                            locale === 'ar'
+                                ? $t('system.bank_transfer_receipts.approved_amount')
+                                : 'Approved amount (SAR)'
+                        }}
+                    </label>
+                    <input
+                        v-model.number="approvedAmount"
+                        type="number"
+                        step="0.01"
+                        min="0.01"
+                        :max="Number(receipt.transfer_amount)"
+                        dir="ltr"
+                        class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-mono dark:border-slate-600 dark:bg-slate-700 dark:text-white"
+                    />
+                    <p
+                        v-if="partialShortfall > 0"
+                        class="text-xs text-amber-700 dark:text-amber-300"
                     >
                         {{
                             locale === 'ar'
-                                ? $t('system.bank_transfer_receipts.notes_optional')
-                                : 'Notes (optional)'
+                                ? $t('system.bank_transfer_receipts.shortfall_recorded_as_credit', {
+                                      amount: formatCurrency(partialShortfall),
+                                  })
+                                : `Shortfall of ${formatCurrency(partialShortfall)} SAR will be recorded as credit (invoice stays open)`
                         }}
-                    </label>
-                    <textarea
-                        v-model="approveNotes"
-                        rows="3"
-                        :placeholder="
-                            locale === 'ar'
-                                ? $t(
-                                      'system.bank_transfer_receipts.examples._confirmed_full_amount_received_from_tenant'
-                                  )
-                                : 'e.g. Confirmed full amount received from tenant...'
-                        "
-                        class="mt-1 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-action-primary focus:ring-1 focus:ring-focus-ring dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                    ></textarea>
-
-                    <div class="mt-6 flex justify-end gap-2">
-                        <button
-                            type="button"
-                            @click="showApproveModal = false"
-                            class="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300"
-                        >
-                            {{
-                                locale === 'ar'
-                                    ? $t('system.bank_transfer_receipts.cancel')
-                                    : 'Cancel'
-                            }}
-                        </button>
-                        <button
-                            type="button"
-                            @click="confirmApprove"
-                            :disabled="!canApprove"
-                            class="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700 disabled:opacity-50"
-                        >
-                            {{
-                                locale === 'ar'
-                                    ? $t('system.bank_transfer_receipts.confirm_approve_2')
-                                    : 'Confirm approve'
-                            }}
-                        </button>
-                    </div>
+                    </p>
                 </div>
             </div>
-        </Teleport>
+
+            <label class="mt-4 block text-sm font-semibold text-gray-700 dark:text-gray-200">
+                {{
+                    locale === 'ar'
+                        ? $t('system.bank_transfer_receipts.notes_optional')
+                        : 'Notes (optional)'
+                }}
+            </label>
+            <textarea
+                v-model="approveNotes"
+                rows="3"
+                :placeholder="
+                    locale === 'ar'
+                        ? $t(
+                              'system.bank_transfer_receipts.examples._confirmed_full_amount_received_from_tenant'
+                          )
+                        : 'e.g. Confirmed full amount received from tenant...'
+                "
+                class="mt-1 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-action-primary focus:ring-1 focus:ring-focus-ring dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+            ></textarea>
+
+            <template #footer>
+                <div class="flex justify-end gap-2 w-full">
+                    <button
+                        type="button"
+                        @click="showApproveModal = false"
+                        class="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300"
+                    >
+                        {{
+                            locale === 'ar' ? $t('system.bank_transfer_receipts.cancel') : 'Cancel'
+                        }}
+                    </button>
+                    <button
+                        type="button"
+                        @click="confirmApprove"
+                        :disabled="!canApprove"
+                        class="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700 disabled:opacity-50"
+                    >
+                        {{
+                            locale === 'ar'
+                                ? $t('system.bank_transfer_receipts.confirm_approve_2')
+                                : 'Confirm approve'
+                        }}
+                    </button>
+                </div>
+            </template>
+        </BaseModal>
     </SystemLayout>
 </template>

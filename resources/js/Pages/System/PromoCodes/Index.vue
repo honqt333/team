@@ -202,266 +202,213 @@
         </div>
 
         <!-- Promo Code Form Modal -->
-        <Transition name="modal">
-            <div v-if="showModal" class="fixed inset-0 z-50 overflow-y-auto">
-                <div
-                    class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:p-0"
-                >
-                    <!-- Backdrop -->
-                    <div
-                        class="fixed inset-0 bg-black/50 transition-opacity"
-                        @click="closeModal"
-                    ></div>
-
-                    <!-- Modal Panel -->
-                    <div
-                        class="relative bg-white dark:bg-gray-800 rounded-2xl text-start overflow-hidden shadow-xl transform transition-all sm:my-8 sm:max-w-2xl sm:w-full"
-                    >
-                        <!-- Header -->
-                        <div
-                            class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between"
+        <BaseModal
+            :show="showModal"
+            :title="
+                editingCode
+                    ? $t('system.promo_codes.edit_title')
+                    : $t('system.promo_codes.create_title')
+            "
+            size="lg"
+            @close="closeModal"
+        >
+            <!-- Form Body -->
+            <form @submit.prevent="submit" class="p-6 space-y-5 max-h-[70vh] overflow-y-auto">
+                <!-- Code & Name -->
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label
+                            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
                         >
-                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
-                                {{
-                                    editingCode
-                                        ? $t('system.promo_codes.edit_title')
-                                        : $t('system.promo_codes.create_title')
-                                }}
-                            </h3>
+                            {{ $t('system.promo_codes.form.code') }}
+                        </label>
+                        <div class="flex gap-2">
+                            <input
+                                v-model="form.code"
+                                type="text"
+                                required
+                                dir="ltr"
+                                class="flex-1 px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white font-mono uppercase"
+                            />
                             <button
-                                @click="closeModal"
-                                class="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300"
-                            >
-                                <svg
-                                    class="w-5 h-5"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        stroke-width="2"
-                                        d="M6 18L18 6M6 6l12 12"
-                                    />
-                                </svg>
-                            </button>
-                        </div>
-
-                        <!-- Form Body -->
-                        <form
-                            @submit.prevent="submit"
-                            class="p-6 space-y-5 max-h-[70vh] overflow-y-auto"
-                        >
-                            <!-- Code & Name -->
-                            <div class="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label
-                                        class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-                                    >
-                                        {{ $t('system.promo_codes.form.code') }}
-                                    </label>
-                                    <div class="flex gap-2">
-                                        <input
-                                            v-model="form.code"
-                                            type="text"
-                                            required
-                                            dir="ltr"
-                                            class="flex-1 px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white font-mono uppercase"
-                                        />
-                                        <button
-                                            v-if="!editingCode"
-                                            type="button"
-                                            @click="generateCode"
-                                            class="px-3 py-2 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg text-gray-700 dark:text-gray-300 text-sm"
-                                            :title="$t('system.promo_codes.form.generate')"
-                                        >
-                                            🎲
-                                        </button>
-                                    </div>
-                                </div>
-                                <div>
-                                    <label
-                                        class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-                                    >
-                                        {{ $t('system.promo_codes.form.name') }}
-                                    </label>
-                                    <input
-                                        v-model="form.name"
-                                        type="text"
-                                        required
-                                        class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                                    />
-                                </div>
-                            </div>
-
-                            <!-- Discount -->
-                            <div>
-                                <h4 class="text-sm font-medium text-gray-900 dark:text-white mb-3">
-                                    {{ $t('system.promo_codes.form.discount') }}
-                                </h4>
-                                <div class="grid grid-cols-2 gap-4">
-                                    <div>
-                                        <SearchableSelect
-                                            v-model="form.discount_type"
-                                            :options="discountTypeOptions"
-                                            option-label="label"
-                                            option-value="value"
-                                            :label="$t('system.promo_codes.form.discount_type')"
-                                        />
-                                    </div>
-                                    <div>
-                                        <label
-                                            class="block text-sm text-gray-600 dark:text-gray-400 mb-1"
-                                        >
-                                            {{ discountLabel }}
-                                        </label>
-                                        <input
-                                            v-model.number="form.discount_value"
-                                            type="number"
-                                            min="0"
-                                            :max="form.discount_type === 'percentage' ? 100 : 9999"
-                                            step="0.01"
-                                            required
-                                            class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                                        />
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Limits -->
-                            <div>
-                                <h4 class="text-sm font-medium text-gray-900 dark:text-white mb-3">
-                                    {{ $t('system.promo_codes.form.limits') }}
-                                </h4>
-                                <div class="grid grid-cols-2 gap-4">
-                                    <div>
-                                        <label
-                                            class="block text-sm text-gray-600 dark:text-gray-400 mb-1"
-                                        >
-                                            {{ $t('system.promo_codes.form.max_uses') }}
-                                        </label>
-                                        <input
-                                            v-model.number="form.max_uses"
-                                            type="number"
-                                            min="1"
-                                            :placeholder="$t('system.promo_codes.unlimited')"
-                                            class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                                        />
-                                    </div>
-                                    <div>
-                                        <label
-                                            class="block text-sm text-gray-600 dark:text-gray-400 mb-1"
-                                        >
-                                            {{ $t('system.promo_codes.form.max_uses_per_tenant') }}
-                                        </label>
-                                        <input
-                                            v-model.number="form.max_uses_per_tenant"
-                                            type="number"
-                                            min="1"
-                                            required
-                                            class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                                        />
-                                    </div>
-                                    <div>
-                                        <label
-                                            class="block text-sm text-gray-600 dark:text-gray-400 mb-1"
-                                        >
-                                            {{ $t('system.promo_codes.form.starts_at') }}
-                                        </label>
-                                        <input
-                                            v-model="form.starts_at"
-                                            type="datetime-local"
-                                            class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                                        />
-                                    </div>
-                                    <div>
-                                        <label
-                                            class="block text-sm text-gray-600 dark:text-gray-400 mb-1"
-                                        >
-                                            {{ $t('system.promo_codes.form.expires_at') }}
-                                        </label>
-                                        <input
-                                            v-model="form.expires_at"
-                                            type="datetime-local"
-                                            class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                                        />
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Restrictions -->
-                            <div>
-                                <h4 class="text-sm font-medium text-gray-900 dark:text-white mb-3">
-                                    {{ $t('system.promo_codes.form.restrictions') }}
-                                </h4>
-                                <div class="grid grid-cols-2 gap-4">
-                                    <div>
-                                        <SearchableSelect
-                                            v-model="form.plan_id"
-                                            :options="planOptions"
-                                            option-label="label"
-                                            option-value="value"
-                                            :label="$t('system.promo_codes.form.plan')"
-                                            :placeholder="$t('system.promo_codes.all_plans')"
-                                        />
-                                    </div>
-                                    <div>
-                                        <SearchableSelect
-                                            v-model="form.billing_cycle"
-                                            :options="billingCycleOptions"
-                                            option-label="label"
-                                            option-value="value"
-                                            :label="$t('system.promo_codes.form.billing_cycle')"
-                                        />
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Status -->
-                            <div class="flex gap-6">
-                                <label class="flex items-center gap-2 cursor-pointer">
-                                    <AppToggle v-model="form.first_subscription_only" />
-                                    <span class="text-gray-700 dark:text-gray-300">
-                                        {{ $t('system.promo_codes.form.first_subscription_only') }}
-                                    </span>
-                                </label>
-                                <label class="flex items-center gap-2 cursor-pointer">
-                                    <AppToggle v-model="form.is_active" />
-                                    <span class="text-gray-700 dark:text-gray-300">
-                                        {{ $t('system.status.active') }}
-                                    </span>
-                                </label>
-                            </div>
-                        </form>
-
-                        <!-- Footer -->
-                        <div
-                            class="px-6 py-4 border-t border-gray-200 dark:border-gray-700 flex justify-end gap-3"
-                        >
-                            <button
-                                @click="closeModal"
+                                v-if="!editingCode"
                                 type="button"
-                                class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
+                                @click="generateCode"
+                                class="px-3 py-2 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg text-gray-700 dark:text-gray-300 text-sm"
+                                :title="$t('system.promo_codes.form.generate')"
                             >
-                                {{ $t('system.actions.cancel') }}
-                            </button>
-                            <button
-                                @click="submit"
-                                :disabled="form.processing"
-                                class="px-5 py-2 bg-action-primary hover:bg-action-primary-hover text-white rounded-lg font-medium disabled:opacity-50"
-                            >
-                                {{
-                                    editingCode
-                                        ? $t('system.promo_codes.save_changes')
-                                        : $t('system.promo_codes.create_action')
-                                }}
+                                🎲
                             </button>
                         </div>
                     </div>
+                    <div>
+                        <label
+                            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                        >
+                            {{ $t('system.promo_codes.form.name') }}
+                        </label>
+                        <input
+                            v-model="form.name"
+                            type="text"
+                            required
+                            class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                        />
+                    </div>
                 </div>
-            </div>
-        </Transition>
+
+                <!-- Discount -->
+                <div>
+                    <h4 class="text-sm font-medium text-gray-900 dark:text-white mb-3">
+                        {{ $t('system.promo_codes.form.discount') }}
+                    </h4>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <SearchableSelect
+                                v-model="form.discount_type"
+                                :options="discountTypeOptions"
+                                option-label="label"
+                                option-value="value"
+                                :label="$t('system.promo_codes.form.discount_type')"
+                            />
+                        </div>
+                        <div>
+                            <label class="block text-sm text-gray-600 dark:text-gray-400 mb-1">
+                                {{ discountLabel }}
+                            </label>
+                            <input
+                                v-model.number="form.discount_value"
+                                type="number"
+                                min="0"
+                                :max="form.discount_type === 'percentage' ? 100 : 9999"
+                                step="0.01"
+                                required
+                                class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                            />
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Limits -->
+                <div>
+                    <h4 class="text-sm font-medium text-gray-900 dark:text-white mb-3">
+                        {{ $t('system.promo_codes.form.limits') }}
+                    </h4>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm text-gray-600 dark:text-gray-400 mb-1">
+                                {{ $t('system.promo_codes.form.max_uses') }}
+                            </label>
+                            <input
+                                v-model.number="form.max_uses"
+                                type="number"
+                                min="1"
+                                :placeholder="$t('system.promo_codes.unlimited')"
+                                class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                            />
+                        </div>
+                        <div>
+                            <label class="block text-sm text-gray-600 dark:text-gray-400 mb-1">
+                                {{ $t('system.promo_codes.form.max_uses_per_tenant') }}
+                            </label>
+                            <input
+                                v-model.number="form.max_uses_per_tenant"
+                                type="number"
+                                min="1"
+                                required
+                                class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                            />
+                        </div>
+                        <div>
+                            <label class="block text-sm text-gray-600 dark:text-gray-400 mb-1">
+                                {{ $t('system.promo_codes.form.starts_at') }}
+                            </label>
+                            <input
+                                v-model="form.starts_at"
+                                type="datetime-local"
+                                class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                            />
+                        </div>
+                        <div>
+                            <label class="block text-sm text-gray-600 dark:text-gray-400 mb-1">
+                                {{ $t('system.promo_codes.form.expires_at') }}
+                            </label>
+                            <input
+                                v-model="form.expires_at"
+                                type="datetime-local"
+                                class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                            />
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Restrictions -->
+                <div>
+                    <h4 class="text-sm font-medium text-gray-900 dark:text-white mb-3">
+                        {{ $t('system.promo_codes.form.restrictions') }}
+                    </h4>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <SearchableSelect
+                                v-model="form.plan_id"
+                                :options="planOptions"
+                                option-label="label"
+                                option-value="value"
+                                :label="$t('system.promo_codes.form.plan')"
+                                :placeholder="$t('system.promo_codes.all_plans')"
+                            />
+                        </div>
+                        <div>
+                            <SearchableSelect
+                                v-model="form.billing_cycle"
+                                :options="billingCycleOptions"
+                                option-label="label"
+                                option-value="value"
+                                :label="$t('system.promo_codes.form.billing_cycle')"
+                            />
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Status -->
+                <div class="flex gap-6">
+                    <label class="flex items-center gap-2 cursor-pointer">
+                        <AppToggle v-model="form.first_subscription_only" />
+                        <span class="text-gray-700 dark:text-gray-300">
+                            {{ $t('system.promo_codes.form.first_subscription_only') }}
+                        </span>
+                    </label>
+                    <label class="flex items-center gap-2 cursor-pointer">
+                        <AppToggle v-model="form.is_active" />
+                        <span class="text-gray-700 dark:text-gray-300">
+                            {{ $t('system.status.active') }}
+                        </span>
+                    </label>
+                </div>
+            </form>
+
+            <template #footer>
+                <div class="flex justify-end gap-3 w-full">
+                    <button
+                        @click="closeModal"
+                        type="button"
+                        class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
+                    >
+                        {{ $t('system.actions.cancel') }}
+                    </button>
+                    <button
+                        @click="submit"
+                        :disabled="form.processing"
+                        class="px-5 py-2 bg-action-primary hover:bg-action-primary-hover text-white rounded-lg font-medium disabled:opacity-50"
+                    >
+                        {{
+                            editingCode
+                                ? $t('system.promo_codes.save_changes')
+                                : $t('system.promo_codes.create_action')
+                        }}
+                    </button>
+                </div>
+            </template>
+        </BaseModal>
     </SystemLayout>
 </template>
 
@@ -474,6 +421,7 @@ import { router, useForm } from '@inertiajs/vue3';
 import SystemLayout from '@/Layouts/SystemLayout.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 import PageHeader from '@/Components/PageHeader.vue';
+import BaseModal from '@/Components/BaseModal.vue';
 import { useNumberFormat } from '@/Composables/useNumberFormat';
 
 const { t } = useI18n();
