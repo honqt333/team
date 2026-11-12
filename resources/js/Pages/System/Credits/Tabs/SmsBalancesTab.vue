@@ -180,104 +180,86 @@
         </div>
 
         <!-- Add Manual Credit Modal -->
-        <Teleport to="body">
-            <Transition name="modal">
-                <div
-                    v-if="showAddModal"
-                    class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
-                >
-                    <div
-                        class="bg-white dark:bg-gray-800 rounded-2xl max-w-md w-full p-6 shadow-xl space-y-4"
-                        @click.stop
-                    >
-                        <h3 class="text-lg font-bold text-gray-900 dark:text-white">
-                            {{ $t('system.credits.add_manual_sms_credit') }}
-                        </h3>
+        <BaseModal
+            :show="showAddModal"
+            :title="$t('system.credits.add_manual_sms_credit')"
+            size="sm"
+            @close="closeModal"
+        >
+            <div
+                v-if="selectedTenant"
+                class="bg-gray-50 dark:bg-gray-700/50 p-3 rounded-lg text-sm mb-4"
+            >
+                <span class="text-gray-500">{{ $t('system.credits.workshop') }}:</span>
+                <span class="font-medium mr-2">{{ selectedTenant.tenant?.name }}</span>
+            </div>
 
-                        <div
-                            v-if="selectedTenant"
-                            class="bg-gray-50 dark:bg-gray-700/50 p-3 rounded-lg text-sm"
-                        >
-                            <span class="text-gray-500">{{ $t('system.credits.workshop') }}:</span>
-                            <span class="font-medium mr-2">{{ selectedTenant.tenant?.name }}</span>
-                        </div>
-
-                        <form @submit.prevent="addCredits" class="space-y-4">
-                            <div v-if="!selectedTenant">
-                                <label
-                                    class="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300"
-                                >
-                                    {{ $t('system.credits.tenant_id') }}
-                                </label>
-                                <input
-                                    v-model="form.tenant_id"
-                                    type="number"
-                                    required
-                                    class="w-full px-3 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                                />
-                            </div>
-
-                            <div>
-                                <label
-                                    class="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300"
-                                >
-                                    {{ $t('system.credits.messages_count') }}
-                                </label>
-                                <input
-                                    v-model="form.credits"
-                                    type="number"
-                                    min="1"
-                                    required
-                                    class="w-full px-3 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                                />
-                            </div>
-
-                            <div>
-                                <label
-                                    class="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300"
-                                >
-                                    {{ $t('system.credits.reason') }}
-                                </label>
-                                <textarea
-                                    v-model="form.reason"
-                                    rows="2"
-                                    class="w-full px-3 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                                    :placeholder="$t('system.credits.reason_placeholder')"
-                                ></textarea>
-                            </div>
-
-                            <div
-                                class="flex justify-end gap-3 pt-4 border-t border-gray-100 dark:border-gray-700"
-                            >
-                                <button
-                                    type="button"
-                                    @click="closeModal"
-                                    class="px-4 py-2 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 text-sm"
-                                >
-                                    {{ $t('common.cancel') }}
-                                </button>
-                                <button
-                                    type="submit"
-                                    :disabled="form.processing"
-                                    class="px-4 py-2 bg-action-primary text-white rounded-lg hover:bg-action-primary-hover disabled:opacity-50 text-sm font-medium"
-                                >
-                                    {{
-                                        form.processing
-                                            ? $t('system.credits.adding')
-                                            : $t('system.credits.add')
-                                    }}
-                                </button>
-                            </div>
-                        </form>
-                    </div>
+            <form @submit.prevent="addCredits" class="space-y-4">
+                <div v-if="!selectedTenant">
+                    <label class="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">
+                        {{ $t('system.credits.tenant_id') }}
+                    </label>
+                    <input
+                        v-model="form.tenant_id"
+                        type="number"
+                        required
+                        class="w-full px-3 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                    />
                 </div>
-            </Transition>
-        </Teleport>
+
+                <div>
+                    <label class="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">
+                        {{ $t('system.credits.messages_count') }}
+                    </label>
+                    <input
+                        v-model="form.credits"
+                        type="number"
+                        min="1"
+                        required
+                        class="w-full px-3 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                    />
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">
+                        {{ $t('system.credits.reason') }}
+                    </label>
+                    <textarea
+                        v-model="form.reason"
+                        rows="2"
+                        class="w-full px-3 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                        :placeholder="$t('system.credits.reason_placeholder')"
+                    ></textarea>
+                </div>
+
+                <div
+                    class="flex justify-end gap-3 pt-4 border-t border-gray-100 dark:border-gray-700"
+                >
+                    <button
+                        type="button"
+                        @click="closeModal"
+                        class="px-4 py-2 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 text-sm"
+                    >
+                        {{ $t('common.cancel') }}
+                    </button>
+                    <button
+                        type="submit"
+                        :disabled="form.processing"
+                        class="px-4 py-2 bg-action-primary text-white rounded-lg hover:bg-action-primary-hover disabled:opacity-50 text-sm font-medium"
+                    >
+                        {{
+                            form.processing ? $t('system.credits.adding') : $t('system.credits.add')
+                        }}
+                    </button>
+                </div>
+            </form>
+        </BaseModal>
     </div>
 </template>
 
 <script setup>
 import DataTable from '@/Components/Common/DataTable.vue';
+import BaseModal from '@/Components/BaseModal.vue';
 import { ref } from 'vue';
 import { router, useForm } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';

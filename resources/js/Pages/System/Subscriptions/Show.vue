@@ -296,46 +296,41 @@
         </div>
 
         <!-- Extend Modal -->
-        <Transition name="modal">
-            <div v-if="showExtendModal" class="fixed inset-0 z-50 overflow-y-auto">
-                <div class="flex items-center justify-center min-h-screen px-4">
-                    <div class="fixed inset-0 bg-black/50" @click="showExtendModal = false"></div>
-                    <div class="relative bg-white dark:bg-gray-800 rounded-2xl p-6 w-full max-w-md">
-                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                            {{ $t('system.subscriptions.extend_subscription') }}
-                        </h3>
-                        <div class="mb-4">
-                            <label
-                                class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-                            >
-                                {{ $t('system.subscriptions.number_of_days') }}
-                            </label>
-                            <input
-                                v-model.number="extendDays"
-                                type="number"
-                                min="1"
-                                max="365"
-                                class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                            />
-                        </div>
-                        <div class="flex gap-3 justify-end">
-                            <button
-                                @click="showExtendModal = false"
-                                class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
-                            >
-                                {{ $t('common.cancel') }}
-                            </button>
-                            <button
-                                @click="extendSubscription"
-                                class="px-4 py-2 bg-action-primary hover:bg-action-primary-hover text-white rounded-lg"
-                            >
-                                {{ $t('system.subscriptions.extend') }}
-                            </button>
-                        </div>
-                    </div>
-                </div>
+        <BaseModal
+            :show="showExtendModal"
+            :title="$t('system.subscriptions.extend_subscription')"
+            size="sm"
+            @close="showExtendModal = false"
+        >
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    {{ $t('system.subscriptions.number_of_days') }}
+                </label>
+                <input
+                    v-model.number="extendDays"
+                    type="number"
+                    min="1"
+                    max="365"
+                    class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                />
             </div>
-        </Transition>
+            <template #footer>
+                <div class="flex gap-3 justify-end w-full">
+                    <button
+                        @click="showExtendModal = false"
+                        class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
+                    >
+                        {{ $t('common.cancel') }}
+                    </button>
+                    <button
+                        @click="extendSubscription"
+                        class="px-4 py-2 bg-action-primary hover:bg-action-primary-hover text-white rounded-lg"
+                    >
+                        {{ $t('system.subscriptions.extend') }}
+                    </button>
+                </div>
+            </template>
+        </BaseModal>
     </SystemLayout>
 </template>
 
@@ -347,6 +342,7 @@ import { ref } from 'vue';
 import { Link, router } from '@inertiajs/vue3';
 import SystemLayout from '@/Layouts/SystemLayout.vue';
 import PageHeader from '@/Components/PageHeader.vue';
+import BaseModal from '@/Components/BaseModal.vue';
 import { useConfirm } from '@/Composables/useConfirm';
 
 const { confirm } = useConfirm();
