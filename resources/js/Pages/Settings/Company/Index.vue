@@ -31,25 +31,7 @@
                 </template>
 
                 <template #filters>
-                    <nav class="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
-                        <button
-                            v-for="tab in tabs"
-                            :key="tab.id"
-                            @click="activeTab = tab.id"
-                            class="flex items-center gap-2 px-4 py-2 text-xs font-black uppercase tracking-widest transition-all relative group shrink-0"
-                            :class="
-                                activeTab === tab.id
-                                    ? 'text-emerald-600 dark:text-emerald-400'
-                                    : 'text-gray-400 hover:text-gray-600 dark:text-gray-500'
-                            "
-                        >
-                            {{ tab.label }}
-                            <div
-                                v-if="activeTab === tab.id"
-                                class="absolute bottom-0 left-0 w-full h-1 bg-emerald-600 dark:bg-emerald-400 rounded-t-full shadow-[0_-2px_8px_rgba(16,185,129,0.4)]"
-                            ></div>
-                        </button>
-                    </nav>
+                    <AppTabs v-model="activeTab" :tabs="tabs" variant="pills" sync-url />
                 </template>
 
                 <template #actions>
@@ -67,7 +49,7 @@
             </PageHeader>
 
             <div
-                class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700/50 overflow-hidden"
+                class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700/50 overflow-visible"
             >
                 <div class="p-8">
                     <!-- Entity Profile Tab -->
@@ -117,19 +99,28 @@
                                 >
                                     {{ $t('company_profile.contact.phone') }}
                                 </label>
-                                <div class="relative">
+                                <div class="flex gap-2" dir="ltr">
                                     <div
-                                        class="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none"
+                                        class="flex items-center gap-1.5 px-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-700/60 text-gray-700 dark:text-gray-300 select-none shrink-0"
                                     >
-                                        <span class="text-lg">🇸🇦</span>
+                                        <span class="text-base leading-none">
+                                            {{ activeCountryMeta.flag }}
+                                        </span>
+                                        <span
+                                            class="text-sm font-semibold text-gray-700 dark:text-gray-200"
+                                        >
+                                            {{ activeCountryMeta.dial_code }}
+                                        </span>
                                     </div>
                                     <input
                                         v-model="form.contact.phone"
                                         name="phone"
                                         type="tel"
                                         dir="ltr"
-                                        placeholder="+966 500 152 900"
-                                        class="w-full ps-12 px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring focus:border-transparent"
+                                        :placeholder="
+                                            activeCountryMeta.local_placeholder || '501234567'
+                                        "
+                                        class="w-full flex-1 px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring focus:border-transparent font-medium"
                                     />
                                 </div>
                             </div>
@@ -307,26 +298,20 @@
                                     />
                                 </div>
 
-                                <!-- Country (Synced with Company Profile) -->
+                                <!-- Country -->
                                 <div>
                                     <label
-                                        class="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1.5"
+                                        class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5"
                                     >
                                         {{ $t('company_profile.profile.country') }}
                                     </label>
-                                    <div
-                                        class="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gray-100 dark:bg-gray-700/50 text-gray-600 dark:text-gray-400 border border-gray-200 dark:border-gray-600 h-[46px]"
-                                    >
-                                        <span class="text-lg">{{ activeCountryMeta.flag }}</span>
-                                        <span>
-                                            {{
-                                                locale === 'ar'
-                                                    ? activeCountryMeta.name_ar
-                                                    : activeCountryMeta.name_en
-                                            }}
-                                            ({{ activeCountryMeta.code }})
-                                        </span>
-                                    </div>
+                                    <input
+                                        v-model="form.address.country"
+                                        name="country"
+                                        type="text"
+                                        :placeholder="$t('company_profile.profile.country')"
+                                        class="w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring focus:border-transparent font-medium"
+                                    />
                                 </div>
                             </div>
 
@@ -851,7 +836,7 @@
                     <div v-if="activeTab === 'zatca'" class="space-y-6">
                         <!-- Phase 2 Integration (Active State) -->
                         <div
-                            v-if="props.zatca?.is_phase2_active"
+                            v-if="props.zatca?.is_phase2_active || props.zatca?.is_simulated"
                             class="p-6 rounded-2xl bg-gradient-to-br from-emerald-50 via-teal-50 to-emerald-50 dark:from-emerald-950/40 dark:via-teal-950/30 dark:to-emerald-950/40 border border-emerald-200 dark:border-emerald-800 shadow-sm"
                         >
                             <div
@@ -880,20 +865,29 @@
                                             <h3
                                                 class="text-lg font-bold text-gray-900 dark:text-white"
                                             >
-                                                {{ $t('company_profile.zatca.phase2_active') }}
+                                                {{
+                                                    props.zatca?.is_simulated
+                                                        ? $t('zatca.simulation_mode_title')
+                                                        : $t('company_profile.zatca.phase2_active')
+                                                }}
                                             </h3>
                                             <span
                                                 class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800 dark:bg-emerald-900/60 dark:text-emerald-200"
                                             >
                                                 {{
-                                                    props.zatca?.environment === 'production'
+                                                    props.zatca?.environment === 'production' &&
+                                                    !props.zatca?.is_simulated
                                                         ? $t('company_profile.tax.production_live')
                                                         : $t('zatca.env_simulation')
                                                 }}
                                             </span>
                                         </div>
                                         <p class="text-sm text-gray-600 dark:text-gray-300 mt-1">
-                                            {{ $t('company_profile.zatca.phase2_active_desc') }}
+                                            {{
+                                                props.zatca?.is_simulated
+                                                    ? $t('zatca.simulation_mode_desc')
+                                                    : $t('company_profile.zatca.phase2_active_desc')
+                                            }}
                                         </p>
                                         <p
                                             v-if="props.zatca?.production_csid_expires_at"
@@ -1113,7 +1107,12 @@
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                             <!-- Invoices -->
                             <div
-                                class="p-5 bg-gray-50/70 dark:bg-gray-900/40 rounded-2xl border border-gray-200 dark:border-gray-700 space-y-3"
+                                class="p-5 bg-gray-50/70 dark:bg-gray-900/40 rounded-2xl border space-y-3"
+                                :class="
+                                    fieldErrors.invoice_number_format
+                                        ? 'border-red-500'
+                                        : 'border-gray-200 dark:border-gray-700'
+                                "
                             >
                                 <label
                                     class="block text-xs font-black uppercase tracking-wider text-gray-700 dark:text-gray-300"
@@ -1123,8 +1122,23 @@
                                 <input
                                     v-model="form.numbering.invoice_number_format"
                                     type="text"
-                                    class="w-full px-3.5 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white font-mono text-sm focus:ring-2 focus:ring-focus-ring"
+                                    :class="[
+                                        'w-full px-3.5 py-2.5 rounded-xl border bg-white dark:bg-gray-800 text-gray-900 dark:text-white font-mono text-sm focus:ring-2 focus:ring-focus-ring',
+                                        fieldErrors.invoice_number_format
+                                            ? 'border-red-500 focus:border-red-500'
+                                            : 'border-gray-300 dark:border-gray-600',
+                                    ]"
                                 />
+                                <p
+                                    v-if="fieldErrors.invoice_number_format"
+                                    class="text-xs text-red-600 dark:text-red-400 font-medium"
+                                >
+                                    {{
+                                        Array.isArray(fieldErrors.invoice_number_format)
+                                            ? fieldErrors.invoice_number_format[0]
+                                            : fieldErrors.invoice_number_format
+                                    }}
+                                </p>
                                 <div
                                     class="text-[11px] text-gray-500 dark:text-gray-400 flex items-center justify-between"
                                 >
@@ -1139,7 +1153,12 @@
 
                             <!-- Work Orders -->
                             <div
-                                class="p-5 bg-gray-50/70 dark:bg-gray-900/40 rounded-2xl border border-gray-200 dark:border-gray-700 space-y-3"
+                                class="p-5 bg-gray-50/70 dark:bg-gray-900/40 rounded-2xl border space-y-3"
+                                :class="
+                                    fieldErrors.work_order_number_format
+                                        ? 'border-red-500'
+                                        : 'border-gray-200 dark:border-gray-700'
+                                "
                             >
                                 <label
                                     class="block text-xs font-black uppercase tracking-wider text-gray-700 dark:text-gray-300"
@@ -1149,8 +1168,23 @@
                                 <input
                                     v-model="form.numbering.work_order_number_format"
                                     type="text"
-                                    class="w-full px-3.5 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white font-mono text-sm focus:ring-2 focus:ring-focus-ring"
+                                    :class="[
+                                        'w-full px-3.5 py-2.5 rounded-xl border bg-white dark:bg-gray-800 text-gray-900 dark:text-white font-mono text-sm focus:ring-2 focus:ring-focus-ring',
+                                        fieldErrors.work_order_number_format
+                                            ? 'border-red-500 focus:border-red-500'
+                                            : 'border-gray-300 dark:border-gray-600',
+                                    ]"
                                 />
+                                <p
+                                    v-if="fieldErrors.work_order_number_format"
+                                    class="text-xs text-red-600 dark:text-red-400 font-medium"
+                                >
+                                    {{
+                                        Array.isArray(fieldErrors.work_order_number_format)
+                                            ? fieldErrors.work_order_number_format[0]
+                                            : fieldErrors.work_order_number_format
+                                    }}
+                                </p>
                                 <div
                                     class="text-[11px] text-gray-500 dark:text-gray-400 flex items-center justify-between"
                                 >
@@ -1165,7 +1199,12 @@
 
                             <!-- Quotes -->
                             <div
-                                class="p-5 bg-gray-50/70 dark:bg-gray-900/40 rounded-2xl border border-gray-200 dark:border-gray-700 space-y-3"
+                                class="p-5 bg-gray-50/70 dark:bg-gray-900/40 rounded-2xl border space-y-3"
+                                :class="
+                                    fieldErrors.quote_number_format
+                                        ? 'border-red-500'
+                                        : 'border-gray-200 dark:border-gray-700'
+                                "
                             >
                                 <label
                                     class="block text-xs font-black uppercase tracking-wider text-gray-700 dark:text-gray-300"
@@ -1175,8 +1214,23 @@
                                 <input
                                     v-model="form.numbering.quote_number_format"
                                     type="text"
-                                    class="w-full px-3.5 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white font-mono text-sm focus:ring-2 focus:ring-focus-ring"
+                                    :class="[
+                                        'w-full px-3.5 py-2.5 rounded-xl border bg-white dark:bg-gray-800 text-gray-900 dark:text-white font-mono text-sm focus:ring-2 focus:ring-focus-ring',
+                                        fieldErrors.quote_number_format
+                                            ? 'border-red-500 focus:border-red-500'
+                                            : 'border-gray-300 dark:border-gray-600',
+                                    ]"
                                 />
+                                <p
+                                    v-if="fieldErrors.quote_number_format"
+                                    class="text-xs text-red-600 dark:text-red-400 font-medium"
+                                >
+                                    {{
+                                        Array.isArray(fieldErrors.quote_number_format)
+                                            ? fieldErrors.quote_number_format[0]
+                                            : fieldErrors.quote_number_format
+                                    }}
+                                </p>
                                 <div
                                     class="text-[11px] text-gray-500 dark:text-gray-400 flex items-center justify-between"
                                 >
@@ -2260,6 +2314,7 @@ import { useI18n } from 'vue-i18n';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import PageHeader from '@/Components/PageHeader.vue';
 import BackButton from '@/Components/BackButton.vue';
+import AppTabs from '@/Components/Common/AppTabs.vue';
 import AppToggle from '@/Components/Common/AppToggle.vue';
 import Tooltip from '@/Components/Tooltip.vue';
 import { useToast } from '@/Composables/useToast';
@@ -2375,31 +2430,7 @@ let marker = null;
 const defaultLat = 21.4858; // Jeddah
 const defaultLng = 39.1925;
 
-const activeCountryCode = computed(
-    () => form.value?.profile?.country || props.profile?.country || 'SA'
-);
-const activeCountryMeta = computed(() => getCountryMeta(activeCountryCode.value));
-const isSaudiTenant = computed(() => activeCountryCode.value === 'SA');
-
-const tabs = computed(() => {
-    const items = [
-        { id: 'profile', label: t('company_profile.tabs.profile') },
-        { id: 'contact', label: t('company_profile.tabs.contact') },
-        { id: 'vat', label: t('company_profile.tabs.vat') },
-    ];
-    if (isSaudiTenant.value) {
-        items.push({ id: 'zatca', label: t('company_profile.tabs.zatca') });
-    }
-    items.push(
-        { id: 'numbering', label: t('company_profile.tabs.numbering') },
-        { id: 'workflow', label: t('company_profile.tabs.workflow') },
-        { id: 'notifications', label: t('company_profile.tabs.notifications') },
-        { id: 'admin_user', label: t('company_profile.tabs.admin_user') },
-        { id: 'revenue_expenses', label: t('company_profile.tabs.revenue_expenses') },
-        { id: 'invoices', label: t('company_profile.tabs.invoices') }
-    );
-    return items;
-});
+const initialCountryMeta = getCountryMeta(props.profile?.country || 'SA');
 
 // Field errors
 const fieldErrors = ref({});
@@ -2426,6 +2457,9 @@ const form = ref({
         district: props.address?.district ?? '',
         building_number: props.address?.building_number ?? '',
         postal_code: props.address?.postal_code ?? '',
+        country:
+            props.address?.country ||
+            (locale.value === 'ar' ? initialCountryMeta.name_ar : initialCountryMeta.name_en),
         latitude: props.address?.latitude ?? null,
         longitude: props.address?.longitude ?? null,
     },
@@ -2471,6 +2505,32 @@ const form = ref({
         new_password: '',
         new_password_confirmation: '',
     },
+});
+
+const activeCountryCode = computed(
+    () => form.value?.profile?.country || props.profile?.country || 'SA'
+);
+const activeCountryMeta = computed(() => getCountryMeta(activeCountryCode.value));
+const isSaudiTenant = computed(() => activeCountryCode.value === 'SA');
+
+const tabs = computed(() => {
+    const items = [
+        { id: 'profile', label: t('company_profile.tabs.profile') },
+        { id: 'contact', label: t('company_profile.tabs.contact') },
+        { id: 'vat', label: t('company_profile.tabs.vat') },
+    ];
+    if (isSaudiTenant.value) {
+        items.push({ id: 'zatca', label: t('company_profile.tabs.zatca') });
+    }
+    items.push(
+        { id: 'numbering', label: t('company_profile.tabs.numbering') },
+        { id: 'workflow', label: t('company_profile.tabs.workflow') },
+        { id: 'notifications', label: t('company_profile.tabs.notifications') },
+        { id: 'admin_user', label: t('company_profile.tabs.admin_user') },
+        { id: 'revenue_expenses', label: t('company_profile.tabs.revenue_expenses') },
+        { id: 'invoices', label: t('company_profile.tabs.invoices') }
+    );
+    return items;
 });
 
 watch(
@@ -2564,11 +2624,20 @@ function saveSection(section) {
                 // Set field errors for red border styling
                 fieldErrors.value = errors;
 
-                // Build Arabic error message
+                // Build Arabic error message using returned validation error text or fallback
                 const errorMessages = [];
                 for (const [key, value] of Object.entries(errors)) {
-                    const fieldLabel = t(`company_profile.profile.${key}`) || key;
-                    errorMessages.push(t('common.validation.required', { field: fieldLabel }));
+                    if (typeof value === 'string' && value.trim() !== '') {
+                        errorMessages.push(value);
+                    } else if (Array.isArray(value) && value.length > 0) {
+                        errorMessages.push(value[0]);
+                    } else {
+                        const fieldLabel =
+                            t(`company_profile.numbering.${key}`) ||
+                            t(`company_profile.profile.${key}`) ||
+                            key;
+                        errorMessages.push(t('common.validation.required', { field: fieldLabel }));
+                    }
                 }
                 error(errorMessages.join('، ') || t('common.validation.required_fields'));
 
@@ -2849,6 +2918,7 @@ async function reverseGeocode(lat, lng) {
 
         if (data && data.address) {
             const addr = data.address;
+            form.value.address.country = addr.country || form.value.address.country || '';
             form.value.address.city =
                 addr.city ||
                 addr.town ||

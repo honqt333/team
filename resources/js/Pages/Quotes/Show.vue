@@ -444,44 +444,8 @@
             </div>
 
             <!-- Tabs: Services / Parts -->
-            <div
-                class="flex items-center justify-between bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm"
-            >
-                <!-- Tabs -->
-                <div class="flex gap-1 bg-gray-100 dark:bg-gray-900 rounded-lg p-1">
-                    <button
-                        @click="activeTab = 'services'"
-                        :class="[
-                            'px-4 py-2 text-sm font-medium rounded-lg transition-all',
-                            activeTab === 'services'
-                                ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm'
-                                : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200',
-                        ]"
-                    >
-                        {{ $t('quotes.tabs.services') }}
-                        <span
-                            class="ms-1.5 px-2 py-0.5 text-xs rounded-full bg-gray-200 dark:bg-gray-600"
-                        >
-                            {{ displayedLinesCount }}
-                        </span>
-                    </button>
-                    <button
-                        @click="activeTab = 'parts'"
-                        :class="[
-                            'px-4 py-2 text-sm font-medium rounded-lg transition-all',
-                            activeTab === 'parts'
-                                ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm'
-                                : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200',
-                        ]"
-                    >
-                        {{ $t('quotes.tabs.parts') }}
-                        <span
-                            class="ms-1.5 px-2 py-0.5 text-xs rounded-full bg-gray-200 dark:bg-gray-600"
-                        >
-                            {{ quote.parts?.length || 0 }}
-                        </span>
-                    </button>
-                </div>
+            <div class="flex flex-wrap items-center justify-between gap-3">
+                <AppTabs v-model="activeTab" :tabs="tabs" variant="pills" sync-url />
 
                 <!-- Add Actions -->
                 <button
@@ -916,6 +880,7 @@ import SecondaryButton from '@/Components/SecondaryButton.vue';
 import SignaturePad from '@/Components/Common/SignaturePad.vue';
 import PartsDisplay from '@/Components/Common/PartsDisplay.vue';
 import AppPrintButton from '@/Components/Common/AppPrintButton.vue';
+import AppTabs from '@/Components/Common/AppTabs.vue';
 import Tooltip from '@/Components/Tooltip.vue';
 import WorkOrderCustomerCard from '@/Components/WorkOrders/WorkOrderCustomerCard.vue';
 import WorkOrderFinancialSummary from '@/Components/WorkOrders/WorkOrderFinancialSummary.vue';
@@ -954,6 +919,18 @@ const editingLine = ref(null);
 const editingPart = ref(null);
 const activeDepartmentId = ref(null);
 const activeTab = ref('services'); // 'services' or 'parts'
+const tabs = computed(() => [
+    {
+        id: 'services',
+        label: t('quotes.tabs.services'),
+        count: displayedLinesCount.value,
+    },
+    {
+        id: 'parts',
+        label: t('quotes.tabs.parts'),
+        count: props.quote.parts?.length || 0,
+    },
+]);
 const serviceModalInitialTab = ref('service'); // 'service' or 'parts'
 
 const { success: successToast, error: errorToast } = useToast();

@@ -30,29 +30,11 @@
                 </template>
 
                 <template #filters>
-                    <div
-                        class="inline-flex items-center p-1.5 bg-slate-900/40 backdrop-blur-md rounded-2xl border border-white/20 shadow-2xl"
-                    >
-                        <button
-                            v-for="tab in tabs"
-                            :key="tab.key"
-                            @click="activeTab = tab.key"
-                            :class="[
-                                'flex items-center gap-3 px-10 py-3 text-sm font-black rounded-xl transition-all duration-500',
-                                activeTab === tab.key
-                                    ? 'bg-white text-slate-900 shadow-xl scale-[1.02] ring-1 ring-white/50'
-                                    : 'text-slate-100 hover:text-white hover:bg-white/10',
-                            ]"
-                        >
-                            <span
-                                class="text-xl transform transition-transform duration-500"
-                                :class="activeTab === tab.key ? 'scale-110' : ''"
-                            >
-                                {{ tab.icon }}
-                            </span>
-                            <span class="tracking-tight uppercase">{{ tab.label }}</span>
-                        </button>
-                    </div>
+                    <AppTabs v-model="activeTab" :tabs="tabs" variant="pills" sync-url>
+                        <template v-for="tab in tabs" :key="tab.id" #[`icon-${tab.id}`]>
+                            <span>{{ tab.emoji }}</span>
+                        </template>
+                    </AppTabs>
                 </template>
             </PageHeader>
             <!-- Units Tab -->
@@ -434,6 +416,7 @@ import { useI18n } from 'vue-i18n';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import PageHeader from '@/Components/PageHeader.vue';
 import BackButton from '@/Components/BackButton.vue';
+import AppTabs from '@/Components/Common/AppTabs.vue';
 import AppToggle from '@/Components/Common/AppToggle.vue';
 import { useToast } from '@/Composables/useToast';
 import { useConfirm } from '@/Composables/useConfirm';
@@ -449,8 +432,8 @@ const props = defineProps({
 
 const activeTab = ref('units');
 const tabs = [
-    { key: 'units', label: t('inventory.settings.units.title'), icon: '📐' },
-    { key: 'categories', label: t('inventory.settings.categories.title'), icon: '📁' },
+    { id: 'units', label: t('inventory.settings.units.title'), emoji: '📐' },
+    { id: 'categories', label: t('inventory.settings.categories.title'), emoji: '📁' },
 ];
 
 // Units

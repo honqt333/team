@@ -362,104 +362,45 @@
             </div>
 
             <!-- Tabs Section Selector -->
-            <div
-                class="flex items-center bg-white dark:bg-gray-800 p-1.5 sm:p-2 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm gap-1 w-full sm:w-fit overflow-x-auto no-scrollbar"
-            >
-                <!-- Services Tab -->
-                <button
-                    @click="activeTab = 'invoice_items'"
-                    :class="[
-                        'px-5 py-2.5 text-sm font-black rounded-xl transition-all flex items-center gap-2',
-                        activeTab === 'invoice_items'
-                            ? 'bg-blue-600 text-white shadow-md shadow-blue-500/20'
-                            : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700/50',
-                    ]"
-                >
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            stroke-width="2"
-                            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                        />
-                    </svg>
-                    <span>
-                        {{
-                            invoice.work_order_id
-                                ? $t('work_orders.services')
-                                : $t('common.details')
-                        }}
-                    </span>
-                    <span
-                        :class="[
-                            'px-2 py-0.5 text-xs rounded-full font-bold',
-                            activeTab === 'invoice_items'
-                                ? 'bg-white/20 text-white'
-                                : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300',
-                        ]"
-                    >
-                        {{ serviceLines.length }}
-                    </span>
-                </button>
-
-                <!-- Spare Parts Tab (only for WO invoices that have parts) -->
-                <button
-                    v-if="invoice.work_order_id && partsLines.length > 0"
-                    @click="activeTab = 'parts'"
-                    :class="[
-                        'px-5 py-2.5 text-sm font-black rounded-xl transition-all flex items-center gap-2',
-                        activeTab === 'parts'
-                            ? 'bg-amber-500 text-white shadow-md shadow-amber-400/20'
-                            : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700/50',
-                    ]"
-                >
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            stroke-width="2"
-                            d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
-                        />
-                        <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            stroke-width="2"
-                            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                        />
-                    </svg>
-                    <span>{{ $t('quotes.show.tabs.spare_parts') }}</span>
-                    <span
-                        :class="[
-                            'px-2 py-0.5 text-xs rounded-full font-bold',
-                            activeTab === 'parts'
-                                ? 'bg-white/20 text-white'
-                                : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300',
-                        ]"
-                    >
-                        {{ partsLines.length }}
-                    </span>
-                </button>
-
-                <!-- Payments Tab -->
-                <button
-                    @click="activeTab = 'payments'"
-                    :class="[
-                        'px-5 py-2.5 text-sm font-black rounded-xl transition-all flex items-center gap-2',
-                        activeTab === 'payments'
-                            ? 'bg-blue-600 text-white shadow-md shadow-blue-500/20'
-                            : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700/50',
-                    ]"
-                >
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            stroke-width="2"
-                            d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                        />
-                    </svg>
-                    <span>{{ $t('invoices.payments_history') }}</span>
-                </button>
+            <div>
+                <AppTabs v-model="activeTab" :tabs="tabs" variant="pills" sync-url>
+                    <template #icon-invoice_items>
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                            />
+                        </svg>
+                    </template>
+                    <template #icon-parts>
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
+                            />
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                            />
+                        </svg>
+                    </template>
+                    <template #icon-payments>
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                            />
+                        </svg>
+                    </template>
+                </AppTabs>
             </div>
 
             <!-- Services / Details Tab -->
@@ -1215,6 +1156,7 @@ import Tooltip from '@/Components/Tooltip.vue';
 import WorkOrderCustomerCard from '@/Components/WorkOrders/WorkOrderCustomerCard.vue';
 import WorkOrderFinancialSummary from '@/Components/WorkOrders/WorkOrderFinancialSummary.vue';
 import LinkedInvoiceBadge from '@/Components/Common/LinkedInvoiceBadge.vue';
+import AppTabs from '@/Components/Common/AppTabs.vue';
 
 const props = defineProps({
     invoice: Object,
@@ -1274,6 +1216,28 @@ const serviceLines = computed(() => {
     return (props.invoice.lines || []).filter((l) => !l.is_part);
 });
 const partsLines = computed(() => (props.invoice.lines || []).filter((l) => l.is_part));
+
+const tabs = computed(() => {
+    const list = [
+        {
+            id: 'invoice_items',
+            label: props.invoice.work_order_id ? t('work_orders.services') : t('common.details'),
+            count: serviceLines.value.length,
+        },
+    ];
+    if (props.invoice.work_order_id && partsLines.value.length > 0) {
+        list.push({
+            id: 'parts',
+            label: t('quotes.show.tabs.spare_parts'),
+            count: partsLines.value.length,
+        });
+    }
+    list.push({
+        id: 'payments',
+        label: t('invoices.payments_history'),
+    });
+    return list;
+});
 
 const invoiceBadDebt = computed(() => {
     return (props.invoice.payments || []).reduce((sum, p) => {

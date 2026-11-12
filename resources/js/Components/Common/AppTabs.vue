@@ -126,6 +126,13 @@ const selectTab = (tab) => {
             role="tab"
             :aria-selected="modelValue === tab.id"
         >
+            <!-- Optional Icon Slot or Prop -->
+            <slot :name="`icon-${tab.id}`">
+                <span v-if="tab.icon" class="w-4 h-4 flex items-center justify-center shrink-0">
+                    <component :is="tab.icon" class="w-4 h-4" />
+                </span>
+            </slot>
+
             <span>{{ tab.label || tab.name || tab.title }}</span>
             <span
                 v-if="tab.count !== undefined && tab.count !== null"

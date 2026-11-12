@@ -121,44 +121,7 @@
             </PageHeader>
 
             <!-- Navigation Tabs -->
-            <div
-                class="bg-white dark:bg-gray-800 p-2 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm overflow-x-auto"
-            >
-                <nav class="flex gap-2 min-w-max">
-                    <button
-                        v-for="tab in tabs"
-                        :key="tab.id"
-                        type="button"
-                        @click="activeTab = tab.id"
-                        class="flex items-center gap-2.5 px-4 py-2.5 rounded-xl font-medium text-sm transition-all"
-                        :class="
-                            activeTab === tab.id
-                                ? 'bg-gradient-to-r from-pink-500 to-rose-600 text-white shadow-md shadow-pink-500/20'
-                                : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-700/50'
-                        "
-                    >
-                        <component :is="tab.icon" class="w-4 h-4" />
-                        <span>{{ tab.label }}</span>
-                        <span
-                            v-if="tab.errorCount > 0"
-                            class="text-[10px] px-1.5 py-0.5 rounded-full font-bold bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-300"
-                        >
-                            {{ tab.errorCount }}
-                        </span>
-                        <span
-                            v-else-if="tab.badge"
-                            class="text-[10px] px-1.5 py-0.5 rounded-full font-bold uppercase tracking-wider"
-                            :class="
-                                activeTab === tab.id
-                                    ? 'bg-white/20 text-white'
-                                    : 'bg-pink-100 text-pink-700 dark:bg-pink-900/40 dark:text-pink-300'
-                            "
-                        >
-                            {{ tab.badge }}
-                        </span>
-                    </button>
-                </nav>
-            </div>
+            <AppTabs v-model="activeTab" :tabs="tabs" variant="pills" sync-url />
 
             <!-- Tab Content Forms -->
             <form @submit.prevent="submit" class="space-y-6">
@@ -1746,6 +1709,7 @@ import PageHeader from '@/Components/PageHeader.vue';
 import ColorField from '@/Components/ColorField.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 import AppToggle from '@/Components/Common/AppToggle.vue';
+import AppTabs from '@/Components/Common/AppTabs.vue';
 import { useI18n } from 'vue-i18n';
 import { usePage, useForm } from '@inertiajs/vue3';
 import { computed, ref, h } from 'vue';
@@ -1881,39 +1845,37 @@ const tabs = computed(() => [
         id: 'branding',
         label: t('tenant_site.admin.tabs.branding'),
         icon: IconPaint,
-        errorCount: tabErrorCount('branding'),
+        count: tabErrorCount('branding') || undefined,
     },
     {
         id: 'banners',
         label: t('tenant_site.admin.tabs.banners'),
         icon: IconSpeaker,
-        badge: form.banners?.length ? String(form.banners.length) : null,
-        errorCount: tabErrorCount('banners'),
+        count: tabErrorCount('banners') || form.banners?.length || undefined,
     },
     {
         id: 'services',
         label: t('tenant_site.admin.tabs.services'),
         icon: IconWrench,
-        errorCount: tabErrorCount('services'),
+        count: tabErrorCount('services') || undefined,
     },
     {
         id: 'contact',
         label: t('tenant_site.admin.tabs.contact'),
         icon: IconBuilding,
-        errorCount: tabErrorCount('contact'),
+        count: tabErrorCount('contact') || undefined,
     },
     {
         id: 'domain_seo',
         label: t('tenant_site.admin.tabs.domain_seo'),
         icon: IconGlobe,
-        badge: form.custom_domain ? 'مربوط' : null,
-        errorCount: tabErrorCount('domain_seo'),
+        count: tabErrorCount('domain_seo') || undefined,
     },
     {
         id: 'features',
         label: t('tenant_site.admin.tabs.features'),
         icon: IconStar,
-        errorCount: tabErrorCount('features'),
+        count: tabErrorCount('features') || undefined,
     },
 ]);
 

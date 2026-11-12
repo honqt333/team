@@ -329,18 +329,8 @@
             </div>
 
             <!-- Tabs Section (العناصر المرجعة - المدفوعات - المرفقات) -->
-            <div
-                class="flex items-center gap-2 p-1.5 bg-gray-100 dark:bg-gray-900/50 rounded-2xl w-fit"
-            >
-                <button
-                    @click="activeTab = 'returned_items'"
-                    :class="[
-                        'px-5 py-2.5 text-sm font-black rounded-xl transition-all flex items-center gap-2',
-                        activeTab === 'returned_items'
-                            ? 'bg-rose-600 text-white shadow-md shadow-rose-500/20'
-                            : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700/50',
-                    ]"
-                >
+            <AppTabs v-model="activeTab" :tabs="tabs" variant="pills" sync-url>
+                <template #icon-returned_items>
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path
                             stroke-linecap="round"
@@ -349,28 +339,8 @@
                             d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
                         />
                     </svg>
-                    <span>{{ $t('invoices.returned_items') }}</span>
-                    <span
-                        :class="[
-                            'px-2 py-0.5 text-xs rounded-full font-bold',
-                            activeTab === 'returned_items'
-                                ? 'bg-white/20 text-white'
-                                : 'bg-rose-50 dark:bg-rose-950/30 text-rose-600 dark:text-rose-400',
-                        ]"
-                    >
-                        {{ returnInvoice.lines?.length || 0 }}
-                    </span>
-                </button>
-
-                <button
-                    @click="activeTab = 'payments'"
-                    :class="[
-                        'px-5 py-2.5 text-sm font-black rounded-xl transition-all flex items-center gap-2',
-                        activeTab === 'payments'
-                            ? 'bg-rose-600 text-white shadow-md shadow-rose-500/20'
-                            : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700/50',
-                    ]"
-                >
+                </template>
+                <template #icon-payments>
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path
                             stroke-linecap="round"
@@ -379,28 +349,8 @@
                             d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
                         />
                     </svg>
-                    <span>{{ $t('invoices.payments_history') }}</span>
-                    <span
-                        :class="[
-                            'px-2 py-0.5 text-xs rounded-full font-bold',
-                            activeTab === 'payments'
-                                ? 'bg-white/20 text-white'
-                                : 'bg-rose-50 dark:bg-rose-950/30 text-rose-600 dark:text-rose-400',
-                        ]"
-                    >
-                        {{ refundPayments.length }}
-                    </span>
-                </button>
-
-                <button
-                    @click="activeTab = 'attachments'"
-                    :class="[
-                        'px-5 py-2.5 text-sm font-black rounded-xl transition-all flex items-center gap-2',
-                        activeTab === 'attachments'
-                            ? 'bg-rose-600 text-white shadow-md shadow-rose-500/20'
-                            : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700/50',
-                    ]"
-                >
+                </template>
+                <template #icon-attachments>
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path
                             stroke-linecap="round"
@@ -409,16 +359,8 @@
                             d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"
                         />
                     </svg>
-                    <span>{{ $t('invoices.attachments') }}</span>
-                    <span
-                        v-if="
-                            returnInvoice.attachment_path ||
-                            returnInvoice.purchase_invoice?.attachment_path
-                        "
-                        class="w-2 h-2 rounded-full bg-rose-500 animate-pulse"
-                    ></span>
-                </button>
-            </div>
+                </template>
+            </AppTabs>
 
             <!-- Tab 1: Returned Items Content -->
             <div
@@ -800,6 +742,7 @@
 
 <script setup>
 import AppAttachmentManager from '@/Components/Common/AppAttachmentManager.vue';
+import AppTabs from '@/Components/Common/AppTabs.vue';
 import PrintEngine from '@/Components/Print/PrintEngine.vue';
 import DataTable from '@/Components/Common/DataTable.vue';
 import { printDocument } from '@/Composables/usePrint';
@@ -826,6 +769,23 @@ const isRtl = computed(() => locale.value === 'ar');
 const { toEnglish, formatMoney } = useNumberFormat();
 
 const activeTab = ref('returned_items');
+
+const tabs = computed(() => [
+    {
+        id: 'returned_items',
+        label: t('invoices.returned_items'),
+        count: props.returnInvoice?.lines?.length || 0,
+    },
+    {
+        id: 'payments',
+        label: t('invoices.payments_history'),
+        count: refundPayments.value.length,
+    },
+    {
+        id: 'attachments',
+        label: t('invoices.attachments'),
+    },
+]);
 
 const formatCurrency = (val) => {
     return formatMoney(val, props.returnInvoice?.currency_code);

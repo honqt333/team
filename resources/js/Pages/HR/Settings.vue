@@ -35,26 +35,11 @@
                 </template>
 
                 <template #filters>
-                    <nav class="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
-                        <button
-                            v-for="tab in tabs"
-                            :key="tab.key"
-                            @click="activeTab = tab.key"
-                            class="flex items-center gap-2 px-4 py-2 text-xs font-black uppercase tracking-widest transition-all relative group shrink-0"
-                            :class="
-                                activeTab === tab.key
-                                    ? 'text-action-primary'
-                                    : 'text-gray-400 hover:text-gray-600 dark:text-gray-500'
-                            "
-                        >
-                            <span class="text-base">{{ tab.icon }}</span>
-                            {{ tab.label }}
-                            <div
-                                v-if="activeTab === tab.key"
-                                class="absolute bottom-0 left-0 w-full h-1 bg-action-primary rounded-t-full shadow-[0_-2px_8px_rgba(79,70,229,0.4)]"
-                            ></div>
-                        </button>
-                    </nav>
+                    <AppTabs v-model="activeTab" :tabs="tabs" variant="pills" sync-url>
+                        <template v-for="tab in tabs" :key="tab.id" #[`icon-${tab.id}`]>
+                            <span>{{ tab.emoji }}</span>
+                        </template>
+                    </AppTabs>
                 </template>
             </PageHeader>
 
@@ -887,13 +872,13 @@
                 >
                     <button
                         @click="closeDeviceModal"
-                        class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600"
+                        class="px-5 py-2.5 text-xs font-bold text-text-secondary hover:bg-surface-secondary border border-border rounded-xl transition-colors cursor-pointer"
                     >
                         {{ $t('common.cancel') }}
                     </button>
                     <button
                         @click="saveDevice"
-                        class="px-4 py-2 text-sm font-medium text-white bg-action-primary rounded-lg hover:bg-action-primary-hover"
+                        class="inline-flex items-center justify-center gap-2 px-6 py-2.5 text-xs font-bold text-white bg-action-primary hover:bg-action-primary-hover rounded-xl shadow-xs transition-all disabled:opacity-50 cursor-pointer"
                     >
                         {{ $t('common.save') }}
                     </button>
@@ -1016,13 +1001,13 @@
                 >
                     <button
                         @click="closeShiftModal"
-                        class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600"
+                        class="px-5 py-2.5 text-xs font-bold text-text-secondary hover:bg-surface-secondary border border-border rounded-xl transition-colors cursor-pointer"
                     >
                         {{ $t('common.cancel') }}
                     </button>
                     <button
                         @click="saveShift"
-                        class="px-4 py-2 text-sm font-medium text-white bg-action-primary rounded-lg hover:bg-action-primary-hover"
+                        class="inline-flex items-center justify-center gap-2 px-6 py-2.5 text-xs font-bold text-white bg-action-primary hover:bg-action-primary-hover rounded-xl shadow-xs transition-all disabled:opacity-50 cursor-pointer"
                     >
                         {{ $t('common.save') }}
                     </button>
@@ -1046,6 +1031,7 @@ import HRSettingModal from '@/Components/HR/HRSettingModal.vue';
 import RegulationModal from '@/Components/HR/RegulationModal.vue';
 import BaseModal from '@/Components/BaseModal.vue';
 import AppToggle from '@/Components/Common/AppToggle.vue';
+import AppTabs from '@/Components/Common/AppTabs.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 import { useToast } from '@/Composables/useToast';
 import { useConfirm } from '@/Composables/useConfirm';
@@ -1075,14 +1061,14 @@ const props = defineProps({
 const activeTab = ref('employee_types');
 
 const tabs = computed(() => [
-    { key: 'employee_types', label: t('hr.settings.employee_types.title'), icon: '👤' },
-    { key: 'job_titles', label: t('hr.settings.job_titles.title'), icon: '💼' },
-    { key: 'allowances', label: t('hr.settings.allowances.title'), icon: '💰' },
-    { key: 'deductions', label: t('hr.settings.deductions.title'), icon: '📉' },
-    { key: 'regulations', label: t('hr.settings.regulations.title'), icon: '📜' },
-    { key: 'shifts', label: t('hr.settings.shifts.title'), icon: '⏰' },
-    { key: 'attendance_settings', label: t('hr.settings.attendance_settings.title'), icon: '📋' },
-    { key: 'biometric_devices', label: t('hr.settings.biometric_devices.title'), icon: '📡' },
+    { id: 'employee_types', label: t('hr.settings.employee_types.title'), emoji: '👤' },
+    { id: 'job_titles', label: t('hr.settings.job_titles.title'), emoji: '💼' },
+    { id: 'allowances', label: t('hr.settings.allowances.title'), emoji: '💰' },
+    { id: 'deductions', label: t('hr.settings.deductions.title'), emoji: '📉' },
+    { id: 'regulations', label: t('hr.settings.regulations.title'), emoji: '📜' },
+    { id: 'shifts', label: t('hr.settings.shifts.title'), emoji: '⏰' },
+    { id: 'attendance_settings', label: t('hr.settings.attendance_settings.title'), emoji: '📋' },
+    { id: 'biometric_devices', label: t('hr.settings.biometric_devices.title'), emoji: '📡' },
 ]);
 
 const groupedRegulations = computed(() => {

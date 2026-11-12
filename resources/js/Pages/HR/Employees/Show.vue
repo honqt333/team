@@ -102,22 +102,12 @@
             <div
                 class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden"
             >
-                <div class="border-b border-gray-200 dark:border-gray-700 px-4">
-                    <nav class="flex gap-6 overflow-x-auto">
-                        <button
-                            v-for="tab in tabs"
-                            :key="tab.key"
-                            @click="activeTab = tab.key"
-                            :class="[
-                                'py-4 text-sm font-medium border-b-2 transition-colors whitespace-nowrap',
-                                activeTab === tab.key
-                                    ? 'border-action-primary text-action-primary'
-                                    : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400',
-                            ]"
-                        >
-                            {{ tab.icon }} {{ tab.label }}
-                        </button>
-                    </nav>
+                <div class="px-4 py-3 border-b border-gray-200 dark:border-gray-700">
+                    <AppTabs v-model="activeTab" :tabs="tabs" variant="pills" sync-url>
+                        <template v-for="tab in tabs" :key="tab.id" #[`icon-${tab.id}`]>
+                            <span>{{ tab.emoji }}</span>
+                        </template>
+                    </AppTabs>
                 </div>
 
                 <div class="p-6">
@@ -209,6 +199,7 @@ import { useI18n } from 'vue-i18n';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import PageHeader from '@/Components/PageHeader.vue';
 import BackButton from '@/Components/BackButton.vue';
+import AppTabs from '@/Components/Common/AppTabs.vue';
 import EmployeeInfoTab from '@/Components/HR/Tabs/EmployeeInfoTab.vue';
 
 import EmployeeFinancialTab from '@/Components/HR/Tabs/EmployeeFinancialTab.vue';
@@ -239,14 +230,14 @@ const props = defineProps({
 const activeTab = ref(new URLSearchParams(window.location.search).get('tab') || 'info');
 
 const tabs = computed(() => [
-    { key: 'info', label: t('hr.employees.tabs.info'), icon: '📋' },
-    { key: 'financial', label: t('hr.employees.tabs.financial'), icon: '💵' },
-    { key: 'schedule', label: t('hr.employees.tabs.schedule'), icon: '⏰' },
-    { key: 'leaves', label: t('hr.leaves.title'), icon: '🏖️' },
-    { key: 'permissions', label: t('hr.employees.tabs.permissions'), icon: '🔐' },
-    { key: 'attendance', label: t('hr.employees.tabs.attendance'), icon: '📅' },
-    { key: 'payroll', label: t('hr.employees.tabs.payroll'), icon: '💰' },
-    { key: 'work_orders', label: t('hr.employees.tabs.work_orders'), icon: '🔧' },
+    { id: 'info', label: t('hr.employees.tabs.info'), emoji: '📋' },
+    { id: 'financial', label: t('hr.employees.tabs.financial'), emoji: '💵' },
+    { id: 'schedule', label: t('hr.employees.tabs.schedule'), emoji: '⏰' },
+    { id: 'leaves', label: t('hr.leaves.title'), emoji: '🏖️' },
+    { id: 'permissions', label: t('hr.employees.tabs.permissions'), emoji: '🔐' },
+    { id: 'attendance', label: t('hr.employees.tabs.attendance'), emoji: '📅' },
+    { id: 'payroll', label: t('hr.employees.tabs.payroll'), emoji: '💰' },
+    { id: 'work_orders', label: t('hr.employees.tabs.work_orders'), emoji: '🔧' },
 ]);
 
 watch(activeTab, (newTab) => {

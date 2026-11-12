@@ -317,18 +317,8 @@
             </div>
 
             <!-- Tabs Section Selector -->
-            <div
-                class="flex items-center bg-white dark:bg-gray-800 p-2 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm gap-1 max-w-full overflow-x-auto whitespace-nowrap"
-            >
-                <button
-                    @click="activeTab = 'received_items'"
-                    :class="[
-                        'px-5 py-2.5 text-sm font-black rounded-xl transition-all flex items-center gap-2 shrink-0',
-                        activeTab === 'received_items'
-                            ? 'bg-amber-500 text-white shadow-md shadow-amber-500/20'
-                            : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700/50',
-                    ]"
-                >
+            <AppTabs v-model="activeTab" :tabs="tabs" variant="pills" sync-url>
+                <template #icon-received_items>
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path
                             stroke-linecap="round"
@@ -337,28 +327,8 @@
                             d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
                         />
                     </svg>
-                    <span>{{ $t('invoices.received_items') }}</span>
-                    <span
-                        :class="[
-                            'px-2 py-0.5 text-xs rounded-full font-bold',
-                            activeTab === 'received_items'
-                                ? 'bg-white/20 text-white'
-                                : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300',
-                        ]"
-                    >
-                        {{ invoice.lines?.length || 0 }}
-                    </span>
-                </button>
-
-                <button
-                    @click="activeTab = 'payments'"
-                    :class="[
-                        'px-5 py-2.5 text-sm font-black rounded-xl transition-all flex items-center gap-2 shrink-0',
-                        activeTab === 'payments'
-                            ? 'bg-amber-500 text-white shadow-md shadow-amber-500/20'
-                            : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700/50',
-                    ]"
-                >
+                </template>
+                <template #icon-payments>
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path
                             stroke-linecap="round"
@@ -367,18 +337,8 @@
                             d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
                         />
                     </svg>
-                    <span>{{ $t('invoices.payments_history') }}</span>
-                </button>
-
-                <button
-                    @click="activeTab = 'attachments'"
-                    :class="[
-                        'px-5 py-2.5 text-sm font-black rounded-xl transition-all flex items-center gap-2 shrink-0',
-                        activeTab === 'attachments'
-                            ? 'bg-amber-500 text-white shadow-md shadow-amber-500/20'
-                            : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700/50',
-                    ]"
-                >
+                </template>
+                <template #icon-attachments>
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path
                             stroke-linecap="round"
@@ -387,22 +347,8 @@
                             d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"
                         />
                     </svg>
-                    <span>{{ $t('invoices.attachments') }}</span>
-                    <span
-                        v-if="invoice.attachment_path"
-                        class="w-2 h-2 rounded-full bg-red-500"
-                    ></span>
-                </button>
-
-                <button
-                    @click="activeTab = 'linked_work_orders'"
-                    :class="[
-                        'px-5 py-2.5 text-sm font-black rounded-xl transition-all flex items-center gap-2 shrink-0',
-                        activeTab === 'linked_work_orders'
-                            ? 'bg-amber-500 text-white shadow-md shadow-amber-500/20'
-                            : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700/50',
-                    ]"
-                >
+                </template>
+                <template #icon-linked_work_orders>
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path
                             stroke-linecap="round"
@@ -411,29 +357,8 @@
                             d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
                         />
                     </svg>
-                    <span>{{ $t('invoices.linked_work_orders') }}</span>
-                    <span
-                        :class="[
-                            'px-2 py-0.5 text-xs rounded-full font-bold',
-                            activeTab === 'linked_work_orders'
-                                ? 'bg-white/20 text-white'
-                                : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300',
-                        ]"
-                    >
-                        {{ linkedWorkOrdersList.length }}
-                    </span>
-                </button>
-
-                <button
-                    v-if="invoice.return_invoices && invoice.return_invoices.length > 0"
-                    @click="activeTab = 'returns'"
-                    :class="[
-                        'px-5 py-2.5 text-sm font-black rounded-xl transition-all flex items-center gap-2 shrink-0',
-                        activeTab === 'returns'
-                            ? 'bg-red-600 text-white shadow-md shadow-red-500/20'
-                            : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700/50',
-                    ]"
-                >
+                </template>
+                <template #icon-returns>
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path
                             stroke-linecap="round"
@@ -442,19 +367,8 @@
                             d="M16 15v-6a4 4 0 00-4-4H8m0 0l3 3m-3-3l3-3"
                         />
                     </svg>
-                    <span>{{ $t('invoices.return_history') }}</span>
-                    <span
-                        :class="[
-                            'px-2 py-0.5 text-xs rounded-full font-bold',
-                            activeTab === 'returns'
-                                ? 'bg-white/20 text-white'
-                                : 'bg-red-50 dark:bg-red-950/30 text-red-650 dark:text-red-400',
-                        ]"
-                    >
-                        {{ invoice.return_invoices.length }}
-                    </span>
-                </button>
-            </div>
+                </template>
+            </AppTabs>
 
             <!-- Elements Received Tab -->
             <div
@@ -2189,6 +2103,7 @@ import CustomDatePicker from '@/Components/CustomDatePicker.vue';
 import Tooltip from '@/Components/Tooltip.vue';
 import WorkOrderCustomerCard from '@/Components/WorkOrders/WorkOrderCustomerCard.vue';
 import LinkedInvoiceBadge from '@/Components/Common/LinkedInvoiceBadge.vue';
+import AppTabs from '@/Components/Common/AppTabs.vue';
 import WorkOrderFinancialSummary from '@/Components/WorkOrders/WorkOrderFinancialSummary.vue';
 import { useNumberFormat } from '@/Composables/useNumberFormat';
 
@@ -2231,6 +2146,37 @@ const { t, locale } = useI18n();
 const page = usePage();
 const isRtl = computed(() => locale.value === 'ar');
 const { toEnglish, formatCurrency, formatMoney } = useNumberFormat();
+
+const tabs = computed(() => {
+    const list = [
+        {
+            id: 'received_items',
+            label: t('invoices.received_items'),
+            count: props.invoice?.lines?.length || 0,
+        },
+        {
+            id: 'payments',
+            label: t('invoices.payments_history'),
+        },
+        {
+            id: 'attachments',
+            label: t('invoices.attachments'),
+        },
+        {
+            id: 'linked_work_orders',
+            label: t('invoices.linked_work_orders'),
+            count: linkedWorkOrdersList.value.length,
+        },
+    ];
+    if (props.invoice?.return_invoices && props.invoice.return_invoices.length > 0) {
+        list.push({
+            id: 'returns',
+            label: t('invoices.return_history'),
+            count: props.invoice.return_invoices.length,
+        });
+    }
+    return list;
+});
 
 const tenant = computed(() => props.invoice.tenant || page.props.tenant || {});
 const isCompany = computed(() => !!props.invoice.company_transaction);

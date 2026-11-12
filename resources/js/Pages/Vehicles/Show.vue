@@ -448,70 +448,7 @@
             <!-- Tabs Section -->
             <div class="space-y-4">
                 <!-- Tabs Navigation -->
-                <div
-                    class="p-1 bg-gray-100/50 dark:bg-gray-900/50 backdrop-blur-xl rounded-3xl border border-gray-200/50 dark:border-gray-700/50 shadow-inner overflow-x-auto no-scrollbar"
-                >
-                    <div class="flex items-center gap-1 min-w-max">
-                        <button
-                            v-for="tab in tabs"
-                            :key="tab.key"
-                            @click="activeTab = tab.key"
-                            :class="[
-                                'group relative flex items-center gap-3 px-5 py-2.5 rounded-2xl transition-all duration-500 ease-out overflow-hidden',
-                                activeTab === tab.key
-                                    ? 'bg-action-primary hover:bg-action-primary-hover text-white shadow-xl shadow-focus-ring-soft scale-[1.01]'
-                                    : 'text-gray-500 dark:text-gray-400 hover:bg-white dark:hover:bg-gray-800 hover:shadow-lg hover:shadow-gray-200/50 dark:hover:shadow-black/20 hover:-translate-y-0.5',
-                            ]"
-                        >
-                            <!-- Animated Background Glow for Active -->
-                            <div
-                                v-if="activeTab === tab.key"
-                                class="absolute inset-0 bg-gradient-to-r from-white/0 via-white/10 to-white/0 translate-x-[-100%] animate-[shimmer_2s_infinite]"
-                            ></div>
-
-                            <div
-                                :class="[
-                                    'w-9 h-9 rounded-xl flex items-center justify-center transition-all duration-500',
-                                    activeTab === tab.key
-                                        ? 'bg-white/20 rotate-[12deg] scale-105 shadow-inner'
-                                        : 'bg-white dark:bg-gray-800 shadow-sm group-hover:rotate-[-6deg] group-hover:scale-105',
-                                ]"
-                            >
-                                <component
-                                    :is="tab.icon"
-                                    :class="[
-                                        'w-4.5 h-4.5 transition-all duration-500',
-                                        activeTab === tab.key
-                                            ? 'text-white scale-105'
-                                            : 'text-action-primary group-hover:text-purple-600',
-                                    ]"
-                                />
-                            </div>
-
-                            <div class="flex flex-col items-start relative z-10">
-                                <span
-                                    :class="[
-                                        'text-[9px] font-black uppercase tracking-[0.15em] transition-colors duration-500',
-                                        activeTab === tab.key
-                                            ? 'text-white/70'
-                                            : 'text-gray-400 dark:text-gray-500',
-                                    ]"
-                                >
-                                    {{ tab.label }}
-                                </span>
-                                <div class="flex items-baseline gap-1.5">
-                                    <span class="text-base font-black leading-none">
-                                        {{ toEnglish(tab.count) }}
-                                    </span>
-                                    <span
-                                        v-if="activeTab === tab.key"
-                                        class="w-1 h-1 rounded-full bg-white animate-pulse"
-                                    ></span>
-                                </div>
-                            </div>
-                        </button>
-                    </div>
-                </div>
+                <AppTabs v-model="activeTab" :tabs="tabs" variant="pills" sync-url />
 
                 <!-- Tab Content Container -->
                 <div
@@ -522,7 +459,7 @@
                         class="absolute top-0 right-0 p-16 opacity-[0.01] dark:opacity-[0.02] pointer-events-none select-none -translate-y-8 translate-x-8"
                     >
                         <component
-                            :is="tabs.find((t) => t.key === activeTab)?.icon"
+                            :is="tabs.find((t) => t.id === activeTab)?.icon"
                             class="w-64 h-64"
                         />
                     </div>
@@ -1803,6 +1740,7 @@ import QuoteFormModal from '@/Components/Quotes/QuoteFormModal.vue';
 import ConfirmModal from '@/Components/ConfirmModal.vue';
 import Tooltip from '@/Components/Tooltip.vue';
 import BackButton from '@/Components/BackButton.vue';
+import AppTabs from '@/Components/Common/AppTabs.vue';
 import SaudiPlateDisplay from '@/Components/Vehicles/SaudiPlateDisplay.vue';
 import { useConfirm } from '@/Composables/useConfirm';
 import { usePermission } from '@/Composables/usePermission';
@@ -2028,38 +1966,38 @@ const workOrderNotes = computed(() => {
 
 const tabs = computed(() => [
     {
-        key: 'workOrders',
+        id: 'workOrders',
         label: t('customers.work_orders'),
         count: props.counts.workOrders,
         icon: ClipboardIcon,
     },
-    { key: 'ratings', label: t('quotes.title'), count: props.counts.quotes, icon: StarIcon },
+    { id: 'ratings', label: t('quotes.title'), count: props.counts.quotes, icon: StarIcon },
     {
-        key: 'invoices',
+        id: 'invoices',
         label: t('invoices.title'),
         count: props.counts.invoices,
         icon: ReceiptIcon,
     },
     {
-        key: 'services',
+        id: 'services',
         label: t('work_orders.item.tab_service'),
         count: workOrderServices.value.length,
         icon: WrenchIcon,
     },
     {
-        key: 'parts',
+        id: 'parts',
         label: t('work_orders.item.tab_parts'),
         count: parts.value.length,
         icon: CogIcon,
     },
     {
-        key: 'notes',
+        id: 'notes',
         label: t('work_orders.item.tab_notes'),
         count: workOrderNotes.value.length,
         icon: DocumentTextIcon,
     },
     {
-        key: 'mileage',
+        id: 'mileage',
         label: t('vehicles.mileage.history'),
         count: props.vehicle.mileage_logs?.length || 0,
         icon: MapIcon,

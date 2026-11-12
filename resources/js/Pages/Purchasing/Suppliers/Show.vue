@@ -312,7 +312,7 @@
                                 </div>
                                 <div
                                     :class="[
-                                        'group/stat flex flex-col items-center justify-center h-20 lg:w-48 lg:h-24 rounded-3xl border transition-all hover:bg-white col-span-2 sm:col-span-1',
+                                        'group/stat flex flex-col items-center justify-center h-20 lg:w-48 lg:h-24 rounded-3xl border transition-all hover:bg-white col-span-2 sm:col-span-1 px-2 text-center',
                                         balance < -0.01
                                             ? 'bg-red-50/50 dark:bg-red-900/20 border-red-100/50 dark:border-red-800/30 hover:shadow-red-500/10 dark:hover:bg-red-900/40 hover:shadow-lg'
                                             : 'bg-emerald-50/50 dark:bg-emerald-900/20 border-emerald-100/50 dark:border-emerald-800/30 hover:shadow-emerald-500/10 dark:hover:bg-emerald-900/40 hover:shadow-lg',
@@ -326,12 +326,22 @@
                                                 : 'text-emerald-600 dark:text-emerald-400',
                                         ]"
                                     >
-                                        {{ formatCurrency(balance) }}
+                                        {{
+                                            formatCurrency(
+                                                balance < -0.01
+                                                    ? amountDueFromSupplier || Math.abs(balance)
+                                                    : balance
+                                            )
+                                        }}
                                     </span>
                                     <span
                                         class="text-[9px] font-black text-gray-400 uppercase tracking-widest mt-1"
                                     >
-                                        {{ $t('purchasing.suppliers.balance') }}
+                                        {{
+                                            balance < -0.01
+                                                ? $t('suppliers.amount_due_from_supplier')
+                                                : $t('purchasing.suppliers.balance')
+                                        }}
                                     </span>
                                 </div>
                             </div>
@@ -346,27 +356,7 @@
             >
                 <!-- Tabs Navigation -->
                 <div class="px-6 py-3 border-b border-gray-200 dark:border-gray-700">
-                    <div class="flex gap-1 bg-gray-100 dark:bg-gray-900 rounded-xl p-1">
-                        <button
-                            v-for="tab in tabs"
-                            :key="tab.key"
-                            @click="activeTab = tab.key"
-                            :class="[
-                                'flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg transition-all flex-1 justify-center',
-                                activeTab === tab.key
-                                    ? 'bg-white dark:bg-gray-800 shadow-sm ' + tab.activeColor
-                                    : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300',
-                            ]"
-                        >
-                            <component :is="tab.icon" class="w-4 h-4" />
-                            {{ tab.label }}
-                            <span
-                                class="px-1.5 py-0.5 text-xs rounded-full bg-gray-200 dark:bg-gray-700"
-                            >
-                                {{ tab.count }}
-                            </span>
-                        </button>
-                    </div>
+                    <AppTabs v-model="activeTab" :tabs="tabs" variant="pills" sync-url />
                 </div>
 
                 <!-- Tab Content -->
@@ -1380,6 +1370,9 @@
                                             {{ $t('common.total') }}
                                         </th>
                                         <th class="py-3 px-4 text-center font-bold align-middle">
+                                            {{ $t('suppliers.remaining_refund') }}
+                                        </th>
+                                        <th class="py-3 px-4 text-center font-bold align-middle">
                                             {{ $t('invoices.returned_items') }}
                                         </th>
                                         <th class="py-3 px-4 text-center font-bold align-middle">
@@ -1452,6 +1445,19 @@
                                             dir="ltr"
                                         >
                                             {{ formatCurrency(ret.total) }}
+                                        </td>
+                                        <td
+                                            class="py-4 px-4 text-center font-black text-amber-600 dark:text-amber-400 font-mono align-middle"
+                                            dir="ltr"
+                                        >
+                                            {{
+                                                formatCurrency(
+                                                    ret.remaining_refund !== undefined &&
+                                                        ret.remaining_refund !== null
+                                                        ? ret.remaining_refund
+                                                        : ret.total
+                                                )
+                                            }}
                                         </td>
                                         <td
                                             class="py-4 px-4 text-center font-black text-gray-700 dark:text-gray-300 align-middle"
@@ -1845,6 +1851,7 @@
 
 <script setup>
 import PrintEngine from '@/Components/Print/PrintEngine.vue';
+import AppTabs from '@/Components/Common/AppTabs.vue';
 import DataTable from '@/Components/Common/DataTable.vue';
 import CustomDatePicker from '@/Components/CustomDatePicker.vue';
 import { printDocument } from '@/Composables/usePrint';
@@ -1871,6 +1878,7 @@ const props = defineProps({
     payments: Array,
     counts: Object,
     balance: Number,
+    amountDueFromSupplier: { type: Number, default: 0 },
     suppliers: Array,
     defaultWarehouse: Object,
     warehouses: Array,
@@ -2131,39 +2139,34 @@ const PaymentIcon = () =>
 
 const tabs = computed(() => [
     {
-        key: 'overview',
+        id: 'overview',
         label: t('common.overview'),
         count: null,
         icon: HomeIcon,
-        activeColor: 'text-blue-600 dark:text-blue-400',
     },
     {
-        key: 'statement',
+        id: 'statement',
         label: t('purchasing.suppliers.statement_tab'),
         count: null,
         icon: StatementIcon,
-        activeColor: 'text-amber-600 dark:text-amber-400',
     },
     {
-        key: 'invoices',
+        id: 'invoices',
         label: t('purchasing.suppliers.invoices'),
         count: props.counts.invoices || 0,
         icon: InvoiceIcon,
-        activeColor: 'text-green-600 dark:text-green-400',
     },
     {
-        key: 'returns',
+        id: 'returns',
         label: t('invoices.return_history') || t('invoices.return_invoice'),
         count: props.counts.returns || 0,
         icon: ReturnIcon,
-        activeColor: 'text-rose-600 dark:text-rose-400',
     },
     {
-        key: 'payments',
+        id: 'payments',
         label: t('purchasing.suppliers.payments'),
         count: props.counts.payments || 0,
         icon: PaymentIcon,
-        activeColor: 'text-purple-600',
     },
 ]);
 
