@@ -33,7 +33,7 @@
                     <AppTabs
                         :model-value="activeSection"
                         :tabs="sectionTabs"
-                        variant="underline"
+                        variant="pills"
                         @update:model-value="navigateToSection"
                     >
                         <template #icon-makes>

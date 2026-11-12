@@ -83,7 +83,12 @@
                     class="flex-1 min-w-0 bg-surface rounded-2xl border border-border-subtle shadow-xs overflow-hidden"
                 >
                     <!-- Tab Bar -->
-                    <AppTabs v-model="activeTab" :tabs="printTabs" variant="underline" class="px-5">
+                    <AppTabs
+                        v-model="activeTab"
+                        :tabs="printTabs"
+                        variant="pills"
+                        class="px-5 py-3"
+                    >
                         <template #icon-appearance>
                             <svg
                                 class="w-4 h-4"

@@ -223,7 +223,7 @@
 
             <!-- Filter Tabs - Standard AppTabs -->
             <div class="w-full">
-                <AppTabs v-model="activeTab" :tabs="mainTabs" variant="underline" />
+                <AppTabs v-model="activeTab" :tabs="mainTabs" variant="pills" />
             </div>
 
             <!-- Services Tab Content -->

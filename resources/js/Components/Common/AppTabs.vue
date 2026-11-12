@@ -13,7 +13,7 @@ const props = defineProps({
     },
     variant: {
         type: String,
-        default: 'underline', // 'underline' | 'pills'
+        default: 'pills', // 'underline' | 'pills'
     },
     syncUrl: {
         type: Boolean,

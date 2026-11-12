@@ -16,19 +16,22 @@ defineProps({
 </script>
 
 <template>
-    <div class="border-b border-border mb-6 overflow-x-auto scrollbar-none">
-        <nav class="-mb-px flex space-x-8 rtl:space-x-reverse min-w-max" aria-label="Tabs">
+    <div class="mb-6 overflow-x-auto no-scrollbar">
+        <nav
+            class="inline-flex p-1.5 bg-surface-muted/90 rounded-2xl border border-border max-w-full overflow-x-auto no-scrollbar gap-1"
+            aria-label="Tabs"
+        >
             <Link
                 v-if="can('users.view')"
                 :href="route('settings.users.index')"
                 :class="[
+                    'inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm whitespace-nowrap transition-all duration-200 focus:outline-none',
                     activeTab === 'users'
-                        ? 'border-action-primary text-action-primary font-bold'
-                        : 'border-transparent text-text-secondary hover:text-text-primary hover:border-border',
-                    'whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors flex items-center gap-2',
+                        ? 'bg-surface text-action-primary shadow-xs font-semibold'
+                        : 'font-medium text-text-secondary hover:text-text-primary hover:bg-surface/40',
                 ]"
             >
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path
                         stroke-linecap="round"
                         stroke-linejoin="round"
@@ -43,13 +46,13 @@ defineProps({
                 v-if="can('users.view')"
                 :href="route('settings.roles.index')"
                 :class="[
+                    'inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm whitespace-nowrap transition-all duration-200 focus:outline-none',
                     activeTab === 'roles'
-                        ? 'border-action-primary text-action-primary font-bold'
-                        : 'border-transparent text-text-secondary hover:text-text-primary hover:border-border',
-                    'whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors flex items-center gap-2',
+                        ? 'bg-surface text-action-primary shadow-xs font-semibold'
+                        : 'font-medium text-text-secondary hover:text-text-primary hover:bg-surface/40',
                 ]"
             >
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path
                         stroke-linecap="round"
                         stroke-linejoin="round"

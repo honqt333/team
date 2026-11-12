@@ -534,7 +534,7 @@ const regenerateCodes = () =>
 
                 <!-- Integrated Modern Tabs Navigation inside PageHeader filters slot -->
                 <template #filters>
-                    <AppTabs v-model="activeTab" :tabs="tabs" variant="underline">
+                    <AppTabs v-model="activeTab" :tabs="tabs" variant="pills">
                         <template #icon-profile>
                             <svg
                                 class="w-4 h-4"

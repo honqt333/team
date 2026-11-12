@@ -29,12 +29,7 @@
             </PageHeader>
 
             <!-- Standardized Approved Tabs Component -->
-            <AppTabs
-                v-model="currentTab"
-                :tabs="tabs"
-                variant="underline"
-                @change="handleTabChange"
-            />
+            <AppTabs v-model="currentTab" :tabs="tabs" variant="pills" @change="handleTabChange" />
 
             <!-- Tab Panels -->
             <div class="mt-4">

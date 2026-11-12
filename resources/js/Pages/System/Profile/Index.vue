@@ -7,6 +7,7 @@ import { ref, computed } from 'vue';
 import { useForm, usePage, router } from '@inertiajs/vue3';
 import SystemLayout from '@/Layouts/SystemLayout.vue';
 import PageHeader from '@/Components/PageHeader.vue';
+import AppTabs from '@/Components/Common/AppTabs.vue';
 import { useToast } from '@/Composables/useToast';
 
 const { success } = useToast();
@@ -16,6 +17,11 @@ const security = computed(() => page.props.security || {});
 
 // Active Tab
 const activeTab = ref('profile');
+const tabs = computed(() => [
+    { id: 'profile', label: t('employee_portal.profile') },
+    { id: 'password', label: t('auth.password') },
+    { id: 'security', label: t('security.tab_two_factor') },
+]);
 
 // Profile Form
 const profileForm = useForm({
@@ -132,69 +138,38 @@ const regenerateCodes = () =>
             </PageHeader>
 
             <!-- Tabs -->
-            <div
-                class="bg-white dark:bg-gray-800 rounded-2xl p-2 shadow-sm border border-gray-200 dark:border-gray-700"
-            >
-                <div class="flex items-center gap-1 flex-wrap">
-                    <button
-                        @click="activeTab = 'profile'"
-                        :class="[
-                            'flex items-center gap-2 px-5 py-3 rounded-xl text-sm font-medium transition-all',
-                            activeTab === 'profile'
-                                ? 'bg-action-primary hover:bg-action-primary-hover text-white shadow-lg shadow-focus-ring-soft'
-                                : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700',
-                        ]"
-                    >
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                            />
-                        </svg>
-                        {{ $t('employee_portal.profile') }}
-                    </button>
-                    <button
-                        @click="activeTab = 'password'"
-                        :class="[
-                            'flex items-center gap-2 px-5 py-3 rounded-xl text-sm font-medium transition-all',
-                            activeTab === 'password'
-                                ? 'bg-action-primary hover:bg-action-primary-hover text-white shadow-lg shadow-focus-ring-soft'
-                                : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700',
-                        ]"
-                    >
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"
-                            />
-                        </svg>
-                        {{ $t('auth.password') }}
-                    </button>
-                    <button
-                        @click="activeTab = 'security'"
-                        :class="[
-                            'flex items-center gap-2 px-5 py-3 rounded-xl text-sm font-medium transition-all',
-                            activeTab === 'security'
-                                ? 'bg-action-primary hover:bg-action-primary-hover text-white shadow-lg shadow-focus-ring-soft'
-                                : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700',
-                        ]"
-                    >
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
-                            />
-                        </svg>
-                        {{ $t('security.tab_two_factor') }}
-                    </button>
-                </div>
-            </div>
+            <AppTabs v-model="activeTab" :tabs="tabs" variant="pills" sync-url>
+                <template #icon-profile>
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                        />
+                    </svg>
+                </template>
+                <template #icon-password>
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"
+                        />
+                    </svg>
+                </template>
+                <template #icon-security>
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
+                        />
+                    </svg>
+                </template>
+            </AppTabs>
 
             <!-- Profile Tab -->
             <div

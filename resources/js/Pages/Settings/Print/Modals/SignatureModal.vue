@@ -70,30 +70,17 @@
                     </div>
 
                     <!-- Tabs -->
-                    <div class="px-8 pt-5 border-b border-gray-100 dark:border-gray-700">
-                        <div
-                            class="flex items-center gap-1 bg-gray-50/60 dark:bg-gray-900/40 p-1 rounded-xl"
-                            role="tablist"
+                    <div class="px-8 pt-5 pb-3 border-b border-gray-100 dark:border-gray-700">
+                        <AppTabs
+                            :model-value="activeTab"
+                            :tabs="tabs"
+                            variant="pills"
+                            @update:model-value="switchTab"
                         >
-                            <button
-                                v-for="tab in tabs"
-                                :key="tab.key"
-                                type="button"
-                                role="tab"
-                                :aria-selected="activeTab === tab.key"
-                                @click="switchTab(tab.key)"
-                                :disabled="uploading"
-                                class="flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-xs font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                                :class="
-                                    activeTab === tab.key
-                                        ? 'bg-white dark:bg-gray-800 text-amber-600 dark:text-amber-400 shadow-sm'
-                                        : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'
-                                "
-                            >
-                                <span v-safe-html="tab.icon" class="w-4 h-4"></span>
-                                {{ tab.label }}
-                            </button>
-                        </div>
+                            <template v-for="tab in tabs" :key="tab.id" #[`icon-${tab.id}`]>
+                                <span v-safe-html="tab.htmlIcon" class="w-4 h-4"></span>
+                            </template>
+                        </AppTabs>
                     </div>
 
                     <!-- Tab Body -->
@@ -600,13 +587,13 @@
 
                     <!-- Footer -->
                     <div
-                        class="bg-gray-50 dark:bg-gray-900/50 px-8 py-5 flex items-center gap-3 border-t border-gray-100 dark:border-gray-700"
+                        class="bg-surface px-8 py-5 flex items-center justify-end gap-3 border-t border-border"
                     >
                         <button
                             type="button"
                             @click="$emit('close')"
                             :disabled="uploading"
-                            class="flex-1 py-2.5 rounded-2xl bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 font-bold hover:bg-gray-100 dark:hover:bg-gray-600 transition-all border border-gray-200 dark:border-gray-600 text-sm disabled:opacity-50"
+                            class="px-5 py-2.5 text-xs font-bold text-text-secondary hover:bg-surface-secondary border border-border rounded-xl transition-colors disabled:opacity-50 cursor-pointer"
                         >
                             {{ $t('common.cancel') }}
                         </button>
@@ -614,7 +601,7 @@
                             type="button"
                             @click="handleSave"
                             :disabled="uploading"
-                            class="flex-[2] py-2.5 rounded-2xl bg-gradient-to-r from-amber-600 to-orange-600 text-white font-bold transition-all shadow-lg shadow-amber-500/20 hover:scale-[1.02] active:scale-[0.98] text-sm flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+                            class="inline-flex items-center justify-center gap-2 px-6 py-2.5 text-xs font-bold text-white bg-action-primary hover:bg-action-primary-hover rounded-xl shadow-xs transition-all disabled:opacity-50 cursor-pointer"
                         >
                             <svg v-if="uploading" class="animate-spin h-4 w-4" viewBox="0 0 24 24">
                                 <circle
@@ -649,6 +636,7 @@
 
 <script setup>
 import Modal from '@/Components/Modal.vue';
+import AppTabs from '@/Components/Common/AppTabs.vue';
 import { ref, computed, watch, onMounted, onBeforeUnmount, nextTick } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useForm, usePage } from '@inertiajs/vue3';
@@ -914,9 +902,24 @@ function onDragEnd() {
 
 // ── Tabs ───────────────────────────────────────────────────────────────
 const tabs = computed(() => [
-    { key: 'draw', label: t('print_settings.tab_draw'), icon: drawIcon() },
-    { key: 'upload', label: t('print_settings.tab_upload'), icon: uploadIcon() },
-    { key: 'library', label: t('print_settings.tab_library'), icon: libraryIcon() },
+    {
+        id: 'draw',
+        label: t('print_settings.tab_draw'),
+        htmlIcon: drawIcon(),
+        disabled: uploading.value,
+    },
+    {
+        id: 'upload',
+        label: t('print_settings.tab_upload'),
+        htmlIcon: uploadIcon(),
+        disabled: uploading.value,
+    },
+    {
+        id: 'library',
+        label: t('print_settings.tab_library'),
+        htmlIcon: libraryIcon(),
+        disabled: uploading.value,
+    },
 ]);
 
 const activeTab = ref('draw');

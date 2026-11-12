@@ -164,36 +164,7 @@
             <!-- ============================================================ -->
             <!-- Tabs Navigation                                              -->
             <!-- ============================================================ -->
-            <div class="border-b border-gray-200 dark:border-gray-700">
-                <nav class="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
-                    <button
-                        v-for="tab in tabs"
-                        :key="tab.id"
-                        @click="activeTab = tab.id"
-                        type="button"
-                        :class="[
-                            'flex items-center gap-2 px-4 py-3 text-xs sm:text-sm font-bold tracking-wide transition-all relative shrink-0 rounded-t-xl',
-                            activeTab === tab.id
-                                ? 'text-action-primary bg-white dark:bg-gray-800 border-t-2 border-action-primary shadow-sm'
-                                : 'text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800/50',
-                        ]"
-                    >
-                        <component :is="tab.icon" class="w-4 h-4 shrink-0" />
-                        <span>{{ tab.label }}</span>
-                        <span
-                            v-if="tab.count !== undefined"
-                            class="ms-1 px-1.5 py-0.5 rounded-md text-[10px] font-bold"
-                            :class="
-                                activeTab === tab.id
-                                    ? 'bg-selection-bg text-selection-text'
-                                    : 'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400'
-                            "
-                        >
-                            {{ tab.count }}
-                        </span>
-                    </button>
-                </nav>
-            </div>
+            <AppTabs v-model="activeTab" :tabs="tabs" variant="pills" sync-url />
 
             <!-- ============================================================ -->
             <!-- TAB 1: Support Channels (قنوات الدعم والتواصل)                 -->
@@ -1399,6 +1370,7 @@ import { useForm, router } from '@inertiajs/vue3';
 import axios from 'axios';
 import SystemLayout from '@/Layouts/SystemLayout.vue';
 import PageHeader from '@/Components/PageHeader.vue';
+import AppTabs from '@/Components/Common/AppTabs.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 import AppToggle from '@/Components/Common/AppToggle.vue';
 import { useToast } from '@/Composables/useToast';

@@ -66,7 +66,7 @@
                         <AppTabs
                             :model-value="activeTab"
                             :tabs="mainTabs"
-                            variant="underline"
+                            variant="pills"
                             @update:model-value="handleMainTabChange"
                         />
                     </div>
@@ -481,14 +481,14 @@
                     <button
                         type="button"
                         @click="showGenerateModal = false"
-                        class="px-4 py-2 bg-surface-secondary text-content-secondary hover:text-content-primary rounded-xl text-sm font-semibold transition-colors cursor-pointer"
+                        class="px-5 py-2.5 text-xs font-bold text-text-secondary hover:bg-surface-secondary border border-border rounded-xl transition-colors cursor-pointer"
                     >
                         {{ $t('common.cancel') }}
                     </button>
                     <button
                         type="submit"
                         :disabled="generating"
-                        class="px-5 py-2 bg-action-primary hover:bg-action-primary-hover text-white rounded-xl text-sm font-bold shadow-xs transition-colors cursor-pointer disabled:opacity-50"
+                        class="inline-flex items-center justify-center gap-2 px-6 py-2.5 text-xs font-bold text-white bg-action-primary hover:bg-action-primary-hover rounded-xl shadow-xs transition-all disabled:opacity-50 cursor-pointer"
                     >
                         {{ generating ? $t('common.processing') : $t('hr.payroll.generate') }}
                     </button>

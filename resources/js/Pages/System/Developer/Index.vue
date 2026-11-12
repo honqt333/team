@@ -164,21 +164,9 @@
             >
                 <!-- Tab Headers -->
                 <div
-                    class="flex border-b border-gray-200 dark:border-gray-700 overflow-x-auto bg-gray-50 dark:bg-gray-900/50"
+                    class="px-6 py-3 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50"
                 >
-                    <button
-                        v-for="tab in tabs"
-                        :key="tab.id"
-                        @click="activeTab = tab.id"
-                        :class="
-                            activeTab === tab.id
-                                ? 'border-action-primary text-action-primary bg-white dark:bg-gray-800'
-                                : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
-                        "
-                        class="px-6 py-4 font-semibold text-sm transition-all border-b-2 whitespace-nowrap"
-                    >
-                        {{ $t(`system.developer.tabs.${tab.id}`) }}
-                    </button>
+                    <AppTabs v-model="activeTab" :tabs="tabs" variant="pills" sync-url />
                 </div>
 
                 <div class="p-6">
@@ -516,6 +504,7 @@ import { useI18n } from 'vue-i18n';
 import { router } from '@inertiajs/vue3';
 import SystemLayout from '@/Layouts/SystemLayout.vue';
 import PageHeader from '@/Components/PageHeader.vue';
+import AppTabs from '@/Components/Common/AppTabs.vue';
 
 const { t } = useI18n();
 
@@ -533,7 +522,12 @@ const loadingAi = ref(false);
 const activeTab = ref('violations');
 const aiAdviceList = ref([]);
 
-const tabs = [{ id: 'violations' }, { id: 'graph' }, { id: 'performance' }, { id: 'ai_advisor' }];
+const tabs = computed(() => [
+    { id: 'violations', label: t('system.developer.tabs.violations') },
+    { id: 'graph', label: t('system.developer.tabs.graph') },
+    { id: 'performance', label: t('system.developer.tabs.performance') },
+    { id: 'ai_advisor', label: t('system.developer.tabs.ai_advisor') },
+]);
 
 // Static dependency-graph node labels. Each label is a translation
 // key; the actual text is resolved through i18n at render time via
