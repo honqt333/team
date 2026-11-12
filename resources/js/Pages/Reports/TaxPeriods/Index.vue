@@ -7,38 +7,29 @@
                 {{ $t('reports.tax_periods_report.consolidated_notice') }}
             </p>
             <!-- Top Header -->
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div>
-                    <div
-                        class="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 mb-1"
-                    >
-                        <Link
-                            :href="route('app.reports.hub')"
-                            class="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors"
-                        >
-                            {{ $t('reports.tax_periods_report.back_to_reports') }}
-                        </Link>
-                        <span>/</span>
-                        <span class="text-gray-900 dark:text-white font-medium">
-                            {{ $t('reports.tax_periods') }}
-                        </span>
-                    </div>
-                    <h1
-                        class="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-3"
-                    >
-                        <span>{{ $t('reports.tax_periods_report.title') }}</span>
-                        <span
-                            class="text-xs px-2.5 py-1 bg-emerald-100 dark:bg-emerald-900/50 text-emerald-800 dark:text-emerald-300 font-bold rounded-full"
-                        >
-                            ZATCA
-                        </span>
-                    </h1>
-                    <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                        {{ $t('reports.tax_periods_report.subtitle') }}
-                    </p>
-                </div>
-
-                <div class="flex items-center gap-3">
+            <PageHeader
+                :title="$t('reports.tax_periods_report.title')"
+                :subtitle="$t('reports.tax_periods_report.subtitle')"
+                badge="ZATCA"
+                gradient-from="from-emerald-600"
+                gradient-to="to-teal-600"
+                glow-from="from-emerald-500"
+                glow-to="to-teal-500"
+            >
+                <template #back>
+                    <BackButton :href="route('app.reports.hub')" />
+                </template>
+                <template #icon>
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2z"
+                        />
+                    </svg>
+                </template>
+                <template #actions>
                     <button
                         type="button"
                         @click="showPeriodModal = true"
@@ -54,8 +45,8 @@
                         </svg>
                         <span>{{ $t('reports.tax_periods_report.select_period_to_create') }}</span>
                     </button>
-                </div>
-            </div>
+                </template>
+            </PageHeader>
 
             <!-- Filters Bar (Using SearchableSelect per Constitution) -->
             <div
@@ -544,6 +535,8 @@ import AppPagination from '@/Components/Common/AppPagination.vue';
 import { ref, computed } from 'vue';
 import { Head, Link, router } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
+import PageHeader from '@/Components/PageHeader.vue';
+import BackButton from '@/Components/BackButton.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 import { useI18n } from 'vue-i18n';
 import { useNumberFormat } from '@/Composables/useNumberFormat';

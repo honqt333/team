@@ -2,72 +2,27 @@
     <SystemLayout>
         <div class="space-y-6 pb-12">
             <!-- ============================================================ -->
-            <!-- Header Section (According to AUDIT_STANDARDS.md)             -->
+            <!-- Header Section                                               -->
             <!-- ============================================================ -->
-            <div
-                class="relative overflow-hidden rounded-3xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-6 sm:p-8 shadow-sm"
+            <PageHeader
+                :title="$t('help.admin.title')"
+                :subtitle="$t('help.admin.description')"
+                :badge="$t('help.admin.controller_hint')"
             >
-                <!-- Background decorative SVG with low opacity -->
-                <svg
-                    class="absolute -end-10 -bottom-10 w-72 h-72 text-action-primary opacity-[0.03] pointer-events-none"
-                    fill="currentColor"
-                    viewBox="0 0 24 24"
-                >
-                    <path
-                        d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
-                    />
-                </svg>
-
-                <div
-                    class="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6"
-                >
-                    <div class="flex items-start sm:items-center gap-5">
-                        <!-- Giant Gradient Icon -->
-                        <div
-                            class="w-16 h-16 rounded-2xl bg-action-primary hover:bg-action-primary-hover flex items-center justify-center text-white ring-4 ring-focus-ring shadow-xl shadow-focus-ring-soft shrink-0"
-                        >
-                            <svg
-                                class="w-8 h-8"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                            >
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    stroke-width="2"
-                                    d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
-                                />
-                            </svg>
-                        </div>
-
-                        <div>
-                            <div class="flex items-center gap-3 flex-wrap">
-                                <h1
-                                    class="text-2xl sm:text-3xl md:text-4xl font-black text-gray-900 dark:text-white tracking-tight"
-                                >
-                                    {{ $t('help.admin.title') }}
-                                </h1>
-                                <span
-                                    class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-selection-bg text-action-primary border border-action-primary/25"
-                                >
-                                    <span
-                                        class="w-2 h-2 rounded-full bg-action-primary animate-pulse"
-                                    ></span>
-                                    <span>{{ $t('help.admin.controller_hint') }}</span>
-                                </span>
-                            </div>
-                            <p
-                                class="mt-2 text-sm text-gray-500 dark:text-gray-400 max-w-2xl leading-relaxed"
-                            >
-                                {{ $t('help.admin.description') }}
-                            </p>
-                        </div>
-                    </div>
-
+                <template #icon>
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
+                        />
+                    </svg>
+                </template>
+                <template #actions>
                     <!-- Stats Pill -->
                     <div
-                        class="flex items-center gap-4 bg-gray-50 dark:bg-gray-900/50 p-3 px-4 rounded-2xl border border-gray-200/80 dark:border-gray-700/80 self-stretch sm:self-auto justify-around"
+                        class="flex items-center gap-4 bg-gray-50 dark:bg-gray-900/50 p-2.5 px-4 rounded-2xl border border-gray-200/80 dark:border-gray-700/80"
                     >
                         <div class="text-center px-2">
                             <span class="block text-lg font-black text-action-primary">
@@ -104,8 +59,8 @@
                             </span>
                         </div>
                     </div>
-                </div>
-            </div>
+                </template>
+            </PageHeader>
 
             <!-- ============================================================ -->
             <!-- Actions Bar (According to AUDIT_STANDARDS.md)                -->
@@ -355,7 +310,7 @@
                                 v-model="form.contact_ticket_url"
                                 type="url"
                                 dir="ltr"
-                                placeholder="https://support.carag.sa"
+                                placeholder="https://support.khidmh.pro"
                                 class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-focus-ring focus:border-action-primary"
                             />
                         </div>
@@ -1443,6 +1398,7 @@ import { ref, computed, h } from 'vue';
 import { useForm, router } from '@inertiajs/vue3';
 import axios from 'axios';
 import SystemLayout from '@/Layouts/SystemLayout.vue';
+import PageHeader from '@/Components/PageHeader.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 import AppToggle from '@/Components/Common/AppToggle.vue';
 import { useToast } from '@/Composables/useToast';

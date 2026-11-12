@@ -2,72 +2,65 @@
     <SystemLayout>
         <div class="space-y-6 text-gray-900 dark:text-gray-100">
             <!-- Header Banner -->
-            <div
-                class="relative overflow-hidden rounded-3xl bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 p-8 shadow-xl border border-indigo-900/30"
+            <PageHeader
+                :title="$t('system.developer.title')"
+                :subtitle="$t('system.developer.subtitle')"
+                :badge="$t('system.developer.console_badge')"
             >
-                <div class="relative flex flex-col md:flex-row items-center justify-between gap-6">
-                    <div>
-                        <div
-                            class="flex items-center gap-2 bg-action-primary/10 text-action-primary text-xs px-3 py-1 rounded-full border border-action-primary w-fit"
+                <template #icon>
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"
+                        />
+                    </svg>
+                </template>
+                <template #actions>
+                    <button
+                        @click="runFreshAudit"
+                        :disabled="loading"
+                        class="bg-action-primary hover:bg-action-primary disabled:opacity-50 text-white font-semibold px-5 py-2.5 rounded-xl shadow-lg shadow-focus-ring-soft transition-all flex items-center gap-2 border border-action-primary"
+                    >
+                        <svg
+                            v-if="loading"
+                            class="animate-spin h-5 w-5 text-white"
+                            fill="none"
+                            viewBox="0 0 24 24"
                         >
-                            <span
-                                class="w-1.5 h-1.5 bg-action-primary rounded-full animate-ping"
-                            ></span>
-                            {{ $t('system.developer.console_badge') }}
-                        </div>
-                        <h1 class="text-white text-3xl font-extrabold mt-3 tracking-tight">
-                            {{ $t('system.developer.title') }}
-                        </h1>
-                        <p class="text-white/75 text-sm mt-1">
-                            {{ $t('system.developer.subtitle') }}
-                        </p>
-                    </div>
-
-                    <div class="flex items-center gap-4">
-                        <button
-                            @click="runFreshAudit"
-                            :disabled="loading"
-                            class="bg-action-primary hover:bg-action-primary disabled:opacity-50 text-white font-semibold px-6 py-3 rounded-2xl shadow-lg shadow-focus-ring-soft transition-all flex items-center gap-2 border border-action-primary"
-                        >
-                            <svg
-                                v-if="loading"
-                                class="animate-spin h-5 w-5 text-white"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                            >
-                                <circle
-                                    class="opacity-25"
-                                    cx="12"
-                                    cy="12"
-                                    r="10"
-                                    stroke="currentColor"
-                                    stroke-width="4"
-                                ></circle>
-                                <path
-                                    class="opacity-75"
-                                    fill="currentColor"
-                                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                                ></path>
-                            </svg>
-                            <svg
-                                v-else
-                                class="w-5 h-5"
-                                fill="none"
+                            <circle
+                                class="opacity-25"
+                                cx="12"
+                                cy="12"
+                                r="10"
                                 stroke="currentColor"
-                                viewBox="0 0 24 24"
-                            >
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    stroke-width="2"
-                                    d="M4 4v5h.582m15.356 2A8.001 8.001 0 1121.21 7.89M9 11l3 3L22 4"
-                                />
-                            </svg>
-                            {{ $t('system.developer.run_audit') }}
-                        </button>
-                    </div>
-                </div>
-            </div>
+                                stroke-width="4"
+                            ></circle>
+                            <path
+                                class="opacity-75"
+                                fill="currentColor"
+                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                            ></path>
+                        </svg>
+                        <svg
+                            v-else
+                            class="w-5 h-5"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M4 4v5h.582m15.356 2A8.001 8.001 0 1121.21 7.89M9 11l3 3L22 4"
+                            />
+                        </svg>
+                        {{ $t('system.developer.run_audit') }}
+                    </button>
+                </template>
+            </PageHeader>
 
             <!-- Overall Scores Overview -->
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -522,6 +515,7 @@ import { ref, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { router } from '@inertiajs/vue3';
 import SystemLayout from '@/Layouts/SystemLayout.vue';
+import PageHeader from '@/Components/PageHeader.vue';
 
 const { t } = useI18n();
 
