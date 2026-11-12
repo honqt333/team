@@ -267,149 +267,126 @@
         </div>
 
         <!-- Unit Modal -->
-        <Teleport to="body">
-            <div v-if="showUnitModal" class="fixed inset-0 z-50 overflow-y-auto">
-                <div class="flex min-h-full items-center justify-center p-4">
-                    <div class="fixed inset-0 bg-black/50" @click="showUnitModal = false"></div>
-                    <div
-                        class="relative bg-white dark:bg-gray-800 rounded-2xl shadow-xl w-full max-w-md p-6"
-                    >
-                        <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4">
-                            {{ editingUnit ? $t('common.edit') : $t('common.add') }}
-                            {{ $t('inventory.settings.units.unit') }}
-                        </h3>
-                        <form @submit.prevent="saveUnit" class="space-y-4">
-                            <div>
-                                <label
-                                    class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-                                >
-                                    {{ $t('common.name') }}
-                                    {{ $t('inventory.settings.arabic_suffix') }}
-                                    <span class="text-red-500">*</span>
-                                </label>
-                                <input
-                                    v-model="unitForm.name_ar"
-                                    type="text"
-                                    required
-                                    class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                                />
-                            </div>
-                            <div>
-                                <label
-                                    class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-                                >
-                                    {{ $t('common.name') }} (English)
-                                    <span class="text-red-500">*</span>
-                                </label>
-                                <input
-                                    v-model="unitForm.name_en"
-                                    type="text"
-                                    required
-                                    class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                                />
-                            </div>
-                            <div>
-                                <AppToggle
-                                    v-model="unitForm.is_active"
-                                    color="success"
-                                    :label="$t('common.active')"
-                                />
-                            </div>
-                            <div class="flex justify-end gap-3 pt-4">
-                                <button
-                                    type="button"
-                                    @click="showUnitModal = false"
-                                    class="px-4 py-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
-                                >
-                                    {{ $t('common.cancel') }}
-                                </button>
-                                <button
-                                    type="submit"
-                                    class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg"
-                                >
-                                    {{ $t('common.save') }}
-                                </button>
-                            </div>
-                        </form>
-                    </div>
+        <BaseModal
+            :show="showUnitModal"
+            :title="`${editingUnit ? $t('common.edit') : $t('common.add')} ${$t('inventory.settings.units.unit')}`"
+            size="sm"
+            @close="showUnitModal = false"
+        >
+            <form @submit.prevent="saveUnit" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        {{ $t('common.name') }}
+                        {{ $t('inventory.settings.arabic_suffix') }}
+                        <span class="text-red-500">*</span>
+                    </label>
+                    <input
+                        v-model="unitForm.name_ar"
+                        type="text"
+                        required
+                        class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                    />
                 </div>
-            </div>
-        </Teleport>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        {{ $t('common.name') }} (English)
+                        <span class="text-red-500">*</span>
+                    </label>
+                    <input
+                        v-model="unitForm.name_en"
+                        type="text"
+                        required
+                        class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                    />
+                </div>
+                <div>
+                    <AppToggle
+                        v-model="unitForm.is_active"
+                        color="success"
+                        :label="$t('common.active')"
+                    />
+                </div>
+                <div class="flex justify-end gap-3 pt-4">
+                    <button
+                        type="button"
+                        @click="showUnitModal = false"
+                        class="px-4 py-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
+                    >
+                        {{ $t('common.cancel') }}
+                    </button>
+                    <button
+                        type="submit"
+                        class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg"
+                    >
+                        {{ $t('common.save') }}
+                    </button>
+                </div>
+            </form>
+        </BaseModal>
 
         <!-- Category Modal -->
-        <Teleport to="body">
-            <div v-if="showCategoryModal" class="fixed inset-0 z-50 overflow-y-auto">
-                <div class="flex min-h-full items-center justify-center p-4">
-                    <div class="fixed inset-0 bg-black/50" @click="showCategoryModal = false"></div>
-                    <div
-                        class="relative bg-white dark:bg-gray-800 rounded-2xl shadow-xl w-full max-w-md p-6"
-                    >
-                        <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4">
-                            {{ editingCategory ? $t('common.edit') : $t('common.add') }}
-                            {{ $t('inventory.settings.categories.category') }}
-                        </h3>
-                        <form @submit.prevent="saveCategory" class="space-y-4">
-                            <div>
-                                <label
-                                    class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-                                >
-                                    {{ $t('common.name') }}
-                                    {{ $t('inventory.settings.arabic_suffix') }}
-                                    <span class="text-red-500">*</span>
-                                </label>
-                                <input
-                                    v-model="categoryForm.name_ar"
-                                    type="text"
-                                    required
-                                    class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                                />
-                            </div>
-                            <div>
-                                <label
-                                    class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-                                >
-                                    {{ $t('common.name') }} (English)
-                                    <span class="text-red-500">*</span>
-                                </label>
-                                <input
-                                    v-model="categoryForm.name_en"
-                                    type="text"
-                                    required
-                                    class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                                />
-                            </div>
-                            <div>
-                                <AppToggle
-                                    v-model="categoryForm.is_active"
-                                    color="success"
-                                    :label="$t('common.active')"
-                                />
-                            </div>
-                            <div class="flex justify-end gap-3 pt-4">
-                                <button
-                                    type="button"
-                                    @click="showCategoryModal = false"
-                                    class="px-4 py-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
-                                >
-                                    {{ $t('common.cancel') }}
-                                </button>
-                                <button
-                                    type="submit"
-                                    class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg"
-                                >
-                                    {{ $t('common.save') }}
-                                </button>
-                            </div>
-                        </form>
-                    </div>
+        <BaseModal
+            :show="showCategoryModal"
+            :title="`${editingCategory ? $t('common.edit') : $t('common.add')} ${$t('inventory.settings.categories.category')}`"
+            size="sm"
+            @close="showCategoryModal = false"
+        >
+            <form @submit.prevent="saveCategory" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        {{ $t('common.name') }}
+                        {{ $t('inventory.settings.arabic_suffix') }}
+                        <span class="text-red-500">*</span>
+                    </label>
+                    <input
+                        v-model="categoryForm.name_ar"
+                        type="text"
+                        required
+                        class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                    />
                 </div>
-            </div>
-        </Teleport>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        {{ $t('common.name') }} (English)
+                        <span class="text-red-500">*</span>
+                    </label>
+                    <input
+                        v-model="categoryForm.name_en"
+                        type="text"
+                        required
+                        class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                    />
+                </div>
+                <div>
+                    <AppToggle
+                        v-model="categoryForm.is_active"
+                        color="success"
+                        :label="$t('common.active')"
+                    />
+                </div>
+                <div class="flex justify-end gap-3 pt-4">
+                    <button
+                        type="button"
+                        @click="showCategoryModal = false"
+                        class="px-4 py-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
+                    >
+                        {{ $t('common.cancel') }}
+                    </button>
+                    <button
+                        type="submit"
+                        class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg"
+                    >
+                        {{ $t('common.save') }}
+                    </button>
+                </div>
+            </form>
+        </BaseModal>
     </AppLayout>
 </template>
 
 <script setup>
 import DataTable from '@/Components/Common/DataTable.vue';
+import BaseModal from '@/Components/BaseModal.vue';
 import { ref, reactive } from 'vue';
 import { router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';

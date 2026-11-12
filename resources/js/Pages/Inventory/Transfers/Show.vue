@@ -204,74 +204,72 @@
             </div>
 
             <!-- Add Item Modal -->
-            <div
-                v-if="showAddModal"
-                class="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
+            <BaseModal
+                :show="showAddModal"
+                :title="$t('inventory.transfers.add_item')"
+                size="sm"
+                @close="showAddModal = false"
             >
-                <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-md p-6">
-                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                        {{ $t('inventory.transfers.add_item') }}
-                    </h3>
-                    <form @submit.prevent="addItem">
-                        <div class="space-y-4">
-                            <div>
-                                <label
-                                    class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-                                >
-                                    {{ $t('inventory.parts.title') }}
-                                </label>
-                                <SearchableSelect
-                                    v-model="newItem.part_id"
-                                    :options="parts"
-                                    :option-label="
-                                        (opt) => `${opt.sku} - ${opt.name_ar || opt.name_en}`
-                                    "
-                                    option-value="id"
-                                    :placeholder="$t('common.select')"
-                                    required
-                                />
-                            </div>
-                            <div>
-                                <label
-                                    class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-                                >
-                                    {{ $t('inventory.transfers.qty_requested') }}
-                                </label>
-                                <input
-                                    v-model="newItem.qty_requested"
-                                    type="number"
-                                    step="0.001"
-                                    min="0.001"
-                                    dir="ltr"
-                                    class="w-full px-3 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600"
-                                    required
-                                />
-                            </div>
-                        </div>
-                        <div class="flex justify-end gap-3 mt-6">
-                            <button
-                                type="button"
-                                @click="showAddModal = false"
-                                class="px-4 py-2 text-gray-700 dark:text-gray-300"
+                <form @submit.prevent="addItem">
+                    <div class="space-y-4">
+                        <div>
+                            <label
+                                class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
                             >
-                                {{ $t('common.cancel') }}
-                            </button>
-                            <button
-                                type="submit"
-                                class="px-4 py-2 bg-action-primary text-white rounded-lg hover:bg-action-primary-hover"
-                            >
-                                {{ $t('common.add') }}
-                            </button>
+                                {{ $t('inventory.parts.title') }}
+                            </label>
+                            <SearchableSelect
+                                v-model="newItem.part_id"
+                                :options="parts"
+                                :option-label="
+                                    (opt) => `${opt.sku} - ${opt.name_ar || opt.name_en}`
+                                "
+                                option-value="id"
+                                :placeholder="$t('common.select')"
+                                required
+                            />
                         </div>
-                    </form>
-                </div>
-            </div>
+                        <div>
+                            <label
+                                class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                            >
+                                {{ $t('inventory.transfers.qty_requested') }}
+                            </label>
+                            <input
+                                v-model="newItem.qty_requested"
+                                type="number"
+                                step="0.001"
+                                min="0.001"
+                                dir="ltr"
+                                class="w-full px-3 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600"
+                                required
+                            />
+                        </div>
+                    </div>
+                    <div class="flex justify-end gap-3 mt-6">
+                        <button
+                            type="button"
+                            @click="showAddModal = false"
+                            class="px-4 py-2 text-gray-700 dark:text-gray-300"
+                        >
+                            {{ $t('common.cancel') }}
+                        </button>
+                        <button
+                            type="submit"
+                            class="px-4 py-2 bg-action-primary text-white rounded-lg hover:bg-action-primary-hover"
+                        >
+                            {{ $t('common.add') }}
+                        </button>
+                    </div>
+                </form>
+            </BaseModal>
         </div>
     </AppLayout>
 </template>
 
 <script setup>
 import DataTable from '@/Components/Common/DataTable.vue';
+import BaseModal from '@/Components/BaseModal.vue';
 import { ref } from 'vue';
 import { router } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';

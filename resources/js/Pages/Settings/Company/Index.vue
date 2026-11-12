@@ -642,161 +642,93 @@
                             </div>
 
                             <!-- VAT Explanation Modal -->
-                            <Teleport to="body">
-                                <div
-                                    v-if="showVatExplanationModal"
-                                    class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50"
-                                    @click.self="showVatExplanationModal = false"
-                                >
-                                    <div
-                                        class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-md overflow-hidden"
-                                    >
-                                        <!-- Modal Header -->
-                                        <div
-                                            class="flex items-center justify-between p-4 bg-gradient-to-r from-gray-700 to-gray-800 text-white"
-                                        >
-                                            <h3 class="text-lg font-semibold">
-                                                {{
-                                                    $t('company_profile.vat.show_amount_before_vat')
-                                                }}
-                                            </h3>
-                                            <button
-                                                @click="showVatExplanationModal = false"
-                                                class="w-8 h-8 flex items-center justify-center rounded-full bg-white/20 hover:bg-white/30 transition-colors"
-                                            >
-                                                <svg
-                                                    class="w-5 h-5"
-                                                    fill="none"
-                                                    stroke="currentColor"
-                                                    viewBox="0 0 24 24"
-                                                >
-                                                    <path
-                                                        stroke-linecap="round"
-                                                        stroke-linejoin="round"
-                                                        stroke-width="2"
-                                                        d="M6 18L18 6M6 6l12 12"
-                                                    />
-                                                </svg>
-                                            </button>
-                                        </div>
-
-                                        <!-- Modal Content -->
-                                        <div class="p-6 space-y-4">
-                                            <!-- Toggle in Modal -->
-                                            <div class="flex items-center justify-center gap-3">
-                                                <span
-                                                    class="text-sm text-gray-600 dark:text-gray-400"
-                                                >
-                                                    {{
-                                                        $t(
-                                                            'company_profile.vat.show_amount_before_vat'
-                                                        )
-                                                    }}
-                                                </span>
-                                                <AppToggle
-                                                    v-model="vatExplanationToggle"
-                                                    color="success"
-                                                />
-                                            </div>
-
-                                            <!-- Example Table -->
-                                            <div
-                                                class="overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700"
-                                            >
-                                                <DataTable structured class="w-full text-sm">
-                                                    <thead class="bg-gray-50 dark:bg-gray-700">
-                                                        <tr>
-                                                            <th
-                                                                class="px-4 py-3 text-center font-medium text-gray-700 dark:text-gray-300 align-middle"
-                                                            >
-                                                                {{
-                                                                    $t(
-                                                                        'company_profile.vat.table_amount'
-                                                                    )
-                                                                }}
-                                                            </th>
-                                                            <th
-                                                                class="px-4 py-3 text-center font-medium text-gray-700 dark:text-gray-300 align-middle"
-                                                            >
-                                                                {{
-                                                                    $t(
-                                                                        'company_profile.vat.table_vat'
-                                                                    )
-                                                                }}
-                                                                <div
-                                                                    class="text-xs font-normal text-gray-500"
-                                                                >
-                                                                    {{ $t('common.vat') }}
-                                                                </div>
-                                                                <div
-                                                                    class="text-xs font-normal text-gray-400"
-                                                                >
-                                                                    ({{
-                                                                        $t(
-                                                                            'company_profile.vat.inclusive'
-                                                                        )
-                                                                    }})
-                                                                </div>
-                                                            </th>
-                                                            <th
-                                                                class="px-4 py-3 text-center font-medium text-gray-700 dark:text-gray-300 align-middle"
-                                                            >
-                                                                {{
-                                                                    $t(
-                                                                        'company_profile.vat.table_total'
-                                                                    )
-                                                                }}
-                                                            </th>
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody>
-                                                        <tr class="bg-white dark:bg-gray-800">
-                                                            <td
-                                                                class="px-4 py-4 text-center text-gray-900 dark:text-white font-medium align-middle"
-                                                                :class="{
-                                                                    'bg-blue-50 dark:bg-blue-900/20':
-                                                                        vatExplanationToggle,
-                                                                }"
-                                                            >
-                                                                {{
-                                                                    vatExplanationToggle
-                                                                        ? '86.96'
-                                                                        : '100'
-                                                                }}
-                                                            </td>
-                                                            <td
-                                                                class="px-4 py-4 text-center text-gray-600 dark:text-gray-400 align-middle"
-                                                            >
-                                                                13.04
-                                                            </td>
-                                                            <td
-                                                                class="px-4 py-4 text-center text-gray-900 dark:text-white font-medium align-middle"
-                                                            >
-                                                                100
-                                                            </td>
-                                                        </tr>
-                                                    </tbody>
-                                                </DataTable>
-                                            </div>
-
-                                            <!-- Explanation Text -->
-                                            <p
-                                                class="text-sm text-gray-500 dark:text-gray-400 text-center"
-                                            >
-                                                {{
-                                                    vatExplanationToggle
-                                                        ? $t(
-                                                              'company_profile.vat.explanation_enabled'
-                                                          )
-                                                        : $t(
-                                                              'company_profile.vat.explanation_disabled'
-                                                          )
-                                                }}
-                                            </p>
-                                        </div>
+                            <BaseModal
+                                :show="showVatExplanationModal"
+                                :title="$t('company_profile.vat.show_amount_before_vat')"
+                                size="sm"
+                                @close="showVatExplanationModal = false"
+                            >
+                                <div class="space-y-4">
+                                    <!-- Toggle in Modal -->
+                                    <div class="flex items-center justify-center gap-3">
+                                        <span class="text-sm text-gray-600 dark:text-gray-400">
+                                            {{ $t('company_profile.vat.show_amount_before_vat') }}
+                                        </span>
+                                        <AppToggle v-model="vatExplanationToggle" color="success" />
                                     </div>
+
+                                    <!-- Example Table -->
+                                    <div
+                                        class="overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700"
+                                    >
+                                        <DataTable structured class="w-full text-sm">
+                                            <thead class="bg-gray-50 dark:bg-gray-700">
+                                                <tr>
+                                                    <th
+                                                        class="px-4 py-3 text-center font-medium text-gray-700 dark:text-gray-300 align-middle"
+                                                    >
+                                                        {{ $t('company_profile.vat.table_amount') }}
+                                                    </th>
+                                                    <th
+                                                        class="px-4 py-3 text-center font-medium text-gray-700 dark:text-gray-300 align-middle"
+                                                    >
+                                                        {{ $t('company_profile.vat.table_vat') }}
+                                                        <div
+                                                            class="text-xs font-normal text-gray-500"
+                                                        >
+                                                            {{ $t('common.vat') }}
+                                                        </div>
+                                                        <div
+                                                            class="text-xs font-normal text-gray-400"
+                                                        >
+                                                            ({{
+                                                                $t('company_profile.vat.inclusive')
+                                                            }})
+                                                        </div>
+                                                    </th>
+                                                    <th
+                                                        class="px-4 py-3 text-center font-medium text-gray-700 dark:text-gray-300 align-middle"
+                                                    >
+                                                        {{ $t('company_profile.vat.table_total') }}
+                                                    </th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr class="bg-white dark:bg-gray-800">
+                                                    <td
+                                                        class="px-4 py-4 text-center text-gray-900 dark:text-white font-medium align-middle"
+                                                        :class="{
+                                                            'bg-blue-50 dark:bg-blue-900/20':
+                                                                vatExplanationToggle,
+                                                        }"
+                                                    >
+                                                        {{ vatExplanationToggle ? '86.96' : '100' }}
+                                                    </td>
+                                                    <td
+                                                        class="px-4 py-4 text-center text-gray-600 dark:text-gray-400 align-middle"
+                                                    >
+                                                        13.04
+                                                    </td>
+                                                    <td
+                                                        class="px-4 py-4 text-center text-gray-900 dark:text-white font-medium align-middle"
+                                                    >
+                                                        100
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </DataTable>
+                                    </div>
+
+                                    <!-- Explanation Text -->
+                                    <p class="text-sm text-gray-500 dark:text-gray-400 text-center">
+                                        {{
+                                            vatExplanationToggle
+                                                ? $t('company_profile.vat.explanation_enabled')
+                                                : $t('company_profile.vat.explanation_disabled')
+                                        }}
+                                    </p>
                                 </div>
-                            </Teleport>
+                            </BaseModal>
 
                             <!-- Warning Notes -->
                             <div class="space-y-3">
@@ -2192,115 +2124,77 @@
             </div>
         </div>
         <!-- Password Check Modal -->
-        <Teleport to="body">
-            <div
-                v-if="showPasswordCheckModal"
-                class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50"
-                @click.self="showPasswordCheckModal = false"
-            >
-                <div
-                    class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-md overflow-hidden border border-gray-100 dark:border-gray-700"
-                >
-                    <!-- Modal Header -->
-                    <div
-                        class="flex items-center justify-between p-4 border-b border-gray-100 dark:border-gray-750 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white"
+        <BaseModal
+            :show="showPasswordCheckModal"
+            :title="locale === 'ar' ? 'تعديل بيانات المستخدم الرئيسي' : 'Edit Admin User Profile'"
+            size="sm"
+            @close="showPasswordCheckModal = false"
+        >
+            <!-- Modal Content -->
+            <form @submit.prevent="handlePasswordConfirm" class="space-y-4">
+                <p class="text-sm text-gray-600 dark:text-gray-400">
+                    {{
+                        locale === 'ar'
+                            ? 'يرجى إدخال كلمة المرور الحالية للمتابعة:'
+                            : 'Please enter your current password to proceed:'
+                    }}
+                </p>
+                <div>
+                    <input
+                        v-model="checkPasswordInput"
+                        type="password"
+                        autofocus
+                        :placeholder="locale === 'ar' ? 'كلمة المرور الحالية' : 'Current Password'"
+                        class="w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring focus:border-transparent font-medium"
+                        :class="[checkPasswordError ? 'border-red-500 font-medium' : '']"
+                    />
+                    <p
+                        v-if="checkPasswordError"
+                        class="mt-1.5 text-xs text-red-650 dark:text-red-400 font-medium"
                     >
-                        <h3 class="text-base font-semibold">
-                            {{
-                                locale === 'ar'
-                                    ? 'تعديل بيانات المستخدم الرئيسي'
-                                    : 'Edit Admin User Profile'
-                            }}
-                        </h3>
-                        <button
-                            @click="showPasswordCheckModal = false"
-                            class="w-8 h-8 flex items-center justify-center rounded-full text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors"
-                        >
-                            <svg
-                                class="w-5 h-5"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                            >
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    stroke-width="2"
-                                    d="M6 18L18 6M6 6l12 12"
-                                />
-                            </svg>
-                        </button>
-                    </div>
-
-                    <!-- Modal Content -->
-                    <form @submit.prevent="handlePasswordConfirm" class="p-6 space-y-4">
-                        <p class="text-sm text-gray-600 dark:text-gray-400">
-                            {{
-                                locale === 'ar'
-                                    ? 'يرجى إدخال كلمة المرور الحالية للمتابعة:'
-                                    : 'Please enter your current password to proceed:'
-                            }}
-                        </p>
-                        <div>
-                            <input
-                                v-model="checkPasswordInput"
-                                type="password"
-                                autofocus
-                                :placeholder="
-                                    locale === 'ar' ? 'كلمة المرور الحالية' : 'Current Password'
-                                "
-                                class="w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring focus:border-transparent font-medium"
-                                :class="[checkPasswordError ? 'border-red-500 font-medium' : '']"
-                            />
-                            <p
-                                v-if="checkPasswordError"
-                                class="mt-1.5 text-xs text-red-650 dark:text-red-400 font-medium"
-                            >
-                                {{ checkPasswordError }}
-                            </p>
-                        </div>
-
-                        <!-- Modal Action Buttons -->
-                        <div class="flex justify-end gap-3 pt-2">
-                            <button
-                                type="button"
-                                @click="showPasswordCheckModal = false"
-                                class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-150 dark:hover:bg-gray-750 rounded-lg transition-colors"
-                            >
-                                {{ locale === 'ar' ? 'إلغاء' : 'Cancel' }}
-                            </button>
-                            <button
-                                type="submit"
-                                :disabled="checkingPassword"
-                                class="px-5 py-2 text-sm font-medium bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition-colors disabled:opacity-50 flex items-center gap-1.5"
-                            >
-                                <svg
-                                    v-if="checkingPassword"
-                                    class="w-4 h-4 animate-spin text-white"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <circle
-                                        class="opacity-25"
-                                        cx="12"
-                                        cy="12"
-                                        r="10"
-                                        stroke="currentColor"
-                                        stroke-width="4"
-                                    ></circle>
-                                    <path
-                                        class="opacity-75"
-                                        fill="currentColor"
-                                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                                    ></path>
-                                </svg>
-                                {{ locale === 'ar' ? 'تأكيد' : 'Confirm' }}
-                            </button>
-                        </div>
-                    </form>
+                        {{ checkPasswordError }}
+                    </p>
                 </div>
-            </div>
-        </Teleport>
+
+                <!-- Modal Action Buttons -->
+                <div class="flex justify-end gap-3 pt-2">
+                    <button
+                        type="button"
+                        @click="showPasswordCheckModal = false"
+                        class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-150 dark:hover:bg-gray-750 rounded-lg transition-colors"
+                    >
+                        {{ locale === 'ar' ? 'إلغاء' : 'Cancel' }}
+                    </button>
+                    <button
+                        type="submit"
+                        :disabled="checkingPassword"
+                        class="px-5 py-2 text-sm font-medium bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition-colors disabled:opacity-50 flex items-center gap-1.5"
+                    >
+                        <svg
+                            v-if="checkingPassword"
+                            class="w-4 h-4 animate-spin text-white"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                        >
+                            <circle
+                                class="opacity-25"
+                                cx="12"
+                                cy="12"
+                                r="10"
+                                stroke="currentColor"
+                                stroke-width="4"
+                            ></circle>
+                            <path
+                                class="opacity-75"
+                                fill="currentColor"
+                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                            ></path>
+                        </svg>
+                        {{ locale === 'ar' ? 'تأكيد' : 'Confirm' }}
+                    </button>
+                </div>
+            </form>
+        </BaseModal>
 
         <ConfirmModal />
     </AppLayout>
@@ -2308,6 +2202,7 @@
 
 <script setup>
 import DataTable from '@/Components/Common/DataTable.vue';
+import BaseModal from '@/Components/BaseModal.vue';
 import { ref, computed, onMounted, onUnmounted, watch, nextTick } from 'vue';
 import { Head, Link, router, usePage } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';

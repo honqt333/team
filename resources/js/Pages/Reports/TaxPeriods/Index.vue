@@ -339,198 +339,158 @@
             </div>
 
             <!-- Tax Period Selection Modal -->
-            <div
-                v-if="showPeriodModal"
-                class="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
-            >
-                <div
-                    class="bg-white dark:bg-gray-800 rounded-3xl max-w-4xl w-full border border-gray-100 dark:border-gray-700 shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200"
-                >
-                    <div
-                        class="p-6 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between"
-                    >
-                        <div>
-                            <h2
-                                class="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2"
-                            >
-                                <span>
-                                    {{ $t('reports.tax_periods_report.select_period_to_create') }}
-                                </span>
-                            </h2>
-                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                                {{ $t('reports.tax_periods_report.select_period_modal_desc') }}
-                            </p>
-                        </div>
-                        <button
-                            type="button"
-                            @click="showPeriodModal = false"
-                            class="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700"
-                        >
-                            <svg
-                                class="w-5 h-5"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                            >
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    stroke-width="2"
-                                    d="M6 18L18 6M6 6l12 12"
-                                />
-                            </svg>
-                        </button>
+            <BaseModal :show="showPeriodModal" size="xl" @close="showPeriodModal = false">
+                <template #title>
+                    <div>
+                        <span class="text-xl font-bold text-gray-900 dark:text-white">
+                            {{ $t('reports.tax_periods_report.select_period_to_create') }}
+                        </span>
+                        <p class="text-xs font-normal text-gray-500 dark:text-gray-400 mt-1">
+                            {{ $t('reports.tax_periods_report.select_period_modal_desc') }}
+                        </p>
                     </div>
+                </template>
 
-                    <!-- Year Tabs -->
-                    <div
-                        class="px-6 pt-4 border-b border-gray-100 dark:border-gray-700/60 flex gap-2"
+                <!-- Year Tabs -->
+                <div
+                    class="pb-4 mb-4 border-b border-gray-100 dark:border-gray-700/60 flex gap-2 flex-wrap"
+                >
+                    <button
+                        v-for="yData in periods3Years"
+                        :key="yData.year"
+                        type="button"
+                        @click="selectedModalYear = yData.year"
+                        :class="[
+                            'px-5 py-2.5 text-sm font-bold rounded-xl transition-all',
+                            selectedModalYear === yData.year
+                                ? 'bg-emerald-600 text-white shadow-md shadow-emerald-500/20'
+                                : 'bg-gray-100 dark:bg-gray-700/60 text-gray-600 dark:text-gray-300 hover:bg-gray-200',
+                        ]"
                     >
-                        <button
-                            v-for="yData in periods3Years"
-                            :key="yData.year"
-                            type="button"
-                            @click="selectedModalYear = yData.year"
+                        {{ yData.year }}
+                    </button>
+                </div>
+
+                <!-- Quarters Grid for Selected Year -->
+                <div
+                    v-for="yData in periods3Years"
+                    :key="yData.year"
+                    v-show="selectedModalYear === yData.year"
+                >
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div
+                            v-for="q in yData.quarters"
+                            :key="q.key"
+                            class="p-5 rounded-2xl border transition-all duration-200"
                             :class="[
-                                'px-5 py-2.5 text-sm font-bold rounded-xl transition-all',
-                                selectedModalYear === yData.year
-                                    ? 'bg-emerald-600 text-white shadow-md shadow-emerald-500/20'
-                                    : 'bg-gray-100 dark:bg-gray-700/60 text-gray-600 dark:text-gray-300 hover:bg-gray-200',
+                                q.is_created
+                                    ? q.status === 'posted'
+                                        ? 'bg-emerald-50/50 dark:bg-emerald-950/20 border-emerald-200 dark:border-emerald-800'
+                                        : 'bg-amber-50/50 dark:bg-amber-950/20 border-amber-200 dark:border-amber-800'
+                                    : 'bg-gray-50/80 dark:bg-gray-700/30 border-gray-200 dark:border-gray-700 hover:border-emerald-300',
                             ]"
                         >
-                            {{ yData.year }}
-                        </button>
-                    </div>
-
-                    <!-- Quarters Grid for Selected Year -->
-                    <div class="p-6">
-                        <div
-                            v-for="yData in periods3Years"
-                            :key="yData.year"
-                            v-show="selectedModalYear === yData.year"
-                        >
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                <div
-                                    v-for="q in yData.quarters"
-                                    :key="q.key"
-                                    class="p-5 rounded-2xl border transition-all duration-200"
-                                    :class="[
-                                        q.is_created
-                                            ? q.status === 'posted'
-                                                ? 'bg-emerald-50/50 dark:bg-emerald-950/20 border-emerald-200 dark:border-emerald-800'
-                                                : 'bg-amber-50/50 dark:bg-amber-950/20 border-amber-200 dark:border-amber-800'
-                                            : 'bg-gray-50/80 dark:bg-gray-700/30 border-gray-200 dark:border-gray-700 hover:border-emerald-300',
-                                    ]"
-                                >
-                                    <div class="flex items-start justify-between">
-                                        <div>
-                                            <span
-                                                class="text-xs font-mono font-bold text-gray-400 dark:text-gray-500"
-                                            >
-                                                {{ q.key }}
-                                            </span>
-                                            <h3
-                                                class="text-base font-bold text-gray-900 dark:text-white mt-0.5"
-                                            >
-                                                {{ q.name_ar }}
-                                            </h3>
-                                            <p
-                                                class="text-xs text-gray-500 dark:text-gray-400 font-mono mt-1"
-                                            >
-                                                {{ q.start_date }} &larr; {{ q.end_date }}
-                                            </p>
-                                        </div>
-
-                                        <!-- Badge Status -->
-                                        <span
-                                            v-if="q.is_created && q.status === 'posted'"
-                                            class="px-2.5 py-1 text-xs font-semibold rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-900/60 dark:text-emerald-300"
-                                        >
-                                            {{ $t('reports.tax_periods_report.status_posted') }}
-                                        </span>
-                                        <span
-                                            v-else-if="q.is_created"
-                                            class="px-2.5 py-1 text-xs font-semibold rounded-full bg-amber-100 text-amber-800 dark:bg-amber-900/60 dark:text-amber-300"
-                                        >
-                                            {{ $t('reports.tax_periods_report.status_draft') }}
-                                        </span>
-                                        <span
-                                            v-else
-                                            class="px-2.5 py-1 text-xs font-semibold rounded-full bg-gray-200 text-gray-700 dark:bg-gray-600 dark:text-gray-300"
-                                        >
-                                            {{ $t('reports.tax_periods_report.status_uncreated') }}
-                                        </span>
-                                    </div>
-
-                                    <!-- If Created, show snapshot figures -->
-                                    <div
-                                        v-if="q.is_created"
-                                        class="mt-4 pt-3 border-t border-gray-200/60 dark:border-gray-700/60 flex items-center justify-between text-xs"
+                            <div class="flex items-start justify-between">
+                                <div>
+                                    <span
+                                        class="text-xs font-mono font-bold text-gray-400 dark:text-gray-500"
                                     >
-                                        <span class="text-gray-500 dark:text-gray-400">
-                                            {{ q.transactions_count }}
-                                            {{ $t('reports.tax_periods_report.operations_unit') }}
-                                        </span>
-                                        <span
-                                            class="font-bold font-mono"
-                                            :class="
-                                                q.net_vat_amount >= 0
-                                                    ? 'text-emerald-600 dark:text-emerald-400'
-                                                    : 'text-blue-600'
-                                            "
-                                        >
-                                            {{ $t('reports.tax_periods_report.net_vat') }}:
-                                            {{ formatCurrency(q.net_vat_amount) }}
-                                        </span>
-                                    </div>
-
-                                    <!-- Actions for Quarter -->
-                                    <div class="mt-4 flex items-center gap-2">
-                                        <Link
-                                            v-if="q.is_created"
-                                            :href="
-                                                route(
-                                                    'app.reports.tax-periods.show',
-                                                    q.tax_period_id
-                                                )
-                                            "
-                                            class="w-full text-center py-2 px-3 text-xs font-bold rounded-xl bg-white dark:bg-gray-800 text-gray-800 dark:text-white border border-gray-200 dark:border-gray-600 hover:bg-gray-50 shadow-sm transition-colors"
-                                        >
-                                            {{ $t('reports.tax_periods_report.view_declaration') }}
-                                        </Link>
-                                        <Link
-                                            v-else
-                                            :href="route('app.reports.tax-periods.create', q.key)"
-                                            class="w-full text-center py-2 px-3 text-xs font-bold rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white shadow-md shadow-emerald-500/20 transition-colors"
-                                        >
-                                            +
-                                            {{ $t('reports.tax_periods_report.create_period_btn') }}
-                                        </Link>
-                                    </div>
+                                        {{ q.key }}
+                                    </span>
+                                    <h3
+                                        class="text-base font-bold text-gray-900 dark:text-white mt-0.5"
+                                    >
+                                        {{ q.name_ar }}
+                                    </h3>
+                                    <p
+                                        class="text-xs text-gray-500 dark:text-gray-400 font-mono mt-1"
+                                    >
+                                        {{ q.start_date }} &larr; {{ q.end_date }}
+                                    </p>
                                 </div>
+
+                                <!-- Badge Status -->
+                                <span
+                                    v-if="q.is_created && q.status === 'posted'"
+                                    class="px-2.5 py-1 text-xs font-semibold rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-900/60 dark:text-emerald-300"
+                                >
+                                    {{ $t('reports.tax_periods_report.status_posted') }}
+                                </span>
+                                <span
+                                    v-else-if="q.is_created"
+                                    class="px-2.5 py-1 text-xs font-semibold rounded-full bg-amber-100 text-amber-800 dark:bg-amber-900/60 dark:text-amber-300"
+                                >
+                                    {{ $t('reports.tax_periods_report.status_draft') }}
+                                </span>
+                                <span
+                                    v-else
+                                    class="px-2.5 py-1 text-xs font-semibold rounded-full bg-gray-200 text-gray-700 dark:bg-gray-600 dark:text-gray-300"
+                                >
+                                    {{ $t('reports.tax_periods_report.status_uncreated') }}
+                                </span>
+                            </div>
+
+                            <!-- If Created, show snapshot figures -->
+                            <div
+                                v-if="q.is_created"
+                                class="mt-4 pt-3 border-t border-gray-200/60 dark:border-gray-700/60 flex items-center justify-between text-xs"
+                            >
+                                <span class="text-gray-500 dark:text-gray-400">
+                                    {{ q.transactions_count }}
+                                    {{ $t('reports.tax_periods_report.operations_unit') }}
+                                </span>
+                                <span
+                                    class="font-bold font-mono"
+                                    :class="
+                                        q.net_vat_amount >= 0
+                                            ? 'text-emerald-600 dark:text-emerald-400'
+                                            : 'text-blue-600'
+                                    "
+                                >
+                                    {{ $t('reports.tax_periods_report.net_vat') }}:
+                                    {{ formatCurrency(q.net_vat_amount) }}
+                                </span>
+                            </div>
+
+                            <!-- Actions for Quarter -->
+                            <div class="mt-4 flex items-center gap-2">
+                                <Link
+                                    v-if="q.is_created"
+                                    :href="route('app.reports.tax-periods.show', q.tax_period_id)"
+                                    class="w-full text-center py-2 px-3 text-xs font-bold rounded-xl bg-white dark:bg-gray-800 text-gray-800 dark:text-white border border-gray-200 dark:border-gray-600 hover:bg-gray-50 shadow-sm transition-colors"
+                                >
+                                    {{ $t('reports.tax_periods_report.view_declaration') }}
+                                </Link>
+                                <Link
+                                    v-else
+                                    :href="route('app.reports.tax-periods.create', q.key)"
+                                    class="w-full text-center py-2 px-3 text-xs font-bold rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white shadow-md shadow-emerald-500/20 transition-colors"
+                                >
+                                    +
+                                    {{ $t('reports.tax_periods_report.create_period_btn') }}
+                                </Link>
                             </div>
                         </div>
                     </div>
-
-                    <div
-                        class="p-4 bg-gray-50 dark:bg-gray-900/40 border-t border-gray-100 dark:border-gray-700 flex justify-end"
-                    >
-                        <button
-                            type="button"
-                            @click="showPeriodModal = false"
-                            class="px-5 py-2 text-sm font-semibold rounded-xl bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-300"
-                        >
-                            {{ $t('common.close') }}
-                        </button>
-                    </div>
                 </div>
-            </div>
+
+                <template #footer>
+                    <button
+                        type="button"
+                        @click="showPeriodModal = false"
+                        class="px-5 py-2 text-sm font-semibold rounded-xl bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-300"
+                    >
+                        {{ $t('common.close') }}
+                    </button>
+                </template>
+            </BaseModal>
         </div>
     </AppLayout>
 </template>
 
 <script setup>
 import DataTable from '@/Components/Common/DataTable.vue';
+import BaseModal from '@/Components/BaseModal.vue';
 import AppPagination from '@/Components/Common/AppPagination.vue';
 import { ref, computed } from 'vue';
 import { Head, Link, router } from '@inertiajs/vue3';

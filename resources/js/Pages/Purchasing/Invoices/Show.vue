@@ -1014,56 +1014,14 @@
             </div>
 
             <!-- Return Invoice Modal (Main Modal) -->
-            <div
-                v-if="showReturnModal"
-                class="fixed inset-0 z-50 flex items-center justify-center p-4 overflow-y-auto"
-            >
-                <!-- Modal Backdrop -->
-                <div
-                    class="fixed inset-0 bg-gray-950/60 backdrop-blur-sm transition-opacity"
-                    @click="showReturnModal = false"
-                ></div>
-
-                <!-- Modal Content Wrapper -->
-                <div
-                    class="relative bg-white dark:bg-gray-800 rounded-3xl max-w-4xl w-full shadow-2xl border border-gray-200 dark:border-gray-700 overflow-hidden transform transition-all duration-300 flex flex-col max-h-[90vh]"
-                >
-                    <!-- Modal Header -->
-                    <div
-                        class="flex items-center justify-between px-6 py-5 bg-gradient-to-r from-red-600 to-orange-600 text-white relative"
-                    >
+            <BaseModal :show="showReturnModal" size="xl" @close="showReturnModal = false">
+                <template #title>
+                    <div class="flex items-center gap-3">
                         <div
-                            class="absolute -top-12 -end-12 w-32 h-32 bg-white/10 rounded-full blur-2xl"
-                        ></div>
-                        <div class="flex items-center gap-3 relative z-10">
-                            <div class="p-2 bg-white/10 rounded-xl">
-                                <svg
-                                    class="w-6 h-6 text-white"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        stroke-width="2.5"
-                                        d="M16 15v-6a4 4 0 00-4-4H8m0 0l3 3m-3-3l3-3"
-                                    />
-                                </svg>
-                            </div>
-                            <div>
-                                <h3 class="text-lg font-black">{{ $t('invoices.new_return') }}</h3>
-                                <p class="text-xs text-white/80 mt-0.5">
-                                    {{ $t('invoices.return_desc') }}
-                                </p>
-                            </div>
-                        </div>
-                        <button
-                            @click="showReturnModal = false"
-                            class="p-2 hover:bg-white/10 rounded-xl transition-all text-white relative z-10"
+                            class="p-2 bg-red-500/10 dark:bg-red-500/20 rounded-xl text-red-600 dark:text-red-400"
                         >
                             <svg
-                                class="w-5 h-5"
+                                class="w-6 h-6"
                                 fill="none"
                                 stroke="currentColor"
                                 viewBox="0 0 24 24"
@@ -1072,401 +1030,656 @@
                                     stroke-linecap="round"
                                     stroke-linejoin="round"
                                     stroke-width="2.5"
-                                    d="M6 18L18 6M6 6l12 12"
+                                    d="M16 15v-6a4 4 0 00-4-4H8m0 0l3 3m-3-3l3-3"
                                 />
                             </svg>
-                        </button>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-black text-gray-900 dark:text-white">
+                                {{ $t('invoices.new_return') }}
+                            </h3>
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                                {{ $t('invoices.return_desc') }}
+                            </p>
+                        </div>
+                    </div>
+                </template>
+
+                <!-- Modal Body -->
+                <div class="space-y-6">
+                    <!-- Table 1: Items Available for Return -->
+                    <div>
+                        <h4
+                            class="text-sm font-black text-gray-900 dark:text-white mb-3 flex items-center gap-2"
+                        >
+                            <div class="w-1.5 h-4 bg-red-500 rounded-full"></div>
+                            {{ $t('invoices.available_items') }}
+                        </h4>
+                        <div
+                            class="border border-gray-100 dark:border-gray-700/60 rounded-2xl overflow-x-auto md:overflow-x-visible bg-gray-50/30 dark:bg-gray-900/20"
+                        >
+                            <DataTable
+                                structured
+                                class="w-full min-w-[980px] md:min-w-0 text-sm md:table-fixed"
+                            >
+                                <thead>
+                                    <tr
+                                        class="bg-gray-50 dark:bg-gray-900/60 text-gray-400 border-b border-gray-100 dark:border-gray-700/60 text-[10px] font-black uppercase tracking-wider"
+                                    >
+                                        <th
+                                            class="py-3 px-3 lg:px-4 text-start w-72 align-middle text-center"
+                                        >
+                                            {{ $t('inventory.parts.title_singular') }}
+                                        </th>
+                                        <th class="py-3 px-2 lg:px-4 text-center w-16 align-middle">
+                                            {{ $t('invoices.ordered_qty') }}
+                                        </th>
+                                        <th
+                                            class="py-3 px-2 lg:px-4 text-center text-red-550 w-16 align-middle"
+                                        >
+                                            {{ $t('invoices.returned_previously') }}
+                                        </th>
+                                        <th
+                                            class="py-3 px-2 lg:px-4 text-center text-emerald-600 w-16 align-middle"
+                                        >
+                                            {{ $t('invoices.available_qty') }}
+                                        </th>
+                                        <th class="py-3 px-2 lg:px-4 text-center w-24 align-middle">
+                                            {{ $t('invoices.original_cost') }}
+                                        </th>
+                                        <th class="py-3 px-2 lg:px-4 text-center w-14 align-middle">
+                                            {{ $t('invoices.tax') }}
+                                        </th>
+                                        <th class="py-3 px-2 lg:px-4 text-center w-24 align-middle">
+                                            {{ $t('common.total') }}
+                                        </th>
+                                        <th class="py-3 px-2 lg:px-4 text-center w-12 align-middle">
+                                            {{ $t('common.actions') }}
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-gray-150 dark:divide-gray-700/40">
+                                    <tr
+                                        v-for="line in availableReturnLines"
+                                        :key="line.id"
+                                        class="bg-white dark:bg-gray-800/40 hover:bg-gray-50 dark:hover:bg-gray-700/40 transition-colors"
+                                    >
+                                        <td
+                                            class="py-3.5 px-3 lg:px-4 font-bold text-gray-900 dark:text-white align-middle"
+                                        >
+                                            <div>
+                                                {{ line.part?.name_ar || line.part?.name }}
+                                            </div>
+                                            <div class="text-[10px] text-gray-400 font-mono mt-0.5">
+                                                {{ line.part?.sku || 'NO-SKU' }}
+                                            </div>
+                                        </td>
+                                        <td
+                                            class="py-3.5 px-2 lg:px-4 text-center font-bold text-gray-600 dark:text-gray-300 font-mono align-middle"
+                                        >
+                                            {{ toEnglish(line.qty) }}
+                                        </td>
+                                        <td
+                                            class="py-3.5 px-2 lg:px-4 text-center font-bold text-red-500 font-mono align-middle"
+                                        >
+                                            {{
+                                                toEnglish(
+                                                    line.return_lines?.reduce(
+                                                        (sum, r) => sum + Number(r.qty),
+                                                        0
+                                                    ) || 0
+                                                )
+                                            }}
+                                        </td>
+                                        <td
+                                            class="py-3.5 px-2 lg:px-4 text-center font-black text-emerald-600 font-mono align-middle"
+                                        >
+                                            {{ toEnglish(getAvailableQty(line)) }}
+                                        </td>
+                                        <td
+                                            class="py-3.5 px-2 lg:px-4 text-center font-bold text-gray-900 dark:text-white font-mono align-middle"
+                                            dir="ltr"
+                                        >
+                                            {{ formatCurrencyEnglish(line.unit_cost) }}
+                                        </td>
+                                        <td
+                                            class="py-3.5 px-2 lg:px-4 text-center text-xs font-mono align-middle"
+                                        >
+                                            <span
+                                                v-if="Number(line.tax_rate) > 0"
+                                                class="px-1.5 py-0.5 bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400 rounded font-bold"
+                                            >
+                                                {{ toEnglish(line.tax_rate) }}%
+                                            </span>
+                                            <span v-else class="text-gray-400">—</span>
+                                        </td>
+                                        <td
+                                            class="py-3.5 px-2 lg:px-4 text-center font-bold text-gray-900 dark:text-white font-mono align-middle"
+                                            dir="ltr"
+                                        >
+                                            {{ formatCurrencyEnglish(line.total) }}
+                                        </td>
+                                        <td class="py-3.5 px-2 lg:px-4 text-center align-middle">
+                                            <button
+                                                v-if="getAvailableQty(line) > 0.001"
+                                                type="button"
+                                                @click="openItemReturnModal(line)"
+                                                class="p-1.5 bg-red-50 hover:bg-red-600 text-red-650 hover:text-white dark:bg-red-950/20 dark:hover:bg-red-900 rounded-lg transition-all"
+                                                :title="$t('invoices.return_this')"
+                                            >
+                                                <svg
+                                                    class="w-4 h-4"
+                                                    fill="none"
+                                                    stroke="currentColor"
+                                                    viewBox="0 0 24 24"
+                                                >
+                                                    <path
+                                                        stroke-linecap="round"
+                                                        stroke-linejoin="round"
+                                                        stroke-width="2.5"
+                                                        d="M16 15v-6a4 4 0 00-4-4H8m0 0l3 3m-3-3l3-3"
+                                                    />
+                                                </svg>
+                                            </button>
+                                            <span
+                                                v-else
+                                                class="text-xs text-gray-400 dark:text-gray-500 font-bold italic"
+                                            >
+                                                {{ $t('invoices.fully_returned') }}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </DataTable>
+                        </div>
                     </div>
 
-                    <!-- Modal Body (Scrollable) -->
-                    <div class="p-6 overflow-y-auto flex-1 space-y-6">
-                        <!-- Table 1: Items Available for Return -->
-                        <div>
-                            <h4
-                                class="text-sm font-black text-gray-900 dark:text-white mb-3 flex items-center gap-2"
-                            >
-                                <div class="w-1.5 h-4 bg-red-500 rounded-full"></div>
-                                {{ $t('invoices.available_items') }}
-                            </h4>
-                            <div
-                                class="border border-gray-100 dark:border-gray-700/60 rounded-2xl overflow-x-auto md:overflow-x-visible bg-gray-50/30 dark:bg-gray-900/20"
-                            >
-                                <DataTable
-                                    structured
-                                    class="w-full min-w-[980px] md:min-w-0 text-sm md:table-fixed"
-                                >
-                                    <thead>
-                                        <tr
-                                            class="bg-gray-50 dark:bg-gray-900/60 text-gray-400 border-b border-gray-100 dark:border-gray-700/60 text-[10px] font-black uppercase tracking-wider"
-                                        >
-                                            <th
-                                                class="py-3 px-3 lg:px-4 text-start w-72 align-middle text-center"
-                                            >
-                                                {{ $t('inventory.parts.title_singular') }}
-                                            </th>
-                                            <th
-                                                class="py-3 px-2 lg:px-4 text-center w-16 align-middle"
-                                            >
-                                                {{ $t('invoices.ordered_qty') }}
-                                            </th>
-                                            <th
-                                                class="py-3 px-2 lg:px-4 text-center text-red-550 w-16 align-middle"
-                                            >
-                                                {{ $t('invoices.returned_previously') }}
-                                            </th>
-                                            <th
-                                                class="py-3 px-2 lg:px-4 text-center text-emerald-600 w-16 align-middle"
-                                            >
-                                                {{ $t('invoices.available_qty') }}
-                                            </th>
-                                            <th
-                                                class="py-3 px-2 lg:px-4 text-center w-24 align-middle"
-                                            >
-                                                {{ $t('invoices.original_cost') }}
-                                            </th>
-                                            <th
-                                                class="py-3 px-2 lg:px-4 text-center w-14 align-middle"
-                                            >
-                                                {{ $t('invoices.tax') }}
-                                            </th>
-                                            <th
-                                                class="py-3 px-2 lg:px-4 text-center w-24 align-middle"
-                                            >
-                                                {{ $t('common.total') }}
-                                            </th>
-                                            <th
-                                                class="py-3 px-2 lg:px-4 text-center w-12 align-middle"
-                                            >
-                                                {{ $t('common.actions') }}
-                                            </th>
-                                        </tr>
-                                    </thead>
-                                    <tbody class="divide-y divide-gray-150 dark:divide-gray-700/40">
-                                        <tr
-                                            v-for="line in availableReturnLines"
-                                            :key="line.id"
-                                            class="bg-white dark:bg-gray-800/40 hover:bg-gray-50 dark:hover:bg-gray-700/40 transition-colors"
-                                        >
-                                            <td
-                                                class="py-3.5 px-3 lg:px-4 font-bold text-gray-900 dark:text-white align-middle"
-                                            >
-                                                <div>
-                                                    {{ line.part?.name_ar || line.part?.name }}
-                                                </div>
-                                                <div
-                                                    class="text-[10px] text-gray-400 font-mono mt-0.5"
-                                                >
-                                                    {{ line.part?.sku || 'NO-SKU' }}
-                                                </div>
-                                            </td>
-                                            <td
-                                                class="py-3.5 px-2 lg:px-4 text-center font-bold text-gray-600 dark:text-gray-300 font-mono align-middle"
-                                            >
-                                                {{ toEnglish(line.qty) }}
-                                            </td>
-                                            <td
-                                                class="py-3.5 px-2 lg:px-4 text-center font-bold text-red-500 font-mono align-middle"
-                                            >
-                                                {{
-                                                    toEnglish(
-                                                        line.return_lines?.reduce(
-                                                            (sum, r) => sum + Number(r.qty),
-                                                            0
-                                                        ) || 0
-                                                    )
-                                                }}
-                                            </td>
-                                            <td
-                                                class="py-3.5 px-2 lg:px-4 text-center font-black text-emerald-600 font-mono align-middle"
-                                            >
-                                                {{ toEnglish(getAvailableQty(line)) }}
-                                            </td>
-                                            <td
-                                                class="py-3.5 px-2 lg:px-4 text-center font-bold text-gray-900 dark:text-white font-mono align-middle"
-                                                dir="ltr"
-                                            >
-                                                {{ formatCurrencyEnglish(line.unit_cost) }}
-                                            </td>
-                                            <td
-                                                class="py-3.5 px-2 lg:px-4 text-center text-xs font-mono align-middle"
-                                            >
-                                                <span
-                                                    v-if="Number(line.tax_rate) > 0"
-                                                    class="px-1.5 py-0.5 bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400 rounded font-bold"
-                                                >
-                                                    {{ toEnglish(line.tax_rate) }}%
-                                                </span>
-                                                <span v-else class="text-gray-400">—</span>
-                                            </td>
-                                            <td
-                                                class="py-3.5 px-2 lg:px-4 text-center font-bold text-gray-900 dark:text-white font-mono align-middle"
-                                                dir="ltr"
-                                            >
-                                                {{ formatCurrencyEnglish(line.total) }}
-                                            </td>
-                                            <td
-                                                class="py-3.5 px-2 lg:px-4 text-center align-middle"
-                                            >
-                                                <button
-                                                    v-if="getAvailableQty(line) > 0.001"
-                                                    type="button"
-                                                    @click="openItemReturnModal(line)"
-                                                    class="p-1.5 bg-red-50 hover:bg-red-600 text-red-650 hover:text-white dark:bg-red-950/20 dark:hover:bg-red-900 rounded-lg transition-all"
-                                                    :title="$t('invoices.return_this')"
-                                                >
-                                                    <svg
-                                                        class="w-4 h-4"
-                                                        fill="none"
-                                                        stroke="currentColor"
-                                                        viewBox="0 0 24 24"
-                                                    >
-                                                        <path
-                                                            stroke-linecap="round"
-                                                            stroke-linejoin="round"
-                                                            stroke-width="2.5"
-                                                            d="M16 15v-6a4 4 0 00-4-4H8m0 0l3 3m-3-3l3-3"
-                                                        />
-                                                    </svg>
-                                                </button>
-                                                <span
-                                                    v-else
-                                                    class="text-xs text-gray-400 dark:text-gray-500 font-bold italic"
-                                                >
-                                                    {{ $t('invoices.fully_returned') }}
-                                                </span>
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </DataTable>
-                            </div>
-                        </div>
-
-                        <!-- Table 2: Items Selected for Return -->
-                        <div>
-                            <h4
-                                class="text-sm font-black text-gray-900 dark:text-white mb-3 flex items-center gap-2"
-                            >
-                                <div class="w-1.5 h-4 bg-orange-500 rounded-full"></div>
-                                {{ $t('invoices.items_to_return') }}
-                            </h4>
-                            <div
-                                class="border border-gray-100 dark:border-gray-700/60 rounded-2xl overflow-x-auto bg-gray-50/30 dark:bg-gray-900/20"
-                            >
-                                <DataTable structured class="w-full min-w-[760px] text-sm">
-                                    <thead>
-                                        <tr
-                                            class="bg-gray-50 dark:bg-gray-900/60 text-gray-400 border-b border-gray-100 dark:border-gray-700/60 text-[10px] font-black uppercase tracking-wider"
-                                        >
-                                            <th
-                                                class="py-3 px-4 text-start align-middle text-center"
-                                            >
-                                                {{ $t('inventory.parts.title_singular') }}
-                                            </th>
-                                            <th class="py-3 px-4 text-center w-28 align-middle">
-                                                {{ $t('invoices.returned_qty') }}
-                                            </th>
-                                            <th class="py-3 px-4 text-center align-middle">
-                                                {{ $t('invoices.return_unit_price') }}
-                                            </th>
-                                            <th class="py-3 px-4 text-center align-middle">
-                                                {{ $t('invoices.tax') }}
-                                            </th>
-                                            <th class="py-3 px-4 text-center align-middle">
-                                                {{ $t('common.total') }}
-                                            </th>
-                                            <th
-                                                class="py-3 px-4 text-center w-12 align-middle"
-                                            ></th>
-                                        </tr>
-                                    </thead>
-                                    <tbody class="divide-y divide-gray-150 dark:divide-gray-700/40">
-                                        <tr v-if="returnForm.items.length === 0">
-                                            <td
-                                                colspan="6"
-                                                class="py-8 text-center text-gray-400 dark:text-gray-500 font-bold italic align-middle"
-                                            >
-                                                {{ $t('invoices.no_items_selected_return') }}
-                                            </td>
-                                        </tr>
-                                        <tr
-                                            v-for="(item, idx) in returnForm.items"
-                                            :key="item.purchase_invoice_line_id"
-                                            class="bg-white dark:bg-gray-800/40 hover:bg-gray-50 dark:hover:bg-gray-700/40 transition-colors"
-                                        >
-                                            <td class="py-3 px-4 align-middle">
-                                                <div
-                                                    class="font-bold text-gray-900 dark:text-white"
-                                                >
-                                                    {{ item.part_name }}
-                                                </div>
-                                                <div
-                                                    v-if="item.is_inclusive"
-                                                    class="text-[10px] text-blue-500 font-bold mt-0.5"
-                                                >
-                                                    {{ $t('common.vat_included') }}
-                                                </div>
-                                            </td>
-                                            <td
-                                                class="py-3 px-4 text-center font-bold text-gray-900 dark:text-white font-mono align-middle"
-                                                dir="ltr"
-                                            >
-                                                {{ toEnglish(Number(item.qty).toFixed(2)) }}
-                                            </td>
-                                            <td
-                                                class="py-3 px-4 text-center font-bold text-gray-900 dark:text-white font-mono align-middle"
-                                                dir="ltr"
-                                            >
-                                                {{ formatCurrencyEnglish(item.unit_cost) }}
-                                            </td>
-                                            <td
-                                                class="py-3 px-4 text-center font-mono align-middle"
-                                                dir="ltr"
-                                            >
-                                                <span
-                                                    v-if="item.tax_amount > 0"
-                                                    class="text-amber-600 dark:text-amber-400 font-bold"
-                                                >
-                                                    {{ formatCurrencyEnglish(item.tax_amount) }}
-                                                </span>
-                                                <span v-else class="text-gray-400 text-xs">—</span>
-                                            </td>
-                                            <td
-                                                class="py-3 px-4 text-center font-black text-gray-900 dark:text-white font-mono align-middle"
-                                                dir="ltr"
-                                            >
-                                                {{ formatCurrencyEnglish(item.total) }}
-                                            </td>
-                                            <td class="py-3 px-4 text-center align-middle">
-                                                <button
-                                                    type="button"
-                                                    @click="removeItemFromReturn(idx)"
-                                                    class="p-1.5 text-gray-400 hover:text-red-650 rounded-lg hover:bg-red-50 dark:hover:bg-red-950/30 transition-all"
-                                                >
-                                                    <svg
-                                                        class="w-4 h-4"
-                                                        fill="none"
-                                                        stroke="currentColor"
-                                                        viewBox="0 0 24 24"
-                                                    >
-                                                        <path
-                                                            stroke-linecap="round"
-                                                            stroke-linejoin="round"
-                                                            stroke-width="2"
-                                                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                                                        />
-                                                    </svg>
-                                                </button>
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </DataTable>
-                            </div>
-                        </div>
-
-                        <!-- Date, Notes and Summary Column Grid -->
-                        <div
-                            class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-gray-150 dark:border-gray-700/60"
+                    <!-- Table 2: Items Selected for Return -->
+                    <div>
+                        <h4
+                            class="text-sm font-black text-gray-900 dark:text-white mb-3 flex items-center gap-2"
                         >
-                            <!-- Left: Date and Notes -->
-                            <div
-                                class="flex flex-col gap-4 w-full md:border-r border-gray-100 dark:border-gray-700/60 md:pr-5"
-                            >
-                                <!-- Return Date -->
-                                <div>
-                                    <label
-                                        class="block text-xs font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-1.5"
+                            <div class="w-1.5 h-4 bg-orange-500 rounded-full"></div>
+                            {{ $t('invoices.items_to_return') }}
+                        </h4>
+                        <div
+                            class="border border-gray-100 dark:border-gray-700/60 rounded-2xl overflow-x-auto bg-gray-50/30 dark:bg-gray-900/20"
+                        >
+                            <DataTable structured class="w-full min-w-[760px] text-sm">
+                                <thead>
+                                    <tr
+                                        class="bg-gray-50 dark:bg-gray-900/60 text-gray-400 border-b border-gray-100 dark:border-gray-700/60 text-[10px] font-black uppercase tracking-wider"
                                     >
-                                        {{ $t('invoices.return_date') }}
-                                        <span class="text-red-500">*</span>
-                                    </label>
-                                    <CustomDatePicker
-                                        v-model="returnForm.return_date"
-                                        class="w-full"
-                                        required
-                                    />
-                                </div>
-                                <!-- Notes -->
-                                <div>
-                                    <label
-                                        class="block text-xs font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-1.5"
-                                    >
-                                        {{ $t('payments.form.notes') }}
-                                    </label>
-                                    <textarea
-                                        v-model="returnForm.notes"
-                                        rows="3"
-                                        :placeholder="$t('invoices.return_notes_placeholder')"
-                                        class="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl font-semibold text-sm"
-                                    ></textarea>
-                                </div>
-                            </div>
-
-                            <!-- Right: Summary Card -->
-                            <div
-                                class="bg-gray-50 dark:bg-gray-900/40 border border-gray-150 dark:border-gray-700/60 rounded-2xl p-5 flex flex-col justify-between"
-                            >
-                                <h4
-                                    class="text-xs font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-3"
-                                >
-                                    {{ $t('invoices.return_totals_summary') }}
-                                </h4>
-                                <div class="space-y-2">
-                                    <div class="flex items-center justify-between text-sm">
-                                        <span class="text-gray-500 dark:text-gray-400">
-                                            {{ $t('invoices.subtotal') }}
-                                        </span>
-                                        <span
-                                            class="font-bold text-gray-900 dark:text-white font-mono"
-                                            dir="ltr"
-                                        >
-                                            {{ formatCurrencyEnglish(returnSubtotal) }}
-                                        </span>
-                                    </div>
-                                    <div
-                                        v-if="returnTaxAmount > 0"
-                                        class="flex items-center justify-between text-sm"
-                                    >
-                                        <span class="text-gray-500 dark:text-gray-400">
+                                        <th class="py-3 px-4 text-start align-middle text-center">
+                                            {{ $t('inventory.parts.title_singular') }}
+                                        </th>
+                                        <th class="py-3 px-4 text-center w-28 align-middle">
+                                            {{ $t('invoices.returned_qty') }}
+                                        </th>
+                                        <th class="py-3 px-4 text-center align-middle">
+                                            {{ $t('invoices.return_unit_price') }}
+                                        </th>
+                                        <th class="py-3 px-4 text-center align-middle">
                                             {{ $t('invoices.tax') }}
-                                        </span>
-                                        <span
-                                            class="font-bold text-gray-900 dark:text-white font-mono"
+                                        </th>
+                                        <th class="py-3 px-4 text-center align-middle">
+                                            {{ $t('common.total') }}
+                                        </th>
+                                        <th class="py-3 px-4 text-center w-12 align-middle"></th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-gray-150 dark:divide-gray-700/40">
+                                    <tr v-if="returnForm.items.length === 0">
+                                        <td
+                                            colspan="6"
+                                            class="py-8 text-center text-gray-400 dark:text-gray-500 font-bold italic align-middle"
+                                        >
+                                            {{ $t('invoices.no_items_selected_return') }}
+                                        </td>
+                                    </tr>
+                                    <tr
+                                        v-for="(item, idx) in returnForm.items"
+                                        :key="item.purchase_invoice_line_id"
+                                        class="bg-white dark:bg-gray-800/40 hover:bg-gray-50 dark:hover:bg-gray-700/40 transition-colors"
+                                    >
+                                        <td class="py-3 px-4 align-middle">
+                                            <div class="font-bold text-gray-900 dark:text-white">
+                                                {{ item.part_name }}
+                                            </div>
+                                            <div
+                                                v-if="item.is_inclusive"
+                                                class="text-[10px] text-blue-500 font-bold mt-0.5"
+                                            >
+                                                {{ $t('common.vat_included') }}
+                                            </div>
+                                        </td>
+                                        <td
+                                            class="py-3 px-4 text-center font-bold text-gray-900 dark:text-white font-mono align-middle"
                                             dir="ltr"
                                         >
-                                            {{ formatCurrencyEnglish(returnTaxAmount) }}
-                                        </span>
-                                    </div>
-                                    <div class="h-px bg-gray-200 dark:bg-gray-700 my-2"></div>
-                                    <div class="flex items-center justify-between">
-                                        <span class="font-black text-red-650 dark:text-red-400">
-                                            {{ $t('invoices.grand_total_returned') }}
-                                        </span>
-                                        <span
-                                            class="text-xl font-black text-red-650 dark:text-red-400 font-mono"
+                                            {{ toEnglish(Number(item.qty).toFixed(2)) }}
+                                        </td>
+                                        <td
+                                            class="py-3 px-4 text-center font-bold text-gray-900 dark:text-white font-mono align-middle"
                                             dir="ltr"
                                         >
-                                            {{ formatCurrencyEnglish(returnTotal) }}
-                                        </span>
-                                    </div>
-                                </div>
+                                            {{ formatCurrencyEnglish(item.unit_cost) }}
+                                        </td>
+                                        <td
+                                            class="py-3 px-4 text-center font-mono align-middle"
+                                            dir="ltr"
+                                        >
+                                            <span
+                                                v-if="item.tax_amount > 0"
+                                                class="text-amber-600 dark:text-amber-400 font-bold"
+                                            >
+                                                {{ formatCurrencyEnglish(item.tax_amount) }}
+                                            </span>
+                                            <span v-else class="text-gray-400 text-xs">—</span>
+                                        </td>
+                                        <td
+                                            class="py-3 px-4 text-center font-black text-gray-900 dark:text-white font-mono align-middle"
+                                            dir="ltr"
+                                        >
+                                            {{ formatCurrencyEnglish(item.total) }}
+                                        </td>
+                                        <td class="py-3 px-4 text-center align-middle">
+                                            <button
+                                                type="button"
+                                                @click="removeItemFromReturn(idx)"
+                                                class="p-1.5 text-gray-400 hover:text-red-650 rounded-lg hover:bg-red-50 dark:hover:bg-red-950/30 transition-all"
+                                            >
+                                                <svg
+                                                    class="w-4 h-4"
+                                                    fill="none"
+                                                    stroke="currentColor"
+                                                    viewBox="0 0 24 24"
+                                                >
+                                                    <path
+                                                        stroke-linecap="round"
+                                                        stroke-linejoin="round"
+                                                        stroke-width="2"
+                                                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                                                    />
+                                                </svg>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </DataTable>
+                        </div>
+                    </div>
+
+                    <!-- Date, Notes and Summary Column Grid -->
+                    <div
+                        class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-gray-150 dark:border-gray-700/60"
+                    >
+                        <!-- Left: Date and Notes -->
+                        <div
+                            class="flex flex-col gap-4 w-full md:border-r border-gray-100 dark:border-gray-700/60 md:pr-5"
+                        >
+                            <!-- Return Date -->
+                            <div>
+                                <label
+                                    class="block text-xs font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-1.5"
+                                >
+                                    {{ $t('invoices.return_date') }}
+                                    <span class="text-red-500">*</span>
+                                </label>
+                                <CustomDatePicker
+                                    v-model="returnForm.return_date"
+                                    class="w-full"
+                                    required
+                                />
+                            </div>
+                            <!-- Notes -->
+                            <div>
+                                <label
+                                    class="block text-xs font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-1.5"
+                                >
+                                    {{ $t('payments.form.notes') }}
+                                </label>
+                                <textarea
+                                    v-model="returnForm.notes"
+                                    rows="3"
+                                    :placeholder="$t('invoices.return_notes_placeholder')"
+                                    class="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl font-semibold text-sm"
+                                ></textarea>
                             </div>
                         </div>
 
-                        <!-- Refund / Money Recovery Section -->
+                        <!-- Right: Summary Card -->
                         <div
-                            v-if="hasPayments || returnTotal > Number(invoice.balance)"
-                            class="bg-gradient-to-br from-rose-50/60 to-red-50/30 dark:from-red-950/15 dark:to-rose-950/5 border border-red-200/70 dark:border-red-900/40 rounded-2xl p-5 space-y-4 mt-4 shadow-inner"
+                            class="bg-gray-50 dark:bg-gray-900/40 border border-gray-150 dark:border-gray-700/60 rounded-2xl p-5 flex flex-col justify-between"
                         >
-                            <!-- Section Header -->
+                            <h4
+                                class="text-xs font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-3"
+                            >
+                                {{ $t('invoices.return_totals_summary') }}
+                            </h4>
+                            <div class="space-y-2">
+                                <div class="flex items-center justify-between text-sm">
+                                    <span class="text-gray-500 dark:text-gray-400">
+                                        {{ $t('invoices.subtotal') }}
+                                    </span>
+                                    <span
+                                        class="font-bold text-gray-900 dark:text-white font-mono"
+                                        dir="ltr"
+                                    >
+                                        {{ formatCurrencyEnglish(returnSubtotal) }}
+                                    </span>
+                                </div>
+                                <div
+                                    v-if="returnTaxAmount > 0"
+                                    class="flex items-center justify-between text-sm"
+                                >
+                                    <span class="text-gray-500 dark:text-gray-400">
+                                        {{ $t('invoices.tax') }}
+                                    </span>
+                                    <span
+                                        class="font-bold text-gray-900 dark:text-white font-mono"
+                                        dir="ltr"
+                                    >
+                                        {{ formatCurrencyEnglish(returnTaxAmount) }}
+                                    </span>
+                                </div>
+                                <div class="h-px bg-gray-200 dark:bg-gray-700 my-2"></div>
+                                <div class="flex items-center justify-between">
+                                    <span class="font-black text-red-650 dark:text-red-400">
+                                        {{ $t('invoices.grand_total_returned') }}
+                                    </span>
+                                    <span
+                                        class="text-xl font-black text-red-650 dark:text-red-400 font-mono"
+                                        dir="ltr"
+                                    >
+                                        {{ formatCurrencyEnglish(returnTotal) }}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Refund / Money Recovery Section -->
+                    <div
+                        v-if="hasPayments || returnTotal > Number(invoice.balance)"
+                        class="bg-gradient-to-br from-rose-50/60 to-red-50/30 dark:from-red-950/15 dark:to-rose-950/5 border border-red-200/70 dark:border-red-900/40 rounded-2xl p-5 space-y-4 mt-4 shadow-inner"
+                    >
+                        <!-- Section Header -->
+                        <div
+                            class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
+                        >
+                            <div class="flex items-center gap-3">
+                                <div
+                                    class="w-10 h-10 rounded-xl bg-red-100 dark:bg-red-950/50 flex items-center justify-center text-red-650 dark:text-red-400 shadow-sm"
+                                >
+                                    <svg
+                                        class="w-5 h-5 animate-pulse"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                                        />
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h4
+                                        class="text-xs font-black text-red-650 dark:text-red-400 uppercase tracking-widest"
+                                    >
+                                        {{ $t('invoices.refund_details') }}
+                                    </h4>
+                                    <p
+                                        class="text-[10px] text-gray-400 dark:text-gray-500 mt-0.5 font-bold"
+                                    >
+                                        {{ $t('invoices.refund_desc') }}
+                                    </p>
+                                </div>
+                            </div>
+                            <button
+                                v-if="hasPayments"
+                                type="button"
+                                @click="openRefundPaymentModal()"
+                                class="flex items-center justify-center gap-1.5 px-4 py-2 bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700 text-white rounded-xl text-[10px] font-black uppercase tracking-widest transition-all duration-300 shadow-md shadow-red-500/10 hover:shadow-lg hover:shadow-red-500/20 hover:-translate-y-0.5 active:scale-95 w-full sm:w-auto"
+                            >
+                                <svg
+                                    class="w-3.5 h-3.5"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2.5"
+                                        d="M12 4v16m8-8H4"
+                                    />
+                                </svg>
+                                {{ $t('payments.add_payment') }}
+                            </button>
+                            <span
+                                v-else
+                                class="text-xs text-amber-600 dark:text-amber-400 font-bold bg-amber-50 dark:bg-amber-950/20 px-3 py-1.5 rounded-lg border border-amber-200/50 dark:border-amber-900/30"
+                            >
+                                {{ $t('payments.cannot_refund_unpaid') }}
+                            </span>
+                        </div>
+
+                        <!-- High-tier Metrics Box -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-1">
                             <div
-                                class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
+                                class="bg-white/80 dark:bg-gray-800/80 rounded-xl p-3 border border-red-100 dark:border-red-900/20 flex items-center justify-between shadow-xs"
+                            >
+                                <span
+                                    class="text-[10px] text-gray-500 dark:text-gray-400 font-black uppercase tracking-widest"
+                                >
+                                    {{ $t('invoices.refund_amount') }}
+                                </span>
+                                <span
+                                    class="text-sm font-black text-red-650 dark:text-red-400 font-mono"
+                                    dir="ltr"
+                                >
+                                    {{ formatCurrencyEnglish(calculatedRefundAmount) }}
+                                </span>
+                            </div>
+                            <div
+                                class="bg-white/80 dark:bg-gray-800/80 rounded-xl p-3 border border-red-100 dark:border-red-900/20 flex items-center justify-between shadow-xs"
+                            >
+                                <span
+                                    class="text-[10px] text-gray-500 dark:text-gray-400 font-black uppercase tracking-widest"
+                                >
+                                    {{ $t('invoices.refunded_so_far') }}
+                                </span>
+                                <span
+                                    :class="
+                                        refundPaymentsTotal >= calculatedRefundAmount
+                                            ? 'text-emerald-600 dark:text-emerald-400'
+                                            : 'text-amber-600 dark:text-amber-400'
+                                    "
+                                    class="text-sm font-black font-mono"
+                                    dir="ltr"
+                                >
+                                    {{ formatCurrencyEnglish(refundPaymentsTotal) }}
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Payments Summary Table -->
+                        <div
+                            v-if="returnForm.refund_payments.length > 0"
+                            class="overflow-x-auto rounded-xl border border-red-200/60 dark:border-red-900/40 shadow-sm"
+                        >
+                            <DataTable structured class="w-full min-w-[720px] text-xs">
+                                <thead
+                                    class="bg-red-100/60 dark:bg-red-950/30 text-red-700 dark:text-red-400"
+                                >
+                                    <tr>
+                                        <th
+                                            class="px-3 py-2.5 text-center font-black uppercase tracking-widest w-8 align-middle"
+                                        >
+                                            #
+                                        </th>
+                                        <th
+                                            class="px-3 py-2.5 text-center font-black uppercase tracking-widest align-middle"
+                                        >
+                                            {{ $t('payments.form.type') }}
+                                        </th>
+                                        <th
+                                            class="px-3 py-2.5 text-center font-black uppercase tracking-widest align-middle"
+                                        >
+                                            {{ $t('payments.form.date') }}
+                                        </th>
+                                        <th
+                                            class="px-3 py-2.5 text-center font-black uppercase tracking-widest align-middle"
+                                        >
+                                            {{ $t('payments.form.reference') }}
+                                        </th>
+                                        <th
+                                            class="px-3 py-2.5 text-center font-black uppercase tracking-widest align-middle"
+                                        >
+                                            {{ $t('payments.form.amount') }}
+                                        </th>
+                                        <th class="px-3 py-2.5 w-10 align-middle text-center"></th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-red-100 dark:divide-red-900/30">
+                                    <tr
+                                        v-for="(rp, idx) in returnForm.refund_payments"
+                                        :key="idx"
+                                        class="bg-white dark:bg-gray-800 group hover:bg-red-50/30 dark:hover:bg-red-950/10 transition-colors"
+                                    >
+                                        <td
+                                            class="px-3 py-2.5 text-center text-gray-400 font-mono align-middle"
+                                        >
+                                            {{ idx + 1 }}
+                                        </td>
+                                        <td class="px-3 py-2.5 text-center align-middle">
+                                            <span
+                                                class="inline-flex items-center gap-1 px-2 py-0.5 bg-red-100 dark:bg-red-950/40 text-red-700 dark:text-red-400 rounded-lg font-black text-[10px] uppercase tracking-widest"
+                                            >
+                                                <svg
+                                                    class="w-3 h-3"
+                                                    fill="none"
+                                                    stroke="currentColor"
+                                                    viewBox="0 0 24 24"
+                                                >
+                                                    <path
+                                                        stroke-linecap="round"
+                                                        stroke-linejoin="round"
+                                                        stroke-width="2"
+                                                        d="M16 15v-1a4 4 0 00-4-4H8m0 0l3 3m-3-3l3-3"
+                                                    />
+                                                </svg>
+                                                {{
+                                                    $t(`payments.methods.${rp.payment_method}`) ||
+                                                    rp.payment_method
+                                                }}
+                                            </span>
+                                        </td>
+                                        <td
+                                            class="px-3 py-2.5 text-center text-gray-600 dark:text-gray-400 font-mono align-middle"
+                                            dir="ltr"
+                                        >
+                                            {{ rp.payment_date || returnForm.return_date }}
+                                        </td>
+                                        <td
+                                            class="px-3 py-2.5 text-center text-gray-500 dark:text-gray-400 font-mono align-middle"
+                                            dir="ltr"
+                                        >
+                                            {{ rp.reference || '—' }}
+                                        </td>
+                                        <td
+                                            class="px-3 py-2.5 text-center font-black text-red-650 dark:text-red-400 font-mono align-middle"
+                                            dir="ltr"
+                                        >
+                                            {{ formatCurrencyEnglish(rp.amount) }}
+                                        </td>
+                                        <td class="px-3 py-2.5 text-center align-middle">
+                                            <button
+                                                type="button"
+                                                @click="removeRefundPaymentRow(idx)"
+                                                class="p-1 text-gray-300 hover:text-red-500 rounded transition-colors opacity-0 group-hover:opacity-100"
+                                            >
+                                                <svg
+                                                    class="w-4 h-4"
+                                                    fill="none"
+                                                    stroke="currentColor"
+                                                    viewBox="0 0 24 24"
+                                                >
+                                                    <path
+                                                        stroke-linecap="round"
+                                                        stroke-linejoin="round"
+                                                        stroke-width="2"
+                                                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                                                    />
+                                                </svg>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                                <tfoot
+                                    class="bg-red-50 dark:bg-red-950/20 border-t border-red-200/60 dark:border-red-900/40"
+                                >
+                                    <tr>
+                                        <td
+                                            colspan="4"
+                                            class="px-3 py-2.5 text-center text-xs font-black text-red-650 dark:text-red-400 uppercase tracking-widest align-middle"
+                                        >
+                                            {{ $t('common.total') }}
+                                        </td>
+                                        <td
+                                            class="px-3 py-2.5 text-center font-black text-red-650 dark:text-red-400 font-mono text-sm align-middle"
+                                            dir="ltr"
+                                        >
+                                            {{ formatCurrencyEnglish(refundPaymentsTotal) }}
+                                        </td>
+                                        <td class="align-middle"></td>
+                                    </tr>
+                                </tfoot>
+                            </DataTable>
+                        </div>
+
+                        <!-- Empty State -->
+                        <div
+                            v-else
+                            class="text-center py-5 text-xs text-gray-400 dark:text-gray-500 border border-dashed border-red-200 dark:border-red-900/40 rounded-xl"
+                        >
+                            <svg
+                                class="w-8 h-8 mx-auto mb-2 opacity-30"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="1.5"
+                                    d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                                />
+                            </svg>
+                            {{ $t('payments.no_payments') }}
+                        </div>
+
+                        <!-- Debit Note Option -->
+                        <div
+                            v-if="
+                                calculatedRefundAmount > 0.001 &&
+                                refundPaymentsTotal < calculatedRefundAmount
+                            "
+                            class="mt-4 pt-4 border-t border-red-200/40 dark:border-red-900/30"
+                        >
+                            <div
+                                class="flex items-center justify-between bg-red-50/50 dark:bg-red-950/10 p-4 rounded-xl border border-red-100 dark:border-red-900/30"
                             >
                                 <div class="flex items-center gap-3">
                                     <div
-                                        class="w-10 h-10 rounded-xl bg-red-100 dark:bg-red-950/50 flex items-center justify-center text-red-650 dark:text-red-400 shadow-sm"
+                                        class="w-10 h-10 rounded-xl bg-red-100 dark:bg-red-950/40 flex items-center justify-center text-red-650 dark:text-red-400"
                                     >
                                         <svg
-                                            class="w-5 h-5 animate-pulse"
+                                            class="w-5 h-5"
                                             fill="none"
                                             stroke="currentColor"
                                             viewBox="0 0 24 24"
@@ -1475,373 +1688,97 @@
                                                 stroke-linecap="round"
                                                 stroke-linejoin="round"
                                                 stroke-width="2"
-                                                d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                                                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
                                             />
                                         </svg>
                                     </div>
                                     <div>
-                                        <h4
-                                            class="text-xs font-black text-red-650 dark:text-red-400 uppercase tracking-widest"
-                                        >
-                                            {{ $t('invoices.refund_details') }}
-                                        </h4>
+                                        <h5 class="text-xs font-bold text-gray-900 dark:text-white">
+                                            {{ $t('invoices.create_debit_note') }}
+                                        </h5>
                                         <p
-                                            class="text-[10px] text-gray-400 dark:text-gray-500 mt-0.5 font-bold"
+                                            class="text-[10px] text-gray-500 dark:text-gray-400 mt-0.5"
                                         >
-                                            {{ $t('invoices.refund_desc') }}
+                                            {{ $t('invoices.debit_note_hint') }}
                                         </p>
                                     </div>
                                 </div>
-                                <button
-                                    v-if="hasPayments"
-                                    type="button"
-                                    @click="openRefundPaymentModal()"
-                                    class="flex items-center justify-center gap-1.5 px-4 py-2 bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700 text-white rounded-xl text-[10px] font-black uppercase tracking-widest transition-all duration-300 shadow-md shadow-red-500/10 hover:shadow-lg hover:shadow-red-500/20 hover:-translate-y-0.5 active:scale-95 w-full sm:w-auto"
-                                >
-                                    <svg
-                                        class="w-3.5 h-3.5"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        viewBox="0 0 24 24"
-                                    >
-                                        <path
-                                            stroke-linecap="round"
-                                            stroke-linejoin="round"
-                                            stroke-width="2.5"
-                                            d="M12 4v16m8-8H4"
-                                        />
-                                    </svg>
-                                    {{ $t('payments.add_payment') }}
-                                </button>
-                                <span
-                                    v-else
-                                    class="text-xs text-amber-600 dark:text-amber-400 font-bold bg-amber-50 dark:bg-amber-950/20 px-3 py-1.5 rounded-lg border border-amber-200/50 dark:border-amber-900/30"
-                                >
-                                    {{ $t('payments.cannot_refund_unpaid') }}
-                                </span>
+                                <AppToggle
+                                    v-model="returnForm.create_debit_note"
+                                    size="sm"
+                                    color="danger"
+                                />
                             </div>
 
-                            <!-- High-tier Metrics Box -->
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-1">
-                                <div
-                                    class="bg-white/80 dark:bg-gray-800/80 rounded-xl p-3 border border-red-100 dark:border-red-900/20 flex items-center justify-between shadow-xs"
-                                >
-                                    <span
-                                        class="text-[10px] text-gray-500 dark:text-gray-400 font-black uppercase tracking-widest"
-                                    >
-                                        {{ $t('invoices.refund_amount') }}
-                                    </span>
-                                    <span
-                                        class="text-sm font-black text-red-650 dark:text-red-400 font-mono"
-                                        dir="ltr"
-                                    >
-                                        {{ formatCurrencyEnglish(calculatedRefundAmount) }}
-                                    </span>
-                                </div>
-                                <div
-                                    class="bg-white/80 dark:bg-gray-800/80 rounded-xl p-3 border border-red-100 dark:border-red-900/20 flex items-center justify-between shadow-xs"
-                                >
-                                    <span
-                                        class="text-[10px] text-gray-500 dark:text-gray-400 font-black uppercase tracking-widest"
-                                    >
-                                        {{ $t('invoices.refunded_so_far') }}
-                                    </span>
-                                    <span
-                                        :class="
-                                            refundPaymentsTotal >= calculatedRefundAmount
-                                                ? 'text-emerald-600 dark:text-emerald-400'
-                                                : 'text-amber-600 dark:text-amber-400'
-                                        "
-                                        class="text-sm font-black font-mono"
-                                        dir="ltr"
-                                    >
-                                        {{ formatCurrencyEnglish(refundPaymentsTotal) }}
-                                    </span>
-                                </div>
-                            </div>
-
-                            <!-- Payments Summary Table -->
+                            <!-- Debit Note Date -->
                             <div
-                                v-if="returnForm.refund_payments.length > 0"
-                                class="overflow-x-auto rounded-xl border border-red-200/60 dark:border-red-900/40 shadow-sm"
+                                v-if="returnForm.create_debit_note"
+                                class="grid grid-cols-1 gap-4 mt-3 bg-white dark:bg-gray-800 p-4 rounded-xl border border-red-150 dark:border-red-900/20 shadow-sm animate-in fade-in slide-in-from-top-2 duration-300"
                             >
-                                <DataTable structured class="w-full min-w-[720px] text-xs">
-                                    <thead
-                                        class="bg-red-100/60 dark:bg-red-950/30 text-red-700 dark:text-red-400"
+                                <div>
+                                    <label
+                                        class="block text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-1.5"
                                     >
-                                        <tr>
-                                            <th
-                                                class="px-3 py-2.5 text-center font-black uppercase tracking-widest w-8 align-middle"
-                                            >
-                                                #
-                                            </th>
-                                            <th
-                                                class="px-3 py-2.5 text-center font-black uppercase tracking-widest align-middle"
-                                            >
-                                                {{ $t('payments.form.type') }}
-                                            </th>
-                                            <th
-                                                class="px-3 py-2.5 text-center font-black uppercase tracking-widest align-middle"
-                                            >
-                                                {{ $t('payments.form.date') }}
-                                            </th>
-                                            <th
-                                                class="px-3 py-2.5 text-center font-black uppercase tracking-widest align-middle"
-                                            >
-                                                {{ $t('payments.form.reference') }}
-                                            </th>
-                                            <th
-                                                class="px-3 py-2.5 text-center font-black uppercase tracking-widest align-middle"
-                                            >
-                                                {{ $t('payments.form.amount') }}
-                                            </th>
-                                            <th
-                                                class="px-3 py-2.5 w-10 align-middle text-center"
-                                            ></th>
-                                        </tr>
-                                    </thead>
-                                    <tbody class="divide-y divide-red-100 dark:divide-red-900/30">
-                                        <tr
-                                            v-for="(rp, idx) in returnForm.refund_payments"
-                                            :key="idx"
-                                            class="bg-white dark:bg-gray-800 group hover:bg-red-50/30 dark:hover:bg-red-950/10 transition-colors"
-                                        >
-                                            <td
-                                                class="px-3 py-2.5 text-center text-gray-400 font-mono align-middle"
-                                            >
-                                                {{ idx + 1 }}
-                                            </td>
-                                            <td class="px-3 py-2.5 text-center align-middle">
-                                                <span
-                                                    class="inline-flex items-center gap-1 px-2 py-0.5 bg-red-100 dark:bg-red-950/40 text-red-700 dark:text-red-400 rounded-lg font-black text-[10px] uppercase tracking-widest"
-                                                >
-                                                    <svg
-                                                        class="w-3 h-3"
-                                                        fill="none"
-                                                        stroke="currentColor"
-                                                        viewBox="0 0 24 24"
-                                                    >
-                                                        <path
-                                                            stroke-linecap="round"
-                                                            stroke-linejoin="round"
-                                                            stroke-width="2"
-                                                            d="M16 15v-1a4 4 0 00-4-4H8m0 0l3 3m-3-3l3-3"
-                                                        />
-                                                    </svg>
-                                                    {{
-                                                        $t(
-                                                            `payments.methods.${rp.payment_method}`
-                                                        ) || rp.payment_method
-                                                    }}
-                                                </span>
-                                            </td>
-                                            <td
-                                                class="px-3 py-2.5 text-center text-gray-600 dark:text-gray-400 font-mono align-middle"
-                                                dir="ltr"
-                                            >
-                                                {{ rp.payment_date || returnForm.return_date }}
-                                            </td>
-                                            <td
-                                                class="px-3 py-2.5 text-center text-gray-500 dark:text-gray-400 font-mono align-middle"
-                                                dir="ltr"
-                                            >
-                                                {{ rp.reference || '—' }}
-                                            </td>
-                                            <td
-                                                class="px-3 py-2.5 text-center font-black text-red-650 dark:text-red-400 font-mono align-middle"
-                                                dir="ltr"
-                                            >
-                                                {{ formatCurrencyEnglish(rp.amount) }}
-                                            </td>
-                                            <td class="px-3 py-2.5 text-center align-middle">
-                                                <button
-                                                    type="button"
-                                                    @click="removeRefundPaymentRow(idx)"
-                                                    class="p-1 text-gray-300 hover:text-red-500 rounded transition-colors opacity-0 group-hover:opacity-100"
-                                                >
-                                                    <svg
-                                                        class="w-4 h-4"
-                                                        fill="none"
-                                                        stroke="currentColor"
-                                                        viewBox="0 0 24 24"
-                                                    >
-                                                        <path
-                                                            stroke-linecap="round"
-                                                            stroke-linejoin="round"
-                                                            stroke-width="2"
-                                                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                                                        />
-                                                    </svg>
-                                                </button>
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                    <tfoot
-                                        class="bg-red-50 dark:bg-red-950/20 border-t border-red-200/60 dark:border-red-900/40"
-                                    >
-                                        <tr>
-                                            <td
-                                                colspan="4"
-                                                class="px-3 py-2.5 text-center text-xs font-black text-red-650 dark:text-red-400 uppercase tracking-widest align-middle"
-                                            >
-                                                {{ $t('common.total') }}
-                                            </td>
-                                            <td
-                                                class="px-3 py-2.5 text-center font-black text-red-650 dark:text-red-400 font-mono text-sm align-middle"
-                                                dir="ltr"
-                                            >
-                                                {{ formatCurrencyEnglish(refundPaymentsTotal) }}
-                                            </td>
-                                            <td class="align-middle"></td>
-                                        </tr>
-                                    </tfoot>
-                                </DataTable>
-                            </div>
-
-                            <!-- Empty State -->
-                            <div
-                                v-else
-                                class="text-center py-5 text-xs text-gray-400 dark:text-gray-500 border border-dashed border-red-200 dark:border-red-900/40 rounded-xl"
-                            >
-                                <svg
-                                    class="w-8 h-8 mx-auto mb-2 opacity-30"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        stroke-width="1.5"
-                                        d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                                    />
-                                </svg>
-                                {{ $t('payments.no_payments') }}
-                            </div>
-
-                            <!-- Debit Note Option -->
-                            <div
-                                v-if="
-                                    calculatedRefundAmount > 0.001 &&
-                                    refundPaymentsTotal < calculatedRefundAmount
-                                "
-                                class="mt-4 pt-4 border-t border-red-200/40 dark:border-red-900/30"
-                            >
-                                <div
-                                    class="flex items-center justify-between bg-red-50/50 dark:bg-red-950/10 p-4 rounded-xl border border-red-100 dark:border-red-900/30"
-                                >
-                                    <div class="flex items-center gap-3">
-                                        <div
-                                            class="w-10 h-10 rounded-xl bg-red-100 dark:bg-red-950/40 flex items-center justify-center text-red-650 dark:text-red-400"
-                                        >
-                                            <svg
-                                                class="w-5 h-5"
-                                                fill="none"
-                                                stroke="currentColor"
-                                                viewBox="0 0 24 24"
-                                            >
-                                                <path
-                                                    stroke-linecap="round"
-                                                    stroke-linejoin="round"
-                                                    stroke-width="2"
-                                                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                                                />
-                                            </svg>
-                                        </div>
-                                        <div>
-                                            <h5
-                                                class="text-xs font-bold text-gray-900 dark:text-white"
-                                            >
-                                                {{ $t('invoices.create_debit_note') }}
-                                            </h5>
-                                            <p
-                                                class="text-[10px] text-gray-500 dark:text-gray-400 mt-0.5"
-                                            >
-                                                {{ $t('invoices.debit_note_hint') }}
-                                            </p>
-                                        </div>
-                                    </div>
-                                    <AppToggle
-                                        v-model="returnForm.create_debit_note"
-                                        size="sm"
-                                        color="danger"
+                                        {{ $t('invoices.debit_note_date') }}
+                                        <span class="text-red-500">*</span>
+                                    </label>
+                                    <CustomDatePicker
+                                        v-model="returnForm.debit_note_date"
+                                        class="w-full"
+                                        required
                                     />
                                 </div>
-
-                                <!-- Debit Note Date -->
-                                <div
-                                    v-if="returnForm.create_debit_note"
-                                    class="grid grid-cols-1 gap-4 mt-3 bg-white dark:bg-gray-800 p-4 rounded-xl border border-red-150 dark:border-red-900/20 shadow-sm animate-in fade-in slide-in-from-top-2 duration-300"
-                                >
-                                    <div>
-                                        <label
-                                            class="block text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-1.5"
-                                        >
-                                            {{ $t('invoices.debit_note_date') }}
-                                            <span class="text-red-500">*</span>
-                                        </label>
-                                        <CustomDatePicker
-                                            v-model="returnForm.debit_note_date"
-                                            class="w-full"
-                                            required
-                                        />
-                                    </div>
-                                </div>
                             </div>
-                        </div>
-                    </div>
-
-                    <!-- Modal Footer Actions -->
-                    <div
-                        class="px-6 py-4 bg-gray-50 dark:bg-gray-900 border-t border-gray-100 dark:border-gray-700/60 flex items-center justify-between gap-3"
-                    >
-                        <div></div>
-                        <div class="flex items-center gap-3">
-                            <button
-                                type="button"
-                                @click="showReturnModal = false"
-                                class="px-5 py-2.5 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700 rounded-xl text-xs font-bold transition-all"
-                            >
-                                {{ $t('common.cancel') }}
-                            </button>
-                            <button
-                                type="button"
-                                @click="submitReturn"
-                                :disabled="!isReturnFormValid"
-                                class="px-6 py-2.5 bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-700 hover:to-orange-700 text-white rounded-xl text-xs font-bold transition-all shadow-md shadow-red-500/20 active:scale-95 disabled:opacity-50"
-                            >
-                                <svg
-                                    v-if="returnForm.processing"
-                                    class="animate-spin w-4 h-4 text-white inline-block mr-1.5"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <circle
-                                        class="opacity-25"
-                                        cx="12"
-                                        cy="12"
-                                        r="10"
-                                        stroke="currentColor"
-                                        stroke-width="4"
-                                    ></circle>
-                                    <path
-                                        class="opacity-75"
-                                        fill="currentColor"
-                                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                                    ></path>
-                                </svg>
-                                <span>
-                                    {{
-                                        returnForm.processing
-                                            ? $t('common.saving')
-                                            : $t('invoices.confirm_return')
-                                    }}
-                                </span>
-                            </button>
                         </div>
                     </div>
                 </div>
-            </div>
+
+                <template #footer>
+                    <div class="flex items-center justify-end gap-3 w-full">
+                        <button
+                            type="button"
+                            @click="showReturnModal = false"
+                            class="px-5 py-2.5 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700 rounded-xl text-xs font-bold transition-all"
+                        >
+                            {{ $t('common.cancel') }}
+                        </button>
+                        <button
+                            type="button"
+                            @click="submitReturn"
+                            :disabled="!isReturnFormValid"
+                            class="px-6 py-2.5 bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-700 hover:to-orange-700 text-white rounded-xl text-xs font-bold transition-all shadow-md shadow-red-500/20 active:scale-95 disabled:opacity-50"
+                        >
+                            <svg
+                                v-if="returnForm.processing"
+                                class="animate-spin w-4 h-4 text-white inline-block mr-1.5"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                            >
+                                <circle
+                                    class="opacity-25"
+                                    cx="12"
+                                    cy="12"
+                                    r="10"
+                                    stroke="currentColor"
+                                    stroke-width="4"
+                                ></circle>
+                                <path
+                                    class="opacity-75"
+                                    fill="currentColor"
+                                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                                ></path>
+                            </svg>
+                            <span>
+                                {{
+                                    returnForm.processing
+                                        ? $t('common.saving')
+                                        : $t('invoices.confirm_return')
+                                }}
+                            </span>
+                        </button>
+                    </div>
+                </template>
+            </BaseModal>
 
             <!-- Refund Payment Modal (uses existing PurchaseOrderPaymentModal with type=refund) -->
             <PurchaseOrderPaymentModal
@@ -1853,206 +1790,171 @@
             />
 
             <!-- Nested Submodal: Item Return Detail Form -->
-            <div
-                v-if="showItemReturnModal"
-                class="fixed inset-0 z-[60] flex items-center justify-center p-4 overflow-y-auto"
+            <BaseModal
+                :show="showItemReturnModal"
+                size="sm"
+                z-index-class="z-[60]"
+                @close="showItemReturnModal = false"
             >
-                <div
-                    class="fixed inset-0 bg-gray-950/70 backdrop-blur-xs"
-                    @click="showItemReturnModal = false"
-                ></div>
+                <template #title>
+                    <span class="flex items-center gap-2">
+                        <span class="w-1.5 h-4 bg-red-600 rounded-full"></span>
+                        {{ $t('invoices.set_return_details') }}
+                    </span>
+                </template>
 
-                <div
-                    class="relative bg-white dark:bg-gray-800 rounded-2xl max-w-md w-full shadow-2xl border border-gray-200 dark:border-gray-700 overflow-hidden transform transition-all duration-200"
-                >
-                    <!-- Header -->
+                <!-- Body -->
+                <div class="space-y-4">
                     <div
-                        class="flex items-center justify-between px-5 py-4 bg-gray-50 dark:bg-gray-900 border-b border-gray-150 dark:border-gray-750"
+                        class="p-3 bg-amber-50/50 dark:bg-amber-950/20 rounded-xl border border-amber-100/50 dark:border-amber-800/20 text-xs"
                     >
-                        <h4
-                            class="text-sm font-black text-gray-900 dark:text-white flex items-center gap-2"
-                        >
-                            <div class="w-1.5 h-4 bg-red-600 rounded-full"></div>
-                            {{ $t('invoices.set_return_details') }}
-                        </h4>
-                        <button
-                            @click="showItemReturnModal = false"
-                            class="p-1 text-gray-400 hover:text-gray-600 rounded-lg"
-                        >
-                            <svg
-                                class="w-5 h-5"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                            >
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    stroke-width="2.5"
-                                    d="M6 18L18 6M6 6l12 12"
-                                />
-                            </svg>
-                        </button>
+                        <div class="font-black text-amber-800 dark:text-amber-450">
+                            {{
+                                selectedReturnLine?.part?.name_ar || selectedReturnLine?.part?.name
+                            }}
+                        </div>
+                        <div class="text-[10px] text-gray-400 mt-0.5 font-mono">
+                            {{ selectedReturnLine?.part?.sku || 'NO-SKU' }}
+                        </div>
                     </div>
 
-                    <!-- Body -->
-                    <div class="p-5 space-y-4">
-                        <div
-                            class="p-3 bg-amber-50/50 dark:bg-amber-950/20 rounded-xl border border-amber-100/50 dark:border-amber-800/20 text-xs"
-                        >
-                            <div class="font-black text-amber-800 dark:text-amber-450">
+                    <!-- Qty Input -->
+                    <div>
+                        <div class="flex items-center justify-between mb-1">
+                            <label
+                                class="text-xs font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest"
+                            >
+                                {{ $t('invoices.qty_to_return') }}
+                            </label>
+                            <span class="text-[10px] font-bold text-emerald-600">
+                                ({{ $t('invoices.available') }}:
                                 {{
-                                    selectedReturnLine?.part?.name_ar ||
-                                    selectedReturnLine?.part?.name
-                                }}
-                            </div>
-                            <div class="text-[10px] text-gray-400 mt-0.5 font-mono">
-                                {{ selectedReturnLine?.part?.sku || 'NO-SKU' }}
-                            </div>
+                                    toEnglish(
+                                        Number(getAvailableQty(selectedReturnLine)).toFixed(2)
+                                    )
+                                }})
+                            </span>
                         </div>
-
-                        <!-- Qty Input -->
-                        <div>
-                            <div class="flex items-center justify-between mb-1">
-                                <label
-                                    class="text-xs font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest"
-                                >
-                                    {{ $t('invoices.qty_to_return') }}
-                                </label>
-                                <span class="text-[10px] font-bold text-emerald-600">
-                                    ({{ $t('invoices.available') }}:
-                                    {{
-                                        toEnglish(
-                                            Number(getAvailableQty(selectedReturnLine)).toFixed(2)
-                                        )
-                                    }})
-                                </span>
-                            </div>
-                            <div class="relative flex flex-col items-center">
-                                <input
-                                    type="number"
-                                    v-model="itemReturnQty"
-                                    :max="getAvailableQty(selectedReturnLine)"
-                                    min="0.01"
-                                    step="0.01"
-                                    class="w-full text-center font-bold py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                                    dir="ltr"
-                                />
-                                <span
-                                    v-if="itemReturnQty > getAvailableQty(selectedReturnLine)"
-                                    class="text-[10px] font-bold text-red-500 mt-1.5"
-                                >
-                                    {{ $t('invoices.errors.qty_exceeds_available') }}
-                                </span>
-                            </div>
-                        </div>
-
-                        <!-- Cost Input (Editable!) -->
-                        <div>
-                            <div class="flex items-center justify-between mb-1">
-                                <label
-                                    class="text-xs font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest"
-                                >
-                                    {{ $t('invoices.return_unit_price') }}
-                                </label>
-                                <span
-                                    class="text-[9px] font-semibold text-amber-600 bg-amber-50 dark:bg-amber-950/20 px-1.5 py-0.5 rounded"
-                                >
-                                    {{ $t('invoices.editable_price') }}
-                                </span>
-                            </div>
+                        <div class="relative flex flex-col items-center">
                             <input
                                 type="number"
-                                v-model="itemReturnPrice"
-                                min="0"
+                                v-model="itemReturnQty"
+                                :max="getAvailableQty(selectedReturnLine)"
+                                min="0.01"
                                 step="0.01"
                                 class="w-full text-center font-bold py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                                 dir="ltr"
                             />
-                        </div>
-
-                        <!-- Live Line Total Summary Box -->
-                        <div
-                            class="p-3.5 bg-gray-50 dark:bg-gray-900/60 rounded-xl border border-gray-150 dark:border-gray-700/60 space-y-1.5 text-xs"
-                        >
-                            <div class="flex justify-between">
-                                <span class="text-gray-400">{{ $t('invoices.subtotal') }}</span>
-                                <span
-                                    class="font-bold text-gray-750 dark:text-gray-300 font-mono"
-                                    dir="ltr"
-                                >
-                                    {{
-                                        formatCurrencyEnglish(
-                                            isLineInclusive(selectedReturnLine)
-                                                ? (itemReturnQty * itemReturnPrice) /
-                                                      (1 +
-                                                          (selectedReturnLine?.tax_rate || 0) / 100)
-                                                : itemReturnQty * itemReturnPrice
-                                        )
-                                    }}
-                                </span>
-                            </div>
-                            <div
-                                v-if="(selectedReturnLine?.tax_rate || 0) > 0"
-                                class="flex justify-between"
+                            <span
+                                v-if="itemReturnQty > getAvailableQty(selectedReturnLine)"
+                                class="text-[10px] font-bold text-red-500 mt-1.5"
                             >
-                                <span class="text-gray-400">
-                                    {{
-                                        $t('common.vat_with_rate', {
-                                            rate: selectedReturnLine?.tax_rate || 0,
-                                        })
-                                    }}
-                                    <span
-                                        v-if="isLineInclusive(selectedReturnLine)"
-                                        class="text-[10px] text-gray-500"
-                                    >
-                                        ({{ $t('common.vat_included') }})
-                                    </span>
-                                </span>
-                                <span
-                                    class="font-bold text-gray-750 dark:text-gray-300 font-mono"
-                                    dir="ltr"
-                                >
-                                    {{
-                                        formatCurrencyEnglish(
-                                            isLineInclusive(selectedReturnLine)
-                                                ? itemReturnQty * itemReturnPrice -
-                                                      (itemReturnQty * itemReturnPrice) /
-                                                          (1 +
-                                                              (selectedReturnLine?.tax_rate || 0) /
-                                                                  100)
-                                                : itemReturnQty *
-                                                      itemReturnPrice *
-                                                      ((selectedReturnLine?.tax_rate || 0) / 100)
-                                        )
-                                    }}
-                                </span>
-                            </div>
-                            <div class="h-px bg-gray-200 dark:bg-gray-700 my-1"></div>
-                            <div class="flex justify-between text-sm">
-                                <span class="font-black text-red-650">
-                                    {{ $t('common.total') }}
-                                </span>
-                                <span class="font-black text-red-650 font-mono" dir="ltr">
-                                    {{
-                                        formatCurrencyEnglish(
-                                            isLineInclusive(selectedReturnLine)
-                                                ? itemReturnQty * itemReturnPrice
-                                                : itemReturnQty *
-                                                      itemReturnPrice *
-                                                      (1 +
-                                                          (selectedReturnLine?.tax_rate || 0) / 100)
-                                        )
-                                    }}
-                                </span>
-                            </div>
+                                {{ $t('invoices.errors.qty_exceeds_available') }}
+                            </span>
                         </div>
                     </div>
 
-                    <!-- Footer -->
+                    <!-- Cost Input (Editable!) -->
+                    <div>
+                        <div class="flex items-center justify-between mb-1">
+                            <label
+                                class="text-xs font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest"
+                            >
+                                {{ $t('invoices.return_unit_price') }}
+                            </label>
+                            <span
+                                class="text-[9px] font-semibold text-amber-600 bg-amber-50 dark:bg-amber-950/20 px-1.5 py-0.5 rounded"
+                            >
+                                {{ $t('invoices.editable_price') }}
+                            </span>
+                        </div>
+                        <input
+                            type="number"
+                            v-model="itemReturnPrice"
+                            min="0"
+                            step="0.01"
+                            class="w-full text-center font-bold py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                            dir="ltr"
+                        />
+                    </div>
+
+                    <!-- Live Line Total Summary Box -->
                     <div
-                        class="px-5 py-4 bg-gray-50 dark:bg-gray-900 border-t border-gray-150 dark:border-gray-700 flex items-center justify-end gap-2.5"
+                        class="p-3.5 bg-gray-50 dark:bg-gray-900/60 rounded-xl border border-gray-150 dark:border-gray-700/60 space-y-1.5 text-xs"
                     >
+                        <div class="flex justify-between">
+                            <span class="text-gray-400">{{ $t('invoices.subtotal') }}</span>
+                            <span
+                                class="font-bold text-gray-750 dark:text-gray-300 font-mono"
+                                dir="ltr"
+                            >
+                                {{
+                                    formatCurrencyEnglish(
+                                        isLineInclusive(selectedReturnLine)
+                                            ? (itemReturnQty * itemReturnPrice) /
+                                                  (1 + (selectedReturnLine?.tax_rate || 0) / 100)
+                                            : itemReturnQty * itemReturnPrice
+                                    )
+                                }}
+                            </span>
+                        </div>
+                        <div
+                            v-if="(selectedReturnLine?.tax_rate || 0) > 0"
+                            class="flex justify-between"
+                        >
+                            <span class="text-gray-400">
+                                {{
+                                    $t('common.vat_with_rate', {
+                                        rate: selectedReturnLine?.tax_rate || 0,
+                                    })
+                                }}
+                                <span
+                                    v-if="isLineInclusive(selectedReturnLine)"
+                                    class="text-[10px] text-gray-500"
+                                >
+                                    ({{ $t('common.vat_included') }})
+                                </span>
+                            </span>
+                            <span
+                                class="font-bold text-gray-750 dark:text-gray-300 font-mono"
+                                dir="ltr"
+                            >
+                                {{
+                                    formatCurrencyEnglish(
+                                        isLineInclusive(selectedReturnLine)
+                                            ? itemReturnQty * itemReturnPrice -
+                                                  (itemReturnQty * itemReturnPrice) /
+                                                      (1 +
+                                                          (selectedReturnLine?.tax_rate || 0) / 100)
+                                            : itemReturnQty *
+                                                  itemReturnPrice *
+                                                  ((selectedReturnLine?.tax_rate || 0) / 100)
+                                    )
+                                }}
+                            </span>
+                        </div>
+                        <div class="h-px bg-gray-200 dark:bg-gray-700 my-1"></div>
+                        <div class="flex justify-between text-sm">
+                            <span class="font-black text-red-650">
+                                {{ $t('common.total') }}
+                            </span>
+                            <span class="font-black text-red-650 font-mono" dir="ltr">
+                                {{
+                                    formatCurrencyEnglish(
+                                        isLineInclusive(selectedReturnLine)
+                                            ? itemReturnQty * itemReturnPrice
+                                            : itemReturnQty *
+                                                  itemReturnPrice *
+                                                  (1 + (selectedReturnLine?.tax_rate || 0) / 100)
+                                    )
+                                }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <template #footer>
+                    <div class="flex items-center justify-end gap-2.5 w-full">
                         <button
                             type="button"
                             @click="showItemReturnModal = false"
@@ -2072,8 +1974,8 @@
                             {{ $t('common.add') }}
                         </button>
                     </div>
-                </div>
-            </div>
+                </template>
+            </BaseModal>
 
             <!-- Payment Modal Component -->
             <PurchaseOrderPaymentModal
@@ -2091,6 +1993,7 @@
 <script setup>
 import AppAttachmentManager from '@/Components/Common/AppAttachmentManager.vue';
 import DataTable from '@/Components/Common/DataTable.vue';
+import BaseModal from '@/Components/BaseModal.vue';
 import { ref, computed, watch } from 'vue';
 import { Head, Link, useForm, router, usePage } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
