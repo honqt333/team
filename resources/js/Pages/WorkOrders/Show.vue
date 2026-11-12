@@ -1549,7 +1549,7 @@
                             <p class="text-[11px] font-bold text-text-secondary mb-2">
                                 {{ $t('work_orders.purchases.lines_title') }}:
                             </p>
-                            <table class="min-w-full text-xs">
+                            <DataTable structured class="min-w-full text-xs">
                                 <thead
                                     class="text-text-muted text-[10px] border-b border-border-subtle"
                                 >
@@ -1584,7 +1584,7 @@
                                         </td>
                                     </tr>
                                 </tbody>
-                            </table>
+                            </DataTable>
                         </div>
 
                         <!-- Allocation inputs when selected -->
