@@ -68,6 +68,67 @@ class InvoiceObserver
     ];
 
     /**
+     * The fields each SPECIFIC transition is allowed to write.
+     *
+     * The allowlist is keyed by the transition — `"from>to"` — and not
+     * by the operation in general. That distinction is the point of the
+     * contract:
+     *
+     *  - `draft>valid` is the ISSUE transition. The issuer assigns the
+     *    document number and the issue date at the moment it issues the
+     *    document, so those two fields are part of the transition
+     *    itself and must land atomically with the status change. It may
+     *    also fill in `currency_code`, which the issuer resolves from
+     *    the tenant when the draft did not carry one — the issue save
+     *    writes `$invoice->currency_code ?: tenantCurrency($tenant)`,
+     *    so a draft with no currency of its own gets the tenant's here,
+     *    in the same save as the status change.
+     *
+     *  - `valid>reported` is the REPORTING transition. It stamps the
+     *    ZATCA chain onto a document that has already been issued. The
+     *    document number and the issue date were fixed at issue time
+     *    and are NOT part of this transition, so they may not move here.
+     *
+     *  - `valid>cancelled` and `draft>cancelled` are CANCELLATIONS.
+     *    They only change the state. The document number and the issue
+     *    date are fixed as soon as the document is issued, and a
+     *    cancellation must never rewrite them.
+     *
+     * Every field not listed for the transition being performed is
+     * rejected, whether or not it is in the list for another transition.
+     *
+     * @var array<string, list<string>>
+     */
+    private const TRANSITION_FIELDS = [
+        // The issue transition: the number and the date are assigned here.
+        self::STATUS_DRAFT.'>'.self::STATUS_VALID => [
+            'status',
+            'invoice_number',
+            'issue_date',
+            'currency_code',
+        ],
+
+        // The reporting transition: the ZATCA chain only.
+        self::STATUS_VALID.'>'.self::STATUS_REPORTED => [
+            'status',
+            'zatca_uuid',
+            'zatca_qr_tlv',
+            'zatca_hash',
+            'zatca_prev_hash',
+            'xml_path',
+        ],
+
+        // Cancellations: the state only. The number and the date were
+        // fixed when the document was issued.
+        self::STATUS_DRAFT.'>'.self::STATUS_CANCELLED => [
+            'status',
+        ],
+        self::STATUS_VALID.'>'.self::STATUS_CANCELLED => [
+            'status',
+        ],
+    ];
+
+    /**
      * Fields that may be written once the invoice has left `draft`,
      * grouped by the operation that is permitted to write them.
      *
@@ -93,21 +154,6 @@ class InvoiceObserver
             'zatca_prev_hash',
             'xml_path',
         ],
-    ];
-
-    /**
-     * Fields that the issue transition is allowed to set, in the same save.
-     *
-     * The issuer assigns the document number and the issue date at the
-     * moment it issues the document; they are part of the transition
-     * itself and must land atomically with the status change.
-     *
-     * @var list<string>
-     */
-    private const ISSUE_FIELDS = [
-        'status',
-        'invoice_number',
-        'issue_date',
     ];
 
     /**
@@ -168,15 +214,21 @@ class InvoiceObserver
         if ($invoice->isDirty('status')) {
             $this->assertTransitionAllowed($invoice, $originalStatus);
 
-            // A transition must not smuggle unrelated changes through the
-            // same save. The issue transition legitimately sets the
-            // document number and the issue date; nothing else.
+            // The allowlist is the one for THIS transition. The issue
+            // transition may set the document number and the issue date;
+            // the reporting transition may stamp the ZATCA chain; a
+            // cancellation may do neither.
             //
-            // The transition has already been validated as a whole, so
-            // the settlement allowlist does not apply to it — the issue
-            // path is the one place that is allowed to write the
-            // document number and the issue date.
-            $this->assertOnlyFields($invoice, $dirty, self::ISSUE_FIELDS, 'status');
+            // A transition must not smuggle unrelated changes through the
+            // same save. If the request combines an allowed change with a
+            // forbidden one, the forbidden field is still in the dirty
+            // set, so the whole operation is rejected.
+            $this->assertOnlyFields(
+                $invoice,
+                $dirty,
+                $this->allowedFieldsForTransition($originalStatus, (string) $invoice->status),
+                'status'
+            );
 
             return;
         }
@@ -227,6 +279,37 @@ class InvoiceObserver
                 ]),
             ]);
         }
+    }
+
+    /**
+     * The fields the given transition is allowed to write.
+     *
+     * A transition that is not listed here has NO fields it may write
+     * beyond the status itself — which means an unknown transition is
+     * rejected rather than silently allowed through with the issue
+     * transition's permissions.
+     *
+     * @return list<string>
+     */
+    private function allowedFieldsForTransition(string $from, string $to): array
+    {
+        if ($from === $to) {
+            // Not a transition at all — the status did not move. This is
+            // the settlement / reporting path, which has its own
+            // allowlist.
+            return [];
+        }
+
+        $allowed = self::TRANSITION_FIELDS[$from.'>'.$to] ?? [];
+
+        // The status itself is always part of the transition, and it is
+        // listed explicitly in every entry — but stating it here makes
+        // the contract independent of that bookkeeping.
+        if (! in_array('status', $allowed, true)) {
+            $allowed[] = 'status';
+        }
+
+        return $allowed;
     }
 
     /**

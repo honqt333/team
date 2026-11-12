@@ -339,8 +339,14 @@ class CompanyTransactionController extends Controller
                         // Link transaction details
                         $transaction->invoice_id = $invoice->id;
 
-                        // Issue Invoice using service
-                        $this->invoiceService->issueInvoice($invoice);
+                        // Issue Invoice using service.
+                        //
+                        // The approval date is passed in so the issued
+                        // document carries the business date it was
+                        // approved on. Without it, `issueInvoice()` stamps
+                        // `now()` and the invoice would disagree with the
+                        // transaction it was raised from.
+                        $this->invoiceService->issueInvoice($invoice, $approvedAt);
 
                         // Record payment using central PaymentService
                         $this->paymentService->recordPayment($invoice, [

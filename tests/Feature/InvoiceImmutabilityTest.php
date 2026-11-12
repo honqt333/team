@@ -366,6 +366,173 @@ class InvoiceImmutabilityTest extends TestCase
     }
 
     // ─────────────────────────────────────────────────────────────
+    // 3b. The allowlist belongs to the TRANSITION, not to "a transition"
+    // ─────────────────────────────────────────────────────────────
+
+    /**
+     * The document number and the issue date are fixed at the moment the
+     * document is issued.
+     *
+     * They are part of the ISSUE transition and of nothing else. The
+     * reporting transition (`valid → reported`) and the cancellation
+     * (`valid → cancelled`) may not move them, even though the observer
+     * used to apply the issue allowlist to every accepted transition.
+     *
+     * Each case changes ONE field and asserts that the whole save is
+     * rejected, and — after re-reading the row from the database — that
+     * the status, the number and the date are exactly as they were.
+     */
+    public function test_the_reporting_transition_cannot_move_the_invoice_number(): void
+    {
+        $invoice = $this->issuedInvoice();
+
+        $number = $invoice->invoice_number;
+        $date = $invoice->issue_date;
+
+        try {
+            $invoice->update([
+                'status' => 'reported',
+                'invoice_number' => 'INV-REWRITTEN',
+            ]);
+            $this->fail('The reporting transition was allowed to rewrite the invoice number.');
+        } catch (ValidationException $e) {
+            $this->assertArrayHasKey('status', $e->errors());
+            $this->assertStringContainsString('invoice_number', $e->errors()['status'][0]);
+        }
+
+        $fresh = $invoice->fresh();
+
+        $this->assertSame('valid', $fresh->status);
+        $this->assertSame($number, $fresh->invoice_number);
+        $this->assertEquals($date, $fresh->issue_date);
+    }
+
+    public function test_the_reporting_transition_cannot_move_the_issue_date(): void
+    {
+        $invoice = $this->issuedInvoice();
+
+        $number = $invoice->invoice_number;
+        $date = $invoice->issue_date;
+
+        try {
+            $invoice->update([
+                'status' => 'reported',
+                'issue_date' => now()->addYear(),
+            ]);
+            $this->fail('The reporting transition was allowed to rewrite the issue date.');
+        } catch (ValidationException $e) {
+            $this->assertArrayHasKey('status', $e->errors());
+            $this->assertStringContainsString('issue_date', $e->errors()['status'][0]);
+        }
+
+        $fresh = $invoice->fresh();
+
+        $this->assertSame('valid', $fresh->status);
+        $this->assertSame($number, $fresh->invoice_number);
+        $this->assertEquals($date, $fresh->issue_date);
+    }
+
+    public function test_the_cancellation_transition_cannot_move_the_invoice_number(): void
+    {
+        $invoice = $this->issuedInvoice();
+
+        $number = $invoice->invoice_number;
+        $date = $invoice->issue_date;
+
+        try {
+            $invoice->update([
+                'status' => 'cancelled',
+                'invoice_number' => 'INV-REWRITTEN',
+            ]);
+            $this->fail('The cancellation transition was allowed to rewrite the invoice number.');
+        } catch (ValidationException $e) {
+            $this->assertArrayHasKey('status', $e->errors());
+            $this->assertStringContainsString('invoice_number', $e->errors()['status'][0]);
+        }
+
+        $fresh = $invoice->fresh();
+
+        $this->assertSame('valid', $fresh->status);
+        $this->assertSame($number, $fresh->invoice_number);
+        $this->assertEquals($date, $fresh->issue_date);
+    }
+
+    public function test_the_cancellation_transition_cannot_move_the_issue_date(): void
+    {
+        $invoice = $this->issuedInvoice();
+
+        $number = $invoice->invoice_number;
+        $date = $invoice->issue_date;
+
+        try {
+            $invoice->update([
+                'status' => 'cancelled',
+                'issue_date' => now()->addYear(),
+            ]);
+            $this->fail('The cancellation transition was allowed to rewrite the issue date.');
+        } catch (ValidationException $e) {
+            $this->assertArrayHasKey('status', $e->errors());
+            $this->assertStringContainsString('issue_date', $e->errors()['status'][0]);
+        }
+
+        $fresh = $invoice->fresh();
+
+        $this->assertSame('valid', $fresh->status);
+        $this->assertSame($number, $fresh->invoice_number);
+        $this->assertEquals($date, $fresh->issue_date);
+    }
+
+    /**
+     * The issue transition is the ONE place that may set the number and
+     * the date — and it may set them together with the status.
+     */
+    public function test_the_issue_transition_may_set_the_number_and_the_date(): void
+    {
+        $invoice = $this->draftInvoice();
+
+        $number = 'INV-ISSUED-0001';
+        $date = now()->startOfDay();
+
+        $invoice->update([
+            'status' => 'valid',
+            'invoice_number' => $number,
+            'issue_date' => $date,
+        ]);
+
+        $fresh = $invoice->fresh();
+
+        $this->assertSame('valid', $fresh->status);
+        $this->assertSame($number, $fresh->invoice_number);
+        $this->assertEquals($date, $fresh->issue_date);
+    }
+
+    /**
+     * The legitimate transitions must still WORK — a contract that
+     * refuses everything is not a contract, it is an outage.
+     */
+    public function test_the_legitimate_reporting_and_cancellation_transitions_succeed(): void
+    {
+        // Reporting — the ZATCA chain may be stamped on the way in.
+        $reported = $this->issuedInvoice();
+        $reported->update([
+            'status' => 'reported',
+            'zatca_uuid' => 'uuid-abc',
+            'zatca_hash' => 'hash-abc',
+        ]);
+
+        $fresh = $reported->fresh();
+        $this->assertSame('reported', $fresh->status);
+        $this->assertSame('uuid-abc', $fresh->zatca_uuid);
+        $this->assertSame('hash-abc', $fresh->zatca_hash);
+
+        // Cancellation — the state only.
+        $cancelled = $this->issuedInvoice();
+        $cancelled->update(['status' => 'cancelled']);
+
+        $this->assertSame('cancelled', $cancelled->fresh()->status);
+    }
+
+    // ─────────────────────────────────────────────────────────────
     // 4. Deletion
     // ─────────────────────────────────────────────────────────────
 

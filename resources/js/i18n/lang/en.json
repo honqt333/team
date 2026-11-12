@@ -1735,7 +1735,7 @@
         "work_orders_status": "Work Orders by Status",
         "work_orders_this_month": "Work Orders This Month",
         "workshop_board": "Workshop Board",
-        "new_dealer": "New Partner / Fleet"
+        "new_dealer": "Add New Partner"
     },
     "departments": {
         "add": "Add section",

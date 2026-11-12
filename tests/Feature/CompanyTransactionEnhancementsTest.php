@@ -9,6 +9,7 @@ use App\Models\CompanyTransaction;
 use App\Models\Customer;
 use App\Models\IncomeCategory;
 use App\Models\InventoryUnit;
+use App\Models\Invoice;
 use App\Models\Supplier;
 use App\Models\TaxPeriod;
 use App\Models\TaxPeriodTransaction;
@@ -18,6 +19,7 @@ use App\Models\User;
 use App\Support\Permissions;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Storage;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\PermissionRegistrar;
@@ -181,49 +183,90 @@ class CompanyTransactionEnhancementsTest extends TestCase
 
     public function test_approve_accepts_approved_at_and_applies_to_generated_invoice(): void
     {
-        $customer = Customer::create([
-            'tenant_id' => $this->tenant->id,
-            'center_id' => $this->center->id,
-            'name' => 'عميل شركة',
-            'phone' => '0566666666',
-            'tax_number' => '322222222222223',
-        ]);
+        // The clock is frozen so "today" is a known instant and the
+        // test never straddles a day boundary while it runs.
+        Carbon::setTestNow(Carbon::parse('2026-06-15 10:00:00'));
 
-        $tx = CompanyTransaction::create([
-            'tenant_id' => $this->tenant->id,
-            'center_id' => $this->center->id,
-            'title' => 'استشارة تقنية',
-            'transaction_date' => now()->subDays(2)->toDateString(),
-            'transaction_type' => 'revenue',
-            'income_category_id' => $this->revenueCategory->id,
-            'amount' => 200.00,
-            'is_taxable' => true,
-            'tax_amount' => 30.00,
-            'total_amount' => 230.00,
-            'contact_type' => 'customer',
-            'contact_id' => $customer->id,
-            'status' => 'draft',
-            'updated_by' => $this->user->id,
-        ]);
+        try {
+            $customer = Customer::create([
+                'tenant_id' => $this->tenant->id,
+                'center_id' => $this->center->id,
+                'name' => 'عميل شركة',
+                'phone' => '0566666666',
+                'tax_number' => '322222222222223',
+            ]);
 
-        $approvedDate = now()->toDateString();
+            $tx = CompanyTransaction::create([
+                'tenant_id' => $this->tenant->id,
+                'center_id' => $this->center->id,
+                'title' => 'استشارة تقنية',
+                'transaction_date' => now()->subDays(2)->toDateString(),
+                'transaction_type' => 'revenue',
+                'income_category_id' => $this->revenueCategory->id,
+                'amount' => 200.00,
+                'is_taxable' => true,
+                'tax_amount' => 30.00,
+                'total_amount' => 230.00,
+                'contact_type' => 'customer',
+                'contact_id' => $customer->id,
+                'status' => 'draft',
+                'updated_by' => $this->user->id,
+            ]);
 
-        $response = $this->post(route('settings.company.transactions.approve', $tx->id), [
-            'approved_at' => $approvedDate,
-        ]);
+            // The approval date is deliberately NOT today. Using today's
+            // date would hide any implementation that ignores the sent
+            // value and stamps `now()` instead — the two would be
+            // indistinguishable.
+            //
+            // It must be on or after the transaction date (2026-06-13),
+            // which the controller validates, and before today
+            // (2026-06-15).
+            $approvedDate = '2026-06-13';
 
-        $response->assertRedirect();
-        $response->assertSessionHasNoErrors();
+            $response = $this->post(route('settings.company.transactions.approve', $tx->id), [
+                'approved_at' => $approvedDate,
+            ]);
 
-        $tx->refresh();
-        $this->assertSame('approved', $tx->status);
-        $this->assertEquals($approvedDate, $tx->approved_at?->format('Y-m-d'));
+            $response->assertRedirect();
+            $response->assertSessionHasNoErrors();
 
-        $this->assertNotNull($tx->invoice_id);
-        $this->assertDatabaseHas('invoices', [
-            'id' => $tx->invoice_id,
-            'issue_date' => $approvedDate,
-        ]);
+            $tx->refresh();
+            $this->assertSame('approved', $tx->status);
+            $this->assertEquals($approvedDate, $tx->approved_at?->format('Y-m-d'));
+
+            $this->assertNotNull($tx->invoice_id);
+
+            // The generated invoice must carry the APPROVAL date, not the
+            // moment the approval was processed.
+            //
+            // `issue_date` is a TIMESTAMP column, so it is compared as a
+            // date rather than as a bare string — a bare date never
+            // matches a timestamp, which is what made this assertion
+            // unusable before.
+            $invoice = Invoice::findOrFail($tx->invoice_id);
+
+            $this->assertSame(
+                $approvedDate,
+                $invoice->issue_date?->format('Y-m-d'),
+                'The issued invoice must carry the approval date, not the moment the approval was processed.'
+            );
+
+            $this->assertSame(
+                'valid',
+                $invoice->status,
+                'The invoice must be issued, not left as a draft.'
+            );
+
+            // The date is frozen at 2026-06-15, so an implementation that
+            // stamped `now()` would produce 2026-06-15, not 2026-06-12.
+            $this->assertNotSame(
+                Carbon::now()->toDateString(),
+                $invoice->issue_date?->format('Y-m-d'),
+                'The invoice must not carry the processing date.'
+            );
+        } finally {
+            Carbon::setTestNow();
+        }
     }
 
     public function test_attachment_upload_and_delete_lifecycle(): void

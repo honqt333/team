@@ -13,7 +13,9 @@ use App\Models\WorkOrderItem;
 use App\Models\WorkOrderItemPart;
 use App\Services\Optimization\TaxCalculator;
 use App\Support\CountryCurrencyRegistry;
+use DateTimeInterface;
 use Exception;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
 class InvoiceService
@@ -255,10 +257,26 @@ class InvoiceService
     /**
      * Issue an invoice (Transition to Valid).
      * assign sequential number and ICV.
+     *
+     * The issue date is the moment the document is issued, and it is
+     * fixed from that moment on — the invoice immutability guard
+     * rejects any later attempt to move it.
+     *
+     * A caller that issues a document ON BEHALF OF an earlier business
+     * event (a financial transaction approved with a back-dated
+     * `approved_at`, for example) passes that date in, so the document
+     * carries the business date it was approved on rather than the
+     * wall-clock moment the approval happened to be processed.
+     *
+     * @param Carbon|string|null $issueDate the business date to stamp; defaults to now
      */
-    public function issueInvoice(Invoice $invoice): Invoice
+    public function issueInvoice(Invoice $invoice, $issueDate = null): Invoice
     {
-        return DB::transaction(function () use ($invoice) {
+        $issuedAt = $issueDate instanceof DateTimeInterface
+            ? Carbon::parse($issueDate)
+            : ($issueDate ? Carbon::parse($issueDate) : Carbon::now());
+
+        return DB::transaction(function () use ($invoice, $issuedAt) {
             $locked = Invoice::query()->lockForUpdate()->findOrFail($invoice->id);
 
             if ($locked->status !== 'draft') {
@@ -284,7 +302,7 @@ class InvoiceService
             $invoice->update([
                 'status' => 'valid',
                 'invoice_number' => $invoiceNumber,
-                'issue_date' => now(),
+                'issue_date' => $issuedAt,
                 'currency_code' => $invoice->currency_code ?: CountryCurrencyRegistry::tenantCurrency($tenant),
                 // 'icv' => $icv, // Add column if needed in schema, currently storing in ZATCA payload
             ]);
