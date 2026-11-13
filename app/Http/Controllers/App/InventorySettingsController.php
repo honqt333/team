@@ -98,6 +98,7 @@ class InventorySettingsController extends Controller
 
     public function destroyUnit(InventoryUnit $unit)
     {
+        $this->authorize(Permissions::INVENTORY_SETTINGS_MANAGE);
         $this->authorizeForTenant($unit);
 
         try {
@@ -119,6 +120,8 @@ class InventorySettingsController extends Controller
 
     public function storeCategory(Request $request)
     {
+        $this->authorize(Permissions::INVENTORY_SETTINGS_MANAGE);
+
         $validated = $request->validate([
             'name_ar' => 'required|string|max:100',
             'name_en' => 'required|string|max:100',
@@ -138,6 +141,7 @@ class InventorySettingsController extends Controller
 
     public function updateCategory(Request $request, InventoryCategory $category)
     {
+        $this->authorize(Permissions::INVENTORY_SETTINGS_MANAGE);
         $this->authorizeForTenant($category);
 
         $validated = $request->validate([
@@ -154,6 +158,7 @@ class InventorySettingsController extends Controller
 
     public function destroyCategory(InventoryCategory $category)
     {
+        $this->authorize(Permissions::INVENTORY_SETTINGS_MANAGE);
         $this->authorizeForTenant($category);
 
         try {

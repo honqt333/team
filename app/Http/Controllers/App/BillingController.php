@@ -63,6 +63,8 @@ class BillingController extends Controller
 
     public function index(Request $request): Response
     {
+        $this->authorize(Permissions::COMPANY_MANAGE);
+
         $tenant = $request->user()->tenant;
         $tenant->load(['taxSettings', 'address', 'zatcaSettings']);
 

@@ -1,6 +1,6 @@
 <template>
     <AppLayout :title="$t('inventory.moves.title')">
-        <PrintEngine document-type="report" class="space-y-6">
+        <div class="space-y-6">
             <!-- Page Header -->
             <PageHeader
                 :title="$t('inventory.moves.title')"
@@ -350,7 +350,7 @@
                     </div>
                 </template>
             </DataTable>
-        </PrintEngine>
+        </div>
 
         <!-- Modals -->
         <ReceiptModal
@@ -431,7 +431,6 @@
 </template>
 
 <script setup>
-import PrintEngine from '@/Components/Print/PrintEngine.vue';
 import { printDocument } from '@/Composables/usePrint';
 import { ref, computed, watch } from 'vue';
 import { Link, router } from '@inertiajs/vue3';
@@ -688,8 +687,9 @@ const canReverse = (move) => {
     ];
     if (restrictedTypes.includes(move.move_type)) return false;
 
-    if (move.move_type === 'receipt') return can('inventory.moves.create');
-    if (move.move_type?.startsWith('adjustment')) return can('inventory.moves.create');
+    if (move.move_type === 'receipt') return can('inventory.moves.create') || isAnyAdmin();
+    if (move.move_type?.startsWith('adjustment'))
+        return can('inventory.moves.create') || isAnyAdmin();
 
     return false;
 };
@@ -715,6 +715,9 @@ const reverseMove = async (move) => {
 };
 
 const handlePrint = () => {
-    printDocument();
+    const url = new URL(window.location.href);
+    url.searchParams.set('print', '1');
+    url.searchParams.delete('page');
+    window.open(url.toString(), '_blank');
 };
 </script>

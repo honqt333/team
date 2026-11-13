@@ -893,6 +893,7 @@ import BackButton from '@/Components/BackButton.vue';
 import AppEmptyState from '@/Components/Common/AppEmptyState.vue';
 import ConfirmModal from '@/Components/ConfirmModal.vue';
 import { useI18n } from 'vue-i18n';
+import { usePermission } from '@/Composables/usePermission';
 import CreateModal from './CreateModal.vue';
 import StockModal from './StockModal.vue';
 import { useNumberFormat } from '@/Composables/useNumberFormat';
@@ -918,9 +919,9 @@ const props = defineProps({
 });
 
 const { t, locale } = useI18n();
-const page = usePage();
 const { formatQuantity, formatCurrency, toEnglish, activeCurrencySymbol } = useNumberFormat();
-const can = (permission) => page.props.auth?.permissions?.includes(permission) ?? false;
+const { can: hasPermission, isAnyAdmin } = usePermission();
+const can = (permission) => hasPermission(permission) || isAnyAdmin();
 
 const breadcrumbItems = computed(() => [
     { label: t('inventory.hub.title'), href: route('app.inventory.hub') },

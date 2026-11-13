@@ -1630,6 +1630,7 @@
                                             class="px-4 py-3 text-center text-xs font-bold text-gray-500 w-12 align-middle"
                                         >
                                             <button
+                                                v-if="can('crm.vehicles.update') || isAnyAdmin()"
                                                 @click.stop="deleteMileageLog(log)"
                                                 class="text-red-500 hover:text-red-700 p-1 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
                                             >

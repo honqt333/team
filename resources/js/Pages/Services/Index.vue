@@ -322,6 +322,7 @@
                                     <span>{{ $t('services_management.add') }}</span>
                                 </button>
                                 <button
+                                    v-if="can('services.departments.manage') || isAnyAdmin()"
                                     @click.stop="openEditDepartmentModal(dept)"
                                     class="p-1.5 text-content-muted hover:text-action-primary hover:bg-surface-secondary rounded-lg transition-colors cursor-pointer"
                                     :title="$t('departments.edit')"
@@ -341,6 +342,7 @@
                                     </svg>
                                 </button>
                                 <button
+                                    v-if="can('services.departments.manage') || isAnyAdmin()"
                                     @click.stop="handleDeleteDepartment(dept)"
                                     class="p-1.5 text-content-muted hover:text-danger hover:bg-danger-soft/20 rounded-lg transition-colors cursor-pointer"
                                     :title="$t('common.delete')"
@@ -594,6 +596,9 @@
                                                         "
                                                     />
                                                     <button
+                                                        v-if="
+                                                            can('services.update') || isAnyAdmin()
+                                                        "
                                                         @click.stop="openEditModal(service)"
                                                         class="p-1.5 text-content-muted hover:text-action-primary hover:bg-surface-secondary rounded-lg transition-colors cursor-pointer"
                                                         :title="$t('common.edit')"
@@ -613,6 +618,9 @@
                                                         </svg>
                                                     </button>
                                                     <button
+                                                        v-if="
+                                                            can('services.delete') || isAnyAdmin()
+                                                        "
                                                         @click.stop="handleDelete(service)"
                                                         class="p-1.5 text-gray-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
                                                     >
@@ -899,6 +907,9 @@
                                                         "
                                                     />
                                                     <button
+                                                        v-if="
+                                                            can('services.update') || isAnyAdmin()
+                                                        "
                                                         @click.stop="openEditModal(service)"
                                                         class="p-1.5 text-content-muted hover:text-action-primary hover:bg-surface-secondary rounded-lg transition-colors cursor-pointer"
                                                         :title="$t('common.edit')"
@@ -918,6 +929,9 @@
                                                         </svg>
                                                     </button>
                                                     <button
+                                                        v-if="
+                                                            can('services.delete') || isAnyAdmin()
+                                                        "
                                                         @click.stop="handleDelete(service)"
                                                         class="p-1.5 text-gray-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
                                                     >

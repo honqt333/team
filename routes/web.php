@@ -665,12 +665,14 @@ Route::prefix('app')->middleware(['auth', 'verified', 'tenant.active', 'center.c
         ->name('settings.website.banner.upload');
 
     // Company Profile Settings
-    Route::get('/settings/company', [CompanyProfileController::class, 'index'])->name('settings.company');
-    Route::put('/settings/company', [CompanyProfileController::class, 'update'])->name('settings.company.update');
-    Route::put('/settings/company/admin-user', [CompanyProfileController::class, 'updateAdminUser'])->name('settings.company.admin-user');
-    Route::post('/settings/company/verify-password', [CompanyProfileController::class, 'verifyPassword'])->name('settings.company.verify-password');
-    Route::post('/settings/company/logo', [CompanyProfileController::class, 'uploadLogo'])->name('settings.company.logo.upload');
-    Route::delete('/settings/company/logo', [CompanyProfileController::class, 'deleteLogo'])->name('settings.company.logo.delete');
+    Route::middleware('permission:settings.company.manage')->group(function () {
+        Route::get('/settings/company', [CompanyProfileController::class, 'index'])->name('settings.company');
+        Route::put('/settings/company', [CompanyProfileController::class, 'update'])->name('settings.company.update');
+        Route::put('/settings/company/admin-user', [CompanyProfileController::class, 'updateAdminUser'])->name('settings.company.admin-user');
+        Route::post('/settings/company/verify-password', [CompanyProfileController::class, 'verifyPassword'])->name('settings.company.verify-password');
+        Route::post('/settings/company/logo', [CompanyProfileController::class, 'uploadLogo'])->name('settings.company.logo.upload');
+        Route::delete('/settings/company/logo', [CompanyProfileController::class, 'deleteLogo'])->name('settings.company.logo.delete');
+    });
 
     // Company Transactions Settings
     Route::get('/settings/company/contacts/search', [CompanyTransactionController::class, 'searchContacts'])->name('settings.company.contacts.search');
@@ -687,14 +689,14 @@ Route::prefix('app')->middleware(['auth', 'verified', 'tenant.active', 'center.c
     Route::delete('/settings/company/transactions/{transaction}/attachment', [CompanyTransactionController::class, 'deleteAttachment'])->name('settings.company.transactions.attachment.delete');
 
     // Notification Settings
-    Route::prefix('settings/notifications')->name('settings.notifications.')->group(function () {
+    Route::prefix('settings/notifications')->middleware('permission:settings.company.manage')->name('settings.notifications.')->group(function () {
         Route::get('/', [NotificationSettingsController::class, 'index'])->name('index');
         Route::put('/', [NotificationSettingsController::class, 'update'])->name('update');
         Route::post('/test', [NotificationSettingsController::class, 'sendTest'])->name('test');
     });
 
     // ZATCA Phase 2 Self-Onboarding
-    Route::prefix('settings/zatca')->name('settings.zatca.')->group(function () {
+    Route::prefix('settings/zatca')->middleware('permission:settings.company.manage')->name('settings.zatca.')->group(function () {
         Route::get('/', [ZatcaOnboardingController::class, 'index'])->name('index');
         Route::post('/csr', [ZatcaOnboardingController::class, 'generateCsr'])->name('csr');
         Route::post('/compliance', [ZatcaOnboardingController::class, 'requestCompliance'])->name('compliance');
@@ -777,13 +779,13 @@ Route::prefix('app')->middleware(['auth', 'verified', 'tenant.active', 'center.c
     Route::delete('/settings/centers/{center}/stamp', [CenterSettingsController::class, 'deleteStamp'])->name('settings.centers.stamp.delete');
 
     // System Settings
-    Route::get('/settings/system', [SystemSettingsController::class, 'index'])->name('settings.system');
+    Route::get('/settings/system', [SystemSettingsController::class, 'index'])->middleware('permission:settings.company.manage')->name('settings.system');
     Route::get('/settings/storage', [SystemSettingsController::class, 'storage'])->name('settings.storage');
     Route::get('/settings/attachments', [AttachmentManagementController::class, 'index'])->name('settings.attachments.index');
     Route::get('/settings/attachments/{source}/{id}/download', [AttachmentManagementController::class, 'download'])->whereNumber('id')->name('settings.attachments.download');
     Route::delete('/settings/attachments/{source}/{id}', [AttachmentManagementController::class, 'destroy'])->whereNumber('id')->name('settings.attachments.destroy');
-    Route::get('/settings/print', [SystemSettingsController::class, 'printSettings'])->name('settings.print');
-    Route::put('/settings/system', [SystemSettingsController::class, 'update'])->name('settings.system.update');
+    Route::get('/settings/print', [SystemSettingsController::class, 'printSettings'])->middleware('permission:settings.company.manage')->name('settings.print');
+    Route::put('/settings/system', [SystemSettingsController::class, 'update'])->middleware('permission:settings.company.manage')->name('settings.system.update');
 
     // Print Settings — Signatures (tenant-scoped image uploads + lifecycle)
     // Each endpoint is a single-action controller under
@@ -983,32 +985,34 @@ Route::prefix('app')->middleware(['auth', 'verified', 'tenant.active', 'center.c
         Route::get('/', [HRController::class, 'index'])->name('index');
 
         // Settings (employee types, job titles, allowances, deductions)
-        Route::get('/settings', [App\Http\Controllers\App\HR\SettingsController::class, 'index'])->name('settings.index');
+        Route::middleware('permission:hr.settings.manage')->group(function () {
+            Route::get('/settings', [App\Http\Controllers\App\HR\SettingsController::class, 'index'])->name('settings.index');
 
-        // Employee Types
-        Route::post('/settings/employee-types', [App\Http\Controllers\App\HR\SettingsController::class, 'storeEmployeeType'])->name('settings.employee-types.store');
-        Route::put('/settings/employee-types/{employeeType}', [App\Http\Controllers\App\HR\SettingsController::class, 'updateEmployeeType'])->name('settings.employee-types.update');
-        Route::delete('/settings/employee-types/{employeeType}', [App\Http\Controllers\App\HR\SettingsController::class, 'destroyEmployeeType'])->name('settings.employee-types.destroy');
+            // Employee Types
+            Route::post('/settings/employee-types', [App\Http\Controllers\App\HR\SettingsController::class, 'storeEmployeeType'])->name('settings.employee-types.store');
+            Route::put('/settings/employee-types/{employeeType}', [App\Http\Controllers\App\HR\SettingsController::class, 'updateEmployeeType'])->name('settings.employee-types.update');
+            Route::delete('/settings/employee-types/{employeeType}', [App\Http\Controllers\App\HR\SettingsController::class, 'destroyEmployeeType'])->name('settings.employee-types.destroy');
 
-        // Job Titles
-        Route::post('/settings/job-titles', [App\Http\Controllers\App\HR\SettingsController::class, 'storeJobTitle'])->name('settings.job-titles.store');
-        Route::put('/settings/job-titles/{jobTitle}', [App\Http\Controllers\App\HR\SettingsController::class, 'updateJobTitle'])->name('settings.job-titles.update');
-        Route::delete('/settings/job-titles/{jobTitle}', [App\Http\Controllers\App\HR\SettingsController::class, 'destroyJobTitle'])->name('settings.job-titles.destroy');
+            // Job Titles
+            Route::post('/settings/job-titles', [App\Http\Controllers\App\HR\SettingsController::class, 'storeJobTitle'])->name('settings.job-titles.store');
+            Route::put('/settings/job-titles/{jobTitle}', [App\Http\Controllers\App\HR\SettingsController::class, 'updateJobTitle'])->name('settings.job-titles.update');
+            Route::delete('/settings/job-titles/{jobTitle}', [App\Http\Controllers\App\HR\SettingsController::class, 'destroyJobTitle'])->name('settings.job-titles.destroy');
 
-        // Allowances
-        Route::post('/settings/allowances', [HRPayrollSettingsController::class, 'storeAllowance'])->name('settings.allowances.store');
-        Route::put('/settings/allowances/{allowance}', [HRPayrollSettingsController::class, 'updateAllowance'])->name('settings.allowances.update');
-        Route::delete('/settings/allowances/{allowance}', [HRPayrollSettingsController::class, 'destroyAllowance'])->name('settings.allowances.destroy');
+            // Allowances
+            Route::post('/settings/allowances', [HRPayrollSettingsController::class, 'storeAllowance'])->name('settings.allowances.store');
+            Route::put('/settings/allowances/{allowance}', [HRPayrollSettingsController::class, 'updateAllowance'])->name('settings.allowances.update');
+            Route::delete('/settings/allowances/{allowance}', [HRPayrollSettingsController::class, 'destroyAllowance'])->name('settings.allowances.destroy');
 
-        // Deductions
-        Route::post('/settings/deductions', [HRPayrollSettingsController::class, 'storeDeduction'])->name('settings.deductions.store');
-        Route::put('/settings/deductions/{deduction}', [HRPayrollSettingsController::class, 'updateDeduction'])->name('settings.deductions.update');
-        Route::delete('/settings/deductions/{deduction}', [HRPayrollSettingsController::class, 'destroyDeduction'])->name('settings.deductions.destroy');
+            // Deductions
+            Route::post('/settings/deductions', [HRPayrollSettingsController::class, 'storeDeduction'])->name('settings.deductions.store');
+            Route::put('/settings/deductions/{deduction}', [HRPayrollSettingsController::class, 'updateDeduction'])->name('settings.deductions.update');
+            Route::delete('/settings/deductions/{deduction}', [HRPayrollSettingsController::class, 'destroyDeduction'])->name('settings.deductions.destroy');
 
-        // Regulations
-        Route::post('/settings/regulations', [HRRegulationsController::class, 'storeRegulation'])->name('settings.regulations.store');
-        Route::put('/settings/regulations/{regulation}', [HRRegulationsController::class, 'updateRegulation'])->name('settings.regulations.update');
-        Route::delete('/settings/regulations/{regulation}', [HRRegulationsController::class, 'destroyRegulation'])->name('settings.regulations.destroy');
+            // Regulations
+            Route::post('/settings/regulations', [HRRegulationsController::class, 'storeRegulation'])->name('settings.regulations.store');
+            Route::put('/settings/regulations/{regulation}', [HRRegulationsController::class, 'updateRegulation'])->name('settings.regulations.update');
+            Route::delete('/settings/regulations/{regulation}', [HRRegulationsController::class, 'destroyRegulation'])->name('settings.regulations.destroy');
+        });
 
         // Employee Permissions
         Route::get('/employees/{employee}/permissions', [EmployeePermissionsController::class, 'index'])->name('employees.permissions.index');
@@ -1080,24 +1084,26 @@ Route::prefix('app')->middleware(['auth', 'verified', 'tenant.active', 'center.c
         Route::delete('/leaves/{leave}', [LeaveController::class, 'destroy'])->name('leaves.destroy');
         Route::put('/leaves/{leave}/status', [LeaveController::class, 'updateStatus'])->name('leaves.update-status');
 
-        // Biometric Devices
-        Route::post('/settings/biometric-devices', [BiometricDeviceController::class, 'store'])->name('settings.biometric-devices.store');
-        Route::put('/settings/biometric-devices/{biometricDevice}', [BiometricDeviceController::class, 'update'])->name('settings.biometric-devices.update');
-        Route::delete('/settings/biometric-devices/{biometricDevice}', [BiometricDeviceController::class, 'destroy'])->name('settings.biometric-devices.destroy');
-        Route::post('/settings/biometric-devices/{biometricDevice}/regenerate-token', [BiometricDeviceController::class, 'regenerateToken'])->name('settings.biometric-devices.regenerate-token');
-        // POST, not GET: the endpoint issues a fresh token and revokes
-        // the previous one, so it must not be a safe/idempotent method
-        // (a GET could be triggered by a prefetch, a crawler, or a
-        // cached page and would silently rotate the credential).
-        Route::post('/settings/biometric-devices/{biometricDevice}/token', [BiometricDeviceController::class, 'showToken'])->name('settings.biometric-devices.show-token');
+        Route::middleware('permission:hr.settings.manage')->group(function () {
+            // Biometric Devices
+            Route::post('/settings/biometric-devices', [BiometricDeviceController::class, 'store'])->name('settings.biometric-devices.store');
+            Route::put('/settings/biometric-devices/{biometricDevice}', [BiometricDeviceController::class, 'update'])->name('settings.biometric-devices.update');
+            Route::delete('/settings/biometric-devices/{biometricDevice}', [BiometricDeviceController::class, 'destroy'])->name('settings.biometric-devices.destroy');
+            Route::post('/settings/biometric-devices/{biometricDevice}/regenerate-token', [BiometricDeviceController::class, 'regenerateToken'])->name('settings.biometric-devices.regenerate-token');
+            // POST, not GET: the endpoint issues a fresh token and revokes
+            // the previous one, so it must not be a safe/idempotent method
+            // (a GET could be triggered by a prefetch, a crawler, or a
+            // cached page and would silently rotate the credential).
+            Route::post('/settings/biometric-devices/{biometricDevice}/token', [BiometricDeviceController::class, 'showToken'])->name('settings.biometric-devices.show-token');
 
-        // Shifts
-        Route::post('/settings/shifts', [ShiftController::class, 'store'])->name('settings.shifts.store');
-        Route::put('/settings/shifts/{shift}', [ShiftController::class, 'update'])->name('settings.shifts.update');
-        Route::delete('/settings/shifts/{shift}', [ShiftController::class, 'destroy'])->name('settings.shifts.destroy');
+            // Shifts
+            Route::post('/settings/shifts', [ShiftController::class, 'store'])->name('settings.shifts.store');
+            Route::put('/settings/shifts/{shift}', [ShiftController::class, 'update'])->name('settings.shifts.update');
+            Route::delete('/settings/shifts/{shift}', [ShiftController::class, 'destroy'])->name('settings.shifts.destroy');
 
-        // Attendance Settings
-        Route::put('/settings/attendance', [App\Http\Controllers\App\HR\SettingsController::class, 'updateAttendanceSettings'])->name('settings.attendance.update');
+            // Attendance Settings
+            Route::put('/settings/attendance', [App\Http\Controllers\App\HR\SettingsController::class, 'updateAttendanceSettings'])->name('settings.attendance.update');
+        });
     });
 
     // ───────────────────────────────────────────────────────────────

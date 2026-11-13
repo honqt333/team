@@ -6,16 +6,21 @@ namespace App\Http\Controllers\App\HR;
 
 use App\Http\Controllers\Controller;
 use App\Models\HR\BiometricDevice;
+use App\Support\Permissions;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
-/** @bypass-authorization-scanner - Protected at route middleware level (auth + center.context + EnsureTwoFactorEnabled) */
 class BiometricDeviceController extends Controller
 {
     public function store(Request $request)
     {
+        $this->authorize(Permissions::HR_SETTINGS_MANAGE);
+
+        $tenantId = auth()->user()->tenant_id;
+
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'center_id' => 'required|exists:centers,id',
+            'center_id' => ['required', Rule::exists('centers', 'id')->where('tenant_id', $tenantId)],
             'device_id' => 'nullable|string|max:255',
             'device_type' => 'nullable|string|max:255',
             'notes' => 'nullable|string',
@@ -36,13 +41,17 @@ class BiometricDeviceController extends Controller
 
     public function update(Request $request, BiometricDevice $biometricDevice)
     {
+        $this->authorize(Permissions::HR_SETTINGS_MANAGE);
+
         if ($biometricDevice->tenant_id !== auth()->user()->tenant_id) {
             abort(403);
         }
 
+        $tenantId = auth()->user()->tenant_id;
+
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'center_id' => 'required|exists:centers,id',
+            'center_id' => ['required', Rule::exists('centers', 'id')->where('tenant_id', $tenantId)],
             'device_id' => 'nullable|string|max:255',
             'device_type' => 'nullable|string|max:255',
             'is_active' => 'boolean',

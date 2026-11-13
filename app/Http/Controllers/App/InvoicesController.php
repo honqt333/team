@@ -18,6 +18,7 @@ use App\Models\WorkOrder;
 use App\Services\CreditNoteService;
 use App\Services\InvoiceService;
 use App\Services\NotificationService;
+use App\Support\Permissions;
 use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -387,8 +388,14 @@ class InvoicesController extends Controller
      */
     public function hub()
     {
-        $tenantId = auth()->user()->tenant_id;
-        $centerId = auth()->user()->current_center_id;
+        $user = auth()->user();
+
+        if (! $user->can(Permissions::INVOICES_VIEW) && ! $user->can(Permissions::PURCHASE_INVOICES_VIEW)) {
+            abort(403);
+        }
+
+        $tenantId = $user->tenant_id;
+        $centerId = $user->current_center_id;
 
         $salesCount = Invoice::where('tenant_id', $tenantId)
             ->where('center_id', $centerId)
@@ -419,6 +426,8 @@ class InvoicesController extends Controller
      */
     public function salesIndex(Request $request)
     {
+        $this->authorize(Permissions::INVOICES_VIEW);
+
         $tenantId = auth()->user()->tenant_id;
         $centerId = auth()->user()->current_center_id;
 
@@ -489,6 +498,8 @@ class InvoicesController extends Controller
      */
     public function purchasesIndex(Request $request)
     {
+        $this->authorize(Permissions::PURCHASE_INVOICES_VIEW);
+
         $tenantId = auth()->user()->tenant_id;
         $centerId = auth()->user()->current_center_id;
 

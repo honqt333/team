@@ -15,8 +15,10 @@ use App\Models\HR\EmployeeType;
 use App\Models\HR\HRRegulation;
 use App\Models\HR\JobTitle;
 use App\Models\HR\Shift;
+use App\Support\Permissions;
 use App\Support\TenancyContext;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 
 class SettingsController extends Controller
@@ -119,10 +121,14 @@ class SettingsController extends Controller
 
     public function storeJobTitle(Request $request)
     {
+        $this->authorize(Permissions::HR_SETTINGS_MANAGE);
+
+        $tenantId = TenancyContext::tenantId();
+
         $validated = $request->validate([
             'name_ar' => 'required|string|max:255',
             'name_en' => 'required|string|max:255',
-            'department_id' => 'nullable|exists:departments,id',
+            'department_id' => ['nullable', Rule::exists('departments', 'id')->where('tenant_id', $tenantId)],
             'is_active' => 'boolean',
         ]);
 
@@ -137,10 +143,14 @@ class SettingsController extends Controller
 
     public function updateJobTitle(Request $request, JobTitle $jobTitle)
     {
+        $this->authorize(Permissions::HR_SETTINGS_MANAGE);
+
+        $tenantId = TenancyContext::tenantId();
+
         $validated = $request->validate([
             'name_ar' => 'required|string|max:255',
             'name_en' => 'sometimes|required|string|max:255',
-            'department_id' => 'nullable|exists:departments,id',
+            'department_id' => ['nullable', Rule::exists('departments', 'id')->where('tenant_id', $tenantId)],
             'is_active' => 'boolean',
         ]);
 

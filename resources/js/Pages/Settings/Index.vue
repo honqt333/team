@@ -143,7 +143,7 @@ const settingCards = computed(() => [
     },
     {
         id: 'billing',
-        visible: true,
+        visible: can('settings.company.manage'),
         href: route('app.billing.index'),
         title: t('settings.cards.billing.title'),
         description: t('settings.cards.billing.description'),

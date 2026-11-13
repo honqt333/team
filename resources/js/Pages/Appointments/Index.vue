@@ -260,7 +260,10 @@
                     </template>
 
                     <template #cell-actions="{ item }">
-                        <div class="flex flex-wrap items-center justify-center gap-1.5">
+                        <div
+                            v-if="can('crm.appointments.manage')"
+                            class="flex flex-wrap items-center justify-center gap-1.5"
+                        >
                             <button
                                 v-if="item.status === 'scheduled' || item.status === 'confirmed'"
                                 type="button"

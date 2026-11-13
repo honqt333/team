@@ -8,9 +8,11 @@ use App\Models\Center;
 use App\Models\PaymentSettings;
 use App\Models\Tenant;
 use App\Models\User;
+use App\Support\Permissions;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Cache;
 use Inertia\Testing\AssertableInertia as Assert;
+use Spatie\Permission\Models\Permission;
 use Spatie\Permission\PermissionRegistrar;
 use Tests\TestCase;
 
@@ -49,6 +51,9 @@ class CompanyPaymentSettingsExposureTest extends TestCase
             'current_center_id' => $this->center->id,
         ]);
         $this->user->centers()->attach($this->center->id, ['tenant_id' => $this->tenant->id]);
+        app(PermissionRegistrar::class)->setPermissionsTeamId($this->tenant->id);
+        Permission::findOrCreate(Permissions::COMPANY_MANAGE, 'web');
+        $this->user->givePermissionTo(Permissions::COMPANY_MANAGE);
 
         PaymentSettings::query()->delete();
         PaymentSettings::create([

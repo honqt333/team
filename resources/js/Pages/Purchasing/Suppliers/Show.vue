@@ -50,7 +50,7 @@
 
                             <Tooltip :text="$t('common.edit')">
                                 <button
-                                    v-if="can('purchasing.suppliers.update')"
+                                    v-if="can('purchasing.suppliers.update') || isAnyAdmin()"
                                     @click="showEditModal = true"
                                     class="inline-flex items-center gap-2 px-3 py-2 rounded-xl font-black text-xs border border-orange-100/70 dark:border-orange-800/30 bg-orange-50/70 dark:bg-orange-900/20 text-orange-700 dark:text-orange-300 hover:bg-white dark:hover:bg-orange-900/30 hover:shadow-md transition-all"
                                 >
@@ -82,7 +82,7 @@
                                 "
                             >
                                 <button
-                                    v-if="can('purchasing.suppliers.destroy')"
+                                    v-if="can('purchasing.suppliers.destroy') || isAnyAdmin()"
                                     @click="confirmDelete"
                                     :disabled="
                                         counts.orders > 0 ||

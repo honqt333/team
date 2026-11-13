@@ -21,6 +21,7 @@ use App\Models\Warehouse;
 use App\Services\Inventory\InventoryService;
 use App\Services\InvoiceService;
 use App\Support\CountryCurrencyRegistry;
+use App\Support\Permissions;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
@@ -38,6 +39,8 @@ class PurchasingInvoicesController extends Controller
      */
     public function salesIndex(Request $request)
     {
+        $this->authorize(Permissions::INVOICES_VIEW);
+
         $tenantId = auth()->user()->tenant_id;
         $centerId = auth()->user()->current_center_id;
 
@@ -75,6 +78,34 @@ class PurchasingInvoicesController extends Controller
             $baseQuery->orderBy("invoices.{$sort}", $direction);
         }
         $baseQuery->orderBy('invoices.id', 'desc');
+
+        $filters = array_merge($request->only(['search', 'payment_status', 'date_from', 'date_to', 'tab']), [
+            'sort' => $sort,
+            'direction' => $direction,
+        ]);
+
+        if ($request->boolean('print')) {
+            $tab = (string) $request->input('tab', 'invoices');
+            $printQuery = (clone $baseQuery)->where(function ($q) use ($tab) {
+                if ($tab === 'returns') {
+                    $q->where('type', 'credit_note')
+                        ->orWhere('type', InvoiceType::CREDIT_NOTE);
+                } else {
+                    $q->where('type', 'invoice')
+                        ->orWhere('type', InvoiceType::INVOICE)
+                        ->orWhereNull('type');
+                }
+            });
+
+            return Inertia::render('Reports/Print', [
+                'reportType' => 'purchasing_sales',
+                'backRoute' => 'app.purchasing.sales.index',
+                'filters' => $filters,
+                'kpis' => [],
+                'rows' => $printQuery->limit(5000)->get(),
+                'companyInfo' => [],
+            ]);
+        }
 
         // Sales Invoices tab: standard sales invoices (exclude credit notes)
         $invoices = (clone $baseQuery)
@@ -129,6 +160,8 @@ class PurchasingInvoicesController extends Controller
      */
     public function storeSalesInvoice(Request $request)
     {
+        $this->authorize(Permissions::INVOICES_CREATE);
+
         $tenantId = auth()->user()->tenant_id;
         $centerId = auth()->user()->current_center_id;
         $userId = auth()->id();
@@ -377,6 +410,8 @@ class PurchasingInvoicesController extends Controller
      */
     public function purchasesIndex(Request $request)
     {
+        $this->authorize(Permissions::PURCHASE_INVOICES_VIEW);
+
         return redirect()->route('app.invoices.purchases.index', $request->query());
     }
 }
