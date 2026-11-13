@@ -1489,11 +1489,9 @@
                     >
                         <div class="flex items-center justify-between gap-3">
                             <div class="flex items-center gap-3">
-                                <input
-                                    type="checkbox"
-                                    :checked="isInvoiceSelected(inv.id)"
+                                <AppCheckbox
+                                    :model-value="isInvoiceSelected(inv.id)"
                                     @change="toggleInvoiceSelection(inv)"
-                                    class="w-4 h-4 rounded text-action-primary focus:ring-action-primary/30 cursor-pointer"
                                 />
                                 <div>
                                     <div class="flex items-center gap-2">
@@ -1731,6 +1729,7 @@
 //     own prop types first (out of scope for Goal 2)
 
 import CustomDatePicker from '@/Components/CustomDatePicker.vue';
+import AppCheckbox from '@/Components/App/AppCheckbox.vue';
 import AppToggle from '@/Components/Common/AppToggle.vue';
 import BackButton from '@/Components/BackButton.vue';
 import { ref, computed, watch, onBeforeUnmount } from 'vue';

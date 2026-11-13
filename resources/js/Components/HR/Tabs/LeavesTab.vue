@@ -111,96 +111,94 @@
         </div>
 
         <!-- Leave Modal -->
-        <Modal :show="showLeaveModal" @close="closeLeaveModal">
-            <div class="p-6">
-                <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">
-                    {{ editingLeave ? $t('hr.leaves.edit') : $t('hr.leaves.add') }}
-                </h3>
+        <BaseModal
+            :show="showLeaveModal"
+            size="md"
+            :title="editingLeave ? $t('hr.leaves.edit') : $t('hr.leaves.add')"
+            @close="closeLeaveModal"
+        >
+            <form id="leave-form" @submit.prevent="submitLeave" class="space-y-4">
+                <!-- Leave Type -->
+                <div>
+                    <SearchableSelect
+                        v-model="leaveForm.type"
+                        :options="leaveTypeOptions"
+                        option-label="label"
+                        option-value="value"
+                        :label="$t('hr.leaves.type')"
+                        :error="leaveForm.errors.type"
+                        required
+                    />
+                </div>
 
-                <form @submit.prevent="submitLeave" class="space-y-4">
-                    <!-- Leave Type -->
-                    <div>
-                        <SearchableSelect
-                            v-model="leaveForm.type"
-                            :options="leaveTypeOptions"
-                            option-label="label"
-                            option-value="value"
-                            :label="$t('hr.leaves.type')"
-                            :error="leaveForm.errors.type"
-                            required
-                        />
-                    </div>
-
-                    <!-- Date Range -->
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label
-                                class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-                            >
-                                {{ $t('common.from') }}
-                            </label>
-                            <input
-                                type="date"
-                                v-model="leaveForm.start_date"
-                                class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-focus-ring"
-                            />
-                            <p v-if="leaveForm.errors.start_date" class="text-xs text-red-500 mt-1">
-                                {{ leaveForm.errors.start_date }}
-                            </p>
-                        </div>
-                        <div>
-                            <label
-                                class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-                            >
-                                {{ $t('common.to') }}
-                            </label>
-                            <input
-                                type="date"
-                                v-model="leaveForm.end_date"
-                                class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-focus-ring"
-                            />
-                            <p v-if="leaveForm.errors.end_date" class="text-xs text-red-500 mt-1">
-                                {{ leaveForm.errors.end_date }}
-                            </p>
-                        </div>
-                    </div>
-
-                    <!-- Reason -->
+                <!-- Date Range -->
+                <div class="grid grid-cols-2 gap-4">
                     <div>
                         <label
                             class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
                         >
-                            {{ $t('hr.leaves.reason') }}
+                            {{ $t('common.from') }}
                         </label>
-                        <textarea
-                            v-model="leaveForm.reason"
-                            rows="3"
-                            class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-focus-ring"
-                        ></textarea>
-                        <p v-if="leaveForm.errors.reason" class="text-xs text-red-500 mt-1">
-                            {{ leaveForm.errors.reason }}
+                        <CustomDatePicker
+                            v-model="leaveForm.start_date"
+                            :placeholder="$t('common.from')"
+                        />
+                        <p v-if="leaveForm.errors.start_date" class="text-xs text-red-500 mt-1">
+                            {{ leaveForm.errors.start_date }}
                         </p>
                     </div>
-
-                    <div class="flex justify-end gap-3 mt-6">
-                        <button
-                            type="button"
-                            @click="closeLeaveModal"
-                            class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
+                    <div>
+                        <label
+                            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
                         >
-                            {{ $t('common.cancel') }}
-                        </button>
-                        <button
-                            type="submit"
-                            :disabled="leaveForm.processing"
-                            class="px-4 py-2 bg-action-primary text-white rounded-lg hover:bg-action-primary-hover disabled:opacity-50"
-                        >
-                            {{ $t('common.save') }}
-                        </button>
+                            {{ $t('common.to') }}
+                        </label>
+                        <CustomDatePicker
+                            v-model="leaveForm.end_date"
+                            :placeholder="$t('common.to')"
+                        />
+                        <p v-if="leaveForm.errors.end_date" class="text-xs text-red-500 mt-1">
+                            {{ leaveForm.errors.end_date }}
+                        </p>
                     </div>
-                </form>
-            </div>
-        </Modal>
+                </div>
+
+                <!-- Reason -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        {{ $t('hr.leaves.reason') }}
+                    </label>
+                    <textarea
+                        v-model="leaveForm.reason"
+                        rows="3"
+                        class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-focus-ring"
+                    ></textarea>
+                    <p v-if="leaveForm.errors.reason" class="text-xs text-red-500 mt-1">
+                        {{ leaveForm.errors.reason }}
+                    </p>
+                </div>
+            </form>
+
+            <template #footer>
+                <div class="flex justify-end gap-3 w-full">
+                    <button
+                        type="button"
+                        @click="closeLeaveModal"
+                        class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
+                    >
+                        {{ $t('common.cancel') }}
+                    </button>
+                    <button
+                        type="submit"
+                        form="leave-form"
+                        :disabled="leaveForm.processing"
+                        class="px-4 py-2 bg-action-primary text-white rounded-lg hover:bg-action-primary-hover disabled:opacity-50"
+                    >
+                        {{ $t('common.save') }}
+                    </button>
+                </div>
+            </template>
+        </BaseModal>
     </div>
 </template>
 
@@ -208,8 +206,9 @@
 import { ref, computed } from 'vue';
 import { useForm, router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
-import Modal from '@/Components/Modal.vue';
+import BaseModal from '@/Components/BaseModal.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
+import CustomDatePicker from '@/Components/CustomDatePicker.vue';
 import { useToast } from '@/Composables/useToast';
 
 const props = defineProps({

@@ -270,131 +270,104 @@
         />
 
         <!-- Credit Invoice Modal -->
-        <Modal
-            :show="showCreditInvoiceModal"
-            @close="showCreditInvoiceModal = false"
-            max-width="md"
-        >
-            <div class="p-6">
-                <div
-                    class="flex items-center justify-between pb-4 border-b border-gray-100 dark:border-gray-700 mb-6"
-                >
-                    <h3
-                        class="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2"
-                    >
-                        <span>📝</span>
-                        {{ $t('invoices.create_credit_invoice') }}
-                    </h3>
+        <BaseModal :show="showCreditInvoiceModal" size="sm" @close="showCreditInvoiceModal = false">
+            <template #title>
+                <span class="flex items-center gap-2">
+                    <span>📝</span>
+                    {{ $t('invoices.create_credit_invoice') }}
+                </span>
+            </template>
+
+            <form id="credit-invoice-form" @submit.prevent="submitCreditInvoice">
+                <div class="space-y-4">
+                    <!-- Remaining Balance (Read Only) -->
+                    <div>
+                        <label
+                            class="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1"
+                        >
+                            {{ $t('work_orders.balance') }} (الباقي)
+                        </label>
+                        <div
+                            class="w-full px-4 py-2.5 text-base border rounded-xl bg-gray-100 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 font-bold font-mono"
+                            dir="ltr"
+                        >
+                            {{ formatPrice(balance) }} {{ activeCurrencySymbol }}
+                        </div>
+                    </div>
+
+                    <!-- Due Date -->
+                    <div>
+                        <label
+                            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                        >
+                            {{ $t('invoices.due_date') }}
+                            <span class="text-red-500">*</span>
+                        </label>
+                        <CustomDatePicker
+                            v-model="creditInvoiceForm.due_date"
+                            :placeholder="$t('invoices.due_date')"
+                            :required="true"
+                            :min-date="todayDate"
+                        />
+                    </div>
+
+                    <!-- Notes -->
+                    <div>
+                        <label
+                            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                        >
+                            {{ $t('payments.form.notes') }}
+                        </label>
+                        <textarea
+                            v-model="creditInvoiceForm.notes"
+                            rows="3"
+                            class="w-full px-4 py-2.5 text-sm border rounded-xl bg-gray-50 dark:bg-gray-900 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-focus-ring placeholder-gray-400 dark:placeholder-gray-500"
+                            :placeholder="$t('payments.form.notes_placeholder')"
+                        ></textarea>
+                    </div>
+                </div>
+            </form>
+
+            <template #footer>
+                <div class="flex items-center justify-end gap-3 w-full">
                     <button
+                        type="button"
                         @click="showCreditInvoiceModal = false"
-                        class="text-gray-400 hover:text-gray-500"
+                        class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg shadow-sm hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-700"
                     >
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        {{ $t('common.cancel') }}
+                    </button>
+                    <button
+                        type="submit"
+                        form="credit-invoice-form"
+                        :disabled="submittingCreditInvoice"
+                        class="px-4 py-2 text-sm font-medium text-white bg-amber-600 hover:bg-amber-700 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-focus-ring focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                        <svg
+                            v-if="submittingCreditInvoice"
+                            class="inline-block w-4 h-4 mr-2 animate-spin"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                        >
+                            <circle
+                                class="opacity-25"
+                                cx="12"
+                                cy="12"
+                                r="10"
+                                stroke="currentColor"
+                                stroke-width="4"
+                            ></circle>
                             <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M6 18L18 6M6 6l12 12"
-                            />
+                                class="opacity-75"
+                                fill="currentColor"
+                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                            ></path>
                         </svg>
+                        {{ submittingCreditInvoice ? $t('common.loading') : $t('common.create') }}
                     </button>
                 </div>
-
-                <form @submit.prevent="submitCreditInvoice">
-                    <div class="space-y-4">
-                        <!-- Remaining Balance (Read Only) -->
-                        <div>
-                            <label
-                                class="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1"
-                            >
-                                {{ $t('work_orders.balance') }} (الباقي)
-                            </label>
-                            <div
-                                class="w-full px-4 py-2.5 text-base border rounded-xl bg-gray-100 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 font-bold font-mono"
-                                dir="ltr"
-                            >
-                                {{ formatPrice(balance) }} {{ activeCurrencySymbol }}
-                            </div>
-                        </div>
-
-                        <!-- Due Date -->
-                        <div>
-                            <label
-                                class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-                            >
-                                {{ $t('invoices.due_date') }}
-                                <span class="text-red-500">*</span>
-                            </label>
-                            <input
-                                type="date"
-                                v-model="creditInvoiceForm.due_date"
-                                required
-                                :min="todayDate"
-                                dir="ltr"
-                                class="w-full px-4 py-2.5 text-sm border rounded-xl bg-gray-50 dark:bg-gray-900 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-focus-ring text-left font-mono"
-                            />
-                        </div>
-
-                        <!-- Notes -->
-                        <div>
-                            <label
-                                class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-                            >
-                                {{ $t('payments.form.notes') }}
-                            </label>
-                            <textarea
-                                v-model="creditInvoiceForm.notes"
-                                rows="3"
-                                class="w-full px-4 py-2.5 text-sm border rounded-xl bg-gray-50 dark:bg-gray-900 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-focus-ring placeholder-gray-400 dark:placeholder-gray-500"
-                                :placeholder="$t('payments.form.notes_placeholder')"
-                            ></textarea>
-                        </div>
-                    </div>
-
-                    <!-- Actions -->
-                    <div
-                        class="flex items-center justify-end gap-3 pt-4 border-t border-gray-100 dark:border-gray-700 mt-6"
-                    >
-                        <button
-                            type="button"
-                            @click="showCreditInvoiceModal = false"
-                            class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg shadow-sm hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-700"
-                        >
-                            {{ $t('common.cancel') }}
-                        </button>
-                        <button
-                            type="submit"
-                            :disabled="submittingCreditInvoice"
-                            class="px-4 py-2 text-sm font-medium text-white bg-amber-600 hover:bg-amber-700 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-focus-ring focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                        >
-                            <svg
-                                v-if="submittingCreditInvoice"
-                                class="inline-block w-4 h-4 mr-2 animate-spin"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                            >
-                                <circle
-                                    class="opacity-25"
-                                    cx="12"
-                                    cy="12"
-                                    r="10"
-                                    stroke="currentColor"
-                                    stroke-width="4"
-                                ></circle>
-                                <path
-                                    class="opacity-75"
-                                    fill="currentColor"
-                                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-                                ></path>
-                            </svg>
-                            {{
-                                submittingCreditInvoice ? $t('common.loading') : $t('common.create')
-                            }}
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </Modal>
+            </template>
+        </BaseModal>
 
         <!-- Delete Confirmation removed - using useConfirm instead -->
     </div>
@@ -405,7 +378,8 @@ import { ref, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { router } from '@inertiajs/vue3';
 import PaymentFormModal from './PaymentFormModal.vue';
-import Modal from '@/Components/Modal.vue';
+import BaseModal from '@/Components/BaseModal.vue';
+import CustomDatePicker from '@/Components/CustomDatePicker.vue';
 import { useConfirm } from '@/Composables/useConfirm';
 import { useNumberFormat } from '@/Composables/useNumberFormat';
 

@@ -557,7 +557,7 @@
                                                             line.description &&
                                                             line.description !== line.title
                                                         "
-                                                        class="text-xs text-gray-500 dark:text-gray-400 mt-2 bg-gray-50/50 dark:bg-gray-900/40 p-2.5 rounded-lg border border-gray-100/50 dark:border-gray-850 leading-relaxed"
+                                                        class="text-xs text-gray-500 dark:text-gray-400 mt-2 bg-gray-50/50 dark:bg-gray-900/40 p-2.5 rounded-lg border border-gray-100/50 dark:border-gray-700 leading-relaxed"
                                                     >
                                                         {{ line.description }}
                                                     </div>
@@ -810,32 +810,25 @@
         />
 
         <!-- Customer Signature Modal -->
-        <Modal :show="showSignatureModal" @close="showSignatureModal = false" max-width="md">
-            <div class="p-6">
-                <div class="flex items-center justify-between mb-4">
-                    <h3
-                        class="text-base font-bold text-gray-900 dark:text-white flex items-center gap-2"
-                    >
-                        <span>✍️</span>
-                        <span>{{ $t('quotes.customer_signature_and_approval') }}</span>
-                    </h3>
-                    <button
-                        type="button"
-                        @click="showSignatureModal = false"
-                        class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
-                    >
-                        ✕
-                    </button>
-                </div>
-                <p class="text-xs text-gray-500 dark:text-gray-400 mb-3">
-                    {{ $t('quotes.customer_can_sign_hint') }}
-                </p>
-                <div
-                    class="rounded-xl border border-dashed border-gray-300 dark:border-gray-600 p-2 bg-gray-50 dark:bg-gray-900/50"
-                >
-                    <SignaturePad v-model="signatureData" />
-                </div>
-                <div class="mt-6 flex justify-end gap-3">
+        <BaseModal :show="showSignatureModal" size="sm" @close="showSignatureModal = false">
+            <template #title>
+                <span class="flex items-center gap-2">
+                    <span>✍️</span>
+                    <span>{{ $t('quotes.customer_signature_and_approval') }}</span>
+                </span>
+            </template>
+
+            <p class="text-xs text-gray-500 dark:text-gray-400 mb-3">
+                {{ $t('quotes.customer_can_sign_hint') }}
+            </p>
+            <div
+                class="rounded-xl border border-dashed border-gray-300 dark:border-gray-600 p-2 bg-gray-50 dark:bg-gray-900/50"
+            >
+                <SignaturePad v-model="signatureData" />
+            </div>
+
+            <template #footer>
+                <div class="flex justify-end gap-3 w-full">
                     <SecondaryButton
                         @click="showSignatureModal = false"
                         :disabled="isSavingSignature"
@@ -849,8 +842,8 @@
                         {{ isSavingSignature ? $t('common.saving') : $t('common.save') }}
                     </PrimaryButton>
                 </div>
-            </div>
-        </Modal>
+            </template>
+        </BaseModal>
     </AppLayout>
 </template>
 
@@ -874,7 +867,7 @@ import QuotePartModal from '@/Components/Quotes/QuotePartModal.vue';
 import QuoteShareModal from '@/Components/Quotes/QuoteShareModal.vue';
 import QuoteApprovalModal from '@/Components/Quotes/QuoteApprovalModal.vue';
 import ConfirmModal from '@/Components/ConfirmModal.vue';
-import Modal from '@/Components/Modal.vue';
+import BaseModal from '@/Components/BaseModal.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import SecondaryButton from '@/Components/SecondaryButton.vue';
 import SignaturePad from '@/Components/Common/SignaturePad.vue';

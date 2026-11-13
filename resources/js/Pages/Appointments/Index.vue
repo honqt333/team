@@ -425,11 +425,13 @@
         </div>
 
         <!-- Create modal -->
-        <Modal :show="showForm" max-width="2xl" @close="showForm = false">
-            <div class="p-6 space-y-4">
-                <h3 class="text-base font-bold text-content-primary">
-                    {{ $t('appointments.new') }}
-                </h3>
+        <BaseModal
+            :show="showForm"
+            size="lg"
+            :title="$t('appointments.new')"
+            @close="showForm = false"
+        >
+            <div class="space-y-4">
                 <!-- Quick Vehicle/Customer Search -->
                 <div class="relative">
                     <div class="relative">
@@ -638,11 +640,14 @@
                         class="w-full rounded-xl border border-border-subtle bg-surface-secondary text-content-primary px-3 py-2 text-sm focus:ring-2 focus:ring-action-primary/20 focus:border-action-primary"
                     ></textarea>
                 </div>
-                <div class="flex items-center justify-end gap-2 pt-2 border-t border-border-subtle">
+            </div>
+
+            <template #footer>
+                <div class="flex items-center justify-end gap-2 w-full">
                     <button
                         type="button"
                         @click="showForm = false"
-                        class="px-4 py-2 rounded-xl text-xs font-bold text-content-secondary hover:bg-surface-secondary transition-colors cursor-pointer"
+                        class="px-5 py-2.5 text-xs font-bold text-text-secondary hover:bg-surface-secondary border border-border rounded-xl transition-colors cursor-pointer"
                     >
                         {{ $t('common.cancel') }}
                     </button>
@@ -656,31 +661,34 @@
                             !form.scheduled_at ||
                             !form.estimated_end_at
                         "
-                        class="px-5 py-2 rounded-xl text-xs font-bold bg-action-primary hover:bg-action-primary-hover text-white disabled:opacity-50 transition-colors cursor-pointer"
+                        class="inline-flex items-center justify-center gap-2 px-6 py-2.5 text-xs font-bold text-white bg-action-primary hover:bg-action-primary-hover rounded-xl shadow-xs transition-all disabled:opacity-50 cursor-pointer"
                     >
                         {{ $t('common.create') }}
                     </button>
                 </div>
-            </div>
-        </Modal>
+            </template>
+        </BaseModal>
 
         <!-- Cancel modal -->
-        <Modal :show="showCancel" max-width="md" @close="showCancel = false">
-            <div class="p-6 space-y-4">
-                <h3 class="text-base font-bold text-content-primary">
-                    {{ $t('appointments.cancel_title') }}
-                </h3>
-                <textarea
-                    v-model="cancelReason"
-                    rows="3"
-                    :placeholder="$t('appointments.cancel_reason_placeholder')"
-                    class="w-full rounded-xl border border-border-subtle bg-surface-secondary text-content-primary px-3 py-2 text-sm focus:ring-2 focus:ring-action-primary/20 focus:border-action-primary"
-                ></textarea>
-                <div class="flex items-center justify-end gap-2 pt-2 border-t border-border-subtle">
+        <BaseModal
+            :show="showCancel"
+            size="sm"
+            :title="$t('appointments.cancel_title')"
+            @close="showCancel = false"
+        >
+            <textarea
+                v-model="cancelReason"
+                rows="3"
+                :placeholder="$t('appointments.cancel_reason_placeholder')"
+                class="w-full rounded-xl border border-border-subtle bg-surface-secondary text-content-primary px-3 py-2 text-sm focus:ring-2 focus:ring-action-primary/20 focus:border-action-primary"
+            ></textarea>
+
+            <template #footer>
+                <div class="flex items-center justify-end gap-2 w-full">
                     <button
                         type="button"
                         @click="showCancel = false"
-                        class="px-4 py-2 rounded-xl text-xs font-bold text-content-secondary hover:bg-surface-secondary transition-colors cursor-pointer"
+                        class="px-5 py-2.5 text-xs font-bold text-text-secondary hover:bg-surface-secondary border border-border rounded-xl transition-colors cursor-pointer"
                     >
                         {{ $t('common.cancel') }}
                     </button>
@@ -688,13 +696,13 @@
                         type="button"
                         @click="confirmCancel"
                         :disabled="busy"
-                        class="px-4 py-2 rounded-xl text-xs font-bold bg-danger hover:bg-danger/90 text-white disabled:opacity-50 transition-colors cursor-pointer"
+                        class="inline-flex items-center justify-center gap-2 px-6 py-2.5 text-xs font-bold text-white bg-danger hover:bg-danger/90 rounded-xl shadow-xs transition-all disabled:opacity-50 cursor-pointer"
                     >
                         {{ $t('appointments.cancel') }}
                     </button>
                 </div>
-            </div>
-        </Modal>
+            </template>
+        </BaseModal>
     </AppLayout>
 </template>
 
@@ -709,7 +717,7 @@ import AppToggle from '@/Components/Common/AppToggle.vue';
 import AppEmptyState from '@/Components/Common/AppEmptyState.vue';
 import AppViewModeToggle from '@/Components/Common/AppViewModeToggle.vue';
 import DataTable from '@/Components/Common/DataTable.vue';
-import Modal from '@/Components/Modal.vue';
+import BaseModal from '@/Components/BaseModal.vue';
 import CustomDatePicker from '@/Components/CustomDatePicker.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 import SaudiPlateDisplay from '@/Components/Vehicles/SaudiPlateDisplay.vue';

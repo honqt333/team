@@ -3,7 +3,7 @@ import { ref, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { router } from '@inertiajs/vue3';
 import axios from 'axios';
-import Modal from '@/Components/Modal.vue';
+import BaseModal from '@/Components/BaseModal.vue';
 import SecondaryButton from '@/Components/SecondaryButton.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import { useToast } from '@/Composables/useToast';
@@ -193,112 +193,93 @@ const viewInspection = async (inspection) => {
         </div>
 
         <!-- New Inspection Modal -->
-        <Modal
+        <BaseModal
             :show="showNewInspectionModal"
+            size="xl"
+            :title="$t('work_orders.systematic.title')"
             @close="showNewInspectionModal = false"
-            max-width="4xl"
         >
-            <div class="p-6">
-                <div class="flex items-center justify-between mb-6">
-                    <h2 class="text-xl font-bold text-gray-900 dark:text-white">
-                        {{ $t('work_orders.systematic.title') }}
-                    </h2>
-                    <button
-                        @click="showNewInspectionModal = false"
-                        class="text-gray-400 hover:text-gray-500"
+            <div class="space-y-8">
+                <div
+                    v-for="(group, categoryName) in Object.groupBy(items || [], (i) =>
+                        i.category
+                            ? i.category[`name_${$i18n.locale}`] || i.category.name_ar
+                            : 'Other'
+                    )"
+                    :key="categoryName"
+                >
+                    <h4
+                        class="text-sm font-bold text-gray-400 uppercase tracking-wider mb-4 border-b border-gray-100 dark:border-gray-700 pb-2"
                     >
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M6 18L18 6M6 6l12 12"
-                            />
-                        </svg>
-                    </button>
-                </div>
-
-                <div class="space-y-8 max-h-[70vh] overflow-y-auto px-2">
-                    <div
-                        v-for="(group, categoryName) in Object.groupBy(items || [], (i) =>
-                            i.category
-                                ? i.category[`name_${$i18n.locale}`] || i.category.name_ar
-                                : 'Other'
-                        )"
-                        :key="categoryName"
-                    >
-                        <h4
-                            class="text-sm font-bold text-gray-400 uppercase tracking-wider mb-4 border-b border-gray-100 dark:border-gray-700 pb-2"
+                        {{ categoryName }}
+                    </h4>
+                    <div class="space-y-4">
+                        <div
+                            v-for="item in group"
+                            :key="item.id"
+                            class="bg-gray-50 dark:bg-gray-900/50 p-4 rounded-xl border border-gray-100 dark:border-gray-800"
                         >
-                            {{ categoryName }}
-                        </h4>
-                        <div class="space-y-4">
                             <div
-                                v-for="item in group"
-                                :key="item.id"
-                                class="bg-gray-50 dark:bg-gray-900/50 p-4 rounded-xl border border-gray-100 dark:border-gray-800"
+                                class="flex flex-col md:flex-row md:items-center justify-between gap-4"
                             >
-                                <div
-                                    class="flex flex-col md:flex-row md:items-center justify-between gap-4"
-                                >
-                                    <div class="flex-1">
-                                        <p class="font-bold text-gray-900 dark:text-white">
-                                            {{ item[`name_${$i18n.locale}`] || item.name_ar }}
-                                        </p>
-                                    </div>
-                                    <div class="flex items-center gap-2">
-                                        <label
-                                            v-for="status in ['good', 'warning', 'danger', 'na']"
-                                            :key="status"
-                                            class="flex-1 md:flex-none"
+                                <div class="flex-1">
+                                    <p class="font-bold text-gray-900 dark:text-white">
+                                        {{ item[`name_${$i18n.locale}`] || item.name_ar }}
+                                    </p>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <label
+                                        v-for="status in ['good', 'warning', 'danger', 'na']"
+                                        :key="status"
+                                        class="flex-1 md:flex-none"
+                                    >
+                                        <input
+                                            type="radio"
+                                            :name="'status-' + item.id"
+                                            v-model="
+                                                inspectionForm.results.find(
+                                                    (r) => r.item_id === item.id
+                                                ).status
+                                            "
+                                            :value="status"
+                                            class="hidden peer"
+                                        />
+                                        <div
+                                            class="cursor-pointer px-3 py-2 rounded-lg text-xs font-bold text-center transition-all border-2 border-transparent"
+                                            :class="{
+                                                'bg-green-50 text-green-600 peer-checked:border-green-500 dark:bg-green-900/20 dark:text-green-400':
+                                                    status === 'good',
+                                                'bg-yellow-50 text-yellow-600 peer-checked:border-yellow-500 dark:bg-yellow-900/20 dark:text-yellow-400':
+                                                    status === 'warning',
+                                                'bg-red-50 text-red-600 peer-checked:border-red-500 dark:bg-red-900/20 dark:text-red-400':
+                                                    status === 'danger',
+                                                'bg-gray-100 text-gray-600 peer-checked:border-gray-400 dark:bg-gray-800 dark:text-gray-400':
+                                                    status === 'na',
+                                            }"
                                         >
-                                            <input
-                                                type="radio"
-                                                :name="'status-' + item.id"
-                                                v-model="
-                                                    inspectionForm.results.find(
-                                                        (r) => r.item_id === item.id
-                                                    ).status
-                                                "
-                                                :value="status"
-                                                class="hidden peer"
-                                            />
-                                            <div
-                                                class="cursor-pointer px-3 py-2 rounded-lg text-xs font-bold text-center transition-all border-2 border-transparent"
-                                                :class="{
-                                                    'bg-green-50 text-green-600 peer-checked:border-green-500 dark:bg-green-900/20 dark:text-green-400':
-                                                        status === 'good',
-                                                    'bg-yellow-50 text-yellow-600 peer-checked:border-yellow-500 dark:bg-yellow-900/20 dark:text-yellow-400':
-                                                        status === 'warning',
-                                                    'bg-red-50 text-red-600 peer-checked:border-red-500 dark:bg-red-900/20 dark:text-red-400':
-                                                        status === 'danger',
-                                                    'bg-gray-100 text-gray-600 peer-checked:border-gray-400 dark:bg-gray-800 dark:text-gray-400':
-                                                        status === 'na',
-                                                }"
-                                            >
-                                                {{ getStatusLabel(status) }}
-                                            </div>
-                                        </label>
-                                    </div>
+                                            {{ getStatusLabel(status) }}
+                                        </div>
+                                    </label>
                                 </div>
-                                <div class="mt-4">
-                                    <textarea
-                                        v-model="
-                                            inspectionForm.results.find(
-                                                (r) => r.item_id === item.id
-                                            ).notes
-                                        "
-                                        class="w-full text-sm bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 rounded-lg focus:ring-focus-ring"
-                                        rows="1"
-                                        :placeholder="$t('common.notes')"
-                                    ></textarea>
-                                </div>
+                            </div>
+                            <div class="mt-4">
+                                <textarea
+                                    v-model="
+                                        inspectionForm.results.find((r) => r.item_id === item.id)
+                                            .notes
+                                    "
+                                    class="w-full text-sm bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 rounded-lg focus:ring-focus-ring"
+                                    rows="1"
+                                    :placeholder="$t('common.notes')"
+                                ></textarea>
                             </div>
                         </div>
                     </div>
                 </div>
+            </div>
 
-                <div class="mt-8 flex justify-end gap-3">
+            <template #footer>
+                <div class="flex justify-end gap-3 w-full">
                     <SecondaryButton @click="showNewInspectionModal = false">
                         {{ $t('common.cancel') }}
                     </SecondaryButton>
@@ -306,109 +287,92 @@ const viewInspection = async (inspection) => {
                         {{ $t('work_orders.systematic.save_inspection') }}
                     </PrimaryButton>
                 </div>
-            </div>
-        </Modal>
+            </template>
+        </BaseModal>
 
         <!-- View Inspection Modal -->
-        <Modal :show="showViewModal" @close="showViewModal = false" max-width="4xl">
-            <div class="p-6">
-                <div class="flex items-center justify-between mb-6">
-                    <div>
-                        <h2 class="text-xl font-bold text-gray-900 dark:text-white">
-                            {{ $t('work_orders.systematic.title') }}
-                        </h2>
-                        <p class="text-sm text-gray-500 mt-1">
-                            {{ $t('work_orders.systematic.performed_by') }}:
-                            {{
-                                selectedInspection?.performed_by?.name ||
-                                selectedInspection?.performed_user?.name
-                            }}
-                            • {{ $t('work_orders.systematic.performed_at') }}:
-                            {{
-                                new Date(selectedInspection?.performed_at).toLocaleString(
-                                    $i18n.locale
-                                )
-                            }}
-                        </p>
+        <BaseModal :show="showViewModal" size="xl" @close="showViewModal = false">
+            <template #title>
+                <div>
+                    <div class="text-xl font-bold text-gray-900 dark:text-white">
+                        {{ $t('work_orders.systematic.title') }}
                     </div>
-                    <button
-                        @click="showViewModal = false"
-                        class="text-gray-400 hover:text-gray-500"
-                    >
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M6 18L18 6M6 6l12 12"
-                            />
-                        </svg>
-                    </button>
+                    <p class="text-sm font-normal text-gray-500 mt-1">
+                        {{ $t('work_orders.systematic.performed_by') }}:
+                        {{
+                            selectedInspection?.performed_by?.name ||
+                            selectedInspection?.performed_user?.name
+                        }}
+                        • {{ $t('work_orders.systematic.performed_at') }}:
+                        {{
+                            new Date(selectedInspection?.performed_at).toLocaleString($i18n.locale)
+                        }}
+                    </p>
                 </div>
+            </template>
 
-                <div class="space-y-8 max-h-[70vh] overflow-y-auto px-2">
-                    <div
-                        v-for="(group, categoryName) in Object.groupBy(
-                            selectedInspection?.results || [],
-                            (r) => {
-                                const item = selectedInspection?.items?.find(
-                                    (i) => i.id === r.item_id
-                                );
-                                return item?.category
-                                    ? item.category[`name_${$i18n.locale}`] || item.category.name_ar
-                                    : 'Other';
-                            }
-                        )"
-                        :key="categoryName"
+            <div class="space-y-8">
+                <div
+                    v-for="(group, categoryName) in Object.groupBy(
+                        selectedInspection?.results || [],
+                        (r) => {
+                            const item = selectedInspection?.items?.find((i) => i.id === r.item_id);
+                            return item?.category
+                                ? item.category[`name_${$i18n.locale}`] || item.category.name_ar
+                                : 'Other';
+                        }
+                    )"
+                    :key="categoryName"
+                >
+                    <h4
+                        class="text-sm font-bold text-gray-400 uppercase tracking-wider mb-4 border-b border-gray-100 dark:border-gray-700 pb-2"
                     >
-                        <h4
-                            class="text-sm font-bold text-gray-400 uppercase tracking-wider mb-4 border-b border-gray-100 dark:border-gray-700 pb-2"
+                        {{ categoryName }}
+                    </h4>
+                    <div class="space-y-3">
+                        <div
+                            v-for="result in group"
+                            :key="result.item_id"
+                            class="flex items-start justify-between p-4 bg-gray-50 dark:bg-gray-900/50 rounded-xl border border-gray-100 dark:border-gray-800"
                         >
-                            {{ categoryName }}
-                        </h4>
-                        <div class="space-y-3">
-                            <div
-                                v-for="result in group"
-                                :key="result.item_id"
-                                class="flex items-start justify-between p-4 bg-gray-50 dark:bg-gray-900/50 rounded-xl border border-gray-100 dark:border-gray-800"
-                            >
-                                <div class="flex-1">
-                                    <p class="font-bold text-gray-900 dark:text-white">
-                                        {{
-                                            selectedInspection.items?.find(
-                                                (i) => i.id === result.item_id
-                                            )?.[`name_${$i18n.locale}`] ||
-                                            selectedInspection.items?.find(
-                                                (i) => i.id === result.item_id
-                                            )?.name_ar
-                                        }}
-                                    </p>
-                                    <p
-                                        v-if="result.notes"
-                                        class="text-sm text-gray-600 dark:text-gray-400 mt-1 italic"
-                                    >
-                                        "{{ result.notes }}"
-                                    </p>
-                                </div>
-                                <div class="flex flex-col items-end gap-1">
-                                    <span
-                                        :class="getStatusColor(result.status)"
-                                        class="text-xs font-bold uppercase tracking-wider"
-                                    >
-                                        {{ getStatusLabel(result.status) }}
-                                    </span>
-                                </div>
+                            <div class="flex-1">
+                                <p class="font-bold text-gray-900 dark:text-white">
+                                    {{
+                                        selectedInspection.items?.find(
+                                            (i) => i.id === result.item_id
+                                        )?.[`name_${$i18n.locale}`] ||
+                                        selectedInspection.items?.find(
+                                            (i) => i.id === result.item_id
+                                        )?.name_ar
+                                    }}
+                                </p>
+                                <p
+                                    v-if="result.notes"
+                                    class="text-sm text-gray-600 dark:text-gray-400 mt-1 italic"
+                                >
+                                    "{{ result.notes }}"
+                                </p>
+                            </div>
+                            <div class="flex flex-col items-end gap-1">
+                                <span
+                                    :class="getStatusColor(result.status)"
+                                    class="text-xs font-bold uppercase tracking-wider"
+                                >
+                                    {{ getStatusLabel(result.status) }}
+                                </span>
                             </div>
                         </div>
                     </div>
                 </div>
+            </div>
 
-                <div class="mt-8 flex justify-end">
+            <template #footer>
+                <div class="flex justify-end w-full">
                     <SecondaryButton @click="showViewModal = false">
                         {{ $t('common.close') }}
                     </SecondaryButton>
                 </div>
-            </div>
-        </Modal>
+            </template>
+        </BaseModal>
     </div>
 </template>
