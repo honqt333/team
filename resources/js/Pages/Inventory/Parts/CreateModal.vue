@@ -20,83 +20,17 @@
                 <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
                     <!-- Image Upload Section -->
                     <div class="md:col-span-1 flex flex-col">
-                        <label
-                            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5"
-                        >
-                            {{ $t('inventory.parts.image') }}
-                        </label>
-                        <div
-                            @click="imageInput.click()"
-                            class="flex-1 flex flex-col items-center justify-center p-4 border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-2xl bg-gray-50/50 dark:bg-gray-900/30 transition-all hover:bg-gray-100 dark:hover:bg-gray-800/50 group relative overflow-hidden min-h-[146px] h-full cursor-pointer"
-                        >
-                            <input
-                                type="file"
-                                ref="imageInput"
-                                class="hidden"
-                                accept="image/*"
-                                @change="handleImageChange"
-                            />
-
-                            <div
-                                v-if="imagePreview"
-                                class="relative group/preview w-full h-full flex items-center justify-center"
-                            >
-                                <img
-                                    :src="imagePreview"
-                                    class="max-h-28 object-contain rounded-xl shadow-md border-2 border-white dark:border-gray-800 transition-transform group-hover/preview:scale-105"
-                                />
-                                <button
-                                    type="button"
-                                    @click.stop="removeImage"
-                                    class="absolute -top-2 -right-2 p-1 bg-red-500 text-white rounded-full shadow-lg opacity-0 group-hover/preview:opacity-100 transition-opacity"
-                                >
-                                    <svg
-                                        class="w-3.5 h-3.5"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        viewBox="0 0 24 24"
-                                    >
-                                        <path
-                                            stroke-linecap="round"
-                                            stroke-linejoin="round"
-                                            stroke-width="2.5"
-                                            d="M6 18L18 6M6 6l12 12"
-                                        />
-                                    </svg>
-                                </button>
-                            </div>
-
-                            <div v-else class="flex flex-col items-center text-center">
-                                <div
-                                    class="w-10 h-10 rounded-xl bg-selection-bg text-action-primary flex items-center justify-center mb-1.5 group-hover:scale-110 transition-transform"
-                                >
-                                    <svg
-                                        class="w-5 h-5"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        viewBox="0 0 24 24"
-                                    >
-                                        <path
-                                            stroke-linecap="round"
-                                            stroke-linejoin="round"
-                                            stroke-width="1.5"
-                                            d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
-                                        />
-                                    </svg>
-                                </div>
-                                <span
-                                    class="text-xs font-bold text-gray-600 dark:text-gray-400 leading-tight"
-                                >
-                                    {{ $t('inventory.parts.add_image') }}
-                                </span>
-                                <span class="text-[9px] text-gray-400 mt-0.5">
-                                    {{ $t('common.max_size', { size: '2MB' }) }}
-                                </span>
-                            </div>
-                        </div>
-                        <p v-if="form.errors.image" class="mt-1 text-xs text-red-500">
-                            {{ form.errors.image }}
-                        </p>
+                        <AppFileUpload
+                            v-model="form.image"
+                            variant="image"
+                            compact-preview
+                            :label="$t('inventory.parts.image')"
+                            :existing-url="imagePreview || ''"
+                            accept="image/*"
+                            :max-size-mb="2"
+                            :error="form.errors.image"
+                            @remove-existing="removeImage"
+                        />
                     </div>
 
                     <!-- Names Stacked -->
@@ -700,10 +634,10 @@
         </template>
 
         <template #footer>
-            <div class="flex justify-between w-full">
+            <div class="flex items-center justify-between w-full">
                 <button
                     @click="close"
-                    class="px-6 py-2.5 text-gray-700 dark:text-gray-300 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 rounded-xl font-medium transition-colors"
+                    class="px-5 py-2.5 text-xs font-bold text-text-secondary hover:bg-surface-secondary border border-border rounded-xl transition-colors cursor-pointer"
                 >
                     {{ $t('common.cancel') }}
                 </button>
@@ -711,7 +645,7 @@
                     <button
                         @click="submit"
                         :disabled="form.processing"
-                        class="px-8 py-2.5 bg-teal-600 hover:bg-teal-700 text-white rounded-xl font-medium shadow-lg shadow-teal-500/30 transition-all disabled:opacity-50 disabled:shadow-none"
+                        class="inline-flex items-center justify-center gap-2 px-6 py-2.5 text-xs font-bold text-white bg-action-primary hover:bg-action-primary-hover rounded-xl shadow-xs transition-all disabled:opacity-50 cursor-pointer"
                     >
                         {{ form.processing ? $t('common.saving') : $t('common.save') }}
                     </button>
@@ -727,7 +661,9 @@
         </template>
         <template #content>
             <div class="flex flex-col items-center gap-6 py-8">
-                <div class="bg-white rounded-xl border-2 border-gray-200 p-8 w-full">
+                <div
+                    class="bg-white rounded-xl border-2 border-gray-200 dark:border-gray-700 p-8 w-full"
+                >
                     <div class="flex flex-col items-center gap-3">
                         <canvas ref="barcodeFullRef" class="max-w-full"></canvas>
                         <span class="font-mono text-2xl font-bold text-gray-900 tracking-widest">
@@ -774,6 +710,7 @@
 
 <script setup>
 import DataTable from '@/Components/Common/DataTable.vue';
+import AppFileUpload from '@/Components/Common/AppFileUpload.vue';
 import { useForm, usePage } from '@inertiajs/vue3';
 import DialogModal from '@/Components/DialogModal.vue';
 import { ref, watch, computed } from 'vue';

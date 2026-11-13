@@ -1,6 +1,7 @@
 <script setup>
 import AppToggle from '@/Components/Common/AppToggle.vue';
 import AppPagination from '@/Components/Common/AppPagination.vue';
+import AppFileUpload from '@/Components/Common/AppFileUpload.vue';
 import { ref, reactive, computed, onMounted, onUnmounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { router } from '@inertiajs/vue3';
@@ -1365,18 +1366,18 @@ const saveChecklist = async () => {
                     <button
                         type="button"
                         @click="closeNotesModal"
-                        class="px-4 py-2 text-xs font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                        class="px-5 py-2.5 text-xs font-bold text-text-secondary hover:bg-surface-secondary border border-border rounded-xl transition-colors cursor-pointer"
                     >
-                        إلغاء
+                        {{ $t('common.cancel') }}
                     </button>
                     <button
                         type="button"
                         @click="saveNotes"
                         :disabled="isSavingNotes"
-                        class="px-5 py-2 bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold rounded-lg shadow-sm disabled:opacity-50 transition-colors flex items-center gap-1.5"
+                        class="inline-flex items-center justify-center gap-2 px-6 py-2.5 text-xs font-bold text-white bg-action-primary hover:bg-action-primary-hover rounded-xl shadow-xs transition-all disabled:opacity-50 cursor-pointer"
                     >
-                        <span v-if="isSavingNotes">جارٍ الحفظ...</span>
-                        <span v-else>حفظ الملاحظة وعكسها على الكرت</span>
+                        <span v-if="isSavingNotes">{{ $t('common.saving') }}</span>
+                        <span v-else>{{ $t('common.save') }}</span>
                     </button>
                 </div>
             </template>
@@ -1416,25 +1417,24 @@ const saveChecklist = async () => {
                         </div>
                     </div>
 
-                    <div class="flex flex-col sm:flex-row items-center gap-3">
-                        <input
-                            ref="fileInputRef"
-                            type="file"
+                    <div class="space-y-3">
+                        <AppFileUpload
+                            v-model="selectedFiles"
                             multiple
                             accept="image/*"
-                            capture="environment"
-                            @change="onFileSelect"
-                            class="block w-full text-xs text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-purple-50 file:text-purple-700 hover:file:bg-purple-100 dark:file:bg-purple-900/30 dark:file:text-purple-300"
+                            :max-size-mb="10"
                         />
-                        <button
-                            type="button"
-                            @click="uploadPhotos"
-                            :disabled="!selectedFiles.length || isUploadingPhotos"
-                            class="w-full sm:w-auto px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold rounded-lg disabled:opacity-50 shrink-0 transition-colors"
-                        >
-                            <span v-if="isUploadingPhotos">جارٍ الرفع...</span>
-                            <span v-else>رفع ({{ selectedFiles.length }})</span>
-                        </button>
+                        <div class="flex justify-end">
+                            <button
+                                type="button"
+                                @click="uploadPhotos"
+                                :disabled="!selectedFiles.length || isUploadingPhotos"
+                                class="w-full sm:w-auto px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold rounded-lg disabled:opacity-50 shrink-0 transition-colors"
+                            >
+                                <span v-if="isUploadingPhotos">جارٍ الرفع...</span>
+                                <span v-else>رفع ({{ selectedFiles.length }})</span>
+                            </button>
+                        </div>
                     </div>
                 </div>
 
@@ -1503,9 +1503,9 @@ const saveChecklist = async () => {
                     <button
                         type="button"
                         @click="closePhotosModal"
-                        class="px-4 py-2 text-xs font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                        class="px-5 py-2.5 text-xs font-bold text-text-secondary hover:bg-surface-secondary border border-border rounded-xl transition-colors cursor-pointer"
                     >
-                        إغلاق
+                        {{ $t('common.close') }}
                     </button>
                 </div>
             </template>
@@ -1615,22 +1615,22 @@ const saveChecklist = async () => {
             </div>
 
             <template #footer>
-                <div class="flex items-center justify-end gap-2">
+                <div class="flex items-center justify-end gap-3">
                     <button
                         type="button"
                         @click="closeChecklistModal"
-                        class="px-4 py-2 text-xs font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                        class="px-5 py-2.5 text-xs font-bold text-text-secondary hover:bg-surface-secondary border border-border rounded-xl transition-colors cursor-pointer"
                     >
-                        إلغاء
+                        {{ $t('common.cancel') }}
                     </button>
                     <button
                         type="button"
                         @click="saveChecklist"
                         :disabled="isSavingChecklist"
-                        class="px-5 py-2 bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold rounded-lg shadow-sm disabled:opacity-50 transition-colors"
+                        class="inline-flex items-center justify-center gap-2 px-6 py-2.5 text-xs font-bold text-white bg-action-primary hover:bg-action-primary-hover rounded-xl shadow-xs transition-all disabled:opacity-50 cursor-pointer"
                     >
-                        <span v-if="isSavingChecklist">جارٍ الحفظ...</span>
-                        <span v-else>حفظ القائمة</span>
+                        <span v-if="isSavingChecklist">{{ $t('common.saving') }}</span>
+                        <span v-else>{{ $t('common.save') }}</span>
                     </button>
                 </div>
             </template>

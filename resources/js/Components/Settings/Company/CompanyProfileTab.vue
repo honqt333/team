@@ -5,91 +5,20 @@
             class="flex flex-col md:flex-row items-start gap-6 p-5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50"
         >
             <!-- Logo Section -->
-            <div class="flex items-start gap-4 flex-shrink-0">
-                <div class="relative">
-                    <div
-                        v-if="logoPreview || profile?.logo_url"
-                        class="w-24 h-24 rounded-xl overflow-hidden bg-white dark:bg-gray-700 border-2 border-gray-200 dark:border-gray-600 shadow-sm"
-                    >
-                        <img
-                            :src="logoPreview || profile.logo_url"
-                            class="w-full h-full object-contain"
-                            :alt="$t('company_profile.logo.alt')"
-                        />
-                    </div>
-                    <div
-                        v-else
-                        class="w-24 h-24 rounded-xl bg-gray-200 dark:bg-gray-700 border-2 border-dashed border-gray-300 dark:border-gray-600 flex items-center justify-center"
-                    >
-                        <svg
-                            class="w-10 h-10 text-gray-400"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                        >
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="1.5"
-                                d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
-                            />
-                        </svg>
-                    </div>
-                    <div
-                        v-if="uploadingLogo"
-                        class="absolute inset-0 bg-black/50 rounded-xl flex items-center justify-center"
-                    >
-                        <svg
-                            class="w-8 h-8 text-white animate-spin"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                        >
-                            <circle
-                                class="opacity-25"
-                                cx="12"
-                                cy="12"
-                                r="10"
-                                stroke="currentColor"
-                                stroke-width="4"
-                            ></circle>
-                            <path
-                                class="opacity-75"
-                                fill="currentColor"
-                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                            ></path>
-                        </svg>
-                    </div>
-                </div>
-                <div>
-                    <h4 class="font-medium text-gray-900 dark:text-white mb-1">
-                        {{ $t('company_profile.logo.title') }}
-                    </h4>
-                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-3">
-                        {{ $t('company_profile.logo.hint') }}
-                    </p>
-                    <div class="flex items-center gap-2">
-                        <label
-                            class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium rounded-lg cursor-pointer transition-colors"
-                        >
-                            <input
-                                type="file"
-                                class="hidden"
-                                accept="image/png,image/jpeg,image/webp"
-                                @change="$emit('upload-logo', $event)"
-                                :disabled="uploadingLogo"
-                            />
-                            {{ $t('company_profile.logo.upload') }}
-                        </label>
-                        <button
-                            v-if="profile?.logo_url || logoPreview"
-                            @click="$emit('delete-logo')"
-                            :disabled="uploadingLogo"
-                            class="px-4 py-2 bg-red-100 hover:bg-red-200 dark:bg-red-900/30 dark:hover:bg-red-900/50 text-red-700 dark:text-red-400 text-sm font-medium rounded-lg transition-colors disabled:opacity-50"
-                        >
-                            {{ $t('company_profile.logo.remove') }}
-                        </button>
-                    </div>
-                </div>
+            <div class="flex-shrink-0 w-full md:w-80">
+                <AppFileUpload
+                    variant="image"
+                    :label="$t('company_profile.logo.title')"
+                    :hint="$t('company_profile.logo.hint')"
+                    :existing-url="logoPreview || profile?.logo_url || ''"
+                    :loading="uploadingLogo"
+                    :upload-button-text="$t('company_profile.logo.upload')"
+                    :reset-button-text="$t('company_profile.logo.remove')"
+                    accept="image/png,image/jpeg,image/webp"
+                    :max-size-mb="2"
+                    @select="(file) => $emit('upload-logo', { target: { files: [file] } })"
+                    @remove-existing="$emit('delete-logo')"
+                />
             </div>
 
             <!-- Company Summary -->
@@ -311,7 +240,7 @@
                     :options="countryOptions"
                     option-label="label"
                     option-value="value"
-                    placeholder="اختر الدولة..."
+                    :placeholder="$t('company_profile.profile.country')"
                 />
             </div>
             <div>
@@ -323,7 +252,7 @@
                     :options="currencyOptions"
                     option-label="label"
                     option-value="value"
-                    placeholder="اختر العملة..."
+                    :placeholder="$t('company_profile.profile.currency')"
                 />
             </div>
         </div>
@@ -391,10 +320,10 @@
 </template>
 
 <script setup>
-import { computed, watch } from 'vue';
+import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
-import { getCountryMeta } from '@/Utils/currency';
+import AppFileUpload from '@/Components/Common/AppFileUpload.vue';
 
 const { t } = useI18n();
 
@@ -433,18 +362,6 @@ const props = defineProps({
     uploadingLogo: Boolean,
     saving: Boolean,
 });
-
-watch(
-    () => props.form?.profile?.country,
-    (newCountry, oldCountry) => {
-        if (!newCountry || !oldCountry || newCountry === oldCountry) return;
-        const oldDefault = getCountryMeta(oldCountry).default_currency;
-        const newDefault = getCountryMeta(newCountry).default_currency;
-        if (!props.form.profile.currency || props.form.profile.currency === oldDefault) {
-            props.form.profile.currency = newDefault;
-        }
-    }
-);
 
 defineEmits(['upload-logo', 'delete-logo', 'save-section']);
 </script>
