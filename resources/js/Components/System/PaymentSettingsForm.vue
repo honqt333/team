@@ -52,33 +52,21 @@
                 </label>
             </div>
             <div v-if="form.moyasar.enabled" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                        {{ t('system.payment_settings.gateway.publishable_key') }}
-                    </label>
-                    <input
-                        type="text"
-                        v-model="form.moyasar.publishable_key"
-                        placeholder="pk_..."
-                        class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-sm"
-                        dir="ltr"
-                    />
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                        {{ t('system.payment_settings.gateway.secret_key') }}
-                    </label>
-                    <input
-                        type="password"
-                        v-model="form.moyasar.secret_key"
-                        :placeholder="settings.moyasar?.secret_key_masked || 'sk_...'"
-                        class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-sm"
-                        dir="ltr"
-                    />
-                    <p class="text-xs text-gray-500 mt-1">
-                        {{ t('system.payment_settings.placeholders.secret_keep') }}
-                    </p>
-                </div>
+                <AppInput
+                    type="text"
+                    v-model="form.moyasar.publishable_key"
+                    :label="t('system.payment_settings.gateway.publishable_key')"
+                    placeholder="pk_..."
+                    dir="ltr"
+                />
+                <AppInput
+                    type="password"
+                    v-model="form.moyasar.secret_key"
+                    :label="t('system.payment_settings.gateway.secret_key')"
+                    :placeholder="settings.moyasar?.secret_key_masked || 'sk_...'"
+                    :hint="t('system.payment_settings.placeholders.secret_keep')"
+                    dir="ltr"
+                />
             </div>
         </div>
 
@@ -98,33 +86,21 @@
                 </label>
             </div>
             <div v-if="form.tap.enabled" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                        {{ t('system.payment_settings.gateway.public_key') }}
-                    </label>
-                    <input
-                        type="text"
-                        v-model="form.tap.public_key"
-                        placeholder="pk_..."
-                        class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-sm"
-                        dir="ltr"
-                    />
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                        {{ t('system.payment_settings.gateway.secret_key') }}
-                    </label>
-                    <input
-                        type="password"
-                        v-model="form.tap.secret_key"
-                        :placeholder="settings.tap?.secret_key_masked || 'sk_...'"
-                        class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-sm"
-                        dir="ltr"
-                    />
-                    <p class="text-xs text-gray-500 mt-1">
-                        {{ t('system.payment_settings.placeholders.secret_keep') }}
-                    </p>
-                </div>
+                <AppInput
+                    type="text"
+                    v-model="form.tap.public_key"
+                    :label="t('system.payment_settings.gateway.public_key')"
+                    placeholder="pk_..."
+                    dir="ltr"
+                />
+                <AppInput
+                    type="password"
+                    v-model="form.tap.secret_key"
+                    :label="t('system.payment_settings.gateway.secret_key')"
+                    :placeholder="settings.tap?.secret_key_masked || 'sk_...'"
+                    :hint="t('system.payment_settings.placeholders.secret_keep')"
+                    dir="ltr"
+                />
             </div>
         </div>
 
@@ -149,45 +125,28 @@
                 </label>
             </div>
             <div v-if="form.paytabs.enabled" class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                        {{ t('system.payment_settings.gateway.profile_id') }}
-                    </label>
-                    <input
-                        type="text"
-                        v-model="form.paytabs.profile_id"
-                        placeholder="12345"
-                        class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-sm"
-                        dir="ltr"
-                    />
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                        {{ t('system.payment_settings.gateway.server_key') }}
-                    </label>
-                    <input
-                        type="password"
-                        v-model="form.paytabs.server_key"
-                        :placeholder="settings.paytabs?.server_key_masked || 'srv_...'"
-                        class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-sm"
-                        dir="ltr"
-                    />
-                    <p class="text-xs text-gray-500 mt-1">
-                        {{ t('system.payment_settings.placeholders.secret_keep') }}
-                    </p>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                        {{ t('system.payment_settings.gateway.client_key') }}
-                    </label>
-                    <input
-                        type="text"
-                        v-model="form.paytabs.client_key"
-                        placeholder="client_..."
-                        class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-sm"
-                        dir="ltr"
-                    />
-                </div>
+                <AppInput
+                    type="text"
+                    v-model="form.paytabs.profile_id"
+                    :label="t('system.payment_settings.gateway.profile_id')"
+                    placeholder="12345"
+                    dir="ltr"
+                />
+                <AppInput
+                    type="password"
+                    v-model="form.paytabs.server_key"
+                    :label="t('system.payment_settings.gateway.server_key')"
+                    :placeholder="settings.paytabs?.server_key_masked || 'srv_...'"
+                    :hint="t('system.payment_settings.placeholders.secret_keep')"
+                    dir="ltr"
+                />
+                <AppInput
+                    type="text"
+                    v-model="form.paytabs.client_key"
+                    :label="t('system.payment_settings.gateway.client_key')"
+                    placeholder="client_..."
+                    dir="ltr"
+                />
             </div>
         </div>
 
@@ -229,37 +188,37 @@
                         class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4 mb-3"
                     >
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                            <input
+                            <AppInput
                                 type="text"
                                 v-model="account.bank_name"
                                 :placeholder="t('system.payment_settings.bank_transfer.bank_name')"
-                                class="rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-sm"
                             />
-                            <input
+                            <AppInput
                                 type="text"
                                 v-model="account.account_name"
                                 :placeholder="
                                     t('system.payment_settings.bank_transfer.account_name')
                                 "
-                                class="rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-sm"
                             />
-                            <input
+                            <AppInput
                                 type="text"
                                 v-model="account.iban"
                                 :placeholder="t('system.payment_settings.bank_transfer.iban')"
-                                class="rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-sm"
                                 dir="ltr"
                             />
-                            <div class="flex gap-2">
-                                <input
-                                    type="text"
-                                    v-model="account.account_number"
-                                    :placeholder="
-                                        t('system.payment_settings.bank_transfer.account_number')
-                                    "
-                                    class="flex-1 rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-sm"
-                                    dir="ltr"
-                                />
+                            <div class="flex gap-2 items-center">
+                                <div class="flex-1">
+                                    <AppInput
+                                        type="text"
+                                        v-model="account.account_number"
+                                        :placeholder="
+                                            t(
+                                                'system.payment_settings.bank_transfer.account_number'
+                                            )
+                                        "
+                                        dir="ltr"
+                                    />
+                                </div>
                                 <button
                                     type="button"
                                     @click="removeBankAccount(index)"
@@ -286,19 +245,14 @@
                 </div>
 
                 <!-- Instructions -->
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                        {{ t('system.payment_settings.bank_transfer.instructions_title') }}
-                    </label>
-                    <textarea
-                        v-model="form.bank_transfer_instructions"
-                        rows="3"
-                        :placeholder="
-                            t('system.payment_settings.bank_transfer.instructions_placeholder')
-                        "
-                        class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-sm"
-                    ></textarea>
-                </div>
+                <AppTextarea
+                    v-model="form.bank_transfer_instructions"
+                    :rows="3"
+                    :label="t('system.payment_settings.bank_transfer.instructions_title')"
+                    :placeholder="
+                        t('system.payment_settings.bank_transfer.instructions_placeholder')
+                    "
+                />
             </div>
         </div>
 
@@ -340,45 +294,28 @@
                 </label>
             </div>
             <div v-if="form.tabby.enabled" class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                        {{ t('system.payment_settings.gateway.public_key') }}
-                    </label>
-                    <input
-                        type="text"
-                        v-model="form.tabby.public_key"
-                        placeholder="pk_..."
-                        class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-sm"
-                        dir="ltr"
-                    />
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                        {{ t('system.payment_settings.gateway.secret_key') }}
-                    </label>
-                    <input
-                        type="password"
-                        v-model="form.tabby.secret_key"
-                        :placeholder="settings.tabby?.secret_key_masked || 'sk_...'"
-                        class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-sm"
-                        dir="ltr"
-                    />
-                    <p class="text-xs text-gray-500 mt-1">
-                        {{ t('system.payment_settings.placeholders.secret_keep') }}
-                    </p>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                        {{ t('system.payment_settings.gateway.merchant_code') }}
-                    </label>
-                    <input
-                        type="text"
-                        v-model="form.tabby.merchant_code"
-                        placeholder="merchant_xxx"
-                        class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-sm"
-                        dir="ltr"
-                    />
-                </div>
+                <AppInput
+                    type="text"
+                    v-model="form.tabby.public_key"
+                    :label="t('system.payment_settings.gateway.public_key')"
+                    placeholder="pk_..."
+                    dir="ltr"
+                />
+                <AppInput
+                    type="password"
+                    v-model="form.tabby.secret_key"
+                    :label="t('system.payment_settings.gateway.secret_key')"
+                    :placeholder="settings.tabby?.secret_key_masked || 'sk_...'"
+                    :hint="t('system.payment_settings.placeholders.secret_keep')"
+                    dir="ltr"
+                />
+                <AppInput
+                    type="text"
+                    v-model="form.tabby.merchant_code"
+                    :label="t('system.payment_settings.gateway.merchant_code')"
+                    placeholder="merchant_xxx"
+                    dir="ltr"
+                />
             </div>
         </div>
 
@@ -410,33 +347,21 @@
                 </label>
             </div>
             <div v-if="form.tamara.enabled" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                        {{ t('system.payment_settings.gateway.api_token') }}
-                    </label>
-                    <input
-                        type="password"
-                        v-model="form.tamara.api_token"
-                        :placeholder="settings.tamara?.api_token_masked || 'token_...'"
-                        class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-sm"
-                        dir="ltr"
-                    />
-                    <p class="text-xs text-gray-500 mt-1">
-                        {{ t('system.payment_settings.placeholders.secret_keep') }}
-                    </p>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                        {{ t('system.payment_settings.gateway.notification_token') }}
-                    </label>
-                    <input
-                        type="password"
-                        v-model="form.tamara.notification_token"
-                        :placeholder="settings.tamara?.notification_token_masked || 'notif_...'"
-                        class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-sm"
-                        dir="ltr"
-                    />
-                </div>
+                <AppInput
+                    type="password"
+                    v-model="form.tamara.api_token"
+                    :label="t('system.payment_settings.gateway.api_token')"
+                    :placeholder="settings.tamara?.api_token_masked || 'token_...'"
+                    :hint="t('system.payment_settings.placeholders.secret_keep')"
+                    dir="ltr"
+                />
+                <AppInput
+                    type="password"
+                    v-model="form.tamara.notification_token"
+                    :label="t('system.payment_settings.gateway.notification_token')"
+                    :placeholder="settings.tamara?.notification_token_masked || 'notif_...'"
+                    dir="ltr"
+                />
             </div>
         </div>
 
@@ -461,52 +386,31 @@
                     </span>
                 </label>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pl-7">
-                    <div>
-                        <label
-                            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-                        >
-                            {{ t('system.payment_settings.bank_transfer.max_days') }}
-                        </label>
-                        <input
-                            type="number"
-                            v-model.number="form.bank_transfer_max_days"
-                            min="1"
-                            max="90"
-                            dir="ltr"
-                            class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-sm"
-                        />
-                    </div>
-                    <div>
-                        <label
-                            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-                        >
-                            {{ t('system.payment_settings.bank_transfer.min_amount') }}
-                        </label>
-                        <input
-                            type="number"
-                            v-model.number="form.bank_transfer_min_amount"
-                            min="0"
-                            step="0.01"
-                            dir="ltr"
-                            class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-sm"
-                        />
-                    </div>
+                    <AppInput
+                        type="number"
+                        v-model.number="form.bank_transfer_max_days"
+                        :label="t('system.payment_settings.bank_transfer.max_days')"
+                        min="1"
+                        max="90"
+                        dir="ltr"
+                    />
+                    <AppInput
+                        type="number"
+                        v-model.number="form.bank_transfer_min_amount"
+                        :label="t('system.payment_settings.bank_transfer.min_amount')"
+                        min="0"
+                        step="0.01"
+                        dir="ltr"
+                    />
                 </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                        {{ t('system.payment_settings.bank_transfer.receipt_instructions_title') }}
-                    </label>
-                    <textarea
-                        v-model="form.bank_transfer_receipt_instructions"
-                        rows="3"
-                        :placeholder="
-                            t(
-                                'system.payment_settings.bank_transfer.receipt_instructions_placeholder'
-                            )
-                        "
-                        class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-sm"
-                    ></textarea>
-                </div>
+                <AppTextarea
+                    v-model="form.bank_transfer_receipt_instructions"
+                    :rows="3"
+                    :label="t('system.payment_settings.bank_transfer.receipt_instructions_title')"
+                    :placeholder="
+                        t('system.payment_settings.bank_transfer.receipt_instructions_placeholder')
+                    "
+                />
             </div>
         </div>
 
@@ -575,6 +479,8 @@
 
 <script setup>
 import AppToggle from '@/Components/Common/AppToggle.vue';
+import AppInput from '@/Components/App/AppInput.vue';
+import AppTextarea from '@/Components/App/AppTextarea.vue';
 import { computed } from 'vue';
 import { useForm } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';

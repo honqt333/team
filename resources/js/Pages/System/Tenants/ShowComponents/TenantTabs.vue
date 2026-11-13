@@ -368,6 +368,9 @@ import { computed, ref, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { Link, router } from '@inertiajs/vue3';
 import { useConfirm } from '@/Composables/useConfirm';
+import { useFormatters } from '@/Composables/useFormatters';
+
+const { formatDate, formatDateTime } = useFormatters();
 
 const props = defineProps({
     tenant: { type: Object, required: true },
@@ -505,28 +508,6 @@ function getWorkOrderStatusLabel(status) {
     if (!status) return t('common.na');
     const key = `system.work_orders.status.${status}`;
     return t(key) !== key ? t(key) : status;
-}
-
-function formatDate(dateStr) {
-    if (!dateStr) return t('common.na');
-    const loc = locale.value === 'ar' ? 'ar-SA-u-nu-latn' : 'en-US';
-    return new Date(dateStr).toLocaleDateString(loc, {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric',
-    });
-}
-
-function formatDateTime(dateStr) {
-    if (!dateStr) return t('common.na');
-    const loc = locale.value === 'ar' ? 'ar-SA-u-nu-latn' : 'en-US';
-    return new Date(dateStr).toLocaleString(loc, {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-    });
 }
 
 // Color-coded status badge. Keeps the visual language consistent with

@@ -131,10 +131,37 @@ export function useFormatters() {
         return `${hours}:${minutes}:${seconds}`;
     }
 
+    /**
+     * Format a number with Latin digits and grouping.
+     *
+     * @param {number|string|null|undefined} value
+     * @param {number} maximumFractionDigits
+     * @returns {string}
+     */
+    function formatNumber(value, maximumFractionDigits = 2) {
+        return new Intl.NumberFormat('en-US', { maximumFractionDigits }).format(Number(value || 0));
+    }
+
+    /**
+     * Format a monetary amount in the given currency (defaults to SAR) with Latin digits.
+     *
+     * @param {number|string|null|undefined} amount
+     * @param {string} currency
+     * @returns {string}
+     */
+    function formatCurrency(amount, currency = 'SAR') {
+        return new Intl.NumberFormat('ar-SA-u-nu-latn', {
+            style: 'currency',
+            currency,
+        }).format(Number(amount || 0));
+    }
+
     return {
         formatDate,
         formatDateTime,
         formatFileSize,
+        formatNumber,
+        formatCurrency,
         getUserRoleName,
         getNoteDate,
         getNoteTime,

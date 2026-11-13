@@ -8,7 +8,8 @@
         :total-count-label="$t('hr.employees.employee')"
         :custom-company="tenant"
         :on-print="print"
-        :on-close="close"
+        default-orientation="landscape"
+        back-route="app.hr.payroll.index"
     >
         <!-- Table -->
         <table class="w-full text-sm border-collapse">
@@ -130,10 +131,6 @@ function print() {
     printDocument();
 }
 
-function close() {
-    window.close();
-}
-
 function formatPeriod(dateStr) {
     if (!dateStr) return '';
     return new Date(dateStr).toLocaleDateString('ar-SA-u-nu-latn', {
@@ -149,12 +146,3 @@ function formatAmount(amount) {
     }).format(amount || 0);
 }
 </script>
-
-<style>
-@media print {
-    @page {
-        size: A4 landscape;
-        margin: 15mm 10mm 12mm 10mm;
-    }
-}
-</style>

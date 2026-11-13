@@ -90,13 +90,15 @@
                         </p>
                     </div>
                     <div class="flex items-center gap-2 shrink-0">
-                        <input
-                            v-model.number="form.subscription_grace_period_days"
-                            type="number"
-                            min="0"
-                            max="365"
-                            class="w-24 px-3 py-2 text-center rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white text-sm font-mono focus:ring-2 focus:ring-action-primary focus:border-transparent"
-                        />
+                        <div class="w-24">
+                            <AppInput
+                                v-model.number="form.subscription_grace_period_days"
+                                type="number"
+                                min="0"
+                                max="365"
+                                class="text-center font-mono"
+                            />
+                        </div>
                         <span class="text-xs text-gray-500 dark:text-gray-400">
                             {{ $t('common.days') }}
                         </span>
@@ -127,6 +129,7 @@ import { useI18n } from 'vue-i18n';
 import { useToast } from '@/Composables/useToast';
 import AppToggle from '@/Components/Common/AppToggle.vue';
 import AppFileUpload from '@/Components/Common/AppFileUpload.vue';
+import AppInput from '@/Components/App/AppInput.vue';
 
 const { t } = useI18n();
 const { success, error } = useToast();

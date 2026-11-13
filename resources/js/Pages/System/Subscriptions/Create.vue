@@ -143,21 +143,14 @@
                 </div>
 
                 <!-- Promo Code -->
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        {{ $t('system.subscriptions.promo_code_label') }}
-                    </label>
-                    <input
-                        v-model="form.promo_code"
-                        type="text"
-                        :placeholder="$t('system.subscriptions.promo_code_placeholder')"
-                        class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
-                        dir="ltr"
-                    />
-                    <p v-if="form.errors.promo_code" class="text-red-500 text-xs mt-1">
-                        {{ form.errors.promo_code }}
-                    </p>
-                </div>
+                <AppInput
+                    v-model="form.promo_code"
+                    type="text"
+                    :label="$t('system.subscriptions.promo_code_label')"
+                    :placeholder="$t('system.subscriptions.promo_code_placeholder')"
+                    :error="form.errors.promo_code"
+                    dir="ltr"
+                />
 
                 <!-- Installments removed — use Tabby/Tamara BNPL for yearly payment splitting -->
 
@@ -197,6 +190,7 @@ import { computed } from 'vue';
 import { Link, useForm } from '@inertiajs/vue3';
 import SystemLayout from '@/Layouts/SystemLayout.vue';
 import PageHeader from '@/Components/PageHeader.vue';
+import AppInput from '@/Components/App/AppInput.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 
 const props = defineProps({

@@ -41,33 +41,19 @@
                 class="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700"
             >
                 <form @submit.prevent="submit" class="space-y-6">
-                    <div>
-                        <label
-                            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-                        >
-                            {{ $t('system.announcements.title_required') }}
-                        </label>
-                        <input
-                            type="text"
-                            v-model="form.title"
-                            required
-                            class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                        />
-                    </div>
+                    <AppInput
+                        v-model="form.title"
+                        type="text"
+                        :label="$t('system.announcements.title_required')"
+                        required
+                    />
 
-                    <div>
-                        <label
-                            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-                        >
-                            {{ $t('system.announcements.content_required') }}
-                        </label>
-                        <textarea
-                            v-model="form.content"
-                            rows="4"
-                            required
-                            class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                        ></textarea>
-                    </div>
+                    <AppTextarea
+                        v-model="form.content"
+                        :rows="4"
+                        :label="$t('system.announcements.content_required')"
+                        required
+                    />
 
                     <div class="grid grid-cols-2 gap-4">
                         <div>
@@ -179,6 +165,8 @@ import { computed } from 'vue';
 import { Head, Link, useForm } from '@inertiajs/vue3';
 import SystemLayout from '@/Layouts/SystemLayout.vue';
 import PageHeader from '@/Components/PageHeader.vue';
+import AppInput from '@/Components/App/AppInput.vue';
+import AppTextarea from '@/Components/App/AppTextarea.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 
 const props = defineProps({

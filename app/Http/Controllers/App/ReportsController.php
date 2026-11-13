@@ -179,6 +179,12 @@ class ReportsController extends Controller
                     'payments' => $items->values(),
                 ];
             })->values();
+        } elseif ($request->boolean('print')) {
+            $payments = (clone $query)
+                ->with($relations)
+                ->orderBy('payment_date', 'desc')
+                ->limit(5000)
+                ->get();
         } else {
             // Paginated flat records
             $payments = (clone $query)
@@ -223,28 +229,46 @@ class ReportsController extends Controller
             ->select('id', 'name')
             ->get();
 
+        $filters = [
+            'range' => $range,
+            'start_date' => $from?->format('Y-m-d') ?? $startDate,
+            'end_date' => $to?->format('Y-m-d') ?? $endDate,
+            'method' => $method,
+            'type' => $type,
+            'customer_id' => $customerId,
+            'customer_type' => $customerType,
+            'supplier_id' => $supplierId,
+            'make_id' => $makeId,
+            'center_id' => $centerFilter,
+            'group_by' => $groupBy,
+            'search' => $search,
+        ];
+        $kpis = [
+            'total_collected' => $totalCollected,
+            'total_refunded' => $totalRefunded,
+            'total_bad_debt' => $totalBadDebt,
+            'net_collected' => $netCollected,
+            'total_count' => $totalCount,
+        ];
+
+        if ($request->boolean('print')) {
+            $printRows = $groupBy !== 'none'
+                ? $groupedPayments->flatMap(fn ($g) => $g['payments'])->take(5000)->values()
+                : $payments;
+
+            return $this->renderReportPrint(
+                'payments',
+                'app.reports.payments',
+                $filters,
+                $kpis,
+                $printRows,
+                $this->resolveReportCompanyInfo($tenant, $centerFilter, $centerId)
+            );
+        }
+
         return Inertia::render('Reports/Payments', [
-            'filters' => [
-                'range' => $range,
-                'start_date' => $from?->format('Y-m-d') ?? $startDate,
-                'end_date' => $to?->format('Y-m-d') ?? $endDate,
-                'method' => $method,
-                'type' => $type,
-                'customer_id' => $customerId,
-                'customer_type' => $customerType,
-                'supplier_id' => $supplierId,
-                'make_id' => $makeId,
-                'center_id' => $centerFilter,
-                'group_by' => $groupBy,
-                'search' => $search,
-            ],
-            'kpis' => [
-                'total_collected' => $totalCollected,
-                'total_refunded' => $totalRefunded,
-                'total_bad_debt' => $totalBadDebt,
-                'net_collected' => $netCollected,
-                'total_count' => $totalCount,
-            ],
+            'filters' => $filters,
+            'kpis' => $kpis,
             'methodsBreakdown' => $methodsBreakdown,
             'customers' => $customers,
             'suppliers' => $suppliers,
@@ -678,6 +702,15 @@ class ReportsController extends Controller
                     'items' => $items->values()->all(),
                 ];
             })->values();
+        } elseif ($request->boolean('print')) {
+            $invoices = (clone $query)
+                ->with($relations)
+                ->withSum('lines as total_discount', 'discount_amount')
+                ->orderBy('issue_date', 'desc')
+                ->limit(5000)
+                ->get()
+                ->map($mapInvoice)
+                ->values();
         } else {
             $paginated = (clone $query)
                 ->with($relations)
@@ -699,36 +732,55 @@ class ReportsController extends Controller
         $centers = $this->resolveAccessibleCenters($tenantId);
         $tenant = auth()->user()->tenant;
 
+        $filters = [
+            'range' => $range,
+            'start_date' => $startDate,
+            'end_date' => $endDate,
+            'date_type' => $dateType,
+            'type' => $type,
+            'subtype' => $subtype,
+            'payment_status' => $paymentStatus,
+            'customer_id' => $customerId,
+            'customer_type' => $customerType,
+            'center_id' => $centerFilter,
+            'is_overdue' => $isOverdue,
+            'group_by' => $groupBy,
+            'search' => $search,
+        ];
+        $kpis = [
+            'total_records' => $totalRecords,
+            'total_subtotal' => $totalSubtotal,
+            'total_discount' => $totalDiscount,
+            'total_vat' => $totalVat,
+            'total_invoice_amount' => $totalInvoiceAmount,
+            'total_paid' => $totalPaid,
+            'total_payment_remaining' => $totalPaymentRemaining,
+        ];
+        $companyInfo = $this->resolveReportCompanyInfo($tenant, $centerFilter, $centerId);
+
+        if ($request->boolean('print')) {
+            $printRows = $groupBy !== 'none'
+                ? $groupedInvoices->flatMap(fn ($g) => $g['items'])->take(5000)->values()
+                : $invoices;
+
+            return $this->renderReportPrint(
+                'invoices',
+                'app.reports.invoices',
+                $filters,
+                $kpis,
+                $printRows,
+                $companyInfo
+            );
+        }
+
         return Inertia::render('Reports/Invoices', [
-            'filters' => [
-                'range' => $range,
-                'start_date' => $startDate,
-                'end_date' => $endDate,
-                'date_type' => $dateType,
-                'type' => $type,
-                'subtype' => $subtype,
-                'payment_status' => $paymentStatus,
-                'customer_id' => $customerId,
-                'customer_type' => $customerType,
-                'center_id' => $centerFilter,
-                'is_overdue' => $isOverdue,
-                'group_by' => $groupBy,
-                'search' => $search,
-            ],
-            'kpis' => [
-                'total_records' => $totalRecords,
-                'total_subtotal' => $totalSubtotal,
-                'total_discount' => $totalDiscount,
-                'total_vat' => $totalVat,
-                'total_invoice_amount' => $totalInvoiceAmount,
-                'total_paid' => $totalPaid,
-                'total_payment_remaining' => $totalPaymentRemaining,
-            ],
+            'filters' => $filters,
+            'kpis' => $kpis,
             'invoices' => $invoices,
             'groupedInvoices' => $groupedInvoices,
             'customers' => $customers,
             'centers' => $centers,
-            'companyInfo' => $this->resolveReportCompanyInfo($tenant, $centerFilter, $centerId),
+            'companyInfo' => $companyInfo,
         ]);
     }
 
@@ -1134,6 +1186,14 @@ class ReportsController extends Controller
                     'items' => $items->values()->all(),
                 ];
             })->values();
+        } elseif ($request->boolean('print')) {
+            $invoices = (clone $query)
+                ->with($relations)
+                ->orderBy('issue_date', 'desc')
+                ->limit(5000)
+                ->get()
+                ->map($mapPurchaseInvoice)
+                ->values();
         } else {
             $paginated = (clone $query)
                 ->with($relations)
@@ -1154,35 +1214,54 @@ class ReportsController extends Controller
         $centers = $this->resolveAccessibleCenters($tenantId);
         $tenant = auth()->user()->tenant;
 
+        $filters = [
+            'range' => $range,
+            'start_date' => $startDate,
+            'end_date' => $endDate,
+            'date_type' => $dateType,
+            'status' => $status,
+            'payment_status' => $paymentStatus,
+            'supplier_id' => $supplierId,
+            'supplier_type' => $supplierType,
+            'center_id' => $centerFilter,
+            'is_overdue' => $isOverdue,
+            'group_by' => $groupBy,
+            'search' => $search,
+        ];
+        $kpis = [
+            'total_records' => $totalRecords,
+            'total_subtotal' => $totalSubtotal,
+            'total_discount' => $totalDiscount,
+            'total_vat' => $totalVat,
+            'total_invoice_amount' => $totalInvoiceAmount,
+            'total_paid' => $totalPaid,
+            'total_payment_remaining' => $totalPaymentRemaining,
+        ];
+        $companyInfo = $this->resolveReportCompanyInfo($tenant, $centerFilter, $centerId);
+
+        if ($request->boolean('print')) {
+            $printRows = $groupBy !== 'none'
+                ? $groupedInvoices->flatMap(fn ($g) => $g['items'])->take(5000)->values()
+                : $invoices;
+
+            return $this->renderReportPrint(
+                'purchase_invoices',
+                'app.reports.purchase-invoices',
+                $filters,
+                $kpis,
+                $printRows,
+                $companyInfo
+            );
+        }
+
         return Inertia::render('Reports/PurchaseInvoices', [
-            'filters' => [
-                'range' => $range,
-                'start_date' => $startDate,
-                'end_date' => $endDate,
-                'date_type' => $dateType,
-                'status' => $status,
-                'payment_status' => $paymentStatus,
-                'supplier_id' => $supplierId,
-                'supplier_type' => $supplierType,
-                'center_id' => $centerFilter,
-                'is_overdue' => $isOverdue,
-                'group_by' => $groupBy,
-                'search' => $search,
-            ],
-            'kpis' => [
-                'total_records' => $totalRecords,
-                'total_subtotal' => $totalSubtotal,
-                'total_discount' => $totalDiscount,
-                'total_vat' => $totalVat,
-                'total_invoice_amount' => $totalInvoiceAmount,
-                'total_paid' => $totalPaid,
-                'total_payment_remaining' => $totalPaymentRemaining,
-            ],
+            'filters' => $filters,
+            'kpis' => $kpis,
             'invoices' => $invoices,
             'groupedInvoices' => $groupedInvoices,
             'suppliers' => $suppliers,
             'centers' => $centers,
-            'companyInfo' => $this->resolveReportCompanyInfo($tenant, $centerFilter, $centerId),
+            'companyInfo' => $companyInfo,
         ]);
     }
 
@@ -1598,41 +1677,56 @@ class ReportsController extends Controller
         $centers = $this->resolveAccessibleCenters($tenantId);
         $tenant = auth()->user()->tenant;
 
+        $filters = [
+            'range' => $range,
+            'start_date' => $range === 'custom' ? $startDate : '',
+            'end_date' => $range === 'custom' ? $endDate : '',
+            'from_date' => $from?->toDateString(),
+            'to_date' => $to?->toDateString(),
+            'payment_status' => $paymentStatus,
+            'document_type' => $documentType,
+            'supplier_id' => $supplierId,
+            'supplier_type' => $supplierType,
+            'center_id' => $centerFilter,
+            'group_by' => $groupBy,
+            'search' => $search,
+        ];
+        $kpis = [
+            'total_records' => $totalRecords,
+            'total_invoices_count' => $totalInvoicesCount,
+            'total_returns_count' => $totalReturnsCount,
+            'total_debit_notes_count' => $totalDebitNotesCount,
+            'total_subtotal' => round($totalSubtotal, 2),
+            'total_discount' => round($totalDiscount, 2),
+            'total_vat' => round($totalVat, 2),
+            'total_invoice_amount' => round($totalInvoiceAmount, 2),
+            'total_paid' => round($totalPaid, 2),
+            'total_payment_remaining' => round($totalPaymentRemaining, 2),
+            'gross_purchases' => round($grossInvoiceAmount, 2),
+            'total_returns_amount' => round($returnsTotal, 2),
+            'total_debit_notes_amount' => round($totalDebitNotesAmount, 2),
+        ];
+        $companyInfo = $this->resolveReportCompanyInfo($tenant, $centerFilter, $centerId);
+
+        if ($request->boolean('print')) {
+            return $this->renderReportPrint(
+                'suppliers',
+                'app.reports.suppliers',
+                $filters,
+                $kpis,
+                $allRecords->take(5000)->values(),
+                $companyInfo
+            );
+        }
+
         return Inertia::render('Reports/Suppliers', [
-            'filters' => [
-                'range' => $range,
-                'start_date' => $range === 'custom' ? $startDate : '',
-                'end_date' => $range === 'custom' ? $endDate : '',
-                'from_date' => $from?->toDateString(),
-                'to_date' => $to?->toDateString(),
-                'payment_status' => $paymentStatus,
-                'document_type' => $documentType,
-                'supplier_id' => $supplierId,
-                'supplier_type' => $supplierType,
-                'center_id' => $centerFilter,
-                'group_by' => $groupBy,
-                'search' => $search,
-            ],
-            'kpis' => [
-                'total_records' => $totalRecords,
-                'total_invoices_count' => $totalInvoicesCount,
-                'total_returns_count' => $totalReturnsCount,
-                'total_debit_notes_count' => $totalDebitNotesCount,
-                'total_subtotal' => round($totalSubtotal, 2),
-                'total_discount' => round($totalDiscount, 2),
-                'total_vat' => round($totalVat, 2),
-                'total_invoice_amount' => round($totalInvoiceAmount, 2),
-                'total_paid' => round($totalPaid, 2),
-                'total_payment_remaining' => round($totalPaymentRemaining, 2),
-                'gross_purchases' => round($grossInvoiceAmount, 2),
-                'total_returns_amount' => round($returnsTotal, 2),
-                'total_debit_notes_amount' => round($totalDebitNotesAmount, 2),
-            ],
+            'filters' => $filters,
+            'kpis' => $kpis,
             'invoices' => $invoices,
             'groupedInvoices' => $groupedInvoices,
             'suppliers' => $suppliers,
             'centers' => $centers,
-            'companyInfo' => $this->resolveReportCompanyInfo($tenant, $centerFilter, $centerId),
+            'companyInfo' => $companyInfo,
         ]);
     }
 
@@ -2154,6 +2248,14 @@ class ReportsController extends Controller
                     'items' => $items->values()->all(),
                 ];
             })->values();
+        } elseif ($request->boolean('print')) {
+            $moves = (clone $query)
+                ->with($relations)
+                ->orderBy('posted_at', 'desc')
+                ->limit(5000)
+                ->get()
+                ->map($mapStockActivity)
+                ->values();
         } else {
             $paginated = (clone $query)
                 ->with($relations)
@@ -2181,28 +2283,47 @@ class ReportsController extends Controller
             ['id' => InventoryMove::TYPE_REVERSAL, 'value' => InventoryMove::TYPE_REVERSAL, 'name' => 'عكس حركة', 'label' => 'عكس حركة'],
         ];
 
+        $filters = [
+            'range' => $range,
+            'start_date' => $range === 'custom' ? $startDate : '',
+            'end_date' => $range === 'custom' ? $endDate : '',
+            'from_date' => $from?->toDateString(),
+            'to_date' => $to?->toDateString(),
+            'move_type' => $moveType,
+            'warehouse_id' => $warehouseId,
+            'category_id' => $categoryId,
+            'part_id' => $partId,
+            'center_id' => $centerFilter,
+            'group_by' => $groupBy,
+            'search' => $search,
+        ];
+        $kpis = [
+            'total_records' => $totalRecords,
+            'total_cost' => round($totalCost, 2),
+            'total_incoming_qty' => round($totalIncomingQty, 3),
+            'total_outgoing_qty' => round($totalOutgoingQty, 3),
+            'net_qty' => $netQty,
+        ];
+
+        if ($request->boolean('print')) {
+            $tenant = auth()->user()->tenant;
+            $printRows = $groupBy !== 'none'
+                ? $groupedMoves->flatMap(fn ($g) => $g['items'])->take(5000)->values()
+                : $moves;
+
+            return $this->renderReportPrint(
+                'stock_activities',
+                'app.reports.stock-activities',
+                $filters,
+                $kpis,
+                $printRows,
+                $this->resolveReportCompanyInfo($tenant, $centerFilter, $centerId)
+            );
+        }
+
         return Inertia::render('Reports/StockActivities', [
-            'filters' => [
-                'range' => $range,
-                'start_date' => $range === 'custom' ? $startDate : '',
-                'end_date' => $range === 'custom' ? $endDate : '',
-                'from_date' => $from?->toDateString(),
-                'to_date' => $to?->toDateString(),
-                'move_type' => $moveType,
-                'warehouse_id' => $warehouseId,
-                'category_id' => $categoryId,
-                'part_id' => $partId,
-                'center_id' => $centerFilter,
-                'group_by' => $groupBy,
-                'search' => $search,
-            ],
-            'kpis' => [
-                'total_records' => $totalRecords,
-                'total_cost' => round($totalCost, 2),
-                'total_incoming_qty' => round($totalIncomingQty, 3),
-                'total_outgoing_qty' => round($totalOutgoingQty, 3),
-                'net_qty' => $netQty,
-            ],
+            'filters' => $filters,
+            'kpis' => $kpis,
             'moves' => $moves,
             'groupedMoves' => $groupedMoves,
             'centers' => $centers,
@@ -2615,6 +2736,14 @@ class ReportsController extends Controller
                     'tickets' => $items->values()->all(),
                 ];
             })->values();
+        } elseif ($request->boolean('print')) {
+            $tickets = (clone $query)
+                ->with($relations)
+                ->orderBy('id', 'desc')
+                ->limit(5000)
+                ->get()
+                ->map($mapTicket)
+                ->values();
         } else {
             $paginated = (clone $query)
                 ->with($relations)
@@ -2645,36 +2774,54 @@ class ReportsController extends Controller
             ->select('id', 'name')
             ->get();
 
+        $filters = [
+            'range' => $range,
+            'start_date' => $from?->format('Y-m-d') ?? $startDate,
+            'end_date' => $to?->format('Y-m-d') ?? $endDate,
+            'date_type' => $dateType,
+            'status' => $status,
+            'payment_status' => $paymentStatus,
+            'customer_id' => $customerId,
+            'customer_type' => $customerType,
+            'make_id' => $makeId,
+            'center_id' => $centerFilter,
+            'is_overdue' => $isOverdue,
+            'group_by' => $groupBy,
+            'search' => $search,
+        ];
+        $kpis = [
+            'total_records' => $totalRecords,
+            'total_amount' => $totalAmount,
+            'total_tax' => $totalTax,
+            'total_parts_cost' => $totalPartsCost,
+            'total_purchase_subtotal' => $totalPurchaseSubtotal,
+            'total_purchase_vat' => $totalPurchaseVat,
+            'total_purchase_amount' => $totalPurchaseAmount,
+            'net_amount' => $netAmount,
+            'total_paid' => $totalPaid,
+            'total_remaining' => $totalRemaining,
+            'total_discount' => $totalDiscount,
+            'total_bad_debt' => $totalBadDebt,
+        ];
+
+        if ($request->boolean('print')) {
+            $printRows = $groupBy !== 'none'
+                ? $groupedTickets->flatMap(fn ($g) => $g['tickets'])->take(5000)->values()
+                : $tickets;
+
+            return $this->renderReportPrint(
+                'tickets',
+                'app.reports.tickets',
+                $filters,
+                $kpis,
+                $printRows,
+                $this->resolveReportCompanyInfo($tenant, $centerFilter, $centerId)
+            );
+        }
+
         return Inertia::render('Reports/Tickets', [
-            'filters' => [
-                'range' => $range,
-                'start_date' => $from?->format('Y-m-d') ?? $startDate,
-                'end_date' => $to?->format('Y-m-d') ?? $endDate,
-                'date_type' => $dateType,
-                'status' => $status,
-                'payment_status' => $paymentStatus,
-                'customer_id' => $customerId,
-                'customer_type' => $customerType,
-                'make_id' => $makeId,
-                'center_id' => $centerFilter,
-                'is_overdue' => $isOverdue,
-                'group_by' => $groupBy,
-                'search' => $search,
-            ],
-            'kpis' => [
-                'total_records' => $totalRecords,
-                'total_amount' => $totalAmount,
-                'total_tax' => $totalTax,
-                'total_parts_cost' => $totalPartsCost,
-                'total_purchase_subtotal' => $totalPurchaseSubtotal,
-                'total_purchase_vat' => $totalPurchaseVat,
-                'total_purchase_amount' => $totalPurchaseAmount,
-                'net_amount' => $netAmount,
-                'total_paid' => $totalPaid,
-                'total_remaining' => $totalRemaining,
-                'total_discount' => $totalDiscount,
-                'total_bad_debt' => $totalBadDebt,
-            ],
+            'filters' => $filters,
+            'kpis' => $kpis,
             'statusBreakdown' => $statusBreakdown,
             'customers' => $customers,
             'makes' => $makes,
@@ -3114,6 +3261,14 @@ class ReportsController extends Controller
                     'services' => $items->values()->all(),
                 ];
             })->values();
+        } elseif ($request->boolean('print')) {
+            $services = (clone $query)
+                ->with($relations)
+                ->orderBy('work_order_items.id', 'desc')
+                ->limit(5000)
+                ->get()
+                ->map($mapService)
+                ->values();
         } else {
             $paginated = (clone $query)
                 ->with($relations)
@@ -3160,35 +3315,53 @@ class ReportsController extends Controller
         $tenant = auth()->user()->tenant;
         $currentCenter = $centerId ? Center::find($centerId) : null;
 
+        $filters = [
+            'range' => $range,
+            'start_date' => $from?->format('Y-m-d') ?? $startDate,
+            'end_date' => $to?->format('Y-m-d') ?? $endDate,
+            'date_type' => $dateType,
+            'center_id' => $centerFilter,
+            'department_id' => $departmentId,
+            'service_id' => $serviceId,
+            'customer_id' => $customerId,
+            'customer_type' => $customerType,
+            'make_id' => $makeId,
+            'model_id' => $modelId,
+            'ticket_status' => $ticketStatus,
+            'service_status' => $serviceStatus,
+            'is_overdue' => $isOverdue,
+            'is_warranty' => $isWarranty,
+            'deduct_ticket_discount' => $deductTicketDiscount,
+            'group_by' => $groupBy,
+            'search' => $search,
+        ];
+        $kpis = [
+            'total_records' => $totalRecords,
+            'total_service_price' => $totalServicePrice,
+            'total_service_discount' => $totalServiceDiscount,
+            'total_service_cost' => $totalServiceCost,
+            'total_service_vat' => $totalServiceVat,
+            'total_amount' => $totalAmount,
+        ];
+
+        if ($request->boolean('print')) {
+            $printRows = $groupBy !== 'none'
+                ? $groupedServices->flatMap(fn ($g) => $g['services'])->take(5000)->values()
+                : $services;
+
+            return $this->renderReportPrint(
+                'services',
+                'app.reports.services',
+                $filters,
+                $kpis,
+                $printRows,
+                $this->resolveReportCompanyInfo($tenant, $centerFilter, $centerId)
+            );
+        }
+
         return Inertia::render('Reports/Services', [
-            'filters' => [
-                'range' => $range,
-                'start_date' => $from?->format('Y-m-d') ?? $startDate,
-                'end_date' => $to?->format('Y-m-d') ?? $endDate,
-                'date_type' => $dateType,
-                'center_id' => $centerFilter,
-                'department_id' => $departmentId,
-                'service_id' => $serviceId,
-                'customer_id' => $customerId,
-                'customer_type' => $customerType,
-                'make_id' => $makeId,
-                'model_id' => $modelId,
-                'ticket_status' => $ticketStatus,
-                'service_status' => $serviceStatus,
-                'is_overdue' => $isOverdue,
-                'is_warranty' => $isWarranty,
-                'deduct_ticket_discount' => $deductTicketDiscount,
-                'group_by' => $groupBy,
-                'search' => $search,
-            ],
-            'kpis' => [
-                'total_records' => $totalRecords,
-                'total_service_price' => $totalServicePrice,
-                'total_service_discount' => $totalServiceDiscount,
-                'total_service_cost' => $totalServiceCost,
-                'total_service_vat' => $totalServiceVat,
-                'total_amount' => $totalAmount,
-            ],
+            'filters' => $filters,
+            'kpis' => $kpis,
             'services' => $services,
             'groupedServices' => $groupedServices,
             'departments' => $departments,
@@ -3610,6 +3783,14 @@ class ReportsController extends Controller
                     'items' => $items->map(fn ($wo) => $this->transformCustomerReportRow($wo))->values(),
                 ];
             })->values();
+        } elseif ($request->boolean('print')) {
+            $records = (clone $query)
+                ->with($relations)
+                ->orderByDesc('id')
+                ->limit(5000)
+                ->get()
+                ->map(fn ($wo) => $this->transformCustomerReportRow($wo))
+                ->values();
         } else {
             $paginated = (clone $query)->with($relations)->orderByDesc('id')->paginate(25)->withQueryString();
             $paginated->getCollection()->transform(fn ($wo) => $this->transformCustomerReportRow($wo));
@@ -3627,29 +3808,47 @@ class ReportsController extends Controller
         $tenant = Tenant::find($tenantId);
         $currentCenter = $centerId ? Center::find($centerId) : null;
 
+        $filters = [
+            'range' => $range,
+            'start_date' => $from?->format('Y-m-d') ?? $startDate,
+            'end_date' => $to?->format('Y-m-d') ?? $endDate,
+            'date_type' => $dateType,
+            'center_id' => $centerFilter,
+            'customer_id' => $customerId,
+            'customer_type' => $customerType,
+            'make_id' => $makeId,
+            'model_id' => $modelId,
+            'payment_status' => $paymentStatus,
+            'group_by' => $groupBy,
+            'search' => $search,
+        ];
+        $kpis = [
+            'total_records' => $totalRecords,
+            'total_payment_due' => $totalPaymentDue,
+            'total_amount_paid' => $totalAmountPaid,
+            'total_amount_adjusted' => $totalAmountAdjusted,
+            'total_payment_remaining' => $totalPaymentRemaining,
+            'total_bad_debt' => $totalBadDebt,
+        ];
+
+        if ($request->boolean('print')) {
+            $printRows = $groupBy !== 'none'
+                ? $groupedRecords->flatMap(fn ($g) => $g['items'])->take(5000)->values()
+                : $records;
+
+            return $this->renderReportPrint(
+                'customers',
+                'app.reports.customers',
+                $filters,
+                $kpis,
+                $printRows,
+                $this->resolveReportCompanyInfo($tenant, $centerFilter, $centerId)
+            );
+        }
+
         return Inertia::render('Reports/Customers', [
-            'filters' => [
-                'range' => $range,
-                'start_date' => $from?->format('Y-m-d') ?? $startDate,
-                'end_date' => $to?->format('Y-m-d') ?? $endDate,
-                'date_type' => $dateType,
-                'center_id' => $centerFilter,
-                'customer_id' => $customerId,
-                'customer_type' => $customerType,
-                'make_id' => $makeId,
-                'model_id' => $modelId,
-                'payment_status' => $paymentStatus,
-                'group_by' => $groupBy,
-                'search' => $search,
-            ],
-            'kpis' => [
-                'total_records' => $totalRecords,
-                'total_payment_due' => $totalPaymentDue,
-                'total_amount_paid' => $totalAmountPaid,
-                'total_amount_adjusted' => $totalAmountAdjusted,
-                'total_payment_remaining' => $totalPaymentRemaining,
-                'total_bad_debt' => $totalBadDebt,
-            ],
+            'filters' => $filters,
+            'kpis' => $kpis,
             'records' => $records,
             'groupedRecords' => $groupedRecords,
             'centers' => $centers,
@@ -4089,6 +4288,14 @@ class ReportsController extends Controller
                     'items' => $items->map(fn ($wo) => $this->transformDealerReportRow($wo))->values(),
                 ];
             })->values();
+        } elseif ($request->boolean('print')) {
+            $records = (clone $query)
+                ->with($relations)
+                ->orderByDesc('id')
+                ->limit(5000)
+                ->get()
+                ->map(fn ($wo) => $this->transformDealerReportRow($wo))
+                ->values();
         } else {
             $paginated = (clone $query)->with($relations)->orderByDesc('id')->paginate(25)->withQueryString();
             $paginated->getCollection()->transform(fn ($wo) => $this->transformDealerReportRow($wo));
@@ -4105,32 +4312,50 @@ class ReportsController extends Controller
         $tenant = Tenant::find($tenantId);
         $currentCenter = $centerId ? Center::find($centerId) : null;
 
+        $filters = [
+            'range' => $range,
+            'start_date' => $from?->format('Y-m-d') ?? $startDate,
+            'end_date' => $to?->format('Y-m-d') ?? $endDate,
+            'date_type' => $dateType,
+            'center_id' => $centerFilter,
+            'dealer_id' => $dealerId,
+            'dealer_type' => $dealerType,
+            'billing_mode' => $billingMode,
+            'make_id' => $makeId,
+            'model_id' => $modelId,
+            'payment_status' => $paymentStatus,
+            'group_by' => $groupBy,
+            'search' => $search,
+        ];
+        $kpis = [
+            'total_records' => $totalRecords,
+            'total_payment_due' => $totalPaymentDue,
+            'total_amount_paid' => $totalAmountPaid,
+            'total_amount_adjusted' => $totalAmountAdjusted,
+            'total_payment_remaining' => $totalPaymentRemaining,
+            'total_bad_debt' => $totalBadDebt,
+            'dealer_billed_total' => $dealerBilledTotal,
+            'customer_billed_total' => $customerBilledTotal,
+        ];
+
+        if ($request->boolean('print')) {
+            $printRows = $groupBy !== 'none'
+                ? $groupedRecords->flatMap(fn ($g) => $g['items'])->take(5000)->values()
+                : $records;
+
+            return $this->renderReportPrint(
+                'dealers',
+                'app.reports.dealers',
+                $filters,
+                $kpis,
+                $printRows,
+                $this->resolveReportCompanyInfo($tenant, $centerFilter, $centerId)
+            );
+        }
+
         return Inertia::render('Reports/Dealers', [
-            'filters' => [
-                'range' => $range,
-                'start_date' => $from?->format('Y-m-d') ?? $startDate,
-                'end_date' => $to?->format('Y-m-d') ?? $endDate,
-                'date_type' => $dateType,
-                'center_id' => $centerFilter,
-                'dealer_id' => $dealerId,
-                'dealer_type' => $dealerType,
-                'billing_mode' => $billingMode,
-                'make_id' => $makeId,
-                'model_id' => $modelId,
-                'payment_status' => $paymentStatus,
-                'group_by' => $groupBy,
-                'search' => $search,
-            ],
-            'kpis' => [
-                'total_records' => $totalRecords,
-                'total_payment_due' => $totalPaymentDue,
-                'total_amount_paid' => $totalAmountPaid,
-                'total_amount_adjusted' => $totalAmountAdjusted,
-                'total_payment_remaining' => $totalPaymentRemaining,
-                'total_bad_debt' => $totalBadDebt,
-                'dealer_billed_total' => $dealerBilledTotal,
-                'customer_billed_total' => $customerBilledTotal,
-            ],
+            'filters' => $filters,
+            'kpis' => $kpis,
             'records' => $records,
             'groupedRecords' => $groupedRecords,
             'centers' => $centers,
@@ -4513,27 +4738,40 @@ class ReportsController extends Controller
         $makes = VehicleMake::all(['id', 'name_ar', 'name_en']);
         $models = VehicleModel::all(['id', 'make_id', 'name_ar', 'name_en']);
 
+        $filters = [
+            'range' => $range,
+            'start_date' => $from?->toDateString(),
+            'end_date' => $to?->toDateString(),
+            'date_type' => $dateType,
+            'center_id' => $centerFilter,
+            'employee_id' => $employeeFilter,
+            'job_title_id' => $jobTitleFilter,
+            'department_id' => $departmentFilter,
+            'service_id' => $serviceFilter,
+            'service_status' => $serviceStatusFilter,
+            'make_id' => $makeFilter,
+            'model_id' => $modelFilter,
+            'ticket_no' => $ticketNo,
+            'is_overdue' => $isOverdue,
+            'remove_inactive_employees' => $removeInactiveEmployees,
+            'deduct_ticket_discount' => $deductTicketDiscount,
+            'group_by' => $groupBy,
+            'search' => $search,
+        ];
+
+        if ($request->boolean('print')) {
+            return $this->renderReportPrint(
+                'employees',
+                'app.reports.employees',
+                $filters,
+                $kpis,
+                $mappedItems->take(5000)->values(),
+                $this->resolveReportCompanyInfo(auth()->user()->tenant, $centerFilter, $centerId)
+            );
+        }
+
         return Inertia::render('Reports/Employees', [
-            'filters' => [
-                'range' => $range,
-                'start_date' => $from?->toDateString(),
-                'end_date' => $to?->toDateString(),
-                'date_type' => $dateType,
-                'center_id' => $centerFilter,
-                'employee_id' => $employeeFilter,
-                'job_title_id' => $jobTitleFilter,
-                'department_id' => $departmentFilter,
-                'service_id' => $serviceFilter,
-                'service_status' => $serviceStatusFilter,
-                'make_id' => $makeFilter,
-                'model_id' => $modelFilter,
-                'ticket_no' => $ticketNo,
-                'is_overdue' => $isOverdue,
-                'remove_inactive_employees' => $removeInactiveEmployees,
-                'deduct_ticket_discount' => $deductTicketDiscount,
-                'group_by' => $groupBy,
-                'search' => $search,
-            ],
+            'filters' => $filters,
             'kpis' => $kpis,
             'employees' => $employees,
             'groupedEmployees' => $groupedEmployees,
@@ -5179,25 +5417,38 @@ class ReportsController extends Controller
         $makes = VehicleMake::orderBy('name_ar')->get(['id', 'name_ar', 'name_en']);
         $models = VehicleModel::orderBy('name_ar')->get(['id', 'make_id', 'name_ar', 'name_en']);
 
+        $filters = [
+            'range' => $range,
+            'start_date' => $startDate ?: ($from ? $from->toDateString() : null),
+            'end_date' => $endDate ?: ($to ? $to->toDateString() : null),
+            'center_id' => $centerFilter,
+            'make_id' => $makeFilter,
+            'model_id' => $modelFilter,
+            'service_status' => $serviceStatusFilter,
+            'ticket_no' => $ticketNo,
+            'plate_no' => $plateNo,
+            'is_overdue' => $isOverdue,
+            'warehouse_parts_only' => $warehousePartsOnly,
+            'group_by' => $groupBy,
+            'search' => $search,
+        ];
+
+        if ($request->boolean('print')) {
+            return $this->renderReportPrint(
+                'vehicles',
+                'app.reports.vehicles',
+                $filters,
+                $kpis,
+                $mappedItems->take(5000)->values(),
+                $this->resolveReportCompanyInfo($tenant, $centerFilter, $centerId)
+            );
+        }
+
         return Inertia::render('Reports/Vehicles', [
             'items' => $paginatedItems,
             'groups' => $groups,
             'kpis' => $kpis,
-            'filters' => [
-                'range' => $range,
-                'start_date' => $startDate ?: ($from ? $from->toDateString() : null),
-                'end_date' => $endDate ?: ($to ? $to->toDateString() : null),
-                'center_id' => $centerFilter,
-                'make_id' => $makeFilter,
-                'model_id' => $modelFilter,
-                'service_status' => $serviceStatusFilter,
-                'ticket_no' => $ticketNo,
-                'plate_no' => $plateNo,
-                'is_overdue' => $isOverdue,
-                'warehouse_parts_only' => $warehousePartsOnly,
-                'group_by' => $groupBy,
-                'search' => $search,
-            ],
+            'filters' => $filters,
             'lookups' => [
                 'centers' => $centers,
                 'makes' => $makes,
@@ -5854,5 +6105,26 @@ class ReportsController extends Controller
     public function exportCashRegister(Request $request): StreamedResponse
     {
         return app(FinancialReportsController::class)->exportCashRegister($request);
+    }
+
+    /**
+     * Render unified printable report view using StandardReportLayout.
+     */
+    private function renderReportPrint(
+        string $reportType,
+        string $backRoute,
+        array $filters,
+        array $kpis,
+        mixed $rows,
+        array $companyInfo
+    ): Response {
+        return Inertia::render('Reports/Print', [
+            'reportType' => $reportType,
+            'backRoute' => $backRoute,
+            'filters' => $filters,
+            'kpis' => $kpis,
+            'rows' => $rows,
+            'companyInfo' => $companyInfo,
+        ]);
     }
 }

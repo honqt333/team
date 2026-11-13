@@ -283,86 +283,47 @@
             <form @submit.prevent="submit" class="p-6 space-y-5">
                 <!-- Basic Info -->
                 <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label
-                            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-                        >
-                            {{ $t('system.plans.form.name_ar') }}
-                        </label>
-                        <input
-                            v-model="form.name_ar"
-                            type="text"
-                            required
-                            class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                        />
-                    </div>
-                    <div>
-                        <label
-                            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-                        >
-                            {{ $t('system.plans.form.name_en') }}
-                        </label>
-                        <input
-                            v-model="form.name_en"
-                            type="text"
-                            required
-                            dir="ltr"
-                            class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                        />
-                    </div>
-                    <div>
-                        <label
-                            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-                        >
-                            {{ $t('system.plans.form.slug') }}
-                        </label>
-                        <input
-                            v-model="form.slug"
-                            type="text"
-                            required
-                            dir="ltr"
-                            :placeholder="$t('system.plans.form.slug_placeholder')"
-                            class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                        />
-                    </div>
-                    <div>
-                        <label
-                            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-                        >
-                            {{ $t('system.plans.form.sort_order') }}
-                        </label>
-                        <input
-                            v-model.number="form.sort_order"
-                            type="number"
-                            min="0"
-                            class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                        />
-                    </div>
+                    <AppInput
+                        v-model="form.name_ar"
+                        type="text"
+                        :label="$t('system.plans.form.name_ar')"
+                        required
+                    />
+                    <AppInput
+                        v-model="form.name_en"
+                        type="text"
+                        :label="$t('system.plans.form.name_en')"
+                        required
+                        dir="ltr"
+                    />
+                    <AppInput
+                        v-model="form.slug"
+                        type="text"
+                        :label="$t('system.plans.form.slug')"
+                        :placeholder="$t('system.plans.form.slug_placeholder')"
+                        required
+                        dir="ltr"
+                    />
+                    <AppInput
+                        v-model.number="form.sort_order"
+                        type="number"
+                        min="0"
+                        :label="$t('system.plans.form.sort_order')"
+                    />
                     <div class="col-span-2">
-                        <label
-                            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-                        >
-                            {{ $t('system.plans.form.description_ar') }}
-                        </label>
-                        <textarea
+                        <AppTextarea
                             v-model="form.description_ar"
-                            rows="2"
-                            class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                        ></textarea>
+                            :rows="2"
+                            :label="$t('system.plans.form.description_ar')"
+                        />
                     </div>
                     <div class="col-span-2">
-                        <label
-                            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-                            dir="ltr"
-                        >
-                            {{ $t('system.plans.form.description_en') }}
-                        </label>
-                        <textarea
+                        <AppTextarea
                             v-model="form.description_en"
-                            rows="2"
+                            :rows="2"
+                            :label="$t('system.plans.form.description_en')"
                             dir="ltr"
-                            class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                        ></textarea>
+                        />
                     </div>
                 </div>
 
@@ -372,31 +333,21 @@
                         {{ $t('system.plans.form.pricing') }}
                     </h4>
                     <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm text-gray-600 dark:text-gray-400 mb-1">
-                                {{ $t('system.plans.form.price_yearly') }}
-                            </label>
-                            <input
-                                v-model.number="form.price_yearly"
-                                type="number"
-                                min="0"
-                                step="0.01"
-                                required
-                                class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                            />
-                        </div>
-                        <div>
-                            <label class="block text-sm text-gray-600 dark:text-gray-400 mb-1">
-                                {{ $t('system.plans.form.trial_days') }}
-                            </label>
-                            <input
-                                v-model.number="form.trial_days"
-                                type="number"
-                                min="0"
-                                required
-                                class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                            />
-                        </div>
+                        <AppInput
+                            v-model.number="form.price_yearly"
+                            type="number"
+                            min="0"
+                            step="0.01"
+                            :label="$t('system.plans.form.price_yearly')"
+                            required
+                        />
+                        <AppInput
+                            v-model.number="form.trial_days"
+                            type="number"
+                            min="0"
+                            :label="$t('system.plans.form.trial_days')"
+                            required
+                        />
                     </div>
                 </div>
 
@@ -406,39 +357,24 @@
                         {{ $t('system.plans.form.limits') }}
                     </h4>
                     <div class="grid grid-cols-3 gap-4">
-                        <div>
-                            <label class="block text-sm text-gray-600 dark:text-gray-400 mb-1">
-                                {{ $t('system.plans.form.max_users') }}
-                            </label>
-                            <input
-                                v-model.number="form.limits.max_users"
-                                type="number"
-                                min="1"
-                                class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                            />
-                        </div>
-                        <div>
-                            <label class="block text-sm text-gray-600 dark:text-gray-400 mb-1">
-                                {{ $t('system.plans.form.max_centers') }}
-                            </label>
-                            <input
-                                v-model.number="form.limits.max_centers"
-                                type="number"
-                                min="1"
-                                class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                            />
-                        </div>
-                        <div>
-                            <label class="block text-sm text-gray-600 dark:text-gray-400 mb-1">
-                                {{ $t('system.plans.form.storage_gb') }}
-                            </label>
-                            <input
-                                v-model.number="form.limits.storage_gb"
-                                type="number"
-                                min="1"
-                                class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                            />
-                        </div>
+                        <AppInput
+                            v-model.number="form.limits.max_users"
+                            type="number"
+                            min="1"
+                            :label="$t('system.plans.form.max_users')"
+                        />
+                        <AppInput
+                            v-model.number="form.limits.max_centers"
+                            type="number"
+                            min="1"
+                            :label="$t('system.plans.form.max_centers')"
+                        />
+                        <AppInput
+                            v-model.number="form.limits.storage_gb"
+                            type="number"
+                            min="1"
+                            :label="$t('system.plans.form.storage_gb')"
+                        />
                     </div>
                 </div>
 
@@ -470,16 +406,17 @@
                                 :key="'ar-' + index"
                                 class="flex gap-2"
                             >
-                                <input
-                                    v-model="form.features_ar[index]"
-                                    type="text"
-                                    class="flex-1 px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-950 dark:text-white"
-                                    :placeholder="
-                                        $t('system.plans.form.feature_placeholder_ar', {
-                                            n: index + 1,
-                                        })
-                                    "
-                                />
+                                <div class="flex-1">
+                                    <AppInput
+                                        v-model="form.features_ar[index]"
+                                        type="text"
+                                        :placeholder="
+                                            $t('system.plans.form.feature_placeholder_ar', {
+                                                n: index + 1,
+                                            })
+                                        "
+                                    />
+                                </div>
                                 <button
                                     @click="form.features_ar.splice(index, 1)"
                                     type="button"
@@ -507,16 +444,17 @@
                                 :key="'en-' + index"
                                 class="flex gap-2"
                             >
-                                <input
-                                    v-model="form.features_en[index]"
-                                    type="text"
-                                    class="flex-1 px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-950 dark:text-white"
-                                    :placeholder="
-                                        $t('system.plans.form.feature_placeholder_en', {
-                                            n: index + 1,
-                                        })
-                                    "
-                                />
+                                <div class="flex-1">
+                                    <AppInput
+                                        v-model="form.features_en[index]"
+                                        type="text"
+                                        :placeholder="
+                                            $t('system.plans.form.feature_placeholder_en', {
+                                                n: index + 1,
+                                            })
+                                        "
+                                    />
+                                </div>
                                 <button
                                     @click="form.features_en.splice(index, 1)"
                                     type="button"
@@ -561,6 +499,8 @@
 
 <script setup>
 import AppToggle from '@/Components/Common/AppToggle.vue';
+import AppInput from '@/Components/App/AppInput.vue';
+import AppTextarea from '@/Components/App/AppTextarea.vue';
 import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { router, useForm } from '@inertiajs/vue3';

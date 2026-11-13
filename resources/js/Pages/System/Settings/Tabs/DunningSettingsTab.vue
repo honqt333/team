@@ -129,14 +129,15 @@
                         {{ $t('system.settings.automatically_suspend_the_workshop_after_invo') }}
                     </p>
                     <div class="mt-3 flex items-center gap-2">
-                        <input
-                            v-model.number="form.auto_suspend_after_days"
-                            type="number"
-                            min="1"
-                            max="90"
-                            placeholder="e.g. 21"
-                            class="w-28 rounded-lg border border-gray-300 px-3 py-2 text-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                        />
+                        <div class="w-28">
+                            <AppInput
+                                v-model.number="form.auto_suspend_after_days"
+                                type="number"
+                                min="1"
+                                max="90"
+                                placeholder="e.g. 21"
+                            />
+                        </div>
                         <span class="text-sm text-gray-500 dark:text-gray-400">
                             {{ $t('system.settings.days_overdue_2') }}
                         </span>
@@ -328,6 +329,7 @@ import AppToggle from '@/Components/Common/AppToggle.vue';
 import { computed, ref } from 'vue';
 import { router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
+import AppInput from '@/Components/App/AppInput.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 import { useToast } from '@/Composables/useToast';
 

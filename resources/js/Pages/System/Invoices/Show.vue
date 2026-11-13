@@ -230,40 +230,21 @@
                         :label="$t('system.invoices.payment_method')"
                     />
                 </div>
-                <div>
-                    <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                        {{ $t('system.invoices.paid_amount') }}
-                    </label>
-                    <input
-                        type="number"
-                        step="0.01"
-                        min="0.01"
-                        v-model.number="markPaidForm.paid_amount"
-                        class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                        dir="ltr"
-                    />
-                </div>
-                <div>
-                    <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                        {{ $t('system.invoices.reference_number') }}
-                    </label>
-                    <input
-                        type="text"
-                        v-model="markPaidForm.reference"
-                        :placeholder="$t('system.invoices.transfer_or_receipt_number')"
-                        class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                    />
-                </div>
-                <div>
-                    <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                        {{ $t('common.notes') }}
-                    </label>
-                    <textarea
-                        v-model="markPaidForm.notes"
-                        rows="2"
-                        class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                    />
-                </div>
+                <AppInput
+                    v-model.number="markPaidForm.paid_amount"
+                    type="number"
+                    step="0.01"
+                    min="0.01"
+                    :label="$t('system.invoices.paid_amount')"
+                    dir="ltr"
+                />
+                <AppInput
+                    v-model="markPaidForm.reference"
+                    type="text"
+                    :label="$t('system.invoices.reference_number')"
+                    :placeholder="$t('system.invoices.transfer_or_receipt_number')"
+                />
+                <AppTextarea v-model="markPaidForm.notes" :rows="2" :label="$t('common.notes')" />
             </div>
             <template #footer>
                 <div class="flex gap-3 w-full">
@@ -298,9 +279,12 @@ import { computed, h, ref } from 'vue';
 import { Head, Link, router } from '@inertiajs/vue3';
 import SystemLayout from '@/Layouts/SystemLayout.vue';
 import PageHeader from '@/Components/PageHeader.vue';
+import AppInput from '@/Components/App/AppInput.vue';
+import AppTextarea from '@/Components/App/AppTextarea.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 import BaseModal from '@/Components/BaseModal.vue';
 import { useConfirm } from '@/Composables/useConfirm';
+import { useFormatters } from '@/Composables/useFormatters';
 import StatusBadge from '@/Components/Billing/StatusBadge.vue';
 import InvoiceTimeline from '@/Components/Billing/InvoiceTimeline.vue';
 import InvoiceItemsTable from '@/Components/Billing/InvoiceItemsTable.vue';
@@ -331,6 +315,7 @@ const effectiveStatus = computed(() => {
 });
 
 const { confirm } = useConfirm();
+const { formatDate, formatCurrency } = useFormatters();
 const sending = ref(false);
 const cancelling = ref(false);
 const regenerating = ref(false);
@@ -357,17 +342,6 @@ const formatPaymentMethod = (method) => {
     const key = `system.invoices.methods.${method}`;
     const translated = t(key);
     return translated === key ? method || t('common.na') : translated;
-};
-
-const formatCurrency = (amount) =>
-    new Intl.NumberFormat('ar-SA-u-nu-latn', {
-        style: 'currency',
-        currency: 'SAR',
-    }).format(amount || 0);
-
-const formatDate = (date) => {
-    if (!date) return t('common.na');
-    return new Date(date).toLocaleDateString('ar-SA-u-nu-latn');
 };
 
 const paymentMethodOptions = computed(() => [

@@ -7,7 +7,8 @@
         :total-count-label="$t('hr.employees.total')"
         :custom-company="tenant"
         :on-print="print"
-        :on-close="close"
+        default-orientation="landscape"
+        back-route="app.hr.employees.index"
     >
         <!-- Table -->
         <table class="w-full text-sm border-collapse">
@@ -128,10 +129,6 @@ function print() {
     printDocument();
 }
 
-function close() {
-    window.close();
-}
-
 function formatDate(dateString) {
     if (!dateString) return '—';
     try {
@@ -141,12 +138,3 @@ function formatDate(dateString) {
     }
 }
 </script>
-
-<style>
-@media print {
-    @page {
-        size: A4 landscape;
-        margin: 15mm 10mm 12mm 10mm;
-    }
-}
-</style>

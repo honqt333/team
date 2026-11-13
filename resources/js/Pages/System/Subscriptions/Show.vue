@@ -303,15 +303,12 @@
             @close="showExtendModal = false"
         >
             <div class="mb-4">
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    {{ $t('system.subscriptions.number_of_days') }}
-                </label>
-                <input
+                <AppInput
                     v-model.number="extendDays"
                     type="number"
                     min="1"
                     max="365"
-                    class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                    :label="$t('system.subscriptions.number_of_days')"
                 />
             </div>
             <template #footer>
@@ -343,9 +340,12 @@ import { Link, router } from '@inertiajs/vue3';
 import SystemLayout from '@/Layouts/SystemLayout.vue';
 import PageHeader from '@/Components/PageHeader.vue';
 import BaseModal from '@/Components/BaseModal.vue';
+import AppInput from '@/Components/App/AppInput.vue';
 import { useConfirm } from '@/Composables/useConfirm';
+import { useFormatters } from '@/Composables/useFormatters';
 
 const { confirm } = useConfirm();
+const { formatDate } = useFormatters();
 
 const props = defineProps({
     subscription: Object,
@@ -353,11 +353,6 @@ const props = defineProps({
 
 const showExtendModal = ref(false);
 const extendDays = ref(30);
-
-const formatDate = (date) => {
-    if (!date) return '-';
-    return new Date(date).toLocaleDateString('ar-SA-u-nu-latn');
-};
 
 const getStatusClass = (status) => {
     const classes = {

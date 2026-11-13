@@ -223,13 +223,15 @@
                             {{ $t('system.promo_codes.form.code') }}
                         </label>
                         <div class="flex gap-2">
-                            <input
-                                v-model="form.code"
-                                type="text"
-                                required
-                                dir="ltr"
-                                class="flex-1 px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white font-mono uppercase"
-                            />
+                            <div class="flex-1">
+                                <AppInput
+                                    v-model="form.code"
+                                    type="text"
+                                    required
+                                    dir="ltr"
+                                    class="font-mono uppercase"
+                                />
+                            </div>
                             <button
                                 v-if="!editingCode"
                                 type="button"
@@ -241,19 +243,12 @@
                             </button>
                         </div>
                     </div>
-                    <div>
-                        <label
-                            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-                        >
-                            {{ $t('system.promo_codes.form.name') }}
-                        </label>
-                        <input
-                            v-model="form.name"
-                            type="text"
-                            required
-                            class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                        />
-                    </div>
+                    <AppInput
+                        v-model="form.name"
+                        type="text"
+                        :label="$t('system.promo_codes.form.name')"
+                        required
+                    />
                 </div>
 
                 <!-- Discount -->
@@ -271,20 +266,15 @@
                                 :label="$t('system.promo_codes.form.discount_type')"
                             />
                         </div>
-                        <div>
-                            <label class="block text-sm text-gray-600 dark:text-gray-400 mb-1">
-                                {{ discountLabel }}
-                            </label>
-                            <input
-                                v-model.number="form.discount_value"
-                                type="number"
-                                min="0"
-                                :max="form.discount_type === 'percentage' ? 100 : 9999"
-                                step="0.01"
-                                required
-                                class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                            />
-                        </div>
+                        <AppInput
+                            v-model.number="form.discount_value"
+                            type="number"
+                            min="0"
+                            :max="form.discount_type === 'percentage' ? 100 : 9999"
+                            step="0.01"
+                            :label="discountLabel"
+                            required
+                        />
                     </div>
                 </div>
 
@@ -294,30 +284,20 @@
                         {{ $t('system.promo_codes.form.limits') }}
                     </h4>
                     <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm text-gray-600 dark:text-gray-400 mb-1">
-                                {{ $t('system.promo_codes.form.max_uses') }}
-                            </label>
-                            <input
-                                v-model.number="form.max_uses"
-                                type="number"
-                                min="1"
-                                :placeholder="$t('system.promo_codes.unlimited')"
-                                class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                            />
-                        </div>
-                        <div>
-                            <label class="block text-sm text-gray-600 dark:text-gray-400 mb-1">
-                                {{ $t('system.promo_codes.form.max_uses_per_tenant') }}
-                            </label>
-                            <input
-                                v-model.number="form.max_uses_per_tenant"
-                                type="number"
-                                min="1"
-                                required
-                                class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                            />
-                        </div>
+                        <AppInput
+                            v-model.number="form.max_uses"
+                            type="number"
+                            min="1"
+                            :label="$t('system.promo_codes.form.max_uses')"
+                            :placeholder="$t('system.promo_codes.unlimited')"
+                        />
+                        <AppInput
+                            v-model.number="form.max_uses_per_tenant"
+                            type="number"
+                            min="1"
+                            :label="$t('system.promo_codes.form.max_uses_per_tenant')"
+                            required
+                        />
                         <div>
                             <label class="block text-sm text-gray-600 dark:text-gray-400 mb-1">
                                 {{ $t('system.promo_codes.form.starts_at') }}
@@ -419,6 +399,7 @@ import { ref, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { router, useForm } from '@inertiajs/vue3';
 import SystemLayout from '@/Layouts/SystemLayout.vue';
+import AppInput from '@/Components/App/AppInput.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 import PageHeader from '@/Components/PageHeader.vue';
 import BaseModal from '@/Components/BaseModal.vue';

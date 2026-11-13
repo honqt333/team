@@ -84,58 +84,31 @@
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label
-                            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-                        >
-                            {{ t('system.company_settings.sections.legal.legal_name_ar') }}
-                        </label>
-                        <input
-                            type="text"
-                            v-model="form.company_legal_name"
-                            class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-sm focus:ring-focus-ring focus:border-action-primary"
-                        />
-                    </div>
-                    <div>
-                        <label
-                            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-                        >
-                            {{ t('system.company_settings.sections.legal.legal_name_en') }}
-                        </label>
-                        <input
-                            type="text"
-                            v-model="form.company_legal_name_en"
-                            dir="ltr"
-                            class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-sm focus:ring-focus-ring focus:border-action-primary"
-                        />
-                    </div>
-                    <div>
-                        <label
-                            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-                        >
-                            {{ t('system.company_settings.sections.legal.vat_number') }}
-                        </label>
-                        <input
-                            type="text"
-                            v-model="form.company_vat_number"
-                            dir="ltr"
-                            maxlength="15"
-                            class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-sm font-mono focus:ring-focus-ring focus:border-action-primary"
-                        />
-                    </div>
-                    <div>
-                        <label
-                            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-                        >
-                            {{ t('system.company_settings.sections.legal.cr_number') }}
-                        </label>
-                        <input
-                            type="text"
-                            v-model="form.company_cr_number"
-                            dir="ltr"
-                            class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-sm focus:ring-focus-ring focus:border-action-primary"
-                        />
-                    </div>
+                    <AppInput
+                        type="text"
+                        v-model="form.company_legal_name"
+                        :label="t('system.company_settings.sections.legal.legal_name_ar')"
+                    />
+                    <AppInput
+                        type="text"
+                        v-model="form.company_legal_name_en"
+                        :label="t('system.company_settings.sections.legal.legal_name_en')"
+                        dir="ltr"
+                    />
+                    <AppInput
+                        type="text"
+                        v-model="form.company_vat_number"
+                        :label="t('system.company_settings.sections.legal.vat_number')"
+                        dir="ltr"
+                        maxlength="15"
+                        class="font-mono"
+                    />
+                    <AppInput
+                        type="text"
+                        v-model="form.company_cr_number"
+                        :label="t('system.company_settings.sections.legal.cr_number')"
+                        dir="ltr"
+                    />
                 </div>
             </div>
 
@@ -153,43 +126,24 @@
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label
-                            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-                        >
-                            {{ t('system.company_settings.sections.contact.phone') }}
-                        </label>
-                        <input
-                            type="tel"
-                            v-model="form.company_phone"
-                            dir="ltr"
-                            class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-sm focus:ring-focus-ring focus:border-action-primary"
-                        />
-                    </div>
-                    <div>
-                        <label
-                            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-                        >
-                            {{ t('system.company_settings.sections.contact.support_email') }}
-                        </label>
-                        <input
-                            type="email"
-                            v-model="form.company_email"
-                            dir="ltr"
-                            class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-sm focus:ring-focus-ring focus:border-action-primary"
-                        />
-                    </div>
+                    <AppInput
+                        type="tel"
+                        v-model="form.company_phone"
+                        :label="t('system.company_settings.sections.contact.phone')"
+                        dir="ltr"
+                    />
+                    <AppInput
+                        type="email"
+                        v-model="form.company_email"
+                        :label="t('system.company_settings.sections.contact.support_email')"
+                        dir="ltr"
+                    />
                     <div class="md:col-span-2">
-                        <label
-                            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-                        >
-                            {{ t('system.company_settings.sections.contact.website') }}
-                        </label>
-                        <input
+                        <AppInput
                             type="url"
                             v-model="form.company_website"
+                            :label="t('system.company_settings.sections.contact.website')"
                             dir="ltr"
-                            class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-sm focus:ring-focus-ring focus:border-action-primary"
                         />
                     </div>
                 </div>
@@ -219,22 +173,15 @@
                     v-if="form.subscription_vat_enabled"
                     class="grid grid-cols-1 md:grid-cols-2 gap-4 pl-7"
                 >
-                    <div>
-                        <label
-                            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-                        >
-                            {{ t('system.company_settings.sections.vat.rate') }}
-                        </label>
-                        <input
-                            type="number"
-                            v-model.number="form.subscription_vat_rate"
-                            min="0"
-                            max="100"
-                            step="0.01"
-                            dir="ltr"
-                            class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-sm focus:ring-focus-ring focus:border-action-primary"
-                        />
-                    </div>
+                    <AppInput
+                        type="number"
+                        v-model.number="form.subscription_vat_rate"
+                        :label="t('system.company_settings.sections.vat.rate')"
+                        min="0"
+                        max="100"
+                        step="0.01"
+                        dir="ltr"
+                    />
                     <div>
                         <label
                             class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
@@ -466,6 +413,7 @@
 <script setup>
 import AppFileUpload from '@/Components/Common/AppFileUpload.vue';
 import AppToggle from '@/Components/Common/AppToggle.vue';
+import AppInput from '@/Components/App/AppInput.vue';
 import { useI18n } from 'vue-i18n';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 import { useCompanySettingsForm } from '@/Composables/useCompanySettingsForm';

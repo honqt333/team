@@ -73,24 +73,20 @@
                 <form @submit.prevent="saveConfig" class="space-y-4">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div v-for="field in configFields" :key="field.key">
-                            <label
-                                class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-                            >
-                                {{ field.label }}
-                                <span v-if="field.required" class="text-red-500">*</span>
-                            </label>
-                            <input
+                            <AppInput
                                 v-if="field.type !== 'select'"
                                 :type="field.type"
                                 v-model="form.config[field.key]"
+                                :label="field.label"
                                 :required="field.required"
                                 :placeholder="field.type === 'password' ? '••••••••' : ''"
-                                class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                                :error="form.errors[`config.${field.key}`]"
                                 dir="ltr"
                             />
                             <SearchableSelect
                                 v-else
                                 v-model="form.config[field.key]"
+                                :label="field.label"
                                 :options="
                                     (field.options || []).map((opt) => ({ value: opt, label: opt }))
                                 "
@@ -198,14 +194,15 @@
                 <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
                     {{ $t('integrations.test_integration') }}
                 </h2>
-                <form @submit.prevent="testIntegration" class="flex gap-3">
-                    <input
-                        type="text"
-                        v-model="testForm.test_recipient"
-                        :placeholder="testPlaceholder"
-                        class="flex-1 rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                        dir="ltr"
-                    />
+                <form @submit.prevent="testIntegration" class="flex gap-3 items-start">
+                    <div class="flex-1">
+                        <AppInput
+                            type="text"
+                            v-model="testForm.test_recipient"
+                            :placeholder="testPlaceholder"
+                            dir="ltr"
+                        />
+                    </div>
                     <button
                         type="submit"
                         :disabled="testForm.processing"
@@ -349,6 +346,7 @@ import { ref, computed } from 'vue';
 import { Head, Link, useForm, router } from '@inertiajs/vue3';
 import SystemLayout from '@/Layouts/SystemLayout.vue';
 import PageHeader from '@/Components/PageHeader.vue';
+import AppInput from '@/Components/App/AppInput.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 import { useConfirm } from '@/Composables/useConfirm';
 

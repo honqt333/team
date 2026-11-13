@@ -1,22 +1,11 @@
 <template>
     <div class="space-y-6">
         <!-- Search -->
-        <div class="relative w-full max-w-md">
-            <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400">
-                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                    />
-                </svg>
-            </span>
-            <input
+        <div class="w-full max-w-md">
+            <AppInput
                 v-model="search"
-                type="text"
+                type="search"
                 :placeholder="t('system.contact_messages.search_placeholder')"
-                class="block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg leading-5 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-focus-ring focus:border-action-primary sm:text-sm transition duration-150 ease-in-out"
             />
         </div>
 
@@ -276,6 +265,7 @@
 <script setup>
 import DataTable from '@/Components/Common/DataTable.vue';
 import AppPagination from '@/Components/Common/AppPagination.vue';
+import AppInput from '@/Components/App/AppInput.vue';
 import BaseModal from '@/Components/BaseModal.vue';
 import { router } from '@inertiajs/vue3';
 import { ref, watch } from 'vue';

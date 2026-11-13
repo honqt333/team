@@ -1,6 +1,6 @@
 <template>
     <AppLayout>
-        <PrintEngine document-type="report" class="space-y-6">
+        <div class="space-y-6">
             <!-- Screen Only Header Section (AUDIT_STANDARDS.md compliant) -->
             <PageHeader
                 :title="$t('reports.vehicles_report.title')"
@@ -1328,12 +1328,11 @@
                     :total="items.total"
                 />
             </div>
-        </PrintEngine>
+        </div>
     </AppLayout>
 </template>
 
 <script setup>
-import PrintEngine from '@/Components/Print/PrintEngine.vue';
 import DataTable from '@/Components/Common/DataTable.vue';
 import AppPagination from '@/Components/Common/AppPagination.vue';
 import AppPrintButton from '@/Components/Common/AppPrintButton.vue';
@@ -1348,7 +1347,6 @@ import SaudiPlateDisplay from '@/Components/Vehicles/SaudiPlateDisplay.vue';
 import CustomDatePicker from '@/Components/CustomDatePicker.vue';
 import StandardReportHeader from '@/Components/Print/StandardReportHeader.vue';
 import StandardReportFooter from '@/Components/Print/StandardReportFooter.vue';
-import { printDocument } from '@/Composables/usePrint';
 
 const props = defineProps({
     items: {
@@ -1375,9 +1373,10 @@ const props = defineProps({
 
 // Print Setup
 const handlePrint = () => {
-    printDocument({
-        title: 'Vehicles Report',
-    });
+    const url = new URL(window.location.href);
+    url.searchParams.set('print', '1');
+    url.searchParams.delete('page');
+    window.open(url.toString(), '_blank');
 };
 
 // State

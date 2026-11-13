@@ -6,10 +6,13 @@ import { useI18n } from 'vue-i18n';
 import { Head, Link } from '@inertiajs/vue3';
 import SystemLayout from '@/Layouts/SystemLayout.vue';
 import PageHeader from '@/Components/PageHeader.vue';
+import AppInput from '@/Components/App/AppInput.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 import { useServerTable } from '@/Composables/useServerTable';
+import { useFormatters } from '@/Composables/useFormatters';
 
 const { t } = useI18n();
+const { formatDate, formatNumber: formatCurrency } = useFormatters();
 
 const props = defineProps({
     receipts: { type: Object, required: true }, // paginated
@@ -51,19 +54,6 @@ const statusOptions = computed(() => [
         label: t('system.bank_transfer_receipts.rejected_2'),
     },
 ]);
-
-function formatDate(dateStr) {
-    if (!dateStr) return '—';
-    return new Date(dateStr).toLocaleDateString(locale.value === 'ar' ? 'ar-SA' : 'en-US', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric',
-    });
-}
-
-function formatCurrency(amount) {
-    return new Intl.NumberFormat('en-US', { maximumFractionDigits: 2 }).format(amount || 0);
-}
 
 // Heuristic: receipt_path has no extension info, but the original
 // Laravel upload keeps the original filename's extension in the
@@ -224,7 +214,7 @@ function getAmountBadge(receipt) {
                 class="flex flex-col gap-3 rounded-xl border border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-800 sm:flex-row sm:items-center"
             >
                 <div class="flex-1">
-                    <input
+                    <AppInput
                         v-model="tableFilters.search"
                         type="search"
                         :placeholder="
@@ -232,8 +222,7 @@ function getAmountBadge(receipt) {
                                 ? $t('system.bank_transfer_receipts.search_by_tenant_name')
                                 : 'Search by tenant name...'
                         "
-                        @keyup.enter="applyFilters"
-                        class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-action-primary focus:ring-1 focus:ring-focus-ring dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                        @enter="applyFilters"
                     />
                 </div>
                 <div class="w-full sm:w-52">

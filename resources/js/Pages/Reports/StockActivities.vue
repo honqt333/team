@@ -1,6 +1,6 @@
 <template>
     <AppLayout>
-        <PrintEngine document-type="report" class="space-y-6">
+        <div class="space-y-6">
             <!-- Screen Only Header Section (AUDIT_STANDARDS.md compliant) -->
             <PageHeader
                 :title="$t('reports.stock_activities_report.title')"
@@ -973,16 +973,14 @@
             <div class="print-section hidden">
                 <StandardReportFooter />
             </div>
-        </PrintEngine>
+        </div>
     </AppLayout>
 </template>
 
 <script setup>
-import PrintEngine from '@/Components/Print/PrintEngine.vue';
 import DataTable from '@/Components/Common/DataTable.vue';
 import AppPagination from '@/Components/Common/AppPagination.vue';
 import AppPrintButton from '@/Components/Common/AppPrintButton.vue';
-import { printDocument } from '@/Composables/usePrint';
 import { useNumberFormat } from '@/Composables/useNumberFormat';
 import { ref, reactive, computed, watch } from 'vue';
 import { router } from '@inertiajs/vue3';
@@ -1268,7 +1266,10 @@ const exportUrl = computed(() => {
 
 // Printing
 const handlePrint = () => {
-    printDocument();
+    const url = new URL(window.location.href);
+    url.searchParams.set('print', '1');
+    url.searchParams.delete('page');
+    window.open(url.toString(), '_blank');
 };
 
 // Badge styles based on move type

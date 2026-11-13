@@ -5,9 +5,13 @@ import { Head, router, Link } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import SystemLayout from '@/Layouts/SystemLayout.vue';
 import PageHeader from '@/Components/PageHeader.vue';
+import AppInput from '@/Components/App/AppInput.vue';
+import AppTextarea from '@/Components/App/AppTextarea.vue';
 import BaseModal from '@/Components/BaseModal.vue';
+import { useFormatters } from '@/Composables/useFormatters';
 
 const { t } = useI18n();
+const { formatDate, formatDateTime, formatNumber: formatCurrency } = useFormatters();
 
 const props = defineProps({
     receipt: { type: Object, required: true },
@@ -73,30 +77,6 @@ const statusLabels = {
     pending: { ar: t('system.bank_transfer_receipts.pending_2'), en: 'Pending' },
     approved: { ar: t('system.bank_transfer_receipts.approved_3'), en: 'Approved' },
     rejected: { ar: t('system.bank_transfer_receipts.rejected_3'), en: 'Rejected' },
-};
-
-const formatDate = (dateStr) => {
-    if (!dateStr) return '—';
-    return new Date(dateStr).toLocaleDateString(locale.value === 'ar' ? 'ar-SA' : 'en-US', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric',
-    });
-};
-
-const formatDateTime = (dateStr) => {
-    if (!dateStr) return '—';
-    return new Date(dateStr).toLocaleString(locale.value === 'ar' ? 'ar-SA' : 'en-US', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-    });
-};
-
-const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('en-US', { maximumFractionDigits: 2 }).format(amount || 0);
 };
 
 async function approve() {
@@ -706,9 +686,10 @@ const amountState = computed(() => {
                         : 'Please provide a rejection reason. The tenant will be notified.'
                 }}
             </p>
-            <textarea
+            <AppTextarea
                 v-model="rejectNotes"
-                rows="4"
+                :rows="4"
+                class="mt-4"
                 :placeholder="
                     locale === 'ar'
                         ? $t(
@@ -716,8 +697,7 @@ const amountState = computed(() => {
                           )
                         : 'e.g. Amount mismatch, receipt unclear...'
                 "
-                class="mt-4 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-danger focus:ring-1 focus:ring-danger dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-            ></textarea>
+            />
             <template #footer>
                 <div class="flex justify-end gap-2 w-full">
                     <button
@@ -864,21 +844,19 @@ const amountState = computed(() => {
                     </span>
                 </label>
                 <div v-if="partialApproval" class="mt-2 space-y-2 pl-6">
-                    <label class="block text-xs font-semibold text-slate-700 dark:text-slate-200">
-                        {{
-                            locale === 'ar'
-                                ? $t('system.bank_transfer_receipts.approved_amount')
-                                : 'Approved amount (SAR)'
-                        }}
-                    </label>
-                    <input
+                    <AppInput
                         v-model.number="approvedAmount"
                         type="number"
                         step="0.01"
                         min="0.01"
                         :max="Number(receipt.transfer_amount)"
+                        :label="
+                            locale === 'ar'
+                                ? $t('system.bank_transfer_receipts.approved_amount')
+                                : 'Approved amount (SAR)'
+                        "
                         dir="ltr"
-                        class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-mono dark:border-slate-600 dark:bg-slate-700 dark:text-white"
+                        class="font-mono"
                     />
                     <p
                         v-if="partialShortfall > 0"
@@ -895,25 +873,24 @@ const amountState = computed(() => {
                 </div>
             </div>
 
-            <label class="mt-4 block text-sm font-semibold text-gray-700 dark:text-gray-200">
-                {{
-                    locale === 'ar'
-                        ? $t('system.bank_transfer_receipts.notes_optional')
-                        : 'Notes (optional)'
-                }}
-            </label>
-            <textarea
-                v-model="approveNotes"
-                rows="3"
-                :placeholder="
-                    locale === 'ar'
-                        ? $t(
-                              'system.bank_transfer_receipts.examples._confirmed_full_amount_received_from_tenant'
-                          )
-                        : 'e.g. Confirmed full amount received from tenant...'
-                "
-                class="mt-1 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-action-primary focus:ring-1 focus:ring-focus-ring dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-            ></textarea>
+            <div class="mt-4">
+                <AppTextarea
+                    v-model="approveNotes"
+                    :rows="3"
+                    :label="
+                        locale === 'ar'
+                            ? $t('system.bank_transfer_receipts.notes_optional')
+                            : 'Notes (optional)'
+                    "
+                    :placeholder="
+                        locale === 'ar'
+                            ? $t(
+                                  'system.bank_transfer_receipts.examples._confirmed_full_amount_received_from_tenant'
+                              )
+                            : 'e.g. Confirmed full amount received from tenant...'
+                    "
+                />
+            </div>
 
             <template #footer>
                 <div class="flex justify-end gap-2 w-full">

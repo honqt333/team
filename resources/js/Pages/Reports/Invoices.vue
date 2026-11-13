@@ -1,6 +1,6 @@
 <template>
     <AppLayout>
-        <PrintEngine document-type="invoices" class="space-y-6">
+        <div class="space-y-6">
             <!-- Screen Only Header Section (AUDIT_STANDARDS.md compliant) -->
             <PageHeader
                 :title="$t('reports.invoices_report.title')"
@@ -35,7 +35,7 @@
                         <AppPrintButton
                             class="print:hidden"
                             :label="$t('reports.invoices_report.print_report')"
-                            @click="printDocument()"
+                            @click="openPrintReport"
                         />
 
                         <a
@@ -942,7 +942,7 @@
 
             <!-- Standard Print Footer -->
             <StandardReportFooter class="hidden print:block pt-4 mt-6 border-t border-gray-300" />
-        </PrintEngine>
+        </div>
     </AppLayout>
 </template>
 
@@ -950,9 +950,14 @@
 import PaymentStatusBadge from '@/Components/Common/PaymentStatusBadge.vue';
 import DataTable from '@/Components/Common/DataTable.vue';
 import AppPagination from '@/Components/Common/AppPagination.vue';
-import PrintEngine from '@/Components/Print/PrintEngine.vue';
 import AppPrintButton from '@/Components/Common/AppPrintButton.vue';
-import { printDocument } from '@/Composables/usePrint';
+
+const openPrintReport = () => {
+    const url = new URL(window.location.href);
+    url.searchParams.set('print', '1');
+    url.searchParams.delete('page');
+    window.open(url.toString(), '_blank');
+};
 import AppToggle from '@/Components/Common/AppToggle.vue';
 import { reactive, computed } from 'vue';
 import { router } from '@inertiajs/vue3';

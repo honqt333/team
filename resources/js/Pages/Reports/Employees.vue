@@ -1350,7 +1350,10 @@ const props = defineProps({
 const { print } = usePrint();
 
 const handlePrint = () => {
-    print();
+    const url = new URL(window.location.href);
+    url.searchParams.set('print', '1');
+    url.searchParams.delete('page');
+    window.open(url.toString(), '_blank');
 };
 
 const localFilters = ref({

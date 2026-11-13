@@ -37,28 +37,12 @@
                 <div class="flex flex-wrap gap-4">
                     <!-- Search -->
                     <div class="flex-1 min-w-[200px]">
-                        <div class="relative">
-                            <svg
-                                class="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                            >
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    stroke-width="2"
-                                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                                />
-                            </svg>
-                            <input
-                                v-model="tableFilters.search"
-                                type="text"
-                                :placeholder="$t('system.tenants.search_placeholder')"
-                                class="w-full px-4 py-2.5 pr-10 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-focus-ring focus:border-transparent transition-colors"
-                                @keyup.enter="applyFilters"
-                            />
-                        </div>
+                        <AppInput
+                            v-model="tableFilters.search"
+                            type="search"
+                            :placeholder="$t('system.tenants.search_placeholder')"
+                            @enter="applyFilters"
+                        />
                     </div>
 
                     <!-- Status Filter -->
@@ -316,6 +300,7 @@
 import DataTable from '@/Components/Common/DataTable.vue';
 import AppEmptyState from '@/Components/Common/AppEmptyState.vue';
 import AppPagination from '@/Components/Common/AppPagination.vue';
+import AppInput from '@/Components/App/AppInput.vue';
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { Link } from '@inertiajs/vue3';

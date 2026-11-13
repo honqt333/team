@@ -186,11 +186,6 @@ const customerSummary = computed(() => {
 </script>
 
 <style>
-@page {
-    size: A4 portrait;
-    margin: 15mm 10mm 12mm 10mm;
-}
-
 @media print {
     table {
         width: 100% !important;

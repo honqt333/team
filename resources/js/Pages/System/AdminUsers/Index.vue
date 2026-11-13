@@ -66,26 +66,12 @@
 
             <!-- Filters -->
             <div class="flex gap-4">
-                <div class="relative w-64">
-                    <svg
-                        class="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                    >
-                        <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            stroke-width="2"
-                            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                        />
-                    </svg>
-                    <input
+                <div class="w-64">
+                    <AppInput
                         v-model="tableFilters.search"
-                        type="text"
+                        type="search"
                         :placeholder="$t('system.admin_users.search_placeholder')"
-                        @keyup.enter="applyFilters"
-                        class="w-full px-4 py-2 pr-10 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring"
+                        @enter="applyFilters"
                     />
                 </div>
                 <SearchableSelect
@@ -267,70 +253,39 @@
             <form @submit.prevent="submitForm" class="space-y-6">
                 <!-- Basic Info -->
                 <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label
-                            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-                        >
-                            {{ $t('system.admin_users.form.name') }} *
-                        </label>
-                        <input
-                            v-model="form.name"
-                            type="text"
-                            required
-                            class="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                        />
-                        <p v-if="form.errors.name" class="mt-1 text-xs text-red-500">
-                            {{ form.errors.name }}
-                        </p>
-                    </div>
-                    <div>
-                        <label
-                            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-                        >
-                            {{ $t('system.admin_users.form.email') }} *
-                        </label>
-                        <input
-                            v-model="form.email"
-                            type="email"
-                            required
-                            dir="ltr"
-                            class="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                        />
-                        <p v-if="form.errors.email" class="mt-1 text-xs text-red-500">
-                            {{ form.errors.email }}
-                        </p>
-                    </div>
+                    <AppInput
+                        v-model="form.name"
+                        type="text"
+                        :label="`${$t('system.admin_users.form.name')} *`"
+                        :error="form.errors.name"
+                        required
+                    />
+                    <AppInput
+                        v-model="form.email"
+                        type="email"
+                        :label="`${$t('system.admin_users.form.email')} *`"
+                        :error="form.errors.email"
+                        required
+                        dir="ltr"
+                    />
                 </div>
 
                 <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label
-                            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-                        >
-                            {{ $t('system.admin_users.form.phone') }}
-                        </label>
-                        <input
-                            v-model="form.phone"
-                            type="text"
-                            dir="ltr"
-                            class="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                        />
-                    </div>
-                    <div>
-                        <label
-                            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-                        >
-                            {{ $t('system.admin_users.form.password') }}
-                            {{ editingAdmin ? $t('system.admin_users.form.password_keep') : ' *' }}
-                        </label>
-                        <input
-                            v-model="form.password"
-                            type="password"
-                            :required="!editingAdmin"
-                            dir="ltr"
-                            class="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                        />
-                    </div>
+                    <AppInput
+                        v-model="form.phone"
+                        type="text"
+                        :label="$t('system.admin_users.form.phone')"
+                        :error="form.errors.phone"
+                        dir="ltr"
+                    />
+                    <AppInput
+                        v-model="form.password"
+                        type="password"
+                        :label="`${$t('system.admin_users.form.password')} ${editingAdmin ? $t('system.admin_users.form.password_keep') : '*'}`"
+                        :error="form.errors.password"
+                        :required="!editingAdmin"
+                        dir="ltr"
+                    />
                 </div>
 
                 <!-- Role -->
@@ -443,6 +398,7 @@ import { ref, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { Head, Link, router, useForm, usePage } from '@inertiajs/vue3';
 import SystemLayout from '@/Layouts/SystemLayout.vue';
+import AppInput from '@/Components/App/AppInput.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 import PageHeader from '@/Components/PageHeader.vue';
 import BaseModal from '@/Components/BaseModal.vue';

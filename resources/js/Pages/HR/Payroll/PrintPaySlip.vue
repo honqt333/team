@@ -179,12 +179,3 @@ const totalDeductions = computed(() => {
 
 const { formatCurrency } = usePrint();
 </script>
-
-<style>
-@media print {
-    @page {
-        size: A4 portrait;
-        margin: 15mm 10mm 12mm 10mm;
-    }
-}
-</style>

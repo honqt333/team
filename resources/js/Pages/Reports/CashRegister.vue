@@ -693,9 +693,10 @@ const props = defineProps({
 // Print Setup
 const { printDocument, formatCurrency: printFormatCurrency } = usePrint();
 const handlePrint = () => {
-    printDocument({
-        title: t('reports.cash_register_report.title') || 'Cash Register Report',
-    });
+    const url = new URL(window.location.href);
+    url.searchParams.set('print', '1');
+    url.searchParams.delete('page');
+    window.open(url.toString(), '_blank');
 };
 
 const formatCurrency = (val) => {

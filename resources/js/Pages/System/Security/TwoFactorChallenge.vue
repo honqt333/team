@@ -4,6 +4,7 @@ import { Head, useForm } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import SystemLayout from '@/Layouts/SystemLayout.vue';
 import PageHeader from '@/Components/PageHeader.vue';
+import AppInput from '@/Components/App/AppInput.vue';
 
 const { t, locale } = useI18n();
 const isRTL = computed(() => locale.value === 'ar');
@@ -87,49 +88,31 @@ const toggleRecovery = () => {
             <form @submit.prevent="verify" class="space-y-6">
                 <!-- TOTP Code -->
                 <div v-if="!showRecovery">
-                    <label
-                        class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 text-center"
-                    >
-                        {{ $t('customer_portal.verify.code_label') }}
-                    </label>
-                    <input
-                        type="text"
+                    <AppInput
                         v-model="form.code"
+                        type="text"
+                        :label="$t('customer_portal.verify.code_label')"
+                        :error="$page.props.errors?.code"
                         maxlength="6"
                         placeholder="000000"
                         autofocus
-                        class="w-full text-center text-3xl tracking-[0.5em] rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white font-mono py-3.5 focus:ring-2 focus:ring-focus-ring focus:border-action-primary"
+                        class="text-center text-3xl tracking-[0.5em] font-mono py-3.5"
                         dir="ltr"
                         inputmode="numeric"
                     />
-                    <p
-                        v-if="$page.props.errors?.code"
-                        class="text-red-500 text-sm mt-2 text-center"
-                    >
-                        {{ $page.props.errors.code }}
-                    </p>
                 </div>
 
                 <!-- Recovery Code -->
                 <div v-else>
-                    <label
-                        class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 text-center"
-                    >
-                        {{ $t('security.recovery_code') }}
-                    </label>
-                    <input
-                        type="text"
+                    <AppInput
                         v-model="form.recovery_code"
+                        type="text"
+                        :label="$t('security.recovery_code')"
+                        :error="$page.props.errors?.recovery_code"
                         placeholder="XXXX-XXXX"
-                        class="w-full text-center text-xl rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white font-mono py-3 uppercase focus:ring-2 focus:ring-focus-ring focus:border-action-primary"
+                        class="text-center text-xl font-mono py-3 uppercase"
                         dir="ltr"
                     />
-                    <p
-                        v-if="$page.props.errors?.recovery_code"
-                        class="text-red-500 text-sm mt-2 text-center"
-                    >
-                        {{ $page.props.errors.recovery_code }}
-                    </p>
                 </div>
 
                 <button

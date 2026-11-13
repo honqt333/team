@@ -2060,9 +2060,9 @@ const props = defineProps({
 // Print Setup
 const { printDocument, formatCurrency: printFormatCurrency } = usePrint();
 const handlePrint = () => {
-    printDocument({
-        title: props.reportTitle || 'Financial Summary Report',
-    });
+    const url = new URL(window.location.href);
+    url.searchParams.set('print', '1');
+    window.open(url.toString(), '_blank');
 };
 
 const formatCurrency = (val) => {

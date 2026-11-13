@@ -80,28 +80,12 @@
             >
                 <div class="flex flex-wrap gap-4">
                     <div class="flex-1 min-w-[200px]">
-                        <div class="relative">
-                            <svg
-                                class="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                            >
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    stroke-width="2"
-                                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                                />
-                            </svg>
-                            <input
-                                v-model="tableFilters.search"
-                                type="text"
-                                :placeholder="$t('system.subscriptions.search_placeholder')"
-                                class="w-full px-4 py-2 pr-10 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-focus-ring focus:border-transparent"
-                                @keyup.enter="applyFilters"
-                            />
-                        </div>
+                        <AppInput
+                            v-model="tableFilters.search"
+                            type="search"
+                            :placeholder="$t('system.subscriptions.search_placeholder')"
+                            @enter="applyFilters"
+                        />
                     </div>
                     <SearchableSelect
                         v-model="tableFilters.status"
@@ -275,11 +259,10 @@
                             {{ $t('system.subscriptions.create_modal.tenant_label') }}
                         </label>
                         <div class="relative">
-                            <input
+                            <AppInput
                                 v-model="tenantSearch"
                                 type="text"
                                 :placeholder="$t('system.subscriptions.tenant_search_placeholder')"
-                                class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                                 @focus="showTenantDropdown = true"
                             />
                             <div
@@ -417,57 +400,34 @@
                                 option-value="value"
                                 :label="$t('system.subscriptions.payment_method')"
                             />
-                            <div>
-                                <label
-                                    class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-                                >
-                                    {{ $t('system.subscriptions.paid_amount') }}
-                                </label>
-                                <input
-                                    v-model.number="form.paid_amount"
-                                    type="number"
-                                    min="0"
-                                    step="0.01"
-                                    dir="ltr"
-                                    class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
-                                />
-                            </div>
+                            <AppInput
+                                v-model.number="form.paid_amount"
+                                type="number"
+                                min="0"
+                                step="0.01"
+                                :label="$t('system.subscriptions.paid_amount')"
+                                dir="ltr"
+                            />
                             <div class="sm:col-span-2">
-                                <label
-                                    class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-                                >
-                                    {{ $t('system.subscriptions.payment_reference') }}
-                                </label>
-                                <input
+                                <AppInput
                                     v-model="form.payment_reference"
                                     type="text"
-                                    class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
+                                    :label="$t('system.subscriptions.payment_reference')"
                                 />
                             </div>
                         </div>
                     </div>
 
                     <!-- Promo Code -->
-                    <div>
-                        <label
-                            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-                        >
-                            {{ $t('system.subscriptions.promo_code_label') }}
-                        </label>
-                        <input
-                            v-model="form.promo_code"
-                            type="text"
-                            dir="ltr"
-                            :placeholder="$t('system.subscriptions.promo_code_placeholder')"
-                            class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white font-mono uppercase"
-                        />
-                        <p
-                            v-if="form.errors.promo_code"
-                            class="mt-1 text-sm text-red-600 dark:text-red-400"
-                        >
-                            {{ form.errors.promo_code }}
-                        </p>
-                    </div>
+                    <AppInput
+                        v-model="form.promo_code"
+                        type="text"
+                        :label="$t('system.subscriptions.promo_code_label')"
+                        :placeholder="$t('system.subscriptions.promo_code_placeholder')"
+                        :error="form.errors.promo_code"
+                        dir="ltr"
+                        class="font-mono uppercase"
+                    />
                 </form>
 
                 <template #footer>
@@ -503,6 +463,7 @@ import { ref, computed, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { Link, useForm } from '@inertiajs/vue3';
 import SystemLayout from '@/Layouts/SystemLayout.vue';
+import AppInput from '@/Components/App/AppInput.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 import PageHeader from '@/Components/PageHeader.vue';
 import BaseModal from '@/Components/BaseModal.vue';
@@ -510,9 +471,11 @@ import AppEmptyState from '@/Components/Common/AppEmptyState.vue';
 import AppPagination from '@/Components/Common/AppPagination.vue';
 import { useNumberFormat } from '@/Composables/useNumberFormat';
 import { useServerTable } from '@/Composables/useServerTable';
+import { useFormatters } from '@/Composables/useFormatters';
 
 const { t } = useI18n();
 const { toEnglish } = useNumberFormat();
+const { formatDate } = useFormatters();
 
 const statusFilterOptions = computed(() => [
     { value: 'all', label: t('system.subscriptions.all_statuses') },
@@ -685,11 +648,6 @@ const submit = () => {
     form.post('/system/subscriptions', {
         onSuccess: () => closeModal(),
     });
-};
-
-const formatDate = (date) => {
-    if (!date) return t('common.na');
-    return new Date(date).toLocaleDateString('ar-SA-u-nu-latn');
 };
 
 const getStatusClass = (status) => {

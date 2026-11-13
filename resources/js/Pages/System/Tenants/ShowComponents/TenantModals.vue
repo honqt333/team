@@ -59,14 +59,11 @@
         @close="$emit('close', 'suspend')"
     >
         <div class="mb-4">
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                {{ $t('system.tenants.modals.suspend_reason') }}
-            </label>
-            <textarea
+            <AppTextarea
                 v-model="local.suspendReason"
-                rows="3"
-                class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-            ></textarea>
+                :rows="3"
+                :label="$t('system.tenants.modals.suspend_reason')"
+            />
         </div>
         <template #footer>
             <div class="flex gap-3 justify-end w-full">
@@ -97,20 +94,15 @@
         @close="$emit('close', 'extend')"
     >
         <div class="mb-4">
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                {{ $t('system.tenants.modals.extend_days') }}
-            </label>
-            <input
+            <AppInput
                 v-model.number="local.extendDays"
                 type="number"
                 min="1"
                 max="90"
-                class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                :label="$t('system.tenants.modals.extend_days')"
+                :hint="$t('system.tenants.modals.extend_hint')"
                 dir="ltr"
             />
-            <p class="text-xs text-gray-500 mt-2">
-                {{ $t('system.tenants.modals.extend_hint') }}
-            </p>
         </div>
         <template #footer>
             <div class="flex gap-3 justify-end w-full">
@@ -181,17 +173,14 @@
             </p>
         </div>
         <div class="mb-4">
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                {{
+            <AppInput
+                v-model="local.deleteConfirmation"
+                type="text"
+                :label="
                     $t('system.tenants.modals.delete_confirm_label', {
                         name: tenant.name,
                     })
-                }}
-            </label>
-            <input
-                v-model="local.deleteConfirmation"
-                type="text"
-                class="w-full px-4 py-2.5 rounded-lg border border-red-300 dark:border-red-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                "
             />
         </div>
         <div class="flex gap-3 justify-end">
@@ -356,44 +345,29 @@
                         option-value="value"
                         :label="$t('system.subscriptions.payment_method')"
                     />
-                    <div>
-                        <label
-                            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-                        >
-                            {{ $t('system.subscriptions.paid_amount') }}
-                        </label>
-                        <input
-                            v-model.number="local.paidAmount"
-                            type="number"
-                            min="0"
-                            step="0.01"
-                            dir="ltr"
-                            class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
-                        />
-                    </div>
+                    <AppInput
+                        v-model.number="local.paidAmount"
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        :label="$t('system.subscriptions.paid_amount')"
+                        dir="ltr"
+                    />
                     <div class="sm:col-span-2">
-                        <label
-                            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-                        >
-                            {{ $t('system.subscriptions.payment_reference') }}
-                        </label>
-                        <input
+                        <AppInput
                             v-model="local.paymentReference"
                             type="text"
-                            class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
+                            :label="$t('system.subscriptions.payment_reference')"
                         />
                     </div>
                 </div>
 
                 <div v-if="local.settlementType !== 'complimentary'">
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                        {{ $t('system.subscriptions.payment_notes') }}
-                    </label>
-                    <textarea
+                    <AppTextarea
                         v-model="local.paymentNotes"
-                        rows="2"
-                        class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
-                    ></textarea>
+                        :rows="2"
+                        :label="$t('system.subscriptions.payment_notes')"
+                    />
                 </div>
             </div>
 
@@ -430,6 +404,8 @@
 
 <script setup>
 import AppToggle from '@/Components/Common/AppToggle.vue';
+import AppInput from '@/Components/App/AppInput.vue';
+import AppTextarea from '@/Components/App/AppTextarea.vue';
 import BaseModal from '@/Components/BaseModal.vue';
 import { reactive, watch, computed } from 'vue';
 import { useI18n } from 'vue-i18n';

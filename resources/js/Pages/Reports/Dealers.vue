@@ -787,7 +787,10 @@ const exportUrl = computed(() => {
 });
 
 const handlePrint = () => {
-    printDocument({ title: t('reports.dealers_report.title') });
+    const url = new URL(window.location.href);
+    url.searchParams.set('print', '1');
+    url.searchParams.delete('page');
+    window.open(url.toString(), '_blank');
 };
 
 const formatMoney = (val) => {

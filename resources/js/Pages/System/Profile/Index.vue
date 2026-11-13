@@ -8,7 +8,8 @@ import { useForm, usePage, router } from '@inertiajs/vue3';
 import SystemLayout from '@/Layouts/SystemLayout.vue';
 import PageHeader from '@/Components/PageHeader.vue';
 import AppTabs from '@/Components/Common/AppTabs.vue';
-import BaseModal from '@/Components/BaseModal.vue';
+import AppInput from '@/Components/App/AppInput.vue';
+import TwoFactorManageSection from '@/Components/System/TwoFactorManageSection.vue';
 import { useToast } from '@/Composables/useToast';
 
 const { success } = useToast();
@@ -56,8 +57,6 @@ const updatePassword = () => {
 };
 
 // 2FA Forms
-const showDisableModal = ref(false);
-const showRegenModal = ref(false);
 const codeSent = ref(false);
 const selectedMethod = ref('email');
 
@@ -65,8 +64,6 @@ const sendCodeForm = useForm({
     method: 'email',
 });
 const enable2FAForm = useForm({ code: '' });
-const disable2FAForm = useForm({ password: '' });
-const regenForm = useForm({ password: '' });
 
 const sendCode = () => {
     sendCodeForm.method = selectedMethod.value;
@@ -84,24 +81,6 @@ const enable2FA = () =>
         preserveScroll: true,
         onError: () => enable2FAForm.reset(),
         onSuccess: () => success(t('security.two_factor_enabled_success')),
-    });
-
-const disable2FA = () =>
-    disable2FAForm.post(route('system.2fa.disable'), {
-        preserveScroll: true,
-        onSuccess: () => {
-            showDisableModal.value = false;
-            success(t('security.two_factor_disabled_success'));
-        },
-    });
-
-const regenerateCodes = () =>
-    regenForm.post(route('system.2fa.regenerate'), {
-        preserveScroll: true,
-        onSuccess: () => {
-            showRegenModal.value = false;
-            success(t('security.recovery_codes_created'));
-        },
     });
 </script>
 
@@ -182,61 +161,32 @@ const regenerateCodes = () =>
                 </h3>
 
                 <form @submit.prevent="updateProfile" class="space-y-6 max-w-xl">
-                    <div>
-                        <label
-                            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-                        >
-                            {{ $t('common.name') }}
-                        </label>
-                        <input
-                            type="text"
-                            v-model="profileForm.name"
-                            class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-focus-ring focus:border-action-primary"
-                            required
-                        />
-                        <p v-if="profileForm.errors.name" class="mt-1 text-sm text-red-500">
-                            {{ profileForm.errors.name }}
-                        </p>
-                    </div>
+                    <AppInput
+                        type="text"
+                        v-model="profileForm.name"
+                        :label="$t('common.name')"
+                        :error="profileForm.errors.name"
+                        required
+                    />
 
-                    <div>
-                        <label
-                            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-                        >
-                            {{ $t('center_settings.contact.email') }}
-                        </label>
-                        <input
-                            type="email"
-                            v-model="profileForm.email"
-                            class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-focus-ring focus:border-action-primary"
-                            required
-                            dir="ltr"
-                        />
-                        <p v-if="profileForm.errors.email" class="mt-1 text-sm text-red-500">
-                            {{ profileForm.errors.email }}
-                        </p>
-                    </div>
+                    <AppInput
+                        type="email"
+                        v-model="profileForm.email"
+                        :label="$t('center_settings.contact.email')"
+                        :error="profileForm.errors.email"
+                        required
+                        dir="ltr"
+                    />
 
-                    <div>
-                        <label
-                            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-                        >
-                            {{ $t('center_settings.contact.phone') }}
-                        </label>
-                        <input
-                            type="tel"
-                            v-model="profileForm.phone"
-                            class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-focus-ring focus:border-action-primary"
-                            dir="ltr"
-                            placeholder="05xxxxxxxx"
-                        />
-                        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                            {{ $t('profile.sms_2fa_required') }}
-                        </p>
-                        <p v-if="profileForm.errors.phone" class="mt-1 text-sm text-red-500">
-                            {{ profileForm.errors.phone }}
-                        </p>
-                    </div>
+                    <AppInput
+                        type="tel"
+                        v-model="profileForm.phone"
+                        :label="$t('center_settings.contact.phone')"
+                        :hint="$t('profile.sms_2fa_required')"
+                        :error="profileForm.errors.phone"
+                        dir="ltr"
+                        placeholder="05xxxxxxxx"
+                    />
 
                     <div class="flex items-center gap-4">
                         <button
@@ -260,56 +210,28 @@ const regenerateCodes = () =>
                 </h3>
 
                 <form @submit.prevent="updatePassword" class="space-y-6 max-w-xl">
-                    <div>
-                        <label
-                            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-                        >
-                            {{ $t('company_profile.admin_user.current_password') }}
-                        </label>
-                        <input
-                            type="password"
-                            v-model="passwordForm.current_password"
-                            class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-focus-ring focus:border-action-primary"
-                            required
-                        />
-                        <p
-                            v-if="passwordForm.errors.current_password"
-                            class="mt-1 text-sm text-red-500"
-                        >
-                            {{ passwordForm.errors.current_password }}
-                        </p>
-                    </div>
+                    <AppInput
+                        type="password"
+                        v-model="passwordForm.current_password"
+                        :label="$t('company_profile.admin_user.current_password')"
+                        :error="passwordForm.errors.current_password"
+                        required
+                    />
 
-                    <div>
-                        <label
-                            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-                        >
-                            {{ $t('company_profile.admin_user.new_password') }}
-                        </label>
-                        <input
-                            type="password"
-                            v-model="passwordForm.password"
-                            class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-focus-ring focus:border-action-primary"
-                            required
-                        />
-                        <p v-if="passwordForm.errors.password" class="mt-1 text-sm text-red-500">
-                            {{ passwordForm.errors.password }}
-                        </p>
-                    </div>
+                    <AppInput
+                        type="password"
+                        v-model="passwordForm.password"
+                        :label="$t('company_profile.admin_user.new_password')"
+                        :error="passwordForm.errors.password"
+                        required
+                    />
 
-                    <div>
-                        <label
-                            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-                        >
-                            {{ $t('auth.confirm_password') }}
-                        </label>
-                        <input
-                            type="password"
-                            v-model="passwordForm.password_confirmation"
-                            class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-focus-ring focus:border-action-primary"
-                            required
-                        />
-                    </div>
+                    <AppInput
+                        type="password"
+                        v-model="passwordForm.password_confirmation"
+                        :label="$t('auth.confirm_password')"
+                        required
+                    />
 
                     <button
                         type="submit"
@@ -446,23 +368,18 @@ const regenerateCodes = () =>
                             </h4>
                             <form @submit.prevent="enable2FA" class="space-y-4">
                                 <div class="flex items-start gap-3">
-                                    <div class="relative">
-                                        <input
+                                    <div class="w-40">
+                                        <AppInput
                                             type="text"
                                             v-model="enable2FAForm.code"
                                             maxlength="6"
                                             placeholder="000000"
-                                            class="w-40 text-center text-2xl tracking-wider rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white font-mono focus:ring-focus-ring focus:border-action-primary"
+                                            :error="enable2FAForm.errors.code"
+                                            class="text-center text-2xl tracking-wider font-mono"
                                             dir="ltr"
                                             inputmode="numeric"
                                             autofocus
                                         />
-                                        <p
-                                            v-if="enable2FAForm.errors.code"
-                                            class="text-red-500 text-sm mt-1 absolute right-0 w-60"
-                                        >
-                                            {{ enable2FAForm.errors.code }}
-                                        </p>
                                     </div>
                                     <button
                                         type="submit"
@@ -495,175 +412,15 @@ const regenerateCodes = () =>
                 </div>
 
                 <!-- Enabled State -->
-                <div v-else class="space-y-6">
-                    <div
-                        class="bg-white dark:bg-gray-800 rounded-2xl p-6 border border-gray-200 dark:border-gray-700 shadow-sm"
-                    >
-                        <div class="flex items-center gap-4">
-                            <div
-                                class="w-12 h-12 rounded-full bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center"
-                            >
-                                <svg
-                                    class="w-6 h-6 text-emerald-600"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        stroke-width="2"
-                                        d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
-                                    />
-                                </svg>
-                            </div>
-                            <div class="flex-1">
-                                <h3 class="font-semibold text-gray-900 dark:text-white text-lg">
-                                    {{ $t('security.two_factor_enabled') }}
-                                </h3>
-                                <p class="text-sm text-gray-500">
-                                    {{ $t('security.account_protected') }}
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Recovery Codes -->
-                    <div
-                        class="bg-white dark:bg-gray-800 rounded-2xl p-6 border border-gray-200 dark:border-gray-700 shadow-sm"
-                    >
-                        <div class="flex items-center justify-between mb-4">
-                            <h3 class="font-semibold text-gray-900 dark:text-white">
-                                {{ $t('security.recovery_codes') }}
-                            </h3>
-                            <button
-                                @click="showRegenModal = true"
-                                class="text-sm text-action-primary hover:text-selection-text"
-                            >
-                                {{ $t('security.new_codes') }}
-                            </button>
-                        </div>
-                        <p class="text-sm text-gray-500 mb-4">
-                            {{ $t('security.keep_codes_safe') }}
-                        </p>
-                        <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
-                            <code
-                                v-for="code in security.recoveryCodes"
-                                :key="code"
-                                class="text-sm bg-gray-100 dark:bg-gray-700 px-3 py-2 rounded text-center font-mono text-gray-800 dark:text-gray-300"
-                            >
-                                {{ code }}
-                            </code>
-                        </div>
-                    </div>
-
-                    <!-- Disable 2FA -->
-                    <div
-                        class="bg-white dark:bg-gray-800 rounded-2xl p-6 border border-red-200 dark:border-red-900/30 shadow-sm"
-                    >
-                        <div class="flex items-center justify-between">
-                            <div>
-                                <h3 class="font-semibold text-gray-900 dark:text-white">
-                                    {{ $t('security.disable_two_factor') }}
-                                </h3>
-                                <p class="text-sm text-gray-500">
-                                    {{ $t('security.this_reduces_security') }}
-                                </p>
-                            </div>
-                            <button
-                                @click="showDisableModal = true"
-                                class="px-4 py-2 bg-red-100 text-red-700 rounded-lg text-sm font-medium hover:bg-red-200 transition-colors"
-                            >
-                                {{ $t('security.deactivate') }}
-                            </button>
-                        </div>
-                    </div>
-                </div>
+                <TwoFactorManageSection
+                    v-else
+                    :recovery-codes="security.recoveryCodes || []"
+                    :disable-url="route('system.2fa.disable')"
+                    :regenerate-url="route('system.2fa.regenerate')"
+                    :disable-success-message="$t('security.two_factor_disabled_success')"
+                    :regenerate-success-message="$t('security.recovery_codes_created')"
+                />
             </div>
-
-            <!-- Modals for 2FA -->
-            <!-- Disable Modal -->
-            <BaseModal
-                :show="showDisableModal"
-                :title="$t('security.confirm_disable_two_factor')"
-                size="sm"
-                @close="showDisableModal = false"
-            >
-                <form @submit.prevent="disable2FA">
-                    <div class="mb-4">
-                        <label
-                            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-                        >
-                            {{ $t('security.enter_password_to_confirm') }}
-                        </label>
-                        <input
-                            type="password"
-                            v-model="disable2FAForm.password"
-                            required
-                            class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                        />
-                    </div>
-                    <div class="flex gap-3">
-                        <button
-                            type="submit"
-                            :disabled="disable2FAForm.processing"
-                            class="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium disabled:opacity-50"
-                        >
-                            {{ $t('security.deactivate') }}
-                        </button>
-                        <button
-                            type="button"
-                            @click="showDisableModal = false"
-                            class="px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg"
-                        >
-                            {{ $t('system.company_subscription.history.confirm_modal.go_back') }}
-                        </button>
-                    </div>
-                </form>
-            </BaseModal>
-
-            <!-- Regenerate Modal -->
-            <BaseModal
-                :show="showRegenModal"
-                :title="$t('security.new_recovery_codes')"
-                size="sm"
-                @close="showRegenModal = false"
-            >
-                <p class="text-sm text-gray-500 mb-4">
-                    {{ $t('security.old_codes_cancelled') }}
-                </p>
-                <form @submit.prevent="regenerateCodes">
-                    <div class="mb-4">
-                        <label
-                            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-                        >
-                            {{ $t('security.enter_password') }}
-                        </label>
-                        <input
-                            type="password"
-                            v-model="regenForm.password"
-                            required
-                            class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                        />
-                    </div>
-                    <div class="flex gap-3">
-                        <button
-                            type="submit"
-                            :disabled="regenForm.processing"
-                            class="flex-1 px-4 py-2 bg-action-primary hover:bg-action-primary-hover text-white rounded-lg font-medium disabled:opacity-50"
-                        >
-                            {{ $t('security.new_codes') }}
-                        </button>
-                        <button
-                            type="button"
-                            @click="showRegenModal = false"
-                            class="px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg"
-                        >
-                            {{ $t('common.cancel') }}
-                        </button>
-                    </div>
-                </form>
-            </BaseModal>
         </div>
     </SystemLayout>
 </template>

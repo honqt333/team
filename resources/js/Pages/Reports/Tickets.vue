@@ -1,6 +1,6 @@
 <template>
     <AppLayout>
-        <PrintEngine document-type="report" class="space-y-6">
+        <div class="space-y-6">
             <!-- Screen Only Header Section -->
             <PageHeader
                 :title="$t('reports.tickets_report.title')"
@@ -1072,17 +1072,15 @@
 
             <!-- Unified Print Footer (no signatures/stamps) -->
             <StandardReportFooter class="hidden print:block pt-8 mt-8 border-t-2 border-gray-300" />
-        </PrintEngine>
+        </div>
     </AppLayout>
 </template>
 
 <script setup>
-import PrintEngine from '@/Components/Print/PrintEngine.vue';
 import DataTable from '@/Components/Common/DataTable.vue';
 import AppPagination from '@/Components/Common/AppPagination.vue';
 import AppPrintButton from '@/Components/Common/AppPrintButton.vue';
 import AppToggle from '@/Components/Common/AppToggle.vue';
-import { printDocument } from '@/Composables/usePrint';
 import { reactive, computed, watch } from 'vue';
 import { router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
@@ -1367,7 +1365,10 @@ const printDate = computed(() => {
 });
 
 const handlePrint = () => {
-    printDocument();
+    const url = new URL(window.location.href);
+    url.searchParams.set('print', '1');
+    url.searchParams.delete('page');
+    window.open(url.toString(), '_blank');
 };
 
 const formatMoney = (val) => {

@@ -144,6 +144,7 @@ export const pageManifest = {
     'Reports/Hub': () => import('./Reports/Hub.vue'),
     'Reports/Invoices': () => import('./Reports/Invoices.vue'),
     'Reports/Payments': () => import('./Reports/Payments.vue'),
+    'Reports/Print': () => import('./Reports/Print.vue'),
     'Reports/PurchaseInvoices': () => import('./Reports/PurchaseInvoices.vue'),
     'Reports/Services': () => import('./Reports/Services.vue'),
     'Reports/StockActivities': () => import('./Reports/StockActivities.vue'),
@@ -222,20 +223,12 @@ export const pageManifest = {
         import('./System/Communication/Templates/Edit.vue'),
     'System/Communication/Templates/Index': () =>
         import('./System/Communication/Templates/Index.vue'),
+    'System/Credits/CreditsHub': () => import('./System/Credits/CreditsHub.vue'),
     'System/Credits/SmsHub': () => import('./System/Credits/SmsHub.vue'),
-    'System/Credits/Tabs/SmsBalancesTab': () => import('./System/Credits/Tabs/SmsBalancesTab.vue'),
-    'System/Credits/Tabs/SmsPackagesTab': () => import('./System/Credits/Tabs/SmsPackagesTab.vue'),
-    'System/Credits/Tabs/SmsPurchasesTab': () =>
-        import('./System/Credits/Tabs/SmsPurchasesTab.vue'),
-    'System/Credits/Tabs/SmsUsageTab': () => import('./System/Credits/Tabs/SmsUsageTab.vue'),
-    'System/Credits/Tabs/WhatsappBalancesTab': () =>
-        import('./System/Credits/Tabs/WhatsappBalancesTab.vue'),
-    'System/Credits/Tabs/WhatsappPackagesTab': () =>
-        import('./System/Credits/Tabs/WhatsappPackagesTab.vue'),
-    'System/Credits/Tabs/WhatsappPurchasesTab': () =>
-        import('./System/Credits/Tabs/WhatsappPurchasesTab.vue'),
-    'System/Credits/Tabs/WhatsappUsageTab': () =>
-        import('./System/Credits/Tabs/WhatsappUsageTab.vue'),
+    'System/Credits/Tabs/BalancesTab': () => import('./System/Credits/Tabs/BalancesTab.vue'),
+    'System/Credits/Tabs/PackagesTab': () => import('./System/Credits/Tabs/PackagesTab.vue'),
+    'System/Credits/Tabs/PurchasesTab': () => import('./System/Credits/Tabs/PurchasesTab.vue'),
+    'System/Credits/Tabs/UsageTab': () => import('./System/Credits/Tabs/UsageTab.vue'),
     'System/Credits/WhatsappHub': () => import('./System/Credits/WhatsappHub.vue'),
     'System/Dashboard': () => import('./System/Dashboard.vue'),
     'System/Developer/Index': () => import('./System/Developer/Index.vue'),

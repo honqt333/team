@@ -270,19 +270,33 @@ class FinancialReportsController extends Controller
             }
         }
 
+        $filters = [
+            'range' => $range,
+            'start_date' => $startDate,
+            'end_date' => $endDate,
+            'center_id' => $centerFilter,
+            'store_sales_only' => $storeSalesOnly,
+        ];
+        $companyInfo = $this->resolveReportCompanyInfo($tenant, $centerFilter, $centerId);
+
+        if ($request->boolean('print')) {
+            return Inertia::render('Reports/Print', [
+                'reportType' => 'financial_summary',
+                'backRoute' => 'app.reports.financial-summary',
+                'filters' => $filters,
+                'kpis' => $overall,
+                'rows' => $results,
+                'companyInfo' => $companyInfo,
+            ]);
+        }
+
         return Inertia::render('Reports/FinancialSummary', [
-            'filters' => [
-                'range' => $range,
-                'start_date' => $startDate,
-                'end_date' => $endDate,
-                'center_id' => $centerFilter,
-                'store_sales_only' => $storeSalesOnly,
-            ],
+            'filters' => $filters,
             'reportTitle' => __('reports.financial_summary_report.title'),
             'result' => $results,
             'overallSummary' => $overall,
             'centers' => $accessibleCenters,
-            'companyInfo' => $this->resolveReportCompanyInfo($tenant, $centerFilter, $centerId),
+            'companyInfo' => $companyInfo,
         ]);
     }
 
@@ -477,32 +491,47 @@ class FinancialReportsController extends Controller
 
         $tenant = auth()->user()->tenant;
 
+        $filters = [
+            'range' => $range,
+            'start_date' => $startDate,
+            'end_date' => $endDate,
+            'center_id' => $centerFilter,
+            'payment_method' => $paymentMethod,
+            'transaction_type' => $transactionType,
+            'user_id' => $userFilter,
+            'search' => $search,
+            'sort_by' => $sortBy,
+            'sort_order' => $sortOrder,
+        ];
+        $kpis = [
+            'total_records' => $totalRecords,
+            'total_debit' => $totalDebit,
+            'total_credit' => $totalCredit,
+            'net_balance' => $netBalance,
+            'cash_balance' => $cashBalance,
+            'electronic_balance' => $electronicBalance,
+        ];
+        $companyInfo = $this->resolveReportCompanyInfo($tenant, $centerFilter, $centerId);
+
+        if ($request->boolean('print')) {
+            return Inertia::render('Reports/Print', [
+                'reportType' => 'cash_register',
+                'backRoute' => 'app.reports.cash-register',
+                'filters' => $filters,
+                'kpis' => $kpis,
+                'rows' => $sortedItems->take(5000)->values(),
+                'companyInfo' => $companyInfo,
+            ]);
+        }
+
         return Inertia::render('Reports/CashRegister', [
-            'filters' => [
-                'range' => $range,
-                'start_date' => $startDate,
-                'end_date' => $endDate,
-                'center_id' => $centerFilter,
-                'payment_method' => $paymentMethod,
-                'transaction_type' => $transactionType,
-                'user_id' => $userFilter,
-                'search' => $search,
-                'sort_by' => $sortBy,
-                'sort_order' => $sortOrder,
-            ],
+            'filters' => $filters,
             'reportTitle' => __('reports.cash_register_report.title'),
             'items' => $paginated,
-            'kpis' => [
-                'total_records' => $totalRecords,
-                'total_debit' => $totalDebit,
-                'total_credit' => $totalCredit,
-                'net_balance' => $netBalance,
-                'cash_balance' => $cashBalance,
-                'electronic_balance' => $electronicBalance,
-            ],
+            'kpis' => $kpis,
             'centers' => $accessibleCenters,
             'users' => $tenantUsers,
-            'companyInfo' => $this->resolveReportCompanyInfo($tenant, $centerFilter, $centerId),
+            'companyInfo' => $companyInfo,
         ]);
     }
 

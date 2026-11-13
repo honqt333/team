@@ -8,7 +8,8 @@
         :total-count-label="$t('hr.employees.total')"
         :custom-company="tenant"
         :on-print="print"
-        :on-close="close"
+        default-orientation="landscape"
+        back-route="app.hr.attendance.index"
     >
         <!-- Table -->
         <table class="w-full text-sm border-collapse">
@@ -111,10 +112,6 @@ function print() {
     printDocument();
 }
 
-function close() {
-    window.close();
-}
-
 function getStatusColor(status) {
     switch (status) {
         case 'present':
@@ -132,12 +129,3 @@ function getStatusColor(status) {
     }
 }
 </script>
-
-<style>
-@media print {
-    @page {
-        size: A4 landscape;
-        margin: 15mm 10mm 12mm 10mm;
-    }
-}
-</style>

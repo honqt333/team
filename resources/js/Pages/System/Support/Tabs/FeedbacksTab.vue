@@ -59,12 +59,13 @@
             <div
                 class="p-4 bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm flex flex-wrap items-center gap-3"
             >
-                <input
-                    type="text"
-                    v-model="search"
-                    :placeholder="$t('system.feedbacks.filters.search_placeholder')"
-                    class="text-xs rounded-xl border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 py-2 px-3 w-64"
-                />
+                <div class="w-64">
+                    <AppInput
+                        type="search"
+                        v-model="search"
+                        :placeholder="$t('system.feedbacks.filters.search_placeholder')"
+                    />
+                </div>
                 <div class="w-48">
                     <SearchableSelect
                         v-model="statusFilter"
@@ -255,21 +256,13 @@
                 </div>
 
                 <form @submit.prevent="submitReply" class="space-y-4">
-                    <div>
-                        <label
-                            class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1"
-                        >
-                            {{ $t('system.feedbacks.reply_modal.reply_label') }}
-                            <span class="text-rose-500">*</span>
-                        </label>
-                        <textarea
-                            v-model="replyForm.admin_reply"
-                            rows="4"
-                            :placeholder="$t('system.feedbacks.reply_modal.reply_placeholder')"
-                            class="w-full text-xs rounded-xl border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 p-3"
-                            required
-                        ></textarea>
-                    </div>
+                    <AppTextarea
+                        v-model="replyForm.admin_reply"
+                        :rows="4"
+                        :label="$t('system.feedbacks.reply_modal.reply_label')"
+                        :placeholder="$t('system.feedbacks.reply_modal.reply_placeholder')"
+                        required
+                    />
 
                     <div>
                         <SearchableSelect
@@ -330,6 +323,8 @@ import { useI18n } from 'vue-i18n';
 import { useNumberFormat } from '@/Composables/useNumberFormat';
 import { useConfirm } from '@/Composables/useConfirm';
 import BaseModal from '@/Components/BaseModal.vue';
+import AppInput from '@/Components/App/AppInput.vue';
+import AppTextarea from '@/Components/App/AppTextarea.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 import VideoPlayerModal from '@/Pages/Feedback/Partials/VideoPlayerModal.vue';
 import { debounce } from 'lodash-es';

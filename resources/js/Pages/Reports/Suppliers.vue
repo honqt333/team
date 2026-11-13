@@ -1,6 +1,6 @@
 <template>
     <AppLayout>
-        <PrintEngine document-type="suppliers" class="space-y-6">
+        <div class="space-y-6">
             <!-- Screen Only Header Section (AUDIT_STANDARDS.md compliant) -->
             <PageHeader
                 :title="$t('reports.suppliers_report.title')"
@@ -35,7 +35,7 @@
                         <AppPrintButton
                             class="print:hidden"
                             :label="$t('reports.suppliers_report.print_report')"
-                            @click="printDocument()"
+                            @click="openPrintReport"
                         />
 
                         <a
@@ -1264,16 +1264,21 @@
             <div class="print-section hidden mt-8">
                 <StandardReportFooter :company="companyInfo" />
             </div>
-        </PrintEngine>
+        </div>
     </AppLayout>
 </template>
 
 <script setup>
 import DataTable from '@/Components/Common/DataTable.vue';
 import AppPagination from '@/Components/Common/AppPagination.vue';
-import PrintEngine from '@/Components/Print/PrintEngine.vue';
 import AppPrintButton from '@/Components/Common/AppPrintButton.vue';
-import { printDocument } from '@/Composables/usePrint';
+
+const openPrintReport = () => {
+    const url = new URL(window.location.href);
+    url.searchParams.set('print', '1');
+    url.searchParams.delete('page');
+    window.open(url.toString(), '_blank');
+};
 import { useNumberFormat } from '@/Composables/useNumberFormat';
 import { ref, reactive, computed, watch } from 'vue';
 import { router } from '@inertiajs/vue3';

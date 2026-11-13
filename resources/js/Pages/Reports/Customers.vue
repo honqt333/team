@@ -891,18 +891,6 @@
                     {{ $t('common.reset_filters') }}
                 </button>
             </div>
-
-            <!-- PRINT ENGINE SECTION -->
-            <PrintEngine
-                class="hidden print:block print-section"
-                documentType="customers_report"
-                :data="{
-                    kpis,
-                    records: printRows,
-                    filters: filterForm,
-                }"
-                :centerData="$page.props.auth?.center || {}"
-            />
         </div>
     </AppLayout>
 </template>
@@ -919,8 +907,6 @@ import PageHeader from '@/Components/PageHeader.vue';
 import BackButton from '@/Components/BackButton.vue';
 import AppPrintButton from '@/Components/Common/AppPrintButton.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
-import PrintEngine from '@/Components/Print/PrintEngine.vue';
-import { printDocument } from '@/Composables/usePrint';
 
 const { t } = useI18n();
 
@@ -1235,9 +1221,10 @@ const exportUrl = computed(() => {
 });
 
 const handlePrint = () => {
-    printDocument({
-        title: t('reports.customers_report.title'),
-    });
+    const url = new URL(window.location.href);
+    url.searchParams.set('print', '1');
+    url.searchParams.delete('page');
+    window.open(url.toString(), '_blank');
 };
 
 const printDate = computed(() => {

@@ -122,16 +122,12 @@
                     </label>
 
                     <div v-if="form.enabled">
-                        <label
-                            class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300"
-                        >
-                            {{ $t('system.settings.active_tiers_2') }}
-                        </label>
-                        <input
+                        <AppInput
                             v-model="form.active_tiers"
                             type="text"
+                            :label="$t('system.settings.active_tiers_2')"
                             placeholder="tier_1,tier_2,tier_3,tier_4"
-                            class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 font-mono text-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                            class="font-mono"
                         />
                     </div>
 
@@ -198,6 +194,7 @@
 
 <script setup>
 import AppToggle from '@/Components/Common/AppToggle.vue';
+import AppInput from '@/Components/App/AppInput.vue';
 import { useI18n } from 'vue-i18n';
 const { t } = useI18n();
 

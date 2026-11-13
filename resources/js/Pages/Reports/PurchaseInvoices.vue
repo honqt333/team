@@ -1,6 +1,6 @@
 <template>
     <AppLayout>
-        <PrintEngine document-type="report" class="space-y-6">
+        <div class="space-y-6">
             <!-- Screen Only Header Section (AUDIT_STANDARDS.md compliant) -->
             <PageHeader
                 :title="$t('reports.purchase_invoices_report.title')"
@@ -1008,18 +1008,16 @@
 
             <!-- Standard Print Footer -->
             <StandardReportFooter class="hidden print:block pt-4 mt-6 border-t border-gray-300" />
-        </PrintEngine>
+        </div>
     </AppLayout>
 </template>
 
 <script setup>
 import PaymentStatusBadge from '@/Components/Common/PaymentStatusBadge.vue';
-import PrintEngine from '@/Components/Print/PrintEngine.vue';
 import DataTable from '@/Components/Common/DataTable.vue';
 import AppPagination from '@/Components/Common/AppPagination.vue';
 import AppPrintButton from '@/Components/Common/AppPrintButton.vue';
 import AppToggle from '@/Components/Common/AppToggle.vue';
-import { printDocument } from '@/Composables/usePrint';
 import { reactive, computed } from 'vue';
 import { router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
@@ -1298,7 +1296,10 @@ const getPaymentStatusLabel = (status) => {
 };
 
 const handlePrint = () => {
-    printDocument();
+    const url = new URL(window.location.href);
+    url.searchParams.set('print', '1');
+    url.searchParams.delete('page');
+    window.open(url.toString(), '_blank');
 };
 </script>
 

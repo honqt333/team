@@ -182,19 +182,12 @@
                     <div v-show="viewMode === 'edit'" class="space-y-6">
                         <!-- Subject (if email) -->
                         <div v-if="template.type === 'email'">
-                            <label
-                                class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1.5"
-                            >
-                                {{ $t('system.communication.subject') }}
-                            </label>
-                            <input
-                                type="text"
+                            <AppInput
                                 v-model="form.subject"
-                                class="w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-focus-ring"
+                                type="text"
+                                :label="$t('system.communication.subject')"
+                                :error="form.errors.subject"
                             />
-                            <p v-if="form.errors.subject" class="text-rose-500 text-xs mt-1">
-                                {{ form.errors.subject }}
-                            </p>
                         </div>
 
                         <!-- Content Textarea -->
@@ -211,15 +204,13 @@
                                     }}
                                 </span>
                             </div>
-                            <textarea
+                            <AppTextarea
                                 v-model="form.content"
-                                rows="16"
-                                class="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white text-sm font-mono focus:ring-2 focus:ring-focus-ring"
+                                :rows="16"
+                                :error="form.errors.content"
+                                class="font-mono"
                                 dir="ltr"
-                            ></textarea>
-                            <p v-if="form.errors.content" class="text-rose-500 text-xs mt-1">
-                                {{ form.errors.content }}
-                            </p>
+                            />
                         </div>
                     </div>
 
@@ -269,6 +260,8 @@ import SystemLayout from '@/Layouts/SystemLayout.vue';
 import PageHeader from '@/Components/PageHeader.vue';
 import { useToast } from '@/Composables/useToast';
 import AppButton from '@/Components/App/AppButton.vue';
+import AppInput from '@/Components/App/AppInput.vue';
+import AppTextarea from '@/Components/App/AppTextarea.vue';
 
 const props = defineProps({
     template: Object,

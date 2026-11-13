@@ -1,6 +1,6 @@
 <template>
     <AppLayout>
-        <PrintEngine document-type="payments" class="space-y-6">
+        <div class="space-y-6">
             <!-- Screen Only Header Section (AUDIT_STANDARDS.md compliant) -->
             <PageHeader
                 :title="$t('reports.payments_report.title')"
@@ -35,7 +35,7 @@
                         <AppPrintButton
                             class="print:hidden"
                             :label="$t('reports.payments_report.print_report')"
-                            @click="printDocument()"
+                            @click="openPrintReport"
                         />
 
                         <a
@@ -765,16 +765,21 @@
 
             <!-- AUDIT_STANDARDS.md Section 5: Standard Print Footer -->
             <StandardReportFooter class="hidden print:block pt-4 mt-6 border-t border-gray-300" />
-        </PrintEngine>
+        </div>
     </AppLayout>
 </template>
 
 <script setup>
 import DataTable from '@/Components/Common/DataTable.vue';
 import AppPagination from '@/Components/Common/AppPagination.vue';
-import PrintEngine from '@/Components/Print/PrintEngine.vue';
 import AppPrintButton from '@/Components/Common/AppPrintButton.vue';
-import { printDocument } from '@/Composables/usePrint';
+
+const openPrintReport = () => {
+    const url = new URL(window.location.href);
+    url.searchParams.set('print', '1');
+    url.searchParams.delete('page');
+    window.open(url.toString(), '_blank');
+};
 import RadioGroup from '@/Components/Common/RadioGroup.vue';
 import { reactive, computed } from 'vue';
 import { router } from '@inertiajs/vue3';
