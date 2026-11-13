@@ -547,7 +547,7 @@
                                     </button>
                                 </Tooltip>
                                 <Tooltip
-                                    v-if="can('crm.customers.edit') || isAnyAdmin()"
+                                    v-if="can('crm.customers.update') || isAnyAdmin()"
                                     :content="$t('common.edit')"
                                 >
                                     <button

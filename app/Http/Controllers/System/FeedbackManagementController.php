@@ -10,54 +10,9 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
-use Inertia\Inertia;
-use Inertia\Response;
 
 class FeedbackManagementController extends Controller
 {
-    /**
-     * Display a listing of all tenant feedbacks for system admins.
-     */
-    public function index(Request $request): Response
-    {
-        $feedbacks = Feedback::withoutGlobalScopes()
-            ->with([
-                'tenant:id,name,trade_name',
-                'user:id,name,email,phone',
-                'adminUser:id,name',
-            ])
-            ->when($request->search, function ($q, $search) {
-                $q->where(function ($sub) use ($search) {
-                    $sub->where('comments', 'like', "%{$search}%")
-                        ->orWhere('admin_reply', 'like', "%{$search}%")
-                        ->orWhereHas('tenant', function ($t) use ($search) {
-                            $t->where('name', 'like', "%{$search}%")
-                                ->orWhere('trade_name', 'like', "%{$search}%");
-                        });
-                });
-            })
-            ->when($request->status, fn ($q, $status) => $q->where('status', $status))
-            ->when($request->type, fn ($q, $type) => $q->where('type', $type))
-            ->when($request->module, fn ($q, $module) => $q->where('module', $module))
-            ->orderByDesc('id')
-            ->paginate(15)
-            ->withQueryString();
-
-        $stats = [
-            'total' => Feedback::withoutGlobalScopes()->count(),
-            'pending' => Feedback::withoutGlobalScopes()->where('status', Feedback::STATUS_PENDING)->count(),
-            'in_progress' => Feedback::withoutGlobalScopes()->where('status', Feedback::STATUS_IN_PROGRESS)->count(),
-            'resolved' => Feedback::withoutGlobalScopes()->where('status', Feedback::STATUS_RESOLVED)->count(),
-            'bugs' => Feedback::withoutGlobalScopes()->where('type', Feedback::TYPE_BUG)->count(),
-        ];
-
-        return Inertia::render('System/Feedbacks/Index', [
-            'feedbacks' => $feedbacks,
-            'stats' => $stats,
-            'filters' => $request->only(['search', 'status', 'type', 'module']),
-        ]);
-    }
-
     /**
      * Reply to a feedback with admin comments and optional response video.
      */

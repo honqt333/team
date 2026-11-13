@@ -64,7 +64,7 @@
                         />
                         <img
                             v-else
-                            src="/images/brand/logo-64.png"
+                            :src="page.props.app_logo || '/images/brand/logo-64.png'"
                             :alt="$t('common.app_name')"
                             class="w-full h-full object-contain"
                         />
@@ -1595,7 +1595,7 @@
                                         'flex items-center gap-2.5 px-3 py-2 text-xs font-medium transition-colors',
                                         isActive('/app/work-orders')
                                             ? 'bg-indigo-50 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300'
-                                            : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-750',
+                                            : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/60',
                                     ]"
                                 >
                                     <svg
@@ -1622,7 +1622,7 @@
                                         'flex items-center justify-between px-3 py-2 text-xs font-medium transition-colors',
                                         isActive('/app/quotes')
                                             ? 'bg-amber-50 dark:bg-amber-900/50 text-amber-700 dark:text-amber-300'
-                                            : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-750',
+                                            : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/60',
                                     ]"
                                 >
                                     <div class="flex items-center gap-2.5">
@@ -1657,7 +1657,7 @@
                                         'flex items-center gap-2.5 px-3 py-2 text-xs font-medium transition-colors',
                                         isActive('/app/workshop')
                                             ? 'bg-emerald-50 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300'
-                                            : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-750',
+                                            : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/60',
                                     ]"
                                 >
                                     <svg
@@ -1684,7 +1684,7 @@
                                         'flex items-center gap-2.5 px-3 py-2 text-xs font-medium transition-colors',
                                         isActive('/app/appointments')
                                             ? 'bg-emerald-50 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300'
-                                            : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-750',
+                                            : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/60',
                                     ]"
                                 >
                                     <svg
@@ -1711,7 +1711,7 @@
                                         'flex items-center gap-2.5 px-3 py-2 text-xs font-medium transition-colors',
                                         isActive('/app/communications/appointment-messages')
                                             ? 'bg-sky-50 dark:bg-sky-900/50 text-sky-700 dark:text-sky-300'
-                                            : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-750',
+                                            : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/60',
                                     ]"
                                 >
                                     <svg
@@ -1796,7 +1796,7 @@
                                         'flex items-center gap-2.5 px-3 py-2 text-xs font-medium transition-colors',
                                         isActive('/app/customers')
                                             ? 'bg-indigo-50 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300'
-                                            : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-750',
+                                            : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/60',
                                     ]"
                                 >
                                     <svg
@@ -1822,7 +1822,7 @@
                                         'flex items-center gap-2.5 px-3 py-2 text-xs font-medium transition-colors',
                                         isActive('/app/dealers')
                                             ? 'bg-indigo-50 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300'
-                                            : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-750',
+                                            : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/60',
                                     ]"
                                 >
                                     <svg
@@ -1848,7 +1848,7 @@
                                         'flex items-center gap-2.5 px-3 py-2 text-xs font-medium transition-colors',
                                         isActive('/app/vehicles')
                                             ? 'bg-indigo-50 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300'
-                                            : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-750',
+                                            : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/60',
                                     ]"
                                 >
                                     <svg
@@ -1997,7 +1997,7 @@
                                         isActive('/app/purchasing') &&
                                         !isActive('/app/purchasing/suppliers')
                                             ? 'bg-violet-50 dark:bg-violet-900/50 text-violet-700 dark:text-violet-300'
-                                            : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-750',
+                                            : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/60',
                                     ]"
                                 >
                                     <svg
@@ -2022,7 +2022,7 @@
                                         'flex items-center gap-2.5 px-3 py-2 text-xs font-medium transition-colors',
                                         isActive('/app/purchasing/suppliers')
                                             ? 'bg-violet-50 dark:bg-violet-900/50 text-violet-700 dark:text-violet-300'
-                                            : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-750',
+                                            : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/60',
                                     ]"
                                 >
                                     <svg
@@ -2101,7 +2101,7 @@
                                         'flex items-center gap-2.5 px-3 py-2 text-xs font-medium transition-colors',
                                         isActive('/app/inventory/parts')
                                             ? 'bg-emerald-50 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300'
-                                            : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-750',
+                                            : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/60',
                                     ]"
                                 >
                                     <svg
@@ -2127,7 +2127,7 @@
                                         'flex items-center gap-2.5 px-3 py-2 text-xs font-medium transition-colors',
                                         isActive('/app/inventory/stock')
                                             ? 'bg-emerald-50 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300'
-                                            : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-750',
+                                            : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/60',
                                     ]"
                                 >
                                     <svg
@@ -2153,7 +2153,7 @@
                                         'flex items-center gap-2.5 px-3 py-2 text-xs font-medium transition-colors',
                                         isActive('/app/inventory/moves')
                                             ? 'bg-emerald-50 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300'
-                                            : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-750',
+                                            : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/60',
                                     ]"
                                 >
                                     <svg
@@ -2179,7 +2179,7 @@
                                         'flex items-center gap-2.5 px-3 py-2 text-xs font-medium transition-colors',
                                         isActive('/app/inventory/transfers')
                                             ? 'bg-emerald-50 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300'
-                                            : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-750',
+                                            : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/60',
                                     ]"
                                 >
                                     <svg
@@ -2205,7 +2205,7 @@
                                         'flex items-center gap-2.5 px-3 py-2 text-xs font-medium transition-colors',
                                         isActive('/app/inventory/settings')
                                             ? 'bg-emerald-50 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300'
-                                            : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-750',
+                                            : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/60',
                                     ]"
                                 >
                                     <svg
@@ -2290,7 +2290,7 @@
                                         'flex items-center gap-2.5 px-3 py-2 text-xs font-medium transition-colors',
                                         isActive('/app/hr/employees')
                                             ? 'bg-violet-50 dark:bg-violet-900/50 text-violet-700 dark:text-violet-300'
-                                            : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-750',
+                                            : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/60',
                                     ]"
                                 >
                                     <svg
@@ -2315,7 +2315,7 @@
                                         'flex items-center gap-2.5 px-3 py-2 text-xs font-medium transition-colors',
                                         isActive('/app/hr/attendance')
                                             ? 'bg-violet-50 dark:bg-violet-900/50 text-violet-700 dark:text-violet-300'
-                                            : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-750',
+                                            : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/60',
                                     ]"
                                 >
                                     <svg
@@ -2341,7 +2341,7 @@
                                         'flex items-center gap-2.5 px-3 py-2 text-xs font-medium transition-colors',
                                         isActive('/app/hr/payroll')
                                             ? 'bg-violet-50 dark:bg-violet-900/50 text-violet-700 dark:text-violet-300'
-                                            : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-750',
+                                            : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/60',
                                     ]"
                                 >
                                     <svg
@@ -2366,7 +2366,7 @@
                                         'flex items-center gap-2.5 px-3 py-2 text-xs font-medium transition-colors',
                                         isActive('/app/hr/settings')
                                             ? 'bg-violet-50 dark:bg-violet-900/50 text-violet-700 dark:text-violet-300'
-                                            : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-750',
+                                            : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/60',
                                     ]"
                                 >
                                     <svg
@@ -3650,7 +3650,7 @@ import CommandPalette from '@/Components/Common/CommandPalette.vue';
 import SystemAnnouncementBanner from '@/Components/SystemAnnouncementBanner.vue';
 import NotificationBell from '@/Components/NotificationBell.vue';
 import { usePermission } from '@/Composables/usePermission';
-import { useToast } from '@/Composables/useToast';
+import { useFlashToasts } from '@/Composables/useFlashToasts';
 
 const props = defineProps({
     hideSidebar: { type: Boolean, default: false },
@@ -3659,7 +3659,6 @@ const props = defineProps({
 const { locale, t } = useI18n();
 const page = usePage();
 const { can, hasRole, isAnyAdmin } = usePermission();
-const { success: toastSuccess, error: toastError } = useToast();
 
 const commandPaletteRef = ref(null);
 const openCommandPalette = () => {
@@ -3667,23 +3666,7 @@ const openCommandPalette = () => {
 };
 
 // ─── Global Flash Handler ─────────────────────────────────────────────────────
-// Automatically display server flash messages as toasts on every Inertia
-// navigation (including redirects from the backend after form submissions).
-// We defer by one event-loop turn (setTimeout 0) so that any onSuccess/onFinish
-// callbacks fired synchronously by the Inertia router (which update
-// lastFrontendToastAt) always run *before* we try to show the flash toast.
-// This prevents duplicate toasts when Inertia v2 updates page.props before
-// invoking the router's onSuccess callback.
-watch(
-    () => page.props.flash,
-    (flash) => {
-        setTimeout(() => {
-            if (flash?.success) toastSuccess(flash.success, { fromFlash: true });
-            if (flash?.error) toastError(flash.error, { fromFlash: true });
-        }, 0);
-    },
-    { deep: true }
-);
+useFlashToasts(page, { immediate: false });
 
 const mobileMenuOpen = ref(false);
 const userMenuOpen = ref(false);

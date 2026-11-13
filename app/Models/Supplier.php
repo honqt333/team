@@ -153,12 +153,19 @@ class Supplier extends Model
             // Overpayment credit = (debit notes still outstanding) - (cash refunds).
             //
             // We also include `payments - inv.total` (overpayment on the
-            // invoice itself, e.g. paid 1100 for a 1000 invoice) as credit
-            // — anything we paid above the invoice total is money the
-            // supplier owes us back.
+            // invoice itself, e.g. paid 1100 for a 1000 invoice) as credit,
+            // as well as any net overpayment after purchase returns on a paid invoice
+            // (`netPaid - netInvoiceAfterReturns`) — anything we paid above the net
+            // invoice total after returns that hasn't been refunded in cash is money
+            // the supplier owes us back (`المبلغ المستحق من المورد`).
             $overpaidOnInvoice = max(0.0, $payments - (float) $inv->total);
             $outstandingDebitNotes = max(0.0, $debitNoteTotal - $cashRefunds);
-            $credit = $overpaidOnInvoice + $outstandingDebitNotes;
+
+            $netInvoiceAfterReturns = max(0.0, (float) $inv->total - $returnsTotal);
+            $netPaid = max(0.0, $payments - $cashRefunds);
+            $overpaidAfterReturns = max(0.0, $netPaid - $netInvoiceAfterReturns);
+
+            $credit = max($overpaidAfterReturns, $overpaidOnInvoice + $outstandingDebitNotes);
 
             $totalCredits += $credit;
         }
@@ -166,6 +173,26 @@ class Supplier extends Model
         $balance = round($invoicesBalance - $totalCredits, 2);
 
         return $balance == 0.0 ? 0.0 : $balance;
+    }
+
+    /**
+     * Calculate the net amount due from the supplier to the workshop (`المبلغ المستحق من المورد`)
+     * when purchase returns / overpayments exceed unpaid invoice balances.
+     */
+    public function calculateAmountDueFromSupplier(): float
+    {
+        $balance = $this->calculateBalance();
+
+        return $balance < 0.0 ? round(abs($balance), 2) : 0.0;
+    }
+
+    public function getAmountDueFromSupplierAttribute(): float
+    {
+        if (array_key_exists('amount_due_from_supplier', $this->attributes)) {
+            return (float) $this->attributes['amount_due_from_supplier'];
+        }
+
+        return $this->calculateAmountDueFromSupplier();
     }
 
     // ─────────────────────────────────────────────────────────────

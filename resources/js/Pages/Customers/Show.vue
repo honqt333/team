@@ -25,7 +25,7 @@
                             <button
                                 @click="showStatementModal = true"
                                 :title="$t('customers.statement.button')"
-                                class="inline-flex items-center gap-2 px-3 py-2 rounded-xl font-black text-xs border border-purple-100/70 bg-purple-50/70 text-purple-700 hover:bg-white hover:shadow-md transition-all"
+                                class="inline-flex items-center gap-2 px-3 py-2 rounded-xl font-black text-xs border border-purple-100/70 dark:border-purple-800/60 bg-purple-50/70 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 hover:bg-white dark:hover:bg-gray-800 hover:shadow-md transition-all"
                             >
                                 <svg
                                     class="w-5 h-5"
@@ -49,7 +49,7 @@
                                 v-if="can('crm.customers.update') || isAnyAdmin()"
                                 @click="showEditModal = true"
                                 :title="$t('common.edit')"
-                                class="inline-flex items-center gap-2 px-3 py-2 rounded-xl font-black text-xs border border-action-primary/25 bg-selection-bg text-selection-text hover:bg-white hover:shadow-md transition-all"
+                                class="inline-flex items-center gap-2 px-3 py-2 rounded-xl font-black text-xs border border-action-primary/25 bg-selection-bg text-selection-text hover:bg-white dark:hover:bg-gray-800 hover:shadow-md transition-all"
                             >
                                 <svg
                                     class="w-5 h-5"
@@ -282,7 +282,7 @@
                                             v-if="headerEmail"
                                             :href="`mailto:${headerEmail}`"
                                             :title="$t('common.email')"
-                                            class="flex items-center gap-3 px-4 py-2.5 rounded-2xl bg-purple-50/50 hover:bg-white hover:text-purple-700 hover:shadow-xl hover:shadow-focus-ring-soft transition-all border border-transparent hover:border-purple-100"
+                                            class="flex items-center gap-3 px-4 py-2.5 rounded-2xl bg-purple-50/50 dark:bg-purple-900/20 hover:bg-white dark:hover:bg-gray-800 hover:text-purple-700 dark:hover:text-purple-300 hover:shadow-xl hover:shadow-focus-ring-soft transition-all border border-transparent hover:border-purple-100 dark:hover:border-purple-800/50"
                                             dir="ltr"
                                         >
                                             <div
@@ -813,7 +813,7 @@
                                                 </svg>
                                             </button>
                                             <button
-                                                v-if="can('crm.quotes.create') || isAnyAdmin()"
+                                                v-if="can('quotes.create') || isAnyAdmin()"
                                                 @click.stop="openQuoteModal(vehicle)"
                                                 :title="$t('quotes.add')"
                                                 class="flex-1 p-1.5 rounded-lg bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 hover:bg-amber-600 hover:text-white transition-all duration-200"
@@ -930,7 +930,7 @@
                                                     </svg>
                                                 </button>
                                                 <button
-                                                    v-if="can('crm.quotes.create') || isAnyAdmin()"
+                                                    v-if="can('quotes.create') || isAnyAdmin()"
                                                     @click.stop="openQuoteModal(vehicle)"
                                                     class="p-1.5 rounded-lg bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 hover:bg-amber-600 hover:text-white transition-all"
                                                 >
@@ -1597,7 +1597,7 @@
                             "
                             :description="quoteSearch ? $t('common.try_adjusting_search') : ''"
                             :action-text="
-                                can('crm.quotes.create') || isAnyAdmin() ? $t('quotes.add') : ''
+                                can('quotes.create') || isAnyAdmin() ? $t('quotes.add') : ''
                             "
                             @action="openQuoteModal(null)"
                         >

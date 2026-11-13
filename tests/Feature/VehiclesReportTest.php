@@ -4,8 +4,11 @@ declare(strict_types=1);
 
 namespace Tests\Feature;
 
+use App\Enums\InvoiceType;
 use App\Models\Center;
 use App\Models\Customer;
+use App\Models\Invoice;
+use App\Models\InvoiceLine;
 use App\Models\Tenant;
 use App\Models\User;
 use App\Models\Vehicle;
@@ -438,6 +441,153 @@ class VehiclesReportTest extends TestCase
             ->where('kpis.total_spare_part_cost', 80)
             ->where('kpis.grand_total', 180)
             ->where('items.data.0.service_name', 'خدمة بقطع من المستودع')
+        );
+    }
+
+    public function test_vehicles_report_deducts_credit_notes_as_negative_rows_from_total_service_cost(): void
+    {
+        app(PerformanceBaselineSeeder::class)->run();
+
+        $tenant = Tenant::first();
+        $center = Center::where('tenant_id', $tenant->id)->first();
+        $user = User::where('tenant_id', $tenant->id)->where('is_system_admin', true)->first();
+
+        $customer = Customer::create([
+            'tenant_id' => $tenant->id,
+            'center_id' => $center->id,
+            'name' => 'خالد المرتجعات',
+            'phone' => '0503334455',
+        ]);
+
+        $vehicle = Vehicle::create([
+            'tenant_id' => $tenant->id,
+            'center_id' => $center->id,
+            'customer_id' => $customer->id,
+            'plate_number' => '2026 RET',
+        ]);
+
+        $workOrder = WorkOrder::create([
+            'tenant_id' => $tenant->id,
+            'center_id' => $center->id,
+            'customer_id' => $customer->id,
+            'vehicle_id' => $vehicle->id,
+            'code' => 'T202620003',
+            'status' => WorkOrder::STATUS_DONE,
+            'entry_date' => now()->toDateString(),
+        ]);
+
+        $item = WorkOrderItem::create([
+            'work_order_id' => $workOrder->id,
+            'tenant_id' => $tenant->id,
+            'center_id' => $center->id,
+            'title' => 'صيانة شاملة للمحرك',
+            'qty' => 1,
+            'unit_price' => 200.00,
+            'total' => 200.00,
+            'status' => WorkOrderItem::STATUS_COMPLETED,
+            'due_date' => now()->toDateString(),
+        ]);
+
+        $originalInvoice = Invoice::create([
+            'tenant_id' => $tenant->id,
+            'center_id' => $center->id,
+            'customer_id' => $customer->id,
+            'work_order_id' => $workOrder->id,
+            'invoice_number' => 'INV-2026-003',
+            'issue_date' => now(),
+            'supply_date' => now()->toDateString(),
+            'type' => InvoiceType::INVOICE,
+            'status' => 'valid',
+            'payment_status' => 'paid',
+            'total_excl_tax' => 200.00,
+            'total_tax' => 0.00,
+            'total_incl_tax' => 200.00,
+            'total_paid' => 200.00,
+        ]);
+
+        // Credit Note 1: R202620001 for (25.00)
+        $cn1 = Invoice::create([
+            'tenant_id' => $tenant->id,
+            'center_id' => $center->id,
+            'customer_id' => $customer->id,
+            'work_order_id' => $workOrder->id,
+            'original_invoice_id' => $originalInvoice->id,
+            'invoice_number' => 'R202620001',
+            'issue_date' => now(),
+            'supply_date' => now()->toDateString(),
+            'type' => InvoiceType::CREDIT_NOTE,
+            'status' => 'valid',
+            'payment_status' => 'paid',
+            'return_reason' => 'مرتجع جزئي 1',
+            'total_excl_tax' => 25.00,
+            'total_tax' => 0.00,
+            'total_incl_tax' => 25.00,
+            'total_paid' => 25.00,
+        ]);
+
+        InvoiceLine::create([
+            'invoice_id' => $cn1->id,
+            'work_order_item_id' => $item->id,
+            'is_part' => false,
+            'description' => 'مرتجع خدمة: صيانة شاملة للمحرك',
+            'qty' => 1,
+            'unit_price' => 25.00,
+            'line_total_excl_tax' => 25.00,
+            'line_total_incl_tax' => 25.00,
+        ]);
+
+        // Credit Note 2: R202620002 for (40.00)
+        $cn2 = Invoice::create([
+            'tenant_id' => $tenant->id,
+            'center_id' => $center->id,
+            'customer_id' => $customer->id,
+            'work_order_id' => $workOrder->id,
+            'original_invoice_id' => $originalInvoice->id,
+            'invoice_number' => 'R202620002',
+            'issue_date' => now(),
+            'supply_date' => now()->toDateString(),
+            'type' => InvoiceType::CREDIT_NOTE,
+            'status' => 'valid',
+            'payment_status' => 'paid',
+            'return_reason' => 'مرتجع جزئي 2',
+            'total_excl_tax' => 40.00,
+            'total_tax' => 0.00,
+            'total_incl_tax' => 40.00,
+            'total_paid' => 40.00,
+        ]);
+
+        InvoiceLine::create([
+            'invoice_id' => $cn2->id,
+            'work_order_item_id' => $item->id,
+            'is_part' => false,
+            'description' => 'مرتجع خدمة: صيانة شاملة للمحرك',
+            'qty' => 1,
+            'unit_price' => 40.00,
+            'line_total_excl_tax' => 40.00,
+            'line_total_incl_tax' => 40.00,
+        ]);
+
+        $response = $this->actingAs($user)->get(route('app.reports.vehicles', [
+            'range' => 'this_month',
+            'ticket_no' => 'T202620003',
+        ]));
+
+        // Net service cost should be 200.00 - 25.00 - 40.00 = 135.00
+        $response->assertStatus(200);
+        $response->assertInertia(fn ($page) => $page
+            ->component('Reports/Vehicles')
+            ->where('kpis.total_records', 3)
+            ->where('kpis.total_vehicles', 1)
+            ->where('kpis.total_tickets', 1)
+            ->where('kpis.total_service_cost', 135)
+            ->where('kpis.grand_total', 135)
+            ->where('items.data.0.service_cost', 200)
+            ->where('items.data.1.is_credit_note', true)
+            ->where('items.data.1.credit_note_number', 'R202620002')
+            ->where('items.data.1.service_cost', -40)
+            ->where('items.data.2.is_credit_note', true)
+            ->where('items.data.2.credit_note_number', 'R202620001')
+            ->where('items.data.2.service_cost', -25)
         );
     }
 }

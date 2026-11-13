@@ -80,8 +80,9 @@ class ImpersonationController extends Controller
             ]);
         }
 
-        // Log in as the tenant user on the 'web' guard.
+        // Log in as the tenant user on the 'web' guard and rotate session ID.
         Auth::guard('web')->login($tenantUser);
+        $request->session()->regenerate();
 
         return redirect('/dashboard')->with('success', __('messages.system.impersonation.inside_account', ['tenant' => $tenant->trade_name]));
     }
@@ -143,6 +144,8 @@ class ImpersonationController extends Controller
                 Auth::guard('admin')->login($originalAdmin);
             }
         }
+
+        $request->session()->regenerate();
 
         return redirect('/system')->with('success', __('messages.system.impersonation.stopped'));
     }

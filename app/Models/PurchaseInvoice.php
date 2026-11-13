@@ -38,6 +38,35 @@ class PurchaseInvoice extends Model
         'balance' => 'decimal:2',
     ];
 
+    protected $appends = [
+        'source_type',
+    ];
+
+    public function getSourceTypeAttribute(): string
+    {
+        if (! empty($this->attributes['source_type'])) {
+            return (string) $this->attributes['source_type'];
+        }
+
+        if ($this->purchase_order_id !== null) {
+            return 'warehouse';
+        }
+
+        if (array_key_exists('lines_count', $this->attributes) && (int) $this->attributes['lines_count'] > 0) {
+            return 'warehouse';
+        }
+
+        if ($this->relationLoaded('lines') && $this->lines->isNotEmpty()) {
+            return 'warehouse';
+        }
+
+        if (str_contains((string) ($this->notes ?? ''), 'GRN')) {
+            return 'warehouse';
+        }
+
+        return 'external';
+    }
+
     // Status helpers
     public function isDraft()
     {

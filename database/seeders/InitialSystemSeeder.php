@@ -27,6 +27,7 @@ class InitialSystemSeeder extends Seeder
         $this->seedDefaultIdentity();
 
         $this->call([
+            NationalitiesSeeder::class,
             MetadataSeeder::class,
             ServiceSeeder::class,
             VehicleConditionSeeder::class,

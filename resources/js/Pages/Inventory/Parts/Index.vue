@@ -48,7 +48,7 @@
 
                         <!-- Add Part Button (Anchored Left) -->
                         <button
-                            v-if="can('inventory.parts.create') || isAnyAdmin()"
+                            v-if="can('inventory.moves.create') || isAnyAdmin()"
                             type="button"
                             @click="createPart"
                             class="inline-flex items-center gap-2 px-4 py-2.5 bg-action-primary hover:bg-action-primary-hover text-action-on rounded-xl font-bold shadow-xs transition-colors cursor-pointer"
@@ -221,7 +221,7 @@
                             $t('common.no_records_found', 'لم يتم العثور على أي سجلات مطابقة')
                         "
                         :action-text="
-                            can('inventory.parts.create') || isAnyAdmin()
+                            can('inventory.moves.create') || isAnyAdmin()
                                 ? $t('inventory.parts.add')
                                 : ''
                         "
@@ -390,7 +390,7 @@
                             >
                                 <Tooltip :content="$t('common.edit')">
                                     <button
-                                        v-if="can('inventory.parts.edit') || isAnyAdmin()"
+                                        v-if="can('inventory.moves.create') || isAnyAdmin()"
                                         type="button"
                                         @click="editPart(part)"
                                         class="p-1.5 text-text-muted hover:text-action-primary hover:bg-surface rounded-lg transition-colors cursor-pointer"
@@ -412,7 +412,7 @@
                                 </Tooltip>
                                 <Tooltip :content="$t('inventory.parts.warehouse_stock')">
                                     <button
-                                        v-if="can('inventory.parts.edit') || isAnyAdmin()"
+                                        v-if="can('inventory.moves.create') || isAnyAdmin()"
                                         type="button"
                                         @click="editPartStock(part)"
                                         class="p-1.5 text-text-muted hover:text-action-primary hover:bg-surface rounded-lg transition-colors cursor-pointer"
@@ -461,7 +461,7 @@
                             $t('common.no_records_found', 'لم يتم العثور على أي سجلات مطابقة')
                         "
                         :empty-action-text="
-                            can('inventory.parts.create') || isAnyAdmin()
+                            can('inventory.moves.create') || isAnyAdmin()
                                 ? $t('inventory.parts.add')
                                 : ''
                         "
@@ -592,7 +592,7 @@
                         <!-- Status Column -->
                         <template #cell-status="{ item }">
                             <button
-                                v-if="can('inventory.parts.deactivate') || isAnyAdmin()"
+                                v-if="can('inventory.moves.create') || isAnyAdmin()"
                                 type="button"
                                 @click="toggleActive(item)"
                                 class="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-semibold border transition-colors cursor-pointer"
@@ -622,7 +622,7 @@
                             <div class="flex items-center justify-center gap-1">
                                 <Tooltip :content="$t('common.edit')">
                                     <button
-                                        v-if="can('inventory.parts.edit') || isAnyAdmin()"
+                                        v-if="can('inventory.moves.create') || isAnyAdmin()"
                                         type="button"
                                         @click="editPart(item)"
                                         class="p-2 rounded-lg text-text-muted hover:text-action-primary hover:bg-action-primary-soft transition-colors cursor-pointer"
@@ -644,7 +644,7 @@
                                 </Tooltip>
                                 <Tooltip :content="$t('inventory.parts.warehouse_stock')">
                                     <button
-                                        v-if="can('inventory.parts.edit') || isAnyAdmin()"
+                                        v-if="can('inventory.moves.create') || isAnyAdmin()"
                                         type="button"
                                         @click="editPartStock(item)"
                                         class="p-2 rounded-lg text-text-muted hover:text-action-primary hover:bg-action-primary-soft transition-colors cursor-pointer"

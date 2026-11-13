@@ -201,19 +201,14 @@
             <div class="flex w-full gap-3">
                 <button
                     @click="$emit('close')"
-                    class="flex-1 px-4 py-3 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-xl text-sm font-black uppercase tracking-widest transition-all"
+                    class="flex-1 px-5 py-2.5 text-xs font-bold text-text-secondary hover:bg-surface-secondary border border-border rounded-xl transition-colors cursor-pointer"
                 >
                     {{ $t('common.cancel') }}
                 </button>
                 <button
                     @click="$emit('confirm')"
                     :disabled="hasOutOfStock"
-                    :class="[
-                        'flex-1 px-4 py-3 rounded-xl text-sm font-black uppercase tracking-widest transition-all flex justify-center items-center gap-2',
-                        hasOutOfStock
-                            ? 'bg-gray-300 dark:bg-gray-600 text-gray-500 dark:text-gray-400 cursor-not-allowed'
-                            : 'bg-action-primary hover:bg-action-primary-hover text-white shadow-lg shadow-focus-ring-soft dark:shadow-none',
-                    ]"
+                    class="flex-1 inline-flex items-center justify-center gap-2 px-6 py-2.5 text-xs font-bold text-white bg-action-primary hover:bg-action-primary-hover rounded-xl shadow-xs transition-all disabled:opacity-50 cursor-pointer"
                 >
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path

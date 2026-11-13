@@ -100,8 +100,12 @@
                                 </p>
                                 <p v-if="plan.trial_days > 0" class="text-xs text-emerald-600 mt-1">
                                     {{
-                                        $t('system.subscriptions.free_trial') + plan.trial_days
-                                    }}$t('common.day') }}
+                                        $t('system.subscriptions.free_trial') +
+                                        ' ' +
+                                        plan.trial_days +
+                                        ' ' +
+                                        $t('common.day')
+                                    }}
                                 </p>
                             </div>
                         </SelectableCard>

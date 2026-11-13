@@ -534,14 +534,14 @@
                         <button
                             type="button"
                             @click="expandAll"
-                            class="px-2.5 py-1 text-xs bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-650 text-gray-700 dark:text-gray-200 rounded-lg font-semibold"
+                            class="px-2.5 py-1 text-xs bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-700/70 text-gray-700 dark:text-gray-200 rounded-lg font-semibold"
                         >
                             {{ $t('reports.tickets_report.expand_all') }}
                         </button>
                         <button
                             type="button"
                             @click="collapseAll"
-                            class="px-2.5 py-1 text-xs bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-650 text-gray-700 dark:text-gray-200 rounded-lg font-semibold"
+                            class="px-2.5 py-1 text-xs bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-700/70 text-gray-700 dark:text-gray-200 rounded-lg font-semibold"
                         >
                             {{ $t('reports.tickets_report.collapse_all') }}
                         </button>
@@ -557,7 +557,7 @@
                     <!-- Accordion Header -->
                     <div
                         @click="toggleGroup(group.group_key)"
-                        class="p-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors flex flex-col md:flex-row md:items-center justify-between gap-3 bg-gray-50/50 dark:bg-gray-900/30"
+                        class="p-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700/60 transition-colors flex flex-col md:flex-row md:items-center justify-between gap-3 bg-gray-50/50 dark:bg-gray-900/30"
                     >
                         <div class="flex items-center gap-3">
                             <span
@@ -652,7 +652,7 @@
                         <div class="overflow-x-auto">
                             <DataTable structured class="w-full text-xs text-start">
                                 <thead
-                                    class="bg-gray-50 dark:bg-gray-850 text-gray-600 dark:text-gray-400 border-b border-gray-200 dark:border-gray-700"
+                                    class="bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-400 border-b border-gray-200 dark:border-gray-700"
                                 >
                                     <tr>
                                         <th class="py-3 px-3 text-center">#</th>
@@ -695,7 +695,7 @@
                                     <tr
                                         v-for="(tkt, idx) in group.tickets"
                                         :key="tkt.id"
-                                        class="hover:bg-gray-50/70 dark:hover:bg-gray-750/50 transition-colors"
+                                        class="hover:bg-gray-50/70 dark:hover:bg-gray-700/40 transition-colors"
                                     >
                                         <td class="py-3 px-3 text-center text-gray-400 font-mono">
                                             {{ idx + 1 }}
@@ -843,7 +843,7 @@
                 <div class="overflow-x-auto">
                     <DataTable structured class="w-full text-xs text-start">
                         <thead
-                            class="bg-gray-50 dark:bg-gray-850 text-gray-600 dark:text-gray-400 border-b border-gray-200 dark:border-gray-700"
+                            class="bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-400 border-b border-gray-200 dark:border-gray-700"
                         >
                             <tr>
                                 <th class="py-3 px-3 text-center">#</th>
@@ -926,7 +926,7 @@
                             <tr
                                 v-for="(tkt, idx) in tickets?.data"
                                 :key="tkt.id"
-                                class="hover:bg-gray-50/70 dark:hover:bg-gray-750/50 transition-colors"
+                                class="hover:bg-gray-50/70 dark:hover:bg-gray-700/40 transition-colors"
                             >
                                 <td class="py-3 px-3 text-center text-gray-400 font-mono">
                                     {{ (tickets.current_page - 1) * tickets.per_page + idx + 1 }}

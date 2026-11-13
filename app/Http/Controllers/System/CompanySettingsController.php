@@ -10,52 +10,12 @@ use App\Services\System\SystemAuditService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
-use Inertia\Inertia;
-use Inertia\Response;
 
 class CompanySettingsController extends Controller
 {
     public function __construct(
         protected SystemAuditService $audit
     ) {}
-
-    /**
-     * Show company settings page.
-     *
-     * Company info + subscription VAT are stored on the PaymentSettings row
-     * (shared table) because the original schema has only one settings row,
-     * and these fields are rendered on tenant invoices. We keep writing to
-     * the same row so we don't break any existing data or invoice rendering.
-     */
-    public function index(): Response
-    {
-        $settings = PaymentSettings::first() ?? new PaymentSettings;
-
-        $companySettings = [
-            'company_legal_name' => $settings->company_legal_name,
-            'company_legal_name_en' => $settings->company_legal_name_en,
-            'company_vat_number' => $settings->company_vat_number,
-            'company_cr_number' => $settings->company_cr_number,
-            'company_phone' => $settings->company_phone,
-            'company_email' => $settings->company_email,
-            'company_website' => $settings->company_website,
-            'company_logo_url' => $settings->company_logo_path
-                ? Storage::url($settings->company_logo_path)
-                : null,
-            'company_stamp_url' => $settings->company_stamp_path
-                ? Storage::url($settings->company_stamp_path)
-                : null,
-
-            // Subscription VAT — applied to tenant subscription invoices
-            'subscription_vat_enabled' => (bool) ($settings->subscription_vat_enabled ?? false),
-            'subscription_vat_rate' => (float) ($settings->subscription_vat_rate ?? 15),
-            'subscription_vat_inclusive' => (bool) ($settings->subscription_vat_inclusive ?? false),
-        ];
-
-        return Inertia::render('System/Settings/CompanySettings', [
-            'settings' => $companySettings,
-        ]);
-    }
 
     /**
      * Update company settings (including subscription VAT).
@@ -116,7 +76,7 @@ class CompanySettingsController extends Controller
     public function uploadLogo(Request $request): JsonResponse
     {
         $request->validate([
-            'logo' => 'required|image|mimes:png,jpg,jpeg,webp,svg|max:4096',
+            'logo' => 'required|image|mimes:png,jpg,jpeg,webp|max:4096',
         ]);
 
         $settings = PaymentSettings::first() ?? new PaymentSettings;
@@ -163,7 +123,7 @@ class CompanySettingsController extends Controller
     public function uploadStamp(Request $request): JsonResponse
     {
         $request->validate([
-            'stamp' => 'required|image|mimes:png,jpg,jpeg,webp,svg|max:2048',
+            'stamp' => 'required|image|mimes:png,jpg,jpeg,webp|max:2048',
         ]);
 
         $settings = PaymentSettings::first() ?? new PaymentSettings;

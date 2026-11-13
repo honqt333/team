@@ -41,7 +41,9 @@ class InventoryMove extends Model
         'qty',
         'unit_cost',
         'total_cost',
+        'balance_before',
         'balance_after',
+        'wac_before',
         'wac_after',
         'reference_type',
         'reference_id',
@@ -58,11 +60,60 @@ class InventoryMove extends Model
         'qty' => 'decimal:3',
         'unit_cost' => 'decimal:4',
         'total_cost' => 'decimal:2',
+        'balance_before' => 'decimal:3',
         'balance_after' => 'decimal:3',
+        'wac_before' => 'decimal:4',
         'wac_after' => 'decimal:4',
         'posted_at' => 'datetime',
         'reversed_at' => 'datetime',
     ];
+
+    protected $appends = [
+        'previous_stock',
+        'stock_before',
+        'new_stock',
+        'stock_after',
+        'previous_cost',
+        'new_wac',
+    ];
+
+    public function getPreviousStockAttribute(): float
+    {
+        if (array_key_exists('balance_before', $this->attributes) && $this->attributes['balance_before'] !== null) {
+            return round((float) $this->attributes['balance_before'], 3);
+        }
+
+        return round((float) ($this->attributes['balance_after'] ?? 0) - (float) ($this->attributes['qty'] ?? 0), 3);
+    }
+
+    public function getStockBeforeAttribute(): float
+    {
+        return $this->getPreviousStockAttribute();
+    }
+
+    public function getNewStockAttribute(): float
+    {
+        return round((float) ($this->attributes['balance_after'] ?? 0), 3);
+    }
+
+    public function getStockAfterAttribute(): float
+    {
+        return $this->getNewStockAttribute();
+    }
+
+    public function getPreviousCostAttribute(): float
+    {
+        if (array_key_exists('wac_before', $this->attributes) && $this->attributes['wac_before'] !== null) {
+            return round((float) $this->attributes['wac_before'], 4);
+        }
+
+        return round((float) ($this->attributes['wac_after'] ?? 0), 4);
+    }
+
+    public function getNewWacAttribute(): float
+    {
+        return round((float) ($this->attributes['wac_after'] ?? 0), 4);
+    }
 
     // ─────────────────────────────────────────────────────────────
     // Relationships

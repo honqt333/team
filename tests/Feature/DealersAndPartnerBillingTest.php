@@ -8,6 +8,7 @@ use App\Actions\WorkOrder\CreateWorkOrderAction;
 use App\Models\Center;
 use App\Models\Customer;
 use App\Models\Dealer;
+use App\Models\DealerPaymentTerm;
 use App\Models\Tenant;
 use App\Models\User;
 use App\Models\Vehicle;
@@ -44,6 +45,8 @@ class DealersAndPartnerBillingTest extends TestCase
             Permissions::CUSTOMERS_CREATE,
             Permissions::CUSTOMERS_UPDATE,
             Permissions::CUSTOMERS_DELETE,
+            Permissions::VEHICLES_VIEW,
+            Permissions::VEHICLES_CREATE,
             Permissions::WORK_ORDERS_VIEW,
             Permissions::WORK_ORDERS_CREATE,
             Permissions::WORK_ORDERS_UPDATE,
@@ -82,6 +85,8 @@ class DealersAndPartnerBillingTest extends TestCase
             Permissions::CUSTOMERS_CREATE,
             Permissions::CUSTOMERS_UPDATE,
             Permissions::CUSTOMERS_DELETE,
+            Permissions::VEHICLES_VIEW,
+            Permissions::VEHICLES_CREATE,
             Permissions::WORK_ORDERS_VIEW,
             Permissions::WORK_ORDERS_CREATE,
             Permissions::WORK_ORDERS_UPDATE,
@@ -353,5 +358,197 @@ class DealersAndPartnerBillingTest extends TestCase
         $csv = $exportResponse->streamedContent();
         $this->assertStringContainsString('WO-DLR-001', $csv);
         $this->assertStringContainsString('شركة تأجير الخليج', $csv);
+    }
+
+    public function test_dealer_payment_terms_crud_and_tenant_isolation(): void
+    {
+        $dealer = Dealer::create([
+            'tenant_id' => $this->tenant->id,
+            'center_id' => $this->center->id,
+            'name' => 'شركة التعاونية للتأمين',
+            'type' => Dealer::TYPE_INSURANCE,
+            'is_active' => true,
+        ]);
+
+        // 1. Store payment term
+        $this->actingAs($this->user)
+            ->post(route('app.dealers.payment-terms.store', $dealer), [
+                'term_text' => 'السداد خلال 30 يوماً من تاريخ إصدار الفاتورة الضريبية.',
+                'sort_order' => 1,
+            ])
+            ->assertRedirect();
+
+        $this->assertDatabaseHas('dealer_payment_terms', [
+            'tenant_id' => $this->tenant->id,
+            'dealer_id' => $dealer->id,
+            'term_text' => 'السداد خلال 30 يوماً من تاريخ إصدار الفاتورة الضريبية.',
+            'sort_order' => 1,
+        ]);
+
+        $paymentTerm = $dealer->paymentTerms()->firstOrFail();
+
+        // 2. Update payment term
+        $this->actingAs($this->user)
+            ->put(route('app.dealers.payment-terms.update', [$dealer, $paymentTerm]), [
+                'term_text' => 'السداد خلال 45 يوماً عبر حوالة بنكية معتمدة.',
+                'sort_order' => 2,
+            ])
+            ->assertRedirect();
+
+        $this->assertDatabaseHas('dealer_payment_terms', [
+            'id' => $paymentTerm->id,
+            'term_text' => 'السداد خلال 45 يوماً عبر حوالة بنكية معتمدة.',
+            'sort_order' => 2,
+        ]);
+
+        // 3. Tenant isolation: user cannot modify or delete another tenant's payment term
+        $otherTenant = Tenant::create([
+            'name' => 'Other Workshop',
+            'slug' => 'other-workshop-pt',
+            'country' => 'SA',
+            'currency' => 'SAR',
+            'timezone' => 'Asia/Riyadh',
+            'is_active' => true,
+        ]);
+        $otherCenter = Center::create([
+            'tenant_id' => $otherTenant->id,
+            'name' => 'Other Center',
+            'slug' => 'other-center-pt',
+            'is_active' => true,
+        ]);
+        $foreignDealer = Dealer::create([
+            'tenant_id' => $otherTenant->id,
+            'center_id' => $otherCenter->id,
+            'name' => 'Foreign Insurance',
+            'type' => Dealer::TYPE_INSURANCE,
+            'is_active' => true,
+        ]);
+        $foreignTerm = DealerPaymentTerm::create([
+            'tenant_id' => $otherTenant->id,
+            'dealer_id' => $foreignDealer->id,
+            'term_text' => 'Foreign term',
+            'sort_order' => 1,
+        ]);
+
+        $this->actingAs($this->user)
+            ->delete(route('app.dealers.payment-terms.destroy', [$foreignDealer->id, $foreignTerm->id]))
+            ->assertNotFound();
+
+        // 4. Delete payment term by authorized user
+        $this->actingAs($this->user)
+            ->delete(route('app.dealers.payment-terms.destroy', [$dealer, $paymentTerm]))
+            ->assertRedirect();
+
+        $this->assertDatabaseMissing('dealer_payment_terms', [
+            'id' => $paymentTerm->id,
+        ]);
+    }
+
+    public function test_adding_vehicle_linked_to_dealer(): void
+    {
+        $dealer = Dealer::create([
+            'tenant_id' => $this->tenant->id,
+            'center_id' => $this->center->id,
+            'name' => 'شركة أسطول المدار',
+            'type' => Dealer::TYPE_FLEET,
+            'is_active' => true,
+        ]);
+
+        $this->actingAs($this->user)
+            ->post(route('vehicles.store'), [
+                'customer_id' => $this->customer->id,
+                'dealer_id' => $dealer->id,
+                'plate_number' => 'أ ب ج 1234',
+                'make_other' => 'Toyota',
+                'model_other' => 'Hilux',
+                'year' => 2025,
+                'color' => 'أبيض',
+                'odometer' => 15000,
+                'vin' => 'JTEBU29J000012345',
+            ])
+            ->assertRedirect();
+
+        $this->assertDatabaseHas('vehicles', [
+            'tenant_id' => $this->tenant->id,
+            'customer_id' => $this->customer->id,
+            'dealer_id' => $dealer->id,
+            'year' => 2025,
+        ]);
+    }
+
+    public function test_open_uninvoiced_work_order_balance_reflected_on_dealer_without_double_counting(): void
+    {
+        $dealer = Dealer::create([
+            'tenant_id' => $this->tenant->id,
+            'center_id' => $this->center->id,
+            'name' => 'شركة النقل السريع',
+            'type' => Dealer::TYPE_CORPORATE,
+            'is_active' => true,
+        ]);
+
+        $vehicle = Vehicle::create([
+            'tenant_id' => $this->tenant->id,
+            'center_id' => $this->center->id,
+            'customer_id' => $this->customer->id,
+            'dealer_id' => $dealer->id,
+            'plate_number' => 'KSA 9090',
+        ]);
+
+        /** @var CreateWorkOrderAction $createAction */
+        $createAction = app(CreateWorkOrderAction::class);
+        $workOrder = $createAction->execute($this->user, [
+            'customer_id' => $this->customer->id,
+            'vehicle_id' => $vehicle->id,
+            'dealer_id' => $dealer->id,
+            'is_paid_by_dealer' => true,
+            'entry_date' => now()->toDateString(),
+        ]);
+
+        WorkOrderItem::create([
+            'tenant_id' => $this->tenant->id,
+            'center_id' => $this->center->id,
+            'work_order_id' => $workOrder->id,
+            'title' => 'Engine Diagnostic & Tune-up',
+            'qty' => 1,
+            'unit_price' => 100.00,
+            'status' => WorkOrderItem::STATUS_COMPLETED,
+        ]);
+        $workOrder->save();
+        $workOrder->refresh();
+
+        $expectedWorkOrderTotal = round((float) $workOrder->total, 2);
+        $this->assertGreaterThan(0, $expectedWorkOrderTotal);
+
+        // 1. Before invoicing: Dealer::getOutstandingBalance() reflects the open work order balance
+        $this->assertSame($expectedWorkOrderTotal, round($dealer->fresh()->getOutstandingBalance(), 2));
+
+        // 2. Dealer Show endpoint includes open uninvoiced work order in outstandingBalance and financialSummary.total_due
+        $this->actingAs($this->user)
+            ->get(route('app.dealers.show', $dealer))
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page
+                ->component('Dealers/Show')
+                ->where('outstandingBalance', fn ($val) => abs((float) $val - $expectedWorkOrderTotal) < 0.01)
+                ->where('financialSummary.total_due', fn ($val) => abs((float) $val - $expectedWorkOrderTotal) < 0.01)
+                ->where('financialSummary.open_work_orders_due', fn ($val) => abs((float) $val - $expectedWorkOrderTotal) < 0.01)
+            );
+
+        // 3. Once invoiced: balance is reflected from the invoice without double-counting the work order
+        /** @var InvoiceService $invoiceService */
+        $invoiceService = app(InvoiceService::class);
+        $invoice = $invoiceService->createFromWorkOrder($workOrder->fresh(), $this->user);
+
+        $expectedInvoiceBalance = round((float) $invoice->balance, 2);
+        $this->assertSame($expectedInvoiceBalance, round($dealer->fresh()->getOutstandingBalance(), 2));
+
+        $this->actingAs($this->user)
+            ->get(route('app.dealers.show', $dealer))
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page
+                ->component('Dealers/Show')
+                ->where('outstandingBalance', fn ($val) => abs((float) $val - $expectedInvoiceBalance) < 0.01)
+                ->where('financialSummary.total_due', fn ($val) => abs((float) $val - $expectedInvoiceBalance) < 0.01)
+                ->where('financialSummary.open_work_orders_due', fn ($val) => (float) $val === 0.0)
+            );
     }
 }

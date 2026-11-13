@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers\System;
 
 use App\Http\Controllers\Controller;
+use App\Models\AdminUser;
 use App\Models\BankTransferReceipt;
 use App\Models\Billing\Plan;
 use App\Models\Billing\Subscription;
@@ -12,6 +13,7 @@ use App\Models\Billing\SubscriptionInvoice;
 use App\Models\Billing\SubscriptionPayment;
 use App\Models\PaymentSettings;
 use App\Models\Tenant;
+use App\Services\Billing\PromoCodeValidator;
 use App\Services\Billing\SubscriptionLifecycleService;
 use App\Services\System\SystemAuditService;
 use Illuminate\Http\Request;
@@ -134,7 +136,27 @@ class SubscriptionsController extends Controller
         $settlementType = $validated['settlement_type'] ?? 'standard';
         $paymentMethod = $validated['payment_method'] ?? 'cash';
 
-        $subscription = DB::transaction(function () use ($request, $validated, $tenant, $plan, $billingCycle, $price, $isTrial, $settlementType, $paymentMethod) {
+        $promoValidator = app(PromoCodeValidator::class);
+        $promoCheck = null;
+        $discount = 0.0;
+        $effectivePrice = $price;
+
+        if (! empty($validated['promo_code'])) {
+            $promoCheck = $promoValidator->check($validated['promo_code'], (int) $tenant->id);
+
+            if (! $promoCheck->isValid()) {
+                return back()->withErrors([
+                    'promo_code' => $promoValidator->messageFor($promoCheck),
+                ])->withInput();
+            }
+
+            if (! $isTrial && $settlementType !== 'complimentary') {
+                $discount = $promoValidator->discountFor($promoCheck, $price);
+                $effectivePrice = max(0.0, $price - $discount);
+            }
+        }
+
+        $subscription = DB::transaction(function () use ($request, $validated, $tenant, $plan, $billingCycle, $effectivePrice, $discount, $promoValidator, $promoCheck, $isTrial, $settlementType, $paymentMethod) {
             $startDate = now();
 
             if ($isTrial) {
@@ -181,14 +203,18 @@ class SubscriptionsController extends Controller
                     'starts_at' => $dates['starts_at'],
                     'ends_at' => $dates['ends_at'],
                     'trial_ends_at' => null,
-                    'price' => $price,
+                    'price' => $effectivePrice,
                     'payment_method' => $paymentMethod,
                     'auto_renew' => true,
                     'promo_code' => $validated['promo_code'] ?? null,
                 ]);
 
+                if ($promoCheck && $promoCheck->isValid()) {
+                    $promoValidator->recordUsage($promoCheck->promo, (int) $tenant->id, $subscription->id, $discount);
+                }
+
                 $paymentSettings = PaymentSettings::first();
-                $vatCalc = $paymentSettings?->calculateVat($price) ?? ['exclusive' => $price, 'vat' => 0, 'total' => $price];
+                $vatCalc = $paymentSettings?->calculateVat($effectivePrice) ?? ['exclusive' => $effectivePrice, 'vat' => 0, 'total' => $effectivePrice];
 
                 SubscriptionInvoice::create([
                     'subscription_id' => $subscription->id,
@@ -196,7 +222,7 @@ class SubscriptionsController extends Controller
                     'invoice_number' => SubscriptionInvoice::generateNumber(),
                     'subtotal' => $vatCalc['exclusive'],
                     'vat' => $vatCalc['vat'],
-                    'discount' => 0,
+                    'discount' => $discount,
                     'total' => $vatCalc['total'],
                     'status' => 'pending',
                     'issued_at' => now(),
@@ -220,7 +246,7 @@ class SubscriptionsController extends Controller
                 'starts_at' => $dates['starts_at'],
                 'ends_at' => $dates['ends_at'],
                 'trial_ends_at' => null,
-                'price' => $settlementType === 'complimentary' ? 0.0 : $price,
+                'price' => $settlementType === 'complimentary' ? 0.0 : $effectivePrice,
                 'payment_method' => match ($settlementType) {
                     'paid_now' => $paymentMethod,
                     'complimentary' => 'complimentary',
@@ -229,6 +255,10 @@ class SubscriptionsController extends Controller
                 'auto_renew' => true,
                 'promo_code' => $validated['promo_code'] ?? null,
             ]);
+
+            if ($promoCheck && $promoCheck->isValid()) {
+                $promoValidator->recordUsage($promoCheck->promo, (int) $tenant->id, $subscription->id, $discount);
+            }
 
             $subscription->tenant->update([
                 'status' => 'active',
@@ -240,7 +270,7 @@ class SubscriptionsController extends Controller
 
             if ($settlementType === 'paid_now') {
                 $paymentSettings = PaymentSettings::first();
-                $vatCalc = $paymentSettings?->calculateVat($price) ?? ['exclusive' => $price, 'vat' => 0, 'total' => $price];
+                $vatCalc = $paymentSettings?->calculateVat($effectivePrice) ?? ['exclusive' => $effectivePrice, 'vat' => 0, 'total' => $effectivePrice];
                 $collectedAmount = isset($validated['paid_amount']) && (float) $validated['paid_amount'] > 0
                     ? (float) $validated['paid_amount']
                     : (float) $vatCalc['total'];
@@ -258,7 +288,7 @@ class SubscriptionsController extends Controller
                     'invoice_number' => SubscriptionInvoice::generateNumber(),
                     'subtotal' => $vatCalc['exclusive'],
                     'vat' => $vatCalc['vat'],
-                    'discount' => 0,
+                    'discount' => $discount,
                     'total' => $collectedAmount,
                     'status' => 'paid',
                     'issued_at' => now(),
@@ -320,10 +350,7 @@ class SubscriptionsController extends Controller
      */
     public function cancel(Request $request, Subscription $subscription)
     {
-        $subscription->update([
-            'status' => 'cancelled',
-            'cancelled_at' => now(),
-        ]);
+        $previousStatus = $subscription->status;
 
         // `$request->user()` honours the guard activated for this
         // request by the `auth:web,admin` middleware, so it returns
@@ -331,26 +358,36 @@ class SubscriptionsController extends Controller
         // tenant-session system admin. `auth('admin')` only ever looks
         // at the 'admin' guard, so for a tenant-session admin it
         // returned null and the superseded receipt lost its reviewer.
-        $reviewerId = $request->user()?->id;
+        $actor = $request->user();
+        $reviewerId = $actor instanceof AdminUser
+            ? $actor->id
+            : ($actor ? AdminUser::where('user_id', $actor->id)->value('id') : null);
 
-        // Close any open invoices on this subscription. Without this the
-        // tenant's subscription page would still show a "pending" invoice
-        // even after the admin cancels — confusing for both sides.
-        $subscription->invoices()
-            ->whereIn('status', ['pending', 'pending_payment'])
-            ->update(['status' => 'cancelled']);
-
-        // Mark any pending bank transfer receipts as superseded so the
-        // admin queue doesn't keep them and so any approval after the
-        // cancel doesn't accidentally re-activate this subscription.
-        BankTransferReceipt::where('subscription_id', $subscription->id)
-            ->where('status', 'pending')
-            ->update([
-                'status' => 'superseded',
-                'reviewed_by' => $reviewerId,
-                'reviewed_at' => now(),
-                'review_notes' => 'Subscription cancelled by admin — receipt superseded.',
+        DB::transaction(function () use ($subscription, $reviewerId) {
+            $subscription->update([
+                'status' => 'cancelled',
+                'cancelled_at' => now(),
             ]);
+
+            // Close any open invoices on this subscription. Without this the
+            // tenant's subscription page would still show a "pending" invoice
+            // even after the admin cancels — confusing for both sides.
+            $subscription->invoices()
+                ->whereIn('status', ['pending', 'pending_payment'])
+                ->update(['status' => 'cancelled']);
+
+            // Mark any pending bank transfer receipts as superseded so the
+            // admin queue doesn't keep them and so any approval after the
+            // cancel doesn't accidentally re-activate this subscription.
+            BankTransferReceipt::where('subscription_id', $subscription->id)
+                ->where('status', 'pending')
+                ->update([
+                    'status' => 'superseded',
+                    'reviewed_by' => $reviewerId,
+                    'reviewed_at' => now(),
+                    'review_notes' => 'Subscription cancelled by admin — receipt superseded.',
+                ]);
+        });
 
         // NOTE: We deliberately do NOT change tenant.status here.
         // Cancelling a subscription shouldn't lock the tenant out of the
@@ -362,7 +399,7 @@ class SubscriptionsController extends Controller
         $this->audit->log('subscription_cancel', Subscription::class, $subscription->id, [
             'tenant_id' => $subscription->tenant_id,
             'plan_id' => $subscription->plan_id,
-            'previous_status' => $subscription->status,
+            'previous_status' => $previousStatus,
         ], $request);
 
         return back()->with('success', __('messages.system.subscriptions.cancelled_success'));

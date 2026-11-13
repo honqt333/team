@@ -39,6 +39,7 @@ use Closure;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -4346,6 +4347,14 @@ class ReportsController extends Controller
     private function transformDealerReportRow(WorkOrder $wo): array
     {
         $row = $this->transformCustomerReportRow($wo);
+
+        if ((float) ($row['payment_due'] ?? 0) <= 0 && (float) $wo->total > 0) {
+            $due = (float) $wo->total;
+            $paid = (float) ($row['amount_paid'] ?? 0);
+            $row['payment_due'] = $due;
+            $row['payment_remaining'] = max(0.0, $due - $paid);
+            $row['payment_status'] = $paid >= $due - 0.01 ? 'paid' : ($paid > 0 ? 'partial' : 'unpaid');
+        }
         $row['is_paid_by_dealer'] = (bool) $wo->is_paid_by_dealer;
         $row['dealer'] = [
             'id' => $wo->dealer?->id,
@@ -5040,6 +5049,9 @@ class ReportsController extends Controller
 
             return [
                 'id' => $row->item_id,
+                'is_credit_note' => false,
+                'credit_note_id' => null,
+                'credit_note_number' => null,
                 'work_order_id' => $row->work_order_id,
                 'ticket_no' => $row->ticket_no,
                 'ticket_status' => $row->ticket_status,
@@ -5066,6 +5078,26 @@ class ReportsController extends Controller
                 'is_overdue' => $isOverdue,
             ];
         });
+
+        $creditNoteItems = $this->getVehiclesCreditNoteItems(
+            $tenantId,
+            $centerId,
+            $from,
+            $to,
+            $centerFilter,
+            $makeFilter,
+            $modelFilter,
+            $serviceStatusFilter,
+            $ticketNo,
+            $plateNo,
+            $isOverdue,
+            $warehousePartsOnly,
+            $search
+        );
+
+        if ($creditNoteItems->isNotEmpty()) {
+            $mappedItems = $mappedItems->concat($creditNoteItems)->values();
+        }
 
         // Overall KPIs calculation
         $totalRecords = $mappedItems->count();
@@ -5108,6 +5140,7 @@ class ReportsController extends Controller
                         'completed' => 'مكتمل',
                         'on_hold' => 'معلق',
                         'cancelled' => 'ملغي',
+                        'returned' => 'مرتجع',
                         default => $key,
                     },
                     default => $key,
@@ -5176,6 +5209,7 @@ class ReportsController extends Controller
                     ['id' => 'completed', 'label' => 'مكتمل'],
                     ['id' => 'on_hold', 'label' => 'معلق'],
                     ['id' => 'cancelled', 'label' => 'ملغي'],
+                    ['id' => 'returned', 'label' => 'مرتجع'],
                 ],
                 'groups' => [
                     ['id' => 'none', 'label' => 'بدون تجميع (قائمة مسطحة)'],
@@ -5226,6 +5260,22 @@ class ReportsController extends Controller
             $search
         )->orderBy('work_order_items.id', 'desc');
 
+        $creditNoteItems = $this->getVehiclesCreditNoteItems(
+            $tenantId,
+            $centerId,
+            $from,
+            $to,
+            $centerFilter,
+            $makeFilter,
+            $modelFilter,
+            $serviceStatusFilter,
+            $ticketNo,
+            $plateNo,
+            $isOverdue,
+            $warehousePartsOnly,
+            $search
+        );
+
         $headers = [
             'Content-Type' => 'text/csv; charset=UTF-8',
             'Content-Disposition' => 'attachment; filename="vehicles_report_'.now()->format('Y-m-d_His').'.csv"',
@@ -5234,7 +5284,7 @@ class ReportsController extends Controller
             'Expires' => '0',
         ];
 
-        return response()->stream(function () use ($query) {
+        return response()->stream(function () use ($query, $creditNoteItems) {
             $handle = fopen('php://output', 'w');
             // Write UTF-8 BOM for Excel compatibility
             fwrite($handle, "\xEF\xBB\xBF");
@@ -5282,6 +5332,7 @@ class ReportsController extends Controller
                         'completed' => 'مكتمل',
                         'on_hold' => 'معلق',
                         'cancelled' => 'ملغي',
+                        'returned' => 'مرتجع',
                         default => $row->service_status,
                     };
 
@@ -5316,6 +5367,38 @@ class ReportsController extends Controller
                     ]);
                 }
             });
+
+            foreach ($creditNoteItems as $cnItem) {
+                $ticketStatusLabel = match ($cnItem['ticket_status']) {
+                    'draft' => 'مسودة',
+                    'open' => 'مفتوح',
+                    'in_progress' => 'قيد العمل',
+                    'on_hold' => 'معلق',
+                    'done' => 'مكتمل',
+                    'ready_for_qc' => 'جاهز للفحص',
+                    'cancelled' => 'ملغي',
+                    default => $cnItem['ticket_status'],
+                };
+
+                fputcsv($handle, [
+                    $rowNumber++,
+                    $cnItem['shop_name'],
+                    trim(($cnItem['make_name'] ?? '').' '.($cnItem['model_name'] ?? '')),
+                    $cnItem['plate_no'],
+                    $cnItem['vehicle_year'] ?: '',
+                    $cnItem['odometer_km'] ?: '',
+                    $cnItem['ticket_no'].($cnItem['credit_note_number'] ? ' ('.$cnItem['credit_note_number'].')' : ''),
+                    $ticketStatusLabel,
+                    $cnItem['section_name'],
+                    $cnItem['service_name'],
+                    'مرتجع',
+                    $cnItem['due_date'],
+                    number_format((float) $cnItem['service_cost'], 2, '.', ''),
+                    number_format((float) $cnItem['spare_part_cost'], 2, '.', ''),
+                    number_format((float) $cnItem['total'], 2, '.', ''),
+                    $cnItem['details'],
+                ]);
+            }
 
             fclose($handle);
         }, 200, $headers);
@@ -5459,6 +5542,8 @@ class ReportsController extends Controller
             'work_orders.notes as ticket_notes',
             'centers.name as shop_name',
             'vehicles.id as vehicle_id',
+            'vehicles.make_id as make_id',
+            'vehicles.model_id as model_id',
             'vehicles.plate_number as plate_no',
             'vehicles.year as vehicle_year',
             'vehicles.odometer as vehicle_odometer',
@@ -5473,6 +5558,270 @@ class ReportsController extends Controller
             'services.name_ar as service_name',
             DB::raw("{$partsSubquery} as spare_part_cost"),
         ]);
+    }
+
+    /**
+     * Build negative credit note / sales return items for the Vehicles Report
+     * so Total Service Cost and rows reflect true net values after returns.
+     */
+    private function getVehiclesCreditNoteItems(
+        int $tenantId,
+        ?int $centerId,
+        ?Carbon $from,
+        ?Carbon $to,
+        string $centerFilter,
+        string $makeFilter,
+        string $modelFilter,
+        string $serviceStatusFilter,
+        string $ticketNo,
+        string $plateNo,
+        bool $isOverdue,
+        bool $warehousePartsOnly,
+        string $search
+    ): Collection {
+        if ($isOverdue) {
+            return collect();
+        }
+
+        if ($serviceStatusFilter !== 'all' && $serviceStatusFilter !== '' && $serviceStatusFilter !== 'returned') {
+            return collect();
+        }
+
+        $user = auth()->user();
+        $userCenterIds = $user?->centers()->pluck('centers.id')->toArray() ?? [];
+
+        $query = DB::table('invoices')
+            ->leftJoin('invoices as orig_inv', 'invoices.original_invoice_id', '=', 'orig_inv.id')
+            ->join('work_orders', function ($join) {
+                $join->on('work_orders.id', '=', DB::raw('COALESCE(invoices.work_order_id, orig_inv.work_order_id)'));
+            })
+            ->join('vehicles', 'work_orders.vehicle_id', '=', 'vehicles.id')
+            ->leftJoin('centers', 'work_orders.center_id', '=', 'centers.id')
+            ->leftJoin('vehicle_makes', 'vehicles.make_id', '=', 'vehicle_makes.id')
+            ->leftJoin('vehicle_models', 'vehicles.model_id', '=', 'vehicle_models.id')
+            ->leftJoin('customers', 'work_orders.customer_id', '=', 'customers.id')
+            ->where('invoices.tenant_id', $tenantId)
+            ->where('invoices.type', 'credit_note')
+            ->whereNotIn('invoices.status', ['cancelled', 'draft'])
+            ->whereNull('invoices.deleted_at')
+            ->whereNull('work_orders.deleted_at')
+            ->whereNull('vehicles.deleted_at');
+
+        if ($centerFilter !== 'all') {
+            $query->where('work_orders.center_id', (int) $centerFilter);
+        } elseif (! empty($userCenterIds)) {
+            $query->whereIn('work_orders.center_id', $userCenterIds);
+        }
+
+        if ($from && $to) {
+            $cnDateExpr = 'COALESCE(DATE(invoices.issue_date), invoices.supply_date, DATE(invoices.created_at))';
+            $woDateExpr = 'COALESCE(DATE(work_orders.expected_end_date), work_orders.entry_date, DATE(work_orders.created_at))';
+            $query->whereRaw(
+                "({$cnDateExpr} BETWEEN ? AND ? OR {$woDateExpr} BETWEEN ? AND ?)",
+                [$from->toDateString(), $to->toDateString(), $from->toDateString(), $to->toDateString()]
+            );
+        }
+
+        if ($makeFilter !== 'all' && ! empty($makeFilter)) {
+            $query->where('vehicles.make_id', (int) $makeFilter);
+        }
+
+        if ($modelFilter !== 'all' && ! empty($modelFilter)) {
+            $query->where('vehicles.model_id', (int) $modelFilter);
+        }
+
+        if ($ticketNo !== '') {
+            $query->where(function ($q) use ($ticketNo) {
+                $q->where('work_orders.code', 'like', "%{$ticketNo}%")
+                    ->orWhere('invoices.invoice_number', 'like', "%{$ticketNo}%");
+            });
+        }
+
+        if ($plateNo !== '') {
+            $query->where('vehicles.plate_number', 'like', "%{$plateNo}%");
+        }
+
+        if ($warehousePartsOnly) {
+            $query->whereExists(function ($subQuery) {
+                $subQuery->select(DB::raw(1))
+                    ->from('invoice_lines as il')
+                    ->join('work_order_item_parts as woip', 'il.work_order_item_part_id', '=', 'woip.id')
+                    ->whereColumn('il.invoice_id', 'invoices.id')
+                    ->where('il.is_part', true)
+                    ->where('woip.source', WorkOrderItemPart::SOURCE_WAREHOUSE)
+                    ->whereNull('woip.deleted_at');
+            });
+        }
+
+        if ($search !== '') {
+            $query->where(function ($sq) use ($search) {
+                $sq->where('work_orders.code', 'like', "%{$search}%")
+                    ->orWhere('invoices.invoice_number', 'like', "%{$search}%")
+                    ->orWhere('invoices.return_reason', 'like', "%{$search}%")
+                    ->orWhere('vehicles.plate_number', 'like', "%{$search}%")
+                    ->orWhere('vehicle_makes.name_ar', 'like', "%{$search}%")
+                    ->orWhere('vehicle_makes.name_en', 'like', "%{$search}%")
+                    ->orWhere('vehicle_models.name_ar', 'like', "%{$search}%")
+                    ->orWhere('vehicle_models.name_en', 'like', "%{$search}%")
+                    ->orWhere('vehicles.make_other', 'like', "%{$search}%")
+                    ->orWhere('vehicles.model_other', 'like', "%{$search}%")
+                    ->orWhere('customers.name', 'like', "%{$search}%")
+                    ->orWhere('customers.phone', 'like', "%{$search}%");
+            });
+        }
+
+        $creditNotes = $query->select([
+            'invoices.id as credit_note_id',
+            'invoices.invoice_number',
+            'invoices.issue_date',
+            'invoices.supply_date',
+            'invoices.created_at as cn_created_at',
+            'invoices.return_reason',
+            'invoices.notes as cn_notes',
+            'invoices.total_excl_tax',
+            'invoices.total_incl_tax',
+            'invoices.tax_enabled_snapshot',
+            'invoices.pricing_mode_snapshot',
+            'work_orders.id as work_order_id',
+            'work_orders.code as ticket_no',
+            'work_orders.status as ticket_status',
+            'work_orders.center_id',
+            'work_orders.expected_end_date',
+            'work_orders.entry_date',
+            'work_orders.created_at as ticket_created_at',
+            'work_orders.odometer as ticket_odometer',
+            'work_orders.notes as ticket_notes',
+            'centers.name as shop_name',
+            'vehicles.id as vehicle_id',
+            'vehicles.make_id as make_id',
+            'vehicles.model_id as model_id',
+            'vehicles.plate_number as plate_no',
+            'vehicles.year as vehicle_year',
+            'vehicles.odometer as vehicle_odometer',
+            'vehicles.notes as vehicle_notes',
+            'vehicle_makes.name_ar as make_name_ar',
+            'vehicle_makes.name_en as make_name_en',
+            'vehicles.make_other',
+            'vehicle_models.name_ar as model_name_ar',
+            'vehicle_models.name_en as model_name_en',
+            'vehicles.model_other',
+        ])
+            ->orderBy('invoices.id', 'desc')
+            ->get();
+
+        if ($creditNotes->isEmpty()) {
+            return collect();
+        }
+
+        $creditNoteIds = $creditNotes->pluck('credit_note_id')->all();
+        $linesByInvoice = DB::table('invoice_lines')
+            ->leftJoin('work_order_items', 'invoice_lines.work_order_item_id', '=', 'work_order_items.id')
+            ->leftJoin('departments', 'work_order_items.department_id', '=', 'departments.id')
+            ->whereIn('invoice_lines.invoice_id', $creditNoteIds)
+            ->select([
+                'invoice_lines.*',
+                'departments.name_ar as department_name_ar',
+            ])
+            ->get()
+            ->groupBy('invoice_id');
+
+        return $creditNotes->map(function ($cn) use ($linesByInvoice) {
+            $lines = $linesByInvoice->get($cn->credit_note_id, collect());
+            $isInclusive = ($cn->pricing_mode_snapshot ?? 'exclusive') === 'inclusive'
+                && (bool) ($cn->tax_enabled_snapshot ?? false);
+
+            $serviceReturn = 0.0;
+            $partReturn = 0.0;
+            $descriptions = [];
+            $sectionName = null;
+
+            if ($lines->isNotEmpty()) {
+                foreach ($lines as $line) {
+                    $lineAmount = $isInclusive && (float) $line->line_total_incl_tax > 0
+                        ? (float) $line->line_total_incl_tax
+                        : ((float) $line->line_total_excl_tax > 0
+                            ? (float) $line->line_total_excl_tax
+                            : ((float) $line->line_total_incl_tax > 0
+                                ? (float) $line->line_total_incl_tax
+                                : ((float) $line->unit_price * (float) $line->qty)));
+
+                    if (! empty($line->is_part)) {
+                        $partReturn += $lineAmount;
+                    } else {
+                        $serviceReturn += $lineAmount;
+                    }
+
+                    if (! empty($line->description)) {
+                        $descriptions[] = $line->description;
+                    }
+
+                    if (! $sectionName && ! empty($line->department_name_ar)) {
+                        $sectionName = $line->department_name_ar;
+                    }
+                }
+            }
+
+            $serviceReturn = round($serviceReturn, 2);
+            $partReturn = round($partReturn, 2);
+
+            if ($serviceReturn <= 0 && $partReturn <= 0) {
+                $headerAmount = $isInclusive && (float) $cn->total_incl_tax > 0
+                    ? (float) $cn->total_incl_tax
+                    : ((float) $cn->total_excl_tax > 0 ? (float) $cn->total_excl_tax : (float) $cn->total_incl_tax);
+                $serviceReturn = round($headerAmount, 2);
+            }
+
+            $makeName = $cn->make_name_ar ?: ($cn->make_name_en ?: ($cn->make_other ?: ''));
+            $modelName = $cn->model_name_ar ?: ($cn->model_name_en ?: ($cn->model_other ?: ''));
+            $vehicleDisplayName = trim("{$makeName} {$modelName} ".($cn->vehicle_year ? "({$cn->vehicle_year})" : ''));
+
+            $dueDate = $cn->issue_date
+                ? Carbon::parse($cn->issue_date)->format('Y-m-d')
+                : ($cn->supply_date ?: ($cn->entry_date ?: ($cn->cn_created_at ? Carbon::parse($cn->cn_created_at)->format('Y-m-d') : '')));
+
+            $baseDesc = ! empty($descriptions)
+                ? implode('، ', array_unique($descriptions))
+                : 'إشعار دائن / مرتجع';
+
+            $serviceName = $cn->invoice_number && ! str_contains($baseDesc, (string) $cn->invoice_number)
+                ? "{$baseDesc} ({$cn->invoice_number})"
+                : $baseDesc;
+
+            $signedServiceCost = $serviceReturn > 0 ? -abs($serviceReturn) : 0.0;
+            $signedPartCost = $partReturn > 0 ? -abs($partReturn) : 0.0;
+            $signedTotal = round($signedServiceCost + $signedPartCost, 2);
+
+            return [
+                'id' => 'cn_'.$cn->credit_note_id,
+                'is_credit_note' => true,
+                'credit_note_id' => $cn->credit_note_id,
+                'credit_note_number' => $cn->invoice_number,
+                'work_order_id' => $cn->work_order_id,
+                'ticket_no' => $cn->ticket_no,
+                'ticket_status' => $cn->ticket_status,
+                'is_ticket_closed' => in_array($cn->ticket_status, [WorkOrder::STATUS_DONE, WorkOrder::STATUS_CANCELLED]),
+                'center_id' => $cn->center_id,
+                'shop_name' => $cn->shop_name ?: 'المركز الرئيسي',
+                'vehicle_id' => $cn->vehicle_id,
+                'plate_no' => $cn->plate_no ?: '',
+                'make_id' => $cn->make_id ?? null,
+                'make_name' => $makeName,
+                'model_id' => $cn->model_id ?? null,
+                'model_name' => $modelName,
+                'vehicle_year' => $cn->vehicle_year,
+                'vehicle_display_name' => $vehicleDisplayName,
+                'odometer_km' => $cn->ticket_odometer ?: ($cn->vehicle_odometer ?: null),
+                'details' => $cn->return_reason ?: ($cn->cn_notes ?: ($cn->vehicle_notes ?: ($cn->ticket_notes ?: ''))),
+                'section_name' => $sectionName ?: 'مرتجع مبيعات',
+                'service_name' => $serviceName,
+                'service_status' => 'returned',
+                'due_date' => $dueDate,
+                'service_cost' => $signedServiceCost,
+                'spare_part_cost' => $signedPartCost,
+                'total' => $signedTotal,
+                'is_overdue' => false,
+            ];
+        });
     }
 
     /**

@@ -258,7 +258,7 @@
                         >
                             <!-- Invoice Dates & ZATCA QR Code -->
                             <div
-                                class="flex justify-between items-center bg-gray-50/50 dark:bg-gray-900/30 p-3 rounded-xl border border-gray-150/50 dark:border-gray-700/30"
+                                class="flex justify-between items-center bg-gray-50/50 dark:bg-gray-900/30 p-3 rounded-xl border border-gray-200/50 dark:border-gray-700/30"
                             >
                                 <div
                                     class="grid gap-x-6 gap-y-2 flex-1"

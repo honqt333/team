@@ -884,6 +884,7 @@
 import { ref, computed, watch } from 'vue';
 import { Link, router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
+import { printDocument } from '@/Composables/usePrint';
 import DataTable from '@/Components/Common/DataTable.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 import CustomDatePicker from '@/Components/CustomDatePicker.vue';
@@ -1260,7 +1261,7 @@ function confirmApproveTransaction() {
 }
 
 function handlePrint() {
-    window.print();
+    printDocument();
 }
 
 function exportCsv() {

@@ -800,7 +800,7 @@
                     >
                         <DataTable structured class="w-full text-right text-xs">
                             <thead
-                                class="bg-gray-100/60 dark:bg-gray-750 text-gray-600 dark:text-gray-300 font-bold uppercase tracking-wider text-[11px]"
+                                class="bg-gray-100/60 dark:bg-gray-800 text-gray-600 dark:text-gray-300 font-bold uppercase tracking-wider text-[11px]"
                             >
                                 <tr>
                                     <th class="py-3 px-3.5 text-center">#</th>
@@ -864,7 +864,7 @@
                                 <tr
                                     v-for="(row, rIdx) in group.items"
                                     :key="row.id"
-                                    class="hover:bg-gray-50/60 dark:hover:bg-gray-750/50 transition-colors"
+                                    class="hover:bg-gray-50/60 dark:hover:bg-gray-700/40 transition-colors"
                                 >
                                     <td
                                         class="py-3 px-3.5 text-center font-mono text-gray-500 font-bold"
@@ -1007,7 +1007,7 @@
                 <div class="overflow-x-auto">
                     <DataTable structured class="w-full text-right text-xs">
                         <thead
-                            class="bg-gray-100/70 dark:bg-gray-750 text-gray-600 dark:text-gray-300 font-bold uppercase tracking-wider text-[11px] border-b border-gray-200 dark:border-gray-700"
+                            class="bg-gray-100/70 dark:bg-gray-800 text-gray-600 dark:text-gray-300 font-bold uppercase tracking-wider text-[11px] border-b border-gray-200 dark:border-gray-700"
                         >
                             <tr>
                                 <th class="py-3 px-3.5 text-center">#</th>
@@ -1094,7 +1094,7 @@
                             <tr
                                 v-for="(row, idx) in paginatedItems"
                                 :key="row.id"
-                                class="hover:bg-gray-50/60 dark:hover:bg-gray-750/50 transition-colors"
+                                class="hover:bg-gray-50/60 dark:hover:bg-gray-700/40 transition-colors"
                             >
                                 <td
                                     class="py-3 px-3.5 text-center font-mono text-gray-500 font-bold"
@@ -1221,7 +1221,7 @@
 
                         <!-- Overall Table Footer -->
                         <tfoot
-                            class="bg-gray-100/90 dark:bg-gray-750 font-bold border-t-2 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
+                            class="bg-gray-100/90 dark:bg-gray-800 font-bold border-t-2 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
                         >
                             <tr>
                                 <td colspan="6" class="py-3 px-3.5 text-right font-black text-xs">

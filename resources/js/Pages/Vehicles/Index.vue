@@ -1,6 +1,6 @@
 <template>
     <AppLayout>
-        <PrintEngine document-type="report" class="space-y-6">
+        <div class="space-y-6">
             <!-- Header Section -->
             <PageHeader
                 :title="$t('vehicles.title')"
@@ -446,7 +446,7 @@
                     </template>
                 </DataTable>
             </div>
-        </PrintEngine>
+        </div>
 
         <!-- Vehicle Form Modal -->
         <VehicleFormModal
@@ -531,8 +531,6 @@
 </template>
 
 <script setup>
-import PrintEngine from '@/Components/Print/PrintEngine.vue';
-import { printDocument } from '@/Composables/usePrint';
 import { ref, computed } from 'vue';
 import { router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
@@ -551,8 +549,6 @@ import VehicleFormModal from '@/Components/Vehicles/VehicleFormModal.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 import Tooltip from '@/Components/Tooltip.vue';
 import SaudiPlateDisplay from '@/Components/Vehicles/SaudiPlateDisplay.vue';
-import StandardReportHeader from '@/Components/Print/StandardReportHeader.vue';
-import StandardReportFooter from '@/Components/Print/StandardReportFooter.vue';
 import { usePermission } from '@/Composables/usePermission';
 
 const props = defineProps({
@@ -658,7 +654,18 @@ function exportVehicles() {
 }
 
 const printVehicles = () => {
-    printDocument();
+    const params = new URLSearchParams();
+    if (tableFilters.search) params.set('search', tableFilters.search);
+    if (tableFilters.make_id) params.set('make_id', tableFilters.make_id);
+    if (tableFilters.date_from) params.set('date_from', tableFilters.date_from);
+    if (tableFilters.date_to) params.set('date_to', tableFilters.date_to);
+    if (sortColumn.value) {
+        params.set('sort', sortColumn.value);
+        params.set('direction', sortDirection.value);
+    }
+    const queryString = params.toString();
+    const url = route('vehicles.print') + (queryString ? `?${queryString}` : '');
+    window.open(url, '_blank');
 };
 
 function visitShowPage(vehicle) {

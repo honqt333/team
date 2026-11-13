@@ -12,7 +12,7 @@
                 leave-to-class="opacity-0 translate-y-1"
             >
                 <div
-                    v-if="isVisible"
+                    v-if="isVisible && tooltipText && !disabled"
                     ref="tooltip"
                     :style="tooltipStyle"
                     class="fixed z-[9999] px-3 py-2 text-sm font-medium text-white bg-gray-900 rounded-lg shadow-xl whitespace-nowrap pointer-events-none"
@@ -44,6 +44,10 @@ const props = defineProps({
         default: 'top',
         validator: (value) => ['top', 'bottom', 'left', 'right'].includes(value),
     },
+    disabled: {
+        type: Boolean,
+        default: false,
+    },
 });
 
 const tooltipText = computed(() => props.text || props.content);
@@ -54,6 +58,7 @@ const tooltip = ref(null);
 const position = ref({ top: 0, left: 0 });
 
 const show = async () => {
+    if (props.disabled || !tooltipText.value) return;
     isVisible.value = true;
     await nextTick();
     updatePosition();

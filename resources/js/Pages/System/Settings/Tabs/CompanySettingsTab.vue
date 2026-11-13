@@ -19,130 +19,23 @@
                     </p>
                 </div>
 
-                <div class="flex flex-col sm:flex-row gap-6 items-start">
-                    <!-- Logo preview -->
-                    <div
-                        class="relative w-40 h-40 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg flex items-center justify-center overflow-hidden bg-gray-50 dark:bg-gray-900 shrink-0"
-                    >
-                        <img
-                            v-if="logoPreview"
-                            :src="logoPreview"
-                            class="max-w-full max-h-full object-contain"
-                            alt="Company logo"
-                        />
-                        <div
-                            v-else
-                            class="flex flex-col items-center justify-center text-center px-2"
-                        >
-                            <svg
-                                class="w-10 h-10 text-gray-300 dark:text-gray-600"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                            >
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    stroke-width="2"
-                                    d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
-                                />
-                            </svg>
-                            <p class="text-xs text-gray-400 dark:text-gray-500 mt-2">
-                                {{ t('system.company_settings.sections.branding.no_logo') }}
-                            </p>
-                        </div>
-
-                        <div
-                            v-if="uploading"
-                            class="absolute inset-0 bg-white/80 dark:bg-gray-900/80 flex items-center justify-center"
-                        >
-                            <svg
-                                class="animate-spin w-6 h-6 text-action-primary"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                            >
-                                <circle
-                                    class="opacity-25"
-                                    cx="12"
-                                    cy="12"
-                                    r="10"
-                                    stroke="currentColor"
-                                    stroke-width="4"
-                                ></circle>
-                                <path
-                                    class="opacity-75"
-                                    fill="currentColor"
-                                    d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
-                                ></path>
-                            </svg>
-                        </div>
-                    </div>
-
-                    <div class="flex-1 w-full space-y-3">
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                            {{ t('system.company_settings.sections.branding.logo_label') }}
-                        </label>
-
-                        <input
-                            type="file"
-                            ref="logoInput"
-                            @change="onLogoSelect"
-                            accept="image/png,image/jpeg,image/webp,image/svg+xml"
-                            class="hidden"
-                        />
-                        <div class="flex flex-wrap gap-2">
-                            <button
-                                type="button"
-                                @click="logoInput.click()"
-                                :disabled="uploading"
-                                class="inline-flex items-center gap-2 px-4 py-2 bg-action-primary hover:bg-action-primary-hover disabled:opacity-50 text-white text-sm font-medium rounded-lg transition-colors"
-                            >
-                                <svg
-                                    class="w-4 h-4"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        stroke-width="2"
-                                        d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"
-                                    />
-                                </svg>
-                                {{
-                                    logoPreview
-                                        ? t('system.company_settings.sections.branding.replace')
-                                        : t('system.company_settings.sections.branding.upload')
-                                }}
-                            </button>
-                            <button
-                                v-if="logoPreview && !uploading"
-                                type="button"
-                                @click="confirmRemoveLogo"
-                                class="inline-flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 text-sm font-medium rounded-lg transition-colors"
-                            >
-                                <svg
-                                    class="w-4 h-4"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        stroke-width="2"
-                                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                                    />
-                                </svg>
-                                {{ t('system.company_settings.sections.branding.remove') }}
-                            </button>
-                        </div>
-                        <p class="text-xs text-gray-500 dark:text-gray-400">
-                            {{ t('system.company_settings.sections.branding.logo_hint') }}
-                        </p>
-                    </div>
-                </div>
+                <AppFileUpload
+                    variant="image"
+                    :label="t('system.company_settings.sections.branding.logo_label')"
+                    :hint="t('system.company_settings.sections.branding.logo_hint')"
+                    :existing-url="logoPreview"
+                    :loading="uploading"
+                    accept="image/png,image/jpeg,image/webp"
+                    :max-size-mb="4"
+                    :upload-button-text="
+                        logoPreview
+                            ? t('system.company_settings.sections.branding.replace')
+                            : t('system.company_settings.sections.branding.upload')
+                    "
+                    :reset-button-text="t('system.company_settings.sections.branding.remove')"
+                    @select="onLogoSelect"
+                    @remove-existing="confirmRemoveLogo"
+                />
             </div>
 
             <!-- Stamp / Signature (Phase 6+ — appears on PDF invoices) -->
@@ -158,130 +51,23 @@
                     </p>
                 </div>
 
-                <div class="flex flex-col sm:flex-row gap-6 items-start">
-                    <!-- Stamp preview -->
-                    <div
-                        class="relative w-40 h-40 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg flex items-center justify-center overflow-hidden bg-gray-50 dark:bg-gray-900 shrink-0"
-                    >
-                        <img
-                            v-if="stampPreview"
-                            :src="stampPreview"
-                            class="max-w-full max-h-full object-contain"
-                            alt="Company stamp"
-                        />
-                        <div
-                            v-else
-                            class="flex flex-col items-center justify-center text-center px-2"
-                        >
-                            <svg
-                                class="w-10 h-10 text-gray-300 dark:text-gray-600"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                            >
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    stroke-width="2"
-                                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                                />
-                            </svg>
-                            <p class="text-xs text-gray-400 dark:text-gray-500 mt-2">
-                                {{ t('system.company_settings.sections.stamp.no_stamp') }}
-                            </p>
-                        </div>
-
-                        <div
-                            v-if="uploadingStamp"
-                            class="absolute inset-0 bg-white/80 dark:bg-gray-900/80 flex items-center justify-center"
-                        >
-                            <svg
-                                class="animate-spin w-6 h-6 text-action-primary"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                            >
-                                <circle
-                                    class="opacity-25"
-                                    cx="12"
-                                    cy="12"
-                                    r="10"
-                                    stroke="currentColor"
-                                    stroke-width="4"
-                                ></circle>
-                                <path
-                                    class="opacity-75"
-                                    fill="currentColor"
-                                    d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
-                                ></path>
-                            </svg>
-                        </div>
-                    </div>
-
-                    <div class="flex-1 w-full space-y-3">
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                            {{ t('system.company_settings.sections.stamp.stamp_label') }}
-                        </label>
-
-                        <input
-                            type="file"
-                            ref="stampInput"
-                            @change="onStampSelect"
-                            accept="image/png,image/jpeg,image/webp,image/svg+xml"
-                            class="hidden"
-                        />
-                        <div class="flex flex-wrap gap-2">
-                            <button
-                                type="button"
-                                @click="stampInput.click()"
-                                :disabled="uploadingStamp"
-                                class="inline-flex items-center gap-2 px-4 py-2 bg-action-primary hover:bg-action-primary-hover disabled:opacity-50 text-white text-sm font-medium rounded-lg transition-colors"
-                            >
-                                <svg
-                                    class="w-4 h-4"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        stroke-width="2"
-                                        d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"
-                                    />
-                                </svg>
-                                {{
-                                    stampPreview
-                                        ? t('system.company_settings.sections.branding.replace')
-                                        : t('system.company_settings.sections.branding.upload')
-                                }}
-                            </button>
-                            <button
-                                v-if="stampPreview && !uploadingStamp"
-                                type="button"
-                                @click="confirmRemoveStamp"
-                                class="inline-flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 text-sm font-medium rounded-lg transition-colors"
-                            >
-                                <svg
-                                    class="w-4 h-4"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        stroke-width="2"
-                                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                                    />
-                                </svg>
-                                {{ t('system.company_settings.sections.branding.remove') }}
-                            </button>
-                        </div>
-                        <p class="text-xs text-gray-500 dark:text-gray-400">
-                            {{ t('system.company_settings.sections.stamp.stamp_hint') }}
-                        </p>
-                    </div>
-                </div>
+                <AppFileUpload
+                    variant="image"
+                    :label="t('system.company_settings.sections.stamp.stamp_label')"
+                    :hint="t('system.company_settings.sections.stamp.stamp_hint')"
+                    :existing-url="stampPreview"
+                    :loading="uploadingStamp"
+                    accept="image/png,image/jpeg,image/webp"
+                    :max-size-mb="2"
+                    :upload-button-text="
+                        stampPreview
+                            ? t('system.company_settings.sections.branding.replace')
+                            : t('system.company_settings.sections.branding.upload')
+                    "
+                    :reset-button-text="t('system.company_settings.sections.branding.remove')"
+                    @select="onStampSelect"
+                    @remove-existing="confirmRemoveStamp"
+                />
             </div>
 
             <!-- Legal & Tax -->
@@ -678,6 +464,7 @@
 </template>
 
 <script setup>
+import AppFileUpload from '@/Components/Common/AppFileUpload.vue';
 import AppToggle from '@/Components/Common/AppToggle.vue';
 import { useI18n } from 'vue-i18n';
 import SearchableSelect from '@/Components/SearchableSelect.vue';

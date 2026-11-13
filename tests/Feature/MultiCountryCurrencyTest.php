@@ -288,4 +288,82 @@ class MultiCountryCurrencyTest extends TestCase
         $this->assertSame('SAR', PaymentSettings::getPlatformCurrency());
         $this->assertSame('KWD', CountryCurrencyRegistry::tenantCurrency($tenant));
     }
+
+    public function test_company_contact_updates_phone_and_email_with_validation(): void
+    {
+        [$tenant, , $user] = $this->createTenantUser('AE', 'AED');
+
+        // Valid contact update
+        $this->actingAs($user)
+            ->put(route('settings.company.update'), [
+                'section' => 'contact',
+                'data' => [
+                    'phone' => '+971 50 123 4567',
+                    'email' => 'contact@dubai-autocare.ae',
+                ],
+            ])
+            ->assertRedirect();
+
+        $tenant->refresh();
+        $this->assertSame('+971 50 123 4567', $tenant->phone);
+        $this->assertSame('contact@dubai-autocare.ae', $tenant->email);
+
+        // Validation error on invalid email
+        $this->actingAs($user)
+            ->put(route('settings.company.update'), [
+                'section' => 'contact',
+                'data' => [
+                    'phone' => '+971 50 123 4567',
+                    'email' => 'not-an-email',
+                ],
+            ])
+            ->assertSessionHasErrors('email');
+
+        // Validation error on phone exceeding 30 characters
+        $this->actingAs($user)
+            ->put(route('settings.company.update'), [
+                'section' => 'contact',
+                'data' => [
+                    'phone' => str_repeat('9', 31),
+                    'email' => 'valid@example.com',
+                ],
+            ])
+            ->assertSessionHasErrors('phone');
+    }
+
+    public function test_company_address_updates_country_and_persists(): void
+    {
+        [$tenant, , $user] = $this->createTenantUser('SA', 'SAR');
+
+        $this->actingAs($user)
+            ->put(route('settings.company.update'), [
+                'section' => 'address',
+                'data' => [
+                    'country' => 'المملكة العربية السعودية',
+                    'city' => 'جدة',
+                    'district' => 'الصفا',
+                    'street' => 'شارع التحلية',
+                    'building_number' => '1234',
+                    'postal_code' => '23456',
+                    'address_line' => 'جدة - الصفا - شارع التحلية - 1234',
+                ],
+            ])
+            ->assertRedirect();
+
+        $tenant->refresh();
+        $tenant->load('address');
+
+        $this->assertNotNull($tenant->address);
+        $this->assertSame('المملكة العربية السعودية', $tenant->address->country);
+        $this->assertSame('جدة', $tenant->address->city);
+
+        // Ensure address with country is shared through Inertia props
+        $this->actingAs($user)
+            ->get(route('settings.company'))
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->where('address.country', 'المملكة العربية السعودية')
+                ->where('address.city', 'جدة')
+            );
+    }
 }

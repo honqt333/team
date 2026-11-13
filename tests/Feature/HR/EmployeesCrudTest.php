@@ -7,6 +7,7 @@ namespace Tests\Feature\HR;
 use App\Models\Center;
 use App\Models\Department;
 use App\Models\HR\Employee;
+use App\Models\HR\EmployeeDocument;
 use App\Models\HR\JobTitle;
 use App\Models\Nationality;
 use App\Models\Tenant;
@@ -311,6 +312,73 @@ class EmployeesCrudTest extends TestCase
             ->component('HR/Employees/Index')
             ->has('employees.data', 1)
             ->where('employees.data.0.employee_number', 'EMP-CURR')
+        );
+    }
+
+    public function test_employees_index_surfaces_id_expiry_status_and_unassigned_permissions_indicator(): void
+    {
+        $expiredDate = now()->subDays(5)->format('Y-m-d');
+        $docExpiryDate = now()->addDays(15)->format('Y-m-d');
+
+        // 1. Employee with national_id_expiry (expired) and no user/permissions
+        $emp1 = Employee::create([
+            'tenant_id' => $this->tenant->id,
+            'center_id' => $this->center->id,
+            'employee_number' => 'EMP-EXP-1',
+            'name_ar' => 'أول موظف هوية منتهية',
+            'name_en' => 'Expired ID Emp',
+            'phone' => '0505550001',
+            'email' => 'exp1@example.com',
+            'gender' => 'male',
+            'nationality_id' => $this->nationality->id,
+            'national_id' => '1010101010',
+            'national_id_expiry' => $expiredDate,
+            'status' => 'active',
+        ]);
+
+        // 2. Employee with ID expiry in EmployeeDocument (expiring soon) and linked user WITH permissions
+        $emp2 = Employee::create([
+            'tenant_id' => $this->tenant->id,
+            'center_id' => $this->center->id,
+            'user_id' => $this->user->id,
+            'employee_number' => 'EMP-DOC-2',
+            'name_ar' => 'ثاني موظف وثيقة هوية',
+            'name_en' => 'Doc ID Emp',
+            'phone' => '0505550002',
+            'email' => 'doc2@example.com',
+            'gender' => 'male',
+            'nationality_id' => $this->nationality->id,
+            'status' => 'active',
+        ]);
+
+        EmployeeDocument::create([
+            'tenant_id' => $this->tenant->id,
+            'employee_id' => $emp2->id,
+            'type' => 'id',
+            'title' => 'بطاقة الهوية الوطنية',
+            'file_path' => 'documents/id.pdf',
+            'expiry_date' => $docExpiryDate,
+        ]);
+
+        $response = $this->actingAs($this->user)->get(route('app.hr.employees.index', [
+            'sort' => 'employee_number',
+            'direction' => 'asc',
+        ]));
+
+        $response->assertOk();
+        $response->assertInertia(fn (Assert $page) => $page
+            ->component('HR/Employees/Index')
+            ->has('employees.data', 2)
+            ->where('employees.data.0.employee_number', 'EMP-DOC-2')
+            ->where('employees.data.0.id_expiry_date', $docExpiryDate)
+            ->where('employees.data.0.id_expiry_status', 'expiring_soon')
+            ->where('employees.data.0.has_permissions_configured', true)
+            ->where('employees.data.0.no_permissions_set', false)
+            ->where('employees.data.1.employee_number', 'EMP-EXP-1')
+            ->where('employees.data.1.id_expiry_date', $expiredDate)
+            ->where('employees.data.1.id_expiry_status', 'expired')
+            ->where('employees.data.1.has_permissions_configured', false)
+            ->where('employees.data.1.no_permissions_set', true)
         );
     }
 }

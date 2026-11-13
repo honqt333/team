@@ -283,6 +283,6 @@ class AttendanceController extends Controller
 
         $attendance->delete();
 
-        return back();
+        return back()->with('success', __('messages.deleted_successfully'));
     }
 }

@@ -4,6 +4,7 @@ import { computed, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import BaseModal from '@/Components/BaseModal.vue';
 import AppInput from '@/Components/App/AppInput.vue';
+import AppButton from '@/Components/App/AppButton.vue';
 import FormField from '@/Components/Common/FormField.vue';
 import AppToggle from '@/Components/Common/AppToggle.vue';
 import SelectableCard from '@/Components/Common/SelectableCard.vue';
@@ -244,18 +245,10 @@ const submit = () => {
             </div>
 
             <div class="flex justify-end gap-3 pt-6 mt-6 border-t border-border">
-                <button
-                    type="button"
-                    class="px-5 py-2.5 text-sm font-medium text-text-secondary bg-surface border border-border rounded-xl hover:bg-surface-muted transition-colors cursor-pointer"
-                    @click="emit('close')"
-                >
+                <AppButton variant="secondary" @click="emit('close')">
                     {{ t('common.cancel', 'إلغاء') }}
-                </button>
-                <button
-                    type="submit"
-                    class="px-5 py-2.5 text-sm font-medium text-action-on bg-action-primary hover:bg-action-primary-hover rounded-xl shadow-xs transition-all duration-200 disabled:opacity-75 disabled:cursor-not-allowed cursor-pointer"
-                    :disabled="form.processing"
-                >
+                </AppButton>
+                <AppButton type="submit" :loading="form.processing">
                     {{
                         form.processing
                             ? t('common.saving', 'جاري الحفظ...')
@@ -263,7 +256,7 @@ const submit = () => {
                               ? t('common.update', 'تحديث')
                               : t('common.save', 'حفظ')
                     }}
-                </button>
+                </AppButton>
             </div>
         </form>
     </BaseModal>

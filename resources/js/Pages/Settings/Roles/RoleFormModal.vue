@@ -7,11 +7,15 @@ import FormField from '@/Components/Common/FormField.vue';
 import AppInput from '@/Components/App/AppInput.vue';
 import AppTextarea from '@/Components/App/AppTextarea.vue';
 import AppCheckbox from '@/Components/App/AppCheckbox.vue';
-import { useToast } from '@/Composables/useToast';
+import AppButton from '@/Components/App/AppButton.vue';
 
 const props = defineProps({
     show: Boolean,
     role: Object,
+    duplicateFrom: {
+        type: Object,
+        default: null,
+    },
     groupedPermissions: {
         type: Object,
         default: () => ({}),
@@ -24,7 +28,6 @@ const props = defineProps({
 
 const emit = defineEmits(['close', 'saved']);
 const { t } = useI18n();
-const { success, error } = useToast();
 
 const form = useForm({
     name: '',
@@ -35,6 +38,7 @@ const form = useForm({
 });
 
 const activeModules = ref([]);
+const permissionSearch = ref('');
 const isEditing = computed(() => !!props.role);
 const title = computed(() =>
     isEditing.value ? t('roles.edit', 'تعديل الدور') : t('roles.add', 'إضافة دور جديد')
@@ -59,6 +63,7 @@ watch(
     (isOpen) => {
         if (isOpen) {
             form.clearErrors();
+            permissionSearch.value = '';
             if (props.role) {
                 form.name = props.role.name || '';
                 form.label_ar = props.role.label_ar || '';
@@ -72,6 +77,21 @@ watch(
                 } else {
                     form.permissions = [];
                 }
+            } else if (props.duplicateFrom) {
+                const suffix = t('roles.copy_suffix', '(نسخة)');
+                form.name = props.duplicateFrom.name ? `${props.duplicateFrom.name}_copy` : '';
+                form.label_ar = props.duplicateFrom.label_ar
+                    ? `${props.duplicateFrom.label_ar} ${suffix}`
+                    : '';
+                form.label_en = props.duplicateFrom.label_en
+                    ? `${props.duplicateFrom.label_en} (Copy)`
+                    : '';
+                form.description = props.duplicateFrom.description || '';
+                form.permissions = Array.isArray(props.duplicateFrom.permissions)
+                    ? props.duplicateFrom.permissions.map((p) =>
+                          typeof p === 'string' ? p : p.name
+                      )
+                    : [];
             } else {
                 form.reset();
                 form.name = '';
@@ -90,6 +110,68 @@ watch(
     },
     { immediate: true }
 );
+
+const getPermissionLabel = (permission) => {
+    if (props.permissionDescriptions && props.permissionDescriptions[permission]) {
+        return props.permissionDescriptions[permission];
+    }
+    return t('permissions.' + permission.replace(/\./g, '_'), permission);
+};
+
+const filteredGroupedPermissions = computed(() => {
+    const query = permissionSearch.value.trim().toLowerCase();
+    const groups = props.groupedPermissions || {};
+
+    if (!query) {
+        return groups;
+    }
+
+    const result = {};
+    for (const [moduleName, perms] of Object.entries(groups)) {
+        const moduleLabel = t('permissions_modules.' + moduleName, moduleName).toLowerCase();
+        if (moduleLabel.includes(query)) {
+            result[moduleName] = perms;
+            continue;
+        }
+        const matched = perms.filter(
+            (p) =>
+                p.toLowerCase().includes(query) ||
+                getPermissionLabel(p).toLowerCase().includes(query)
+        );
+        if (matched.length > 0) {
+            result[moduleName] = matched;
+        }
+    }
+    return result;
+});
+
+const allModuleKeys = computed(() => Object.keys(filteredGroupedPermissions.value));
+const allVisiblePermissions = computed(() =>
+    Object.values(filteredGroupedPermissions.value).flat()
+);
+const isEveryPermissionSelected = computed(
+    () =>
+        allVisiblePermissions.value.length > 0 &&
+        allVisiblePermissions.value.every((p) => form.permissions.includes(p))
+);
+
+const toggleExpandAll = () => {
+    if (activeModules.value.length === allModuleKeys.value.length) {
+        activeModules.value = [];
+    } else {
+        activeModules.value = [...allModuleKeys.value];
+    }
+};
+
+const toggleSelectAllPermissions = () => {
+    const visible = allVisiblePermissions.value;
+    if (isEveryPermissionSelected.value) {
+        form.permissions = form.permissions.filter((p) => !visible.includes(p));
+    } else {
+        const toAdd = visible.filter((p) => !form.permissions.includes(p));
+        form.permissions.push(...toAdd);
+    }
+};
 
 const toggleModule = (moduleName) => {
     if (activeModules.value.includes(moduleName)) {
@@ -129,22 +211,18 @@ const submit = () => {
     if (isEditing.value) {
         form.put(route('settings.roles.update', props.role.id), {
             onSuccess: () => {
-                success(t('messages.saved_success', 'تم الحفظ بنجاح'));
                 emit('close');
                 emit('saved');
             },
-            onError: () => error(t('common.error_occurred', 'حدث خطأ ما')),
             preserveScroll: true,
         });
     } else {
         form.post(route('settings.roles.store'), {
             onSuccess: () => {
-                success(t('messages.saved_success', 'تم الحفظ بنجاح'));
                 emit('close');
                 emit('saved');
                 form.reset();
             },
-            onError: () => error(t('common.error_occurred', 'حدث خطأ ما')),
             preserveScroll: true,
         });
     }
@@ -247,21 +325,82 @@ const submit = () => {
             <!-- Row 4: Permissions Tree -->
             <div class="border border-border rounded-2xl overflow-hidden bg-surface">
                 <div
-                    class="bg-surface-muted px-4 py-3 border-b border-border flex items-center justify-between"
+                    class="bg-surface-muted px-4 py-3 border-b border-border flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"
                 >
-                    <span class="font-bold text-sm text-text-primary">
-                        {{ t('roles.permissions', 'الصلاحيات') }}
-                    </span>
-                    <span class="text-xs text-text-muted">
-                        {{ form.permissions.length }}
-                        {{ t('roles.selected_permissions', 'صلاحية محددة') }}
-                    </span>
+                    <div class="flex items-center gap-2">
+                        <span class="font-bold text-sm text-text-primary">
+                            {{ t('roles.permissions', 'الصلاحيات') }}
+                        </span>
+                        <span class="text-xs text-text-muted">
+                            ({{ form.permissions.length }}
+                            {{ t('roles.selected_permissions', 'صلاحية محددة') }})
+                        </span>
+                    </div>
+
+                    <div class="flex flex-wrap items-center gap-2">
+                        <div class="relative w-full sm:w-56">
+                            <AppInput
+                                v-model="permissionSearch"
+                                type="text"
+                                :placeholder="t('roles.search_permissions', 'ابحث في الصلاحيات...')"
+                                class="ps-8 py-1.5 text-xs"
+                            />
+                            <svg
+                                class="absolute start-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-text-muted pointer-events-none"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                                />
+                            </svg>
+                        </div>
+
+                        <button
+                            type="button"
+                            class="px-2.5 py-1.5 text-xs font-semibold rounded-lg border border-border bg-surface text-text-secondary hover:text-text-primary hover:bg-surface-secondary transition-colors cursor-pointer"
+                            @click="toggleExpandAll"
+                        >
+                            {{
+                                activeModules.length === allModuleKeys.length &&
+                                allModuleKeys.length > 0
+                                    ? t('roles.collapse_all', 'طي الكل')
+                                    : t('roles.expand_all', 'توسيع الكل')
+                            }}
+                        </button>
+
+                        <button
+                            type="button"
+                            class="px-2.5 py-1.5 text-xs font-semibold rounded-lg border border-selection-ring/40 bg-selection-bg/50 text-action-primary hover:bg-selection-bg transition-colors cursor-pointer"
+                            @click="toggleSelectAllPermissions"
+                        >
+                            {{
+                                isEveryPermissionSelected
+                                    ? t('roles.deselect_all_permissions', 'إلغاء تحديد الكل')
+                                    : t('roles.select_all_permissions', 'تحديد الكل')
+                            }}
+                        </button>
+                    </div>
                 </div>
 
                 <div
                     class="max-h-[50vh] overflow-y-auto divide-y divide-border bg-surface custom-scrollbar"
                 >
-                    <div v-for="(perms, moduleName) in groupedPermissions" :key="moduleName">
+                    <div
+                        v-if="allModuleKeys.length === 0"
+                        class="p-8 text-center text-sm text-text-muted"
+                    >
+                        {{ t('roles.no_matching_permissions', 'لا توجد صلاحيات مطابقة لبحثك') }}
+                    </div>
+
+                    <div
+                        v-for="(perms, moduleName) in filteredGroupedPermissions"
+                        :key="moduleName"
+                    >
                         <!-- Module Header (Accordion Toggle) -->
                         <div
                             class="flex items-center justify-between px-4 py-3 bg-surface-muted/40 hover:bg-surface-muted transition-colors cursor-pointer select-none"
@@ -270,7 +409,11 @@ const submit = () => {
                             <div class="flex items-center gap-2.5">
                                 <svg
                                     class="w-4 h-4 text-text-muted transition-transform duration-200"
-                                    :class="{ 'rotate-180': activeModules.includes(moduleName) }"
+                                    :class="{
+                                        'rotate-180':
+                                            activeModules.includes(moduleName) ||
+                                            permissionSearch.trim().length > 0,
+                                    }"
                                     fill="none"
                                     viewBox="0 0 24 24"
                                     stroke="currentColor"
@@ -308,7 +451,10 @@ const submit = () => {
 
                         <!-- Module Permissions Grid -->
                         <div
-                            v-show="activeModules.includes(moduleName)"
+                            v-show="
+                                activeModules.includes(moduleName) ||
+                                permissionSearch.trim().length > 0
+                            "
                             class="p-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2.5 bg-surface"
                         >
                             <label
@@ -330,16 +476,7 @@ const submit = () => {
                                     <span
                                         class="block text-xs sm:text-sm font-medium text-text-primary leading-snug break-words"
                                     >
-                                        {{
-                                            permissionDescriptions &&
-                                            permissionDescriptions[permission]
-                                                ? permissionDescriptions[permission]
-                                                : t(
-                                                      'permissions.' +
-                                                          permission.replace(/\./g, '_'),
-                                                      permission
-                                                  )
-                                        }}
+                                        {{ getPermissionLabel(permission) }}
                                     </span>
                                     <span
                                         class="text-[11px] text-text-muted font-mono block mt-0.5 break-all"
@@ -355,18 +492,10 @@ const submit = () => {
 
             <!-- Footer Actions -->
             <div class="flex justify-end gap-3 pt-6 mt-6 border-t border-border">
-                <button
-                    type="button"
-                    class="px-5 py-2.5 text-sm font-medium text-text-secondary bg-surface border border-border rounded-xl hover:bg-surface-muted transition-colors cursor-pointer"
-                    @click="emit('close')"
-                >
+                <AppButton variant="secondary" @click="emit('close')">
                     {{ t('common.cancel', 'إلغاء') }}
-                </button>
-                <button
-                    type="submit"
-                    class="px-5 py-2.5 text-sm font-medium text-action-on bg-action-primary hover:bg-action-primary-hover rounded-xl shadow-xs transition-all duration-200 disabled:opacity-75 disabled:cursor-not-allowed cursor-pointer"
-                    :disabled="form.processing"
-                >
+                </AppButton>
+                <AppButton type="submit" :loading="form.processing">
                     {{
                         form.processing
                             ? t('common.saving', 'جاري الحفظ...')
@@ -374,7 +503,7 @@ const submit = () => {
                               ? t('common.update', 'تحديث')
                               : t('common.save', 'حفظ')
                     }}
-                </button>
+                </AppButton>
             </div>
         </form>
     </BaseModal>

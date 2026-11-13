@@ -271,7 +271,7 @@ class AnalyticsController extends Controller
         $monthsBack = (int) $request->input('months', 6);
         $monthsBack = max(1, min($monthsBack, 12));
 
-        $startMonth = now()->copy()->subMonths($monthsBack - 1)->startOfMonth();
+        $startMonth = now()->copy()->startOfMonth()->subMonths($monthsBack - 1);
         $currentMonth = now()->copy()->startOfMonth();
 
         // Pull all tenants created in the window with their subscriptions
@@ -406,7 +406,7 @@ class AnalyticsController extends Controller
         $points = [];
 
         for ($i = $monthsBack; $i >= 0; $i--) {
-            $point = $now->copy()->subMonths($i)->endOfMonth();
+            $point = $now->copy()->startOfMonth()->subMonths($i)->endOfMonth();
             $points[] = [
                 'month' => $point->format('Y-m'),
                 'score' => $this->computeHealthScoreAt($tenant, $point),

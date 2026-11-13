@@ -7,7 +7,9 @@ namespace App\Services;
 use App\Models\HR\EmployeeType;
 use App\Models\HR\JobTitle;
 use App\Models\InventoryUnit;
+use App\Models\Nationality;
 use App\Support\Permissions;
+use Database\Seeders\NationalitiesSeeder;
 use Spatie\Permission\Exceptions\PermissionDoesNotExist;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
@@ -82,6 +84,10 @@ class TenantSetupService
      */
     public function seedDefaultsForTenant(int $tenantId): void
     {
+        if (! Nationality::exists()) {
+            (new NationalitiesSeeder)->run();
+        }
+
         $this->seedInventoryUnits($tenantId);
         $this->seedEmployeeTypes($tenantId);
         $this->seedJobTitles($tenantId);

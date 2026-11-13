@@ -336,7 +336,7 @@
                         <button
                             type="button"
                             @click="resetFilters"
-                            class="px-3.5 py-2 rounded-xl border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-750 text-xs font-bold transition-all"
+                            class="px-3.5 py-2 rounded-xl border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/60 text-xs font-bold transition-all"
                         >
                             {{ $t('reports.purchase_invoices_report.reset_filters') }}
                         </button>
@@ -586,7 +586,7 @@
                     <button
                         type="button"
                         @click="toggleGroup(grp.group_key)"
-                        class="w-full px-5 py-4 flex flex-wrap items-center justify-between gap-3 text-right bg-gradient-to-r from-gray-50/80 to-transparent dark:from-gray-750 hover:bg-gray-100/50 dark:hover:bg-gray-700 transition-colors"
+                        class="w-full px-5 py-4 flex flex-wrap items-center justify-between gap-3 text-right bg-gradient-to-r from-gray-50/80 to-transparent dark:from-gray-800 hover:bg-gray-100/50 dark:hover:bg-gray-700 transition-colors"
                     >
                         <div class="flex items-center gap-3">
                             <svg
@@ -694,7 +694,7 @@
                                     <tr
                                         v-for="(inv, iIdx) in grp.items"
                                         :key="inv.id"
-                                        class="hover:bg-gray-50/50 dark:hover:bg-gray-750/50 transition-colors"
+                                        class="hover:bg-gray-50/50 dark:hover:bg-gray-700/40 transition-colors"
                                     >
                                         <td
                                             class="px-4 py-3 text-center font-mono text-gray-400 text-xs"
@@ -856,7 +856,7 @@
                             <tr
                                 v-for="(inv, idx) in invoices?.data || []"
                                 :key="inv.id"
-                                class="hover:bg-gray-50/50 dark:hover:bg-gray-750/50 transition-colors"
+                                class="hover:bg-gray-50/50 dark:hover:bg-gray-700/40 transition-colors"
                             >
                                 <td class="px-4 py-3 text-center font-mono text-gray-400 text-xs">
                                     {{ (invoices.from || 1) + idx }}

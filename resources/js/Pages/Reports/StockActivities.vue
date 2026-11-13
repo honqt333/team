@@ -374,7 +374,7 @@
                         <button
                             type="button"
                             @click="resetFilters"
-                            class="px-3.5 py-2 rounded-xl border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-750 text-xs font-bold transition-all flex items-center gap-1.5"
+                            class="px-3.5 py-2 rounded-xl border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/60 text-xs font-bold transition-all flex items-center gap-1.5"
                         >
                             <svg
                                 class="w-3.5 h-3.5 text-gray-400"
@@ -639,7 +639,7 @@
                     <!-- Group Header Accordion Bar -->
                     <div
                         @click="toggleGroup(grp.group_key)"
-                        class="p-4 bg-gray-50 dark:bg-gray-750/70 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between cursor-pointer hover:bg-gray-100/60 dark:hover:bg-gray-700/50 transition-colors"
+                        class="p-4 bg-gray-50 dark:bg-gray-800/80 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between cursor-pointer hover:bg-gray-100/60 dark:hover:bg-gray-700/50 transition-colors"
                     >
                         <div class="flex items-center gap-3">
                             <div
@@ -819,7 +819,7 @@
                 <div class="overflow-x-auto">
                     <DataTable structured class="w-full text-xs text-right">
                         <thead
-                            class="bg-gray-50 dark:bg-gray-750 text-gray-500 dark:text-gray-400 font-bold border-b border-gray-100 dark:border-gray-700"
+                            class="bg-gray-50 dark:bg-gray-800 text-gray-500 dark:text-gray-400 font-bold border-b border-gray-100 dark:border-gray-700"
                         >
                             <tr>
                                 <th class="py-3 px-3.5 w-12 text-center">#</th>

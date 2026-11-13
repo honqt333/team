@@ -59,6 +59,12 @@ class WorkOrderPartsController extends Controller
             'notes' => 'nullable|string|max:500',
         ]);
 
+        if (empty($validated['work_order_item_id'])) {
+            $validated['work_order_item_id'] = null;
+            $validated['include_in_package'] = false;
+            $validated['hide_on_print'] = false;
+        }
+
         // If warehouse source, require part_id and warehouse_id
         if ($validated['source'] === 'warehouse') {
             if (empty($validated['part_id']) || empty($validated['warehouse_id'])) {
@@ -156,6 +162,12 @@ class WorkOrderPartsController extends Controller
             'hide_on_print' => 'boolean',
             'notes' => 'nullable|string|max:500',
         ]);
+
+        if (empty($validated['work_order_item_id'])) {
+            $validated['work_order_item_id'] = null;
+            $validated['include_in_package'] = false;
+            $validated['hide_on_print'] = false;
+        }
 
         // Validate min price if warehouse part and not included in package
         $source = $validated['source'] ?? $workOrderPart->source;

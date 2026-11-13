@@ -382,14 +382,15 @@
                     <button
                         type="button"
                         @click="$emit('close')"
-                        class="px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white font-medium transition-colors"
+                        class="px-5 py-2.5 text-xs font-bold text-text-secondary hover:bg-surface-secondary border border-border rounded-xl transition-colors cursor-pointer"
                     >
                         {{ $t('common.cancel') }}
                     </button>
                     <button
+                        type="button"
                         @click="submitForm"
                         :disabled="form.processing"
-                        class="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 text-white rounded-xl font-medium shadow-lg shadow-teal-500/30 hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                        class="inline-flex items-center justify-center gap-2 px-6 py-2.5 text-xs font-bold text-white bg-action-primary hover:bg-action-primary-hover rounded-xl shadow-xs transition-all disabled:opacity-50 cursor-pointer"
                     >
                         <svg
                             v-if="form.processing"
@@ -564,14 +565,14 @@
                     <button
                         type="button"
                         @click="showDuplicateModal = false"
-                        class="px-4 py-2 text-sm font-semibold text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-xl transition-all"
+                        class="px-5 py-2.5 text-xs font-bold text-text-secondary hover:bg-surface-secondary border border-border rounded-xl transition-colors cursor-pointer"
                     >
                         {{ $t('common.cancel') }}
                     </button>
                     <button
                         type="button"
                         @click="navigateToDuplicateVehicle"
-                        class="px-4 py-2 text-sm font-semibold text-white bg-action-primary hover:bg-action-primary-hover rounded-xl transition-all shadow"
+                        class="inline-flex items-center justify-center gap-2 px-6 py-2.5 text-xs font-bold text-white bg-action-primary hover:bg-action-primary-hover rounded-xl shadow-xs transition-all disabled:opacity-50 cursor-pointer"
                     >
                         {{ $t('vehicles.view_details') }}
                     </button>
@@ -587,6 +588,7 @@ import { useForm, router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import { useConfirm } from '@/Composables/useConfirm';
 import { useFormScrollToError } from '@/Composables/useFormScrollToError';
+import { useNumberFormat } from '@/Composables/useNumberFormat';
 import BaseModal from '@/Components/BaseModal.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 import Tooltip from '@/Components/Tooltip.vue';
@@ -618,6 +620,7 @@ function normalizeArabicNumerals(value) {
 const { t } = useI18n();
 const { confirm } = useConfirm();
 const { scrollToError } = useFormScrollToError();
+const { toEnglish } = useNumberFormat();
 
 const props = defineProps({
     show: {
@@ -755,15 +758,15 @@ watch(
         if (newVehicle) {
             form.customer_id = newVehicle.customer_id || '';
             form.dealer_id = newVehicle.dealer_id || '';
-            form.plate_number = newVehicle.plate_number || '';
+            form.plate_number = toEnglish(newVehicle.plate_number || '');
             form.make_id = newVehicle.make_id || (newVehicle.make_other ? '__other__' : '');
             form.model_id = newVehicle.model_id || (newVehicle.model_other ? '__other__' : '');
             form.make_other = newVehicle.make_other || '';
             form.model_other = newVehicle.model_other || '';
-            form.year = newVehicle.year || '';
+            form.year = toEnglish(newVehicle.year || '');
             form.color = newVehicle.color || '';
             form.vin = newVehicle.vin || '';
-            form.odometer = newVehicle.odometer || '';
+            form.odometer = toEnglish(newVehicle.odometer || '');
             form.notes = newVehicle.notes || '';
         }
     },

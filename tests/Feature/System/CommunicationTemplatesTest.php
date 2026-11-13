@@ -86,4 +86,33 @@ class CommunicationTemplatesTest extends TestCase
         $this->assertSame('<p>محتوى جديد محدث</p>', $template->content);
         $this->assertFalse($template->is_active);
     }
+
+    public function test_update_strips_xss_bypass_vectors_from_template_content(): void
+    {
+        $template = CommunicationTemplate::create([
+            'code' => 'test_template_xss',
+            'name' => 'قالب أمان',
+            'type' => 'email',
+            'subject' => 'عنوان',
+            'content' => '<p>آمن</p>',
+            'variables' => [],
+            'is_active' => true,
+        ]);
+
+        $response = $this->actingAs($this->admin)
+            ->put(route('system.communication.templates.update', $template->id), [
+                'subject' => 'عنوان',
+                'content' => '<p>مرحبا</p><svg/onload=alert(1)><img src="x"onerror="alert(2)"><a href="javascript:alert(3)">click</a>',
+                'is_active' => true,
+            ]);
+
+        $response->assertRedirect(route('system.communication.templates.index'));
+
+        $template->refresh();
+        $this->assertStringNotContainsString('onload', $template->content);
+        $this->assertStringNotContainsString('onerror', $template->content);
+        $this->assertStringNotContainsString('javascript:', $template->content);
+        $this->assertStringNotContainsString('<svg', $template->content);
+        $this->assertStringContainsString('<p>مرحبا</p>', $template->content);
+    }
 }

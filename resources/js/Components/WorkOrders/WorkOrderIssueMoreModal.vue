@@ -94,7 +94,7 @@
             <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
                 <!-- Issued Qty -->
                 <div
-                    class="p-4 bg-gray-50 dark:bg-gray-900/50 rounded-2xl border border-gray-150 dark:border-gray-800"
+                    class="p-4 bg-gray-50 dark:bg-gray-900/50 rounded-2xl border border-gray-200 dark:border-gray-800"
                 >
                     <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">
                         {{ $t('inventory.parts.issued_qty') }}
@@ -106,7 +106,7 @@
 
                 <!-- Returned Qty -->
                 <div
-                    class="p-4 bg-gray-50 dark:bg-gray-900/50 rounded-2xl border border-gray-150 dark:border-gray-800"
+                    class="p-4 bg-gray-50 dark:bg-gray-900/50 rounded-2xl border border-gray-200 dark:border-gray-800"
                 >
                     <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">
                         {{ $t('inventory.parts.returned_qty') }}
@@ -118,7 +118,7 @@
 
                 <!-- Current Qty on Card -->
                 <div
-                    class="p-4 bg-gray-50 dark:bg-gray-900/50 rounded-2xl border border-gray-150 dark:border-gray-800"
+                    class="p-4 bg-gray-50 dark:bg-gray-900/50 rounded-2xl border border-gray-200 dark:border-gray-800"
                 >
                     <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">
                         {{ $t('inventory.parts.current_card_qty') }}
@@ -261,7 +261,7 @@
                 <button
                     type="button"
                     @click="$emit('close')"
-                    class="px-5 py-2.5 text-xs font-bold text-gray-500 hover:text-red-500 transition-all uppercase tracking-widest"
+                    class="px-5 py-2.5 text-xs font-bold text-text-secondary hover:bg-surface-secondary border border-border rounded-xl transition-colors cursor-pointer"
                 >
                     {{ $t('common.cancel') }}
                 </button>
@@ -273,7 +273,7 @@
                         parseFloat(additionalQty) <= 0 ||
                         parseFloat(additionalQty) > currentStock
                     "
-                    class="px-10 py-3 bg-action-primary hover:bg-action-primary-hover text-white rounded-2xl font-black uppercase tracking-widest text-xs transition-all shadow-lg shadow-focus-ring-soft disabled:opacity-50"
+                    class="inline-flex items-center justify-center gap-2 px-6 py-2.5 text-xs font-bold text-white bg-action-primary hover:bg-action-primary-hover rounded-xl shadow-xs transition-all disabled:opacity-50 cursor-pointer"
                 >
                     {{ form.processing ? $t('common.loading') : $t('common.save') }}
                 </button>

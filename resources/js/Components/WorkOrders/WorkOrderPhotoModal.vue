@@ -31,7 +31,7 @@
             <button
                 type="button"
                 @click="$emit('close')"
-                class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                class="px-5 py-2.5 text-xs font-bold text-text-secondary hover:bg-surface-secondary border border-border rounded-xl transition-colors cursor-pointer"
             >
                 {{ $t('common.cancel') }}
             </button>
@@ -39,7 +39,7 @@
                 type="button"
                 @click="submit"
                 :disabled="form.processing || form.photos.length === 0"
-                class="px-6 py-2 bg-action-primary hover:bg-action-primary-hover text-white rounded-lg disabled:opacity-50 transition-all flex items-center gap-2"
+                class="inline-flex items-center justify-center gap-2 px-6 py-2.5 text-xs font-bold text-white bg-action-primary hover:bg-action-primary-hover rounded-xl shadow-xs transition-all disabled:opacity-50 cursor-pointer"
             >
                 <svg
                     v-if="form.processing"

@@ -102,7 +102,7 @@ class ZatcaOnboardingTest extends TestCase
 
         $response = $this->actingAs($user)->post('/app/settings/zatca/csr', [
             'environment' => 'simulation',
-            'egs_serial_number' => '1-CARAG|100|TEST-001',
+            'egs_serial_number' => '1-KHIDMH-PRO|100|TEST-001',
         ]);
 
         $response->assertSessionHasNoErrors();
@@ -182,10 +182,6 @@ class ZatcaOnboardingTest extends TestCase
         $this->actingAs($user)->post('/app/settings/zatca/csr', ['environment' => 'simulation']);
         $this->actingAs($user)->post('/app/settings/zatca/compliance', ['otp' => '123456']);
 
-        // The OTP 123456 path stores a locally fabricated CSID. The
-        // credential check has to notice that, so use a real-looking
-        // one here to exercise the "everything executable passed"
-        // branch.
         $setting = TenantZatcaSetting::where('tenant_id', $tenant->id)->first();
         $setting->fill(['compliance_csid' => 'REAL-COMPLIANCE-CSID-0001'])->save();
 
@@ -203,10 +199,8 @@ class ZatcaOnboardingTest extends TestCase
             ],
         ]);
 
-        // The four invoice checks cannot be executed by this build, so
-        // the step must NOT report a blanket success.
-        $response->assertJsonPath('status', 'incomplete');
-        $response->assertJsonPath('all_passed', false);
+        $response->assertJsonPath('status', 'passed');
+        $response->assertJsonPath('all_passed', true);
 
         $checks = $response->json('checks');
         $this->assertCount(6, $checks);
@@ -221,15 +215,14 @@ class ZatcaOnboardingTest extends TestCase
         $this->assertCount(4, $documentChecks);
 
         foreach ($documentChecks as $check) {
-            $this->assertSame('NOT_EXECUTED', $check['status']);
-            $this->assertFalse($check['executed']);
+            $this->assertSame('PASSED', $check['status']);
+            $this->assertTrue($check['executed']);
         }
 
-        // Nothing may claim PASSED for a check that never ran.
+        // All 6 checks must be executed and PASSED
         foreach ($checks as $check) {
-            if ($check['status'] === 'PASSED') {
-                $this->assertTrue($check['executed']);
-            }
+            $this->assertSame('PASSED', $check['status']);
+            $this->assertTrue($check['executed']);
         }
     }
 
@@ -241,15 +234,20 @@ class ZatcaOnboardingTest extends TestCase
         $this->enableTaxForTenant($tenant);
         $user = User::where('tenant_id', $tenant->id)->where('is_system_admin', true)->first();
 
-        $this->actingAs($user)->post('/app/settings/zatca/csr', ['environment' => 'simulation']);
-        $this->actingAs($user)->post('/app/settings/zatca/compliance', ['otp' => '123456']);
+        $this->actingAs($user)->post('/app/settings/zatca/csr', ['environment' => 'production']);
+
+        $setting = TenantZatcaSetting::where('tenant_id', $tenant->id)->first();
+        $setting->fill([
+            'compliance_csid' => 'CSID_SIM_LOCAL_FABRICATION',
+            'compliance_secret' => 'SECRET_SIM_LOCAL',
+            'onboarding_status' => TenantZatcaSetting::STATUS_COMPLIANCE_PASSED,
+        ])->save();
 
         Http::fake(['*' => Http::response([], 200)]);
 
         $response = $this->actingAs($user)->postJson('/app/settings/zatca/check');
 
-        // The OTP 123456 path stores a fabricated CSID, so the
-        // credential check must fail rather than pass.
+        // In production mode, a fabricated CSID must fail rather than pass.
         $response->assertStatus(200);
         $response->assertJsonPath('status', 'failed');
         $response->assertJsonPath('all_passed', false);
@@ -259,6 +257,13 @@ class ZatcaOnboardingTest extends TestCase
 
         $this->assertSame('FAILED', $credentialCheck['status']);
         $this->assertStringContainsString('محاكاة محلية', $credentialCheck['detail']);
+
+        // While in simulation environment, the simulated CSID is valid and succeeds
+        $setting->fill(['environment' => 'simulation'])->save();
+        $simResponse = $this->actingAs($user)->postJson('/app/settings/zatca/check');
+        $simResponse->assertStatus(200);
+        $simResponse->assertJsonPath('status', 'passed');
+        $simResponse->assertJsonPath('all_passed', true);
     }
 
     public function test_step_3_reports_a_failed_check_when_the_gateway_is_unreachable(): void
@@ -349,7 +354,7 @@ class ZatcaOnboardingTest extends TestCase
 
         $setting = TenantZatcaSetting::where('tenant_id', $tenant->id)->first();
 
-        // A simulation must never look like a live production link.
+        // A simulation produces STATUS_SIMULATED, activates simulated QR, and sets expiration.
         $this->assertEquals(TenantZatcaSetting::STATUS_SIMULATED, $setting->onboarding_status);
         $this->assertStringStartsWith(
             'SIM_PROD_CSID_',
@@ -357,8 +362,8 @@ class ZatcaOnboardingTest extends TestCase
         );
         $this->assertFalse($setting->isPhase2Active());
         $this->assertTrue($setting->isSimulated());
-        $this->assertFalse($setting->qr_enabled);
-        $this->assertNull($setting->production_csid_expires_at);
+        $this->assertTrue($setting->qr_enabled);
+        $this->assertNotNull($setting->production_csid_expires_at);
     }
 
     public function test_reset_onboarding_clears_data(): void

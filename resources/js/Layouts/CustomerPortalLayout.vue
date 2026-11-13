@@ -10,6 +10,7 @@
         :style="cssVars"
         class="relative min-h-screen overflow-x-hidden bg-[#f4f7fb] pb-24 text-slate-950 md:pb-10"
     >
+        <Toast />
         <!-- Ambient brand glow -->
         <div class="pointer-events-none fixed inset-0" aria-hidden="true">
             <div
@@ -193,6 +194,8 @@ import { computed, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import BrandMark from '@/Components/CustomerPortal/BrandMark.vue';
 import LanguageToggle from '@/Components/CustomerPortal/LanguageToggle.vue';
+import Toast from '@/Components/Toast.vue';
+import { useFlashToasts } from '@/Composables/useFlashToasts';
 
 const props = defineProps({
     tenant: { type: Object, required: true },
@@ -292,6 +295,8 @@ const bottomNav = computed(() => [
         icon: `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>`,
     },
 ]);
+
+useFlashToasts(page, { immediate: true });
 
 onMounted(() => {
     if (typeof window !== 'undefined') {

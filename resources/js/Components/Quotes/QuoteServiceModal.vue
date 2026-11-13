@@ -393,7 +393,7 @@
             <button
                 type="button"
                 @click="$emit('close')"
-                class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                class="px-5 py-2.5 text-xs font-bold text-text-secondary hover:bg-surface-secondary border border-border rounded-xl transition-colors cursor-pointer"
             >
                 {{ isReadOnly ? $t('common.close') : $t('common.cancel') }}
             </button>
@@ -402,7 +402,7 @@
                 type="button"
                 @click="submitForm"
                 :disabled="form.processing || isPriceBelowMinimum"
-                class="px-6 py-2 bg-action-primary hover:bg-action-primary-hover text-white rounded-lg hover:from-blue-600 hover:to-action-primary disabled:opacity-50 transition-all"
+                class="inline-flex items-center justify-center gap-2 px-6 py-2.5 text-xs font-bold text-white bg-action-primary hover:bg-action-primary-hover rounded-xl shadow-xs transition-all disabled:opacity-50 cursor-pointer"
             >
                 {{ form.processing ? $t('common.loading') : $t('common.save') }}
             </button>

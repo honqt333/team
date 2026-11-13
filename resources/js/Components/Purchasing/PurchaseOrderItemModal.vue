@@ -1,11 +1,13 @@
 <template>
-    <BaseModal :show="show" @close="$emit('close')" size="2xl" z-index-class="z-[60]">
+    <BaseModal :show="show" @close="$emit('close')" size="md" z-index-class="z-[60]">
         <template #title>
             <div class="flex items-center gap-3">
                 <div
-                    class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center"
+                    class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center text-white shrink-0"
                 >
+                    <span v-if="isServiceSupplier" class="text-lg">🤝</span>
                     <svg
+                        v-else
                         class="w-5 h-5 text-white"
                         fill="none"
                         stroke="currentColor"
@@ -19,13 +21,44 @@
                         />
                     </svg>
                 </div>
-                {{ item ? $t('purchasing.items.edit') : $t('purchasing.items.add') }}
+                <span>{{ modalTitle }}</span>
             </div>
         </template>
 
-        <form @submit.prevent="submit" class="space-y-6">
-            <!-- Search Part -->
-            <div class="space-y-3">
+        <form @submit.prevent="submit" class="space-y-5">
+            <!-- Item Source Segmented Control (Only when context is not fixed) -->
+            <div
+                v-if="context !== 'inventory' && context !== 'external_part' && !isServiceSupplier"
+                class="flex items-center gap-2 p-1 bg-gray-100 dark:bg-gray-800/80 rounded-xl border border-gray-200 dark:border-gray-700"
+            >
+                <button
+                    type="button"
+                    @click="itemType = 'inventory'"
+                    :class="[
+                        'flex-1 py-1.5 text-xs font-bold rounded-lg transition-all',
+                        itemType === 'inventory'
+                            ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-xs'
+                            : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300',
+                    ]"
+                >
+                    📦 {{ $t('purchasing.items.from_inventory') }}
+                </button>
+                <button
+                    type="button"
+                    @click="itemType = 'custom'"
+                    :class="[
+                        'flex-1 py-1.5 text-xs font-bold rounded-lg transition-all',
+                        itemType === 'custom'
+                            ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-xs'
+                            : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300',
+                    ]"
+                >
+                    🛒 {{ $t('purchasing.items.external_part') }}
+                </button>
+            </div>
+
+            <!-- Search Part (When Inventory) -->
+            <div v-if="itemType === 'inventory'" class="space-y-3">
                 <SearchableSelect
                     v-model="form.part_id"
                     :options="searchResults"
@@ -73,6 +106,70 @@
                         </div>
                     </template>
                 </SearchableSelect>
+            </div>
+
+            <!-- Custom External Part Inputs (Matches WorkOrderPartModal External Tab) -->
+            <div
+                v-if="itemType === 'custom'"
+                class="space-y-4 bg-amber-50/50 dark:bg-amber-950/20 p-4 rounded-2xl border border-amber-200/60 dark:border-amber-900/40"
+            >
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                        <label
+                            class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1.5"
+                        >
+                            {{ $t('inventory.parts.part_number') }}
+                        </label>
+                        <input
+                            type="text"
+                            v-model="form.part_number"
+                            :placeholder="
+                                $t('inventory.parts.part_number_placeholder') || 'رقم القطعة...'
+                            "
+                            class="w-full px-3.5 py-2.5 text-xs font-mono rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring/20 focus:border-action-primary shadow-xs"
+                            dir="ltr"
+                        />
+                    </div>
+                    <div>
+                        <label
+                            class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1.5"
+                        >
+                            {{ $t('inventory.parts.unit') }}
+                        </label>
+                        <SearchableSelect
+                            v-model="form.purchase_unit_id"
+                            :options="unitSelectOptions"
+                            option-label="label"
+                            option-value="value"
+                            :placeholder="$t('common.unit')"
+                            class="w-full text-xs"
+                        />
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1.5">
+                        {{ $t('inventory.parts.name') }}
+                        <span class="text-red-500">*</span>
+                    </label>
+                    <input
+                        type="text"
+                        v-model="form.custom_name"
+                        required
+                        :placeholder="$t('inventory.parts.name_placeholder') || 'اسم القطعة...'"
+                        class="w-full px-3.5 py-2.5 text-xs font-bold rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring/20 focus:border-action-primary shadow-xs"
+                    />
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1.5">
+                        {{ $t('inventory.parts.description') }}
+                    </label>
+                    <input
+                        type="text"
+                        v-model="form.notes"
+                        :placeholder="$t('inventory.parts.description_placeholder')"
+                        class="w-full px-3.5 py-2.5 text-xs rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring/20 focus:border-action-primary shadow-xs"
+                    />
+                </div>
             </div>
 
             <!-- Selected Part Card -->
@@ -177,17 +274,17 @@
                     <label
                         class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5"
                     >
-                        {{ $t('common.quantity') }}
+                        {{ $t('common.quantity') }} ({{ $t('common.piece') }})
                         <span class="text-red-500">*</span>
                     </label>
                     <div class="relative">
                         <input
-                            type="text"
-                            v-model="form.qty"
-                            inputmode="decimal"
+                            type="number"
+                            v-model.number="form.qty"
+                            min="1"
+                            step="1"
                             dir="ltr"
                             lang="en"
-                            @input="(e) => (form.qty = toEnglish(e.target.value))"
                             class="w-full px-4 py-3 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring text-center font-bold text-lg shadow-sm font-mono"
                         />
                     </div>
@@ -208,8 +305,9 @@
                 </div>
             </div>
 
-            <!-- Unit Conversion Grid -->
+            <!-- Unit Conversion Grid (Only for Inventory Parts) -->
             <div
+                v-if="!isServiceSupplier && itemType === 'inventory'"
                 class="grid grid-cols-1 sm:grid-cols-3 gap-6 bg-blue-50/50 dark:bg-blue-900/10 p-5 rounded-2xl border border-blue-100 dark:border-blue-800/30"
             >
                 <!-- Purchase Unit -->
@@ -401,7 +499,7 @@
                     <button
                         type="button"
                         @click="$emit('close')"
-                        class="px-5 py-2.5 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl transition-colors font-medium"
+                        class="px-5 py-2.5 text-xs font-bold text-text-secondary hover:bg-surface-secondary border border-border rounded-xl transition-colors cursor-pointer"
                     >
                         {{ $t('common.cancel') }}
                     </button>
@@ -409,7 +507,7 @@
                         type="button"
                         @click="submit"
                         :disabled="!selectedPart || form.qty <= 0"
-                        class="flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-blue-600 to-cyan-600 text-white rounded-xl hover:from-blue-700 hover:to-cyan-700 disabled:opacity-50 transition-all shadow-lg shadow-blue-500/30 font-bold"
+                        class="inline-flex items-center justify-center gap-2 px-6 py-2.5 text-xs font-bold text-white bg-action-primary hover:bg-action-primary-hover rounded-xl shadow-xs transition-all disabled:opacity-50 cursor-pointer"
                     >
                         <svg
                             v-if="!item"
@@ -469,6 +567,23 @@ const props = defineProps({
         type: Object,
         default: () => ({}),
     },
+    context: {
+        type: String,
+        default: 'inventory', // 'inventory' | 'work_order'
+    },
+    supplierType: {
+        type: String,
+        default: 'parts', // 'parts' | 'services'
+    },
+});
+
+const isServiceSupplier = computed(() => props.supplierType === 'services');
+
+const modalTitle = computed(() => {
+    if (props.context === 'external_part' || itemType.value === 'custom') {
+        return props.item ? t('purchasing.items.edit') : t('purchasing.items.external_part');
+    }
+    return props.item ? t('purchasing.items.edit') : t('purchasing.items.add');
 });
 
 const emit = defineEmits(['close', 'saved', 'update:taxIncluded']);
@@ -476,6 +591,9 @@ const { t } = useI18n();
 
 const form = ref({
     part_id: '',
+    custom_name: '',
+    part_number: '',
+    notes: '',
     qty: 1,
     unit_cost: 0,
     discount: 0,
@@ -494,10 +612,18 @@ const { getName } = useLocalized();
 
 const searchQuery = ref('');
 const searchResults = ref([]);
+const itemType = ref('inventory');
 const searching = ref(false);
 const selectedPart = ref(null);
 const isUnitLocked = ref(true);
 const defaultUnitId = ref(null);
+
+const unitSelectOptions = computed(() => {
+    return (props.units || []).map((u) => ({
+        value: u.id,
+        label: getName(u),
+    }));
+});
 
 const availableUnits = computed(() => {
     return isUnitLocked.value
@@ -506,8 +632,12 @@ const availableUnits = computed(() => {
 });
 
 const resetForm = () => {
+    itemType.value = props.context === 'external_part' ? 'custom' : 'inventory';
     form.value = {
         part_id: '',
+        custom_name: '',
+        part_number: '',
+        notes: '',
         qty: 1,
         unit_cost: 0,
         discount: 0,
@@ -542,6 +672,15 @@ watch(
         if (newVal) {
             if (props.item) {
                 form.value = { ...props.item };
+                itemType.value =
+                    props.item.is_custom || props.context === 'external_part'
+                        ? 'custom'
+                        : 'inventory';
+                if (props.item.is_custom || props.context === 'external_part') {
+                    form.value.custom_name =
+                        props.item.name || props.item.custom_name || props.item.part?.name_ar || '';
+                    form.value.part_number = props.item.part_number || props.item.part?.sku || '';
+                }
                 selectedPart.value = props.item.part;
                 searchResults.value = props.item.part ? [props.item.part] : [];
                 searchQuery.value = props.item.part?.name_ar || '';
@@ -552,7 +691,9 @@ watch(
             } else {
                 resetForm();
                 isUnitLocked.value = true;
-                debouncedSearch(''); // Pre-fetch parts when adding a new item
+                if (props.context !== 'external_part') {
+                    debouncedSearch(''); // Pre-fetch parts when adding a new item
+                }
             }
         }
     },
@@ -640,14 +781,43 @@ const formatCurrency = (value) => {
 };
 
 const submit = () => {
-    if (!selectedPart.value) return;
+    if (itemType.value === 'inventory') {
+        if (!selectedPart.value) return;
 
-    emit('saved', {
-        ...form.value,
-        part: selectedPart.value,
-        total: calculatedTotal.value,
-        tax_amount: calculatedVat.value,
-        inventory_qty: calculatedInventoryQty.value,
-    });
+        emit('saved', {
+            ...form.value,
+            qty: Math.max(1, Math.floor(Number(form.value.qty || 1))),
+            is_custom: false,
+            is_service: false,
+            part: selectedPart.value,
+            total: calculatedTotal.value,
+            tax_amount: calculatedVat.value,
+            inventory_qty: calculatedInventoryQty.value,
+        });
+    } else {
+        const customName = form.value.custom_name?.trim();
+        if (!customName) return;
+
+        const partNum = form.value.part_number?.trim() || 'EXTERNAL';
+
+        emit('saved', {
+            ...form.value,
+            part_id: null,
+            is_custom: true,
+            is_service: false,
+            name: customName,
+            custom_name: customName,
+            part_number: partNum,
+            part: {
+                name_ar: customName,
+                name_en: customName,
+                sku: partNum,
+            },
+            qty: Math.max(1, Math.floor(Number(form.value.qty || 1))),
+            total: calculatedTotal.value,
+            tax_amount: calculatedVat.value,
+            inventory_qty: calculatedInventoryQty.value,
+        });
+    }
 };
 </script>

@@ -231,7 +231,7 @@ class WebsiteSettingsTest extends TestCase
 
         $response->assertStatus(422);
         $response->assertJsonFragment([
-            'message' => 'ملف SVG المرفوع يحتوي على برمجيات غير آمنة',
+            'message' => __('messages.system.svg_unsafe'),
         ]);
     }
 

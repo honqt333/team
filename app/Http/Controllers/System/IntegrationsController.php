@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Integration\Integration;
 use App\Models\Integration\IntegrationLog;
 use App\Services\Sms\AuthenticaService;
+use App\Services\System\SystemAuditService;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
@@ -17,6 +18,14 @@ use Mail;
 
 class IntegrationsController extends Controller
 {
+    protected SystemAuditService $audit;
+
+    public function __construct(
+        ?SystemAuditService $audit = null
+    ) {
+        $this->audit = $audit ?? app(SystemAuditService::class);
+    }
+
     /**
      * Placeholder sent to the browser in place of a stored secret.
      *
@@ -131,6 +140,11 @@ class IntegrationsController extends Controller
             ]
         );
 
+        $this->audit->log('integration_create', Integration::class, $integration->id, [
+            'type' => $integration->type,
+            'provider' => $integration->provider,
+        ], $request);
+
         return redirect()->route('system.integrations.show', $integration)
             ->with('success', __('messages.system.integrations.added'));
     }
@@ -214,6 +228,14 @@ class IntegrationsController extends Controller
                 ->update(['is_default' => false]);
         }
 
+        $this->audit->log('integration_update', Integration::class, $integration->id, [
+            'type' => $integration->type,
+            'provider' => $integration->provider,
+            'is_active' => $integration->is_active,
+            'is_default' => $integration->is_default,
+            'purpose' => $integration->purpose,
+        ], $request);
+
         return back()->with('success', __('messages.system.integrations.settings_saved'));
     }
 
@@ -265,7 +287,16 @@ class IntegrationsController extends Controller
      */
     public function destroy(Integration $integration)
     {
+        $integrationId = $integration->id;
+        $provider = $integration->provider;
+        $type = $integration->type;
+
         $integration->delete();
+
+        $this->audit->log('integration_delete', Integration::class, $integrationId, [
+            'type' => $type,
+            'provider' => $provider,
+        ]);
 
         return redirect()->route('system.integrations.index')
             ->with('success', __('messages.system.integrations.deleted'));
@@ -290,10 +321,11 @@ class IntegrationsController extends Controller
 
     private function testUnifonic(array $config, string $phone): array
     {
+        $brandName = config('app.name_ar', 'خدمة برو').' / '.config('app.name', 'Khidmh Pro');
         $response = Http::post('https://el.cloud.unifonic.com/rest/SMS/messages', [
             'AppSid' => $config['app_sid'],
             'SenderID' => $config['sender_id'],
-            'Body' => 'رسالة اختبار من Khidma Pro',
+            'Body' => "رسالة اختبار من {$brandName}",
             'Recipient' => $phone,
         ]);
 
@@ -306,12 +338,13 @@ class IntegrationsController extends Controller
 
     private function testTwilio(array $config, string $phone): array
     {
+        $brandName = config('app.name_ar', 'خدمة برو').' / '.config('app.name', 'Khidmh Pro');
         $response = Http::withBasicAuth($config['account_sid'], $config['auth_token'])
             ->asForm()
             ->post("https://api.twilio.com/2010-04-01/Accounts/{$config['account_sid']}/Messages.json", [
                 'To' => $phone,
                 'From' => $config['from_number'],
-                'Body' => 'رسالة اختبار من خدمة برو / Khidmh Pro',
+                'Body' => "رسالة اختبار من {$brandName}",
             ]);
 
         if (! $response->successful()) {
@@ -381,7 +414,7 @@ class IntegrationsController extends Controller
         if ($integration->provider !== 'authentica') {
             return response()->json([
                 'success' => false,
-                'message' => 'هذا المزود لا يدعم جلب الرصيد',
+                'message' => __('messages.system.integration_balance_unsupported'),
             ], 400);
         }
 

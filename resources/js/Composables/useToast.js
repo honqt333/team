@@ -4,19 +4,29 @@ const toasts = ref([]);
 let toastId = 0;
 let containerCounter = 0;
 const activeContainers = ref([]);
+const toastTimers = new Map();
 
-// Tracks when the last non-flash toast of each type was shown.
-// Flash toasts (fromFlash:true) are suppressed if a frontend-initiated toast
-// of the same type was shown within FLASH_SUPPRESS_MS milliseconds.
-// This prevents double-toasting when onSuccess callbacks and backend flash
-// messages both fire for the same user action.
-const FLASH_SUPPRESS_MS = 4000;
-const lastFrontendToastAt = {
-    success: 0,
-    error: 0,
-    warning: 0,
-    info: 0,
-};
+// Tracks recent frontend-initiated toasts to prevent double-toasting
+// when both frontend onSuccess callbacks and backend flash messages fire for the exact same action.
+const RECENT_DEDUPE_MS = 3500;
+const SAME_RESPONSE_DEDUPE_MS = 300;
+const recentFrontendToasts = [];
+let pendingFlashErrorUntil = 0;
+
+function markPendingFlashError() {
+    pendingFlashErrorUntil = Date.now() + 150;
+}
+
+function clearPendingFlashError() {
+    pendingFlashErrorUntil = 0;
+}
+
+function cleanOldRecentToasts() {
+    const now = Date.now();
+    while (recentFrontendToasts.length > 0 && now - recentFrontendToasts[0].timestamp > 10000) {
+        recentFrontendToasts.shift();
+    }
+}
 
 export function useToast() {
     function registerContainer() {
@@ -32,28 +42,88 @@ export function useToast() {
         }
     }
 
+    function startTimer(toast) {
+        if (!toast || toast.duration <= 0) return;
+        const timerData = {
+            startedAt: Date.now(),
+            remaining: toast.duration,
+            timeoutId: null,
+        };
+        timerData.timeoutId = setTimeout(() => {
+            removeToast(toast.id);
+        }, toast.duration);
+        toastTimers.set(toast.id, timerData);
+    }
+
+    function pauseToast(id) {
+        const timerData = toastTimers.get(id);
+        if (!timerData) return;
+        if (timerData.timeoutId) {
+            clearTimeout(timerData.timeoutId);
+            timerData.timeoutId = null;
+            const elapsed = Date.now() - timerData.startedAt;
+            timerData.remaining = Math.max(0, timerData.remaining - elapsed);
+        }
+    }
+
+    function resumeToast(id) {
+        const timerData = toastTimers.get(id);
+        if (!timerData || timerData.remaining <= 0) return;
+        timerData.startedAt = Date.now();
+        timerData.timeoutId = setTimeout(() => {
+            removeToast(id);
+        }, timerData.remaining);
+    }
+
     function addToast(options) {
         const type = options.type || 'info';
         const isFlash = !!options.fromFlash;
+        const msg = String(options.message || '').trim();
 
-        // If this is a flash toast and a frontend toast of the same type was shown
-        // recently, suppress it to avoid duplicates regardless of message text.
-        if (isFlash && (Date.now() - (lastFrontendToastAt[type] || 0)) < FLASH_SUPPRESS_MS) {
+        if (!msg) return null;
+
+        // If the current Inertia response already carries a server flash error,
+        // suppress any optimistic frontend onSuccess toast so users never see "success then error".
+        if (!isFlash && type === 'success' && Date.now() < pendingFlashErrorUntil) {
             return null;
         }
 
-        // Prevent truly duplicate messages (same type + same text) already visible
-        const isDuplicate = toasts.value.some(
-            t => t.type === type && t.message === options.message
+        cleanOldRecentToasts();
+
+        // Prevent truly duplicate messages (same type + same text) currently visible
+        const isCurrentlyVisible = toasts.value.some(
+            (t) => t.type === type && String(t.message || '').trim() === msg
         );
-        if (isDuplicate) {
+        if (isCurrentlyVisible) {
             return null;
         }
 
-        // Record when a frontend-initiated toast was shown so we can suppress
-        // a subsequent flash of the same type.
+        // If this is a flash toast, suppress it if:
+        // 1. A frontend toast of the same type fired in the same response tick (< 300ms), even with different wording, OR
+        // 2. A frontend toast with matching/similar wording fired recently (< 3500ms).
+        if (isFlash) {
+            const now = Date.now();
+            const matchingRecent = recentFrontendToasts.find(
+                (r) =>
+                    r.type === type &&
+                    (now - r.timestamp < SAME_RESPONSE_DEDUPE_MS ||
+                        (now - r.timestamp < RECENT_DEDUPE_MS &&
+                            (r.message === msg ||
+                                r.message.includes(msg) ||
+                                msg.includes(r.message))))
+            );
+            if (matchingRecent) {
+                return null;
+            }
+        }
+
+        // Record frontend-initiated toasts for intelligent flash deduplication
         if (!isFlash) {
-            lastFrontendToastAt[type] = Date.now();
+            recentFrontendToasts.push({
+                type,
+                message: msg,
+                timestamp: Date.now(),
+            });
         }
 
         const id = ++toastId;
@@ -62,22 +132,26 @@ export function useToast() {
             type,
             title: options.title || null,
             message: options.message,
-            duration: options.duration ?? 4000,
+            duration: options.duration ?? (type === 'error' ? 6000 : 4000),
+            dismissOnClick: options.dismissOnClick ?? true,
+            action: options.action || null,
         };
 
         toasts.value.push(toast);
 
-        if (toast.duration > 0) {
-            setTimeout(() => {
-                removeToast(id);
-            }, toast.duration);
-        }
+        startTimer(toast);
 
         return id;
     }
 
     function removeToast(id) {
-        const index = toasts.value.findIndex(t => t.id === id);
+        const timerData = toastTimers.get(id);
+        if (timerData?.timeoutId) {
+            clearTimeout(timerData.timeoutId);
+        }
+        toastTimers.delete(id);
+
+        const index = toasts.value.findIndex((t) => t.id === id);
         if (index > -1) {
             toasts.value.splice(index, 1);
         }
@@ -100,6 +174,12 @@ export function useToast() {
     }
 
     function clear() {
+        for (const timerData of toastTimers.values()) {
+            if (timerData.timeoutId) clearTimeout(timerData.timeoutId);
+        }
+        toastTimers.clear();
+        recentFrontendToasts.length = 0;
+        pendingFlashErrorUntil = 0;
         toasts.value = [];
     }
 
@@ -110,6 +190,10 @@ export function useToast() {
         unregisterContainer,
         addToast,
         removeToast,
+        pauseToast,
+        resumeToast,
+        markPendingFlashError,
+        clearPendingFlashError,
         success,
         error,
         warning,

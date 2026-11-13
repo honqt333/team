@@ -438,18 +438,18 @@
                     ></textarea>
                 </div>
 
-                <div class="flex justify-end gap-2 pt-2">
+                <div class="flex justify-end gap-3 pt-2">
                     <button
                         type="button"
                         @click="showEditModal = false"
-                        class="px-4 py-2 text-xs font-semibold text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-xl hover:bg-gray-200"
+                        class="px-5 py-2.5 text-xs font-bold text-text-secondary hover:bg-surface-secondary border border-border rounded-xl transition-colors cursor-pointer"
                     >
                         {{ $t('common.cancel') }}
                     </button>
                     <button
                         type="submit"
                         :disabled="itemForm.processing"
-                        class="px-4 py-2 text-xs font-semibold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl disabled:opacity-50"
+                        class="inline-flex items-center justify-center gap-2 px-6 py-2.5 text-xs font-bold text-white bg-action-primary hover:bg-action-primary-hover rounded-xl shadow-xs transition-all disabled:opacity-50 cursor-pointer"
                     >
                         {{ itemForm.processing ? $t('common.saving') : $t('common.save') }}
                     </button>
@@ -493,18 +493,18 @@
                         class="w-full px-3 py-2 text-sm border rounded-xl bg-gray-50 dark:bg-gray-900 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-focus-ring text-gray-900 dark:text-white"
                     />
                 </div>
-                <div class="flex justify-end gap-2 pt-2">
+                <div class="flex justify-end gap-3 pt-2">
                     <button
                         type="button"
                         @click="showPaidModal = false"
-                        class="px-4 py-2 text-xs font-semibold text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-xl hover:bg-gray-200"
+                        class="px-5 py-2.5 text-xs font-bold text-text-secondary hover:bg-surface-secondary border border-border rounded-xl transition-colors cursor-pointer"
                     >
                         {{ $t('common.cancel') }}
                     </button>
                     <button
                         type="submit"
                         :disabled="paidForm.processing"
-                        class="px-4 py-2 text-xs font-semibold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl disabled:opacity-50"
+                        class="inline-flex items-center justify-center gap-2 px-6 py-2.5 text-xs font-bold text-white bg-action-primary hover:bg-action-primary-hover rounded-xl shadow-xs transition-all disabled:opacity-50 cursor-pointer"
                     >
                         {{ paidForm.processing ? $t('common.saving') : $t('hr.payroll.mark_paid') }}
                     </button>

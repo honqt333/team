@@ -172,7 +172,7 @@
                                                     item.title &&
                                                     item.title !== getName(item.service)
                                                 "
-                                                class="text-xs text-gray-500 dark:text-gray-400 mt-2 bg-gray-50/50 dark:bg-gray-900/40 p-2.5 rounded-lg border border-gray-100/50 dark:border-gray-850 leading-relaxed"
+                                                class="text-xs text-gray-500 dark:text-gray-400 mt-2 bg-gray-50/50 dark:bg-gray-900/40 p-2.5 rounded-lg border border-gray-100/50 dark:border-gray-700 leading-relaxed"
                                             >
                                                 {{ item.title }}
                                             </div>
@@ -414,6 +414,55 @@
                                             <span>{{ formatDate(item.created_at) }}</span>
                                         </div>
                                     </div>
+
+                                    <!-- Mapped Supplier Service Allocation Line -->
+                                    <div
+                                        v-if="
+                                            item.mapped_supplier_service ||
+                                            getSupplierServiceFor(item.id)
+                                        "
+                                        class="mt-3 flex items-center justify-between gap-2 px-3 py-1.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-xs font-semibold text-emerald-800 dark:text-emerald-300"
+                                    >
+                                        <div class="flex items-center gap-2 truncate">
+                                            <span
+                                                class="text-emerald-600 dark:text-emerald-400 shrink-0"
+                                            >
+                                                🔗
+                                            </span>
+                                            <span class="font-bold truncate">
+                                                {{
+                                                    (
+                                                        item.mapped_supplier_service ||
+                                                        getSupplierServiceFor(item.id)
+                                                    ).name
+                                                }}
+                                            </span>
+                                            <span
+                                                class="text-emerald-600/70 dark:text-emerald-400/70"
+                                            >
+                                                |
+                                            </span>
+                                            <span class="font-mono text-[11px]" dir="ltr">
+                                                {{
+                                                    formatPrice(
+                                                        (
+                                                            item.mapped_supplier_service ||
+                                                            getSupplierServiceFor(item.id)
+                                                        ).cost
+                                                    )
+                                                }}
+                                            </span>
+                                        </div>
+                                        <button
+                                            v-if="!isReadOnly"
+                                            type="button"
+                                            @click.stop="emit('unlink-supplier-service', item.id)"
+                                            class="text-rose-500 hover:text-rose-700 p-1 rounded transition-colors shrink-0 cursor-pointer"
+                                            :title="$t('work_orders.purchases.unlink_btn')"
+                                        >
+                                            🗑️
+                                        </button>
+                                    </div>
                                 </div>
 
                                 <!-- Per-item actions & status -->
@@ -479,7 +528,7 @@
                                         <!-- Dropdown Menu -->
                                         <div
                                             v-if="activeDropdownItemId === item.id"
-                                            class="absolute z-30 start-0 mt-1.5 w-40 bg-white dark:bg-gray-800 border border-gray-150 dark:border-gray-700 rounded-xl shadow-xl py-1 overflow-hidden"
+                                            class="absolute z-30 start-0 mt-1.5 w-40 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-xl py-1 overflow-hidden"
                                         >
                                             <!-- Invisible overlay to close dropdown -->
                                             <div
@@ -708,6 +757,7 @@ const props = defineProps({
     availableDepartments: { type: Array, required: true },
     /** All known departments (used to decide the empty-state message). */
     departments: { type: Array, default: () => [] },
+    supplierServiceAllocations: { type: Object, default: () => ({}) },
     isReadOnly: { type: Boolean, default: false },
 });
 
@@ -718,7 +768,15 @@ const emit = defineEmits([
     'edit-item',
     'print-department',
     'assign-technician',
+    'unlink-supplier-service',
 ]);
+
+function getSupplierServiceFor(itemId) {
+    if (props.supplierServiceAllocations && props.supplierServiceAllocations[itemId]) {
+        return props.supplierServiceAllocations[itemId];
+    }
+    return null;
+}
 
 // Sentinel key for the virtual "service packages" department bucket.
 // Kept in sync with Show.vue (PACKAGES_DEPT_KEY).

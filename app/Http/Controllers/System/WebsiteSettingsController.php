@@ -10,6 +10,7 @@ use App\Models\AdminUser;
 use App\Models\Setting;
 use App\Models\User;
 use App\Services\Media\ImageOptimizer;
+use DOMDocument;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -403,8 +404,8 @@ class WebsiteSettingsController extends Controller
         if ($extension === 'svg' || str_contains($mime, 'svg')) {
             $content = (string) file_get_contents($file->getRealPath());
 
-            if (preg_match('/<script|onload|onerror|onclick|onmouseover|javascript:/i', $content)) {
-                return response()->json(['message' => 'ملف SVG المرفوع يحتوي على برمجيات غير آمنة'], 422);
+            if (! $this->isSafeSvg($content)) {
+                return response()->json(['message' => __('messages.system.svg_unsafe')], 422);
             }
         }
 
@@ -470,5 +471,69 @@ class WebsiteSettingsController extends Controller
     {
         return ($user instanceof AdminUser && $user->isSuperAdmin())
             || ($user instanceof User && (bool) ($user->is_system_admin ?? false));
+    }
+
+    /**
+     * Strictly validate an uploaded SVG against XSS, event handlers,
+     * foreignObject/script/animate elements, and external entity injection.
+     */
+    private function isSafeSvg(string $content): bool
+    {
+        if ($content === '' || preg_match('/<!(?:DOCTYPE|ENTITY)/i', $content)) {
+            return false;
+        }
+
+        $dom = new DOMDocument;
+        $previousErrorSetting = libxml_use_internal_errors(true);
+
+        try {
+            $loaded = $dom->loadXML($content, LIBXML_NONET | LIBXML_NOERROR | LIBXML_NOWARNING);
+        } finally {
+            libxml_clear_errors();
+            libxml_use_internal_errors($previousErrorSetting);
+        }
+
+        if (! $loaded || ! $dom->documentElement || strtolower($dom->documentElement->localName) !== 'svg') {
+            return false;
+        }
+
+        $allowedTags = [
+            'svg', 'g', 'path', 'circle', 'rect', 'line', 'polyline', 'polygon',
+            'ellipse', 'defs', 'lineargradient', 'radialgradient', 'stop',
+            'title', 'desc', 'clippath', 'mask', 'pattern', 'symbol', 'use',
+            'text', 'tspan',
+        ];
+
+        $elements = $dom->getElementsByTagName('*');
+
+        foreach ($elements as $element) {
+            if (! in_array(strtolower($element->localName), $allowedTags, true)) {
+                return false;
+            }
+
+            if (! $element->hasAttributes()) {
+                continue;
+            }
+
+            foreach ($element->attributes as $attribute) {
+                $name = strtolower($attribute->nodeName);
+                $localName = strtolower($attribute->localName);
+                $value = trim($attribute->nodeValue);
+
+                if (str_starts_with($localName, 'on') || str_starts_with($name, 'on')) {
+                    return false;
+                }
+
+                if ($localName === 'href' && $value !== '' && ! str_starts_with($value, '#')) {
+                    return false;
+                }
+
+                if ($localName === 'style' && preg_match('/(?:url\s*\(|expression\s*\(|javascript:|data:)/i', $value)) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
     }
 }

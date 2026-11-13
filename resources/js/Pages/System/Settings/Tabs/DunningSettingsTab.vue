@@ -12,7 +12,7 @@
                         : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800',
                 ]"
             >
-                {{ isAr ? $t('system.settings.dunning_settings') : 'Dunning Rules' }}
+                {{ $t('system.settings.dunning_settings') }}
             </button>
             <button
                 type="button"
@@ -24,7 +24,7 @@
                         : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800',
                 ]"
             >
-                <span>{{ isAr ? $t('system.settings.dunning_log') : 'Audit Log' }}</span>
+                <span>{{ $t('system.settings.dunning_log') }}</span>
                 <span
                     v-if="logs?.total"
                     class="px-2 py-0.5 text-xs rounded-full bg-white/20 dark:bg-black/20"
@@ -44,19 +44,13 @@
                     <AppToggle v-model="form.enabled" />
                     <div class="flex-1">
                         <div class="text-base font-semibold text-gray-900 dark:text-white">
-                            {{
-                                isAr
-                                    ? $t('system.settings.enable_automated_dunning')
-                                    : 'Enable automated dunning'
-                            }}
+                            {{ $t('system.settings.enable_automated_dunning') }}
                         </div>
                         <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
                             {{
-                                isAr
-                                    ? $t(
-                                          'system.settings.when_enabled_the_daily_cron_sends_reminders_to_t'
-                                      )
-                                    : 'When enabled, the daily cron sends reminders to tenants with overdue subscription invoices based on the tier schedule below.'
+                                $t(
+                                    'system.settings.when_enabled_the_daily_cron_sends_reminders_to_t'
+                                )
                             }}
                         </p>
                     </div>
@@ -68,26 +62,22 @@
                 class="rounded-xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-700 dark:bg-gray-800"
             >
                 <h3 class="text-base font-semibold text-gray-900 dark:text-white">
-                    {{ isAr ? $t('system.settings.active_tiers') : 'Active tiers' }}
+                    {{ $t('system.settings.active_tiers') }}
                 </h3>
                 <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                    {{
-                        isAr
-                            ? $t('system.settings.uncheck_a_tier_to_skip_it_globally_skipped_tier')
-                            : 'Uncheck a tier to skip it globally. Skipped tiers will not trigger messages.'
-                    }}
+                    {{ $t('system.settings.uncheck_a_tier_to_skip_it_globally_skipped_tier') }}
                 </p>
 
                 <div class="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
                     <label
                         v-for="(def, key) in tier_definitions"
                         :key="key"
-                        class="flex cursor-pointer items-start gap-3 rounded-lg border border-gray-200 p-3 hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-750"
+                        class="flex cursor-pointer items-start gap-3 rounded-lg border border-gray-200 p-3 hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-700/60"
                     >
                         <AppToggle :value="key" v-model="form.active_tiers_list" />
                         <div class="flex-1 text-sm">
                             <div class="font-medium text-gray-900 dark:text-white">
-                                {{ isAr ? $t('system.settings.tier_3') : 'Tier' }}
+                                {{ $t('system.settings.tier_3') }}
                                 {{ key.replace('tier_', '') }} —
                                 {{ def.tone[isAr ? 'ar' : 'en'] }}
                             </div>
@@ -109,14 +99,10 @@
             >
                 <div>
                     <h3 class="text-base font-semibold text-gray-900 dark:text-white">
-                        {{ isAr ? $t('system.settings.quiet_hours_ksa') : 'Quiet hours (KSA)' }}
+                        {{ $t('system.settings.quiet_hours_ksa') }}
                     </h3>
                     <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                        {{
-                            isAr
-                                ? $t('system.settings.skip_outbound_messages_during_these_hours_')
-                                : 'Skip outbound messages during these hours. Blank = send 24/7.'
-                        }}
+                        {{ $t('system.settings.skip_outbound_messages_during_these_hours_') }}
                     </p>
                     <div class="mt-3 flex items-center gap-2">
                         <input
@@ -125,7 +111,7 @@
                             class="rounded-lg border border-gray-300 px-3 py-2 text-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                         />
                         <span class="text-gray-500 dark:text-gray-400">
-                            {{ isAr ? $t('system.settings.to') : 'to' }}
+                            {{ $t('system.settings.to') }}
                         </span>
                         <input
                             v-model="form.quiet_hours_end"
@@ -137,16 +123,10 @@
 
                 <div>
                     <h3 class="text-base font-semibold text-gray-900 dark:text-white">
-                        {{ isAr ? $t('system.settings.auto_suspension') : 'Auto-suspension' }}
+                        {{ $t('system.settings.auto_suspension') }}
                     </h3>
                     <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                        {{
-                            isAr
-                                ? $t(
-                                      'system.settings.automatically_suspend_the_workshop_after_invo'
-                                  )
-                                : 'Automatically suspend the workshop after invoice is overdue for this many days. Leave blank to disable.'
-                        }}
+                        {{ $t('system.settings.automatically_suspend_the_workshop_after_invo') }}
                     </p>
                     <div class="mt-3 flex items-center gap-2">
                         <input
@@ -158,7 +138,7 @@
                             class="w-28 rounded-lg border border-gray-300 px-3 py-2 text-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                         />
                         <span class="text-sm text-gray-500 dark:text-gray-400">
-                            {{ isAr ? $t('system.settings.days_overdue_2') : 'days overdue' }}
+                            {{ $t('system.settings.days_overdue_2') }}
                         </span>
                     </div>
                 </div>
@@ -170,14 +150,10 @@
             >
                 <div class="border-b border-gray-200 p-5 dark:border-gray-700">
                     <h3 class="text-base font-semibold text-gray-900 dark:text-white">
-                        {{ isAr ? $t('system.settings.channel_matrix') : 'Channel matrix' }}
+                        {{ $t('system.settings.channel_matrix') }}
                     </h3>
                     <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                        {{
-                            isAr
-                                ? $t('system.settings.select_which_channels_are_used_for_each_tier')
-                                : 'Select which channels are used for each tier. At least one channel per active tier is recommended.'
-                        }}
+                        {{ $t('system.settings.select_which_channels_are_used_for_each_tier') }}
                     </p>
                 </div>
 
@@ -185,7 +161,7 @@
                     <thead class="bg-gray-50 text-xs uppercase text-gray-500 dark:bg-gray-900/40">
                         <tr>
                             <th class="px-4 py-3 text-start">
-                                {{ isAr ? $t('system.settings.tier_2') : 'Tier' }}
+                                {{ $t('system.settings.tier_2') }}
                             </th>
                             <th
                                 v-for="channel in availableChannels"
@@ -199,7 +175,7 @@
                     <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
                         <tr v-for="(def, tierKey) in tier_definitions" :key="tierKey">
                             <td class="px-4 py-3 font-medium text-gray-900 dark:text-white">
-                                {{ isAr ? $t('system.settings.tier_3') : 'Tier' }}
+                                {{ $t('system.settings.tier_3') }}
                                 {{ tierKey.replace('tier_', '') }}
                                 ({{ def.days }}d)
                             </td>
@@ -225,15 +201,7 @@
                     :disabled="processing"
                     class="rounded-xl bg-amber-600 px-6 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-amber-700 disabled:opacity-50 transition-all"
                 >
-                    {{
-                        processing
-                            ? isAr
-                                ? $t('system.settings.saving')
-                                : 'Saving...'
-                            : isAr
-                              ? $t('system.settings.save')
-                              : 'Save settings'
-                    }}
+                    {{ processing ? $t('system.settings.saving') : $t('system.settings.save') }}
                 </button>
             </div>
         </div>
@@ -246,7 +214,7 @@
             >
                 <div class="flex-1 min-w-[150px]">
                     <label class="mb-1 block text-xs font-medium text-gray-700 dark:text-gray-300">
-                        {{ isAr ? $t('common.status') : 'Status' }}
+                        {{ $t('common.status') }}
                     </label>
                     <SearchableSelect
                         v-model="filtersState.status"
@@ -258,7 +226,7 @@
                 </div>
                 <div class="flex-1 min-w-[150px]">
                     <label class="mb-1 block text-xs font-medium text-gray-700 dark:text-gray-300">
-                        {{ isAr ? $t('system.settings.tier') : 'Tier' }}
+                        {{ $t('system.settings.tier') }}
                     </label>
                     <SearchableSelect
                         v-model="filtersState.tier"
@@ -272,7 +240,7 @@
                     @click="applyFilters"
                     class="rounded-xl bg-amber-600 px-4 py-2 text-sm font-semibold text-white hover:bg-amber-700"
                 >
-                    {{ isAr ? $t('common.apply') : 'Apply' }}
+                    {{ $t('common.apply') }}
                 </button>
             </div>
 
@@ -284,25 +252,25 @@
                     <thead class="bg-gray-50 text-xs uppercase text-gray-500 dark:bg-gray-900/40">
                         <tr>
                             <th class="px-4 py-3 text-start">
-                                {{ isAr ? $t('common.date') : 'Date' }}
+                                {{ $t('common.date') }}
                             </th>
                             <th class="px-4 py-3 text-start">
-                                {{ isAr ? $t('system.settings.tenant') : 'Tenant' }}
+                                {{ $t('system.settings.tenant') }}
                             </th>
                             <th class="px-4 py-3 text-start">
-                                {{ isAr ? $t('system.settings.invoice') : 'Invoice' }}
+                                {{ $t('system.settings.invoice') }}
                             </th>
                             <th class="px-4 py-3 text-start">
-                                {{ isAr ? $t('system.settings.tier') : 'Tier' }}
+                                {{ $t('system.settings.tier') }}
                             </th>
                             <th class="px-4 py-3 text-start">
-                                {{ isAr ? $t('system.settings.channel') : 'Channel' }}
+                                {{ $t('system.settings.channel') }}
                             </th>
                             <th class="px-4 py-3 text-start">
-                                {{ isAr ? $t('common.status') : 'Status' }}
+                                {{ $t('common.status') }}
                             </th>
                             <th class="px-4 py-3 text-start">
-                                {{ isAr ? $t('common.error') : 'Error' }}
+                                {{ $t('common.error') }}
                             </th>
                         </tr>
                     </thead>
@@ -344,11 +312,7 @@
                                 colspan="7"
                                 class="px-4 py-8 text-center text-sm text-gray-500 dark:text-gray-400"
                             >
-                                {{
-                                    isAr
-                                        ? $t('system.settings.no_log_entries_yet')
-                                        : 'No log entries yet'
-                                }}
+                                {{ $t('system.settings.no_log_entries_yet') }}
                             </td>
                         </tr>
                     </tbody>
@@ -414,21 +378,28 @@ const toggleChannel = (tierKey, channelKey, checked) => {
     form.value.channel_matrix[tierKey][channelKey] = checked;
 };
 
-const save = async () => {
+const save = () => {
     processing.value = true;
-    try {
-        await router.put('/system/settings/dunning', {
+    router.put(
+        '/system/settings/dunning',
+        {
             enabled: form.value.enabled,
             active_tiers: form.value.active_tiers_list.join(','),
             channel_matrix: form.value.channel_matrix,
             quiet_hours_start: form.value.quiet_hours_start || null,
             quiet_hours_end: form.value.quiet_hours_end || null,
             auto_suspend_after_days: form.value.auto_suspend_after_days || null,
-        });
-        success(t('system.settings.saved'));
-    } finally {
-        processing.value = false;
-    }
+        },
+        {
+            preserveScroll: true,
+            onSuccess: () => {
+                success(t('system.settings.saved'));
+            },
+            onFinish: () => {
+                processing.value = false;
+            },
+        }
+    );
 };
 
 // Log view methods
@@ -438,14 +409,14 @@ const filtersState = ref({
 });
 
 const statusOptions = computed(() => [
-    { value: '', label: isAr.value ? t('common.all') : 'All' },
-    { value: 'sent', label: isAr.value ? t('system.credits.sent') : 'Sent' },
-    { value: 'failed', label: isAr.value ? t('system.credits.failed') : 'Failed' },
-    { value: 'skipped', label: isAr.value ? t('system.settings.skipped') : 'Skipped' },
+    { value: '', label: t('common.all') },
+    { value: 'sent', label: t('system.credits.sent') },
+    { value: 'failed', label: t('system.credits.failed') },
+    { value: 'skipped', label: t('system.settings.skipped') },
 ]);
 
 const tierOptions = computed(() => [
-    { value: '', label: isAr.value ? t('common.all') : 'All' },
+    { value: '', label: t('common.all') },
     { value: 'tier_1', label: 'Tier 1' },
     { value: 'tier_2', label: 'Tier 2' },
     { value: 'tier_3', label: 'Tier 3' },
@@ -486,8 +457,8 @@ const statusClass = (status) =>
 
 const statusLabel = (status) =>
     ({
-        sent: isAr.value ? t('system.credits.sent') : 'Sent',
-        failed: isAr.value ? t('system.credits.failed') : 'Failed',
-        skipped: isAr.value ? t('system.settings.skipped') : 'Skipped',
+        sent: t('system.credits.sent'),
+        failed: t('system.credits.failed'),
+        skipped: t('system.settings.skipped'),
     })[status] || status;
 </script>

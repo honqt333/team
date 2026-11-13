@@ -212,7 +212,7 @@
                                     <tr
                                         v-for="v in violations"
                                         :key="v.id"
-                                        class="border-b border-gray-50 dark:border-gray-800 text-sm hover:bg-gray-50 dark:hover:bg-gray-850"
+                                        class="border-b border-gray-50 dark:border-gray-800 text-sm hover:bg-gray-50 dark:hover:bg-gray-800/80"
                                     >
                                         <td class="py-3 px-4">
                                             <span
@@ -342,7 +342,7 @@
                                         </span>
                                     </div>
                                     <p
-                                        class="font-mono text-xs text-action-primary bg-white dark:bg-gray-800 p-2.5 rounded-lg border border-gray-100 dark:border-gray-750 break-all select-all"
+                                        class="font-mono text-xs text-action-primary bg-white dark:bg-gray-800 p-2.5 rounded-lg border border-gray-100 dark:border-gray-700 break-all select-all"
                                     >
                                         {{ q.sql_statement }}
                                     </p>
@@ -451,7 +451,7 @@
                                 </div>
 
                                 <div
-                                    class="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-750 p-4 rounded-2xl"
+                                    class="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 p-4 rounded-2xl"
                                 >
                                     <span
                                         class="text-xs text-gray-400 font-bold uppercase tracking-wider"

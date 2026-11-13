@@ -5,7 +5,11 @@
         :centerData="mappedCenterData"
         :documentSettings="documentSettings"
         :visualSettings="visualSettings"
-        :backUrl="returnInvoice?.id ? route('purchases.returns.show', returnInvoice.id) : null"
+        :backUrl="
+            returnInvoice?.id
+                ? route('app.invoices.purchases.returns.show', returnInvoice.id)
+                : null
+        "
     />
 </template>
 

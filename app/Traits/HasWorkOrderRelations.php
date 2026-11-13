@@ -23,6 +23,7 @@ use App\Models\WorkOrderItemNote;
 use App\Models\WorkOrderItemPart;
 use App\Models\WorkOrderLaborEntry;
 use App\Models\WorkOrderPhoto;
+use App\Models\WorkOrderPurchaseAllocation;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -120,6 +121,23 @@ trait HasWorkOrderRelations
     public function purchaseInvoices(): HasMany
     {
         return $this->hasMany(PurchaseInvoice::class, 'work_order_id');
+    }
+
+    public function purchaseAllocations(): HasMany
+    {
+        return $this->hasMany(WorkOrderPurchaseAllocation::class);
+    }
+
+    public function supplierServiceAllocations(): HasMany
+    {
+        return $this->hasMany(WorkOrderPurchaseAllocation::class)
+            ->where('type', WorkOrderPurchaseAllocation::TYPE_SUPPLIER_SERVICE);
+    }
+
+    public function externalPartAllocations(): HasMany
+    {
+        return $this->hasMany(WorkOrderPurchaseAllocation::class)
+            ->where('type', WorkOrderPurchaseAllocation::TYPE_EXTERNAL_PART);
     }
 
     public function attachments(): HasMany

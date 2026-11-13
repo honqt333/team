@@ -152,7 +152,7 @@ return [
         'description_placeholder' => 'Description Placeholder',
         'discount' => 'Discount',
         'hide_on_print' => 'Hide On Print',
-        'include_in_package' => 'Include In Package',
+        'include_in_package' => 'Included in service price',
         'no_notes' => 'No Notes',
         'no_parts' => 'No Parts',
         'no_technicians' => 'No Assigned Staff',

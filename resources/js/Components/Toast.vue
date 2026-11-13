@@ -3,21 +3,28 @@
         <TransitionGroup
             tag="div"
             name="toast"
-            class="fixed top-4 z-[9999] flex flex-col gap-3"
+            class="fixed top-4 z-[9999] flex flex-col gap-3 pointer-events-none"
             :class="isRtl ? 'left-4' : 'right-4'"
         >
             <div
                 v-for="toast in toasts"
                 :key="toast.id"
-                class="flex items-start gap-3 min-w-[320px] max-w-md p-4 rounded-xl shadow-2xl backdrop-blur-sm border transition-all duration-300"
+                role="status"
+                aria-live="polite"
+                class="pointer-events-auto flex items-start gap-3 min-w-[320px] max-w-md p-4 rounded-2xl shadow-2xl backdrop-blur-md border transition-all duration-200 cursor-pointer select-none hover:scale-[1.01] hover:shadow-3xl active:scale-[0.99]"
                 :class="toastClasses[toast.type]"
+                @click="handleCardClick(toast)"
+                @mouseenter="pauseToast(toast.id)"
+                @mouseleave="resumeToast(toast.id)"
+                @touchstart.passive="onTouchStart($event, toast.id)"
+                @touchend.passive="onTouchEnd($event, toast.id)"
             >
                 <!-- Icon -->
-                <div class="flex-shrink-0">
+                <div class="flex-shrink-0 mt-0.5">
                     <!-- Success -->
                     <svg
                         v-if="toast.type === 'success'"
-                        class="w-5 h-5"
+                        class="w-5 h-5 text-white"
                         fill="currentColor"
                         viewBox="0 0 20 20"
                     >
@@ -30,7 +37,7 @@
                     <!-- Error -->
                     <svg
                         v-else-if="toast.type === 'error'"
-                        class="w-5 h-5"
+                        class="w-5 h-5 text-white"
                         fill="currentColor"
                         viewBox="0 0 20 20"
                     >
@@ -43,7 +50,7 @@
                     <!-- Warning -->
                     <svg
                         v-else-if="toast.type === 'warning'"
-                        class="w-5 h-5"
+                        class="w-5 h-5 text-white"
                         fill="currentColor"
                         viewBox="0 0 20 20"
                     >
@@ -54,7 +61,7 @@
                         />
                     </svg>
                     <!-- Info -->
-                    <svg v-else class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                    <svg v-else class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
                         <path
                             fill-rule="evenodd"
                             d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
@@ -65,14 +72,31 @@
 
                 <!-- Content -->
                 <div class="flex-1 min-w-0">
-                    <p v-if="toast.title" class="font-semibold text-sm">{{ toast.title }}</p>
-                    <p class="text-sm opacity-90">{{ toast.message }}</p>
+                    <p v-if="toast.title" class="font-bold text-sm leading-snug">
+                        {{ toast.title }}
+                    </p>
+                    <p class="text-sm font-medium opacity-95 leading-relaxed">
+                        {{ toast.message }}
+                    </p>
+
+                    <!-- Optional Action Button -->
+                    <div v-if="toast.action" class="mt-2">
+                        <button
+                            type="button"
+                            @click.stop="handleAction(toast)"
+                            class="px-2.5 py-1 text-xs font-bold rounded-lg bg-white/20 hover:bg-white/30 text-white transition-colors cursor-pointer"
+                        >
+                            {{ toast.action.label }}
+                        </button>
+                    </div>
                 </div>
 
-                <!-- Close -->
+                <!-- Close Button -->
                 <button
-                    @click="removeToast(toast.id)"
-                    class="flex-shrink-0 opacity-60 hover:opacity-100 transition-opacity"
+                    type="button"
+                    @click.stop="removeToast(toast.id)"
+                    class="flex-shrink-0 p-1 -m-1 rounded-lg opacity-70 hover:opacity-100 hover:bg-white/10 transition-all cursor-pointer"
+                    :aria-label="$t('common.close') || 'Close'"
                 >
                     <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                         <path
@@ -92,8 +116,15 @@ import { activeModalElement } from '@/Support/modalStack';
 import { computed, onMounted, onUnmounted, ref } from 'vue';
 import { useToast } from '@/Composables/useToast';
 
-const { toasts, removeToast, registerContainer, unregisterContainer, activeContainers } =
-    useToast();
+const {
+    toasts,
+    removeToast,
+    pauseToast,
+    resumeToast,
+    registerContainer,
+    unregisterContainer,
+    activeContainers,
+} = useToast();
 
 const containerId = ref(null);
 
@@ -111,37 +142,67 @@ const isPrimary = computed(() => {
     return activeContainers.value[activeContainers.value.length - 1] === containerId.value;
 });
 
-const isRtl = computed(() => document.documentElement.dir === 'rtl');
+const isRtl = computed(() => {
+    return typeof document !== 'undefined' && document.documentElement.dir === 'rtl';
+});
+
+// Click anywhere on card to dismiss
+function handleCardClick(toast) {
+    if (toast.dismissOnClick !== false) {
+        removeToast(toast.id);
+    }
+}
+
+// Action button click
+function handleAction(toast) {
+    if (toast.action && typeof toast.action.onClick === 'function') {
+        toast.action.onClick();
+    }
+    removeToast(toast.id);
+}
+
+// Touch swipe to dismiss
+const touchStartX = ref(0);
+
+function onTouchStart(e, id) {
+    if (e.touches && e.touches[0]) {
+        touchStartX.value = e.touches[0].clientX;
+    }
+}
+
+function onTouchEnd(e, id) {
+    if (e.changedTouches && e.changedTouches[0]) {
+        const deltaX = e.changedTouches[0].clientX - touchStartX.value;
+        // If swiped more than 45px in either direction, dismiss
+        if (Math.abs(deltaX) > 45) {
+            removeToast(id);
+        }
+    }
+}
 
 const toastClasses = {
-    success: 'bg-green-500/95 text-white border-green-400/50',
-    error: 'bg-red-500/95 text-white border-red-400/50',
-    warning: 'bg-amber-500/95 text-white border-amber-400/50',
-    info: 'bg-blue-500/95 text-white border-blue-400/50',
+    success:
+        'bg-emerald-600/95 dark:bg-emerald-700/95 text-white border-emerald-400/40 shadow-emerald-950/20',
+    error: 'bg-rose-600/95 dark:bg-rose-700/95 text-white border-rose-400/40 shadow-rose-950/20',
+    warning:
+        'bg-amber-600/95 dark:bg-amber-700/95 text-white border-amber-400/40 shadow-amber-950/20',
+    info: 'bg-sky-600/95 dark:bg-sky-700/95 text-white border-sky-400/40 shadow-sky-950/20',
 };
 </script>
 
 <style scoped>
 .toast-enter-active,
 .toast-leave-active {
-    transition: all 0.3s ease;
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .toast-enter-from {
     opacity: 0;
-    transform: translateX(100%);
-}
-
-[dir='rtl'] .toast-enter-from {
-    transform: translateX(-100%);
+    transform: translateY(-10px) scale(0.95);
 }
 
 .toast-leave-to {
     opacity: 0;
-    transform: translateX(100%) scale(0.9);
-}
-
-[dir='rtl'] .toast-leave-to {
-    transform: translateX(-100%) scale(0.9);
+    transform: translateY(-10px) scale(0.95);
 }
 </style>

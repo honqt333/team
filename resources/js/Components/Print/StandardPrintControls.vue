@@ -39,7 +39,11 @@
         class="print:hidden mb-6 flex justify-between items-center bg-gray-50 dark:bg-gray-800/60 p-4 rounded-2xl border border-gray-200 dark:border-gray-700"
     >
         <div class="flex items-center gap-2">
-            <AppPrintButton @click="handlePrint" :label="printLabel || $t('common.print')" />
+            <AppPrintButton
+                variant="primary"
+                @click="handlePrint"
+                :label="printLabel || $t('common.print')"
+            />
             <slot name="extra-actions" />
         </div>
 
@@ -81,14 +85,22 @@ const props = defineProps({
 const emit = defineEmits(['print', 'close']);
 
 function handlePrint() {
-    if (!props.onPrint) printDocument();
+    if (props.onPrint) {
+        props.onPrint();
+        return;
+    }
+    printDocument();
     emit('print');
 }
 
 function handleClose() {
-    if (!props.onClose && window.history.length > 1) {
+    if (props.onClose) {
+        props.onClose();
+        return;
+    }
+    if (window.history.length > 1) {
         window.history.back();
-    } else if (!props.onClose) {
+    } else {
         window.close();
     }
     emit('close');

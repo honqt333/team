@@ -132,6 +132,10 @@ flowchart LR
 | **RadioGroup** | `@/Components/Common/RadioGroup.vue` | **إلزامي:** مجموعة أزرار الراديو الموحدة المتوافقة مع إمكانية الوصول. |
 | **DataTable** | `@/Components/Common/DataTable.vue` | **إلزامي:** محرك عرض الجداول وقوائم البيانات الموحد (يدعم الترتيب والتحميل والتفريغ). |
 | **AppPagination** | `@/Components/Common/AppPagination.vue` | **إلزامي:** شريط التنقل بين الصفحات الموحد بالاعتماد على Design Tokens. |
+| **Toast & useToast** | `@/Components/Toast.vue`<br/>`@/Composables/useToast.js` | **إلزامي:** نظام الإشعارات الموحد لرسائل النجاح والأخطاء والتنبيهات. يمنع بناء نوافذ أو أشرطة إشعارات موازية. |
+| **BaseModal** | `@/Components/BaseModal.vue` | **إلزامي:** الغلاف الموحد لجميع النوافذ المنبثقة للنماذج، يدعم التمرير الكامل افتراضياً (`scrollEntire: true`). |
+| **AppInput / AppTextarea / AppSelect / AppButton / AppCheckbox** | `@/Components/App/` | **إلزامي:** مكونات الإدخال والأزرار الموحدة؛ يمنع استخدام عناصر HTML الخام للنماذج. |
+| **AppFileUpload** | `@/Components/Common/AppFileUpload.vue` | **إلزامي:** مكون رفع الملفات والمرفقات والصور الموحد (يدعم السحب والإفلات `dropzone` ومعاينة الصور `image`). يمنع استخدام `<input type="file">` الخام. |
 
 #### معايير مفتاح التبديل الموحد (`AppToggle.vue`)
 - **إلزامي لجميع حالات التبديل المنطقي (On/Off Switches):**
@@ -164,6 +168,63 @@ flowchart LR
   />
   ```
 
+#### معايير مكون رفع الملفات والمرفقات الموحد (`AppFileUpload.vue`)
+- **إلزامي لجميع عمليات رفع الملفات والمرفقات والصور:**
+  - يمنع منعاً باتاً كتابة `<input type="file">` خام أو بناء مناطق سحب وإفلات (Dropzones) أو معاينات صور مخصصة داخل الصفحات والنوافذ.
+  - المكون المعتمد الوحيد هو `@/Components/Common/AppFileUpload.vue`.
+- **الأنماط والخصائص المدعومة (Variants & Props):**
+  - `variant`: يدعم نمطين:
+    - `dropzone` (الافتراضي): منطقة سحب وإفلات للمرفقات والملفات العامة مع قائمة الملفات المختارة وإمكانية الحذف.
+    - `image`: بطاقة معاينة بصرية للصور والشعارات والأيقونات (`existingUrl`, `fallbackUrl`, `defaultBadge`, `compactPreview`) مع أزرار الرفع والإزالة.
+  - `v-model`: يرتبط مباشرة بالملف (`File`) أو مصفوفة الملفات عند تفعيل `multiple`.
+  - التحقق المدمج: `accept` (الصيغ المسموحة)، `maxSizeMb` (الحد الأقصى للحجم بالميجابايت)، و `disabled` / `loading` / `error` / `hint` / `label`.
+  - الأحداث (`Emits`): `select`، `invalid` (عند رفض ملف بسبب الحجم أو النوع)، و `remove-existing` (لإزالة الصورة الحالية من الخادم).
+- **نماذج الاستخدام القياسية:**
+  ```vue
+  <!-- 1. رفع مرفقات/ملفات عبر السحب والإفلات -->
+  <AppFileUpload
+      v-model="form.attachments"
+      :label="$t('common.attachments')"
+      accept=".pdf,.jpg,.png"
+      :max-size-mb="5"
+      multiple
+      @invalid="(msg) => toast.error(msg)"
+  />
+
+  <!-- 2. رفع ومعاينة صورة أو شعار (Variant: image) -->
+  <AppFileUpload
+      v-model="form.logo"
+      variant="image"
+      :label="$t('system.settings.brand_logo_title')"
+      :existing-url="currentLogoUrl"
+      accept="image/png,image/jpeg,image/webp,image/svg+xml"
+      :max-size-mb="2"
+      @remove-existing="handleRemoveLogo"
+  />
+  ```
+
+#### معايير نظام الإشعارات الموحد ورسائل الفلاش (`Toast` & Flash)
+- **المصدر الوحيد للإشعارات:** يُدار عرض رسائل النجاح والأخطاء والتنبيهات حصراً عبر `@/Components/Toast.vue` و `@/Composables/useToast.js`.
+- **السلوك التفاعلي القياسي للبطاقة:**
+  - الإغلاق الفوري عند النقر في أي مكان على البطاقة (`dismissOnClick: true` افتراضياً).
+  - الإيقاف المؤقت للمؤقت التلقائي عند تمرير المؤشر (`Pause on Hover`) واستئنافه عند المغادرة.
+  - دعم السحب للإغلاق (`Swipe to Dismiss`) على شاشات اللمس، مع زوايا `rounded-2xl`.
+- **تغطية كافة التخطيطات (Layouts):** يجب أن يتضمن كل تخطيط في المنظومة (`AppLayout`, `SystemLayout`, `CustomerPortalLayout`, `EmployeePortalLayout`, `AuthLayout`) مكون `<Toast />` مع مراقب نشط (`watch`) لـ `page.props.flash` يدعم المفاتيح: `success`, `error`, `warning`, `info`, `status`, `message`.
+- **منع التكرار الذكي (Content-Based Deduplication):** يُمنع تكرار الإشعار بناءً على تطابق نص الرسالة ونوعها في نفس السياق الزمني للعملية، ويُمنع الحجب الزمني الأعمى الذي يُسقط رسائل عمليات متتالية مختلفة.
+- **إلزامية فلاش الخادم في المتحكمات (Backend Mutations):**
+  - كل دالة تغيير بيانات (`store`, `update`, `destroy`, `toggleActive`, أو ما يماثلها) تُرجع `RedirectResponse` **يجب** أن تُرفق رسالة نجاح مترجمة عبر `->with('success', __('messages.xxx'))` (أو رسالة خطأ مترجمة عند الفشل).
+  - يُمنع إرجاع `back()` أو `redirect()->route(...)` صامتة دون رسالة، كما يُمنع استخدام نصوص ثابتة (Hardcoded) في رسائل الفلاش.
+
+#### معايير النماذج الموحدة والتمرير والأرقام
+- **توحيد النوافذ والحقول:** يجب بناء جميع نماذج الإدخال والتعديل داخل `@/Components/BaseModal.vue` (للنوافذ المنبثقة) وباستخدام مكونات `@/Components/App/` (`AppInput`, `AppTextarea`, `AppSelect`, `AppButton`, `AppCheckbox`) مع `@/Components/Common/FormField.vue` و `FormSection.vue`.
+- **سلوك التمرير في النماذج (`scrollEntire`):**
+  - الإعداد الافتراضي في `BaseModal.vue` هو `scrollEntire: true` بحيث يتمرر النموذج كاملاً مع الصفحة لإلزام المستخدم بالنزول إلى آخر النموذج والوصول لأزرار الحفظ والإلغاء بوضوح، بدلاً من تقسيم التمرير الداخلي أو إبقاء أزرار التثبيت فوق حقول مقطوعة.
+  - يُمنع تعطيل `scrollEntire` أو إضافة `max-h-[...]` مع `overflow-y-auto` داخل جسم النموذج إلا لحالات خاصة مبررة.
+- **التمرير التلقائي عند أخطاء التحقق:** يُستخدم `@/Composables/useFormScrollToError.js` للتمرير التلقائي والتركيز على أول حقل يحمل خطأ تحقق عند فشل الإرسال.
+- **توحيد الأرقام وتحويل الأرقام العربية (`ArabicNumeralsPlugin`):**
+  - يتم التحويل التلقائي للأرقام العربية والفارسية (`٠-٩`, `۰-۹`, `٫`) إلى أرقام إنجليزية قياسية (`0-9`, `.`) عالمياً عبر `@/Plugins/arabicNumerals.js` (بما يشمل حقول `type="number"` عبر اعتراض حدث `beforeinput`).
+  - يُمنع إضافة منطق تحويل يدوي مكرر داخل المكونات أو ترك حقول رقمية ترفض أو تمسح الأرقام العربية عند الإدخال أو التعديل.
+
 ---
 
 ## 4. خريطة المعالم البرمجية (Source of Truth Map)
@@ -176,6 +237,8 @@ flowchart LR
 | **الفواتير والمدفوعات والضريبة** | `app/Services/InvoiceService.php`<br/>`app/Services/Payment/PaymentManager.php`<br/>`app/Services/Optimization/TaxCalculator.php` | العمليات المالية ذرية (Atomic) ومقفلة |
 | **المخزون وحركات القطع** | `app/Services/Inventory/InventoryService.php`<br/>`app/Models/InventoryMove.php` | حركات المستودعات والكميات المتوفرة |
 | **محرك الطباعة** | `resources/js/Composables/usePrint.js`<br/>`resources/js/Components/Print/PrintEngine.vue` | يمنع إنشاء شاشات أو نوافذ طباعة مستقلة |
+| **الإشعارات ورسائل الفلاش** | `resources/js/Components/Toast.vue`<br/>`resources/js/Composables/useToast.js`<br/>`app/Http/Middleware/HandleInertiaRequests.php` | إشعارات تفاعلية موحدة ومشاركة جميع مفاتيح الفلاش |
+| **النماذج والتمرير والأرقام** | `resources/js/Components/BaseModal.vue`<br/>`resources/js/Components/App/`<br/>`resources/js/Composables/useFormScrollToError.js`<br/>`resources/js/Plugins/arabicNumerals.js` | توحيد النوافذ والحقول، التمرير الكامل، التمرير للخطأ، وتحويل الأرقام العربية تلقائياً |
 | **ملفات الترجمة واللغة** | `resources/js/i18n/lang/ar.json` & `en.json`<br/>`lang/ar/` & `lang/en/` | التدويل إلزامي للواجهة والخلفية |
 
 ---
@@ -193,6 +256,7 @@ flowchart LR
 9. ❌ **ممنوع عكس ترتيب الهيدر:** شريط الأدوات أولاً، يليه زر الإجراء الأساسي في أقصى الزاوية الخارجية.
 10. ❌ **ممنوع تسليم المهمة دون تحقق:** لا تنتهي المهمة إلا بتشغيل الاختبارات و `npm run build` و `php artisan optimize:clear`.
 11. ❌ **ممنوع استخدام الاسم القديم Carag أو تثبيت اسم النظام كنص ثابت:** الاسم المعتمد هو **خدمة برو (Khidmh Pro)**، ويُقرأ دائماً ديناميكياً من `config('app.name_ar')` / `config('app.name')` أو `$t('common.app_name')` لتمكين تغيير الاسم في أي وقت من `.env`.
+12. ❌ **ممنوع العمليات الصامتة أو حجب الإشعارات:** يمنع إرجاع `back()` أو `redirect()` في متحكمات الحفظ والتعديل والحذف والتفعيل دون إرفاق رسالة فلاش مترجمة (`with('success', __('...'))`)، كما يمنع بناء أي مكون إشعارات بديل عن `Toast.vue` و `useToast.js`.
 
 ---
 

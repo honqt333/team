@@ -1,8 +1,6 @@
 <template>
     <SystemLayout>
-        <Head
-            :title="`${isAr ? $t('system.communication.edit_template') : 'Edit Template'}: ${template.name}`"
-        />
+        <Head :title="`${$t('system.communication.edit_template')}: ${template.name}`" />
 
         <div class="space-y-6">
             <!-- Header Section -->
@@ -66,14 +64,12 @@
                     class="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-200 dark:border-gray-700 space-y-3"
                 >
                     <h3 class="text-xs font-bold uppercase tracking-wider text-gray-400">
-                        {{
-                            isAr ? $t('system.communication.template_details') : 'Template Details'
-                        }}
+                        {{ $t('system.communication.template_details') }}
                     </h3>
                     <div class="space-y-2 text-sm">
                         <div class="flex items-center justify-between">
                             <span class="text-gray-500 dark:text-gray-400">
-                                {{ isAr ? $t('system.communication.code') : 'Code:' }}
+                                {{ $t('system.communication.code') }}
                             </span>
                             <span
                                 class="font-mono text-xs px-2 py-0.5 rounded bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200"
@@ -83,19 +79,15 @@
                         </div>
                         <div class="flex items-center justify-between">
                             <span class="text-gray-500 dark:text-gray-400">
-                                {{ isAr ? $t('system.communication.type') : 'Type:' }}
+                                {{ $t('system.communication.type') }}
                             </span>
                             <span
                                 class="text-xs font-semibold px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300"
                             >
                                 {{
                                     template.type === 'email'
-                                        ? isAr
-                                            ? $t('system.communication.email')
-                                            : 'Email'
-                                        : isAr
-                                          ? $t('system.communication.sms_label')
-                                          : 'SMS'
+                                        ? $t('system.communication.email')
+                                        : $t('system.communication.sms_label')
                                 }}
                             </span>
                         </div>
@@ -105,11 +97,7 @@
                         <label class="flex items-center gap-2 cursor-pointer">
                             <AppToggle v-model="form.is_active" />
                             <span class="text-xs font-bold text-gray-700 dark:text-gray-300">
-                                {{
-                                    isAr
-                                        ? $t('system.communication.enable_template')
-                                        : 'Enable template'
-                                }}
+                                {{ $t('system.communication.enable_template') }}
                             </span>
                         </label>
                     </div>
@@ -120,11 +108,7 @@
                     class="md:col-span-2 bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-200 dark:border-gray-700"
                 >
                     <h3 class="text-xs font-bold uppercase tracking-wider text-gray-400 mb-2">
-                        {{
-                            isAr
-                                ? $t('system.communication.available_variables_click_to_copy')
-                                : 'Available Variables (Click to copy)'
-                        }}
+                        {{ $t('system.communication.available_variables_click_to_copy') }}
                     </h3>
                     <div
                         v-if="template.variables && template.variables.length"
@@ -154,11 +138,7 @@
                         </button>
                     </div>
                     <p v-else class="text-xs text-gray-500">
-                        {{
-                            isAr
-                                ? $t('system.communication.no_variables_defined_for_this_template')
-                                : 'No variables defined for this template.'
-                        }}
+                        {{ $t('system.communication.no_variables_defined_for_this_template') }}
                     </p>
                 </div>
             </div>
@@ -181,7 +161,7 @@
                                 : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400',
                         ]"
                     >
-                        {{ isAr ? $t('system.communication.template_editor') : 'Template Editor' }}
+                        {{ $t('system.communication.template_editor') }}
                     </button>
                     <button
                         v-if="template.type === 'email'"
@@ -194,7 +174,7 @@
                                 : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400',
                         ]"
                     >
-                        {{ isAr ? $t('system.communication.live_preview') : 'Live Preview' }}
+                        {{ $t('system.communication.live_preview') }}
                     </button>
                 </div>
 
@@ -205,7 +185,7 @@
                             <label
                                 class="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1.5"
                             >
-                                {{ isAr ? $t('system.communication.subject') : 'Subject' }}
+                                {{ $t('system.communication.subject') }}
                             </label>
                             <input
                                 type="text"
@@ -223,7 +203,7 @@
                                 <label
                                     class="block text-xs font-bold text-gray-700 dark:text-gray-300"
                                 >
-                                    {{ isAr ? $t('system.communication.content') : 'Content' }}
+                                    {{ $t('system.communication.content') }}
                                 </label>
                                 <span class="text-[11px] text-gray-400 font-mono">
                                     {{
@@ -249,13 +229,13 @@
                             class="p-3 bg-gray-100 dark:bg-gray-900 rounded-xl text-xs text-gray-600 dark:text-gray-300 font-mono"
                         >
                             <strong>
-                                {{ isAr ? $t('system.communication.subject_2') : 'Subject:' }}
+                                {{ $t('system.communication.subject_2') }}
                             </strong>
                             {{ form.subject }}
                         </div>
                         <div
                             class="p-6 rounded-xl border border-gray-200 bg-white text-gray-900 shadow-inner overflow-auto max-h-[600px]"
-                            v-html="form.content"
+                            v-safe-html="form.content"
                         ></div>
                     </div>
                 </div>
@@ -270,7 +250,7 @@
                         :disabled="form.processing"
                         :loading="form.processing"
                     >
-                        {{ isAr ? $t('common.save_changes') : 'Save Changes' }}
+                        {{ $t('common.save_changes') }}
                     </AppButton>
                 </div>
             </div>

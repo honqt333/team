@@ -6,6 +6,8 @@ namespace Tests\Feature;
 
 use App\Models\Center;
 use App\Models\Customer;
+use App\Models\Dealer;
+use App\Models\Invoice;
 use App\Models\PurchaseInvoice;
 use App\Models\Supplier;
 use App\Models\Tenant;
@@ -227,5 +229,127 @@ class WorkOrderPurchaseInvoiceLinkTest extends TestCase
             ]);
 
         $response->assertSessionHasErrors('purchase_invoice_id');
+    }
+
+    public function test_purchase_invoice_show_includes_linked_work_orders_tab_data(): void
+    {
+        $this->purchaseInvoice->update(['work_order_id' => $this->workOrder->id]);
+
+        $response = $this->actingAs($this->user)
+            ->get(route('app.invoices.purchases.show', $this->purchaseInvoice->id));
+
+        $response->assertOk();
+        $response->assertInertia(fn ($page) => $page
+            ->component('Purchasing/Invoices/Show')
+            ->has('linkedWorkOrders', 1)
+            ->where('linkedWorkOrders.0.work_order_id', $this->workOrder->id)
+            ->where('linkedWorkOrders.0.code', 'WO-TEST-001')
+            ->where('linkedWorkOrders.0.customer_name', 'Ali Test')
+            ->where('linkedWorkOrders.0.plate_number', 'ABC 1234')
+            ->where('linkedWorkOrders.0.allocated_amount', 230)
+        );
+    }
+
+    public function test_purchase_invoice_source_type_distinguishes_warehouse_and_external_purchases(): void
+    {
+        $this->purchaseInvoice->update(['work_order_id' => $this->workOrder->id]);
+
+        $warehouseInvoice = PurchaseInvoice::create([
+            'tenant_id' => $this->tenant->id,
+            'center_id' => $this->center->id,
+            'supplier_id' => $this->purchaseInvoice->supplier_id,
+            'work_order_id' => $this->workOrder->id,
+            'invoice_number' => 'SUP-WH-200',
+            'code' => 'PINV-0002',
+            'issue_date' => now()->toDateString(),
+            'status' => PurchaseInvoice::STATUS_OPEN,
+            'subtotal' => 500.00,
+            'tax_amount' => 75.00,
+            'total' => 575.00,
+            'balance' => 575.00,
+            'notes' => 'Auto-generated from GRN: GRN-0001',
+        ]);
+
+        $this->assertSame('external', $this->purchaseInvoice->fresh()->source_type);
+        $this->assertSame('warehouse', $warehouseInvoice->fresh()->source_type);
+
+        $showResponse = $this->actingAs($this->user)
+            ->get(route('work-orders.show', $this->workOrder->id));
+
+        $showResponse->assertOk();
+        $showResponse->assertInertia(fn ($page) => $page
+            ->has('workOrder.purchase_invoices', 2)
+        );
+    }
+
+    public function test_link_purchase_invoice_accepts_optional_allocated_amount_and_work_order_show_exposes_invoices_and_dealer(): void
+    {
+        $dealer = Dealer::create([
+            'tenant_id' => $this->tenant->id,
+            'name' => 'Partner Fleet Co',
+            'type' => 'fleet',
+            'is_active' => true,
+        ]);
+
+        $this->workOrder->update([
+            'dealer_id' => $dealer->id,
+            'is_paid_by_dealer' => true,
+        ]);
+
+        $inv = Invoice::create([
+            'tenant_id' => $this->tenant->id,
+            'center_id' => $this->center->id,
+            'work_order_id' => $this->workOrder->id,
+            'customer_id' => $this->workOrder->customer_id,
+            'dealer_id' => $dealer->id,
+            'invoice_number' => 'I202620001',
+            'type' => 'invoice',
+            'status' => 'valid',
+            'issue_date' => now()->toDateString(),
+            'supply_date' => now()->toDateString(),
+            'customer_name_snapshot' => 'Ali Test',
+            'total_excl_tax' => 1000,
+            'total_tax' => 150,
+            'total_incl_tax' => 1150,
+        ]);
+
+        $cn = Invoice::create([
+            'tenant_id' => $this->tenant->id,
+            'center_id' => $this->center->id,
+            'work_order_id' => $this->workOrder->id,
+            'customer_id' => $this->workOrder->customer_id,
+            'dealer_id' => $dealer->id,
+            'original_invoice_id' => $inv->id,
+            'invoice_number' => 'R202620001',
+            'type' => 'credit_note',
+            'status' => 'valid',
+            'issue_date' => now()->toDateString(),
+            'supply_date' => now()->toDateString(),
+            'customer_name_snapshot' => 'Ali Test',
+            'total_excl_tax' => 200,
+            'total_tax' => 30,
+            'total_incl_tax' => 230,
+        ]);
+
+        $linkResponse = $this->actingAs($this->user)
+            ->post(route('work-orders.purchase-invoices.link', $this->workOrder->id), [
+                'purchase_invoice_id' => $this->purchaseInvoice->id,
+                'allocated_amount' => 150.00,
+                'allocated_qty' => 1,
+            ]);
+        $linkResponse->assertRedirect();
+
+        $showResponse = $this->actingAs($this->user)
+            ->get(route('work-orders.show', $this->workOrder->id));
+
+        $showResponse->assertOk();
+        $showResponse->assertInertia(fn ($page) => $page
+            ->where('workOrder.dealer.id', $dealer->id)
+            ->where('workOrder.dealer.name', 'Partner Fleet Co')
+            ->has('workOrder.invoices', 2)
+            ->where('workOrder.invoice.invoice_number', 'I202620001')
+            ->has('workOrder.credit_notes', 1)
+            ->where('workOrder.credit_notes.0.invoice_number', 'R202620001')
+        );
     }
 }

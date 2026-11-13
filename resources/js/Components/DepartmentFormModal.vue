@@ -130,14 +130,15 @@
             <button
                 type="button"
                 @click="$emit('close')"
-                class="px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white font-medium transition-colors"
+                class="px-5 py-2.5 text-xs font-bold text-text-secondary hover:bg-surface-secondary border border-border rounded-xl transition-colors cursor-pointer"
             >
                 {{ $t('common.cancel') }}
             </button>
             <button
+                type="button"
                 @click="submitForm"
                 :disabled="form.processing"
-                class="px-5 py-2.5 bg-gradient-to-r from-orange-600 to-amber-600 text-white rounded-xl font-medium shadow-lg shadow-orange-500/30 hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                class="inline-flex items-center justify-center gap-2 px-6 py-2.5 text-xs font-bold text-white bg-action-primary hover:bg-action-primary-hover rounded-xl shadow-xs transition-all disabled:opacity-50 cursor-pointer"
             >
                 {{ form.processing ? $t('common.loading') : $t('common.save') }}
             </button>

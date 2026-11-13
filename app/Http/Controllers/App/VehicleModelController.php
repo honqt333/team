@@ -63,7 +63,7 @@ class VehicleModelController extends Controller
 
         VehicleModel::create($validated);
 
-        return redirect()->back();
+        return redirect()->back()->with('success', __('messages.created_successfully'));
     }
 
     /**
@@ -86,7 +86,7 @@ class VehicleModelController extends Controller
         $validated['updated_by'] = auth()->id();
         $model->update($validated);
 
-        return redirect()->back();
+        return redirect()->back()->with('success', __('messages.updated_successfully'));
     }
 
     /**
@@ -101,7 +101,7 @@ class VehicleModelController extends Controller
 
         $model->delete();
 
-        return redirect()->back();
+        return redirect()->back()->with('success', __('messages.deleted_successfully'));
     }
 
     /**
@@ -116,6 +116,6 @@ class VehicleModelController extends Controller
 
         $model->update(['is_active' => ! $model->is_active]);
 
-        return redirect()->back();
+        return redirect()->back()->with('success', __('messages.updated_successfully'));
     }
 }

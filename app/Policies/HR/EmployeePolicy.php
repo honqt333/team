@@ -7,6 +7,7 @@ namespace App\Policies\HR;
 use App\Models\HR\Employee;
 use App\Models\User;
 use App\Support\Permissions;
+use App\Support\TenancyContext;
 
 class EmployeePolicy
 {
@@ -36,8 +37,7 @@ class EmployeePolicy
             return false;
         }
 
-        // Tenant isolation
-        return $employee->tenant_id === $user->tenant_id;
+        return $this->canAccessCenter($user, $employee);
     }
 
     /**
@@ -57,8 +57,7 @@ class EmployeePolicy
             return false;
         }
 
-        // Tenant isolation
-        return $employee->tenant_id === $user->tenant_id;
+        return $this->canAccessCenter($user, $employee);
     }
 
     /**
@@ -70,7 +69,21 @@ class EmployeePolicy
             return false;
         }
 
-        // Tenant isolation
-        return $employee->tenant_id === $user->tenant_id;
+        return $this->canAccessCenter($user, $employee);
+    }
+
+    private function canAccessCenter(User $user, Employee $employee): bool
+    {
+        if ((int) $employee->tenant_id !== (int) $user->tenant_id) {
+            return false;
+        }
+
+        if ($user->hasRole('super_admin')) {
+            return true;
+        }
+
+        $currentCenterId = TenancyContext::centerId() ?? $user->current_center_id;
+
+        return $employee->center_id === null || (int) $employee->center_id === (int) $currentCenterId;
     }
 }

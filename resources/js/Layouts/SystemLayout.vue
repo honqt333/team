@@ -17,7 +17,7 @@
                     class="h-14 flex items-center gap-3 px-4 border-b border-gray-200 dark:border-gray-700 flex-shrink-0"
                 >
                     <img
-                        src="/images/brand/logo-64.png"
+                        :src="$page.props.app_logo || '/images/brand/logo-64.png'"
                         :alt="$t('common.app_name')"
                         class="w-9 h-9 rounded-lg object-contain flex-shrink-0"
                     />
@@ -103,29 +103,31 @@
                         </a>
                     </template>
 
-                    <!-- Divider -->
-                    <div class="my-3 border-t border-gray-200 dark:border-gray-700"></div>
+                    <!-- Divider & Back to App (only for users with an active tenant workshop context) -->
+                    <template v-if="$page.props.auth?.has_tenant_context">
+                        <div class="my-3 border-t border-gray-200 dark:border-gray-700"></div>
 
-                    <a
-                        href="/app"
-                        class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-                    >
-                        <svg
-                            class="w-5 h-5 flex-shrink-0"
-                            :class="isRtl ? '' : 'rotate-180'"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
+                        <a
+                            href="/dashboard"
+                            class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
                         >
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
-                            />
-                        </svg>
-                        {{ $t('system.nav_items.back_to_app') }}
-                    </a>
+                            <svg
+                                class="w-5 h-5 flex-shrink-0"
+                                :class="isRtl ? '' : 'rotate-180'"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+                                />
+                            </svg>
+                            {{ $t('system.nav_items.back_to_app') }}
+                        </a>
+                    </template>
                 </nav>
             </aside>
 
@@ -430,7 +432,7 @@
                 >
                     <div class="flex items-center gap-3 flex-1 min-w-0">
                         <img
-                            src="/images/brand/logo-64.png"
+                            :src="$page.props.app_logo || '/images/brand/logo-64.png'"
                             :alt="$t('common.app_name')"
                             class="w-9 h-9 rounded-lg object-contain flex-shrink-0"
                         />
@@ -517,29 +519,31 @@
                         </a>
                     </template>
 
-                    <div class="my-3 border-t border-gray-200 dark:border-gray-700"></div>
+                    <template v-if="$page.props.auth?.has_tenant_context">
+                        <div class="my-3 border-t border-gray-200 dark:border-gray-700"></div>
 
-                    <a
-                        href="/app"
-                        @click="mobileMenuOpen = false"
-                        class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-                    >
-                        <svg
-                            class="w-5 h-5 flex-shrink-0"
-                            :class="isRtl ? '' : 'rotate-180'"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
+                        <a
+                            href="/dashboard"
+                            @click="mobileMenuOpen = false"
+                            class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
                         >
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
-                            />
-                        </svg>
-                        {{ $t('system.nav_items.back_to_app') }}
-                    </a>
+                            <svg
+                                class="w-5 h-5 flex-shrink-0"
+                                :class="isRtl ? '' : 'rotate-180'"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+                                />
+                            </svg>
+                            {{ $t('system.nav_items.back_to_app') }}
+                        </a>
+                    </template>
                 </nav>
             </aside>
         </Transition>
@@ -564,16 +568,12 @@ import { useToast } from '@/Composables/useToast';
 import { setLocale } from '@/i18n/index.js';
 import ConfirmModal from '@/Components/ConfirmModal.vue';
 import Toast from '@/Components/Toast.vue';
+import { useFlashToasts } from '@/Composables/useFlashToasts';
 import { systemNavGroups } from '@/Layouts/systemNav.js';
 
 const page = usePage();
 const { locale } = useI18n();
-const {
-    success: toastSuccess,
-    error: toastError,
-    warning: toastWarning,
-    info: toastInfo,
-} = useToast();
+const { error: toastError } = useToast();
 
 // Filter out nav groups the current user isn't allowed to see. The
 // `requiresSuperAdmin` flag on a group hides the whole section for
@@ -584,27 +584,32 @@ const isSuperAdmin = computed(() => {
     return page.props.auth?.is_super_admin === true;
 });
 
+const permissions = computed(() => page.props.auth?.permissions || []);
+
+const hasPermission = (permission) => {
+    if (!permission) return true;
+    if (isSuperAdmin.value) return true;
+    if (Array.isArray(permission)) {
+        return permission.some((p) => permissions.value.includes(p));
+    }
+    return permissions.value.includes(permission);
+};
+
 const visibleNavGroups = computed(() => {
-    return systemNavGroups.filter((group) => {
-        if (group.requiresSuperAdmin && !isSuperAdmin.value) {
-            return false;
-        }
-        return true;
-    });
+    return systemNavGroups
+        .filter((group) => !group.requiresSuperAdmin || isSuperAdmin.value)
+        .map((group) => ({
+            ...group,
+            items: group.items.filter(
+                (item) =>
+                    (!item.requiresSuperAdmin || isSuperAdmin.value) &&
+                    hasPermission(item.permission)
+            ),
+        }))
+        .filter((group) => group.items.length > 0);
 });
 
-watch(
-    () => page.props.flash,
-    (flash) => {
-        if (flash) {
-            if (flash.success) toastSuccess(flash.success, { fromFlash: true });
-            if (flash.error) toastError(flash.error, { fromFlash: true });
-            if (flash.warning) toastWarning(flash.warning, { fromFlash: true });
-            if (flash.info) toastInfo(flash.info, { fromFlash: true });
-        }
-    },
-    { deep: true, immediate: true }
-);
+useFlashToasts(page, { immediate: true });
 
 const mobileMenuOpen = ref(false);
 const userMenuOpen = ref(false);
@@ -699,9 +704,9 @@ function formatNotifTime(iso) {
     const d = new Date(iso);
     const diffMin = Math.round((Date.now() - d.getTime()) / 60000);
     if (diffMin < 1) return t('notifications.just_now');
-    if (diffMin < 60) return `${diffMin} ${t('nav.day_suffix')}`;
+    if (diffMin < 60) return t('notifications.minutes_ago', { count: diffMin });
     const diffHr = Math.round(diffMin / 60);
-    if (diffHr < 24) return `${diffHr} ${t('nav.year_suffix')}`;
+    if (diffHr < 24) return t('notifications.hours_ago', { count: diffHr });
     return d.toLocaleDateString(locale.value === 'ar' ? 'ar-SA' : 'en-US', {
         month: 'short',
         day: 'numeric',
@@ -737,8 +742,10 @@ onMounted(() => {
     // freshness and battery / server load. The actual fetch is a tiny
     // SELECT count(*) so it's cheap. On unmount we stop the timer so
     // navigating away doesn't leak the interval.
-    refreshUnreadCount();
-    notifPollId = setInterval(refreshUnreadCount, 30000);
+    if (hasPermission('system.notifications.manage')) {
+        refreshUnreadCount();
+        notifPollId = setInterval(refreshUnreadCount, 30000);
+    }
 
     // Lazy-load the full notification list on first bell click. The
     // list itself is cached in notifList until the user navigates away
@@ -753,7 +760,7 @@ onUnmounted(() => {
 // Fetch the full list the first time the dropdown opens. The list is
 // then cached in `notifList` for the rest of the page session.
 watch(notifMenuOpen, (open) => {
-    if (open && notifList.value.length === 0) {
+    if (open && notifList.value.length === 0 && hasPermission('system.notifications.manage')) {
         loadNotificationList();
     }
 });

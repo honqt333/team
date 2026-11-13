@@ -233,9 +233,17 @@ class BankTransferReceiptsController extends Controller
         // the acting identity actually lives in, and the model's
         // `reviewer()` relation resolves the same table.
         $actor = $request->user();
-        $reviewerId = $actor?->id;
+        $reviewerId = $actor instanceof AdminUser
+            ? $actor->id
+            : ($actor ? AdminUser::where('user_id', $actor->id)->value('id') : null);
 
-        DB::transaction(function () use ($receipt, $validated, $diff, $expected, $approvedAmount, $actual, &$reviewNotes, $reviewerId) {
+        $processed = DB::transaction(function () use ($receipt, $validated, $diff, $expected, $approvedAmount, $actual, &$reviewNotes, $reviewerId): bool {
+            $receipt = BankTransferReceipt::whereKey($receipt->id)->lockForUpdate()->firstOrFail();
+
+            if ($receipt->status !== 'pending') {
+                return false;
+            }
+
             $isPartial = abs($approvedAmount - $actual) > 0.01;
             $isShortVsExpected = $expected !== null && abs($approvedAmount - (float) $expected) > 0.01;
 
@@ -343,7 +351,13 @@ class BankTransferReceiptsController extends Controller
                 // We surface a session message so the UI can show the
                 // remaining balance on the next page.
             }
+
+            return true;
         });
+
+        if (! $processed) {
+            return back()->with('error', __('messages.system.receipts.already_reviewed'));
+        }
 
         $message = $approvedAmount < $actual - 0.01
             ? __('messages.system.receipts.partial_approved', ['amount' => number_format($approvedAmount, 2)])
@@ -392,14 +406,31 @@ class BankTransferReceiptsController extends Controller
         // request by the `auth:web,admin` middleware, so the recorded
         // id belongs to the table the reviewer relation reads back
         // (`admin_users`). See approve() for the full rationale.
-        $reviewerId = $request->user()?->id;
+        $actor = $request->user();
+        $reviewerId = $actor instanceof AdminUser
+            ? $actor->id
+            : ($actor ? AdminUser::where('user_id', $actor->id)->value('id') : null);
 
-        $receipt->update([
-            'status' => 'rejected',
-            'reviewed_by' => $reviewerId,
-            'reviewed_at' => now(),
-            'review_notes' => $validated['notes'],
-        ]);
+        $processed = DB::transaction(function () use ($receipt, $reviewerId, $validated): bool {
+            $lockedReceipt = BankTransferReceipt::whereKey($receipt->id)->lockForUpdate()->firstOrFail();
+
+            if ($lockedReceipt->status !== 'pending') {
+                return false;
+            }
+
+            $lockedReceipt->update([
+                'status' => 'rejected',
+                'reviewed_by' => $reviewerId,
+                'reviewed_at' => now(),
+                'review_notes' => $validated['notes'],
+            ]);
+
+            return true;
+        });
+
+        if (! $processed) {
+            return back()->with('error', __('messages.system.receipts.already_reviewed'));
+        }
 
         // Notify the tenant with the rejection reason so they know
         // what to fix before resubmitting.

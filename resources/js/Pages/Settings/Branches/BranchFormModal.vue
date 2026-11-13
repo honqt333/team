@@ -213,14 +213,14 @@ const submit = () => {
             <button
                 type="button"
                 @click="close"
-                class="px-4 py-2 text-content-secondary hover:text-content-primary font-bold transition-colors cursor-pointer"
+                class="px-5 py-2.5 text-xs font-bold text-text-secondary hover:bg-surface-secondary border border-border rounded-xl transition-colors cursor-pointer"
             >
                 {{ t('common.cancel') }}
             </button>
             <button
                 @click="submit"
                 :disabled="form.processing"
-                class="px-5 py-2.5 bg-action-primary hover:bg-action-primary-hover text-white rounded-xl font-bold shadow-xs disabled:opacity-50 disabled:cursor-not-allowed transition-colors cursor-pointer"
+                class="inline-flex items-center justify-center gap-2 px-6 py-2.5 text-xs font-bold text-white bg-action-primary hover:bg-action-primary-hover rounded-xl shadow-xs transition-all disabled:opacity-50 cursor-pointer"
             >
                 {{ form.processing ? t('common.loading') : t('common.save') }}
             </button>

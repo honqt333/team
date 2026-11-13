@@ -69,6 +69,6 @@ class VehicleConditionCategoryController extends Controller
 
         $conditionCategory->update(['is_active' => ! $conditionCategory->is_active]);
 
-        return redirect()->back();
+        return redirect()->back()->with('success', __('messages.updated_successfully'));
     }
 }

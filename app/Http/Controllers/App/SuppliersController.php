@@ -65,7 +65,9 @@ class SuppliersController extends Controller
 
         // Calculate real balance using calculateBalance helper
         $suppliers->getCollection()->transform(function ($supplier) {
-            $supplier->balance = $supplier->calculateBalance();
+            $balance = $supplier->calculateBalance();
+            $supplier->balance = $balance;
+            $supplier->amount_due_from_supplier = $balance < 0.0 ? round(abs($balance), 2) : 0.0;
 
             return $supplier;
         });
@@ -89,7 +91,7 @@ class SuppliersController extends Controller
         $supplier->loadCount('purchaseOrders');
         $supplier->load([
             'purchaseInvoices' => fn ($q) => $q->latest(),
-            'returnInvoices' => fn ($q) => $q->with('purchaseInvoice')->latest('return_date'),
+            'returnInvoices' => fn ($q) => $q->with(['purchaseInvoice.payments', 'purchaseInvoice.returnInvoices', 'lines'])->latest('return_date'),
             'payments' => fn ($q) => $q->with(['receivedBy', 'purchaseInvoice'])->latest(),
         ]);
 
@@ -102,6 +104,9 @@ class SuppliersController extends Controller
 
         // Calculate balance using calculateBalance helper
         $balance = $supplier->calculateBalance();
+        $amountDueFromSupplier = $balance < 0.0 ? round(abs($balance), 2) : 0.0;
+        $supplier->balance = $balance;
+        $supplier->amount_due_from_supplier = $amountDueFromSupplier;
 
         $tenantId = auth()->user()->tenant_id;
         $centerId = auth()->user()->current_center_id;
@@ -118,6 +123,7 @@ class SuppliersController extends Controller
             'payments' => $supplier->payments,
             'counts' => $counts,
             'balance' => $balance,
+            'amountDueFromSupplier' => $amountDueFromSupplier,
             'suppliers' => $suppliers,
             'defaultWarehouse' => $defaultWarehouse,
             'warehouses' => $warehouses,

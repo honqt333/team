@@ -237,7 +237,7 @@ defineProps({ form: Object, tab: String });
                             <input
                                 type="color"
                                 v-model="form.settings.website_announcement_bg_color"
-                                class="h-10 w-20 rounded-lg border border-gray-300 dark:border-gray-600 bg-white"
+                                class="h-10 w-20 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800"
                             />
                             <input
                                 v-model="form.settings.website_announcement_bg_color"
@@ -255,7 +255,7 @@ defineProps({ form: Object, tab: String });
                             <input
                                 type="color"
                                 v-model="form.settings.website_announcement_text_color"
-                                class="h-10 w-20 rounded-lg border border-gray-300 dark:border-gray-600 bg-white"
+                                class="h-10 w-20 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800"
                             />
                             <input
                                 v-model="form.settings.website_announcement_text_color"

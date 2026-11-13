@@ -160,6 +160,12 @@
                         </tr>
                     </tbody>
                 </DataTable>
+                <AppPagination
+                    :links="purchases?.links || []"
+                    :from="purchases?.from"
+                    :to="purchases?.to"
+                    :total="purchases?.total"
+                />
             </div>
         </div>
     </div>
@@ -167,6 +173,7 @@
 
 <script setup>
 import DataTable from '@/Components/Common/DataTable.vue';
+import AppPagination from '@/Components/Common/AppPagination.vue';
 import { ref, computed } from 'vue';
 import { router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';

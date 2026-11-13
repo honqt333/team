@@ -681,7 +681,7 @@
                     <button
                         type="button"
                         @click="$emit('close')"
-                        class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                        class="px-5 py-2.5 text-xs font-bold text-text-secondary hover:bg-surface-secondary border border-border rounded-xl transition-colors cursor-pointer"
                     >
                         {{ $t('common.cancel') }}
                     </button>
@@ -693,7 +693,7 @@
                             !selectedVehicle ||
                             (showOdometerWarning && !form.allow_lower_odometer)
                         "
-                        class="px-6 py-2 bg-action-primary hover:bg-action-primary-hover text-white rounded-lg disabled:opacity-50 transition-all flex items-center gap-2"
+                        class="inline-flex items-center justify-center gap-2 px-6 py-2.5 text-xs font-bold text-white bg-action-primary hover:bg-action-primary-hover rounded-xl shadow-xs transition-all disabled:opacity-50 cursor-pointer"
                     >
                         <svg
                             v-if="form.processing"
@@ -906,11 +906,11 @@ const form = useForm({
     is_paid_by_dealer: Boolean(props.workOrder?.is_paid_by_dealer || false),
     customer_complaint: props.workOrder?.customer_complaint || '',
     initial_assessment: props.workOrder?.initial_assessment || '',
-    odometer: props.workOrder?.odometer ?? props.workOrder?.mileage ?? '',
+    odometer: toEnglish(props.workOrder?.odometer ?? props.workOrder?.mileage ?? ''),
     allow_lower_odometer: false,
     allow_credit_override: false,
     contact_name: props.workOrder?.contact_name || '',
-    contact_phone: props.workOrder?.contact_phone || '',
+    contact_phone: toEnglish(props.workOrder?.contact_phone || ''),
     entry_date: props.workOrder?.entry_date || new Date().toISOString().split('T')[0],
     expected_end_date: props.workOrder?.expected_end_date || new Date().toISOString().split('T')[0],
     departments: (() => {
@@ -966,10 +966,10 @@ watch(
             form.is_paid_by_dealer = Boolean(props.workOrder.is_paid_by_dealer || false);
             form.customer_complaint = props.workOrder.customer_complaint || '';
             form.initial_assessment = props.workOrder.initial_assessment || '';
-            form.odometer = props.workOrder.odometer ?? props.workOrder.mileage ?? '';
+            form.odometer = toEnglish(props.workOrder.odometer ?? props.workOrder.mileage ?? '');
             form.allow_lower_odometer = false;
             form.contact_name = props.workOrder.contact_name || '';
-            form.contact_phone = props.workOrder.contact_phone || '';
+            form.contact_phone = toEnglish(props.workOrder.contact_phone || '');
             form.entry_date = formatDateForInput(props.workOrder.entry_date);
             form.expected_end_date = formatDateForInput(props.workOrder.expected_end_date);
             const depts = props.workOrder.departments?.map((d) => d.id) || [];
@@ -1046,7 +1046,7 @@ watch(
                 form.contact_name = val.customer.name;
             }
             if (!form.contact_phone) {
-                form.contact_phone = val.customer.phone;
+                form.contact_phone = toEnglish(val.customer.phone || '');
             }
         }
     },

@@ -21,6 +21,7 @@ class TenantAddress extends Model
         'district',
         'building_number',
         'postal_code',
+        'country',
         'latitude',
         'longitude',
     ];

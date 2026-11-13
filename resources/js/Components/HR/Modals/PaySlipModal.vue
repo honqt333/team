@@ -173,6 +173,7 @@
 <script setup>
 import BaseModal from '@/Components/BaseModal.vue';
 import { useI18n } from 'vue-i18n';
+import { printDocument } from '@/Composables/usePrint';
 const { t } = useI18n();
 
 import { computed, ref } from 'vue';
@@ -209,7 +210,7 @@ function formatMoney(value) {
 }
 
 function printSlip() {
-    window.print();
+    printDocument();
 }
 </script>
 

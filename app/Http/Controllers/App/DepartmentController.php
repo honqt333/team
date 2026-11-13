@@ -76,7 +76,7 @@ class DepartmentController
 
         Department::create($validated);
 
-        return back();
+        return back()->with('success', __('messages.department_added'));
     }
 
     public function update(Request $request, Department $department): RedirectResponse
@@ -102,7 +102,7 @@ class DepartmentController
 
         $department->update($validated);
 
-        return back();
+        return back()->with('success', __('messages.department_updated'));
     }
 
     public function destroy(Department $department): RedirectResponse
@@ -118,7 +118,7 @@ class DepartmentController
 
         $department->delete();
 
-        return back();
+        return back()->with('success', __('messages.department_removed'));
     }
 
     public function toggleActive(Department $department): RedirectResponse
@@ -127,6 +127,6 @@ class DepartmentController
 
         $department->update(['is_active' => ! $department->is_active]);
 
-        return back();
+        return back()->with('success', __('messages.department_updated'));
     }
 }

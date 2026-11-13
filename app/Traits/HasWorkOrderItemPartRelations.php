@@ -12,7 +12,9 @@ use App\Models\User;
 use App\Models\Warehouse;
 use App\Models\WorkOrder;
 use App\Models\WorkOrderItem;
+use App\Models\WorkOrderPurchaseAllocation;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 trait HasWorkOrderItemPartRelations
 {
@@ -68,5 +70,11 @@ trait HasWorkOrderItemPartRelations
     public function reversedByUser(): BelongsTo
     {
         return $this->belongsTo(User::class, 'reversed_by');
+    }
+
+    /** @return HasOne<WorkOrderPurchaseAllocation, $this> */
+    public function purchaseAllocation(): HasOne
+    {
+        return $this->hasOne(WorkOrderPurchaseAllocation::class, 'work_order_item_part_id');
     }
 }

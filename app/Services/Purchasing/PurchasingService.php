@@ -12,6 +12,8 @@ use App\Models\PurchaseInvoice;
 use App\Models\PurchaseInvoiceLine;
 use App\Models\PurchaseOrder;
 use App\Models\PurchaseOrderItem;
+use App\Models\WorkOrder;
+use App\Models\WorkOrderPurchaseAllocation;
 use App\Services\Inventory\InventoryService;
 use Exception;
 use Illuminate\Support\Facades\DB;
@@ -458,7 +460,27 @@ class PurchasingService
 
             if (! empty($data['items'])) {
                 foreach ($data['items'] as $item) {
-                    $part = Part::find($item['part_id']);
+                    $partId = $item['part_id'] ?? null;
+
+                    if (empty($partId)) {
+                        $customName = ! empty($item['custom_name']) ? $item['custom_name'] : (! empty($item['name']) ? $item['name'] : 'بند مخصص');
+                        $sku = ! empty($item['sku']) && ! in_array($item['sku'], ['EXTERNAL', 'SERVICE', 'CUSTOM'])
+                            ? $item['sku']
+                            : 'EXT-'.strtoupper(substr(md5($customName.time().uniqid()), 0, 8));
+
+                        $part = Part::create([
+                            'tenant_id' => $data['tenant_id'],
+                            'sku' => $sku,
+                            'name_ar' => $customName,
+                            'name_en' => $customName,
+                            'unit' => 'piece',
+                            'default_sale_price' => round(($item['unit_cost'] ?? 0) * 1.25, 2),
+                            'is_active' => true,
+                        ]);
+                        $partId = $part->id;
+                    } else {
+                        $part = Part::find($partId);
+                    }
 
                     if ($part && ! empty($item['purchase_unit_id'])) {
                         $part->update([
@@ -469,7 +491,7 @@ class PurchasingService
 
                     $poItem = PurchaseOrderItem::create([
                         'purchase_order_id' => $po->id,
-                        'part_id' => $item['part_id'],
+                        'part_id' => $partId,
                         'qty_ordered' => $item['qty'],
                         'unit_cost' => $item['unit_cost'],
                         'tax_rate' => $item['tax_rate'] ?? 15.00,
@@ -478,7 +500,7 @@ class PurchasingService
 
                     $grnItems[] = [
                         'purchase_order_item_id' => $poItem->id,
-                        'part_id' => $item['part_id'],
+                        'part_id' => $partId,
                         'qty_received' => $item['qty'],
                         'unit_cost' => $item['unit_cost'],
                         'notes' => $item['notes'] ?? null,
@@ -517,10 +539,45 @@ class PurchasingService
             $invoice = PurchaseInvoice::where('purchase_order_id', $po->id)->first();
 
             if ($invoice) {
+                $pType = $data['purchase_type'] ?? null;
+                $sourceType = 'warehouse';
+
+                if ($pType === 'service') {
+                    $sourceType = 'supplier_service';
+                } elseif ($pType === 'external_part' || ! empty($data['work_order_id'])) {
+                    $sourceType = 'external';
+                }
+
                 $invoice->update([
                     'notes' => $data['notes'] ?? null,
                     'work_order_id' => $data['work_order_id'] ?? null,
+                    'source_type' => $sourceType,
                 ]);
+
+                if (! empty($data['work_order_id'])) {
+                    $workOrder = WorkOrder::where('tenant_id', $invoice->tenant_id)->find($data['work_order_id']);
+
+                    if ($workOrder) {
+                        $allocationType = $pType === 'service'
+                            ? WorkOrderPurchaseAllocation::TYPE_SUPPLIER_SERVICE
+                            : ($pType === 'inventory' ? WorkOrderPurchaseAllocation::TYPE_WAREHOUSE_PART : WorkOrderPurchaseAllocation::TYPE_EXTERNAL_PART);
+
+                        foreach ($invoice->lines as $line) {
+                            $workOrder->purchaseAllocations()->create([
+                                'tenant_id' => $invoice->tenant_id,
+                                'center_id' => $invoice->center_id,
+                                'purchase_invoice_id' => $invoice->id,
+                                'purchase_invoice_line_id' => $line->id,
+                                'type' => $allocationType,
+                                'item_description' => $line->part?->name_ar ?? $line->description ?? 'بند مشتريات',
+                                'allocated_qty' => $line->qty,
+                                'unit_cost' => $line->unit_cost,
+                                'tax_amount' => $line->tax_amount,
+                                'total_cost' => $line->total,
+                            ]);
+                        }
+                    }
+                }
             }
 
             // 7. If payments were recorded in the direct purchase form, record them!

@@ -344,28 +344,26 @@
         <template #footer>
             <div class="flex items-center gap-3">
                 <button
+                    type="button"
                     @click="$emit('close')"
-                    class="px-4 py-2 text-text-primary border border-border-strong rounded-lg hover:bg-surface-muted"
+                    class="px-5 py-2.5 text-xs font-bold text-text-secondary hover:bg-surface-secondary border border-border rounded-xl transition-colors cursor-pointer"
                 >
                     {{ $t('common.cancel') }}
                 </button>
                 <button
                     v-if="selectedTarget"
+                    type="button"
                     @click="selectedTarget = null"
-                    class="px-4 py-2 text-text-primary border border-border-strong rounded-lg hover:bg-surface-muted"
+                    class="px-5 py-2.5 text-xs font-bold text-text-secondary hover:bg-surface-secondary border border-border rounded-xl transition-colors cursor-pointer"
                 >
                     {{ $t('customers.merge.change_target') }}
                 </button>
                 <button
                     v-if="selectedTarget"
+                    type="button"
                     @click="executeMerge"
                     :disabled="!canMerge || processing"
-                    :class="[
-                        'px-6 py-2 rounded-lg font-medium transition-all',
-                        canMerge && !processing
-                            ? 'bg-action-primary hover:bg-action-primary-hover text-action-on shadow-sm hover:-translate-y-0.5 transition-all'
-                            : 'bg-surface-tertiary text-text-muted cursor-not-allowed',
-                    ]"
+                    class="inline-flex items-center justify-center gap-2 px-6 py-2.5 text-xs font-bold text-white bg-action-primary hover:bg-action-primary-hover rounded-xl shadow-xs transition-all disabled:opacity-50 cursor-pointer"
                 >
                     {{ processing ? $t('common.loading') : $t('customers.merge.execute') }}
                 </button>

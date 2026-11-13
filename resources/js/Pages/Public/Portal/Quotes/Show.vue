@@ -491,6 +491,7 @@
 <script setup>
 import { router, usePage } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
+import { printDocument } from '@/Composables/usePrint';
 import CustomerPortalLayout from '@/Layouts/CustomerPortalLayout.vue';
 import SaudiPlateDisplay from '@/Components/Vehicles/SaudiPlateDisplay.vue';
 import SignaturePad from '@/Components/Common/SignaturePad.vue';
@@ -571,6 +572,6 @@ function submitReject() {
 }
 
 function printPage() {
-    window.print();
+    printDocument();
 }
 </script>

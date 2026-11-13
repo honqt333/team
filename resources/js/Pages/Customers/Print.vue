@@ -46,6 +46,11 @@
                         {{ $t('customers.print.no_customers') }}
                     </td>
                 </tr>
+                <tr v-if="customers.length === 0">
+                    <td colspan="8" class="py-6 px-4 border border-gray-300 text-gray-500">
+                        {{ $t('common.no_data') }}
+                    </td>
+                </tr>
                 <tr
                     v-for="(customer, index) in customers"
                     :key="customer.id"
@@ -66,7 +71,7 @@
                     <td class="py-2 px-2 border border-gray-300">
                         {{
                             customer.customer_type
-                                ? $t(`customers.types.${customer.customer_type}`)
+                                ? $t(`customers.type.${customer.customer_type}`)
                                 : '—'
                         }}
                     </td>
@@ -91,7 +96,7 @@
 <script setup>
 import { printDocument, usePrint } from '@/Composables/usePrint';
 import { onMounted } from 'vue';
-import { Head } from '@inertiajs/vue3';
+import { Head, router } from '@inertiajs/vue3';
 import StandardReportLayout from '@/Components/Print/StandardReportLayout.vue';
 
 const { formatCurrency: formatMoney } = usePrint();
@@ -119,10 +124,22 @@ function handlePrint() {
 }
 
 function handleBack() {
+    if (window.opener) {
+        window.close();
+        setTimeout(() => {
+            if (!window.closed) {
+                router.visit(route('customers.index'));
+            }
+        }, 150);
+        return;
+    }
     if (window.history.length > 1) {
         window.history.back();
     } else {
         window.close();
+        setTimeout(() => {
+            router.visit(route('customers.index'));
+        }, 150);
     }
 }
 
@@ -132,12 +149,3 @@ onMounted(() => {
     // Optional print trigger after render if requested
 });
 </script>
-
-<style>
-@media print {
-    @page {
-        size: A4 portrait;
-        margin: 15mm 10mm 12mm 10mm;
-    }
-}
-</style>

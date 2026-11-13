@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Tests\Feature;
 
 use App\Models\Center;
+use App\Models\InventoryBalance;
+use App\Models\InventoryMove;
 use App\Models\Part;
 use App\Models\Payment;
 use App\Models\PurchaseInvoice;
@@ -14,6 +16,7 @@ use App\Models\Supplier;
 use App\Models\Tenant;
 use App\Models\User;
 use App\Models\Warehouse;
+use App\Services\Inventory\InventoryService;
 use Database\Seeders\PermissionsSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Spatie\Permission\Models\Permission;
@@ -517,5 +520,143 @@ class PurchaseDebitNoteTest extends TestCase
         $this->assertCount(1, $ctxB['supplier']->refresh()->returnInvoices);
         $this->assertEquals(200.0, (float) $ctxA['supplier']->returnInvoices->sum('total'));
         $this->assertEquals(300.0, (float) $ctxB['supplier']->returnInvoices->sum('total'));
+    }
+
+    /** @test */
+    public function purchase_returns_on_paid_invoice_recalculate_reverse_wac_and_expose_remaining_refund_and_amount_due_from_supplier(): void
+    {
+        $ctx = $this->bootFullPurchasingContext();
+        $user = $ctx['user'];
+        $supplier = $ctx['supplier'];
+        $warehouse = Warehouse::forCenter($ctx['center']->id)->default()->firstOrFail();
+        $part = $ctx['part'];
+
+        // Reset initial stock to 1 unit @ 22.00 (WAC = 22.00)
+        InventoryBalance::withoutGlobalScopes()
+            ->where('warehouse_id', $warehouse->id)
+            ->where('part_id', $part->id)
+            ->delete();
+        InventoryMove::withoutGlobalScopes()
+            ->where('warehouse_id', $warehouse->id)
+            ->where('part_id', $part->id)
+            ->delete();
+
+        $inventoryService = app(InventoryService::class);
+        $inventoryService->receipt(
+            warehouseId: $warehouse->id,
+            partId: $part->id,
+            qty: 1,
+            unitCost: 22.00,
+            userId: $user->id,
+            notes: 'Opening stock 1 @ 22.00'
+        );
+
+        // Purchase PI202620001: +3 units @ 25.00 = 75.00 SAR (paid 75.00 SAR)
+        $inventoryService->receipt(
+            warehouseId: $warehouse->id,
+            partId: $part->id,
+            qty: 3,
+            unitCost: 25.00,
+            userId: $user->id,
+            notes: 'Purchase PI202620001'
+        );
+
+        $balanceAfterPurchase = InventoryBalance::withoutGlobalScopes()
+            ->where('warehouse_id', $warehouse->id)
+            ->where('part_id', $part->id)
+            ->firstOrFail();
+        $this->assertEquals(4.0, (float) $balanceAfterPurchase->qty_on_hand);
+        $this->assertEquals(24.25, (float) $balanceAfterPurchase->wac_cost);
+
+        $invoice = PurchaseInvoice::create([
+            'tenant_id' => $ctx['tenant']->id,
+            'center_id' => $ctx['center']->id,
+            'supplier_id' => $supplier->id,
+            'code' => 'PI202620001',
+            'invoice_number' => 'PI202620001',
+            'issue_date' => now()->toDateString(),
+            'status' => PurchaseInvoice::STATUS_PAID,
+            'subtotal' => 75.00,
+            'tax_amount' => 0.00,
+            'total' => 75.00,
+            'balance' => 0.00,
+        ]);
+
+        $line = PurchaseInvoiceLine::create([
+            'tenant_id' => $ctx['tenant']->id,
+            'center_id' => $ctx['center']->id,
+            'purchase_invoice_id' => $invoice->id,
+            'part_id' => $part->id,
+            'qty' => 3,
+            'unit_cost' => 25.00,
+            'tax_rate' => 0,
+            'tax_amount' => 0,
+            'total' => 75.00,
+        ]);
+
+        Payment::create([
+            'tenant_id' => $ctx['tenant']->id,
+            'center_id' => $ctx['center']->id,
+            'purchase_invoice_id' => $invoice->id,
+            'amount' => 75.00,
+            'payment_date' => now()->toDateString(),
+            'payment_method' => 'cash',
+            'type' => Payment::TYPE_PAYMENT,
+        ]);
+
+        // Return 1 (PR202620001): -2 units @ 25.00 = 50.00 SAR (unrefunded)
+        $this->actingAs($user)
+            ->post(route('app.invoices.purchases.returns.store', $invoice->id), [
+                'return_date' => now()->toDateString(),
+                'items' => [
+                    [
+                        'purchase_invoice_line_id' => $line->id,
+                        'qty' => 2,
+                        'unit_cost' => 25.00,
+                    ],
+                ],
+                'refund_payments' => [],
+                'create_debit_note' => false,
+            ])
+            ->assertRedirect();
+
+        $balanceAfterReturn1 = InventoryBalance::withoutGlobalScopes()
+            ->where('warehouse_id', $warehouse->id)
+            ->where('part_id', $part->id)
+            ->firstOrFail();
+        $this->assertEquals(2.0, (float) $balanceAfterReturn1->qty_on_hand);
+        $this->assertEquals(23.50, (float) $balanceAfterReturn1->wac_cost);
+
+        // Return 2 (PR202620002): -1 unit @ 25.00 = 25.00 SAR (unrefunded)
+        $this->actingAs($user)
+            ->post(route('app.invoices.purchases.returns.store', $invoice->id), [
+                'return_date' => now()->toDateString(),
+                'items' => [
+                    [
+                        'purchase_invoice_line_id' => $line->id,
+                        'qty' => 1,
+                        'unit_cost' => 25.00,
+                    ],
+                ],
+                'refund_payments' => [],
+                'create_debit_note' => false,
+            ])
+            ->assertRedirect();
+
+        $balanceAfterReturn2 = InventoryBalance::withoutGlobalScopes()
+            ->where('warehouse_id', $warehouse->id)
+            ->where('part_id', $part->id)
+            ->firstOrFail();
+        $this->assertEquals(1.0, (float) $balanceAfterReturn2->qty_on_hand);
+        $this->assertEquals(22.00, (float) $balanceAfterReturn2->wac_cost);
+
+        $returns = PurchaseReturnInvoice::where('purchase_invoice_id', $invoice->id)->orderBy('id')->get();
+        $this->assertCount(2, $returns);
+        $this->assertEquals(50.00, $returns[0]->remaining_refund);
+        $this->assertEquals(25.00, $returns[1]->remaining_refund);
+
+        $supplier->refresh();
+        $this->assertEquals(-75.00, $supplier->calculateBalance());
+        $this->assertEquals(75.00, $supplier->calculateAmountDueFromSupplier());
     }
 }

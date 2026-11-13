@@ -33,11 +33,20 @@ class EmployeeObserver
             $user = $employee->user ?? User::find($employee->user_id);
 
             if ($user) {
-                // Update the linked user's email so they can log in
-                $user->update(['email' => $employee->email]);
-                // Send new activation/invitation email
-                $user->notify(new WelcomeEmployeeInvitation);
-                Log::info("EmployeeObserver: Email updated and new invitation sent for employee {$employee->id}");
+                $emailTaken = User::where('tenant_id', $employee->tenant_id)
+                    ->where('email', $employee->email)
+                    ->where('id', '!=', $user->id)
+                    ->exists();
+
+                if ($emailTaken) {
+                    Log::warning("EmployeeObserver: Skipping email sync for employee {$employee->id} - email already in use within tenant {$employee->tenant_id}");
+                } else {
+                    // Update the linked user's email so they can log in
+                    $user->update(['email' => $employee->email]);
+                    // Send new activation/invitation email
+                    $user->notify(new WelcomeEmployeeInvitation);
+                    Log::info("EmployeeObserver: Email updated and new invitation sent for employee {$employee->id}");
+                }
             } else {
                 $this->handleUserCreation($employee);
             }
@@ -54,8 +63,8 @@ class EmployeeObserver
         }
 
         // Handle deactivation logic
-        if ($employee->isDirty('status') && in_array($employee->status, ['terminated', 'resigned'])) {
-            if ($employee->user) {
+        if ($employee->isDirty('status') && in_array($employee->status, ['terminated', 'resigned', 'inactive'], true)) {
+            if ($employee->user && $employee->user->is_active) {
                 $employee->user->update(['is_active' => false]);
             }
         }
@@ -91,8 +100,10 @@ class EmployeeObserver
             return;
         }
 
-        // Check if user with this email already exists
-        $user = User::where('email', $employee->email)->first();
+        // Check if user with this email already exists within the same tenant
+        $user = User::where('tenant_id', $employee->tenant_id)
+            ->where('email', $employee->email)
+            ->first();
         $isNewUser = false;
 
         if (! $user) {

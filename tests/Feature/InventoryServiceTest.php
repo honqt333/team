@@ -269,4 +269,77 @@ class InventoryServiceTest extends TestCase
             unitCost: 50.00
         );
     }
+
+    /** @test */
+    public function it_recalculates_wac_in_reverse_on_purchase_returns_and_records_movement_audit_columns()
+    {
+        // 1. Opening stock: 1 unit @ 22.00 -> WAC = 22.00
+        $move1 = $this->service->receipt(
+            warehouseId: $this->warehouse->id,
+            partId: $this->part->id,
+            qty: 1,
+            unitCost: 22.00,
+            userId: $this->user->id,
+            notes: 'Opening stock'
+        );
+
+        $this->assertEquals(0.0, $move1->previous_stock);
+        $this->assertEquals(1.0, $move1->new_stock);
+        $this->assertEquals(0.0, $move1->previous_cost);
+        $this->assertEquals(22.00, $move1->new_wac);
+
+        // 2. Purchase PI202620001: +3 units @ 25.00 -> stock = 4, WAC = ((1*22) + (3*25)) / 4 = 24.25
+        $move2 = $this->service->receipt(
+            warehouseId: $this->warehouse->id,
+            partId: $this->part->id,
+            qty: 3,
+            unitCost: 25.00,
+            userId: $this->user->id,
+            notes: 'PI202620001'
+        );
+
+        $this->assertEquals(1.0, $move2->previous_stock);
+        $this->assertEquals(4.0, $move2->new_stock);
+        $this->assertEquals(22.00, $move2->previous_cost);
+        $this->assertEquals(24.25, $move2->new_wac);
+
+        // 3. Purchase Return PR202620001: -2 units @ 25.00 -> stock = 2, WAC = ((4*24.25) - (2*25)) / 2 = 23.50
+        $move3 = $this->service->issue(
+            warehouseId: $this->warehouse->id,
+            partId: $this->part->id,
+            qty: 2,
+            userId: $this->user->id,
+            notes: 'PR202620001',
+            moveType: InventoryMove::TYPE_PURCHASE_RETURN,
+            unitCost: 25.00
+        );
+
+        $this->assertEquals(4.0, $move3->previous_stock);
+        $this->assertEquals(2.0, $move3->new_stock);
+        $this->assertEquals(24.25, $move3->previous_cost);
+        $this->assertEquals(23.50, $move3->new_wac);
+
+        // 4. Purchase Return PR202620002: -1 unit @ 25.00 -> stock = 1, WAC = ((2*23.50) - (1*25)) / 1 = 22.00
+        $move4 = $this->service->issue(
+            warehouseId: $this->warehouse->id,
+            partId: $this->part->id,
+            qty: 1,
+            userId: $this->user->id,
+            notes: 'PR202620002',
+            moveType: InventoryMove::TYPE_PURCHASE_RETURN,
+            unitCost: 25.00
+        );
+
+        $this->assertEquals(2.0, $move4->previous_stock);
+        $this->assertEquals(1.0, $move4->new_stock);
+        $this->assertEquals(23.50, $move4->previous_cost);
+        $this->assertEquals(22.00, $move4->new_wac);
+
+        $balance = InventoryBalance::where('warehouse_id', $this->warehouse->id)
+            ->where('part_id', $this->part->id)
+            ->first();
+
+        $this->assertEquals(1.0, (float) $balance->qty_on_hand);
+        $this->assertEquals(22.00, (float) $balance->wac_cost);
+    }
 }

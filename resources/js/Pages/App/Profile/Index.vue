@@ -1014,7 +1014,7 @@ const regenerateCodes = () =>
 
                                 <div class="space-y-3">
                                     <div
-                                        class="flex items-center justify-between p-3.5 rounded-2xl bg-gray-50/80 dark:bg-gray-750/50 border border-gray-100 dark:border-gray-700"
+                                        class="flex items-center justify-between p-3.5 rounded-2xl bg-gray-50/80 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-700"
                                     >
                                         <div class="flex items-center gap-3">
                                             <div
@@ -1044,7 +1044,7 @@ const regenerateCodes = () =>
                                     </div>
 
                                     <div
-                                        class="flex items-center justify-between p-3.5 rounded-2xl bg-gray-50/80 dark:bg-gray-750/50 border border-gray-100 dark:border-gray-700"
+                                        class="flex items-center justify-between p-3.5 rounded-2xl bg-gray-50/80 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-700"
                                     >
                                         <div class="flex items-center gap-3">
                                             <div
@@ -1362,7 +1362,7 @@ const regenerateCodes = () =>
                             <!-- Recovery Codes -->
                             <div
                                 v-if="recoveryCodes"
-                                class="p-5 bg-gray-50/80 dark:bg-gray-750/50 rounded-2xl border border-gray-200 dark:border-gray-700"
+                                class="p-5 bg-gray-50/80 dark:bg-gray-800/50 rounded-2xl border border-gray-200 dark:border-gray-700"
                             >
                                 <div class="flex items-center justify-between mb-3">
                                     <h4 class="text-sm font-bold text-gray-900 dark:text-white">
@@ -1590,7 +1590,7 @@ const regenerateCodes = () =>
                             <div
                                 v-for="permission in filteredPermissions"
                                 :key="permission.id || permission.name"
-                                class="flex items-center gap-2.5 p-3 rounded-xl bg-gray-50 dark:bg-gray-750 border border-gray-100 dark:border-gray-700 text-sm"
+                                class="flex items-center gap-2.5 p-3 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 text-sm"
                             >
                                 <svg
                                     class="w-4 h-4 text-emerald-600 shrink-0"

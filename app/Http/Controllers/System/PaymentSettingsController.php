@@ -8,59 +8,12 @@ use App\Http\Controllers\Controller;
 use App\Models\PaymentSettings;
 use App\Services\System\SystemAuditService;
 use Illuminate\Http\Request;
-use Inertia\Inertia;
-use Inertia\Response;
 
 class PaymentSettingsController extends Controller
 {
     public function __construct(
         protected SystemAuditService $audit
     ) {}
-
-    /**
-     * Show payment settings page.
-     */
-    public function index(): Response
-    {
-        $settings = PaymentSettings::first() ?? new PaymentSettings;
-
-        // Pass through every field the Settings page binds to. Missing
-        // fields here meant the form re-mounted with `undefined` values
-        // and the user would see them as blank, even when the DB had
-        // data. We mask secret keys server-side so they're never sent
-        // to the browser in cleartext.
-        $maskedSettings = [
-            // Gateways
-            'moyasar' => $this->maskGatewayConfig($settings->moyasar),
-            'tap' => $this->maskGatewayConfig($settings->tap),
-            'paytabs' => $this->maskGatewayConfig($settings->paytabs),
-            'tabby' => $this->maskGatewayConfig($settings->tabby),
-            'tamara' => $this->maskGatewayConfig($settings->tamara),
-
-            // Default + bank transfer
-            'default_gateway' => $settings->default_gateway,
-            'bank_transfer_enabled' => (bool) $settings->bank_transfer_enabled,
-            'bank_accounts' => $settings->bank_accounts ?? [],
-            'bank_transfer_instructions' => $settings->bank_transfer_instructions,
-            'bank_transfer_require_receipt' => (bool) ($settings->bank_transfer_require_receipt ?? true),
-            'bank_transfer_max_days' => $settings->bank_transfer_max_days ?? 7,
-            'bank_transfer_min_amount' => (float) ($settings->bank_transfer_min_amount ?? 0),
-            'bank_transfer_receipt_instructions' => $settings->bank_transfer_receipt_instructions,
-
-            // Payment methods
-            'mada_enabled' => (bool) ($settings->mada_enabled ?? true),
-            'visa_enabled' => (bool) ($settings->visa_enabled ?? true),
-            'mastercard_enabled' => (bool) ($settings->mastercard_enabled ?? true),
-            'applepay_enabled' => (bool) ($settings->applepay_enabled ?? true),
-            'stcpay_enabled' => (bool) ($settings->stcpay_enabled ?? false),
-
-            // Company info + Subscription VAT — moved to CompanySettingsController
-        ];
-
-        return Inertia::render('System/Settings/PaymentSettings', [
-            'settings' => $maskedSettings,
-        ]);
-    }
 
     /**
      * Update payment settings.
@@ -166,28 +119,6 @@ class PaymentSettingsController extends Controller
         ], $request);
 
         return back()->with('success', __('messages.system.payment_settings.saved'));
-    }
-
-    /**
-     * Mask secret keys for display.
-     */
-    private function maskGatewayConfig(?array $config): array
-    {
-        if (! $config) {
-            return ['enabled' => false];
-        }
-
-        $masked = $config;
-
-        // Mask secret keys
-        foreach (['secret_key', 'server_key', 'api_token', 'notification_token'] as $key) {
-            if (! empty($masked[$key])) {
-                $masked[$key.'_masked'] = '••••••••'.substr($masked[$key], -4);
-                $masked[$key] = ''; // Don't send actual secret to frontend
-            }
-        }
-
-        return $masked;
     }
 
     /**

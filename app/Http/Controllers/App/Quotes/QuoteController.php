@@ -387,7 +387,8 @@ class QuoteController extends Controller
             actorId: auth()->id(),
         );
 
-        return redirect()->route('app.quotes.show', $quote);
+        return redirect()->route('app.quotes.show', $quote)
+            ->with('success', __('messages.quote_created'));
     }
 
     /**
@@ -488,7 +489,7 @@ class QuoteController extends Controller
         $quote->recalculateTotals();
         $quote->save();
 
-        return redirect()->back();
+        return redirect()->back()->with('success', __('messages.quote_updated'));
     }
 
     /**
@@ -584,7 +585,8 @@ class QuoteController extends Controller
 
         $quote->delete();
 
-        return redirect()->route('app.quotes.index');
+        return redirect()->route('app.quotes.index')
+            ->with('success', __('messages.quote_deleted'));
     }
 
     /**

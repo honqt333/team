@@ -127,6 +127,9 @@ const centerName = computed(() => {
     if (center.value.name) {
         return isRtl.value ? center.value.name : center.value.name_en || center.value.name;
     }
+    if (props.customCompany?.center_name) {
+        return props.customCompany.center_name;
+    }
     return null;
 });
 

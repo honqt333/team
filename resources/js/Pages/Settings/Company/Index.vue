@@ -513,7 +513,7 @@
                                                 :class="[
                                                     'w-full px-4 py-2.5 rounded-lg border focus:ring-2 focus:ring-focus-ring focus:border-transparent',
                                                     isSaudiTenant
-                                                        ? 'border-gray-250 dark:border-gray-650 bg-gray-100 dark:bg-gray-800 text-gray-400 cursor-not-allowed opacity-75'
+                                                        ? 'border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 text-gray-400 cursor-not-allowed opacity-75'
                                                         : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white',
                                                 ]"
                                             />
@@ -581,7 +581,7 @@
                                                 :class="[
                                                     'w-full px-4 py-2.5 rounded-lg border focus:ring-2 focus:ring-focus-ring focus:border-transparent',
                                                     isSaudiTenant
-                                                        ? 'border-gray-250 dark:border-gray-650 bg-gray-100 dark:bg-gray-800 text-gray-400 cursor-not-allowed opacity-75'
+                                                        ? 'border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 text-gray-400 cursor-not-allowed opacity-75'
                                                         : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white',
                                                 ]"
                                             />
@@ -1626,7 +1626,7 @@
                                             {{ props.admin_user?.email }}
                                         </p>
                                         <p
-                                            class="text-xs text-gray-400 dark:text-gray-550 font-medium mt-1"
+                                            class="text-xs text-gray-400 dark:text-gray-400 font-medium mt-1"
                                         >
                                             {{ $t('company_profile.admin_user.admin_label') }}
                                         </p>
@@ -1802,7 +1802,7 @@
 
                         <!-- Sub Tab Toggle for Sales vs Purchases -->
                         <div
-                            class="flex items-center gap-2 border-b border-gray-100 dark:border-gray-750"
+                            class="flex items-center gap-2 border-b border-gray-100 dark:border-gray-700"
                         >
                             <button
                                 type="button"
@@ -1842,7 +1842,7 @@
 
                         <!-- Sub-tab contents -->
                         <div
-                            class="bg-white dark:bg-gray-855 border border-gray-100 dark:border-gray-800 rounded-2xl overflow-hidden shadow-sm"
+                            class="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-800 rounded-2xl overflow-hidden shadow-sm"
                         >
                             <!-- 1. Sales Invoices -->
                             <div v-if="subInvoiceTab === 'sales'" class="overflow-x-auto">
@@ -2161,7 +2161,7 @@
                     <button
                         type="button"
                         @click="showPasswordCheckModal = false"
-                        class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-150 dark:hover:bg-gray-750 rounded-lg transition-colors"
+                        class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/60 rounded-lg transition-colors"
                     >
                         {{ locale === 'ar' ? 'إلغاء' : 'Cancel' }}
                     </button>

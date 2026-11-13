@@ -29,8 +29,8 @@
                         :class="[
                             sizeClass,
                             scrollEntire
-                                ? 'relative bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full mx-auto flex flex-col transition-all my-8 text-start'
-                                : 'relative bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full mx-auto max-h-[90vh] flex flex-col transition-all',
+                                ? 'relative bg-surface rounded-2xl shadow-xl w-full mx-auto flex flex-col transition-all my-8 text-start'
+                                : 'relative bg-surface rounded-2xl shadow-xl w-full mx-auto max-h-[90vh] flex flex-col transition-all',
                         ]"
                     >
                         <!-- Header -->
@@ -113,7 +113,7 @@ const props = defineProps({
     },
     scrollEntire: {
         type: Boolean,
-        default: false,
+        default: true,
     },
     overflowVisible: {
         type: Boolean,
@@ -131,6 +131,10 @@ const sizeClass = computed(() => {
         '2xl': 'max-w-5xl',
         '3xl': 'max-w-6xl',
         '4xl': 'max-w-7xl',
+        '5xl': 'max-w-[1000px]',
+        '6xl': 'max-w-6xl',
+        '7xl': 'max-w-7xl',
+        '1000px': 'max-w-[1000px]',
         full: 'max-w-full m-4',
     };
     return map[props.size] || props.size || 'max-w-3xl';

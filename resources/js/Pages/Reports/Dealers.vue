@@ -129,7 +129,7 @@
                     class="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4"
                 >
                     <div
-                        class="flex flex-wrap items-center gap-1.5 bg-gray-50 dark:bg-gray-750 p-1.5 rounded-xl border border-gray-200/80 dark:border-gray-700/60"
+                        class="flex flex-wrap items-center gap-1.5 bg-gray-50 dark:bg-gray-800 p-1.5 rounded-xl border border-gray-200/80 dark:border-gray-700/60"
                     >
                         <button
                             v-for="preset in datePresets"
@@ -152,7 +152,7 @@
                             v-model="filterForm.search"
                             type="text"
                             :placeholder="$t('reports.dealers_report.search_placeholder')"
-                            class="w-full ps-10 pe-4 py-2 text-xs rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-750 text-gray-900 dark:text-white focus:bg-white dark:focus:bg-gray-800 focus:ring-2 focus:ring-focus-ring focus:border-action-primary"
+                            class="w-full ps-10 pe-4 py-2 text-xs rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white focus:bg-white dark:focus:bg-gray-800 focus:ring-2 focus:ring-focus-ring focus:border-action-primary"
                             @keydown.enter="applyFilters"
                         />
                         <div
@@ -344,7 +344,7 @@
 
                     <div v-if="openGroups[group.group_key]" class="overflow-x-auto">
                         <DataTable :columns="tableColumns" :data="group.items">
-                            <template #cell-code="{ row }">
+                            <template #cell-code="{ item: row }">
                                 <div class="flex flex-col">
                                     <Link
                                         :href="`/app/work-orders/${row.id}`"
@@ -360,7 +360,7 @@
                                     </span>
                                 </div>
                             </template>
-                            <template #cell-dealer="{ row }">
+                            <template #cell-dealer="{ item: row }">
                                 <Link
                                     v-if="row.dealer?.id"
                                     :href="route('app.dealers.show', row.dealer.id)"
@@ -369,7 +369,7 @@
                                     {{ row.dealer.name }}
                                 </Link>
                             </template>
-                            <template #cell-billing="{ row }">
+                            <template #cell-billing="{ item: row }">
                                 <span
                                     class="inline-flex px-2 py-0.5 rounded-full text-[10px] font-bold"
                                     :class="
@@ -385,12 +385,12 @@
                                     }}
                                 </span>
                             </template>
-                            <template #cell-customer="{ row }">
+                            <template #cell-customer="{ item: row }">
                                 <span class="text-xs text-gray-800 dark:text-gray-200">
                                     {{ row.customer?.name }}
                                 </span>
                             </template>
-                            <template #cell-vehicle="{ row }">
+                            <template #cell-vehicle="{ item: row }">
                                 <div class="flex flex-col text-xs">
                                     <span>{{ row.vehicle?.name }}</span>
                                     <span class="font-mono text-gray-500">
@@ -398,22 +398,22 @@
                                     </span>
                                 </div>
                             </template>
-                            <template #cell-payment_due="{ row }">
+                            <template #cell-payment_due="{ item: row }">
                                 <span class="font-mono font-bold">
                                     {{ formatMoney(row.payment_due) }}
                                 </span>
                             </template>
-                            <template #cell-amount_paid="{ row }">
+                            <template #cell-amount_paid="{ item: row }">
                                 <span class="font-mono font-bold text-teal-600">
                                     {{ formatMoney(row.amount_paid) }}
                                 </span>
                             </template>
-                            <template #cell-payment_remaining="{ row }">
+                            <template #cell-payment_remaining="{ item: row }">
                                 <span class="font-mono font-bold text-amber-600">
                                     {{ formatMoney(row.payment_remaining) }}
                                 </span>
                             </template>
-                            <template #cell-payment_status="{ row }">
+                            <template #cell-payment_status="{ item: row }">
                                 <span
                                     class="inline-block px-2 py-0.5 rounded-full text-[10px] font-bold"
                                     :class="getPaymentStatusBadgeClass(row.payment_status)"
@@ -428,8 +428,8 @@
 
             <!-- Flat Table View -->
             <div v-else-if="records && records.data && records.data.length" class="space-y-4">
-                <DataTable :columns="tableColumns" :data="records">
-                    <template #cell-code="{ row }">
+                <DataTable :columns="tableColumns" :data="records" :show-pagination="false">
+                    <template #cell-code="{ item: row }">
                         <div class="flex flex-col">
                             <Link
                                 :href="`/app/work-orders/${row.id}`"
@@ -442,7 +442,7 @@
                             </span>
                         </div>
                     </template>
-                    <template #cell-dealer="{ row }">
+                    <template #cell-dealer="{ item: row }">
                         <div class="flex flex-col">
                             <Link
                                 v-if="row.dealer?.id"
@@ -456,7 +456,7 @@
                             </span>
                         </div>
                     </template>
-                    <template #cell-billing="{ row }">
+                    <template #cell-billing="{ item: row }">
                         <span
                             class="inline-flex px-2 py-0.5 rounded-full text-[10px] font-bold"
                             :class="
@@ -472,7 +472,7 @@
                             }}
                         </span>
                     </template>
-                    <template #cell-customer="{ row }">
+                    <template #cell-customer="{ item: row }">
                         <div class="flex flex-col text-xs">
                             <span class="font-semibold text-gray-800 dark:text-gray-200">
                                 {{ row.customer?.name }}
@@ -482,7 +482,7 @@
                             </span>
                         </div>
                     </template>
-                    <template #cell-vehicle="{ row }">
+                    <template #cell-vehicle="{ item: row }">
                         <div class="flex flex-col text-xs">
                             <span>{{ row.vehicle?.name }}</span>
                             <span class="font-mono text-gray-500">
@@ -490,17 +490,17 @@
                             </span>
                         </div>
                     </template>
-                    <template #cell-payment_due="{ row }">
+                    <template #cell-payment_due="{ item: row }">
                         <span class="font-mono font-bold text-gray-900 dark:text-white">
                             {{ formatMoney(row.payment_due) }}
                         </span>
                     </template>
-                    <template #cell-amount_paid="{ row }">
+                    <template #cell-amount_paid="{ item: row }">
                         <span class="font-mono font-bold text-teal-600 dark:text-teal-400">
                             {{ formatMoney(row.amount_paid) }}
                         </span>
                     </template>
-                    <template #cell-payment_remaining="{ row }">
+                    <template #cell-payment_remaining="{ item: row }">
                         <span
                             class="font-mono font-bold"
                             :class="
@@ -512,7 +512,7 @@
                             {{ formatMoney(row.payment_remaining) }}
                         </span>
                     </template>
-                    <template #cell-payment_status="{ row }">
+                    <template #cell-payment_status="{ item: row }">
                         <span
                             class="inline-block px-2 py-0.5 rounded-full text-[10px] font-bold"
                             :class="getPaymentStatusBadgeClass(row.payment_status)"

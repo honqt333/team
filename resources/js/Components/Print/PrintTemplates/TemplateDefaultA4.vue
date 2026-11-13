@@ -913,7 +913,7 @@
 
                 <!-- Damage Marks List -->
                 <div v-if="damageMarks.length > 0" class="mb-6">
-                    <h4 class="font-bold text-gray-855 mb-2">
+                    <h4 class="font-bold text-gray-800 mb-2">
                         {{ $t('work_orders.print_view.vehicle_condition') }}:
                     </h4>
                     <div class="grid grid-cols-2 gap-2 text-sm">

@@ -289,6 +289,55 @@
                                         {{ employee.phone || '—' }}
                                     </span>
                                 </div>
+
+                                <!-- ID / Iqama Expiry Date Badge & Unassigned Permissions Indicator -->
+                                <div
+                                    v-if="
+                                        getEmployeeIdExpiryDate(employee) ||
+                                        employee.no_permissions_set ||
+                                        employee.has_permissions_configured === false
+                                    "
+                                    class="pt-2 border-t border-border-subtle/60 flex flex-col gap-1.5"
+                                >
+                                    <div
+                                        v-if="getEmployeeIdExpiryDate(employee)"
+                                        class="flex items-center justify-between"
+                                    >
+                                        <span
+                                            :class="[
+                                                'w-full inline-flex items-center justify-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-bold border',
+                                                getIdExpiryBadgeClass(employee),
+                                            ]"
+                                            :title="getIdExpiryTitle(employee)"
+                                        >
+                                            <span class="font-mono" dir="ltr">
+                                                {{ getEmployeeIdExpiryDate(employee) }}
+                                            </span>
+                                            <span>({{ $t('hr.employees.national_id') }})</span>
+                                            <span
+                                                v-if="getIdExpiryStatusText(employee)"
+                                                class="text-[10px] font-bold"
+                                            >
+                                                • {{ getIdExpiryStatusText(employee) }}
+                                            </span>
+                                        </span>
+                                    </div>
+
+                                    <div
+                                        v-if="
+                                            employee.no_permissions_set ||
+                                            employee.has_permissions_configured === false
+                                        "
+                                        class="flex items-center justify-between"
+                                    >
+                                        <span
+                                            class="w-full inline-flex items-center justify-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-bold border bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-900/30 dark:text-amber-300 dark:border-amber-800"
+                                        >
+                                            <span class="font-black">!</span>
+                                            <span>{{ $t('hr.employees.no_permissions_set') }}</span>
+                                        </span>
+                                    </div>
+                                </div>
                             </div>
 
                             <!-- Card Action Link -->
@@ -381,6 +430,44 @@
                                     >
                                         {{ item.name_en }}
                                     </p>
+                                    <div
+                                        v-if="
+                                            getEmployeeIdExpiryDate(item) ||
+                                            item.no_permissions_set ||
+                                            item.has_permissions_configured === false
+                                        "
+                                        class="flex flex-wrap items-center gap-1 mt-1"
+                                    >
+                                        <span
+                                            v-if="getEmployeeIdExpiryDate(item)"
+                                            :class="[
+                                                'inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold border',
+                                                getIdExpiryBadgeClass(item),
+                                            ]"
+                                            :title="getIdExpiryTitle(item)"
+                                        >
+                                            <span class="font-mono" dir="ltr">
+                                                {{ getEmployeeIdExpiryDate(item) }}
+                                            </span>
+                                            <span>({{ $t('hr.employees.national_id') }})</span>
+                                            <span
+                                                v-if="getIdExpiryStatusText(item)"
+                                                class="text-[9px] font-bold"
+                                            >
+                                                • {{ getIdExpiryStatusText(item) }}
+                                            </span>
+                                        </span>
+                                        <span
+                                            v-if="
+                                                item.no_permissions_set ||
+                                                item.has_permissions_configured === false
+                                            "
+                                            class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold border bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-900/30 dark:text-amber-300 dark:border-amber-800"
+                                        >
+                                            <span class="font-black">!</span>
+                                            <span>{{ $t('hr.employees.no_permissions_set') }}</span>
+                                        </span>
+                                    </div>
                                 </div>
                             </div>
                         </template>
@@ -661,5 +748,48 @@ const columns = computed(() => [
 
 const printEmployees = () => {
     window.open(route('app.hr.employees.print'), '_blank');
+};
+
+const getEmployeeIdExpiryDate = (employee) => {
+    return employee?.id_expiry_date || employee?.national_id_expiry || null;
+};
+
+const getEmployeeIdExpiryStatus = (employee) => {
+    if (employee?.id_expiry_status) {
+        return employee.id_expiry_status;
+    }
+    const dateStr = getEmployeeIdExpiryDate(employee);
+    if (!dateStr) return null;
+    const expiry = new Date(dateStr + 'T00:00:00');
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    if (expiry < today) return 'expired';
+    const in30Days = new Date(today);
+    in30Days.setDate(in30Days.getDate() + 30);
+    if (expiry <= in30Days) return 'expiring_soon';
+    return 'valid';
+};
+
+const getIdExpiryBadgeClass = (employee) => {
+    const status = getEmployeeIdExpiryStatus(employee);
+    if (status === 'expired') {
+        return 'bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-900/30 dark:text-rose-300 dark:border-rose-800';
+    }
+    if (status === 'expiring_soon') {
+        return 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-900/30 dark:text-amber-300 dark:border-amber-800';
+    }
+    return 'bg-sky-50 text-sky-700 border-sky-200 dark:bg-sky-900/30 dark:text-sky-300 dark:border-sky-800';
+};
+
+const getIdExpiryStatusText = (employee) => {
+    const status = getEmployeeIdExpiryStatus(employee);
+    if (!status) return '';
+    return t(`hr.employees.id_expiry_statuses.${status}`);
+};
+
+const getIdExpiryTitle = (employee) => {
+    const date = getEmployeeIdExpiryDate(employee);
+    const text = getIdExpiryStatusText(employee);
+    return date && text ? `${date} (${t('hr.employees.national_id')} - ${text})` : '';
 };
 </script>

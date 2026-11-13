@@ -271,7 +271,7 @@
                 <!-- Stock After Column -->
                 <template #cell-stock_after="{ item }">
                     <span class="text-xs font-mono font-semibold text-content-primary" dir="ltr">
-                        {{ formatQuantity(item.balance_after) }}
+                        {{ formatQuantity(item.new_stock ?? item.balance_after) }}
                     </span>
                 </template>
 
@@ -282,10 +282,23 @@
                     </span>
                 </template>
 
+                <!-- WAC Before Column -->
+                <template #cell-wac_before="{ item }">
+                    <span class="text-xs font-mono text-content-muted" dir="ltr">
+                        {{
+                            item.previous_cost !== null && item.previous_cost !== undefined
+                                ? formatCurrency(item.previous_cost)
+                                : item.wac_before !== null && item.wac_before !== undefined
+                                  ? formatCurrency(item.wac_before)
+                                  : '—'
+                        }}
+                    </span>
+                </template>
+
                 <!-- WAC Column -->
                 <template #cell-wac="{ item }">
                     <span class="text-xs font-mono text-content-muted" dir="ltr">
-                        {{ formatCurrency(item.wac_after) }}
+                        {{ formatCurrency(item.new_wac ?? item.wac_after) }}
                     </span>
                 </template>
 
@@ -577,6 +590,12 @@ const columns = computed(() => [
         align: 'center',
         sortable: true,
     },
+    {
+        key: 'wac_before',
+        label: t('inventory.moves.columns.wac_before'),
+        align: 'center',
+        sortable: false,
+    },
     { key: 'wac', label: t('inventory.moves.columns.wac'), align: 'center', sortable: false },
     {
         key: 'total_cost',
@@ -645,9 +664,11 @@ const getMoveTypeBadgeClass = (type) => {
 };
 
 const calculateStockBefore = (move) => {
-    const balanceAfter = parseFloat(move.balance_after) || 0;
-    const qty = parseFloat(move.qty) || 0;
-    const before = balanceAfter - qty;
+    const explicitBefore = move.previous_stock ?? move.balance_before;
+    const before =
+        explicitBefore !== null && explicitBefore !== undefined
+            ? parseFloat(explicitBefore) || 0
+            : (parseFloat(move.balance_after) || 0) - (parseFloat(move.qty) || 0);
     return before.toLocaleString('en-US', {
         minimumFractionDigits: 0,
         maximumFractionDigits: 3,
@@ -667,8 +688,8 @@ const canReverse = (move) => {
     ];
     if (restrictedTypes.includes(move.move_type)) return false;
 
-    if (move.move_type === 'receipt') return can('inventory.receipts.cancel');
-    if (move.move_type?.startsWith('adjustment')) return can('inventory.adjustments.cancel');
+    if (move.move_type === 'receipt') return can('inventory.moves.create');
+    if (move.move_type?.startsWith('adjustment')) return can('inventory.moves.create');
 
     return false;
 };

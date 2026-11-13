@@ -111,14 +111,15 @@
                 <button
                     type="button"
                     @click="$emit('close')"
-                    class="px-4 py-2 text-sm font-medium text-text-primary bg-surface-muted rounded-lg hover:bg-surface-tertiary"
+                    class="px-5 py-2.5 text-xs font-bold text-text-secondary hover:bg-surface-secondary border border-border rounded-xl transition-colors cursor-pointer"
                 >
                     {{ $t('common.cancel') }}
                 </button>
                 <button
+                    type="button"
                     @click="submit"
                     :disabled="form.processing"
-                    class="px-4 py-2 text-sm font-medium text-action-on bg-action-primary rounded-lg hover:bg-action-primary-hover disabled:opacity-50"
+                    class="inline-flex items-center justify-center gap-2 px-6 py-2.5 text-xs font-bold text-white bg-action-primary hover:bg-action-primary-hover rounded-xl shadow-xs transition-all disabled:opacity-50 cursor-pointer"
                 >
                     {{ form.processing ? $t('common.saving') : $t('common.save') }}
                 </button>

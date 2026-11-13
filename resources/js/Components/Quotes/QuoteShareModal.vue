@@ -202,7 +202,7 @@
             <div class="flex w-full gap-3">
                 <button
                     @click="$emit('print')"
-                    class="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-xl text-sm font-black uppercase tracking-widest transition-all"
+                    class="flex-1 inline-flex items-center justify-center gap-2 px-6 py-2.5 text-xs font-bold text-white bg-action-primary hover:bg-action-primary-hover rounded-xl shadow-xs transition-all disabled:opacity-50 cursor-pointer"
                 >
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path
@@ -216,7 +216,7 @@
                 </button>
                 <button
                     @click="$emit('close')"
-                    class="flex-1 px-4 py-3 bg-gray-900 dark:bg-black hover:bg-gray-800 text-white rounded-xl text-sm font-black uppercase tracking-widest transition-all"
+                    class="flex-1 px-5 py-2.5 text-xs font-bold text-text-secondary hover:bg-surface-secondary border border-border rounded-xl transition-colors cursor-pointer"
                 >
                     {{ $t('common.close') }}
                 </button>

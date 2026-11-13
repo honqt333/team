@@ -429,20 +429,45 @@ function parseInitialValue(val) {
     // Prevent emitting during initial parse
     isInternalUpdate = true;
 
-    // Try to parse as structured plate (letters + space + numbers)
-    const match = val.match(/^([A-Z]{1,3})\s*(\d{1,4})$/);
-    if (match) {
-        const letters = match[1].split('');
+    // Convert any Arabic/Persian digits to English digits first
+    const normalizedVal = toEnglish(String(val)).trim();
+
+    let lettersPart = '';
+    let numbersPart = '';
+
+    const matchEn = normalizedVal.match(/^([A-Za-z]{1,3})\s*(\d{1,4})$/);
+    if (matchEn) {
+        lettersPart = matchEn[1].toUpperCase();
+        numbersPart = matchEn[2];
+    } else {
+        // Try Arabic letters match, e.g. "أ ب ج 1234" or "ب س ر 1234"
+        const arMatch = normalizedVal.match(/^([\u0621-\u064A\s]{1,7})\s*(\d{1,4})$/);
+        if (arMatch) {
+            const rawArLetters = arMatch[1].replace(/\s+/g, '');
+            if (rawArLetters.length >= 1 && rawArLetters.length <= 3) {
+                const mappedEn = rawArLetters.split('').map((ch) => {
+                    const found = plateLetters.find((l) => l.ar === ch || l.ar.startsWith(ch));
+                    return found ? found.en : null;
+                });
+                if (mappedEn.every((l) => l !== null)) {
+                    lettersPart = mappedEn.join('');
+                    numbersPart = arMatch[2];
+                }
+            }
+        }
+    }
+
+    if (lettersPart && numbersPart) {
+        const letters = lettersPart.split('');
         letter1.value = letters[0] || '';
         letter2.value = letters[1] || '';
         letter3.value = letters[2] || '';
-        plateNumbers.value = match[2] || '';
+        plateNumbers.value = numbersPart;
         skipFormat.value = false;
-    } else if (val) {
-        // Not structured format, use free text
-        // IMPORTANT: Set both values together to ensure plateString computes correctly
+    } else if (normalizedVal) {
+        // Not structured format, use free text with sanitized English numerals
         skipFormat.value = true;
-        freeTextPlate.value = val;
+        freeTextPlate.value = normalizedVal;
     }
 
     // Reset internal update flag after Vue completes all reactive updates

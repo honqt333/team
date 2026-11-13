@@ -13,6 +13,7 @@ use App\Models\Billing\SubscriptionPayment;
 use App\Models\PaymentSettings;
 use App\Services\Billing\SubscriptionLifecycleService;
 use App\Services\Invoice\SubscriptionInvoiceService;
+use App\Services\System\SystemAuditService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
@@ -26,12 +27,16 @@ class SubscriptionInvoicesController extends Controller
 
     protected SubscriptionLifecycleService $lifecycle;
 
+    protected SystemAuditService $audit;
+
     public function __construct(
         SubscriptionInvoiceService $invoiceService,
-        ?SubscriptionLifecycleService $lifecycle = null
+        ?SubscriptionLifecycleService $lifecycle = null,
+        ?SystemAuditService $audit = null
     ) {
         $this->invoiceService = $invoiceService;
         $this->lifecycle = $lifecycle ?? app(SubscriptionLifecycleService::class);
+        $this->audit = $audit ?? app(SystemAuditService::class);
     }
 
     /**
@@ -180,7 +185,13 @@ class SubscriptionInvoicesController extends Controller
             ? (float) $validated['paid_amount']
             : (float) $invoice->total;
 
-        DB::transaction(function () use ($invoice, $method, $reference, $paidAmount, $validated, $markedBy) {
+        $alreadyPaid = DB::transaction(function () use ($invoice, $method, $reference, $paidAmount, $validated, $markedBy): bool {
+            $invoice = SubscriptionInvoice::whereKey($invoice->id)->lockForUpdate()->firstOrFail();
+
+            if ($invoice->status === 'paid') {
+                return true;
+            }
+
             $this->invoiceService->markAsPaid(
                 $invoice,
                 $method,
@@ -232,7 +243,19 @@ class SubscriptionInvoicesController extends Controller
             if ($invoice->subscription && $invoice->subscription->status !== 'active') {
                 $this->lifecycle->activateSubscription($invoice->subscription);
             }
+
+            return false;
         });
+
+        if ($alreadyPaid) {
+            return back()->with('success', __('messages.system.invoices.paid'));
+        }
+
+        $this->audit->log('subscription_invoice_mark_paid', SubscriptionInvoice::class, $invoice->id, [
+            'invoice_number' => $invoice->invoice_number,
+            'payment_method' => $validated['payment_method'] ?? null,
+            'amount' => $invoice->total,
+        ], $request);
 
         try {
             $this->invoiceService->refreshPdf($invoice);
@@ -325,6 +348,11 @@ class SubscriptionInvoicesController extends Controller
         } catch (Throwable) {
             $this->invoiceService->invalidatePdf($invoice);
         }
+
+        $this->audit->log('subscription_invoice_cancel', SubscriptionInvoice::class, $invoice->id, [
+            'invoice_number' => $invoice->invoice_number,
+            'tenant_id' => $invoice->tenant_id,
+        ], $request);
 
         return back()->with('success', __('messages.system.invoices.cancelled'));
     }

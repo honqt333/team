@@ -499,7 +499,7 @@ class HelpSettingsController extends Controller
 
         return response()->json([
             'success' => false,
-            'message' => 'تعذر استخراج مدة الفيديو تلقائياً من هذا الرابط، يمكنك إدخالها يدوياً.',
+            'message' => __('messages.system.video_duration_extract_failed'),
             'title' => $title,
         ], 200);
     }

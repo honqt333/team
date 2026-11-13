@@ -24,6 +24,8 @@ use App\Models\VehicleMake;
 use App\Models\VehicleModel;
 use App\Models\Warehouse;
 use App\Models\WorkOrder;
+use App\Models\WorkOrderPurchaseAllocation;
+use BackedEnum;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\JsonResponse;
@@ -32,6 +34,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
 use Maatwebsite\Excel\Facades\Excel;
@@ -368,7 +371,8 @@ class WorkOrderController
             'items' => fn ($q) => $q->withoutGlobalScope('center_scoped')->with([
                 'service' => fn ($q) => $q->withoutGlobalScope('center_scoped')->with(['department' => fn ($q) => $q->withoutGlobalScope('center_scoped')]),
                 'technicians.employee.jobTitle',
-                'parts' => fn ($q) => $q->withoutGlobalScope('center_scoped')->with(['part', 'warehouse']),
+                'parts' => fn ($q) => $q->withoutGlobalScope('center_scoped')->with(['part' => fn ($pq) => $pq->with('inventoryBalances'), 'warehouse', 'purchaseAllocation']),
+                'supplierServiceAllocation.purchaseInvoice.supplier',
                 'itemNotes.user.roles',
                 'qualityChecks' => fn ($q) => $q->with('checkedBy:id,name')->latest('created_at')->limit(5),
                 'heldBy:id,name',
@@ -380,16 +384,34 @@ class WorkOrderController
             'departments' => fn ($q) => $q->withoutGlobalScope('center_scoped'),
             'payments' => fn ($q) => $q->with('receivedBy')->orderByDesc('payment_date'),
             'parts' => fn ($q) => $q->withoutGlobalScope('center_scoped')->with([
-                'part' => fn ($q) => $q->withSum('inventoryBalances', 'qty_on_hand'),
+                'part' => fn ($q) => $q->with('inventoryBalances')->withSum('inventoryBalances', 'qty_on_hand'),
                 'workOrderItem.service',
+                'purchaseAllocation.purchaseInvoice.supplier',
             ]),
             'attachments.user',
             'activities.user',
             'inspections' => fn ($q) => $q->withoutGlobalScope('center_scoped')->with('performedBy'),
-            'invoice' => fn ($q) => $q->withoutGlobalScope('center_scoped'),
-            'creditNotes' => fn ($q) => $q->withoutGlobalScope('center_scoped'),
-            'purchaseInvoices' => fn ($q) => $q->with('supplier:id,name')->orderByDesc('issue_date'),
+            'invoices' => fn ($q) => $q->withoutGlobalScope('center_scoped')->orderBy('id'),
+            'purchaseInvoices' => fn ($q) => $q->with(['supplier:id,name', 'lines.part'])->withCount('lines')->orderByDesc('issue_date'),
+            'purchaseAllocations' => fn ($q) => $q->withoutGlobalScope('center_scoped')->with([
+                'purchaseInvoice' => fn ($pi) => $pi->select('id', 'code', 'invoice_number', 'supplier_id', 'issue_date'),
+                'purchaseInvoice.supplier:id,name',
+                'targetPart:id,name,part_number',
+                'targetService:id,title',
+            ])->orderByDesc('id'),
         ]);
+
+        $workOrder->setRelation(
+            'invoice',
+            $workOrder->invoices
+                ->first(fn ($inv) => ($inv->type instanceof BackedEnum ? $inv->type->value : $inv->type) === 'invoice')
+        );
+        $workOrder->setRelation(
+            'creditNotes',
+            $workOrder->invoices
+                ->filter(fn ($inv) => ($inv->type instanceof BackedEnum ? $inv->type->value : $inv->type) === 'credit_note')
+                ->values()
+        );
 
         // TODO(refactor): Move tab-specific relations to partial-reload endpoints.
 
@@ -476,15 +498,15 @@ class WorkOrderController
                     ->from('company_transactions')
                     ->whereColumn('company_transactions.purchase_invoice_id', 'purchase_invoices.id');
             })
-            ->with('supplier:id,name')
+            ->with(['supplier:id,name', 'lines.part'])
             ->latest('id')
             ->limit(100)
-            ->get(['id', 'code', 'invoice_number', 'supplier_id', 'issue_date', 'subtotal', 'tax_amount', 'total', 'balance', 'status']);
+            ->get(['id', 'code', 'invoice_number', 'supplier_id', 'purchase_order_id', 'issue_date', 'subtotal', 'tax_amount', 'total', 'balance', 'status', 'notes']);
 
         $suppliers = Supplier::forTenant($workOrder->tenant_id)
             ->forCenter($workOrder->center_id)
             ->active()
-            ->get(['id', 'name']);
+            ->get(['id', 'name', 'type']);
 
         // The inspection preference belongs to the tenant — reading the
         // system-wide row would show one workshop's setting to another.
@@ -526,6 +548,7 @@ class WorkOrderController
             'inventoryParts' => $inventoryParts,
             'inventoryUnits' => $inventoryUnits,
             'availablePurchaseInvoices' => $availablePurchaseInvoices,
+            'purchaseAllocations' => $workOrder->purchaseAllocations,
             'suppliers' => $suppliers,
             'enableSystematicInspections' => filter_var($enableSystematicInspections, FILTER_VALIDATE_BOOLEAN),
         ]);
@@ -547,6 +570,8 @@ class WorkOrderController
                     ->where('center_id', $workOrder->center_id)
                     ->whereNull('deleted_at'),
             ],
+            'allocated_amount' => ['nullable', 'numeric', 'min:0'],
+            'allocated_qty' => ['nullable', 'numeric', 'min:0'],
         ]);
 
         $purchaseInvoice = PurchaseInvoice::query()
@@ -565,6 +590,376 @@ class WorkOrderController
         ]);
 
         return redirect()->back()->with('success', __('messages.work_orders.purchase_invoice_linked'));
+    }
+
+    /**
+     * Allocate a purchase line/item to this work order.
+     */
+    public function allocatePurchaseLine(Request $request, WorkOrder $workOrder): RedirectResponse|JsonResponse
+    {
+        $this->authorize('update', $workOrder);
+
+        $validated = $request->validate([
+            'purchase_invoice_id' => [
+                'required',
+                'integer',
+                Rule::exists('purchase_invoices', 'id')
+                    ->where('tenant_id', $workOrder->tenant_id)
+                    ->where('center_id', $workOrder->center_id)
+                    ->whereNull('deleted_at'),
+            ],
+            'purchase_invoice_line_id' => [
+                'nullable',
+                'integer',
+                Rule::exists('purchase_invoice_lines', 'id')
+                    ->where('tenant_id', $workOrder->tenant_id),
+            ],
+            'type' => ['nullable', 'string', Rule::in(WorkOrderPurchaseAllocation::TYPES)],
+            'item_description' => ['nullable', 'string', 'max:255'],
+            'allocated_qty' => ['nullable', 'numeric', 'min:0.01'],
+            'unit_cost' => ['nullable', 'numeric', 'min:0'],
+            'tax_amount' => ['nullable', 'numeric', 'min:0'],
+            'total_cost' => ['nullable', 'numeric', 'min:0'],
+            'allocated_amount' => ['nullable', 'numeric', 'min:0'],
+            'work_order_item_part_id' => [
+                'nullable',
+                'integer',
+                Rule::exists('work_order_item_parts', 'id')
+                    ->where('work_order_id', $workOrder->id),
+            ],
+            'work_order_item_id' => [
+                'nullable',
+                'integer',
+                Rule::exists('work_order_items', 'id')
+                    ->where('work_order_id', $workOrder->id),
+            ],
+            'notes' => ['nullable', 'string', 'max:1000'],
+        ]);
+
+        $purchaseInvoice = PurchaseInvoice::query()
+            ->where('tenant_id', $workOrder->tenant_id)
+            ->where('center_id', $workOrder->center_id)
+            ->findOrFail($validated['purchase_invoice_id']);
+
+        $purchaseInvoice->update(['work_order_id' => $workOrder->id]);
+
+        $qty = (float) ($validated['allocated_qty'] ?? 1);
+        $unitCost = isset($validated['unit_cost'])
+            ? (float) $validated['unit_cost']
+            : (isset($validated['allocated_amount']) ? (float) $validated['allocated_amount'] / max(1, $qty) : (float) $purchaseInvoice->total);
+        $taxAmount = isset($validated['tax_amount']) ? (float) $validated['tax_amount'] : 0.00;
+        $totalCost = isset($validated['total_cost']) && (float) $validated['total_cost'] > 0
+            ? (float) $validated['total_cost']
+            : round(($qty * $unitCost) + $taxAmount, 2);
+
+        $type = $validated['type'] ?? (
+            $purchaseInvoice->source_type === 'supplier_service'
+                ? WorkOrderPurchaseAllocation::TYPE_SUPPLIER_SERVICE
+                : ($purchaseInvoice->source_type === 'warehouse' ? WorkOrderPurchaseAllocation::TYPE_WAREHOUSE_PART : WorkOrderPurchaseAllocation::TYPE_EXTERNAL_PART)
+        );
+
+        $itemDescription = ! empty($validated['item_description'])
+            ? $validated['item_description']
+            : ($purchaseInvoice->invoice_number ?: $purchaseInvoice->code ?: 'بند مشتريات');
+
+        $allocation = $workOrder->purchaseAllocations()->create([
+            'tenant_id' => $workOrder->tenant_id,
+            'center_id' => $workOrder->center_id,
+            'purchase_invoice_id' => $validated['purchase_invoice_id'],
+            'purchase_invoice_line_id' => $validated['purchase_invoice_line_id'] ?? null,
+            'work_order_item_part_id' => $validated['work_order_item_part_id'] ?? null,
+            'work_order_item_id' => $validated['work_order_item_id'] ?? null,
+            'type' => $type,
+            'item_description' => $itemDescription,
+            'allocated_qty' => $qty,
+            'unit_cost' => $unitCost,
+            'tax_amount' => $taxAmount,
+            'total_cost' => $totalCost,
+            'notes' => $validated['notes'] ?? null,
+        ]);
+
+        $workOrder->logActivity(
+            'purchase_allocation_created',
+            __('messages.work_orders.purchase_allocation_created_activity', ['item' => $allocation->item_description])
+        );
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'message' => __('messages.work_orders.purchase_allocation_created'),
+                'allocation' => $allocation->load(['purchaseInvoice.supplier', 'targetPart', 'targetService']),
+            ], 201);
+        }
+
+        return redirect()->back()->with('success', __('messages.work_orders.purchase_allocation_created'));
+    }
+
+    /**
+     * Map or unmap a purchase allocation to a work order item part or work order item service.
+     */
+    public function mapAllocation(Request $request, WorkOrder $workOrder, WorkOrderPurchaseAllocation $allocation): RedirectResponse|JsonResponse
+    {
+        $this->authorize('update', $workOrder);
+
+        if ((int) $allocation->work_order_id !== (int) $workOrder->id
+            || (int) $allocation->tenant_id !== (int) $workOrder->tenant_id) {
+            abort(403);
+        }
+
+        $validated = $request->validate([
+            'target_type' => ['nullable', 'string', 'in:part,service,none'],
+            'work_order_item_part_id' => [
+                'nullable',
+                'integer',
+                Rule::exists('work_order_item_parts', 'id')
+                    ->where('work_order_id', $workOrder->id),
+            ],
+            'work_order_item_id' => [
+                'nullable',
+                'integer',
+                Rule::exists('work_order_items', 'id')
+                    ->where('work_order_id', $workOrder->id),
+            ],
+            'unmap' => ['nullable', 'boolean'],
+        ]);
+
+        $unmap = $request->boolean('unmap') || ($validated['target_type'] ?? null) === 'none';
+
+        if ($unmap) {
+            $allocation->update([
+                'work_order_item_part_id' => null,
+                'work_order_item_id' => null,
+            ]);
+            $message = __('messages.work_orders.purchase_allocation_unmapped');
+        } else {
+            $updates = [];
+
+            if ($request->has('work_order_item_part_id')) {
+                $updates['work_order_item_part_id'] = $validated['work_order_item_part_id'];
+            }
+
+            if ($request->has('work_order_item_id')) {
+                $updates['work_order_item_id'] = $validated['work_order_item_id'];
+            }
+
+            if (($validated['target_type'] ?? null) === 'part' && ! $request->has('work_order_item_id')) {
+                $updates['work_order_item_id'] = null;
+            } elseif (($validated['target_type'] ?? null) === 'service' && ! $request->has('work_order_item_part_id')) {
+                $updates['work_order_item_part_id'] = null;
+            }
+
+            $allocation->update($updates);
+            $message = __('messages.work_orders.purchase_allocation_mapped');
+        }
+
+        $workOrder->logActivity(
+            'purchase_allocation_mapped',
+            $message.' ('.$allocation->item_description.')'
+        );
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'message' => $message,
+                'allocation' => $allocation->fresh(['targetPart', 'targetService']),
+            ]);
+        }
+
+        return redirect()->back()->with('success', $message);
+    }
+
+    /**
+     * Delete/deallocate a purchase line allocation.
+     */
+    public function deallocatePurchaseLine(WorkOrder $workOrder, WorkOrderPurchaseAllocation $allocation): RedirectResponse|JsonResponse
+    {
+        $this->authorize('update', $workOrder);
+
+        if ((int) $allocation->work_order_id !== (int) $workOrder->id
+            || (int) $allocation->tenant_id !== (int) $workOrder->tenant_id) {
+            abort(403);
+        }
+
+        $description = $allocation->item_description;
+        $allocation->delete();
+
+        $workOrder->logActivity(
+            'purchase_allocation_deleted',
+            __('messages.work_orders.purchase_allocation_deleted').' ('.$description.')'
+        );
+
+        if (request()->wantsJson()) {
+            return response()->json([
+                'message' => __('messages.work_orders.purchase_allocation_deleted'),
+            ]);
+        }
+
+        return redirect()->back()->with('success', __('messages.work_orders.purchase_allocation_deleted'));
+    }
+
+    /**
+     * Create a quick purchase invoice directly allocated to this work order.
+     */
+    public function storeQuickPurchaseInvoice(Request $request, WorkOrder $workOrder): RedirectResponse|JsonResponse
+    {
+        $this->authorize('update', $workOrder);
+
+        $validated = $request->validate([
+            'supplier_id' => [
+                'required',
+                'integer',
+                Rule::exists('suppliers', 'id')
+                    ->where('tenant_id', $workOrder->tenant_id)
+                    ->where('center_id', $workOrder->center_id),
+            ],
+            'invoice_number' => ['nullable', 'string', 'max:100'],
+            'issue_date' => ['required', 'date'],
+            'due_date' => ['nullable', 'date'],
+            'type' => ['nullable', 'string', 'in:external_parts,supplier_service,external_part'],
+            'is_deferred' => ['nullable', 'boolean'],
+            'notes' => ['nullable', 'string', 'max:1000'],
+            'lines' => ['nullable', 'array'],
+            'lines.*.item_description' => ['nullable', 'string', 'max:255'],
+            'lines.*.allocated_qty' => ['nullable', 'numeric', 'min:0.001'],
+            'lines.*.unit_cost' => ['nullable', 'numeric', 'min:0'],
+            'lines.*.tax_amount' => ['nullable', 'numeric', 'min:0'],
+            'lines.*.total_cost' => ['nullable', 'numeric', 'min:0'],
+            'lines.*.work_order_item_part_id' => [
+                'nullable',
+                'integer',
+                Rule::exists('work_order_item_parts', 'id')->where('work_order_id', $workOrder->id),
+            ],
+            'lines.*.work_order_item_id' => [
+                'nullable',
+                'integer',
+                Rule::exists('work_order_items', 'id')->where('work_order_id', $workOrder->id),
+            ],
+            'lines.*.notes' => ['nullable', 'string', 'max:500'],
+            // Fallback to support legacy 'items'
+            'items' => ['nullable', 'array'],
+            'items.*.description' => ['nullable', 'string', 'max:255'],
+            'items.*.unit_cost' => ['nullable', 'numeric', 'min:0'],
+            'items.*.qty' => ['nullable', 'numeric', 'min:0.001'],
+            'items.*.tax_rate' => ['nullable', 'numeric', 'min:0', 'max:100'],
+        ]);
+
+        $rawLines = $validated['lines'] ?? [];
+
+        if (empty($rawLines) && ! empty($validated['items'])) {
+            foreach ($validated['items'] as $item) {
+                $qty = (float) ($item['qty'] ?? 1);
+                $cost = (float) ($item['unit_cost'] ?? 0);
+                $rate = isset($item['tax_rate']) ? (float) $item['tax_rate'] : 15.0;
+                $lineSubtotal = round($qty * $cost, 2);
+                $lineTax = round($lineSubtotal * ($rate / 100), 2);
+                $rawLines[] = [
+                    'item_description' => $item['description'] ?? '',
+                    'allocated_qty' => $qty,
+                    'unit_cost' => $cost,
+                    'tax_amount' => $lineTax,
+                    'total_cost' => $lineSubtotal + $lineTax,
+                ];
+            }
+        }
+
+        if (empty($rawLines)) {
+            throw ValidationException::withMessages([
+                'lines' => [__('validation.required', ['attribute' => 'lines'])],
+            ]);
+        }
+
+        $allocationType = ($validated['type'] ?? 'external_parts') === 'supplier_service'
+            ? WorkOrderPurchaseAllocation::TYPE_SUPPLIER_SERVICE
+            : WorkOrderPurchaseAllocation::TYPE_EXTERNAL_PART;
+
+        $createdAllocations = [];
+
+        $invoice = DB::transaction(function () use ($workOrder, $validated, $rawLines, $allocationType, &$createdAllocations) {
+            $subtotal = 0.0;
+            $taxAmount = 0.0;
+
+            foreach ($rawLines as $line) {
+                $qty = (float) ($line['allocated_qty'] ?? 1);
+                $cost = (float) ($line['unit_cost'] ?? 0);
+                $lineSubtotal = round($qty * $cost, 2);
+                $lineTax = isset($line['tax_amount']) ? (float) $line['tax_amount'] : 0.0;
+                $subtotal += $lineSubtotal;
+                $taxAmount += $lineTax;
+            }
+            $total = round($subtotal + $taxAmount, 2);
+
+            $invoiceNumber = $validated['invoice_number'] ?? null;
+
+            if (empty($invoiceNumber)) {
+                $invoiceNumber = 'PINV-'.now()->format('YmdHis');
+            }
+
+            $purchaseInvoice = PurchaseInvoice::create([
+                'tenant_id' => $workOrder->tenant_id,
+                'center_id' => $workOrder->center_id,
+                'supplier_id' => $validated['supplier_id'],
+                'work_order_id' => $workOrder->id,
+                'invoice_number' => $invoiceNumber,
+                'code' => PurchaseInvoice::generateCode($workOrder->tenant_id),
+                'issue_date' => $validated['issue_date'],
+                'due_date' => $validated['due_date'] ?? null,
+                'status' => PurchaseInvoice::STATUS_OPEN,
+                'subtotal' => $subtotal,
+                'tax_amount' => $taxAmount,
+                'total' => $total,
+                'balance' => ($validated['is_deferred'] ?? false) ? $total : 0.0,
+                'notes' => $validated['notes'] ?? null,
+            ]);
+
+            foreach ($rawLines as $line) {
+                $qty = (float) ($line['allocated_qty'] ?? 1);
+                $cost = (float) ($line['unit_cost'] ?? 0);
+                $lineSubtotal = round($qty * $cost, 2);
+                $lineTax = isset($line['tax_amount']) ? (float) $line['tax_amount'] : 0.0;
+                $lineTotal = isset($line['total_cost']) && (float) $line['total_cost'] > 0
+                    ? (float) $line['total_cost']
+                    : round($lineSubtotal + $lineTax, 2);
+
+                $createdAllocations[] = $workOrder->purchaseAllocations()->create([
+                    'tenant_id' => $workOrder->tenant_id,
+                    'center_id' => $workOrder->center_id,
+                    'purchase_invoice_id' => $purchaseInvoice->id,
+                    'purchase_invoice_line_id' => null,
+                    'work_order_item_part_id' => $line['work_order_item_part_id'] ?? null,
+                    'work_order_item_id' => $line['work_order_item_id'] ?? null,
+                    'type' => $allocationType,
+                    'item_description' => $line['item_description'] ?? '',
+                    'allocated_qty' => $qty,
+                    'unit_cost' => $cost,
+                    'tax_amount' => $lineTax,
+                    'total_cost' => $lineTotal,
+                    'notes' => $line['notes'] ?? null,
+                ]);
+            }
+
+            return $purchaseInvoice;
+        });
+
+        $workOrder->logActivity(
+            'quick_purchase_invoice_created',
+            __('messages.work_orders.quick_purchase_invoice_created').' ('.$invoice->code.')'
+        );
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'message' => __('messages.work_orders.quick_purchase_invoice_created'),
+                'purchase_invoice' => $invoice->load('supplier'),
+                'allocations' => $createdAllocations,
+            ], 201);
+        }
+
+        return redirect()->back()->with('success', __('messages.work_orders.quick_purchase_invoice_created'));
+    }
+
+    /**
+     * Backward-compatible alias for quick purchase invoice creation.
+     */
+    public function quickPurchaseInvoice(Request $request, WorkOrder $workOrder): RedirectResponse|JsonResponse
+    {
+        return $this->storeQuickPurchaseInvoice($request, $workOrder);
     }
 
     /**

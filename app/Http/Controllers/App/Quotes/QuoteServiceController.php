@@ -6,10 +6,12 @@ namespace App\Http\Controllers\App\Quotes;
 
 use App\Http\Controllers\Controller;
 use App\Models\Department;
+use App\Models\InventoryBalance;
 use App\Models\Quote;
 use App\Models\QuoteLine;
 use App\Models\QuotePart;
 use App\Models\Service;
+use App\Models\Warehouse;
 use App\Support\PricingHelper;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\RedirectResponse;
@@ -185,6 +187,32 @@ class QuoteServiceController extends Controller
         }
 
         $this->authorize('delete', $line);
+
+        // When a service line is deleted, reset any parts that were included in it
+        foreach ($line->parts as $part) {
+            $updateData = [
+                'quote_line_id' => null,
+                'include_in_package' => false,
+                'hide_on_print' => false,
+            ];
+
+            if ($part->include_in_package && (float) $part->unit_price == 0) {
+                if ($part->source === 'warehouse' && $part->part) {
+                    $centerId = $quote->center_id;
+                    $warehouse = Warehouse::forCenter($centerId)->default()->first();
+                    $balance = $warehouse ? InventoryBalance::where('part_id', $part->part_id)->where('warehouse_id', $warehouse->id)->first() : null;
+                    $salePrice = ($balance && (float) $balance->sale_price > 0)
+                        ? (float) $balance->sale_price
+                        : (float) ($part->part->default_sale_price ?? 0);
+
+                    if ($salePrice > 0) {
+                        $updateData['unit_price'] = $salePrice;
+                    }
+                }
+            }
+
+            $part->update($updateData);
+        }
 
         $line->delete();
 

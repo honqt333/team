@@ -37,6 +37,8 @@ class SystemSettingsHubController extends Controller
         $generalSettings = [
             'security_2fa_sms_enabled' => Setting::get('security.2fa_sms_enabled', 'false') === 'true',
             'subscription_grace_period_days' => $this->lifecycle->getGracePeriodDays(),
+            'brand_logo_url' => Setting::get('system.brand_logo') ?: null,
+            'brand_favicon_url' => Setting::get('system.brand_favicon') ?: null,
         ];
 
         // 2. Company Settings
@@ -103,7 +105,7 @@ class SystemSettingsHubController extends Controller
             }
 
             if ($request->filled('tier')) {
-                $logsQuery->where('tier', $request->query('tier'));
+                $logsQuery->where('tier_key', $request->query('tier'));
             }
 
             if ($request->filled('tenant_id')) {

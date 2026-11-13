@@ -12,11 +12,18 @@
          page. The CMS favicon wins when the page provides one (the public
          pages do), so the browser never fetches two icons. --}}
     @php
-        $pageFavicon = $page['props']['settings']['favicon'] ?? ($page['props']['site']['logo_url'] ?? null);
+        $pageFavicon = $page['props']['settings']['favicon']
+            ?? ($page['props']['site']['logo_url']
+            ?? ($page['props']['app_favicon'] ?? null));
     @endphp
-    <link rel="icon" type="image/png" href="{{ $pageFavicon ?: '/images/brand/favicon-32.png' }}">
-    <link rel="icon" type="image/x-icon" sizes="16x16 32x32 48x48" href="{{ $pageFavicon ?: '/images/brand/favicon.ico' }}">
-    <link rel="apple-touch-icon" sizes="180x180" href="{{ $pageFavicon ?: '/images/brand/apple-touch-icon.png' }}">
+    @if ($pageFavicon)
+        <link rel="icon" href="{{ $pageFavicon }}">
+        <link rel="apple-touch-icon" href="{{ $pageFavicon }}">
+    @else
+        <link rel="icon" type="image/png" href="/images/brand/favicon-32.png">
+        <link rel="icon" type="image/x-icon" sizes="16x16 32x32 48x48" href="/images/brand/favicon.ico">
+        <link rel="apple-touch-icon" sizes="180x180" href="/images/brand/apple-touch-icon.png">
+    @endif
 
     <!-- Inline Dark Mode Check -->
     <script>

@@ -42,7 +42,7 @@
                     <!-- Dropdown Menu -->
                     <div
                         v-if="showAddTechDropdown"
-                        class="absolute start-0 mt-2 w-64 bg-white dark:bg-gray-800 border border-gray-150 dark:border-gray-700 rounded-xl shadow-xl z-30 overflow-hidden divide-y divide-gray-50 dark:divide-gray-750"
+                        class="absolute start-0 mt-2 w-64 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-xl z-30 overflow-hidden divide-y divide-gray-50 dark:divide-gray-700"
                     >
                         <div class="py-1 max-h-60 overflow-y-auto">
                             <button
@@ -55,7 +55,7 @@
                                 <img
                                     v-if="tech.photo_url"
                                     :src="tech.photo_url"
-                                    class="w-8 h-8 rounded-full object-cover border border-gray-100 dark:border-gray-850 flex-shrink-0"
+                                    class="w-8 h-8 rounded-full object-cover border border-gray-100 dark:border-gray-700 flex-shrink-0"
                                     alt=""
                                 />
                                 <div
@@ -134,7 +134,7 @@
             <div
                 v-for="tech in assignedTechnicians"
                 :key="tech.id"
-                class="bg-white dark:bg-gray-800 border border-gray-150 dark:border-gray-700/80 rounded-2xl p-5 shadow-sm hover:shadow-md hover:border-gray-200 dark:hover:border-gray-600 transition-all duration-200 flex flex-col justify-between"
+                class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700/80 rounded-2xl p-5 shadow-sm hover:shadow-md hover:border-gray-200 dark:hover:border-gray-600 transition-all duration-200 flex flex-col justify-between"
             >
                 <!-- Top Section: Photo, Name, Job Title & Print Button -->
                 <div>
@@ -261,7 +261,7 @@
                             <!-- Add Service Dropdown -->
                             <div
                                 v-if="activeServiceTechId === tech.id"
-                                class="absolute right-0 mt-1 w-64 bg-white dark:bg-gray-800 border border-gray-150 dark:border-gray-700 rounded-xl shadow-xl z-20 overflow-hidden divide-y divide-gray-50 dark:divide-gray-750"
+                                class="absolute right-0 mt-1 w-64 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-xl z-20 overflow-hidden divide-y divide-gray-50 dark:divide-gray-700"
                             >
                                 <div class="py-1 max-h-52 overflow-y-auto">
                                     <button
@@ -363,7 +363,7 @@
             <!-- Empty Grid State -->
             <div
                 v-if="assignedTechnicians.length === 0"
-                class="col-span-full py-16 flex flex-col items-center justify-center text-center text-gray-400 dark:text-gray-500 bg-white dark:bg-gray-800 border border-gray-150 dark:border-gray-700 rounded-2xl p-6 shadow-sm"
+                class="col-span-full py-16 flex flex-col items-center justify-center text-center text-gray-400 dark:text-gray-500 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl p-6 shadow-sm"
             >
                 <span class="text-4xl mb-3">👷</span>
                 <p class="text-sm font-semibold text-gray-500 dark:text-gray-400">
@@ -375,7 +375,7 @@
         <!-- Table View -->
         <div
             v-else
-            class="bg-white dark:bg-gray-800 border border-gray-150 dark:border-gray-700/80 rounded-2xl overflow-hidden shadow-sm"
+            class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700/80 rounded-2xl overflow-hidden shadow-sm"
         >
             <div class="overflow-x-auto">
                 <table class="min-w-full divide-y divide-gray-100 dark:divide-gray-700">
@@ -442,7 +442,7 @@
                                         v-for="item in tech.items"
                                         :key="item.id"
                                         @click="$emit('click-service', item.id)"
-                                        class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-gray-100 dark:bg-gray-700/60 text-gray-700 dark:text-gray-300 hover:bg-selection-bg hover:text-action-primary transition-colors border border-gray-150/20 dark:border-gray-650"
+                                        class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-gray-100 dark:bg-gray-700/60 text-gray-700 dark:text-gray-300 hover:bg-selection-bg hover:text-action-primary transition-colors border border-gray-200/20 dark:border-gray-700"
                                     >
                                         <span
                                             class="w-1.5 h-1.5 rounded-full bg-action-primary"
@@ -453,7 +453,7 @@
                                                 item.pivot_share !== undefined &&
                                                 parseFloat(item.pivot_share) < 100
                                             "
-                                            class="ms-1 text-gray-450 dark:text-gray-400 font-mono"
+                                            class="ms-1 text-gray-400 dark:text-gray-400 font-mono"
                                         >
                                             ({{
                                                 parseFloat(parseFloat(item.pivot_share).toFixed(2))
@@ -462,7 +462,7 @@
                                     </button>
                                     <span
                                         v-if="tech.items.length === 0"
-                                        class="text-xs text-gray-450 italic"
+                                        class="text-xs text-gray-400 italic"
                                     >
                                         {{ labels.noServices }}
                                     </span>

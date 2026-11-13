@@ -6,10 +6,14 @@ namespace App\Http\Controllers\App\HR;
 
 use App\Http\Controllers\Controller;
 use App\Models\HR\Employee;
+use App\Models\Role;
+use App\Models\User;
 use App\Support\Permissions;
 use App\Support\TenancyContext;
 use Illuminate\Http\Request;
-use Spatie\Permission\Models\Role;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
+use Spatie\Permission\PermissionRegistrar;
 
 class EmployeePermissionsController extends Controller
 {
@@ -29,8 +33,10 @@ class EmployeePermissionsController extends Controller
             ]);
         }
 
-        // Get all roles for current tenant WITH their permissions
+        // Get all assignable roles for current tenant WITH their permissions
         $roles = Role::where('tenant_id', TenancyContext::tenantId())
+            ->where('guard_name', 'web')
+            ->where('name', '!=', 'super_admin')
             ->with('permissions:id,name')
             ->get(['id', 'name', 'label_ar', 'label_en']);
 
@@ -55,18 +61,45 @@ class EmployeePermissionsController extends Controller
             return back()->with('error', __('messages.user_not_found'));
         }
 
+        $this->authorize('update', $employee->user);
+
+        $tenantId = TenancyContext::tenantId();
+        $tenantPermissions = collect(Permissions::byModule())->flatten()->all();
+
         $validated = $request->validate([
             'roles' => ['array'],
-            'roles.*' => ['integer', 'exists:roles,id'], // Validate IDs
+            'roles.*' => [
+                'integer',
+                Rule::exists('roles', 'id')
+                    ->where('tenant_id', $tenantId)
+                    ->where('guard_name', 'web'),
+            ],
             'permissions' => ['array'],
-            'permissions.*' => ['string'],
+            'permissions.*' => ['string', Rule::in($tenantPermissions)],
         ]);
 
-        // Sync Roles by ID
-        $employee->user->syncRoles($validated['roles'] ?? []);
+        $roles = Role::where('tenant_id', $tenantId)
+            ->where('guard_name', 'web')
+            ->whereIn('id', $validated['roles'] ?? [])
+            ->get();
 
-        // Sync Direct Permissions
-        $employee->user->syncPermissions($validated['permissions'] ?? []);
+        foreach ($roles as $role) {
+            $this->authorize('assignRole', [User::class, $role]);
+        }
+
+        foreach ($validated['permissions'] ?? [] as $permissionName) {
+            abort_unless($request->user()->can($permissionName), 403);
+        }
+
+        DB::transaction(function () use ($employee, $roles, $validated, $tenantId) {
+            app(PermissionRegistrar::class)->setPermissionsTeamId($tenantId);
+
+            $employee->user->syncRoles($roles);
+            $employee->user->syncPermissions($validated['permissions'] ?? []);
+            $employee->user->logActivity('employee.permissions.updated', [
+                'employee_id' => $employee->id,
+            ]);
+        });
 
         return back()->with('success', __('messages.updated_successfully'));
     }

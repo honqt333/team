@@ -27,7 +27,7 @@
                                 <button
                                     v-if="can('crm.vehicles.update') || isAnyAdmin()"
                                     @click="showEditModal = true"
-                                    class="inline-flex items-center gap-2 px-3 py-2 rounded-xl font-black text-xs border border-action-primary/25 bg-selection-bg text-selection-text hover:bg-white hover:shadow-md transition-all"
+                                    class="inline-flex items-center gap-2 px-3 py-2 rounded-xl font-black text-xs border border-action-primary/25 bg-selection-bg text-selection-text hover:bg-white dark:hover:bg-gray-800 hover:shadow-md transition-all"
                                 >
                                     <svg
                                         class="w-5 h-5"
@@ -106,7 +106,7 @@
                             </Tooltip>
 
                             <button
-                                v-if="can('crm.quotes.create') || isAnyAdmin()"
+                                v-if="can('quotes.create') || isAnyAdmin()"
                                 @click="openQuoteModal"
                                 class="inline-flex items-center gap-2 px-3 py-2 rounded-xl font-black text-xs border border-amber-100/70 dark:border-amber-800/30 bg-amber-50/70 dark:bg-amber-900/20 text-amber-700 dark:text-amber-300 hover:bg-white dark:hover:bg-amber-900/30 hover:shadow-md transition-all"
                             >
@@ -1007,7 +1007,7 @@
                             :title="quoteSearch ? $t('common.no_results') : $t('quotes.empty')"
                             :description="quoteSearch ? $t('common.try_adjusting_search') : ''"
                             :action-text="
-                                can('crm.quotes.create') || isAnyAdmin()
+                                can('quotes.create') || isAnyAdmin()
                                     ? $t('common.btn_create_quote')
                                     : ''
                             "
@@ -1476,7 +1476,7 @@
                                 v-for="note in workOrderNotes"
                                 :key="note.id"
                                 @click="router.visit(route('work-orders.show', note.work_order_id))"
-                                class="group relative bg-white dark:bg-gray-800 rounded-3xl p-6 border border-gray-150 dark:border-gray-700 hover:border-action-primary/25 hover:shadow-md cursor-pointer transition-all"
+                                class="group relative bg-white dark:bg-gray-800 rounded-3xl p-6 border border-gray-200 dark:border-gray-700 hover:border-action-primary/25 hover:shadow-md cursor-pointer transition-all"
                             >
                                 <div
                                     class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 border-b border-gray-100 dark:border-gray-700 pb-3"

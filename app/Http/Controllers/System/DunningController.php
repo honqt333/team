@@ -6,9 +6,9 @@ namespace App\Http\Controllers\System;
 
 use App\Http\Controllers\Controller;
 use App\Models\Billing\DunningConfig;
-use App\Models\Billing\DunningReminderLog;
 use App\Models\Tenant;
 use App\Services\Billing\DunningService;
+use App\Services\System\SystemAuditService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -28,30 +28,13 @@ use Inertia\Response;
  */
 class DunningController extends Controller
 {
-    public function __construct(private readonly DunningService $dunning) {}
+    private SystemAuditService $audit;
 
-    /**
-     * Settings page — shows the global config, the tier table, and
-     * lets the admin toggle enabled/active tiers and the channel
-     * matrix. Per-tenant overrides are managed from the tenant
-     * detail page (future Phase).
-     */
-    public function settings(): Response
-    {
-        $global = $this->dunning->ensureGlobalDefault();
-
-        return Inertia::render('System/Settings/DunningSettings', [
-            'config' => [
-                'enabled' => $global->enabled,
-                'active_tiers' => $global->active_tiers,
-                'channel_matrix' => $global->channel_matrix ?: DunningConfig::defaultChannelMatrix(),
-                'quiet_hours_start' => $global->quiet_hours_start ? $global->quiet_hours_start->format('H:i') : null,
-                'quiet_hours_end' => $global->quiet_hours_end ? $global->quiet_hours_end->format('H:i') : null,
-                'auto_suspend_after_days' => $global->auto_suspend_after_days,
-            ],
-            'tier_definitions' => DunningConfig::tierDefinitions(),
-            'default_channel_matrix' => DunningConfig::defaultChannelMatrix(),
-        ]);
+    public function __construct(
+        private readonly DunningService $dunning,
+        ?SystemAuditService $audit = null
+    ) {
+        $this->audit = $audit ?? app(SystemAuditService::class);
     }
 
     /**
@@ -85,49 +68,15 @@ class DunningController extends Controller
             'auto_suspend_after_days' => $validated['auto_suspend_after_days'] ?? null,
         ]);
 
+        $this->audit->log('dunning_global_settings_update', DunningConfig::class, $global->id, [
+            'enabled' => $validated['enabled'],
+            'active_tiers' => $validated['active_tiers'],
+            'auto_suspend_after_days' => $validated['auto_suspend_after_days'] ?? null,
+        ], $request);
+
         return redirect()
             ->route('system.settings.dunning')
             ->with('success', __('Dunning settings updated.'));
-    }
-
-    /**
-     * Dunning log — paginated audit trail of all reminder
-     * attempts. Each row shows tenant, invoice, tier, channel,
-     * status, and any error message. Filters are simple query
-     * params: ?status=sent|failed|skipped, ?tier=tier_1, ?tenant_id.
-     */
-    public function log(Request $request): Response
-    {
-        $query = DunningReminderLog::query()
-            // The invoices table has no `total` and no `due_at` column: the
-            // amount is `total_incl_tax` and the date is `due_date`. Asking
-            // for columns that do not exist is a fatal SQL error.
-            ->with(['tenant:id,name', 'invoice:id,invoice_number,total_incl_tax,due_date'])
-            ->orderByDesc('sent_at');
-
-        if ($status = $request->query('status')) {
-            $query->where('status', $status);
-        }
-
-        if ($tier = $request->query('tier')) {
-            $query->where('tier_key', $tier);
-        }
-
-        if ($tenantId = $request->query('tenant_id')) {
-            $query->where('tenant_id', (int) $tenantId);
-        }
-
-        $logs = $query->paginate(50)->withQueryString();
-
-        return Inertia::render('System/Settings/DunningLog', [
-            'logs' => $logs,
-            'filters' => [
-                'status' => $status,
-                'tier' => $tier,
-                'tenant_id' => $tenantId,
-            ],
-            'tier_definitions' => DunningConfig::tierDefinitions(),
-        ]);
     }
 
     /**
@@ -179,7 +128,7 @@ class DunningController extends Controller
             'quiet_hours_end' => ['nullable', 'date_format:H:i'],
         ]);
 
-        DunningConfig::updateOrCreate(
+        $config = DunningConfig::updateOrCreate(
             ['tenant_id' => $tenant->id],
             [
                 'enabled' => $validated['enabled'],
@@ -189,6 +138,12 @@ class DunningController extends Controller
                 'quiet_hours_end' => $validated['quiet_hours_end'] ?? null,
             ]
         );
+
+        $this->audit->log('dunning_tenant_config_update', DunningConfig::class, $config->id, [
+            'tenant_id' => $tenant->id,
+            'enabled' => $validated['enabled'],
+            'active_tiers' => $validated['active_tiers'],
+        ], $request);
 
         return back()->with('success', __('messages.system.dunning.tenant_saved'));
     }
@@ -200,6 +155,8 @@ class DunningController extends Controller
     public function clearTenantConfig(Tenant $tenant)
     {
         DunningConfig::query()->where('tenant_id', $tenant->id)->delete();
+
+        $this->audit->log('dunning_tenant_config_clear', Tenant::class, $tenant->id);
 
         return back()->with('success', __('messages.system.dunning.tenant_cleared'));
     }

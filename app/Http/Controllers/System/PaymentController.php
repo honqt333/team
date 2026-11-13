@@ -6,6 +6,7 @@ namespace App\Http\Controllers\System;
 
 use App\Exceptions\PaymentMismatchException;
 use App\Http\Controllers\Controller;
+use App\Models\AdminUser;
 use App\Models\Billing\Subscription;
 use App\Models\Billing\SubscriptionPayment;
 use App\Models\PaymentSettings;
@@ -52,15 +53,26 @@ class PaymentController extends Controller
 
         $platformCurrency = PaymentSettings::getPlatformCurrency();
 
-        // Create pending payment record
-        $payment = SubscriptionPayment::create([
-            'tenant_id' => $subscription->tenant_id,
-            'subscription_id' => $subscription->id,
-            'amount' => $totalAmount,
-            'currency' => $platformCurrency,
-            'gateway' => $defaultGateway,
-            'status' => 'pending',
-        ]);
+        // Reuse an existing matching pending payment record to avoid creating
+        // orphan rows on page refreshes or after retry().
+        $payment = SubscriptionPayment::where('subscription_id', $subscription->id)
+            ->where('status', 'pending')
+            ->where('gateway', $defaultGateway)
+            ->where('currency', $platformCurrency)
+            ->where('amount', $totalAmount)
+            ->latest('id')
+            ->first();
+
+        if (! $payment) {
+            $payment = SubscriptionPayment::create([
+                'tenant_id' => $subscription->tenant_id,
+                'subscription_id' => $subscription->id,
+                'amount' => $totalAmount,
+                'currency' => $platformCurrency,
+                'gateway' => $defaultGateway,
+                'status' => 'pending',
+            ]);
+        }
 
         // Get payment form data
         $formData = $this->paymentManager->initiate([
@@ -104,7 +116,10 @@ class PaymentController extends Controller
             // (typically from the admin re-charging a tenant). Pass the
             // current admin user id for the audit log so we can trace who
             // triggered the payment on the system side.
-            $adminUserId = auth('admin')->id();
+            $actor = $request->user();
+            $adminUserId = $actor instanceof AdminUser
+                ? $actor->id
+                : ($actor ? AdminUser::where('user_id', $actor->id)->value('id') : null);
 
             try {
                 $this->paymentCompletion->completePayment($payment, $result, $adminUserId);

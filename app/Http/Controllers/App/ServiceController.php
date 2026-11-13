@@ -250,7 +250,9 @@ class ServiceController
             Log::info('Package items synced', ['items' => $items]);
         }
 
-        return back()->with('new_service_id', $service->id);
+        return back()
+            ->with('new_service_id', $service->id)
+            ->with('success', __('messages.service_added'));
     }
 
     public function update(Request $request, Service $service): RedirectResponse
@@ -301,7 +303,7 @@ class ServiceController
             }
         }
 
-        return back();
+        return back()->with('success', __('messages.service_updated'));
     }
 
     public function destroy(Service $service): RedirectResponse
@@ -353,7 +355,7 @@ class ServiceController
 
         $service->delete();
 
-        return back();
+        return back()->with('success', __('messages.service_deleted'));
     }
 
     public function toggleActive(Service $service): RedirectResponse
@@ -365,7 +367,7 @@ class ServiceController
             'updated_by' => auth()->id(),
         ]);
 
-        return back();
+        return back()->with('success', __('messages.service_updated'));
     }
 
     /**

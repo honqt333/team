@@ -1,13 +1,19 @@
 <script setup>
-const { t } = useI18n();
-
 import { computed, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { usePage } from '@inertiajs/vue3';
 import { useLocaleSync } from '@/Composables/useLocaleSync';
+import Toast from '@/Components/Toast.vue';
+import { useFlashToasts } from '@/Composables/useFlashToasts';
 
+const { t } = useI18n();
 const { locale } = useI18n();
 const { init: initLocaleSync } = useLocaleSync();
+const page = usePage();
+
 const isRTL = computed(() => locale.value === 'ar');
+
+useFlashToasts(page, { immediate: true });
 
 // Sync locale to backend on mount
 onMounted(() => {
@@ -17,6 +23,7 @@ onMounted(() => {
 
 <template>
     <div class="min-h-screen flex" :dir="isRTL ? 'rtl' : 'ltr'">
+        <Toast />
         <!-- Form Side -->
         <div class="w-full lg:w-1/2 flex flex-col">
             <!-- Mobile Header (Logo) -->
@@ -25,9 +32,9 @@ onMounted(() => {
             >
                 <div class="inline-flex items-center justify-center w-20 h-20 mb-4">
                     <img
-                        src="/images/brand/logo-128.png"
+                        :src="$page.props.app_logo || '/images/brand/logo-128.png'"
                         :alt="$t('common.app_name')"
-                        class="w-20 h-20 object-contain"
+                        class="w-20 h-20 object-contain rounded-xl"
                     />
                 </div>
                 <h1 class="text-2xl font-bold text-white">
@@ -76,9 +83,9 @@ onMounted(() => {
             <div class="relative z-10 text-center">
                 <div class="inline-flex items-center justify-center w-32 h-32 mb-8">
                     <img
-                        src="/images/brand/logo-256.png"
+                        :src="$page.props.app_logo || '/images/brand/logo-256.png'"
                         :alt="$t('common.app_name')"
-                        class="w-32 h-32 object-contain"
+                        class="w-32 h-32 object-contain rounded-2xl"
                     />
                 </div>
                 <h1 class="text-4xl font-bold text-white mb-4">

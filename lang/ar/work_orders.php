@@ -152,7 +152,7 @@ return [
         'description_placeholder' => 'أدخل وصف الخدمة',
         'discount' => 'الخصم',
         'hide_on_print' => 'إخفاء في الطباعة',
-        'include_in_package' => 'تضمين في الباقة',
+        'include_in_package' => 'ضمن السعر في الخدمة',
         'no_notes' => 'لا توجد ملاحظات',
         'no_parts' => 'لا توجد قطع',
         'no_technicians' => 'لا يوجد موظفون معينون',

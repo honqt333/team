@@ -1,5 +1,5 @@
 <template>
-    <BaseModal :show="show" @close="handleModalClose" size="5xl">
+    <BaseModal :show="show" @close="handleModalClose" size="xl">
         <template #title>
             <div class="flex items-center gap-3">
                 <div
@@ -19,7 +19,7 @@
                         />
                     </svg>
                 </div>
-                {{ order ? $t('purchasing.orders.edit') : $t('purchasing.orders.add') }}
+                <span>{{ modalTitle }}</span>
             </div>
         </template>
 
@@ -57,29 +57,8 @@
                 class="bg-gray-50 dark:bg-gray-900/50 rounded-xl p-4 border border-gray-200 dark:border-gray-700"
             >
                 <div class="grid grid-cols-1 md:grid-cols-12 gap-4">
-                    <!-- Warehouse (Span 6) -->
-                    <div class="md:col-span-6">
-                        <label
-                            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5"
-                        >
-                            {{ $t('inventory.warehouses.title') }}
-                            <span class="text-red-500">*</span>
-                        </label>
-                        <SearchableSelect
-                            v-model="form.warehouse_id"
-                            :options="warehouses"
-                            option-label="name"
-                            option-value="id"
-                            :placeholder="$t('inventory.warehouses.select')"
-                            required
-                        />
-                        <div v-if="form.errors.warehouse_id" class="text-red-500 text-xs mt-1">
-                            {{ form.errors.warehouse_id }}
-                        </div>
-                    </div>
-
-                    <!-- Supplier (Span 6) -->
-                    <div class="md:col-span-6">
+                    <!-- Supplier (Span 4) -->
+                    <div class="md:col-span-4">
                         <div class="flex items-center justify-between mb-1.5">
                             <label
                                 class="block text-sm font-medium text-gray-700 dark:text-gray-300"
@@ -90,7 +69,7 @@
                             <button
                                 type="button"
                                 @click="showSupplierModal = true"
-                                class="text-xs text-blue-600 hover:text-blue-700 font-bold flex items-center gap-1 transition-colors"
+                                class="text-xs text-action-primary hover:underline font-bold flex items-center gap-1 transition-colors"
                             >
                                 <svg
                                     class="w-4 h-4"
@@ -122,35 +101,8 @@
                         </div>
                     </div>
 
-                    <!-- Date (Span 3) -->
-                    <div class="md:col-span-3">
-                        <label
-                            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5"
-                        >
-                            {{ $t('purchasing.orders.date') }}
-                            <span class="text-red-500">*</span>
-                        </label>
-                        <CustomDatePicker
-                            v-model="form.order_date"
-                            :placeholder="$t('purchasing.orders.date')"
-                        />
-                    </div>
-
-                    <!-- Expected Date (Span 3) -->
-                    <div class="md:col-span-3">
-                        <label
-                            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5"
-                        >
-                            {{ $t('purchasing.orders.expected_date') }}
-                        </label>
-                        <CustomDatePicker
-                            v-model="form.expected_date"
-                            :placeholder="$t('purchasing.orders.expected_date')"
-                        />
-                    </div>
-
-                    <!-- Supplier Reference (Span 6) -->
-                    <div class="md:col-span-6">
+                    <!-- Supplier Reference / Document # (Span 4) -->
+                    <div class="md:col-span-4">
                         <label
                             class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5"
                         >
@@ -164,6 +116,63 @@
                             :placeholder="$t('purchasing.orders.supplier_reference_placeholder')"
                             class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring"
                         />
+                        <div
+                            v-if="form.errors.supplier_reference"
+                            class="text-red-500 text-xs mt-1"
+                        >
+                            {{ form.errors.supplier_reference }}
+                        </div>
+                    </div>
+
+                    <!-- Date (Span 4) -->
+                    <div class="md:col-span-4">
+                        <label
+                            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5"
+                        >
+                            {{ $t('purchasing.orders.date') }}
+                            <span class="text-red-500">*</span>
+                        </label>
+                        <CustomDatePicker
+                            v-model="form.order_date"
+                            :placeholder="$t('purchasing.orders.date')"
+                        />
+                        <div v-if="form.errors.order_date" class="text-red-500 text-xs mt-1">
+                            {{ form.errors.order_date }}
+                        </div>
+                    </div>
+
+                    <!-- Expected Date (Span 4) -->
+                    <div class="md:col-span-4">
+                        <label
+                            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5"
+                        >
+                            {{ $t('purchasing.orders.expected_date') }}
+                        </label>
+                        <CustomDatePicker
+                            v-model="form.expected_date"
+                            :placeholder="$t('purchasing.orders.expected_date')"
+                        />
+                    </div>
+
+                    <!-- Warehouse (Span 8) -->
+                    <div class="md:col-span-8">
+                        <label
+                            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5"
+                        >
+                            {{ $t('inventory.warehouses.title') }}
+                            <span class="text-red-500">*</span>
+                        </label>
+                        <SearchableSelect
+                            v-model="form.warehouse_id"
+                            :options="warehouses"
+                            option-label="name"
+                            option-value="id"
+                            :placeholder="$t('inventory.warehouses.select')"
+                            required
+                        />
+                        <div v-if="form.errors.warehouse_id" class="text-red-500 text-xs mt-1">
+                            {{ form.errors.warehouse_id }}
+                        </div>
                     </div>
                 </div>
             </div>
@@ -249,10 +258,15 @@
                                 </td>
                                 <td class="px-4 py-3 text-center">
                                     <div class="font-medium text-gray-900 dark:text-white">
-                                        {{ item.part?.name_ar }}
+                                        {{ item.part?.name_ar || item.name }}
                                     </div>
                                     <div class="text-xs text-gray-500 font-mono mt-0.5">
-                                        {{ item.part?.sku }}
+                                        {{
+                                            item.part?.sku ||
+                                            (item.is_custom
+                                                ? $t('purchasing.items.custom_item')
+                                                : '')
+                                        }}
                                     </div>
                                 </td>
                                 <td
@@ -386,7 +400,7 @@
                         </div>
                         <div
                             v-if="form.tax_included"
-                            class="flex justify-between items-center text-sm text-gray-500 dark:text-gray-550 text-xs"
+                            class="flex justify-between items-center text-sm text-gray-500 dark:text-gray-400 text-xs"
                         >
                             <span>{{ $t('common.vat_included') }}</span>
                             <span class="font-mono" dir="ltr" lang="en">
@@ -662,7 +676,7 @@
                     <button
                         type="button"
                         @click="$emit('close')"
-                        class="px-5 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl transition-colors font-medium"
+                        class="px-5 py-2.5 text-xs font-bold text-text-secondary hover:bg-surface-secondary border border-border rounded-xl transition-colors cursor-pointer"
                     >
                         {{ $t('common.cancel') }}
                     </button>
@@ -670,7 +684,7 @@
                         type="button"
                         @click="submit"
                         :disabled="!isFormValid || form.processing || submitting"
-                        class="px-8 py-2.5 bg-action-primary hover:bg-action-primary-hover text-white rounded-xl disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-lg shadow-focus-ring-soft font-black uppercase tracking-widest text-xs flex items-center gap-2"
+                        class="inline-flex items-center justify-center gap-2 px-6 py-2.5 text-xs font-bold text-white bg-action-primary hover:bg-action-primary-hover rounded-xl shadow-xs transition-all disabled:opacity-50 cursor-pointer"
                     >
                         <svg
                             v-if="form.processing || submitting"
@@ -708,6 +722,8 @@
         :show="showItemModal"
         :item="editingItem"
         :units="units"
+        :context="props.purpose === 'order' ? 'inventory' : 'work_order'"
+        :supplier-type="supplierType"
         v-model:tax-included="form.tax_included"
         :tenant-tax-settings="tenantTaxSettings"
         @close="closeItemModal"
@@ -754,15 +770,35 @@ const props = defineProps({
     warehouses: Array,
     units: Array,
     defaultWarehouse: Object,
-});
-
-const tenantTaxSettings = computed(() => {
-    return usePage().props.tenant?.tax_settings || {};
+    purpose: {
+        type: String,
+        default: 'order', // 'order', 'external_part', 'service'
+    },
+    title: {
+        type: String,
+        default: null,
+    },
 });
 
 const emit = defineEmits(['close', 'saved']);
 const { t } = useI18n();
 const { sanitizeInput, formatCurrency: formatCurrencyEn, toEnglish } = useNumberFormat();
+
+const modalTitle = computed(() => {
+    if (props.title) return props.title;
+    if (props.order) return t('purchasing.orders.edit');
+    if (props.purpose === 'external_part') {
+        return `${t('purchasing.orders.add')} - ${t('purchasing.purposes.external_parts')}`;
+    }
+    if (props.purpose === 'service') {
+        return `${t('purchasing.orders.add')} - ${t('purchasing.purposes.external_service')}`;
+    }
+    return t('purchasing.orders.add');
+});
+
+const tenantTaxSettings = computed(() => {
+    return usePage().props.tenant?.tax_settings || {};
+});
 
 const showItemModal = ref(false);
 const showSupplierModal = ref(false);
@@ -776,6 +812,14 @@ const submitting = ref(false);
 const localAddedSuppliers = ref([]);
 const allSuppliers = computed(() => {
     return [...props.suppliers, ...localAddedSuppliers.value];
+});
+
+const selectedSupplier = computed(() => {
+    return allSuppliers.value.find((s) => String(s.id) === String(form.supplier_id));
+});
+
+const supplierType = computed(() => {
+    return selectedSupplier.value?.type || 'parts';
 });
 
 const paymentMethods = computed(() => [

@@ -37,8 +37,29 @@ class UserController extends Controller
             ->when($request->search, function ($query, $search) {
                 $query->where(function ($q) use ($search) {
                     $q->where('name', 'like', "%{$search}%")
-                        ->orWhere('email', 'like', "%{$search}%");
+                        ->orWhere('email', 'like', "%{$search}%")
+                        ->orWhereHas('employee', function ($empQuery) use ($search) {
+                            $empQuery->where('name_ar', 'like', "%{$search}%")
+                                ->orWhere('name_en', 'like', "%{$search}%");
+                        });
                 });
+            })
+            ->when($request->filled('role_id'), function ($query) use ($request) {
+                $roleId = (int) $request->input('role_id');
+                $query->whereHas('roles', fn ($q) => $q->where('roles.id', $roleId));
+            })
+            ->when($request->filled('center_id'), function ($query) use ($request) {
+                $centerId = (int) $request->input('center_id');
+                $query->whereHas('centers', fn ($q) => $q->where('centers.id', $centerId));
+            })
+            ->when($request->filled('status'), function ($query) use ($request) {
+                $status = $request->input('status');
+
+                if ($status === 'active') {
+                    $query->where('is_active', true);
+                } elseif ($status === 'inactive') {
+                    $query->where('is_active', false);
+                }
             })
             ->orderByDesc('created_at')
             ->paginate(20)
@@ -46,9 +67,18 @@ class UserController extends Controller
 
         return Inertia::render('Settings/Users/Index', [
             'users' => $users,
-            'filters' => $request->only(['search']),
+            'filters' => [
+                'search' => (string) $request->input('search', ''),
+                'role_id' => $request->filled('role_id') ? (int) $request->input('role_id') : null,
+                'center_id' => $request->filled('center_id') ? (int) $request->input('center_id') : null,
+                'status' => (string) $request->input('status', ''),
+            ],
             'centers' => Center::where('tenant_id', $tenantId)->get(['id', 'name']),
-            'roles' => Role::where('tenant_id', $tenantId)->where('name', '!=', 'super_admin')->get(['id', 'name', 'label_ar', 'label_en']),
+            'roles' => Role::where('tenant_id', $tenantId)
+                ->where('guard_name', 'web')
+                ->where('name', '!=', 'super_admin')
+                ->get(['id', 'name', 'label_ar', 'label_en']),
+            'userLimit' => $this->getUserPlanUsage($tenantId),
             // Note: employees list removed - linking is automatic via EmployeeObserver
         ]);
     }
@@ -191,18 +221,24 @@ class UserController extends Controller
     }
 
     /**
-     * Check whether the tenant's active subscription allows adding/activating another user.
+     * Get the tenant's active user count and subscription max_users limit.
+     *
+     * @return array{active_count: int, max_users: int|null}
      */
-    private function checkUserPlanLimit(?int $tenantId): ?string
+    private function getUserPlanUsage(?int $tenantId): array
     {
         if (! $tenantId) {
-            return null;
+            return ['active_count' => 0, 'max_users' => null];
         }
+
+        $activeUsersCount = User::where('tenant_id', $tenantId)
+            ->where('is_active', true)
+            ->count();
 
         $tenant = Tenant::find($tenantId);
 
         if (! $tenant) {
-            return null;
+            return ['active_count' => $activeUsersCount, 'max_users' => null];
         }
 
         $activeSubscription = $tenant->subscriptions()
@@ -217,27 +253,32 @@ class UserController extends Controller
         $limits = $activeSubscription?->plan?->limits;
 
         if (! is_array($limits)) {
-            return null;
+            return ['active_count' => $activeUsersCount, 'max_users' => null];
         }
 
         $rawMax = $limits['max_users'] ?? $limits['users'] ?? null;
 
         if ($rawMax === null) {
-            return null;
+            return ['active_count' => $activeUsersCount, 'max_users' => null];
         }
 
         $maxUsers = (int) $rawMax;
 
-        if ($maxUsers <= 0 || $maxUsers >= 999) {
-            return null;
-        }
+        return [
+            'active_count' => $activeUsersCount,
+            'max_users' => ($maxUsers > 0 && $maxUsers < 999) ? $maxUsers : null,
+        ];
+    }
 
-        $activeUsersCount = User::where('tenant_id', $tenantId)
-            ->where('is_active', true)
-            ->count();
+    /**
+     * Check whether the tenant's active subscription allows adding/activating another user.
+     */
+    private function checkUserPlanLimit(?int $tenantId): ?string
+    {
+        $usage = $this->getUserPlanUsage($tenantId);
 
-        if ($activeUsersCount >= $maxUsers) {
-            return __('company_profile.users.max_limit_reached', ['max' => $maxUsers]);
+        if ($usage['max_users'] !== null && $usage['active_count'] >= $usage['max_users']) {
+            return __('company_profile.users.max_limit_reached', ['max' => $usage['max_users']]);
         }
 
         return null;

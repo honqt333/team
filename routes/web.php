@@ -422,6 +422,11 @@ Route::middleware(['auth', 'verified', EnsureTenantActive::class, EnsureTwoFacto
     });
 });
 
+// Fallback redirect for /app to tenant dashboard
+Route::get('/app', fn () => redirect()->route('dashboard'))
+    ->middleware(['auth', 'verified', 'tenant.active'])
+    ->name('app.redirect');
+
 // App routes (authenticated + tenancy)
 Route::prefix('app')->middleware(['auth', 'verified', 'tenant.active', 'center.context', EnsureTwoFactorEnabled::class])->group(function () {
     // Customer export/import routes (must be before resource routes)
@@ -449,6 +454,9 @@ Route::prefix('app')->middleware(['auth', 'verified', 'tenant.active', 'center.c
     Route::put('/dealers/{dealer}', [DealerController::class, 'update'])->name('app.dealers.update');
     Route::patch('/dealers/{dealer}/toggle', [DealerController::class, 'toggleActive'])->name('app.dealers.toggle');
     Route::delete('/dealers/{dealer}', [DealerController::class, 'destroy'])->name('app.dealers.destroy');
+    Route::post('/dealers/{dealer}/payment-terms', [DealerController::class, 'storePaymentTerm'])->name('app.dealers.payment-terms.store');
+    Route::put('/dealers/{dealer}/payment-terms/{paymentTerm}', [DealerController::class, 'updatePaymentTerm'])->name('app.dealers.payment-terms.update');
+    Route::delete('/dealers/{dealer}/payment-terms/{paymentTerm}', [DealerController::class, 'destroyPaymentTerm'])->name('app.dealers.payment-terms.destroy');
 
     // Vehicle export/print routes
     Route::get('/vehicles/export', [VehicleController::class, 'export'])->name('vehicles.export');
@@ -593,9 +601,13 @@ Route::prefix('app')->middleware(['auth', 'verified', 'tenant.active', 'center.c
     Route::post('/work-orders/{workOrder}/attachments', [WorkOrderMediaController::class, 'uploadAttachments'])->name('work-orders.attachments.store');
     Route::delete('/work-orders/{workOrder}/attachments/{attachment}', [WorkOrderMediaController::class, 'destroyAttachment'])->name('work-orders.attachments.destroy');
 
-    // Work Order Linked Purchase Invoices
+    // Work Order Linked Purchase Invoices & Line Allocations
     Route::post('/work-orders/{workOrder}/purchase-invoices', [WorkOrderController::class, 'linkPurchaseInvoice'])->name('work-orders.purchase-invoices.link');
     Route::delete('/work-orders/{workOrder}/purchase-invoices/{purchaseInvoice}', [WorkOrderController::class, 'unlinkPurchaseInvoice'])->name('work-orders.purchase-invoices.unlink');
+    Route::post('/work-orders/{workOrder}/purchase-allocations', [WorkOrderController::class, 'allocatePurchaseLine'])->name('app.work-orders.purchase-allocations.store');
+    Route::post('/work-orders/{workOrder}/purchase-allocations/{allocation}/map', [WorkOrderController::class, 'mapAllocation'])->name('app.work-orders.purchase-allocations.map');
+    Route::delete('/work-orders/{workOrder}/purchase-allocations/{allocation}', [WorkOrderController::class, 'deallocatePurchaseLine'])->name('app.work-orders.purchase-allocations.destroy');
+    Route::post('/work-orders/{workOrder}/quick-purchase-invoice', [WorkOrderController::class, 'storeQuickPurchaseInvoice'])->name('app.work-orders.quick-purchase-invoice.store');
 
     // Quotes
     Route::get('/quotes/export', [QuoteController::class, 'export'])->name('app.quotes.export');
@@ -1331,7 +1343,7 @@ Route::prefix('system')->middleware(['auth:web,admin', 'system.admin'])->group(f
         // a tenant's full data set, and the file itself is held on
         // shared storage. Both pre-delete (automatic) and manual
         // backups go through this controller.
-        Route::post('/tenants/{tenant}/backups', [BackupController::class, 'store'])->name('system.tenants.backups.store')->middleware(['super_admin', 'system.permission:system.tenants.view']);
+        Route::post('/tenants/{tenant}/backups', [BackupController::class, 'store'])->name('system.tenants.backups.store')->middleware(['super_admin', 'system.permission:system.tenants.manage']);
     });
 
     // Admin notification bell endpoints (Phase 4). Polling-based:
@@ -1391,7 +1403,7 @@ Route::prefix('system')->middleware(['auth:web,admin', 'system.admin'])->group(f
 
     // Payment
     Route::get('/payment/checkout/{subscription}', [PaymentController::class, 'checkout'])->name('system.payment.checkout')->middleware('system.permission:system.subscriptions.view');
-    Route::get('/payment/callback/{payment}', [PaymentController::class, 'callback'])->name('system.payment.callback')->middleware('system.permission:system.payment.retry');
+    Route::get('/payment/callback/{payment}', [PaymentController::class, 'callback'])->name('system.payment.callback')->middleware('system.permission:system.subscriptions.view,system.subscriptions.manage');
     Route::get('/payment/success/{payment}', [PaymentController::class, 'success'])->name('system.payment.success')->middleware('system.permission:system.subscriptions.view');
     Route::get('/payment/failed/{payment}', [PaymentController::class, 'failed'])->name('system.payment.failed')->middleware('system.permission:system.subscriptions.view');
     Route::post('/payment/retry/{payment}', [PaymentController::class, 'retry'])->name('system.payment.retry')->middleware('system.permission:system.payment.retry');
@@ -1419,6 +1431,10 @@ Route::prefix('system')->middleware(['auth:web,admin', 'system.admin'])->group(f
     // General Settings
     Route::get('/settings/general', fn () => redirect()->route('system.settings.index', ['tab' => 'general']))->name('system.settings.general')->middleware('system.permission:system.settings.manage');
     Route::put('/settings/general', [GeneralSettingsController::class, 'update'])->name('system.settings.general.update')->middleware(['super_admin', 'system.permission:system.settings.manage']);
+    Route::post('/settings/general/upload-logo', [GeneralSettingsController::class, 'uploadLogo'])->name('system.settings.general.upload-logo')->middleware(['super_admin', 'system.permission:system.settings.manage']);
+    Route::delete('/settings/general/logo', [GeneralSettingsController::class, 'removeLogo'])->name('system.settings.general.remove-logo')->middleware(['super_admin', 'system.permission:system.settings.manage']);
+    Route::post('/settings/general/upload-favicon', [GeneralSettingsController::class, 'uploadFavicon'])->name('system.settings.general.upload-favicon')->middleware(['super_admin', 'system.permission:system.settings.manage']);
+    Route::delete('/settings/general/favicon', [GeneralSettingsController::class, 'removeFavicon'])->name('system.settings.general.remove-favicon')->middleware(['super_admin', 'system.permission:system.settings.manage']);
 
     // Website Settings
     Route::get('/settings/website', [WebsiteSettingsController::class, 'index'])->name('system.settings.website')->middleware('system.permission:system.settings.manage');
@@ -1467,25 +1483,25 @@ Route::prefix('system')->middleware(['auth:web,admin', 'system.admin'])->group(f
 
     // SMS Credits
     Route::get('/sms', [SmsCreditsController::class, 'index'])->name('system.sms.index')->middleware('system.permission:system.credits.manage');
-    Route::get('/sms/packages', fn () => redirect()->route('system.sms.index', ['tab' => 'packages']))->name('system.sms.packages');
+    Route::get('/sms/packages', fn () => redirect()->route('system.sms.index', ['tab' => 'packages']))->name('system.sms.packages')->middleware('system.permission:system.credits.manage');
     Route::post('/sms/packages', [SmsCreditsController::class, 'storePackage'])->name('system.sms.packages.store')->middleware('system.permission:system.credits.manage');
     Route::put('/sms/packages/{package}', [SmsCreditsController::class, 'updatePackage'])->name('system.sms.packages.update')->middleware('system.permission:system.credits.manage');
     Route::delete('/sms/packages/{package}', [SmsCreditsController::class, 'destroyPackage'])->name('system.sms.packages.destroy')->middleware('system.permission:system.credits.manage');
-    Route::get('/sms/balances', fn () => redirect()->route('system.sms.index', ['tab' => 'balances']))->name('system.sms.balances');
+    Route::get('/sms/balances', fn () => redirect()->route('system.sms.index', ['tab' => 'balances']))->name('system.sms.balances')->middleware('system.permission:system.credits.manage');
     Route::post('/sms/add-credits', [SmsCreditsController::class, 'addCredits'])->name('system.sms.add-credits')->middleware('system.permission:system.credits.manage');
-    Route::get('/sms/purchases', fn () => redirect()->route('system.sms.index', ['tab' => 'purchases']))->name('system.sms.purchases');
-    Route::get('/sms/usage', fn () => redirect()->route('system.sms.index', ['tab' => 'usage']))->name('system.sms.usage');
+    Route::get('/sms/purchases', fn () => redirect()->route('system.sms.index', ['tab' => 'purchases']))->name('system.sms.purchases')->middleware('system.permission:system.credits.manage');
+    Route::get('/sms/usage', fn () => redirect()->route('system.sms.index', ['tab' => 'usage']))->name('system.sms.usage')->middleware('system.permission:system.credits.manage');
 
     // WhatsApp Credits
     Route::get('/whatsapp', [WhatsappCreditsController::class, 'index'])->name('system.whatsapp.index')->middleware('system.permission:system.credits.manage');
-    Route::get('/whatsapp/packages', fn () => redirect()->route('system.whatsapp.index', ['tab' => 'packages']))->name('system.whatsapp.packages');
+    Route::get('/whatsapp/packages', fn () => redirect()->route('system.whatsapp.index', ['tab' => 'packages']))->name('system.whatsapp.packages')->middleware('system.permission:system.credits.manage');
     Route::post('/whatsapp/packages', [WhatsappCreditsController::class, 'storePackage'])->name('system.whatsapp.packages.store')->middleware('system.permission:system.credits.manage');
     Route::put('/whatsapp/packages/{package}', [WhatsappCreditsController::class, 'updatePackage'])->name('system.whatsapp.packages.update')->middleware('system.permission:system.credits.manage');
     Route::delete('/whatsapp/packages/{package}', [WhatsappCreditsController::class, 'destroyPackage'])->name('system.whatsapp.packages.destroy')->middleware('system.permission:system.credits.manage');
-    Route::get('/whatsapp/balances', fn () => redirect()->route('system.whatsapp.index', ['tab' => 'balances']))->name('system.whatsapp.balances');
+    Route::get('/whatsapp/balances', fn () => redirect()->route('system.whatsapp.index', ['tab' => 'balances']))->name('system.whatsapp.balances')->middleware('system.permission:system.credits.manage');
     Route::post('/whatsapp/add-credits', [WhatsappCreditsController::class, 'addCredits'])->name('system.whatsapp.add-credits')->middleware('system.permission:system.credits.manage');
-    Route::get('/whatsapp/usage', fn () => redirect()->route('system.whatsapp.index', ['tab' => 'usage']))->name('system.whatsapp.usage');
-    Route::get('/whatsapp/purchases', fn () => redirect()->route('system.whatsapp.index', ['tab' => 'purchases']))->name('system.whatsapp.purchases');
+    Route::get('/whatsapp/usage', fn () => redirect()->route('system.whatsapp.index', ['tab' => 'usage']))->name('system.whatsapp.usage')->middleware('system.permission:system.credits.manage');
+    Route::get('/whatsapp/purchases', fn () => redirect()->route('system.whatsapp.index', ['tab' => 'purchases']))->name('system.whatsapp.purchases')->middleware('system.permission:system.credits.manage');
 
     // Integrations
     Route::get('/integrations', [IntegrationsController::class, 'index'])->name('system.integrations.index')->middleware('system.permission:system.integrations.manage');
@@ -1551,7 +1567,9 @@ Route::prefix('system')->middleware(['auth:web,admin', 'system.admin'])->group(f
 // 2FA Challenge (during login, before auth)
 Route::middleware('web')->group(function () {
     Route::get('/2fa/challenge', [App\Http\Controllers\System\TwoFactorController::class, 'challenge'])->name('2fa.challenge');
-    Route::post('/2fa/verify', [App\Http\Controllers\System\TwoFactorController::class, 'verify'])->name('2fa.verify');
+    Route::post('/2fa/verify', [App\Http\Controllers\System\TwoFactorController::class, 'verify'])
+        ->middleware('throttle:2fa-verify')
+        ->name('2fa.verify');
 });
 
 // Stop Impersonation (accessible from anywhere when impersonating)

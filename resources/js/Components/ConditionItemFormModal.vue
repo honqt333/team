@@ -121,14 +121,14 @@
                     <button
                         type="button"
                         @click="close"
-                        class="px-5 py-2.5 text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-all font-medium"
+                        class="px-5 py-2.5 text-xs font-bold text-text-secondary hover:bg-surface-secondary border border-border rounded-xl transition-colors cursor-pointer"
                         :disabled="form.processing"
                     >
                         {{ $t('common.cancel') }}
                     </button>
                     <button
                         type="submit"
-                        class="px-5 py-2.5 text-white bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 rounded-xl shadow-lg shadow-amber-500/30 transition-all font-medium flex items-center justify-center min-w-[120px]"
+                        class="inline-flex items-center justify-center gap-2 px-6 py-2.5 text-xs font-bold text-white bg-action-primary hover:bg-action-primary-hover rounded-xl shadow-xs transition-all disabled:opacity-50 cursor-pointer"
                         :disabled="form.processing"
                     >
                         <svg

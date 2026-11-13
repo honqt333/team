@@ -145,6 +145,12 @@
                         </tr>
                     </tbody>
                 </DataTable>
+                <AppPagination
+                    :links="balances?.links || []"
+                    :from="balances?.from"
+                    :to="balances?.to"
+                    :total="balances?.total"
+                />
             </div>
         </div>
 
@@ -228,6 +234,7 @@
 
 <script setup>
 import DataTable from '@/Components/Common/DataTable.vue';
+import AppPagination from '@/Components/Common/AppPagination.vue';
 import BaseModal from '@/Components/BaseModal.vue';
 import { ref } from 'vue';
 import { useForm, router } from '@inertiajs/vue3';

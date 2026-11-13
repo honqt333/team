@@ -372,6 +372,7 @@
 
 <script setup>
 import { computed } from 'vue';
+import { printDocument } from '@/Composables/usePrint';
 import CustomerPortalLayout from '@/Layouts/CustomerPortalLayout.vue';
 import SaudiPlateDisplay from '@/Components/Vehicles/SaudiPlateDisplay.vue';
 import { usePortalFormat, paymentStatusClass } from '@/Composables/usePortalFormat';
@@ -415,6 +416,6 @@ function paymentMethodLabel(method) {
 }
 
 function printInvoice() {
-    window.print();
+    printDocument();
 }
 </script>

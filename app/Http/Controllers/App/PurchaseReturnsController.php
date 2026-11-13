@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers\App;
 
 use App\Http\Controllers\Controller;
+use App\Models\InventoryMove;
 use App\Models\Payment;
 use App\Models\PurchaseInvoice;
 use App\Models\PurchaseInvoiceLine;
@@ -106,7 +107,7 @@ class PurchaseReturnsController extends Controller
 
             $inventoryService = app(InventoryService::class);
 
-            $warehouseId = $purchaseInvoice->purchaseOrder->warehouse_id
+            $warehouseId = $purchaseInvoice->purchaseOrder?->warehouse_id
                 ?? Warehouse::forCenter($user->current_center_id)->default()->first()?->id
                 ?? Warehouse::forCenter($user->current_center_id)->first()?->id;
 
@@ -122,12 +123,14 @@ class PurchaseReturnsController extends Controller
 
                 $inventoryService->issue(
                     warehouseId: $warehouseId,
-                    partId: $itemData['part_id'],
+                    partId: (int) $itemData['part_id'],
                     qty: (float) $itemData['qty'],
                     userId: $user->id,
                     referenceType: PurchaseReturnInvoiceLine::class,
                     referenceId: $returnInvoice->id,
-                    notes: "Returned to supplier via return invoice: {$returnInvoice->code}"
+                    notes: "Returned to supplier via return invoice: {$returnInvoice->code}",
+                    moveType: InventoryMove::TYPE_PURCHASE_RETURN,
+                    unitCost: (float) $itemData['unit_cost']
                 );
             }
 
@@ -191,6 +194,7 @@ class PurchaseReturnsController extends Controller
         $purchaseReturnInvoice->load([
             'purchaseInvoice.supplier',
             'purchaseInvoice.payments.receivedBy',
+            'purchaseInvoice.returnInvoices',
             'lines.part',
             'center.address',
         ]);
@@ -237,19 +241,7 @@ class PurchaseReturnsController extends Controller
         $this->authorize('managePayments', $purchaseReturnInvoice);
 
         $purchaseInvoice = $purchaseReturnInvoice->purchaseInvoice;
-
-        $allRefunds = $purchaseInvoice->payments()
-            ->where('type', Payment::TYPE_REFUND)
-            ->get();
-
-        $code = $purchaseReturnInvoice->code;
-        $matchedRefunds = $allRefunds->filter(function ($p) use ($code) {
-            return str_contains($p->notes ?? '', $code);
-        });
-
-        $refunds = $matchedRefunds->count() > 0 ? $matchedRefunds : $allRefunds;
-        $refundPaymentsTotal = $refunds->sum('amount');
-        $remainingBalance = max(0.00, (float) $purchaseReturnInvoice->total - (float) $refundPaymentsTotal);
+        $remainingBalance = $purchaseReturnInvoice->calculateRemainingRefund();
 
         $validated = $request->validate([
             'amount' => 'required|numeric|min:0.01|max:'.$remainingBalance,
@@ -291,6 +283,7 @@ class PurchaseReturnsController extends Controller
         $purchaseReturnInvoice->load([
             'purchaseInvoice.supplier',
             'purchaseInvoice.payments.receivedBy',
+            'purchaseInvoice.returnInvoices',
             'lines.part',
             'center.address',
         ]);

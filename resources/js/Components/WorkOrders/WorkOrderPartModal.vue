@@ -58,13 +58,13 @@
                     :class="[
                         'py-1.5 px-2 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1.5',
                         form.source === 'external'
-                            ? 'bg-white dark:bg-gray-700 text-blue-600 dark:text-blue-400 shadow-sm'
+                            ? 'bg-white dark:bg-gray-700 text-amber-600 dark:text-amber-400 shadow-sm ring-1 ring-amber-300 dark:ring-amber-700'
                             : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white',
                         isReadOnly ? 'opacity-50 cursor-not-allowed' : '',
                     ]"
                 >
                     <span>🛒</span>
-                    <span>{{ $t('quotes.parts.external') }}</span>
+                    <span>{{ $t('work_orders.parts.external_purchase') }}</span>
                 </button>
                 <button
                     type="button"
@@ -73,7 +73,7 @@
                     :class="[
                         'py-1.5 px-2 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1.5',
                         form.source === 'customer'
-                            ? 'bg-white dark:bg-gray-700 text-amber-600 dark:text-amber-400 shadow-sm'
+                            ? 'bg-white dark:bg-gray-700 text-purple-600 dark:text-purple-400 shadow-sm'
                             : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white',
                         isReadOnly ? 'opacity-50 cursor-not-allowed' : '',
                     ]"
@@ -81,6 +81,17 @@
                     <span>👤</span>
                     <span>{{ $t('quotes.parts.customer') }}</span>
                 </button>
+            </div>
+
+            <!-- External Purchase Notice -->
+            <div
+                v-if="form.source === 'external'"
+                class="flex items-start gap-2.5 p-3 rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/60 text-xs text-amber-900 dark:text-amber-200"
+            >
+                <span class="text-base shrink-0">💡</span>
+                <p class="leading-relaxed font-medium">
+                    {{ $t('work_orders.parts.external_cost_notice') }}
+                </p>
             </div>
 
             <!-- Content Container -->
@@ -294,7 +305,11 @@
                         <label
                             class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1"
                         >
-                            {{ $t('work_orders.item.part_price') }}
+                            {{
+                                form.source === 'external'
+                                    ? $t('work_orders.parts.selling_price_to_customer')
+                                    : $t('work_orders.item.part_price')
+                            }}
                             <span class="text-red-500">*</span>
                         </label>
                         <input
@@ -506,7 +521,7 @@
                     <button
                         type="button"
                         @click="$emit('close')"
-                        class="px-4 py-2 text-xs font-semibold text-gray-500 hover:text-red-500 transition-colors"
+                        class="px-5 py-2.5 text-xs font-bold text-text-secondary hover:bg-surface-secondary border border-border rounded-xl transition-colors cursor-pointer"
                     >
                         {{ isReadOnly ? $t('common.close') : $t('common.cancel') }}
                     </button>
@@ -543,7 +558,7 @@
                                 (!form.warehouse_id || !form.part_id)) ||
                             isPriceBelowMinimum
                         "
-                        class="px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 rounded-xl font-bold text-xs hover:bg-gray-50 dark:hover:bg-gray-700 transition-all shadow-sm disabled:opacity-50"
+                        class="px-5 py-2.5 text-xs font-bold text-text-secondary hover:bg-surface-secondary border border-border rounded-xl transition-colors cursor-pointer disabled:opacity-50"
                     >
                         {{
                             form.processing
@@ -565,7 +580,7 @@
                                 (!form.warehouse_id || !form.part_id)) ||
                             isPriceBelowMinimum
                         "
-                        class="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-xs transition-all shadow-md shadow-emerald-600/20 disabled:opacity-50 flex items-center gap-1.5"
+                        class="inline-flex items-center justify-center gap-2 px-6 py-2.5 text-xs font-bold text-white bg-action-primary hover:bg-action-primary-hover rounded-xl shadow-xs transition-all disabled:opacity-50 cursor-pointer"
                     >
                         <svg
                             v-if="form.processing"
@@ -665,6 +680,35 @@ const form = useForm({
 const stashedPrice = ref(0);
 const stashedDiscount = ref(0);
 
+function getRestorableUnitPrice() {
+    if (stashedPrice.value > 0) {
+        return stashedPrice.value;
+    }
+    if (form.source === 'warehouse' && selectedPart.value) {
+        const balances = selectedPart.value.inventory_balances || [];
+        const balance = balances.find((b) => b.warehouse_id === form.warehouse_id);
+        if (balance && parseFloat(balance.sale_price) > 0) {
+            return parseFloat(balance.sale_price);
+        }
+        if (parseFloat(selectedPart.value.default_sale_price) > 0) {
+            return parseFloat(selectedPart.value.default_sale_price);
+        }
+    }
+    return 0;
+}
+
+function restorePriceAndDiscount() {
+    if (Number(form.unit_price) === 0) {
+        const priceToRestore = getRestorableUnitPrice();
+        if (priceToRestore > 0) {
+            form.unit_price = priceToRestore;
+        }
+    }
+    if (Number(form.discount_value) === 0 && stashedDiscount.value > 0) {
+        form.discount_value = stashedDiscount.value;
+    }
+}
+
 watch(
     () => form.include_in_package,
     (newVal, oldVal) => {
@@ -688,11 +732,21 @@ watch(
             form.discount_value = 0;
         } else if (!newVal && oldVal && (form.work_order_item_id || props.showToggles)) {
             // Restore values when untoggling
-            if (Number(form.unit_price) === 0 && stashedPrice.value > 0) {
-                form.unit_price = stashedPrice.value;
-            }
-            if (Number(form.discount_value) === 0 && stashedDiscount.value > 0) {
-                form.discount_value = stashedDiscount.value;
+            restorePriceAndDiscount();
+        }
+    }
+);
+
+watch(
+    () => form.work_order_item_id,
+    (newVal) => {
+        if (isPopulating.value) return;
+        if (!newVal) {
+            // Service was unlinked or cleared
+            if (form.include_in_package) {
+                form.include_in_package = false;
+                form.hide_on_print = false;
+                restorePriceAndDiscount();
             }
         }
     }
@@ -911,6 +965,12 @@ function submitForm(shouldClose = true) {
         return;
     }
 
+    // If not linked to any service, ensure include_in_package and hide_on_print are false
+    if (!form.work_order_item_id && !props.showToggles) {
+        form.include_in_package = false;
+        form.hide_on_print = false;
+    }
+
     // Normalize data before processing
     form.qty = toEnglish(form.qty);
     form.unit_price = toEnglish(form.unit_price);
@@ -1037,6 +1097,19 @@ watch(
                 } else {
                     selectedPart.value = null;
                 }
+
+                // If part was already included in package, pre-initialize stashedPrice
+                stashedPrice.value = 0;
+                stashedDiscount.value = part.discount ? parseFloat(part.discount) : 0;
+                if (form.include_in_package && selectedPart.value) {
+                    const balances = selectedPart.value.inventory_balances || [];
+                    const balance = balances.find((b) => b.warehouse_id === form.warehouse_id);
+                    if (balance && parseFloat(balance.sale_price) > 0) {
+                        stashedPrice.value = parseFloat(balance.sale_price);
+                    } else if (parseFloat(selectedPart.value.default_sale_price) > 0) {
+                        stashedPrice.value = parseFloat(selectedPart.value.default_sale_price);
+                    }
+                }
             } else {
                 // Reset for new part
                 form.reset();
@@ -1050,6 +1123,8 @@ watch(
                 form.name = '';
                 form.part_id = null;
                 selectedPart.value = null;
+                stashedPrice.value = 0;
+                stashedDiscount.value = 0;
                 if (props.suggestedPart) selectPart(props.suggestedPart);
             }
 

@@ -235,6 +235,45 @@
                             {{ $t('common.pending') }}
                         </div>
                     </div>
+
+                    <!-- External Part Mapped Purchase Allocation -->
+                    <div
+                        v-if="
+                            part.source === 'external' &&
+                            (part.mapped_allocation || getPartAllocation(part.id))
+                        "
+                        class="flex items-center justify-between gap-2 p-2 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-xs font-semibold text-emerald-800 dark:text-emerald-300"
+                    >
+                        <div class="flex items-center gap-1.5 truncate">
+                            <span class="text-emerald-600 dark:text-emerald-400 shrink-0">🔗</span>
+                            <span class="font-bold truncate">
+                                {{ (part.mapped_allocation || getPartAllocation(part.id)).name }}
+                            </span>
+                            <span class="font-mono text-[11px] shrink-0" dir="ltr">
+                                [{{
+                                    formatCurrency(
+                                        (part.mapped_allocation || getPartAllocation(part.id))
+                                            .unit_cost
+                                    )
+                                }}
+                                × {{ (part.mapped_allocation || getPartAllocation(part.id)).qty }} =
+                                {{
+                                    formatCurrency(
+                                        (part.mapped_allocation || getPartAllocation(part.id)).total
+                                    )
+                                }}]
+                            </span>
+                        </div>
+                        <button
+                            v-if="!readOnly"
+                            type="button"
+                            @click.stop="$emit('unlink-part-allocation', part.id)"
+                            class="text-rose-500 hover:text-rose-700 p-1 rounded transition-colors shrink-0 cursor-pointer"
+                            :title="$t('work_orders.purchases.unlink_btn')"
+                        >
+                            🗑️
+                        </button>
+                    </div>
                 </div>
 
                 <!-- Card Footer (Total Bar) -->
@@ -448,6 +487,65 @@
                                     >
                                         {{ part.part_number || part.sku }}
                                     </p>
+                                    <!-- External Part Mapped Purchase Allocation -->
+                                    <div
+                                        v-if="
+                                            part.source === 'external' &&
+                                            (part.mapped_allocation || getPartAllocation(part.id))
+                                        "
+                                        class="mt-1 flex items-center justify-between gap-1.5 px-2 py-0.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-[10px] font-semibold text-emerald-800 dark:text-emerald-300"
+                                    >
+                                        <div class="flex items-center gap-1 truncate">
+                                            <span
+                                                class="text-emerald-600 dark:text-emerald-400 shrink-0"
+                                            >
+                                                🔗
+                                            </span>
+                                            <span class="font-bold truncate">
+                                                {{
+                                                    (
+                                                        part.mapped_allocation ||
+                                                        getPartAllocation(part.id)
+                                                    ).name
+                                                }}
+                                            </span>
+                                            <span class="font-mono text-[9px] shrink-0" dir="ltr">
+                                                [{{
+                                                    formatCurrency(
+                                                        (
+                                                            part.mapped_allocation ||
+                                                            getPartAllocation(part.id)
+                                                        ).unit_cost
+                                                    )
+                                                }}
+                                                ×
+                                                {{
+                                                    (
+                                                        part.mapped_allocation ||
+                                                        getPartAllocation(part.id)
+                                                    ).qty
+                                                }}
+                                                =
+                                                {{
+                                                    formatCurrency(
+                                                        (
+                                                            part.mapped_allocation ||
+                                                            getPartAllocation(part.id)
+                                                        ).total
+                                                    )
+                                                }}]
+                                            </span>
+                                        </div>
+                                        <button
+                                            v-if="!readOnly"
+                                            type="button"
+                                            @click.stop="$emit('unlink-part-allocation', part.id)"
+                                            class="text-rose-500 hover:text-rose-700 p-0.5 rounded transition-colors shrink-0 cursor-pointer"
+                                            :title="$t('work_orders.purchases.unlink_btn')"
+                                        >
+                                            🗑️
+                                        </button>
+                                    </div>
                                 </div>
                             </td>
                             <td class="px-6 py-4">
@@ -676,9 +774,17 @@ const props = defineProps({
     showService: { type: Boolean, default: true },
     compactGrid: { type: Boolean, default: false },
     pendingCheck: { type: Function, default: null },
+    partAllocations: { type: Object, default: () => ({}) },
 });
 
-const emit = defineEmits(['edit', 'delete', 'add', 'click-service']);
+const emit = defineEmits(['edit', 'delete', 'add', 'click-service', 'unlink-part-allocation']);
+
+function getPartAllocation(partId) {
+    if (props.partAllocations && props.partAllocations[partId]) {
+        return props.partAllocations[partId];
+    }
+    return null;
+}
 const { getName } = useLocalized();
 const { formatCurrency, formatQuantity, toEnglish } = useNumberFormat();
 

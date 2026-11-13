@@ -109,6 +109,6 @@ class VehicleConditionItemController extends Controller
 
         $conditionItem->update(['is_active' => ! $conditionItem->is_active]);
 
-        return redirect()->back();
+        return redirect()->back()->with('success', __('messages.updated_successfully'));
     }
 }

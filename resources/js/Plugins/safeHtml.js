@@ -11,11 +11,9 @@ import DOMPurify from 'dompurify';
  * Usage in templates:
  *   <span v-safe-html="link.label" />
  *
- * Sanitization is also applied automatically to v-html by overriding its
- * default behaviour, so existing `v-html` usages become safe without
- * touching every call-site. If you intentionally need raw HTML, use the
- * built-in `v-html` and opt out by binding to a `__unsafe_html` prefixed
- * helper or a value you have already sanitized yourself.
+ * NOTE: Vue 3's built-in `v-html` compiles directly to `innerHTML` and is NOT
+ * overridden by this plugin. Always use `v-safe-html` for any untrusted or
+ * user-editable HTML content.
  */
 export const SafeHtmlPlugin = {
     install(app) {

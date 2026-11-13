@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers\System;
 
 use App\Http\Controllers\Controller;
+use App\Models\AdminUser;
 use App\Models\InternalNotification;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -35,10 +36,10 @@ class AdminNotificationController extends Controller
      */
     public function index(Request $request)
     {
-        $adminId = auth('admin')->id();
+        $adminId = $this->resolveAdminId($request);
 
         $notifications = InternalNotification::query()
-            ->where('admin_id', $adminId)
+            ->when($adminId, fn ($q) => $q->where('admin_id', $adminId), fn ($q) => $q->whereRaw('1 = 0'))
             ->orderByDesc('created_at')
             ->paginate(30)
             ->withQueryString();
@@ -54,7 +55,11 @@ class AdminNotificationController extends Controller
      */
     public function recent(Request $request): JsonResponse
     {
-        $adminId = auth('admin')->id();
+        $adminId = $this->resolveAdminId($request);
+
+        if (! $adminId) {
+            return response()->json(['notifications' => []]);
+        }
 
         $notifications = InternalNotification::query()
             ->where('admin_id', $adminId)
@@ -73,7 +78,11 @@ class AdminNotificationController extends Controller
      */
     public function unreadCount(Request $request): JsonResponse
     {
-        $adminId = auth('admin')->id();
+        $adminId = $this->resolveAdminId($request);
+
+        if (! $adminId) {
+            return response()->json(['count' => 0]);
+        }
 
         $count = InternalNotification::query()
             ->where('admin_id', $adminId)
@@ -89,7 +98,11 @@ class AdminNotificationController extends Controller
      */
     public function markAsRead(Request $request, string $id): JsonResponse
     {
-        $adminId = auth('admin')->id();
+        $adminId = $this->resolveAdminId($request);
+
+        if (! $adminId) {
+            abort(404);
+        }
 
         $notification = InternalNotification::query()
             ->where('admin_id', $adminId)
@@ -107,7 +120,11 @@ class AdminNotificationController extends Controller
      */
     public function markAllAsRead(Request $request): JsonResponse
     {
-        $adminId = auth('admin')->id();
+        $adminId = $this->resolveAdminId($request);
+
+        if (! $adminId) {
+            return response()->json(['success' => true, 'count' => 0]);
+        }
 
         $count = InternalNotification::query()
             ->where('admin_id', $adminId)
@@ -115,5 +132,16 @@ class AdminNotificationController extends Controller
             ->update(['read_at' => now()]);
 
         return response()->json(['success' => true, 'count' => $count]);
+    }
+
+    private function resolveAdminId(Request $request): ?int
+    {
+        $actor = $request->user();
+
+        if ($actor instanceof AdminUser) {
+            return $actor->id;
+        }
+
+        return $actor ? AdminUser::where('user_id', $actor->id)->value('id') : null;
     }
 }

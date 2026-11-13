@@ -6,10 +6,19 @@ namespace App\Http\Controllers\System;
 
 use App\Http\Controllers\Controller;
 use App\Models\Tenant;
+use App\Services\System\SystemAuditService;
 use Illuminate\Http\Request;
 
 class TenantSecurityController extends Controller
 {
+    protected SystemAuditService $audit;
+
+    public function __construct(
+        ?SystemAuditService $audit = null
+    ) {
+        $this->audit = $audit ?? app(SystemAuditService::class);
+    }
+
     /**
      * Update tenant 2FA settings.
      */
@@ -21,6 +30,8 @@ class TenantSecurityController extends Controller
         ]);
 
         $tenant->update($validated);
+
+        $this->audit->log('tenant_security_2fa_update', Tenant::class, $tenant->id, $validated, $request);
 
         return back()->with('success', __('messages.system.security.two_factor_updated'));
     }

@@ -141,6 +141,28 @@ class WorkOrderPaymentController
             return back()->with('error', __('payments.bad_debt_credit_invoices_only'));
         }
 
+        if (in_array($validated['type'], ['payment', 'bad_debt'], true)) {
+            $availableBalance = (float) $workOrder->balance;
+
+            if ($existingPayment !== null) {
+                $existingType = $existingPayment->type instanceof PaymentType
+                    ? $existingPayment->type->value
+                    : $existingPayment->type;
+
+                if (in_array($existingType, ['payment', 'bad_debt'], true)) {
+                    $availableBalance += (float) $existingPayment->amount;
+                } elseif ($existingType === 'refund') {
+                    $availableBalance = max(0.0, $availableBalance - (float) $existingPayment->amount);
+                }
+            }
+
+            if ((float) $validated['amount'] > round($availableBalance, 2) + 0.01) {
+                return back()
+                    ->withErrors(['amount' => __('payments.amount_exceeds_balance')])
+                    ->with('error', __('payments.amount_exceeds_balance'));
+            }
+        }
+
         return null;
     }
 }

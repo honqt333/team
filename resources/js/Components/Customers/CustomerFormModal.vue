@@ -520,14 +520,15 @@
                     <button
                         type="button"
                         @click="$emit('close')"
-                        class="px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white font-medium transition-colors"
+                        class="px-5 py-2.5 text-xs font-bold text-text-secondary hover:bg-surface-secondary border border-border rounded-xl transition-colors cursor-pointer"
                     >
                         {{ $t('common.cancel') }}
                     </button>
                     <button
+                        type="button"
                         @click="submitForm"
                         :disabled="form.processing"
-                        class="inline-flex items-center gap-2 px-5 py-2.5 bg-action-primary hover:bg-action-primary-hover text-white rounded-xl font-medium shadow-lg shadow-focus-ring-soft hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                        class="inline-flex items-center justify-center gap-2 px-6 py-2.5 text-xs font-bold text-white bg-action-primary hover:bg-action-primary-hover rounded-xl shadow-xs transition-all disabled:opacity-50 cursor-pointer"
                     >
                         <svg
                             v-if="form.processing"
@@ -638,7 +639,7 @@
                 <button
                     type="button"
                     @click="showDuplicateModal = false"
-                    class="px-4 py-2 bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-xl font-medium transition-colors"
+                    class="px-5 py-2.5 text-xs font-bold text-text-secondary hover:bg-surface-secondary border border-border rounded-xl transition-colors cursor-pointer"
                 >
                     {{ $t('common.cancel') }}
                 </button>
@@ -654,6 +655,7 @@ import axios from 'axios';
 import { useI18n } from 'vue-i18n';
 import { useConfirm } from '@/Composables/useConfirm';
 import { useFormScrollToError } from '@/Composables/useFormScrollToError';
+import { useNumberFormat } from '@/Composables/useNumberFormat';
 import BaseModal from '@/Components/BaseModal.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 import FormField from '@/Components/Common/FormField.vue';
@@ -683,6 +685,7 @@ const props = defineProps({
 const emit = defineEmits(['close', 'saved']);
 const { t, locale } = useI18n(); // Access t function and current locale
 const { scrollToError } = useFormScrollToError();
+const { toEnglish } = useNumberFormat();
 const page = usePage();
 
 const duplicateCustomer = ref(null);
@@ -746,23 +749,23 @@ watch(
             form.type = newCustomer.type || 'individual';
             form.name = newCustomer.name || '';
             form.contact_name = newCustomer.contact_name || '';
-            form.phone = newCustomer.phone || '';
-            form.whatsapp = newCustomer.whatsapp || '';
+            form.phone = toEnglish(newCustomer.phone || '');
+            form.whatsapp = toEnglish(newCustomer.whatsapp || '');
             form.email = newCustomer.email || '';
             form.notes = newCustomer.notes || '';
-            form.tax_number = newCustomer.tax_number || '';
+            form.tax_number = toEnglish(newCustomer.tax_number || '');
             form.credit_limit =
                 newCustomer.credit_limit !== undefined && newCustomer.credit_limit !== null
-                    ? newCustomer.credit_limit
+                    ? toEnglish(newCustomer.credit_limit)
                     : null;
             form.payment_terms_days =
                 newCustomer.payment_terms_days !== undefined &&
                 newCustomer.payment_terms_days !== null
-                    ? newCustomer.payment_terms_days
+                    ? Number(toEnglish(newCustomer.payment_terms_days)) || 0
                     : 0;
             form.address_line = newCustomer.address_line || '';
-            form.building_number = newCustomer.building_number || '';
-            form.postal_code = newCustomer.postal_code || '';
+            form.building_number = toEnglish(newCustomer.building_number || '');
+            form.postal_code = toEnglish(newCustomer.postal_code || '');
             form.district = newCustomer.district || '';
             form.city = newCustomer.city || '';
             form.region = newCustomer.region || '';

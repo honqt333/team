@@ -19,6 +19,7 @@ use App\Models\WorkOrder;
 use App\Services\Backup\TenantBackupService;
 use App\Services\Billing\SubscriptionLifecycleService;
 use App\Services\Billing\TenantSuspensionService;
+use App\Services\System\SystemAuditService;
 use DB;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -30,6 +31,14 @@ use Throwable;
 
 class TenantsController extends Controller
 {
+    protected SystemAuditService $audit;
+
+    public function __construct(
+        ?SystemAuditService $audit = null
+    ) {
+        $this->audit = $audit ?? app(SystemAuditService::class);
+    }
+
     /**
      * Display a listing of tenants.
      */
@@ -265,6 +274,10 @@ class TenantsController extends Controller
             'suspension_reason' => $request->reason,
         ]);
 
+        $this->audit->log('tenant_suspend', Tenant::class, $tenant->id, [
+            'reason' => $request->reason,
+        ], $request);
+
         return back()->with('success', __('messages.system.tenants.suspended'));
     }
 
@@ -274,6 +287,8 @@ class TenantsController extends Controller
     public function activate(Tenant $tenant, SubscriptionLifecycleService $lifecycle)
     {
         $lifecycle->reactivateTenant($tenant);
+
+        $this->audit->log('tenant_activate', Tenant::class, $tenant->id);
 
         return back()->with('success', __('messages.system.tenants.activated'));
     }
@@ -288,6 +303,10 @@ class TenantsController extends Controller
         ]);
 
         $lifecycle->extendTenantTrial($tenant, (int) $request->days);
+
+        $this->audit->log('tenant_extend_trial', Tenant::class, $tenant->id, [
+            'days' => (int) $request->days,
+        ], $request);
 
         return back()->with('success', __('messages.system.tenants.trial_extended', ['days' => $request->days]));
     }
@@ -331,6 +350,9 @@ class TenantsController extends Controller
             );
         }
 
+        $tenantId = $tenant->id;
+        $tenantName = $tenant->name;
+
         DB::transaction(function () use ($tenant) {
             $centerIds = $tenant->centers()->pluck('id');
 
@@ -355,6 +377,11 @@ class TenantsController extends Controller
             // 5. Finally delete the tenant
             $tenant->forceDelete();
         });
+
+        $this->audit->log('tenant_delete', Tenant::class, $tenantId, [
+            'name' => $tenantName,
+            'backup_id' => $backup->id ?? null,
+        ], $request);
 
         return redirect()->route('system.tenants.index')->with('success', __('messages.system.tenants.deleted'));
     }
@@ -396,6 +423,11 @@ class TenantsController extends Controller
         ]);
 
         $tenant->update(['dunning_opted_out' => $validated['dunning_opted_out']]);
+
+        $this->audit->log('tenant_dunning_opt_out', Tenant::class, $tenant->id, [
+            'dunning_opted_out' => $validated['dunning_opted_out'],
+            'reason' => $validated['reason'] ?? null,
+        ], $request);
 
         // Log via the central activity logger (falls back to
         // Log facade if the helper isn't available). We record
@@ -451,6 +483,8 @@ class TenantsController extends Controller
             'auto_suspended_at' => null,
             'suspension_reason' => null,
         ])->save();
+
+        $this->audit->log('tenant_lift_auto_suspend', Tenant::class, $tenant->id, [], $request);
 
         if (function_exists('activity')) {
             activity()

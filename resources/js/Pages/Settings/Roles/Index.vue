@@ -8,10 +8,11 @@ import BackButton from '@/Components/BackButton.vue';
 import UserManagementTabs from '@/Pages/Settings/Partials/UserManagementTabs.vue';
 import RoleFormModal from './RoleFormModal.vue';
 import DataTable from '@/Components/Common/DataTable.vue';
+import AppInput from '@/Components/App/AppInput.vue';
 import AppTableSkeleton from '@/Components/Common/AppTableSkeleton.vue';
 import AppEmptyState from '@/Components/Common/AppEmptyState.vue';
-import { useToast } from '@/Composables/useToast';
 import { useConfirm } from '@/Composables/useConfirm';
+import { usePermission } from '@/Composables/usePermission';
 import { useServerTable } from '@/Composables/useServerTable';
 
 const props = defineProps({
@@ -22,7 +23,7 @@ const props = defineProps({
 });
 
 const { t, locale } = useI18n();
-const { success, error } = useToast();
+const { can } = usePermission();
 const { confirm } = useConfirm();
 const page = usePage();
 
@@ -49,6 +50,12 @@ watch(
 const columns = computed(() => [
     { key: 'name', label: t('roles.name', 'الدور'), sortable: false },
     {
+        key: 'permissions_count',
+        label: t('roles.permissions_count', 'عدد الصلاحيات'),
+        sortable: false,
+        align: 'center',
+    },
+    {
         key: 'users_count',
         label: t('roles.users_count', 'عدد المستخدمين'),
         sortable: false,
@@ -60,20 +67,29 @@ const columns = computed(() => [
 // ─── Modal State ─────────────────────────────────────────────────────────────
 const showModal = ref(false);
 const editingRole = ref(null);
+const duplicateRoleSource = ref(null);
 
 const openCreateModal = () => {
     editingRole.value = null;
+    duplicateRoleSource.value = null;
     showModal.value = true;
 };
 
 const openEditModal = (role) => {
     editingRole.value = role;
+    duplicateRoleSource.value = null;
+    showModal.value = true;
+};
+
+const openDuplicateModal = (role) => {
+    editingRole.value = null;
+    duplicateRoleSource.value = role;
     showModal.value = true;
 };
 
 // ─── Delete Role Confirmation ────────────────────────────────────────────────
 const deleteRole = async (role) => {
-    if (role.users_count > 0) return;
+    if (role.users_count > 0 || role.name === 'super_admin') return;
 
     const confirmed = await confirm({
         type: 'danger',
@@ -90,12 +106,6 @@ const deleteRole = async (role) => {
 
     router.delete(route('settings.roles.destroy', role.id), {
         preserveScroll: true,
-        onSuccess: () => {
-            success(t('messages.deleted_success', 'تم الحذف بنجاح'));
-        },
-        onError: () => {
-            error(t('common.error_occurred', 'حدث خطأ ما'));
-        },
     });
 };
 </script>
@@ -134,6 +144,7 @@ const deleteRole = async (role) => {
 
                 <template #actions>
                     <button
+                        v-if="can('users.create')"
                         type="button"
                         @click="openCreateModal"
                         class="group relative inline-flex items-center gap-2 px-6 py-2.5 bg-action-primary hover:bg-action-primary-hover text-action-on font-bold rounded-xl transition-all hover:scale-[1.02] shadow-xs hover:shadow-md active:scale-95 cursor-pointer"
@@ -159,11 +170,11 @@ const deleteRole = async (role) => {
             <!-- ─── Search Bar ─────────────────────────────────────────── -->
             <div class="bg-surface rounded-xl shadow-xs border border-border p-4">
                 <div class="relative max-w-md">
-                    <input
+                    <AppInput
                         v-model="tableFilters.search"
                         type="text"
                         :placeholder="t('common.search', 'بحث...')"
-                        class="w-full ps-10 pe-4 py-2 text-sm rounded-lg border border-border bg-surface-muted text-text-primary placeholder:text-text-muted focus:ring-2 focus:ring-focus-ring focus:border-action-primary transition-colors"
+                        class="ps-10"
                     />
                     <svg
                         class="absolute start-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted pointer-events-none"
@@ -209,6 +220,15 @@ const deleteRole = async (role) => {
                     </div>
                 </template>
 
+                <!-- Permissions Count cell -->
+                <template #cell-permissions_count="{ item }">
+                    <span
+                        class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-surface-muted text-text-secondary border border-border"
+                    >
+                        {{ item.permissions_count ?? item.permissions?.length ?? 0 }}
+                    </span>
+                </template>
+
                 <!-- Users Count cell -->
                 <template #cell-users_count="{ item }">
                     <span
@@ -222,6 +242,28 @@ const deleteRole = async (role) => {
                 <template #cell-actions="{ item }">
                     <div class="flex items-center justify-end gap-1">
                         <button
+                            v-if="can('users.create')"
+                            type="button"
+                            @click="openDuplicateModal(item)"
+                            class="p-1.5 rounded-lg text-text-muted hover:text-action-primary hover:bg-selection-bg transition-colors cursor-pointer"
+                            :title="t('roles.duplicate', 'نسخ الدور')"
+                        >
+                            <svg
+                                class="w-4 h-4"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
+                                />
+                            </svg>
+                        </button>
+                        <button
+                            v-if="can('users.update') && item.name !== 'super_admin'"
                             type="button"
                             @click="openEditModal(item)"
                             class="p-1.5 rounded-lg text-text-muted hover:text-action-primary hover:bg-selection-bg transition-colors cursor-pointer"
@@ -242,6 +284,7 @@ const deleteRole = async (role) => {
                             </svg>
                         </button>
                         <button
+                            v-if="can('users.delete')"
                             type="button"
                             @click="deleteRole(item)"
                             :disabled="item.users_count > 0 || item.name === 'super_admin'"
@@ -289,7 +332,7 @@ const deleteRole = async (role) => {
                                   )
                                 : t('roles.empty_description', 'لم يتم إضافة أي أدوار بعد')
                         "
-                        :action-text="t('roles.add', 'إضافة دور جديد')"
+                        :action-text="can('users.create') ? t('roles.add', 'إضافة دور جديد') : ''"
                         @action="openCreateModal"
                     >
                         <template #icon>
@@ -316,6 +359,7 @@ const deleteRole = async (role) => {
         <RoleFormModal
             :show="showModal"
             :role="editingRole"
+            :duplicate-from="duplicateRoleSource"
             :grouped-permissions="groupedPermissions"
             :permission-descriptions="permissionDescriptions"
             @close="showModal = false"

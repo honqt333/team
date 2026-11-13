@@ -171,11 +171,9 @@
                             {{ $t('payments.form.date') }}
                             <span class="text-red-500">*</span>
                         </label>
-                        <input
-                            type="date"
+                        <CustomDatePicker
                             v-model="form.payment_date"
-                            dir="ltr"
-                            class="w-full px-4 py-2.5 text-sm border rounded-xl bg-gray-50 dark:bg-gray-900 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-focus-ring text-left font-mono"
+                            name="payment_date"
                             :class="{ 'border-red-500': errors.payment_date }"
                         />
                         <p v-if="errors.payment_date" class="mt-1 text-sm text-red-500">
@@ -221,19 +219,19 @@
                         <button
                             type="button"
                             @click="emit('close')"
-                            class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg shadow-sm hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-700"
+                            class="px-5 py-2.5 text-xs font-bold text-text-secondary hover:bg-surface-secondary border border-border rounded-xl transition-colors cursor-pointer"
                         >
                             {{ $t('common.cancel') }}
                         </button>
                         <button
                             type="submit"
                             :disabled="loading"
-                            class="px-4 py-2 text-sm font-medium text-white rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                            :class="
+                            :class="[
+                                'inline-flex items-center justify-center gap-2 px-6 py-2.5 text-xs font-bold text-white rounded-xl shadow-xs transition-all disabled:opacity-50 cursor-pointer',
                                 form.type === 'refund'
-                                    ? 'bg-red-600 hover:bg-red-700 focus:ring-danger'
-                                    : 'bg-action-primary hover:bg-action-primary-hover focus:ring-focus-ring'
-                            "
+                                    ? 'bg-danger hover:bg-danger-hover'
+                                    : 'bg-action-primary hover:bg-action-primary-hover',
+                            ]"
                         >
                             <svg
                                 v-if="loading"
@@ -275,6 +273,7 @@ import { ref, computed, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { router } from '@inertiajs/vue3';
 import Modal from '@/Components/Modal.vue';
+import CustomDatePicker from '@/Components/CustomDatePicker.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 import { useToast } from '@/Composables/useToast';
 import { useNumberFormat } from '@/Composables/useNumberFormat';
@@ -418,6 +417,23 @@ function validate() {
 
     if (!form.value.amount || parseFloat(form.value.amount) <= 0) {
         errors.value.amount = t('common.validation.required', { field: t('payments.form.amount') });
+    }
+
+    if (form.value.type === 'payment' || form.value.type === 'bad_debt') {
+        let maxAllowedBalance = parseFloat(props.balance || 0);
+        if (isEditing.value && props.payment) {
+            if (props.payment.type === 'payment' || props.payment.type === 'bad_debt') {
+                maxAllowedBalance += parseFloat(props.payment.amount || 0);
+            } else if (props.payment.type === 'refund') {
+                maxAllowedBalance = Math.max(
+                    0,
+                    maxAllowedBalance - parseFloat(props.payment.amount || 0)
+                );
+            }
+        }
+        if (parseFloat(form.value.amount) > maxAllowedBalance + 0.001) {
+            errors.value.amount = t('payments.amount_exceeds_balance');
+        }
     }
 
     if (form.value.type === 'refund' && parseFloat(form.value.amount) > props.totalPaid + 0.001) {

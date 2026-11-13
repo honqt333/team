@@ -56,7 +56,7 @@ class VehicleColorController extends Controller
 
         VehicleColor::create($validated);
 
-        return redirect()->back();
+        return redirect()->back()->with('success', __('messages.created_successfully'));
     }
 
     /**
@@ -79,7 +79,7 @@ class VehicleColorController extends Controller
         $validated['updated_by'] = auth()->id();
         $color->update($validated);
 
-        return redirect()->back();
+        return redirect()->back()->with('success', __('messages.updated_successfully'));
     }
 
     /**
@@ -94,7 +94,7 @@ class VehicleColorController extends Controller
 
         $color->delete();
 
-        return redirect()->back();
+        return redirect()->back()->with('success', __('messages.deleted_successfully'));
     }
 
     /**
@@ -109,6 +109,6 @@ class VehicleColorController extends Controller
 
         $color->update(['is_active' => ! $color->is_active]);
 
-        return redirect()->back();
+        return redirect()->back()->with('success', __('messages.updated_successfully'));
     }
 }

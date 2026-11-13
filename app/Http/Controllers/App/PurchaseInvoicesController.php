@@ -11,6 +11,7 @@ use App\Models\PurchaseInvoice;
 use App\Models\Supplier;
 use App\Models\Warehouse;
 use App\Models\WorkOrder;
+use App\Models\WorkOrderItemPart;
 use App\Services\PurchaseAttachmentService;
 use App\Services\Purchasing\PurchasingService;
 use Illuminate\Http\Request;
@@ -42,14 +43,21 @@ class PurchaseInvoicesController extends Controller
             ->when($request->input('date_to'), fn ($q, $d) => $q->whereDate('issue_date', '<=', $d))
             ->orderBy('id', 'desc');
 
-        $suppliers = Supplier::forTenant($tenantId)->forCenter($centerId)->active()->get(['id', 'name']);
+        $suppliers = Supplier::forTenant($tenantId)->forCenter($centerId)->active()->get(['id', 'name', 'type']);
         $defaultWarehouse = Warehouse::forCenter($centerId)->default()->first();
         $warehouses = Warehouse::forCenter($centerId)->active()->get(['id', 'name']);
         $units = InventoryUnit::where('is_active', true)->get(['id', 'name_ar', 'name_en']);
         $workOrders = WorkOrder::where('tenant_id', $tenantId)
             ->where('center_id', $centerId)
             ->whereNotIn('status', [WorkOrder::STATUS_CANCELLED])
-            ->with(['customer:id,name', 'vehicle:id,plate_number'])
+            ->with([
+                'customer:id,name',
+                'vehicle:id,plate_number',
+                'items' => function ($q) {
+                    $q->where('status', '!=', 'cancelled')
+                        ->with(['department:id,name_ar,name_en', 'service:id,name_ar,name_en,department_id,type', 'service.department:id,name_ar,name_en']);
+                },
+            ])
             ->latest('id')
             ->limit(100)
             ->get(['id', 'code', 'customer_id', 'vehicle_id', 'status']);
@@ -89,9 +97,13 @@ class PurchaseInvoicesController extends Controller
             'issue_date' => 'required|date',
             'due_date' => 'nullable|date|after_or_equal:issue_date',
             'create_credit_invoice' => 'nullable|boolean',
+            'purchase_type' => 'nullable|string|in:inventory,external_part,service',
             'notes' => 'nullable|string|max:1000',
             'items' => 'required|array|min:1',
-            'items.*.part_id' => 'required|exists:parts,id',
+            'items.*.part_id' => 'nullable|exists:parts,id',
+            'items.*.name' => 'nullable|string|max:255',
+            'items.*.custom_name' => 'nullable|string|max:255',
+            'items.*.sku' => 'nullable|string|max:100',
             'items.*.qty' => 'required|numeric|min:0.001',
             'items.*.unit_cost' => 'required|numeric|min:0',
             'items.*.tax_rate' => 'nullable|numeric|min:0|max:100',
@@ -122,7 +134,11 @@ class PurchaseInvoicesController extends Controller
         $purchaseInvoice->load([
             'supplier',
             'purchaseOrder',
-            'workOrder:id,code,status',
+            'workOrder:id,code,status,customer_id,vehicle_id,entry_date,created_at',
+            'workOrder.customer:id,name,phone',
+            'workOrder.vehicle:id,plate_number,make_id,model_id,make_other,model_other,year',
+            'workOrder.vehicle.make:id,name_ar,name_en',
+            'workOrder.vehicle.model:id,name_ar,name_en',
             'lines.part',
             'lines.returnLines',
             'center.address',
@@ -132,8 +148,105 @@ class PurchaseInvoicesController extends Controller
             'tenant.address',
         ]);
 
+        $linkedWorkOrders = [];
+
+        if ($purchaseInvoice->workOrder) {
+            $wo = $purchaseInvoice->workOrder;
+            $vehicleMake = $wo->vehicle?->make?->name_ar
+                ?? $wo->vehicle?->make?->name_en
+                ?? $wo->vehicle?->make_other;
+            $vehicleModel = $wo->vehicle?->model?->name_ar
+                ?? $wo->vehicle?->model?->name_en
+                ?? $wo->vehicle?->model_other;
+            $vehicleLabel = trim(collect([$vehicleMake, $vehicleModel, $wo->vehicle?->plate_number])->filter()->implode(' - '));
+
+            $allocatedQty = (float) $purchaseInvoice->lines->sum('qty');
+
+            if ($allocatedQty <= 0) {
+                $allocatedQty = 1.0;
+            }
+
+            $linkedWorkOrders[] = [
+                'id' => $wo->id,
+                'work_order_id' => $wo->id,
+                'code' => $wo->code,
+                'status' => $wo->status,
+                'customer_name' => $wo->customer?->name,
+                'vehicle_label' => $vehicleLabel !== '' ? $vehicleLabel : null,
+                'plate_number' => $wo->vehicle?->plate_number,
+                'allocated_qty' => $allocatedQty,
+                'allocated_amount' => (float) $purchaseInvoice->total,
+                'date' => $purchaseInvoice->issue_date?->format('Y-m-d') ?? $wo->entry_date?->format('Y-m-d') ?? $wo->created_at?->format('Y-m-d'),
+            ];
+        }
+
+        $partIds = $purchaseInvoice->lines->pluck('part_id')->filter()->unique()->values();
+
+        if ($partIds->isNotEmpty()) {
+            $existingWoIds = collect($linkedWorkOrders)->pluck('work_order_id')->all();
+            $issuedParts = WorkOrderItemPart::withoutGlobalScope('center_scoped')
+                ->where('tenant_id', $purchaseInvoice->tenant_id)
+                ->where('center_id', $purchaseInvoice->center_id)
+                ->whereIn('part_id', $partIds)
+                ->when(! empty($existingWoIds), fn ($q) => $q->whereNotIn('work_order_id', $existingWoIds))
+                ->with([
+                    'workOrder:id,code,status,customer_id,vehicle_id,entry_date,created_at',
+                    'workOrder.customer:id,name,phone',
+                    'workOrder.vehicle:id,plate_number,make_id,model_id,make_other,model_other,year',
+                    'workOrder.vehicle.make:id,name_ar,name_en',
+                    'workOrder.vehicle.model:id,name_ar,name_en',
+                ])
+                ->latest('id')
+                ->limit(50)
+                ->get()
+                ->groupBy('work_order_id');
+
+            foreach ($issuedParts as $woId => $partsGroup) {
+                $wo = $partsGroup->first()?->workOrder;
+
+                if (! $wo) {
+                    continue;
+                }
+
+                $vehicleMake = $wo->vehicle?->make?->name_ar
+                    ?? $wo->vehicle?->make?->name_en
+                    ?? $wo->vehicle?->make_other;
+                $vehicleModel = $wo->vehicle?->model?->name_ar
+                    ?? $wo->vehicle?->model?->name_en
+                    ?? $wo->vehicle?->model_other;
+                $vehicleLabel = trim(collect([$vehicleMake, $vehicleModel, $wo->vehicle?->plate_number])->filter()->implode(' - '));
+
+                $allocatedQty = (float) $partsGroup->sum('qty');
+                $allocatedAmount = (float) $partsGroup->sum(function ($itemPart) {
+                    $cost = (float) ($itemPart->cost_snapshot ?? 0);
+
+                    if ($cost > 0) {
+                        return $cost * (float) $itemPart->qty;
+                    }
+
+                    return (float) ($itemPart->total ?? ((float) $itemPart->unit_price * (float) $itemPart->qty));
+                });
+
+                $linkedWorkOrders[] = [
+                    'id' => $wo->id,
+                    'work_order_id' => $wo->id,
+                    'code' => $wo->code,
+                    'status' => $wo->status,
+                    'customer_name' => $wo->customer?->name,
+                    'vehicle_label' => $vehicleLabel !== '' ? $vehicleLabel : null,
+                    'plate_number' => $wo->vehicle?->plate_number,
+                    'allocated_qty' => $allocatedQty,
+                    'allocated_amount' => $allocatedAmount,
+                    'date' => $partsGroup->first()?->created_at?->format('Y-m-d') ?? $wo->entry_date?->format('Y-m-d'),
+                ];
+            }
+        }
+
+        $purchaseInvoice->setAttribute('linked_work_orders', $linkedWorkOrders);
+
         return Inertia::render('Purchasing/Invoices/Show', [
             'invoice' => $purchaseInvoice,
+            'linkedWorkOrders' => $linkedWorkOrders,
             'canManageAttachment' => request()->user()->can('update', $purchaseInvoice),
         ]);
     }

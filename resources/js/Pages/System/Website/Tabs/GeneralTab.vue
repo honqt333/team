@@ -1,15 +1,15 @@
 <script setup>
 import { ref } from 'vue';
+import AppFileUpload from '@/Components/Common/AppFileUpload.vue';
+import { useToast } from '@/Composables/useToast';
 
 const props = defineProps({ form: Object, uploadImage: Function });
+const { error: toastError } = useToast();
 
-const logoInput = ref(null);
-const faviconInput = ref(null);
 const uploadingLogo = ref(false);
 const uploadingFavicon = ref(false);
 
-async function onLogoChange(e) {
-    const file = e.target.files?.[0];
+async function onLogoSelect(file) {
     if (!file) return;
     if (props.uploadImage) {
         uploadingLogo.value = true;
@@ -26,8 +26,7 @@ async function onLogoChange(e) {
     }
 }
 
-async function onFaviconChange(e) {
-    const file = e.target.files?.[0];
+async function onFaviconSelect(file) {
     if (!file) return;
     if (props.uploadImage) {
         uploadingFavicon.value = true;
@@ -51,70 +50,33 @@ async function onFaviconChange(e) {
             {{ $t('tenant_site.general.visual_identity') }}
         </h3>
         <div class="grid grid-cols-1 gap-y-8 gap-x-6 sm:grid-cols-6">
-            <div class="sm:col-span-6 border border-gray-200 dark:border-gray-700 rounded-lg p-5">
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-4">
-                    {{ $t('tenant_site.general.main_logo') }}
-                </label>
-                <div class="flex flex-col sm:flex-row gap-6 items-start">
-                    <div
-                        class="w-40 h-24 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg flex items-center justify-center overflow-hidden bg-gray-50 dark:bg-gray-900"
-                    >
-                        <img
-                            v-if="form.settings.website_logo"
-                            :src="
-                                typeof form.settings.website_logo === 'string'
-                                    ? form.settings.website_logo
-                                    : URL.createObjectURL(form.settings.website_logo)
-                            "
-                            class="max-h-full object-contain"
-                        />
-                        <svg
-                            v-else
-                            class="w-8 h-8 text-gray-300 dark:text-gray-600"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                        >
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
-                            />
-                        </svg>
-                    </div>
-                    <div class="space-y-3 flex-1 w-full">
-                        <input
-                            type="file"
-                            @change="onLogoChange"
-                            class="hidden"
-                            ref="logoInput"
-                            accept="image/*"
-                        />
-                        <button
-                            @click="logoInput.click()"
-                            type="button"
-                            :disabled="uploadingLogo"
-                            class="inline-flex items-center px-3 py-2 border border-gray-300 dark:border-gray-600 shadow-sm text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors disabled:opacity-50"
-                        >
-                            {{
-                                uploadingLogo
-                                    ? $t('system.website.uploading')
-                                    : $t('tenant_site.general.browse_files')
-                            }}
-                        </button>
-                        <p class="text-xs text-gray-500">
-                            {{ $t('tenant_site.general.logo_hint') }}
-                        </p>
-                        <input
-                            v-model="form.settings.website_logo"
-                            type="text"
-                            :placeholder="$t('system.website.logo_url_placeholder')"
-                            class="block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-action-primary focus:ring-focus-ring sm:text-sm py-2 px-3 bg-white dark:bg-gray-700 dark:text-white"
-                            dir="ltr"
-                        />
-                    </div>
-                </div>
+            <div
+                class="sm:col-span-6 border border-gray-200 dark:border-gray-700 rounded-lg p-5 space-y-3"
+            >
+                <AppFileUpload
+                    variant="image"
+                    :label="$t('tenant_site.general.main_logo')"
+                    :hint="$t('tenant_site.general.logo_hint')"
+                    :existing-url="
+                        typeof form.settings.website_logo === 'string'
+                            ? form.settings.website_logo
+                            : null
+                    "
+                    :loading="uploadingLogo"
+                    accept="image/png,image/jpeg,image/webp,image/svg+xml"
+                    :max-size-mb="4"
+                    :upload-button-text="$t('tenant_site.general.browse_files')"
+                    @select="onLogoSelect"
+                    @invalid="toastError"
+                    @remove-existing="form.settings.website_logo = ''"
+                />
+                <input
+                    v-model="form.settings.website_logo"
+                    type="text"
+                    :placeholder="$t('system.website.logo_url_placeholder')"
+                    class="block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-action-primary focus:ring-focus-ring sm:text-sm py-2 px-3 bg-white dark:bg-gray-700 dark:text-white"
+                    dir="ltr"
+                />
             </div>
 
             <div class="sm:col-span-3">
@@ -147,43 +109,23 @@ async function onFaviconChange(e) {
             </div>
 
             <div class="sm:col-span-3">
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    {{ $t('tenant_site.general.favicon') }}
-                </label>
-                <div class="flex gap-3">
-                    <div
-                        class="w-10 h-10 border border-gray-300 dark:border-gray-600 rounded-lg flex items-center justify-center overflow-hidden bg-gray-50 dark:bg-gray-900"
-                    >
-                        <img
-                            v-if="form.settings.website_favicon"
-                            :src="
-                                typeof form.settings.website_favicon === 'string'
-                                    ? form.settings.website_favicon
-                                    : URL.createObjectURL(form.settings.website_favicon)
-                            "
-                            class="w-full h-full object-contain"
-                        />
-                    </div>
-                    <input
-                        type="file"
-                        @change="onFaviconChange"
-                        class="hidden"
-                        ref="faviconInput"
-                        accept="image/*"
-                    />
-                    <button
-                        @click="faviconInput.click()"
-                        type="button"
-                        :disabled="uploadingFavicon"
-                        class="inline-flex items-center px-3 py-2 border border-gray-300 dark:border-gray-600 shadow-sm text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 flex-1 transition-colors disabled:opacity-50"
-                    >
-                        {{
-                            uploadingFavicon
-                                ? $t('system.website.uploading')
-                                : $t('tenant_site.general.update_favicon')
-                        }}
-                    </button>
-                </div>
+                <AppFileUpload
+                    variant="image"
+                    compact-preview
+                    :label="$t('tenant_site.general.favicon')"
+                    :existing-url="
+                        typeof form.settings.website_favicon === 'string'
+                            ? form.settings.website_favicon
+                            : null
+                    "
+                    :loading="uploadingFavicon"
+                    accept="image/png,image/jpeg,image/webp,image/svg+xml"
+                    :max-size-mb="2"
+                    :upload-button-text="$t('tenant_site.general.update_favicon')"
+                    @select="onFaviconSelect"
+                    @invalid="toastError"
+                    @remove-existing="form.settings.website_favicon = ''"
+                />
             </div>
 
             <div class="sm:col-span-3">

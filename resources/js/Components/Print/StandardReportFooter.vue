@@ -32,6 +32,7 @@
 <script setup>
 import { computed } from 'vue';
 import { usePage } from '@inertiajs/vue3';
+import { useI18n } from 'vue-i18n';
 
 const props = defineProps({
     preparedBy: {
@@ -45,13 +46,14 @@ const props = defineProps({
 });
 
 const page = usePage();
+const { t } = useI18n();
 
 const userName = computed(() => {
     return props.preparedBy || page.props.auth?.user?.name || 'Admin';
 });
 
 const systemName = computed(() => {
-    return page.props.tenant?.name || 'Khidmah Pro';
+    return page.props.tenant?.name || page.props.app?.name || t('common.app_name');
 });
 
 const footerText = computed(() => {

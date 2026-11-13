@@ -48,7 +48,17 @@ class EmployeeController extends Controller
             ->when($isSuperAdmin && $request->center_id, fn ($q) => $q->where('center_id', $request->center_id))
             ->when($status === 'active', fn ($q) => $q->active())
             ->when($status === 'inactive', fn ($q) => $q->where('status', '!=', 'active'))
-            ->with(['jobTitle:id,name_ar,name_en', 'department:id,name_ar,name_en', 'employeeType:id,name_ar,name_en', 'center:id,name'])
+            ->with([
+                'jobTitle:id,name_ar,name_en',
+                'department:id,name_ar,name_en',
+                'employeeType:id,name_ar,name_en',
+                'center:id,name',
+                'documents' => fn ($q) => $q->whereIn('type', ['id', 'iqama', 'national_id'])->whereNotNull('expiry_date'),
+                'user:id,name,email,is_system_admin',
+                'user.roles:id,name',
+                'user.roles.permissions:id,name',
+                'user.permissions:id,name',
+            ])
             ->when($request->search, function ($query, $search) {
                 $query->where(function ($q) use ($search) {
                     $q->where('name_ar', 'like', "%{$search}%")

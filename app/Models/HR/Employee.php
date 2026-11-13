@@ -39,6 +39,10 @@ class Employee extends Model
     protected $appends = [
         'photo_url',
         'display_name',
+        'id_expiry_date',
+        'id_expiry_status',
+        'has_permissions_configured',
+        'no_permissions_set',
     ];
 
     public function getPhotoUrlAttribute(): ?string
@@ -56,22 +60,6 @@ class Employee extends Model
                     ->withTrashed()
                     ->max('id') ?? 0;
                 $employee->employee_number = 'EMP-'.str_pad((string) ($lastNumber + 1), 4, '0', STR_PAD_LEFT);
-            }
-        });
-
-        static::updated(function ($employee) {
-            if ($employee->isDirty('status')) {
-                if ($employee->user_id && $employee->user) {
-                    $newStatus = $employee->status;
-
-                    if (in_array($newStatus, ['terminated', 'inactive'])) {
-                        $employee->user->update(['is_active' => false]);
-                    } elseif ($newStatus === 'active') {
-                        if (! $employee->user->is_active) {
-                            $employee->user->update(['is_active' => true]);
-                        }
-                    }
-                }
             }
         });
     }
@@ -126,6 +114,103 @@ class Employee extends Model
         return (app()->getLocale() === 'ar' && $this->name_ar)
             ? $this->name_ar
             : ($this->name_en ?? $this->name_ar ?? '');
+    }
+
+    public function getIdExpiryDateAttribute(): ?string
+    {
+        if ($this->national_id_expiry) {
+            return $this->national_id_expiry instanceof Carbon
+                ? $this->national_id_expiry->format('Y-m-d')
+                : Carbon::parse((string) $this->national_id_expiry)->format('Y-m-d');
+        }
+
+        if ($this->relationLoaded('documents')) {
+            $idDoc = $this->documents
+                ->filter(fn ($doc) => in_array($doc->type, ['id', 'iqama', 'national_id'], true) && $doc->expiry_date !== null)
+                ->sortByDesc('expiry_date')
+                ->first();
+
+            if ($idDoc && $idDoc->expiry_date) {
+                return $idDoc->expiry_date instanceof Carbon
+                    ? $idDoc->expiry_date->format('Y-m-d')
+                    : Carbon::parse((string) $idDoc->expiry_date)->format('Y-m-d');
+            }
+        }
+
+        return null;
+    }
+
+    public function getIdExpiryStatusAttribute(): ?string
+    {
+        $expiryDate = $this->id_expiry_date;
+
+        if (! $expiryDate) {
+            return null;
+        }
+
+        $expiry = Carbon::parse($expiryDate)->startOfDay();
+        $today = Carbon::today();
+
+        if ($expiry->lt($today)) {
+            return 'expired';
+        }
+
+        if ($expiry->lte($today->copy()->addDays(30))) {
+            return 'expiring_soon';
+        }
+
+        return 'valid';
+    }
+
+    public function getHasPermissionsConfiguredAttribute(): bool
+    {
+        if (! $this->user_id) {
+            return false;
+        }
+
+        $user = $this->relationLoaded('user')
+            ? $this->user
+            : $this->user()->with(['roles.permissions', 'permissions'])->first();
+
+        if (! $user) {
+            return false;
+        }
+
+        if ($user->is_system_admin) {
+            return true;
+        }
+
+        if ($user->relationLoaded('roles') && $user->roles->contains('name', 'super_admin')) {
+            return true;
+        }
+
+        if ($user->relationLoaded('permissions') && $user->relationLoaded('roles')) {
+            if ($user->permissions->isNotEmpty()) {
+                return true;
+            }
+
+            $operationalRoles = $user->roles->where('name', '!=', 'employee');
+
+            $rolePermissions = $operationalRoles->flatMap(
+                fn ($role) => $role->relationLoaded('permissions') ? $role->permissions : collect()
+            );
+
+            return $rolePermissions->isNotEmpty();
+        }
+
+        if ($user->hasRole('super_admin') || $user->permissions()->exists()) {
+            return true;
+        }
+
+        return $user->roles()
+            ->where('name', '!=', 'employee')
+            ->whereHas('permissions')
+            ->exists();
+    }
+
+    public function getNoPermissionsSetAttribute(): bool
+    {
+        return ! $this->has_permissions_configured;
     }
 
     // Calculate total allowances for this employee

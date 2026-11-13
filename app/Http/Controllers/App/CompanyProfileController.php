@@ -68,6 +68,7 @@ class CompanyProfileController extends Controller
                 'district' => $tenant->address->district,
                 'building_number' => $tenant->address->building_number,
                 'postal_code' => $tenant->address->postal_code,
+                'country' => $tenant->address->country,
                 'latitude' => $tenant->address->latitude,
                 'longitude' => $tenant->address->longitude,
             ] : null,
@@ -89,6 +90,7 @@ class CompanyProfileController extends Controller
             'zatca' => [
                 'qr_enabled' => $tenant->zatcaSettings?->qr_enabled ?? false,
                 'is_phase2_active' => $tenant->zatcaSettings?->isPhase2Active() ?? false,
+                'is_simulated' => $tenant->zatcaSettings?->isSimulated() ?? false,
                 'onboarding_status' => $tenant->zatcaSettings?->onboarding_status ?? 'not_started',
                 'environment' => $tenant->zatcaSettings?->environment ?? 'simulation',
                 'production_csid_expires_at' => $tenant->zatcaSettings?->production_csid_expires_at?->format('Y-m-d'),

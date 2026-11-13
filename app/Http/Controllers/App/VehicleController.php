@@ -7,6 +7,7 @@ namespace App\Http\Controllers\App;
 use App\Exports\VehiclesExport;
 use App\Http\Requests\VehicleStoreRequest;
 use App\Http\Requests\VehicleUpdateRequest;
+use App\Models\Center;
 use App\Models\Customer;
 use App\Models\Dealer;
 use App\Models\Department;
@@ -16,10 +17,13 @@ use App\Models\Vehicle;
 use App\Models\VehicleColor;
 use App\Models\VehicleMake;
 use App\Models\VehicleModel;
+use App\Support\TenancyContext;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use Inertia\Response;
 use Maatwebsite\Excel\Facades\Excel;
 
 class VehicleController
@@ -43,15 +47,96 @@ class VehicleController
     }
 
     /**
+     * Build base vehicle query with common filters and sorting.
+     */
+    protected function buildVehicleQuery(Request $request): Builder
+    {
+        $user = $request->user();
+
+        $vehicles = Vehicle::query()
+            ->where('tenant_id', $user->tenant_id)
+            ->with(['customer', 'dealer:id,name,name_en,type', 'make', 'model'])
+            ->when($request->search, function ($query, $search) {
+                $arabicToEnglish = [
+                    'أ' => 'A', 'ب' => 'B', 'ح' => 'J', 'د' => 'D', 'ر' => 'R', 'س' => 'S',
+                    'ص' => 'X', 'ط' => 'T', 'ع' => 'E', 'ق' => 'G', 'ك' => 'K', 'ل' => 'L',
+                    'م' => 'Z', 'ن' => 'N', 'هـ' => 'H', 'ه' => 'H', 'و' => 'U', 'ي' => 'V',
+                    '٠' => '0', '١' => '1', '٢' => '2', '٣' => '3', '٤' => '4',
+                    '٥' => '5', '٦' => '6', '٧' => '7', '٨' => '8', '٩' => '9',
+                ];
+                $plateSearch = strtr(mb_strtoupper($search, 'UTF-8'), $arabicToEnglish);
+                $plateSearch = str_replace(' ', '%', $plateSearch);
+
+                $query->where(function ($q) use ($search, $plateSearch) {
+                    $q->where('plate_number', 'like', "%{$plateSearch}%")
+                        ->orWhereHas('customer', fn ($c) => $c->where('name', 'like', "%{$search}%"));
+                });
+            })
+            ->when($request->make_id, fn ($q, $makeId) => $q->where('make_id', $makeId))
+            ->when($request->date_from, fn ($q, $date) => $q->whereDate('created_at', '>=', $date))
+            ->when($request->date_to, fn ($q, $date) => $q->whereDate('created_at', '<=', $date));
+
+        $sort = (string) $request->input('sort');
+        $direction = strtolower((string) $request->input('direction', 'asc')) === 'desc' ? 'desc' : 'asc';
+
+        if ($sort === 'customer') {
+            $vehicles->orderBy(
+                Customer::select('name')
+                    ->whereColumn('customers.id', 'vehicles.customer_id')
+                    ->limit(1),
+                $direction
+            );
+        } elseif ($sort === 'make') {
+            $vehicles->orderBy(
+                VehicleMake::select('name_ar')
+                    ->whereColumn('vehicle_makes.id', 'vehicles.make_id')
+                    ->limit(1),
+                $direction
+            );
+        } elseif ($sort === 'model') {
+            $vehicles->orderBy(
+                VehicleModel::select('name_ar')
+                    ->whereColumn('vehicle_models.id', 'vehicles.model_id')
+                    ->limit(1),
+                $direction
+            );
+        } elseif (in_array($sort, ['plate_number', 'year', 'odometer', 'created_at', 'id'], true)) {
+            $vehicles->orderBy("vehicles.{$sort}", $direction);
+        } else {
+            $vehicles->latest('vehicles.id');
+        }
+
+        return $vehicles;
+    }
+
+    /**
      * Print vehicles list (Full Page).
      */
-    public function print()
+    public function print(Request $request): Response
     {
         $this->authorize('viewAny', Vehicle::class);
 
-        $user = auth()->user();
-        $search = request('search');
+        $sort = (string) $request->input('sort');
+        $direction = strtolower((string) $request->input('direction', 'asc')) === 'desc' ? 'desc' : 'asc';
 
+        $vehicles = $this->buildVehicleQuery($request)->get();
+
+        $tenant = $request->user()->tenant;
+        $centerId = TenancyContext::centerId();
+        $center = $centerId ? Center::find($centerId) : null;
+
+        return Inertia::render('Vehicles/Print', [
+            'vehicles' => $vehicles,
+            'filters' => $request->only(['search', 'make_id', 'date_from', 'date_to']),
+            'companyInfo' => [
+                'name' => $center?->name_ar ?? $center?->name ?? $tenant->trade_name ?? $tenant->name ?? config('app.name_ar', 'خدمة برو'),
+                'vat_number' => $tenant->vat_number ?? '',
+                'cr_number' => $tenant->cr_number ?? '',
+                'logo_path' => $tenant->logo_path ?? '',
+                'center_name' => $center?->name ?? '',
+                'phone' => $center?->phone ?? $tenant->phone ?? '',
+            ],
+        ]);
     }
 
     public function apiIndex(Request $request)
@@ -164,60 +249,12 @@ class VehicleController
 
         $user = $request->user();
 
-        $vehicles = Vehicle::query()
-            ->where('tenant_id', $user->tenant_id)
-            ->with(['customer', 'dealer:id,name,name_en,type', 'make', 'model'])
-            ->when($request->search, function ($query, $search) {
-                $arabicToEnglish = [
-                    'أ' => 'A', 'ب' => 'B', 'ح' => 'J', 'د' => 'D', 'ر' => 'R', 'س' => 'S',
-                    'ص' => 'X', 'ط' => 'T', 'ع' => 'E', 'ق' => 'G', 'ك' => 'K', 'ل' => 'L',
-                    'م' => 'Z', 'ن' => 'N', 'هـ' => 'H', 'ه' => 'H', 'و' => 'U', 'ي' => 'V',
-                    '٠' => '0', '١' => '1', '٢' => '2', '٣' => '3', '٤' => '4',
-                    '٥' => '5', '٦' => '6', '٧' => '7', '٨' => '8', '٩' => '9',
-                ];
-                $plateSearch = strtr(mb_strtoupper($search, 'UTF-8'), $arabicToEnglish);
-                $plateSearch = str_replace(' ', '%', $plateSearch);
-
-                $query->where(function ($q) use ($search, $plateSearch) {
-                    $q->where('plate_number', 'like', "%{$plateSearch}%")
-                        ->orWhereHas('customer', fn ($c) => $c->where('name', 'like', "%{$search}%"));
-                });
-            })
-            ->when($request->make_id, fn ($q, $makeId) => $q->where('make_id', $makeId))
-            ->when($request->date_from, fn ($q, $date) => $q->whereDate('created_at', '>=', $date))
-            ->when($request->date_to, fn ($q, $date) => $q->whereDate('created_at', '<=', $date));
-
         $sort = (string) $request->input('sort');
         $direction = strtolower((string) $request->input('direction', 'asc')) === 'desc' ? 'desc' : 'asc';
 
-        if ($sort === 'customer') {
-            $vehicles->orderBy(
-                Customer::select('name')
-                    ->whereColumn('customers.id', 'vehicles.customer_id')
-                    ->limit(1),
-                $direction
-            );
-        } elseif ($sort === 'make') {
-            $vehicles->orderBy(
-                VehicleMake::select('name_ar')
-                    ->whereColumn('vehicle_makes.id', 'vehicles.make_id')
-                    ->limit(1),
-                $direction
-            );
-        } elseif ($sort === 'model') {
-            $vehicles->orderBy(
-                VehicleModel::select('name_ar')
-                    ->whereColumn('vehicle_models.id', 'vehicles.model_id')
-                    ->limit(1),
-                $direction
-            );
-        } elseif (in_array($sort, ['plate_number', 'year', 'odometer', 'created_at', 'id'], true)) {
-            $vehicles->orderBy("vehicles.{$sort}", $direction);
-        } else {
-            $vehicles->latest('vehicles.id');
-        }
-
-        $vehicles = $vehicles->paginate(20)->withQueryString();
+        $vehicles = $this->buildVehicleQuery($request)
+            ->paginate(20)
+            ->withQueryString();
 
         // Get customers for the dropdown
         $customers = Customer::query()
@@ -297,7 +334,9 @@ class VehicleController
         // Load customer relationship for frontend
         $vehicle->load('customer');
 
-        return back()->with('vehicle', $vehicle);
+        return back()
+            ->with('vehicle', $vehicle)
+            ->with('success', __('messages.vehicle_created'));
     }
 
     public function show(Vehicle $vehicle)
@@ -422,7 +461,7 @@ class VehicleController
             ]);
         }
 
-        return back()->with('success', 'Vehicle updated successfully.');
+        return back()->with('success', __('messages.vehicle_updated'));
     }
 
     public function checkPlate(Request $request): JsonResponse
@@ -480,6 +519,6 @@ class VehicleController
 
         $vehicle->delete();
 
-        return back()->with('success', 'Vehicle deleted successfully.');
+        return back()->with('success', __('messages.vehicle_deleted'));
     }
 }

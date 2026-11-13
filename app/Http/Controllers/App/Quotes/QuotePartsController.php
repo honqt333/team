@@ -43,6 +43,12 @@ class QuotePartsController extends Controller
             'hide_on_print' => ['boolean'],
         ]);
 
+        if (empty($validated['quote_line_id'])) {
+            $validated['quote_line_id'] = null;
+            $validated['include_in_package'] = false;
+            $validated['hide_on_print'] = false;
+        }
+
         if ($validated['source'] === 'warehouse' && ! empty($validated['part_id']) && ! ($validated['include_in_package'] ?? false)) {
             $partId = (int) $validated['part_id'];
             $qty = (float) ($validated['qty'] ?: 1);
@@ -105,6 +111,12 @@ class QuotePartsController extends Controller
             'include_in_package' => ['boolean'],
             'hide_on_print' => ['boolean'],
         ]);
+
+        if (array_key_exists('quote_line_id', $validated) && empty($validated['quote_line_id'])) {
+            $validated['quote_line_id'] = null;
+            $validated['include_in_package'] = false;
+            $validated['hide_on_print'] = false;
+        }
 
         $source = $validated['source'] ?? $quotePart->source;
         $partId = $validated['part_id'] ?? $quotePart->part_id;

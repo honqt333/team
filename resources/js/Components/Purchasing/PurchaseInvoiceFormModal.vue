@@ -1,5 +1,5 @@
 <template>
-    <BaseModal :show="show" @close="handleModalClose" size="5xl">
+    <BaseModal :show="show" @close="handleModalClose" size="xl">
         <template #title>
             <div class="flex items-center gap-3">
                 <div
@@ -19,11 +19,56 @@
                         />
                     </svg>
                 </div>
-                {{ $t('invoices.purchases.add') }}
+                <span>{{ modalTitle }}</span>
             </div>
         </template>
 
         <form @submit.prevent="submit" class="space-y-6">
+            <!-- Purchase Type Selector (Wrshah Style 3-Types: Inventory, External Parts, External Service) -->
+            <div
+                class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 p-1.5 bg-gray-100 dark:bg-gray-800/80 rounded-2xl border border-gray-200 dark:border-gray-700"
+            >
+                <button
+                    type="button"
+                    @click="setPurchaseType('inventory')"
+                    :class="[
+                        'py-3 px-3 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition-all cursor-pointer',
+                        selectedPurchaseType === 'inventory'
+                            ? 'bg-white dark:bg-gray-700 text-sky-700 dark:text-sky-300 shadow-sm ring-1 ring-sky-300 dark:ring-sky-600'
+                            : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white',
+                    ]"
+                >
+                    <span class="text-base">📦</span>
+                    <span>{{ $t('purchasing.purposes.inventory_stock') }}</span>
+                </button>
+                <button
+                    type="button"
+                    @click="setPurchaseType('external_part')"
+                    :class="[
+                        'py-3 px-3 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition-all cursor-pointer',
+                        selectedPurchaseType === 'external_part'
+                            ? 'bg-white dark:bg-gray-700 text-amber-700 dark:text-amber-300 shadow-sm ring-1 ring-amber-300 dark:ring-amber-600'
+                            : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white',
+                    ]"
+                >
+                    <span class="text-base">🛒</span>
+                    <span>{{ $t('purchasing.purposes.external_parts') }}</span>
+                </button>
+                <button
+                    type="button"
+                    @click="setPurchaseType('service')"
+                    :class="[
+                        'py-3 px-3 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition-all cursor-pointer',
+                        selectedPurchaseType === 'service'
+                            ? 'bg-white dark:bg-gray-700 text-purple-700 dark:text-purple-300 shadow-sm ring-1 ring-purple-300 dark:ring-purple-600'
+                            : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white',
+                    ]"
+                >
+                    <span class="text-base">🤝</span>
+                    <span>{{ $t('purchasing.purposes.external_service') }}</span>
+                </button>
+            </div>
+
             <!-- Error Alert -->
             <div
                 v-if="form.hasErrors"
@@ -57,25 +102,8 @@
                 class="bg-gray-50 dark:bg-gray-900/50 rounded-xl p-4 border border-gray-200 dark:border-gray-700"
             >
                 <div class="grid grid-cols-1 md:grid-cols-12 gap-4">
-                    <!-- Warehouse (Span 6) -->
-                    <FormField
-                        class="md:col-span-6"
-                        :label="$t('inventory.warehouses.title')"
-                        :error="form.errors.warehouse_id"
-                        required
-                    >
-                        <SearchableSelect
-                            v-model="form.warehouse_id"
-                            :options="warehouses"
-                            option-label="name"
-                            option-value="id"
-                            :placeholder="$t('inventory.warehouses.select')"
-                            required
-                        />
-                    </FormField>
-
-                    <!-- Supplier (Span 6) -->
-                    <FormField class="md:col-span-6" :error="form.errors.supplier_id" required>
+                    <!-- Supplier (Span 4) -->
+                    <FormField class="md:col-span-4" :error="form.errors.supplier_id" required>
                         <template #label>
                             <div class="flex items-center justify-between w-full">
                                 <span>{{ $t('purchasing.orders.supplier') }}</span>
@@ -103,7 +131,7 @@
                         </template>
                         <SearchableSelect
                             v-model="form.supplier_id"
-                            :options="allSuppliers"
+                            :options="filteredSuppliers"
                             option-label="name"
                             option-value="id"
                             :placeholder="$t('purchasing.orders.select_supplier')"
@@ -112,35 +140,10 @@
                         />
                     </FormField>
 
-                    <!-- Date (Span 3) -->
-                    <FormField
-                        class="md:col-span-3"
-                        :label="$t('invoices.issue_date')"
-                        :error="form.errors.issue_date"
-                        required
-                    >
-                        <CustomDatePicker
-                            v-model="form.issue_date"
-                            :placeholder="$t('invoices.issue_date')"
-                        />
-                    </FormField>
-
-                    <!-- Due Date (Span 3) -->
-                    <FormField
-                        class="md:col-span-3"
-                        :label="$t('purchasing.orders.due_date')"
-                        :error="form.errors.due_date"
-                    >
-                        <CustomDatePicker
-                            v-model="form.due_date"
-                            :placeholder="$t('purchasing.orders.due_date')"
-                        />
-                    </FormField>
-
-                    <!-- Supplier Invoice Number (Span 6) -->
+                    <!-- Supplier Invoice Number (Span 4) -->
                     <FormField
                         v-slot="field"
-                        class="md:col-span-6"
+                        class="md:col-span-4"
                         :label="$t('invoices.purchases.invoice_number')"
                         :error="form.errors.invoice_number"
                         required
@@ -157,10 +160,60 @@
                         />
                     </FormField>
 
-                    <!-- Linked Work Order (Optional, Span 6) -->
+                    <!-- Issue Date (Span 4) -->
                     <FormField
-                        v-if="workOrderOptions.length > 0"
-                        class="md:col-span-6"
+                        class="md:col-span-4"
+                        :label="$t('invoices.issue_date')"
+                        :error="form.errors.issue_date"
+                        required
+                    >
+                        <CustomDatePicker
+                            v-model="form.issue_date"
+                            :placeholder="$t('invoices.issue_date')"
+                        />
+                    </FormField>
+
+                    <!-- Due Date (Span 4) -->
+                    <FormField
+                        class="md:col-span-4"
+                        :label="$t('purchasing.orders.due_date')"
+                        :error="form.errors.due_date"
+                    >
+                        <CustomDatePicker
+                            v-model="form.due_date"
+                            :placeholder="$t('purchasing.orders.due_date')"
+                        />
+                    </FormField>
+
+                    <!-- Warehouse / Center (Span 4 when work order is shown, otherwise Span 8) -->
+                    <FormField
+                        :class="
+                            selectedPurchaseType !== 'inventory' &&
+                            (workOrderOptions.length > 0 || props.defaultWorkOrderId)
+                                ? 'md:col-span-4'
+                                : 'md:col-span-8'
+                        "
+                        :label="$t('inventory.warehouses.title')"
+                        :error="form.errors.warehouse_id"
+                        required
+                    >
+                        <SearchableSelect
+                            v-model="form.warehouse_id"
+                            :options="warehouses"
+                            option-label="name"
+                            option-value="id"
+                            :placeholder="$t('inventory.warehouses.select')"
+                            required
+                        />
+                    </FormField>
+
+                    <!-- Linked Work Order (ONLY when context is NOT general inventory) -->
+                    <FormField
+                        v-if="
+                            selectedPurchaseType !== 'inventory' &&
+                            (workOrderOptions.length > 0 || props.defaultWorkOrderId)
+                        "
+                        class="md:col-span-4"
                         :label="$t('work_orders.purchase_invoices.work_order_optional')"
                         :error="form.errors.work_order_id"
                     >
@@ -194,9 +247,24 @@
                     <button
                         type="button"
                         @click.stop="openItemModal()"
-                        class="flex items-center gap-2 px-4 py-2 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded-xl hover:bg-blue-100 dark:hover:bg-blue-900/40 transition-all font-bold text-sm select-none active:scale-95 shadow-sm border border-blue-100 dark:border-blue-800/30"
+                        :class="[
+                            'flex items-center gap-2 px-4 py-2 rounded-xl transition-all font-bold text-sm select-none active:scale-95 shadow-sm border cursor-pointer',
+                            selectedPurchaseType === 'service'
+                                ? 'bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-300 hover:bg-purple-100 border-purple-200 dark:border-purple-800/40'
+                                : selectedPurchaseType === 'external_part'
+                                  ? 'bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-300 hover:bg-amber-100 border-amber-200 dark:border-amber-800/40'
+                                  : 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 hover:bg-blue-100 border-blue-100 dark:border-blue-800/30',
+                        ]"
                     >
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <span v-if="selectedPurchaseType === 'service'">🤝</span>
+                        <span v-else-if="selectedPurchaseType === 'external_part'">🛒</span>
+                        <svg
+                            v-else
+                            class="w-5 h-5"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                        >
                             <path
                                 stroke-linecap="round"
                                 stroke-linejoin="round"
@@ -204,7 +272,15 @@
                                 d="M12 4v16m8-8H4"
                             />
                         </svg>
-                        {{ $t('purchasing.items.add') }}
+                        <span>
+                            {{
+                                selectedPurchaseType === 'service'
+                                    ? $t('purchasing.supplier_services.add')
+                                    : selectedPurchaseType === 'external_part'
+                                      ? $t('purchasing.items.external_part')
+                                      : $t('purchasing.items.add')
+                            }}
+                        </span>
                     </button>
                 </div>
 
@@ -223,7 +299,13 @@
                                     #
                                 </th>
                                 <th class="px-4 py-3 text-center font-medium">
-                                    {{ $t('inventory.parts.part_number') }}
+                                    {{
+                                        selectedPurchaseType === 'service'
+                                            ? $t('purchasing.supplier_services.service_name')
+                                            : selectedPurchaseType === 'external_part'
+                                              ? $t('inventory.parts.name')
+                                              : $t('inventory.parts.part_number')
+                                    }}
                                 </th>
                                 <th class="px-4 py-3 text-center font-medium">
                                     {{ $t('inventory.parts.unit_price') }}
@@ -257,10 +339,15 @@
                                 </td>
                                 <td class="px-4 py-3 text-center">
                                     <div class="font-medium text-gray-900 dark:text-white">
-                                        {{ item.part?.name_ar }}
+                                        {{ item.part?.name_ar || item.name }}
                                     </div>
                                     <div class="text-xs text-gray-500 font-mono mt-0.5">
-                                        {{ item.part?.sku }}
+                                        {{
+                                            item.part?.sku ||
+                                            (item.is_custom
+                                                ? $t('purchasing.items.custom_item')
+                                                : '')
+                                        }}
                                     </div>
                                 </td>
                                 <td
@@ -394,7 +481,7 @@
                         </div>
                         <div
                             v-if="form.tax_included"
-                            class="flex justify-between items-center text-sm text-gray-500 dark:text-gray-550 text-xs"
+                            class="flex justify-between items-center text-sm text-gray-500 dark:text-gray-400 text-xs"
                         >
                             <span>{{ $t('common.vat_included') }}</span>
                             <span class="font-mono" dir="ltr" lang="en">
@@ -671,7 +758,7 @@
                     <button
                         type="button"
                         @click="$emit('close')"
-                        class="px-5 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl transition-colors font-medium"
+                        class="px-5 py-2.5 text-xs font-bold text-text-secondary hover:bg-surface-secondary border border-border rounded-xl transition-colors cursor-pointer"
                     >
                         {{ $t('common.cancel') }}
                     </button>
@@ -679,7 +766,7 @@
                         type="button"
                         @click="submit"
                         :disabled="!isFormValid || form.processing || submitting"
-                        class="px-8 py-2.5 bg-action-primary hover:bg-action-primary-hover text-white rounded-xl disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-lg shadow-focus-ring-soft font-black uppercase tracking-widest text-xs flex items-center gap-2"
+                        class="inline-flex items-center justify-center gap-2 px-6 py-2.5 text-xs font-bold text-white bg-action-primary hover:bg-action-primary-hover rounded-xl shadow-xs transition-all disabled:opacity-50 cursor-pointer"
                     >
                         <svg
                             v-if="form.processing || submitting"
@@ -711,13 +798,27 @@
         </template>
     </BaseModal>
 
-    <!-- Item Modal -->
+    <!-- Item Modal (Inventory and External Part) -->
     <PurchaseOrderItemModal
         v-if="showItemModal"
         :show="showItemModal"
         :item="editingItem"
         :units="units"
+        :context="selectedPurchaseType"
+        :supplier-type="supplierType"
         v-model:tax-included="form.tax_included"
+        :tenant-tax-settings="tenantTaxSettings"
+        @close="closeItemModal"
+        @saved="onItemSaved"
+    />
+
+    <!-- Dedicated Supplier Service Modal -->
+    <SupplierServiceItemModal
+        v-if="showSupplierServiceModal"
+        :show="showSupplierServiceModal"
+        :item="editingItem"
+        :work-order="selectedWorkOrder"
+        :tax-included="form.tax_included"
         :tenant-tax-settings="tenantTaxSettings"
         @close="closeItemModal"
         @saved="onItemSaved"
@@ -727,6 +828,7 @@
     <SupplierCreateModal
         v-if="showSupplierModal"
         :show="showSupplierModal"
+        :default-type="selectedPurchaseType === 'service' ? 'services' : 'parts'"
         @close="showSupplierModal = false"
         @saved="onSupplierSaved"
     />
@@ -754,6 +856,7 @@ import FormField from '@/Components/Common/FormField.vue';
 import AppInput from '@/Components/App/AppInput.vue';
 import Tooltip from '@/Components/Tooltip.vue';
 import PurchaseOrderItemModal from './PurchaseOrderItemModal.vue';
+import SupplierServiceItemModal from './SupplierServiceItemModal.vue';
 import SupplierCreateModal from '@/Pages/Purchasing/Suppliers/CreateModal.vue';
 import PurchaseOrderPaymentModal from './PurchaseOrderPaymentModal.vue';
 import { useNumberFormat } from '@/Composables/useNumberFormat';
@@ -767,17 +870,68 @@ const props = defineProps({
     defaultSupplierId: [Number, String],
     workOrders: { type: Array, default: () => [] },
     defaultWorkOrderId: [Number, String],
-});
-
-const tenantTaxSettings = computed(() => {
-    return usePage().props.tenant?.tax_settings || {};
+    purpose: {
+        type: String,
+        default: 'inventory', // 'inventory', 'external_part', 'service'
+    },
+    title: {
+        type: String,
+        default: null,
+    },
 });
 
 const emit = defineEmits(['close', 'saved']);
 const { t } = useI18n();
 const { sanitizeInput, formatCurrency: formatCurrencyEn, toEnglish } = useNumberFormat();
 
+const selectedPurchaseType = ref(props.purpose || 'inventory');
+
+watch(
+    () => props.purpose,
+    (val) => {
+        if (val) selectedPurchaseType.value = val;
+    }
+);
+
+function setPurchaseType(type) {
+    selectedPurchaseType.value = type;
+    if (type === 'inventory') {
+        form.work_order_id = '';
+    } else if (props.defaultWorkOrderId) {
+        form.work_order_id = props.defaultWorkOrderId;
+    }
+
+    if (form.supplier_id) {
+        const currentSupplier = allSuppliers.value.find(
+            (s) => String(s.id) === String(form.supplier_id)
+        );
+        if (currentSupplier) {
+            if (type === 'service' && currentSupplier.type !== 'services') {
+                form.supplier_id = '';
+            } else if (type !== 'service' && currentSupplier.type === 'services') {
+                form.supplier_id = '';
+            }
+        }
+    }
+}
+
+const modalTitle = computed(() => {
+    if (props.title) return props.title;
+    if (selectedPurchaseType.value === 'external_part') {
+        return `${t('invoices.purchases.add')} - ${t('purchasing.purposes.external_parts')}`;
+    }
+    if (selectedPurchaseType.value === 'service') {
+        return `${t('invoices.purchases.add')} - ${t('purchasing.purposes.external_service')}`;
+    }
+    return `${t('invoices.purchases.add')} - ${t('purchasing.purposes.inventory_stock')}`;
+});
+
+const tenantTaxSettings = computed(() => {
+    return usePage().props.tenant?.tax_settings || {};
+});
+
 const showItemModal = ref(false);
+const showSupplierServiceModal = ref(false);
 const showSupplierModal = ref(false);
 const showPaymentModal = ref(false);
 const editingItem = ref(null);
@@ -791,11 +945,32 @@ const allSuppliers = computed(() => {
     return [...props.suppliers, ...localAddedSuppliers.value];
 });
 
+const filteredSuppliers = computed(() => {
+    if (selectedPurchaseType.value === 'service') {
+        return allSuppliers.value.filter((s) => s.type === 'services');
+    }
+    return allSuppliers.value.filter((s) => s.type !== 'services');
+});
+
+const selectedSupplier = computed(() => {
+    return allSuppliers.value.find((s) => String(s.id) === String(form.supplier_id));
+});
+
+const supplierType = computed(() => {
+    return selectedSupplier.value?.type || 'parts';
+});
+
 const workOrderOptions = computed(() => {
     return (props.workOrders || []).map((wo) => ({
         value: wo.id,
         label: [wo.code, wo.customer?.name, wo.vehicle?.plate_number].filter(Boolean).join(' • '),
     }));
+});
+
+const selectedWorkOrder = computed(() => {
+    const id = form.work_order_id || props.defaultWorkOrderId;
+    if (!id) return null;
+    return (props.workOrders || []).find((wo) => String(wo.id) === String(id)) || null;
 });
 
 const form = useForm({
@@ -833,17 +1008,22 @@ watch(
 const openItemModal = (item = null, index = -1) => {
     editingItem.value = item;
     editingItemIndex.value = index;
-    showItemModal.value = true;
+    if (selectedPurchaseType.value === 'service') {
+        showSupplierServiceModal.value = true;
+    } else {
+        showItemModal.value = true;
+    }
 };
 
 const closeItemModal = () => {
     showItemModal.value = false;
+    showSupplierServiceModal.value = false;
     editingItem.value = null;
     editingItemIndex.value = -1;
 };
 
 const handleModalClose = () => {
-    if (showItemModal.value) return;
+    if (showItemModal.value || showSupplierServiceModal.value) return;
     emit('close');
 };
 
@@ -986,10 +1166,18 @@ const submit = () => {
             unitCost = unitCost / (1 + rate);
         }
         return {
-            part_id: item.part_id,
-            qty: item.qty,
+            part_id: item.part_id || null,
+            name: item.name || item.custom_name || item.part?.name_ar || '',
+            custom_name: item.custom_name || item.name || '',
+            sku: item.part_number || item.part?.sku || '',
+            qty: Math.max(1, Math.floor(Number(item.qty || 1))),
             unit_cost: unitCost,
-            tax_rate: form.tax_included ? tenantTaxSettings.value?.parts_vat_rate || 15 : 0,
+            tax_rate:
+                item.tax_rate !== undefined
+                    ? Number(item.tax_rate)
+                    : form.tax_included
+                      ? tenantTaxSettings.value?.parts_vat_rate || 15
+                      : 0,
             notes: item.notes || '',
             purchase_unit_id: item.purchase_unit_id || null,
             purchase_conversion_factor: item.conversion_factor || 1,
@@ -998,6 +1186,7 @@ const submit = () => {
 
     form.transform((data) => ({
         ...data,
+        purchase_type: selectedPurchaseType.value,
         items: transformedItems,
     })).post(url, options);
 };

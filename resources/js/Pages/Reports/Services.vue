@@ -678,7 +678,7 @@
                     <!-- Accordion Header -->
                     <div
                         @click="toggleGroup(grp.group_key)"
-                        class="p-4 bg-gray-50/70 dark:bg-gray-750 flex flex-col md:flex-row md:items-center justify-between gap-3 cursor-pointer hover:bg-teal-50/40 dark:hover:bg-teal-900/10 transition-colors"
+                        class="p-4 bg-gray-50/70 dark:bg-gray-800 flex flex-col md:flex-row md:items-center justify-between gap-3 cursor-pointer hover:bg-teal-50/40 dark:hover:bg-teal-900/10 transition-colors"
                     >
                         <div class="flex items-center gap-3">
                             <span
@@ -806,7 +806,7 @@
                                 <tr
                                     v-for="(srv, i) in grp.services"
                                     :key="srv.id"
-                                    class="hover:bg-gray-50/50 dark:hover:bg-gray-750/50"
+                                    class="hover:bg-gray-50/50 dark:hover:bg-gray-700/40"
                                 >
                                     <td class="py-2.5 px-3 text-center text-gray-400">
                                         {{ i + 1 }}
@@ -1043,7 +1043,7 @@
                             <tr
                                 v-for="(srv, i) in services?.data"
                                 :key="srv.id"
-                                class="hover:bg-gray-50/50 dark:hover:bg-gray-750/50 transition-colors"
+                                class="hover:bg-gray-50/50 dark:hover:bg-gray-700/40 transition-colors"
                             >
                                 <td class="py-3 px-3 text-center text-gray-400 font-mono">
                                     {{ (services.current_page - 1) * services.per_page + i + 1 }}

@@ -202,8 +202,9 @@
         <template #footer>
             <div class="flex justify-end">
                 <button
+                    type="button"
                     @click="emit('close')"
-                    class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                    class="px-5 py-2.5 text-xs font-bold text-text-secondary hover:bg-surface-secondary border border-border rounded-xl transition-colors cursor-pointer"
                 >
                     {{ $t('common.close') }}
                 </button>

@@ -288,7 +288,7 @@
                     <div
                         v-for="item in methodsBreakdown"
                         :key="item.method"
-                        class="flex items-center gap-2.5 px-3 py-2 rounded-xl bg-gray-50 dark:bg-gray-750 border border-gray-200 dark:border-gray-700 text-xs"
+                        class="flex items-center gap-2.5 px-3 py-2 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-xs"
                     >
                         <span class="font-bold text-gray-700 dark:text-gray-300">
                             {{ getMethodLabel(item.method) }}:
@@ -417,7 +417,7 @@
                         <button
                             type="button"
                             @click="resetFilters"
-                            class="px-4 py-3 rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-750 text-xs font-bold transition-all shadow-sm"
+                            class="px-4 py-3 rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/60 text-xs font-bold transition-all shadow-sm"
                         >
                             {{ $t('reports.payments_report.reset_filters') }}
                         </button>
@@ -577,7 +577,7 @@
                             <tr
                                 v-for="(payment, index) in payments.data"
                                 :key="payment.id"
-                                class="hover:bg-gray-50/70 dark:hover:bg-gray-750 transition-colors text-center"
+                                class="hover:bg-gray-50/70 dark:hover:bg-gray-700/60 transition-colors text-center"
                             >
                                 <!-- Row number -->
                                 <td class="px-4 py-3 font-mono text-gray-400 text-xs">

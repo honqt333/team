@@ -65,7 +65,7 @@
         <button
             v-if="tenant.dunning_opted_out"
             @click="$emit('clear-dunning-opt-out')"
-            class="px-4 py-2 border border-amber-300 bg-white hover:bg-amber-50 text-amber-700 rounded-lg text-sm font-medium transition-colors"
+            class="px-4 py-2 border border-amber-300 dark:border-amber-700/60 bg-white dark:bg-gray-800 hover:bg-amber-50 dark:hover:bg-amber-900/20 text-amber-700 dark:text-amber-300 rounded-lg text-sm font-medium transition-colors"
         >
             <span class="inline-flex items-center gap-1.5">
                 <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -103,7 +103,7 @@
                 tenant.suspension_reason === 'auto_suspend_dunning_tier_4'
             "
             @click="$emit('lift-auto-suspend')"
-            class="px-4 py-2 border border-orange-300 bg-white hover:bg-orange-50 text-orange-700 rounded-lg text-sm font-medium transition-colors"
+            class="px-4 py-2 border border-orange-300 dark:border-orange-700/60 bg-white dark:bg-gray-800 hover:bg-orange-50 dark:hover:bg-orange-900/20 text-orange-700 dark:text-orange-300 rounded-lg text-sm font-medium transition-colors"
         >
             <span class="inline-flex items-center gap-1.5">
                 <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

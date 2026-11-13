@@ -108,6 +108,13 @@ class Dealer extends Model
         return $this->hasMany(Invoice::class, 'dealer_id');
     }
 
+    public function paymentTerms(): HasMany
+    {
+        return $this->hasMany(DealerPaymentTerm::class, 'dealer_id')
+            ->orderBy('sort_order')
+            ->orderBy('id');
+    }
+
     public function scopeActive($query)
     {
         return $query->where('is_active', true);
@@ -129,17 +136,30 @@ class Dealer extends Model
     }
 
     /**
-     * Calculate outstanding balance on invoices billed to this dealer.
+     * Calculate outstanding balance on invoices and open uninvoiced work orders billed/linked to this dealer.
      */
     public function getOutstandingBalance(): float
     {
-        $due = (float) $this->invoices()
+        $invoicedDue = (float) $this->invoices()
             ->withoutGlobalScope('center_scoped')
             ->whereNotIn('status', ['cancelled'])
-            ->where('type', 'invoice')
-            ->selectRaw('COALESCE(SUM(total_incl_tax - total_paid), 0) as balance')
-            ->value('balance');
+            ->where(fn ($q) => $q->whereNull('type')->orWhere('type', '!=', 'credit_note'))
+            ->toBase()
+            ->selectRaw('COALESCE(SUM(CASE WHEN (total_incl_tax - COALESCE(total_paid, 0)) > 0 THEN (total_incl_tax - COALESCE(total_paid, 0)) ELSE 0 END), 0) as total_balance')
+            ->value('total_balance');
 
-        return max(0.0, round($due, 2));
+        $uninvoicedWorkOrders = $this->workOrders()
+            ->withoutGlobalScope('center_scoped')
+            ->whereNotIn('status', ['cancelled'])
+            ->whereDoesntHave('invoice', function ($q) {
+                $q->withoutGlobalScope('center_scoped')
+                    ->whereNotIn('status', ['cancelled']);
+            })
+            ->with(['payments', 'creditNotes'])
+            ->get();
+
+        $uninvoicedDue = (float) $uninvoicedWorkOrders->sum(fn (WorkOrder $wo) => (float) $wo->balance);
+
+        return max(0.0, round($invoicedDue + $uninvoicedDue, 2));
     }
 }

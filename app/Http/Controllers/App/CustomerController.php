@@ -151,7 +151,9 @@ class CustomerController
 
         $customer = Customer::create($request->validated());
 
-        return redirect()->back()->with('customer', $customer);
+        return redirect()->back()
+            ->with('customer', $customer)
+            ->with('success', __('messages.customer_created'));
     }
 
     public function show(Customer $customer): Response

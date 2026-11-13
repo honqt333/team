@@ -238,24 +238,13 @@
         </div>
 
         <!-- Admin Reply Modal -->
-        <Modal :show="showReplyModal" max-width="lg" @close="showReplyModal = false">
-            <div class="p-6 bg-white dark:bg-gray-800 rounded-2xl space-y-4">
-                <div
-                    class="flex items-center justify-between pb-3 border-b border-gray-100 dark:border-gray-700"
-                >
-                    <h3 class="text-sm font-bold text-gray-900 dark:text-white">
-                        {{ $t('system.feedbacks.reply_modal.title') }}
-                        {{ activeFeedback?.tenant?.trade_name || activeFeedback?.tenant?.name }}
-                    </h3>
-                    <button
-                        type="button"
-                        @click="showReplyModal = false"
-                        class="text-gray-400 hover:text-gray-600"
-                    >
-                        ✕
-                    </button>
-                </div>
-
+        <BaseModal
+            :show="showReplyModal"
+            :title="`${$t('system.feedbacks.reply_modal.title')} ${activeFeedback?.tenant?.trade_name || activeFeedback?.tenant?.name || ''}`"
+            size="lg"
+            @close="showReplyModal = false"
+        >
+            <div class="p-6 space-y-4">
                 <div class="p-3 bg-gray-50 dark:bg-gray-900/50 rounded-xl text-xs space-y-1">
                     <div class="font-semibold text-gray-700 dark:text-gray-300">
                         {{ $t('system.feedbacks.reply_modal.notes_label') }}
@@ -291,19 +280,13 @@
                         />
                     </div>
 
-                    <div>
-                        <label
-                            class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1"
-                        >
-                            {{ $t('system.feedbacks.reply_modal.video_label') }}
-                        </label>
-                        <input
-                            type="file"
-                            accept="video/*"
-                            @change="replyForm.reply_video = $event.target.files[0]"
-                            class="text-xs text-gray-500 file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:bg-selection-bg file:text-selection-text"
-                        />
-                    </div>
+                    <AppFileUpload
+                        v-model="replyForm.reply_video"
+                        :label="$t('system.feedbacks.reply_modal.video_label')"
+                        accept="video/*"
+                        :max-size-mb="50"
+                        @invalid="toastError"
+                    />
 
                     <div
                         class="flex items-center justify-end gap-2 pt-3 border-t border-gray-100 dark:border-gray-700"
@@ -326,7 +309,7 @@
                     </div>
                 </form>
             </div>
-        </Modal>
+        </BaseModal>
 
         <!-- Video Modal -->
         <VideoPlayerModal
@@ -346,15 +329,18 @@ import { router, useForm } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import { useNumberFormat } from '@/Composables/useNumberFormat';
 import { useConfirm } from '@/Composables/useConfirm';
-import Modal from '@/Components/Modal.vue';
+import BaseModal from '@/Components/BaseModal.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 import VideoPlayerModal from '@/Pages/Feedback/Partials/VideoPlayerModal.vue';
 import { debounce } from 'lodash-es';
 import AppButton from '@/Components/App/AppButton.vue';
+import AppFileUpload from '@/Components/Common/AppFileUpload.vue';
+import { useToast } from '@/Composables/useToast';
 
 const { t, locale } = useI18n();
 const { toEnglish } = useNumberFormat();
 const { confirm } = useConfirm();
+const { error: toastError } = useToast();
 
 const props = defineProps({
     feedbacks: Object,

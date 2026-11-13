@@ -159,7 +159,7 @@
                 >
                     <!-- Presets Pills -->
                     <div
-                        class="flex flex-wrap items-center gap-1.5 bg-gray-50 dark:bg-gray-750 p-1.5 rounded-xl border border-gray-200/80 dark:border-gray-700/60"
+                        class="flex flex-wrap items-center gap-1.5 bg-gray-50 dark:bg-gray-800 p-1.5 rounded-xl border border-gray-200/80 dark:border-gray-700/60"
                     >
                         <button
                             v-for="preset in datePresets"
@@ -183,7 +183,7 @@
                             v-model="filterForm.search"
                             type="text"
                             :placeholder="$t('reports.customers_report.search_placeholder')"
-                            class="w-full ps-10 pe-4 py-2 text-xs rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-750 text-gray-900 dark:text-white focus:bg-white dark:focus:bg-gray-800 focus:ring-2 focus:ring-focus-ring focus:border-action-primary transition-all placeholder:text-gray-400"
+                            class="w-full ps-10 pe-4 py-2 text-xs rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white focus:bg-white dark:focus:bg-gray-800 focus:ring-2 focus:ring-focus-ring focus:border-action-primary transition-all placeholder:text-gray-400"
                             @keydown.enter="applyFilters"
                         />
                         <div
@@ -425,7 +425,7 @@
                     <button
                         type="button"
                         @click="toggleGroup(group.group_key)"
-                        class="w-full px-5 py-3.5 bg-gray-50/80 dark:bg-gray-750 hover:bg-gray-100/80 dark:hover:bg-gray-700 flex flex-wrap items-center justify-between gap-3 text-start transition-colors"
+                        class="w-full px-5 py-3.5 bg-gray-50/80 dark:bg-gray-800 hover:bg-gray-100/80 dark:hover:bg-gray-700 flex flex-wrap items-center justify-between gap-3 text-start transition-colors"
                     >
                         <div class="flex items-center gap-3">
                             <svg
@@ -679,7 +679,7 @@
                 <div class="overflow-x-auto">
                     <DataTable structured class="w-full text-xs text-start">
                         <thead
-                            class="bg-gray-50 dark:bg-gray-750 text-gray-600 dark:text-gray-300 border-b border-gray-200 dark:border-gray-700 font-bold"
+                            class="bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-300 border-b border-gray-200 dark:border-gray-700 font-bold"
                         >
                             <tr>
                                 <th class="py-3.5 px-3 text-start">#</th>

@@ -213,7 +213,7 @@
             @close="closeModal"
         >
             <!-- Form Body -->
-            <form @submit.prevent="submit" class="p-6 space-y-5 max-h-[70vh] overflow-y-auto">
+            <form @submit.prevent="submit" class="p-6 space-y-5">
                 <!-- Code & Name -->
                 <div class="grid grid-cols-2 gap-4">
                     <div>
@@ -422,9 +422,11 @@ import SystemLayout from '@/Layouts/SystemLayout.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 import PageHeader from '@/Components/PageHeader.vue';
 import BaseModal from '@/Components/BaseModal.vue';
+import { useConfirm } from '@/Composables/useConfirm';
 import { useNumberFormat } from '@/Composables/useNumberFormat';
 
 const { t } = useI18n();
+const { confirm } = useConfirm();
 const { toEnglish } = useNumberFormat();
 
 const discountTypeOptions = computed(() => [
@@ -533,8 +535,15 @@ const submit = () => {
     }
 };
 
-const deleteCode = (code) => {
-    if (confirm(t('system.promo_codes.confirm_delete', { code: code.code }))) {
+const deleteCode = async (code) => {
+    const ok = await confirm({
+        title: t('common.delete'),
+        message: t('system.promo_codes.confirm_delete', { code: code.code }),
+        confirmText: t('common.delete'),
+        cancelText: t('common.cancel'),
+        type: 'danger',
+    });
+    if (ok) {
         router.delete(`/system/promo-codes/${code.id}`);
     }
 };

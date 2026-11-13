@@ -946,7 +946,12 @@
                                     <tr
                                         v-for="(row, idx) in group.items"
                                         :key="'row-' + row.id"
-                                        class="hover:bg-gray-50/60 dark:hover:bg-gray-700/20 transition-colors"
+                                        class="transition-colors"
+                                        :class="
+                                            row.is_credit_note || Number(row.total) < 0
+                                                ? 'bg-rose-50/40 dark:bg-rose-950/20 hover:bg-rose-50/70 dark:hover:bg-rose-900/30'
+                                                : 'hover:bg-gray-50/60 dark:hover:bg-gray-700/20'
+                                        "
                                     >
                                         <td class="py-3 px-3 text-center text-gray-400 font-mono">
                                             {{ idx + 1 }}
@@ -1003,6 +1008,13 @@
                                                         {{ row.ticket_no }}
                                                     </a>
                                                 </div>
+                                                <div v-if="row.credit_note_number">
+                                                    <span
+                                                        class="inline-block px-1.5 py-0.5 rounded text-[10px] font-mono font-bold bg-rose-100 text-rose-700 dark:bg-rose-900/40 dark:text-rose-300"
+                                                    >
+                                                        {{ row.credit_note_number }}
+                                                    </span>
+                                                </div>
                                             </div>
                                         </td>
                                         <td
@@ -1011,7 +1023,14 @@
                                             {{ row.section_name }}
                                         </td>
                                         <td class="py-3 px-3">
-                                            <div class="font-bold text-gray-800 dark:text-gray-200">
+                                            <div
+                                                class="font-bold"
+                                                :class="
+                                                    row.is_credit_note || Number(row.total) < 0
+                                                        ? 'text-rose-700 dark:text-rose-300'
+                                                        : 'text-gray-800 dark:text-gray-200'
+                                                "
+                                            >
                                                 {{ row.service_name }}
                                             </div>
                                             <span
@@ -1042,17 +1061,32 @@
                                             </span>
                                         </td>
                                         <td
-                                            class="py-3 px-3 text-end font-mono font-bold text-cyan-700 dark:text-cyan-300"
+                                            class="py-3 px-3 text-end font-mono font-bold"
+                                            :class="
+                                                Number(row.service_cost) < 0 || row.is_credit_note
+                                                    ? 'text-rose-600 dark:text-rose-400'
+                                                    : 'text-cyan-700 dark:text-cyan-300'
+                                            "
                                         >
                                             {{ formatCurrency(row.service_cost) }}
                                         </td>
                                         <td
-                                            class="py-3 px-3 text-end font-mono font-bold text-emerald-700 dark:text-emerald-300"
+                                            class="py-3 px-3 text-end font-mono font-bold"
+                                            :class="
+                                                Number(row.spare_part_cost) < 0
+                                                    ? 'text-rose-600 dark:text-rose-400'
+                                                    : 'text-emerald-700 dark:text-emerald-300'
+                                            "
                                         >
                                             {{ formatCurrency(row.spare_part_cost) }}
                                         </td>
                                         <td
-                                            class="py-3 px-3 text-end font-mono font-black text-gray-900 dark:text-white"
+                                            class="py-3 px-3 text-end font-mono font-black"
+                                            :class="
+                                                Number(row.total) < 0 || row.is_credit_note
+                                                    ? 'text-rose-600 dark:text-rose-400'
+                                                    : 'text-gray-900 dark:text-white'
+                                            "
                                         >
                                             {{ formatCurrency(row.total) }}
                                         </td>
@@ -1114,7 +1148,12 @@
                             <tr
                                 v-for="(row, idx) in items.data"
                                 :key="'flat-' + row.id"
-                                class="hover:bg-gray-50/60 dark:hover:bg-gray-700/20 transition-colors"
+                                class="transition-colors"
+                                :class="
+                                    row.is_credit_note || Number(row.total) < 0
+                                        ? 'bg-rose-50/40 dark:bg-rose-950/20 hover:bg-rose-50/70 dark:hover:bg-rose-900/30'
+                                        : 'hover:bg-gray-50/60 dark:hover:bg-gray-700/20'
+                                "
                             >
                                 <td class="py-3 px-3 text-center text-gray-400 font-mono">
                                     {{ idx + 1 + (items.current_page - 1) * items.per_page }}
@@ -1164,13 +1203,27 @@
                                                 {{ row.ticket_no }}
                                             </a>
                                         </div>
+                                        <div v-if="row.credit_note_number">
+                                            <span
+                                                class="inline-block px-1.5 py-0.5 rounded text-[10px] font-mono font-bold bg-rose-100 text-rose-700 dark:bg-rose-900/40 dark:text-rose-300"
+                                            >
+                                                {{ row.credit_note_number }}
+                                            </span>
+                                        </div>
                                     </div>
                                 </td>
                                 <td class="py-3 px-3 text-gray-600 dark:text-gray-300 font-medium">
                                     {{ row.section_name }}
                                 </td>
                                 <td class="py-3 px-3">
-                                    <div class="font-bold text-gray-800 dark:text-gray-200">
+                                    <div
+                                        class="font-bold"
+                                        :class="
+                                            row.is_credit_note || Number(row.total) < 0
+                                                ? 'text-rose-700 dark:text-rose-300'
+                                                : 'text-gray-800 dark:text-gray-200'
+                                        "
+                                    >
                                         {{ row.service_name }}
                                     </div>
                                     <span
@@ -1197,17 +1250,32 @@
                                     </span>
                                 </td>
                                 <td
-                                    class="py-3 px-3 text-end font-mono font-bold text-cyan-700 dark:text-cyan-300"
+                                    class="py-3 px-3 text-end font-mono font-bold"
+                                    :class="
+                                        Number(row.service_cost) < 0 || row.is_credit_note
+                                            ? 'text-rose-600 dark:text-rose-400'
+                                            : 'text-cyan-700 dark:text-cyan-300'
+                                    "
                                 >
                                     {{ formatCurrency(row.service_cost) }}
                                 </td>
                                 <td
-                                    class="py-3 px-3 text-end font-mono font-bold text-emerald-700 dark:text-emerald-300"
+                                    class="py-3 px-3 text-end font-mono font-bold"
+                                    :class="
+                                        Number(row.spare_part_cost) < 0
+                                            ? 'text-rose-600 dark:text-rose-400'
+                                            : 'text-emerald-700 dark:text-emerald-300'
+                                    "
                                 >
                                     {{ formatCurrency(row.spare_part_cost) }}
                                 </td>
                                 <td
-                                    class="py-3 px-3 text-end font-mono font-black text-gray-900 dark:text-white"
+                                    class="py-3 px-3 text-end font-mono font-black"
+                                    :class="
+                                        Number(row.total) < 0 || row.is_credit_note
+                                            ? 'text-rose-600 dark:text-rose-400'
+                                            : 'text-gray-900 dark:text-white'
+                                    "
                                 >
                                     {{ formatCurrency(row.total) }}
                                 </td>
@@ -1437,10 +1505,12 @@ const formatNumber = (num) => {
 };
 
 const formatCurrency = (val) => {
-    return new Intl.NumberFormat('en-US', {
+    const num = Number(val) || 0;
+    const formatted = new Intl.NumberFormat('en-US', {
         minimumFractionDigits: 2,
         maximumFractionDigits: 2,
-    }).format(Number(val) || 0);
+    }).format(Math.abs(num));
+    return num < 0 ? `(${formatted})` : formatted;
 };
 
 // Badge Styling
@@ -1456,6 +1526,8 @@ const serviceStatusBadgeClass = (status) => {
             return 'bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300';
         case 'cancelled':
             return 'bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-300';
+        case 'returned':
+            return 'bg-rose-100 text-rose-800 dark:bg-rose-900/40 dark:text-rose-300';
         default:
             return 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300';
     }

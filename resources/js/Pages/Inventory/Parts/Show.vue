@@ -127,10 +127,10 @@
                             class="flex items-center gap-2 p-1.5 bg-gray-50/80 dark:bg-gray-800/80 backdrop-blur-md rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm"
                         >
                             <button
-                                v-if="can('inventory.parts.edit')"
+                                v-if="can('inventory.moves.create')"
                                 @click="editPart"
                                 :title="$t('common.edit')"
-                                class="inline-flex items-center gap-2 px-3 py-2 rounded-xl font-black text-xs border border-action-primary/25 bg-selection-bg text-selection-text hover:bg-white hover:shadow-md transition-all"
+                                class="inline-flex items-center gap-2 px-3 py-2 rounded-xl font-black text-xs border border-action-primary/25 bg-selection-bg text-selection-text hover:bg-white dark:hover:bg-gray-800 hover:shadow-md transition-all"
                             >
                                 <svg
                                     class="w-4 h-4"
@@ -174,7 +174,7 @@
 
                         <!-- Primary CTA Button -->
                         <button
-                            v-if="can('inventory.parts.edit')"
+                            v-if="can('inventory.moves.create')"
                             @click="openStockModal"
                             class="inline-flex items-center gap-2 px-4 py-2.5 bg-action-primary hover:bg-action-primary-hover text-white rounded-xl text-xs sm:text-sm font-black shadow-md shadow-focus-ring-soft hover:shadow-lg hover:shadow-focus-ring-soft active:scale-95 transition-all"
                         >
@@ -242,15 +242,17 @@
 
                     <!-- Selling Price -->
                     <div
-                        @click="can('inventory.parts.edit') ? openStockModal() : null"
+                        @click="can('inventory.moves.create') ? openStockModal() : null"
                         :class="
-                            can('inventory.parts.edit')
+                            can('inventory.moves.create')
                                 ? 'cursor-pointer hover:border-action-primary/25 hover:shadow-sm'
                                 : 'cursor-default'
                         "
                         class="bg-gray-50/50 dark:bg-gray-900/30 rounded-2xl p-4 border border-gray-100 dark:border-gray-700/50 group/stat hover:bg-white dark:hover:bg-gray-800 transition-all"
                         :title="
-                            can('inventory.parts.edit') ? $t('inventory.parts.warehouse_stock') : ''
+                            can('inventory.moves.create')
+                                ? $t('inventory.parts.warehouse_stock')
+                                : ''
                         "
                     >
                         <div class="flex items-center justify-between mb-1">
@@ -260,7 +262,7 @@
                                 {{ $t('inventory.parts.default_sale_price') }}
                             </div>
                             <svg
-                                v-if="can('inventory.parts.edit')"
+                                v-if="can('inventory.moves.create')"
                                 class="w-3.5 h-3.5 text-gray-300 group-hover/stat:text-action-primary transition-colors"
                                 fill="none"
                                 stroke="currentColor"
@@ -294,9 +296,9 @@
 
                     <!-- Minimum Qty -->
                     <div
-                        @click="can('inventory.parts.edit') ? openStockModal() : null"
+                        @click="can('inventory.moves.create') ? openStockModal() : null"
                         :class="[
-                            can('inventory.parts.edit')
+                            can('inventory.moves.create')
                                 ? 'cursor-pointer hover:shadow-sm'
                                 : 'cursor-default',
                             isLowStock
@@ -305,7 +307,9 @@
                         ]"
                         class="rounded-2xl p-4 border group/stat hover:bg-white dark:hover:bg-gray-800 transition-all"
                         :title="
-                            can('inventory.parts.edit') ? $t('inventory.parts.warehouse_stock') : ''
+                            can('inventory.moves.create')
+                                ? $t('inventory.parts.warehouse_stock')
+                                : ''
                         "
                     >
                         <div class="flex items-center justify-between mb-1">
@@ -326,7 +330,7 @@
                                 {{ $t('inventory.stock.status.low') }}
                             </span>
                             <svg
-                                v-else-if="can('inventory.parts.edit')"
+                                v-else-if="can('inventory.moves.create')"
                                 class="w-3.5 h-3.5 text-gray-300 group-hover/stat:text-action-primary transition-colors"
                                 fill="none"
                                 stroke="currentColor"
@@ -377,7 +381,7 @@
                             {{ $t('inventory.stock.warehouses_stock') }}
                         </h2>
                         <button
-                            v-if="can('inventory.parts.edit')"
+                            v-if="can('inventory.moves.create')"
                             @click="openStockModal"
                             class="text-xs text-action-primary hover:text-selection-text font-bold hover:underline"
                         >
@@ -433,7 +437,7 @@
                                 :title="$t('inventory.stock.empty')"
                                 :description="$t('inventory.stock.no_balances_desc')"
                                 :action-text="
-                                    can('inventory.parts.edit')
+                                    can('inventory.moves.create')
                                         ? $t('inventory.parts.warehouse_stock')
                                         : ''
                                 "
@@ -469,7 +473,7 @@
                                 {{ $t('inventory.parts.compatibility.title') }}
                             </h2>
                             <button
-                                v-if="can('inventory.parts.edit')"
+                                v-if="can('inventory.moves.create')"
                                 @click="editPart"
                                 class="text-xs text-action-primary hover:text-selection-text font-bold hover:underline"
                             >
@@ -573,6 +577,11 @@
                                     <th
                                         class="px-4 py-4 text-center font-bold text-gray-500 dark:text-gray-400 whitespace-nowrap uppercase tracking-wider bg-gray-50/50 dark:bg-gray-700/30 align-middle"
                                     >
+                                        {{ $t('inventory.stock.previous_cost') }}
+                                    </th>
+                                    <th
+                                        class="px-4 py-4 text-center font-bold text-gray-500 dark:text-gray-400 whitespace-nowrap uppercase tracking-wider bg-gray-50/50 dark:bg-gray-700/30 align-middle"
+                                    >
                                         {{ $t('inventory.stock.wac') }}
                                     </th>
                                     <th
@@ -655,7 +664,9 @@
                                     >
                                         {{
                                             formatQuantity(
-                                                Number(move.balance_after) - Number(move.qty)
+                                                move.previous_stock ??
+                                                    move.balance_before ??
+                                                    Number(move.balance_after) - Number(move.qty)
                                             )
                                         }}
                                     </td>
@@ -679,7 +690,7 @@
                                     <td
                                         class="px-4 py-4 text-center font-mono font-bold text-gray-700 dark:text-gray-200 align-middle"
                                     >
-                                        {{ formatQuantity(move.balance_after) }}
+                                        {{ formatQuantity(move.new_stock ?? move.balance_after) }}
                                     </td>
 
                                     <!-- Cost Data -->
@@ -689,9 +700,22 @@
                                         {{ formatCurrency(move.unit_cost) }}
                                     </td>
                                     <td
+                                        class="px-4 py-4 text-center font-mono text-gray-500 dark:text-gray-400 bg-gray-50/30 dark:bg-gray-800/30 align-middle"
+                                    >
+                                        {{
+                                            move.previous_cost !== null &&
+                                            move.previous_cost !== undefined
+                                                ? formatCurrency(move.previous_cost)
+                                                : move.wac_before !== null &&
+                                                    move.wac_before !== undefined
+                                                  ? formatCurrency(move.wac_before)
+                                                  : '—'
+                                        }}
+                                    </td>
+                                    <td
                                         class="px-4 py-4 text-center font-mono text-gray-600 dark:text-gray-400 bg-gray-50/30 dark:bg-gray-800/30 align-middle"
                                     >
-                                        {{ formatCurrency(move.wac_after) }}
+                                        {{ formatCurrency(move.new_wac ?? move.wac_after) }}
                                     </td>
                                     <td
                                         class="px-4 py-4 text-center font-mono text-gray-600 dark:text-gray-400 bg-gray-50/30 dark:bg-gray-800/30 align-middle"

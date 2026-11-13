@@ -1098,7 +1098,7 @@
                                         </th>
                                     </tr>
                                 </thead>
-                                <tbody class="divide-y divide-gray-150 dark:divide-gray-700/40">
+                                <tbody class="divide-y divide-gray-200 dark:divide-gray-700/40">
                                     <tr
                                         v-for="line in availableReturnLines"
                                         :key="line.id"
@@ -1228,7 +1228,7 @@
                                         <th class="py-3 px-4 text-center w-12 align-middle"></th>
                                     </tr>
                                 </thead>
-                                <tbody class="divide-y divide-gray-150 dark:divide-gray-700/40">
+                                <tbody class="divide-y divide-gray-200 dark:divide-gray-700/40">
                                     <tr v-if="returnForm.items.length === 0">
                                         <td
                                             colspan="6"
@@ -1312,7 +1312,7 @@
 
                     <!-- Date, Notes and Summary Column Grid -->
                     <div
-                        class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-gray-150 dark:border-gray-700/60"
+                        class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-gray-200 dark:border-gray-700/60"
                     >
                         <!-- Left: Date and Notes -->
                         <div
@@ -1350,7 +1350,7 @@
 
                         <!-- Right: Summary Card -->
                         <div
-                            class="bg-gray-50 dark:bg-gray-900/40 border border-gray-150 dark:border-gray-700/60 rounded-2xl p-5 flex flex-col justify-between"
+                            class="bg-gray-50 dark:bg-gray-900/40 border border-gray-200 dark:border-gray-700/60 rounded-2xl p-5 flex flex-col justify-between"
                         >
                             <h4
                                 class="text-xs font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-3"
@@ -1880,12 +1880,12 @@
 
                     <!-- Live Line Total Summary Box -->
                     <div
-                        class="p-3.5 bg-gray-50 dark:bg-gray-900/60 rounded-xl border border-gray-150 dark:border-gray-700/60 space-y-1.5 text-xs"
+                        class="p-3.5 bg-gray-50 dark:bg-gray-900/60 rounded-xl border border-gray-200 dark:border-gray-700/60 space-y-1.5 text-xs"
                     >
                         <div class="flex justify-between">
                             <span class="text-gray-400">{{ $t('invoices.subtotal') }}</span>
                             <span
-                                class="font-bold text-gray-750 dark:text-gray-300 font-mono"
+                                class="font-bold text-gray-700 dark:text-gray-300 font-mono"
                                 dir="ltr"
                             >
                                 {{
@@ -1916,7 +1916,7 @@
                                 </span>
                             </span>
                             <span
-                                class="font-bold text-gray-750 dark:text-gray-300 font-mono"
+                                class="font-bold text-gray-700 dark:text-gray-300 font-mono"
                                 dir="ltr"
                             >
                                 {{

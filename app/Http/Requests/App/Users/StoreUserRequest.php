@@ -50,7 +50,6 @@ class StoreUserRequest extends FormRequest
                         $fail(__('messages.cannot_edit_system_role'));
                     }
                 }],
-            'employee_id' => ['nullable', Rule::exists('hr_employees', 'id')->where('tenant_id', TenancyContext::tenantId())],
             'is_active' => ['sometimes', 'boolean'],
             // `prohibited`, NOT `forbidden`: Laravel has no `forbidden`
             // rule, so the validator would raise

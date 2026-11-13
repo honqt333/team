@@ -67,7 +67,7 @@ class DeveloperController extends Controller
         $user = Auth::user();
         $snapshot = $this->orchestrator->runAudit($user ? $user->id : null);
 
-        return redirect()->back()->with('success', "Fresh audit snapshot generated successfully! (Score: {$snapshot->score_overall}%)");
+        return redirect()->back()->with('success', __('messages.system.audit_snapshot_generated', ['score' => $snapshot->score_overall]));
     }
 
     /**
@@ -298,7 +298,7 @@ class DeveloperController extends Controller
         if (! $latestSnapshot) {
             return response()->json([
                 'success' => false,
-                'message' => 'No audit snapshot found. Run audit first.',
+                'message' => __('messages.system.audit_snapshot_missing'),
             ], 400);
         }
 

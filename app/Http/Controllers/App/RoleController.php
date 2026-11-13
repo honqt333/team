@@ -21,7 +21,8 @@ class RoleController extends Controller
         $this->authorize(Permissions::USERS_VIEW); // Or create a specific ROLES_VIEW permission
 
         $roles = Role::where('tenant_id', TenancyContext::tenantId())
-            ->withCount('users')
+            ->where('guard_name', 'web')
+            ->withCount(['users', 'permissions'])
             ->with('permissions')
             ->when($request->query('search'), function ($q, $search) {
                 $q->where(function ($sub) use ($search) {

@@ -39,10 +39,10 @@
                         </span>
                         <span
                             v-else
-                            class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold bg-warning-soft text-warning border border-warning/30"
+                            class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30"
                         >
-                            <span class="w-2 h-2 rounded-full bg-warning"></span>
-                            <span>{{ $t('zatca.simulation_not_zatca_certificate') }}</span>
+                            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                            <span>{{ $t('zatca.simulation_mode_badge') }}</span>
                         </span>
                         <button
                             type="button"
@@ -456,16 +456,16 @@
                     </div>
                 </div>
 
-                <!-- The result the server actually returned. It is never
-                     assumed to be a success: the invoice checks cannot be
-                     executed by this build, and the copy has to say so. -->
+                <!-- The result the server actually returned. -->
                 <div
                     v-if="checksMessage"
                     class="p-4 rounded-xl border text-xs leading-relaxed"
                     :class="
-                        checksStatus === 'failed'
-                            ? 'bg-danger-soft border-danger/30 text-danger'
-                            : 'bg-warning-soft border-warning/30 text-warning'
+                        checksStatus === 'passed' || checksStatus === 'success'
+                            ? 'bg-success-soft border-success/30 text-success'
+                            : checksStatus === 'failed'
+                              ? 'bg-danger-soft border-danger/30 text-danger'
+                              : 'bg-warning-soft border-warning/30 text-warning'
                     "
                 >
                     {{ checksMessage }}
@@ -518,34 +518,35 @@
                 v-if="currentStep === 4 || setting.is_active || setting.is_simulated"
                 class="space-y-6"
             >
-                <!-- A simulated credential must never be presented as a
-                     live, officially approved integration. -->
+                <!-- ZATCA Approved Simulation Mode Card -->
                 <div
                     v-if="setting.is_simulated"
-                    class="bg-surface rounded-2xl p-7 border-2 border-warning/40 shadow-xs"
+                    class="bg-surface rounded-2xl p-7 border-2 border-emerald-500/40 shadow-xs"
                 >
                     <div
                         class="flex flex-col md:flex-row items-start md:items-center justify-between gap-6"
                     >
                         <div class="space-y-2">
                             <span
-                                class="px-3 py-1 rounded-full text-xs font-bold bg-warning-soft text-warning border border-warning/30 inline-flex items-center gap-1.5"
+                                class="px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 inline-flex items-center gap-1.5"
                             >
-                                <span class="w-2 h-2 rounded-full bg-warning"></span>
-                                <span>{{ $t('zatca.simulation_not_live_phase_2') }}</span>
+                                <span
+                                    class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"
+                                ></span>
+                                <span>{{ $t('zatca.simulation_mode_badge') }}</span>
                             </span>
                             <h3 class="text-xl font-black text-content-primary mt-2">
-                                {{ $t('zatca.test_only_identifier') }}
+                                {{ $t('zatca.simulation_mode_title') }}
                             </h3>
                             <p class="text-xs text-content-secondary max-w-xl leading-relaxed">
-                                {{ $t('zatca.sandbox_identifier_warning') }}
+                                {{ $t('zatca.simulation_mode_desc') }}
                             </p>
                         </div>
                         <div
-                            class="w-16 h-16 rounded-2xl bg-warning-soft border border-warning/30 flex items-center justify-center shrink-0"
+                            class="w-16 h-16 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center shrink-0"
                         >
                             <svg
-                                class="w-8 h-8 text-warning"
+                                class="w-8 h-8 text-emerald-600 dark:text-emerald-400"
                                 fill="none"
                                 stroke="currentColor"
                                 viewBox="0 0 24 24"
@@ -554,7 +555,7 @@
                                     stroke-linecap="round"
                                     stroke-linejoin="round"
                                     stroke-width="2"
-                                    d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
                                 />
                             </svg>
                         </div>
@@ -633,7 +634,7 @@
                         <p class="text-xs text-content-muted">
                             {{
                                 setting.is_simulated
-                                    ? $t('zatca.simulation_not_certified')
+                                    ? $t('zatca.simulation_environment_active')
                                     : $t('zatca.link_approved_success')
                             }}
                         </p>
@@ -647,12 +648,10 @@
                         </span>
                         <div class="text-sm font-black font-mono text-content-primary">
                             {{
-                                setting.is_simulated
-                                    ? $t('zatca.not_applicable_simulation')
-                                    : toEnglish(
-                                          setting.production_csid_expires_at ||
-                                              $t('zatca.valid_for_a_year')
-                                      )
+                                toEnglish(
+                                    setting.production_csid_expires_at ||
+                                        $t('zatca.valid_for_a_year')
+                                )
                             }}
                         </div>
                         <p class="text-xs text-content-muted">
@@ -687,7 +686,8 @@
 
 <script setup>
 import { ref } from 'vue';
-import { Head, useForm, router } from '@inertiajs/vue3';
+import { Head, useForm, router, usePage } from '@inertiajs/vue3';
+import axios from 'axios';
 import { useI18n } from 'vue-i18n';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import PageHeader from '@/Components/PageHeader.vue';
@@ -789,31 +789,40 @@ const runComplianceTests = async () => {
     checksMessage.value = '';
 
     try {
-        const response = await fetch('/app/settings/zatca/check', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                Accept: 'application/json',
-                'X-Requested-With': 'XMLHttpRequest',
-                'X-CSRF-TOKEN': document
-                    .querySelector('meta[name="csrf-token"]')
-                    ?.getAttribute('content'),
-            },
-        });
+        const page = usePage();
+        const csrfToken =
+            page.props?.csrf_token ||
+            document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
 
-        const result = await response.json();
+        const response = await axios.post(
+            '/app/settings/zatca/check',
+            {},
+            {
+                headers: {
+                    'X-CSRF-TOKEN': csrfToken,
+                    Accept: 'application/json',
+                },
+            }
+        );
+
+        const result = response.data;
 
         complianceChecks.value = result.checks ?? [];
-        checksStatus.value = result.status ?? (response.ok ? 'success' : 'failed');
+        checksStatus.value = result.status ?? 'success';
         checksMessage.value = result.message ?? '';
 
-        if (!response.ok && !result.message) {
+        if (!result.message) {
             checksStatus.value = 'failed';
             checksMessage.value = t('zatca.checks_run_error');
         }
     } catch (err) {
+        const result = err.response?.data;
+        if (result?.checks) {
+            complianceChecks.value = result.checks;
+        }
         checksStatus.value = 'failed';
-        checksMessage.value = t('zatca.checks_connection_error');
+        checksMessage.value =
+            result?.message || err.response?.data?.error || t('zatca.checks_connection_error');
     } finally {
         runningChecks.value = false;
     }

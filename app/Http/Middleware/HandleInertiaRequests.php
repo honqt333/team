@@ -68,9 +68,12 @@ class HandleInertiaRequests extends Middleware
             'app_name' => app()->getLocale() === 'ar'
                 ? config('app.name_ar', 'خدمة برو')
                 : config('app.name', 'Khidmh Pro'),
+            'app_logo' => Setting::get('system.brand_logo') ?: (Setting::get('website.logo') ?: null),
+            'app_favicon' => Setting::get('system.brand_favicon') ?: (Setting::get('website.favicon') ?: null),
             'auth' => [
                 'user' => $user ? ($isTenantUser ? $user->load('roles:id,name,label_ar,label_en') : $user) : null,
                 'is_super_admin' => $isSuperAdmin,
+                'has_tenant_context' => $isTenantUser && $tenant !== null && ! $tenant->trashed(),
                 // For a system admin the panel resolves abilities from the
                 // role and the account's own list, so the EFFECTIVE set is
                 // what the front end needs — not the raw column, which is
@@ -115,6 +118,10 @@ class HandleInertiaRequests extends Middleware
             'flash' => [
                 'success' => fn () => $request->session()->get('success'),
                 'error' => fn () => $request->session()->get('error'),
+                'warning' => fn () => $request->session()->get('warning'),
+                'info' => fn () => $request->session()->get('info'),
+                'status' => fn () => $request->session()->get('status'),
+                'message' => fn () => $request->session()->get('message'),
                 'new_service_id' => fn () => $request->session()->get('new_service_id'),
                 // The biometric device token is issued once and is
                 // never stored in recoverable form (it is hashed at

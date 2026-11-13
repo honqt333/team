@@ -488,18 +488,18 @@
                     ></textarea>
                 </div>
 
-                <div class="flex items-center justify-end gap-2 pt-4 border-t border-border-subtle">
+                <div class="flex items-center justify-end gap-3 pt-4 border-t border-border-subtle">
                     <button
                         @click="editingAttendance = null"
                         type="button"
-                        class="px-4 py-2 text-xs font-bold text-content-secondary hover:bg-surface-secondary rounded-xl transition-colors cursor-pointer"
+                        class="px-5 py-2.5 text-xs font-bold text-text-secondary hover:bg-surface-secondary border border-border rounded-xl transition-colors cursor-pointer"
                     >
                         {{ $t('common.cancel') }}
                     </button>
                     <button
                         @click="updateAttendance"
                         type="button"
-                        class="px-4 py-2 text-xs font-bold text-white bg-action-primary hover:bg-action-primary-hover rounded-xl shadow-xs transition-colors cursor-pointer"
+                        class="inline-flex items-center justify-center gap-2 px-6 py-2.5 text-xs font-bold text-white bg-action-primary hover:bg-action-primary-hover rounded-xl shadow-xs transition-all disabled:opacity-50 cursor-pointer"
                     >
                         {{ $t('common.save') }}
                     </button>

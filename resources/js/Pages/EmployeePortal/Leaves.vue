@@ -73,7 +73,7 @@
                         class="px-3 py-1 text-xs font-bold rounded-full"
                         :class="getStatusClass(value)"
                     >
-                        {{ value ? $t('hr.leaves.status.' + value) : '-' }}
+                        {{ value ? $t('hr.leaves.statuses.' + value) : '-' }}
                     </span>
                 </template>
             </DataTable>

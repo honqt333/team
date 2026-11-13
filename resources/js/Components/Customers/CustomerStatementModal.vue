@@ -340,6 +340,7 @@
 
 <script setup>
 import { useI18n } from 'vue-i18n';
+import { printDocument } from '@/Composables/usePrint';
 const { t } = useI18n();
 
 import { computed } from 'vue';
@@ -413,7 +414,7 @@ const handlePrint = () => {
     if (props.customer?.id) {
         window.open(route('customers.statement.print', props.customer.id), '_blank');
     } else {
-        window.print();
+        printDocument();
     }
 };
 </script>

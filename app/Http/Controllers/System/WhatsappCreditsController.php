@@ -4,265 +4,60 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\System;
 
-use App\Http\Controllers\Controller;
 use App\Models\Credits\TenantWhatsappBalance;
 use App\Models\Credits\WhatsappPackage;
 use App\Models\Credits\WhatsappPurchase;
 use App\Models\Credits\WhatsappUsageLog;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Inertia\Inertia;
-use Inertia\Response;
+use Illuminate\Support\Collection;
 
-class WhatsappCreditsController extends Controller
+class WhatsappCreditsController extends BaseCreditsController
 {
-    public function index(Request $request): Response
+    protected function channelKey(): string
     {
-        $tab = $request->query('tab', 'packages');
+        return 'whatsapp';
+    }
 
-        if (! in_array($tab, ['packages', 'balances', 'purchases', 'usage'], true)) {
-            $tab = 'packages';
-        }
+    protected function packageModel(): string
+    {
+        return WhatsappPackage::class;
+    }
 
-        $packages = WhatsappPackage::orderBy('sort_order')->get();
+    protected function balanceModel(): string
+    {
+        return TenantWhatsappBalance::class;
+    }
 
-        $balances = ['data' => [], 'total' => 0, 'links' => []];
+    protected function purchaseModel(): string
+    {
+        return WhatsappPurchase::class;
+    }
 
-        if ($tab === 'balances') {
-            $balancesQuery = TenantWhatsappBalance::with('tenant');
+    protected function usageLogModel(): string
+    {
+        return WhatsappUsageLog::class;
+    }
 
-            if ($request->search) {
-                $search = $request->search;
-                $balancesQuery->whereHas('tenant', fn ($q) => $q->where('trade_name', 'like', "%{$search}%"));
-            }
-            $balances = $balancesQuery->orderByDesc('balance')->paginate(20, ['*'], 'page')->withQueryString();
-        }
+    protected function inertiaPage(): string
+    {
+        return 'System/Credits/WhatsappHub';
+    }
 
-        $purchases = ['data' => [], 'total' => 0, 'links' => []];
-
-        if ($tab === 'purchases') {
-            $purchasesQuery = WhatsappPurchase::with(['tenant', 'package']);
-
-            if ($request->search) {
-                $search = $request->search;
-                $purchasesQuery->where(function ($q) use ($search) {
-                    $q->whereHas('tenant', fn ($t) => $t->where('trade_name', 'like', "%{$search}%")
-                        ->orWhere('name', 'like', "%{$search}%"))
-                        ->orWhere('payment_reference', 'like', "%{$search}%");
-                });
-            }
-
-            if ($request->status && $request->status !== 'all') {
-                $purchasesQuery->where('status', $request->status);
-            }
-
-            if ($request->gateway && $request->gateway !== 'all') {
-                $purchasesQuery->where('payment_gateway', $request->gateway);
-            }
-            $purchases = $purchasesQuery->orderBy('created_at', 'desc')->paginate(20, ['*'], 'page')->withQueryString();
-        }
-
-        $logs = ['data' => [], 'total' => 0, 'links' => []];
-
-        if ($tab === 'usage') {
-            $usageQuery = WhatsappUsageLog::with(['tenant', 'center']);
-
-            if ($request->status) {
-                $usageQuery->where('status', $request->status);
-            }
-            $logs = $usageQuery->latest()->paginate(50, ['*'], 'page')->withQueryString();
-        }
-
-        $stats = [
-            'total_purchased' => TenantWhatsappBalance::sum('total_purchased'),
-            'total_used' => TenantWhatsappBalance::sum('total_used'),
-            'total_balance' => TenantWhatsappBalance::sum('balance'),
-            'total_revenue' => (float) WhatsappPurchase::where('status', 'paid')->sum('amount'),
-            'total_credits_sold' => (int) WhatsappPurchase::where('status', 'paid')->sum('credits'),
-            'delivered' => WhatsappUsageLog::where('status', 'delivered')->count(),
+    protected function extraStats(Collection $packages): array
+    {
+        return [
             'read' => WhatsappUsageLog::where('status', 'read')->count(),
-            'failed' => WhatsappUsageLog::where('status', 'failed')->count(),
-            'packages_count' => $packages->count(),
         ];
-
-        return Inertia::render('System/Credits/WhatsappHub', [
-            'tab' => $tab,
-            'packages' => $packages,
-            'balances' => $balances,
-            'purchases' => $purchases,
-            'logs' => $logs,
-            'stats' => $stats,
-            'filters' => $request->only(['search', 'status', 'gateway']),
-        ]);
     }
 
-    public function packages(): Response
+    public function updatePackage(Request $request, WhatsappPackage $package): RedirectResponse
     {
-        $packages = WhatsappPackage::orderBy('sort_order')->get();
-
-        return Inertia::render('System/Credits/WhatsappPackages', [
-            'packages' => $packages,
-        ]);
+        return $this->performUpdatePackage($request, $package);
     }
 
-    public function storePackage(Request $request)
+    public function destroyPackage(WhatsappPackage $package): RedirectResponse
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'name_ar' => 'required|string|max:255',
-            'credits' => 'required|integer|min:1',
-            'price' => 'required|numeric|min:0',
-            'is_active' => 'boolean',
-            'is_popular' => 'boolean',
-            'sort_order' => 'integer',
-        ]);
-
-        WhatsappPackage::create($validated);
-
-        return back()->with('success', __('messages.system.credits.created_success'));
-    }
-
-    public function updatePackage(Request $request, WhatsappPackage $package)
-    {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'name_ar' => 'required|string|max:255',
-            'credits' => 'required|integer|min:1',
-            'price' => 'required|numeric|min:0',
-            'is_active' => 'boolean',
-            'is_popular' => 'boolean',
-            'sort_order' => 'integer',
-        ]);
-
-        $package->update($validated);
-
-        return back()->with('success', __('messages.system.credits.updated_success'));
-    }
-
-    public function destroyPackage(WhatsappPackage $package)
-    {
-        $package->delete();
-
-        return back()->with('success', __('messages.system.credits.deleted_success'));
-    }
-
-    public function balances(Request $request): Response
-    {
-        $query = TenantWhatsappBalance::with('tenant');
-
-        if ($request->search) {
-            $search = $request->search;
-            $query->whereHas('tenant', fn ($q) => $q->where('trade_name', 'like', "%{$search}%"));
-        }
-
-        $balances = $query->orderByDesc('balance')->paginate(20)->withQueryString();
-
-        $stats = [
-            'total_purchased' => TenantWhatsappBalance::sum('total_purchased'),
-            'total_used' => TenantWhatsappBalance::sum('total_used'),
-            'total_balance' => TenantWhatsappBalance::sum('balance'),
-            'total_revenue' => WhatsappPurchase::where('status', 'paid')->sum('amount'),
-        ];
-
-        return Inertia::render('System/Credits/WhatsappBalances', [
-            'balances' => $balances,
-            'stats' => $stats,
-            'filters' => $request->only(['search']),
-        ]);
-    }
-
-    public function addCredits(Request $request)
-    {
-        $validated = $request->validate([
-            'tenant_id' => 'required|exists:tenants,id',
-            'credits' => 'required|integer|min:1',
-            'reason' => 'nullable|string|max:500',
-        ]);
-
-        $balance = TenantWhatsappBalance::getOrCreate($validated['tenant_id']);
-        $balance->addCredits($validated['credits']);
-
-        WhatsappPurchase::create([
-            'tenant_id' => $validated['tenant_id'],
-            'credits' => $validated['credits'],
-            'amount' => 0,
-            'payment_gateway' => 'manual',
-            'payment_reference' => 'MANUAL-'.time(),
-            'status' => 'paid',
-            'payment_details' => ['reason' => $validated['reason'] ?? 'إضافة يدوية'],
-        ]);
-
-        return back()->with('success', __('messages.system.credits.added_success', ['credits' => $validated['credits']]));
-    }
-
-    public function usage(Request $request): Response
-    {
-        $query = WhatsappUsageLog::with(['tenant', 'center']);
-
-        if ($request->status) {
-            $query->where('status', $request->status);
-        }
-
-        $logs = $query->latest()->paginate(50)->withQueryString();
-
-        $stats = [
-            'total_sent' => WhatsappUsageLog::count(),
-            'delivered' => WhatsappUsageLog::where('status', 'delivered')->count(),
-            'read' => WhatsappUsageLog::where('status', 'read')->count(),
-            'failed' => WhatsappUsageLog::where('status', 'failed')->count(),
-        ];
-
-        return Inertia::render('System/Credits/WhatsappUsage', [
-            'logs' => $logs,
-            'stats' => $stats,
-            'filters' => $request->only(['status']),
-        ]);
-    }
-
-    /**
-     * List all WhatsApp credit purchases across tenants.
-     *
-     * Mirrors SmsCreditsController::purchases so admins can see the
-     * full purchase history for WhatsApp — the field parity was the
-     * only thing missing from the system panel.
-     */
-    public function purchases(Request $request): Response
-    {
-        $query = WhatsappPurchase::with(['tenant', 'package']);
-
-        if ($request->search) {
-            $search = $request->search;
-            $query->where(function ($q) use ($search) {
-                $q->whereHas('tenant', fn ($t) => $t->where('trade_name', 'like', "%{$search}%")
-                    ->orWhere('name', 'like', "%{$search}%"))
-                    ->orWhere('payment_reference', 'like', "%{$search}%");
-            });
-        }
-
-        if ($request->status && $request->status !== 'all') {
-            $query->where('status', $request->status);
-        }
-
-        if ($request->gateway && $request->gateway !== 'all') {
-            $query->where('payment_gateway', $request->gateway);
-        }
-
-        $purchases = $query->orderBy('created_at', 'desc')
-            ->paginate(20)
-            ->withQueryString();
-
-        $stats = [
-            'total' => WhatsappPurchase::count(),
-            'paid' => WhatsappPurchase::where('status', 'paid')->count(),
-            'pending' => WhatsappPurchase::where('status', 'pending')->count(),
-            'failed' => WhatsappPurchase::where('status', 'failed')->count(),
-            'total_revenue' => (float) WhatsappPurchase::where('status', 'paid')->sum('amount'),
-            'total_credits_sold' => (int) WhatsappPurchase::where('status', 'paid')->sum('credits'),
-        ];
-
-        return Inertia::render('System/Credits/WhatsappPurchases', [
-            'purchases' => $purchases,
-            'stats' => $stats,
-            'filters' => $request->only(['search', 'status', 'gateway']),
-        ]);
+        return $this->performDestroyPackage($package);
     }
 }

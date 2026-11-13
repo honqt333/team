@@ -162,11 +162,11 @@
                 <DataTable
                     :columns="columns"
                     :data="dealers"
-                    :sort-by="filters.sort || 'id'"
+                    :sort-column="filters.sort || 'id'"
                     :sort-direction="filters.direction || 'desc'"
                     @sort="handleSort"
                 >
-                    <template #cell-name="{ row }">
+                    <template #cell-name="{ item: row }">
                         <div class="flex flex-col">
                             <Link
                                 :href="route('app.dealers.show', row.id)"
@@ -184,7 +184,7 @@
                         </div>
                     </template>
 
-                    <template #cell-type="{ row }">
+                    <template #cell-type="{ item: row }">
                         <span
                             class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold"
                             :class="getTypeBadgeClass(row.type)"
@@ -193,7 +193,7 @@
                         </span>
                     </template>
 
-                    <template #cell-contact="{ row }">
+                    <template #cell-contact="{ item: row }">
                         <div class="flex flex-col text-xs space-y-0.5">
                             <span
                                 v-if="row.contact_name"
@@ -211,25 +211,25 @@
                         </div>
                     </template>
 
-                    <template #cell-tax_number="{ row }">
+                    <template #cell-tax_number="{ item: row }">
                         <span class="font-mono text-xs text-gray-600 dark:text-gray-300" dir="ltr">
                             {{ row.tax_number || '-' }}
                         </span>
                     </template>
 
-                    <template #cell-vehicles_count="{ row }">
+                    <template #cell-vehicles_count="{ item: row }">
                         <span class="font-mono font-bold text-gray-700 dark:text-gray-200">
                             {{ row.vehicles_count ?? 0 }}
                         </span>
                     </template>
 
-                    <template #cell-work_orders_count="{ row }">
+                    <template #cell-work_orders_count="{ item: row }">
                         <span class="font-mono font-bold text-gray-700 dark:text-gray-200">
                             {{ row.work_orders_count ?? 0 }}
                         </span>
                     </template>
 
-                    <template #cell-outstanding_balance="{ row }">
+                    <template #cell-outstanding_balance="{ item: row }">
                         <span
                             class="font-mono font-bold"
                             :class="
@@ -242,7 +242,7 @@
                         </span>
                     </template>
 
-                    <template #cell-is_active="{ row }">
+                    <template #cell-is_active="{ item: row }">
                         <AppToggle
                             :model-value="Boolean(row.is_active)"
                             size="sm"
@@ -252,7 +252,7 @@
                         />
                     </template>
 
-                    <template #cell-actions="{ row }">
+                    <template #cell-actions="{ item: row }">
                         <div class="flex items-center justify-end gap-1.5">
                             <Link
                                 :href="route('app.dealers.show', row.id)"
@@ -324,13 +324,6 @@
                         </div>
                     </template>
                 </DataTable>
-
-                <AppPagination
-                    :links="dealers.links || []"
-                    :from="dealers.from"
-                    :to="dealers.to"
-                    :total="dealers.total"
-                />
             </div>
 
             <!-- Empty State -->
@@ -395,7 +388,6 @@ import PageHeader from '@/Components/PageHeader.vue';
 import DataTable from '@/Components/Common/DataTable.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 import AppToggle from '@/Components/Common/AppToggle.vue';
-import AppPagination from '@/Components/Common/AppPagination.vue';
 import ConfirmModal from '@/Components/ConfirmModal.vue';
 import DealerFormModal from '@/Components/Dealers/DealerFormModal.vue';
 import { usePermission } from '@/Composables/usePermission';
@@ -487,9 +479,13 @@ const resetFilters = () => {
     applyFilters();
 };
 
-const handleSort = ({ key, direction }) => {
-    filterForm.sort = key;
-    filterForm.direction = direction;
+const handleSort = (key) => {
+    if (filterForm.sort === key) {
+        filterForm.direction = filterForm.direction === 'asc' ? 'desc' : 'asc';
+    } else {
+        filterForm.sort = key;
+        filterForm.direction = 'asc';
+    }
     applyFilters();
 };
 

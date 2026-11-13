@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace Tests\Feature;
 
+use App\Enums\PaymentType;
 use App\Models\Center;
 use App\Models\Customer;
 use App\Models\HR\Employee;
 use App\Models\Invoice;
+use App\Models\Payment;
 use App\Models\Tenant;
 use App\Models\User;
 use App\Models\Vehicle;
@@ -414,15 +416,17 @@ class WorkOrderFixesTest extends TestCase
             'status' => WorkOrderItem::STATUS_COMPLETED,
         ]);
 
-        // Record payment higher than work order total (350 > 200)
-        $this->actingAs($user)
-            ->post(route('work-orders.payments.store', $workOrder->id), [
-                'type' => 'payment',
-                'payment_method' => 'cash',
-                'amount' => 350,
-                'payment_date' => now()->toDateString(),
-            ])
-            ->assertRedirect();
+        // Seed an excess payment (350 > 200, e.g. from reduced/removed items after payment)
+        Payment::create([
+            'tenant_id' => $tenant->id,
+            'center_id' => $center->id,
+            'work_order_id' => $workOrder->id,
+            'type' => PaymentType::PAYMENT,
+            'payment_method' => 'cash',
+            'amount' => 350,
+            'payment_date' => now()->toDateString(),
+            'created_by' => $user->id,
+        ]);
 
         $workOrder->refresh();
         $this->assertTrue($workOrder->hasExcessPayment());

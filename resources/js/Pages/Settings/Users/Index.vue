@@ -7,6 +7,8 @@ import AppLayout from '@/Layouts/AppLayout.vue';
 import PageHeader from '@/Components/PageHeader.vue';
 import BackButton from '@/Components/BackButton.vue';
 import AppToggle from '@/Components/Common/AppToggle.vue';
+import AppInput from '@/Components/App/AppInput.vue';
+import SearchableSelect from '@/Components/SearchableSelect.vue';
 import AppEmptyState from '@/Components/Common/AppEmptyState.vue';
 import AppTableSkeleton from '@/Components/Common/AppTableSkeleton.vue';
 import DataTable from '@/Components/Common/DataTable.vue';
@@ -22,7 +24,7 @@ const props = defineProps({
     filters: Object,
     centers: Array,
     roles: Array,
-    employees: Array,
+    userLimit: Object,
 });
 
 const { t, locale } = useI18n();
@@ -35,18 +37,59 @@ const { tableFilters, isLoading } = useServerTable({
     routeUrl: () => route('settings.users.index'),
     initialFilters: {
         search: props.filters?.search || '',
+        role_id: props.filters?.role_id ?? null,
+        center_id: props.filters?.center_id ?? null,
+        status: props.filters?.status || '',
     },
-    only: ['users', 'filters'],
+    only: ['users', 'filters', 'userLimit'],
     debounceMs: 350,
 });
 
 watch(
-    () => props.filters?.search,
+    () => props.filters,
     (val) => {
-        if (val !== undefined && val !== tableFilters.search) {
-            tableFilters.search = val;
+        if (!val) return;
+        if (val.search !== undefined && val.search !== tableFilters.search) {
+            tableFilters.search = val.search;
+        }
+        if (val.role_id !== undefined && val.role_id !== tableFilters.role_id) {
+            tableFilters.role_id = val.role_id;
+        }
+        if (val.center_id !== undefined && val.center_id !== tableFilters.center_id) {
+            tableFilters.center_id = val.center_id;
+        }
+        if (val.status !== undefined && val.status !== tableFilters.status) {
+            tableFilters.status = val.status;
         }
     }
+);
+
+const roleFilterOptions = computed(() => [
+    { value: null, label: t('users.all_roles', 'جميع الأدوار') },
+    ...(props.roles || []).map((role) => ({
+        value: role.id,
+        label: locale.value === 'ar' ? role.label_ar || role.name : role.label_en || role.name,
+    })),
+]);
+
+const centerFilterOptions = computed(() => [
+    { value: null, label: t('users.all_branches', 'جميع الفروع') },
+    ...(props.centers || []).map((c) => ({
+        value: c.id,
+        label: c.name,
+    })),
+]);
+
+const statusFilterOptions = computed(() => [
+    { value: '', label: t('users.all_statuses', 'جميع الحالات') },
+    { value: 'active', label: t('users.active', 'نشط') },
+    { value: 'inactive', label: t('users.inactive', 'غير نشط') },
+]);
+
+const isPlanLimitReached = computed(
+    () =>
+        props.userLimit?.max_users != null &&
+        props.userLimit.active_count >= props.userLimit.max_users
 );
 
 // ─── Column Definitions ───────────────────────────────────────────────────────
@@ -166,28 +209,78 @@ const toggleUserActive = (user) => {
                 </template>
             </PageHeader>
 
-            <!-- ─── Search Bar ─────────────────────────────────────────── -->
-            <div class="bg-surface rounded-xl shadow-sm border border-border p-4">
-                <div class="relative max-w-md">
-                    <input
-                        v-model="tableFilters.search"
-                        type="text"
-                        :placeholder="t('common.search', 'بحث...')"
-                        class="w-full ps-10 pe-4 py-2 text-sm rounded-lg border border-border bg-surface-muted text-text-primary placeholder:text-text-muted focus:ring-2 focus:ring-focus-ring focus:border-action-primary transition-colors"
-                    />
-                    <svg
-                        class="absolute start-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                    >
-                        <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            stroke-width="2"
-                            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+            <!-- ─── Search & Filters Bar ─────────────────────────────────── -->
+            <div class="bg-surface rounded-xl shadow-sm border border-border p-4 space-y-3">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 items-center">
+                    <div class="relative">
+                        <AppInput
+                            v-model="tableFilters.search"
+                            type="text"
+                            :placeholder="
+                                t('users.search_placeholder', 'ابحث بالاسم، البريد، أو الموظف...')
+                            "
+                            class="ps-10"
                         />
-                    </svg>
+                        <svg
+                            class="absolute start-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted pointer-events-none"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                            />
+                        </svg>
+                    </div>
+
+                    <SearchableSelect
+                        v-model="tableFilters.role_id"
+                        :options="roleFilterOptions"
+                        option-label="label"
+                        option-value="value"
+                        :placeholder="t('users.all_roles', 'جميع الأدوار')"
+                    />
+
+                    <SearchableSelect
+                        v-model="tableFilters.center_id"
+                        :options="centerFilterOptions"
+                        option-label="label"
+                        option-value="value"
+                        :placeholder="t('users.all_branches', 'جميع الفروع')"
+                    />
+
+                    <SearchableSelect
+                        v-model="tableFilters.status"
+                        :options="statusFilterOptions"
+                        option-label="label"
+                        option-value="value"
+                        :placeholder="t('users.all_statuses', 'جميع الحالات')"
+                    />
+                </div>
+
+                <div
+                    v-if="userLimit?.max_users"
+                    class="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-border text-xs"
+                >
+                    <div class="flex items-center gap-2 text-text-secondary">
+                        <span>{{ t('users.plan_usage', 'المستخدمون النشطون') }}:</span>
+                        <span
+                            class="px-2 py-0.5 rounded-full font-bold border"
+                            :class="
+                                isPlanLimitReached
+                                    ? 'bg-danger/10 text-danger border-danger/30'
+                                    : 'bg-selection-bg text-action-primary border-selection-ring/30'
+                            "
+                        >
+                            {{ userLimit.active_count }} / {{ userLimit.max_users }}
+                        </span>
+                    </div>
+                    <span v-if="isPlanLimitReached" class="text-danger font-semibold">
+                        {{ t('users.plan_limit_reached_badge', 'تم بلوغ الحد الأقصى للباقة') }}
+                    </span>
                 </div>
             </div>
 
@@ -365,7 +458,6 @@ const toggleUserActive = (user) => {
             :user="selectedUser"
             :centers="centers"
             :roles="roles"
-            :employees="employees"
             @close="showModal = false"
         />
     </AppLayout>

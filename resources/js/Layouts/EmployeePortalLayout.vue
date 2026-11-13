@@ -365,9 +365,12 @@ import { usePage, router, Link } from '@inertiajs/vue3';
 import { useTheme } from '@/Composables/useTheme';
 import { setLocale, getCurrentLocale } from '@/i18n/index.js';
 import Toast from '@/Components/Toast.vue';
+import { useFlashToasts } from '@/Composables/useFlashToasts';
 
 const { locale } = useI18n();
 const page = usePage();
+
+useFlashToasts(page, { immediate: true });
 
 const mobileMenuOpen = ref(false);
 const userMenuOpen = ref(false);

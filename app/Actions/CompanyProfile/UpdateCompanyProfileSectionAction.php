@@ -64,6 +64,27 @@ class UpdateCompanyProfileSectionAction
                 ];
                 break;
 
+            case 'contact':
+                $rules = [
+                    'phone' => 'nullable|string|max:30',
+                    'email' => 'nullable|email|max:255',
+                ];
+                break;
+
+            case 'address':
+                $rules = [
+                    'address_line' => 'nullable|string|max:255',
+                    'street' => 'nullable|string|max:255',
+                    'city' => 'nullable|string|max:100',
+                    'district' => 'nullable|string|max:100',
+                    'building_number' => 'nullable|string|max:20',
+                    'postal_code' => 'nullable|string|max:10',
+                    'country' => 'nullable|string|max:100',
+                    'latitude' => 'nullable',
+                    'longitude' => 'nullable',
+                ];
+                break;
+
             case 'vat':
                 $rules = [
                     'vat_enabled' => 'required|boolean',
@@ -187,8 +208,8 @@ class UpdateCompanyProfileSectionAction
     private function updateContact(Tenant $tenant, array $data): void
     {
         $tenant->update([
-            'phone' => $data['phone'] ?? null,
-            'email' => $data['email'] ?? null,
+            'phone' => array_key_exists('phone', $data) ? ($data['phone'] ?: null) : $tenant->phone,
+            'email' => array_key_exists('email', $data) ? ($data['email'] ?: null) : $tenant->email,
         ]);
     }
 
@@ -203,6 +224,7 @@ class UpdateCompanyProfileSectionAction
                 'district' => $data['district'] ?? null,
                 'building_number' => $data['building_number'] ?? null,
                 'postal_code' => $data['postal_code'] ?? null,
+                'country' => $data['country'] ?? null,
                 'latitude' => $data['latitude'] ?? null,
                 'longitude' => $data['longitude'] ?? null,
             ]

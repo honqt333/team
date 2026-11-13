@@ -77,7 +77,7 @@
                             <tr
                                 v-for="template in templates"
                                 :key="template.id"
-                                class="hover:bg-gray-50/50 dark:hover:bg-gray-750 transition-colors"
+                                class="hover:bg-gray-50/50 dark:hover:bg-gray-700/60 transition-colors"
                             >
                                 <td class="px-6 py-4">
                                     <div class="font-bold text-gray-900 dark:text-white">
@@ -118,7 +118,11 @@
                                                     : 'bg-rose-500'
                                             "
                                         ></span>
-                                        {{ $t('common.active') }}
+                                        {{
+                                            template.is_active
+                                                ? $t('common.active')
+                                                : $t('common.inactive')
+                                        }}
                                     </span>
                                 </td>
                                 <td

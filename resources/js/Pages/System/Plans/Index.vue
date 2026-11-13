@@ -280,7 +280,7 @@
             @close="closeModal"
         >
             <!-- Form Body -->
-            <form @submit.prevent="submit" class="p-6 space-y-5 max-h-[70vh] overflow-y-auto">
+            <form @submit.prevent="submit" class="p-6 space-y-5">
                 <!-- Basic Info -->
                 <div class="grid grid-cols-2 gap-4">
                     <div>
@@ -567,9 +567,11 @@ import { router, useForm } from '@inertiajs/vue3';
 import SystemLayout from '@/Layouts/SystemLayout.vue';
 import PageHeader from '@/Components/PageHeader.vue';
 import BaseModal from '@/Components/BaseModal.vue';
+import { useConfirm } from '@/Composables/useConfirm';
 import { useNumberFormat } from '@/Composables/useNumberFormat';
 
 const { t } = useI18n();
+const { confirm } = useConfirm();
 const { toEnglish } = useNumberFormat();
 
 defineProps({
@@ -647,8 +649,15 @@ const submit = () => {
     }
 };
 
-const deletePlan = (plan) => {
-    if (confirm(t('system.plans.confirm_delete', { name: plan.name_ar }))) {
+const deletePlan = async (plan) => {
+    const ok = await confirm({
+        title: t('common.delete'),
+        message: t('system.plans.confirm_delete', { name: plan.name_ar }),
+        confirmText: t('common.delete'),
+        cancelText: t('common.cancel'),
+        type: 'danger',
+    });
+    if (ok) {
         router.delete(`/system/plans/${plan.id}`);
     }
 };

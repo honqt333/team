@@ -133,12 +133,19 @@
                     </tr>
                 </tbody>
             </DataTable>
+            <AppPagination
+                :links="logs?.links || []"
+                :from="logs?.from"
+                :to="logs?.to"
+                :total="logs?.total"
+            />
         </div>
     </div>
 </template>
 
 <script setup>
 import DataTable from '@/Components/Common/DataTable.vue';
+import AppPagination from '@/Components/Common/AppPagination.vue';
 import { ref, computed } from 'vue';
 import { router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';

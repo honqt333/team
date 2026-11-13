@@ -11,11 +11,7 @@
         <div class="space-y-6">
             <!-- Header -->
             <PageHeader
-                :title="
-                    (isAr ? $t('system.invoices.invoice_2') : 'Invoice') +
-                    ' ' +
-                    invoice.invoice_number
-                "
+                :title="$t('system.invoices.invoice_2') + ' ' + invoice.invoice_number"
                 :subtitle="invoice.tenant?.trade_name || invoice.tenant?.name || ''"
             >
                 <template #back>
@@ -52,7 +48,7 @@
                         >
                             <DownloadIcon class="h-4 w-4" />
                             <span>
-                                {{ isAr ? $t('system.invoices.download_pdf') : 'Download PDF' }}
+                                {{ $t('system.invoices.download_pdf') }}
                             </span>
                         </a>
 
@@ -65,12 +61,8 @@
                             <span>
                                 {{
                                     sending
-                                        ? isAr
-                                            ? $t('common.sending')
-                                            : 'Sending...'
-                                        : isAr
-                                          ? $t('system.invoices.send_by_email')
-                                          : 'Send by email'
+                                        ? $t('common.sending')
+                                        : $t('system.invoices.send_by_email')
                                 }}
                             </span>
                         </button>
@@ -82,7 +74,7 @@
                             class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-rose-600 dark:text-rose-400 hover:bg-white dark:hover:bg-gray-800 rounded-xl transition-all shadow-sm disabled:opacity-50"
                         >
                             <XIcon class="h-4 w-4" />
-                            <span>{{ isAr ? $t('common.cancel') : 'Cancel' }}</span>
+                            <span>{{ $t('common.cancel') }}</span>
                         </button>
                     </div>
 
@@ -216,7 +208,7 @@
                     class="h-[700px] w-full border-0"
                 />
                 <div v-else class="flex h-64 items-center justify-center text-sm text-gray-400">
-                    {{ isAr ? $t('system.invoices.pdf_not_available') : 'PDF not available' }}
+                    {{ $t('system.invoices.pdf_not_available') }}
                 </div>
             </div>
         </div>
@@ -224,9 +216,7 @@
         <!-- Mark Paid Modal -->
         <BaseModal
             :show="showMarkPaidModal"
-            :title="
-                isAr ? $t('system.invoices.confirm_payment_manually') : 'Confirm payment manually'
-            "
+            :title="$t('system.invoices.confirm_payment_manually')"
             size="sm"
             @close="showMarkPaidModal = false"
         >
@@ -255,22 +245,18 @@
                 </div>
                 <div>
                     <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                        {{ isAr ? $t('system.invoices.reference_number') : 'Reference number' }}
+                        {{ $t('system.invoices.reference_number') }}
                     </label>
                     <input
                         type="text"
                         v-model="markPaidForm.reference"
-                        :placeholder="
-                            isAr
-                                ? $t('system.invoices.transfer_or_receipt_number')
-                                : 'Transfer or receipt number'
-                        "
+                        :placeholder="$t('system.invoices.transfer_or_receipt_number')"
                         class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                     />
                 </div>
                 <div>
                     <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                        {{ isAr ? $t('common.notes') : 'Notes' }}
+                        {{ $t('common.notes') }}
                     </label>
                     <textarea
                         v-model="markPaidForm.notes"
@@ -288,19 +274,15 @@
                     >
                         {{
                             markingPaid
-                                ? isAr
-                                    ? $t('system.invoices.confirming')
-                                    : 'Confirming...'
-                                : isAr
-                                  ? $t('system.invoices.mark_as_paid')
-                                  : 'Confirm payment'
+                                ? $t('system.invoices.confirming')
+                                : $t('system.invoices.mark_as_paid')
                         }}
                     </button>
                     <button
                         @click="showMarkPaidModal = false"
                         class="rounded-lg bg-gray-100 px-4 py-2 font-medium text-gray-700 dark:bg-gray-700 dark:text-gray-300"
                     >
-                        {{ isAr ? $t('common.cancel') : 'Cancel' }}
+                        {{ $t('common.cancel') }}
                     </button>
                 </div>
             </template>

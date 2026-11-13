@@ -177,6 +177,12 @@
                     </tr>
                 </tbody>
             </DataTable>
+            <AppPagination
+                :links="balances?.links || []"
+                :from="balances?.from"
+                :to="balances?.to"
+                :total="balances?.total"
+            />
         </div>
 
         <!-- Add Manual Credit Modal -->
@@ -259,6 +265,7 @@
 
 <script setup>
 import DataTable from '@/Components/Common/DataTable.vue';
+import AppPagination from '@/Components/Common/AppPagination.vue';
 import BaseModal from '@/Components/BaseModal.vue';
 import { ref } from 'vue';
 import { router, useForm } from '@inertiajs/vue3';

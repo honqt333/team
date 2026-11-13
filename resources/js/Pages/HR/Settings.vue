@@ -293,14 +293,14 @@
                                         </button>
                                         <button
                                             @click="openDeviceModal(device)"
-                                            class="p-1.5 text-gray-600 hover:bg-gray-200 rounded-lg"
+                                            class="p-1.5 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg"
                                             :title="$t('common.edit')"
                                         >
                                             ✏️
                                         </button>
                                         <button
                                             @click="deleteDevice(device)"
-                                            class="p-1.5 text-red-600 hover:bg-red-100 rounded-lg"
+                                            class="p-1.5 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/30 rounded-lg"
                                             :title="$t('common.delete')"
                                         >
                                             🗑️
@@ -413,13 +413,13 @@
                                 >
                                     <button
                                         @click="openShiftModal(shift)"
-                                        class="p-1.5 text-gray-600 hover:bg-gray-200 rounded-lg"
+                                        class="p-1.5 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg"
                                     >
                                         ✏️
                                     </button>
                                     <button
                                         @click="deleteShift(shift)"
-                                        class="p-1.5 text-red-600 hover:bg-red-100 rounded-lg"
+                                        class="p-1.5 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/30 rounded-lg"
                                     >
                                         🗑️
                                     </button>

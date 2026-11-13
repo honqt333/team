@@ -78,8 +78,8 @@ export function useCompanySettingsForm(props) {
     const csrfToken = () =>
         document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
 
-    const onLogoSelect = async (event) => {
-        const file = event.target.files?.[0];
+    const onLogoSelect = async (fileOrEvent) => {
+        const file = fileOrEvent instanceof File ? fileOrEvent : fileOrEvent?.target?.files?.[0];
         if (!file) return;
 
         if (localPreview.value && localPreview.value.startsWith('blob:')) {
@@ -140,8 +140,8 @@ export function useCompanySettingsForm(props) {
         }
     };
 
-    const onStampSelect = async (event) => {
-        const file = event.target.files?.[0];
+    const onStampSelect = async (fileOrEvent) => {
+        const file = fileOrEvent instanceof File ? fileOrEvent : fileOrEvent?.target?.files?.[0];
         if (!file) return;
 
         if (localStampPreview.value && localStampPreview.value.startsWith('blob:')) {

@@ -153,7 +153,9 @@ class InventoryService
                 'qty' => $qty,
                 'unit_cost' => $unitCost,
                 'total_cost' => $qty * $unitCost,
+                'balance_before' => $oldQty,
                 'balance_after' => $newQty,
+                'wac_before' => $oldWac,
                 'wac_after' => $newWac,
                 'reference_type' => $referenceType,
                 'reference_id' => $referenceId,
@@ -165,8 +167,36 @@ class InventoryService
     }
 
     /**
+     * Process a purchase return (stock out to supplier) with reverse WAC recalculation.
+     */
+    public function purchaseReturn(
+        int $warehouseId,
+        int $partId,
+        float $qty,
+        float $unitCost,
+        ?int $userId = null,
+        ?string $referenceType = null,
+        ?int $referenceId = null,
+        ?string $notes = null,
+        bool $allowNegative = false
+    ): InventoryMove {
+        return $this->issue(
+            warehouseId: $warehouseId,
+            partId: $partId,
+            qty: $qty,
+            userId: $userId,
+            referenceType: $referenceType,
+            referenceId: $referenceId,
+            notes: $notes,
+            allowNegative: $allowNegative,
+            moveType: InventoryMove::TYPE_PURCHASE_RETURN,
+            unitCost: $unitCost
+        );
+    }
+
+    /**
      * Process an issue (stock out).
-     * Used for work order parts consumption.
+     * Used for work order parts consumption or purchase returns.
      */
     public function issue(
         int $warehouseId,
@@ -177,7 +207,8 @@ class InventoryService
         ?int $referenceId = null,
         ?string $notes = null,
         bool $allowNegative = false,
-        ?string $moveType = null
+        ?string $moveType = null,
+        ?float $unitCost = null
     ): InventoryMove {
         if ($qty <= 0) {
             throw ValidationException::withMessages([
@@ -187,7 +218,7 @@ class InventoryService
 
         $this->assertResourcesInScope($warehouseId, $partId);
 
-        return DB::transaction(function () use ($warehouseId, $partId, $qty, $userId, $referenceType, $referenceId, $notes, $allowNegative, $moveType) {
+        return DB::transaction(function () use ($warehouseId, $partId, $qty, $userId, $referenceType, $referenceId, $notes, $allowNegative, $moveType, $unitCost) {
             // Lock balance row (bypass global scope — we identify by natural key warehouse_id+part_id).
             $balance = InventoryBalance::query()
                 ->withoutGlobalScopes()
@@ -214,14 +245,23 @@ class InventoryService
                 ]);
             }
 
-            // Calculate new balance (WAC unchanged on issue)
             $oldQty = (float) $balance->qty_on_hand;
-            $wac = (float) $balance->wac_cost;
+            $oldWac = (float) $balance->wac_cost;
             $newQty = $oldQty - $qty;
+
+            $resolvedMoveType = $moveType ?? InventoryMove::TYPE_ISSUE_TO_WORKORDER;
+            $effectiveUnitCost = $unitCost ?? $oldWac;
+
+            if ($resolvedMoveType === InventoryMove::TYPE_PURCHASE_RETURN) {
+                $newWac = $this->calculateReverseWAC($oldQty, $oldWac, $qty, $effectiveUnitCost);
+            } else {
+                $newWac = $oldWac;
+            }
 
             // Update balance
             $balance->update([
                 'qty_on_hand' => $newQty,
+                'wac_cost' => $newWac,
                 'last_move_at' => now(),
             ]);
 
@@ -231,12 +271,14 @@ class InventoryService
                 'tenant_id' => $this->resolveTenantId($warehouseId),
                 'center_id' => $this->resolveCenterId($warehouseId),
                 'part_id' => $partId,
-                'move_type' => $moveType ?? InventoryMove::TYPE_ISSUE_TO_WORKORDER,
+                'move_type' => $resolvedMoveType,
                 'qty' => -$qty, // Negative for outgoing
-                'unit_cost' => $wac,
-                'total_cost' => $qty * $wac,
+                'unit_cost' => $effectiveUnitCost,
+                'total_cost' => $qty * $effectiveUnitCost,
+                'balance_before' => $oldQty,
                 'balance_after' => $newQty,
-                'wac_after' => $wac,
+                'wac_before' => $oldWac,
+                'wac_after' => $newWac,
                 'reference_type' => $referenceType,
                 'reference_id' => $referenceId,
                 'notes' => $notes,
@@ -327,7 +369,9 @@ class InventoryService
                 'qty' => $qty,
                 'unit_cost' => $cost,
                 'total_cost' => abs($qty) * $cost,
+                'balance_before' => $oldQty,
                 'balance_after' => $newQty,
+                'wac_before' => $oldWac,
                 'wac_after' => $newWac,
                 'notes' => $notes,
                 'posted_at' => now(),
@@ -369,9 +413,7 @@ class InventoryService
 
             // Recalculate WAC if it was an incoming move
             if ($move->isIncoming()) {
-                // Reversing a receipt - complicated WAC adjustment
-                // For simplicity, keep current WAC (audit-friendly)
-                $newWac = $oldWac;
+                $newWac = $this->calculateReverseWAC($oldQty, $oldWac, abs($reversalQty), (float) $move->unit_cost);
             } else {
                 $newWac = $oldWac;
             }
@@ -393,7 +435,9 @@ class InventoryService
                 'qty' => $reversalQty,
                 'unit_cost' => $move->unit_cost,
                 'total_cost' => abs($reversalQty) * $move->unit_cost,
+                'balance_before' => $oldQty,
                 'balance_after' => $newQty,
+                'wac_before' => $oldWac,
                 'wac_after' => $newWac,
                 'reverses_move_id' => $move->id,
                 'notes' => $notes ?? 'Reversal of move #'.$move->id,
@@ -427,6 +471,23 @@ class InventoryService
         $totalValue = ($oldQty * $oldWac) + ($newQty * $newCost);
 
         return round($totalValue / $totalQty, 4);
+    }
+
+    /**
+     * Calculate Reverse Weighted Average Cost when deducting returned goods.
+     * new_wac = new_qty > 0 ? max(0, ((old_qty * old_wac) - (returned_qty * return_unit_cost)) / new_qty) : old_wac
+     */
+    protected function calculateReverseWAC(float $oldQty, float $oldWac, float $returnedQty, float $returnUnitCost): float
+    {
+        $newQty = $oldQty - $returnedQty;
+
+        if ($newQty <= 0) {
+            return $oldWac;
+        }
+
+        $remainingValue = ($oldQty * $oldWac) - ($returnedQty * $returnUnitCost);
+
+        return round(max(0.0, $remainingValue / $newQty), 4);
     }
 
     /**
@@ -544,7 +605,9 @@ class InventoryService
                 'qty' => $qty, // Positive - returning to stock
                 'unit_cost' => $originalMove->unit_cost,
                 'total_cost' => $qty * $originalMove->unit_cost,
+                'balance_before' => $oldQty,
                 'balance_after' => $newQty,
+                'wac_before' => $wac,
                 'wac_after' => $wac,
                 'reverses_move_id' => $originalMove->id,
                 'notes' => $notes ?? 'Partial reversal of move #'.$originalMove->id,

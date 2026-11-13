@@ -350,6 +350,9 @@ import { Head, Link, useForm, router } from '@inertiajs/vue3';
 import SystemLayout from '@/Layouts/SystemLayout.vue';
 import PageHeader from '@/Components/PageHeader.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
+import { useConfirm } from '@/Composables/useConfirm';
+
+const { confirm } = useConfirm();
 
 const props = defineProps({
     integration: Object,
@@ -400,8 +403,15 @@ const testIntegration = () => {
     testForm.post(`/system/integrations/${props.integration.id}/test`);
 };
 
-const deleteIntegration = () => {
-    if (confirm(t('integrations.delete_confirm'))) {
+const deleteIntegration = async () => {
+    const ok = await confirm({
+        title: t('common.delete'),
+        message: t('integrations.delete_confirm'),
+        confirmText: t('common.delete'),
+        cancelText: t('common.cancel'),
+        type: 'danger',
+    });
+    if (ok) {
         router.delete(`/system/integrations/${props.integration.id}`);
     }
 };

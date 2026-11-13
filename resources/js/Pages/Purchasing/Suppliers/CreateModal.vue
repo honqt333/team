@@ -533,6 +533,10 @@ L.Icon.Default.mergeOptions({
 const props = defineProps({
     show: Boolean,
     supplier: Object,
+    defaultType: {
+        type: String,
+        default: null,
+    },
 });
 
 const emit = defineEmits(['close', 'saved']);
@@ -616,7 +620,7 @@ watch(
         } else {
             form.reset();
             form.id = null;
-            form.type = 'parts';
+            form.type = props.defaultType || 'parts';
             form.is_active = true;
         }
     },

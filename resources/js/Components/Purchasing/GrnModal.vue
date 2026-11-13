@@ -167,7 +167,7 @@
                     <button
                         type="button"
                         @click="close"
-                        class="px-5 py-2.5 text-sm font-bold text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-all"
+                        class="px-5 py-2.5 text-xs font-bold text-text-secondary hover:bg-surface-secondary border border-border rounded-xl transition-colors cursor-pointer"
                     >
                         {{ $t('common.cancel') }}
                     </button>
@@ -176,7 +176,7 @@
                         type="button"
                         @click="submit(true)"
                         :disabled="form.processing || !hasReceptions || hasErrors"
-                        class="px-8 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 text-white rounded-xl font-black uppercase tracking-widest text-xs shadow-lg shadow-emerald-500/30 hover:shadow-emerald-500/50 hover:-translate-y-0.5 transition-all disabled:opacity-50 disabled:translate-y-0"
+                        class="inline-flex items-center justify-center gap-2 px-6 py-2.5 text-xs font-bold text-white bg-action-primary hover:bg-action-primary-hover rounded-xl shadow-xs transition-all disabled:opacity-50 cursor-pointer"
                     >
                         <span v-if="form.processing">{{ $t('common.loading') }}</span>
                         <span v-else>{{ $t('purchasing.grn.save_and_post') }}</span>

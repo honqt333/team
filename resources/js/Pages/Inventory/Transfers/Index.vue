@@ -44,7 +44,7 @@
 
                         <!-- Add Transfer Button (Outer Left in RTL) -->
                         <button
-                            v-if="can('inventory.transfers.create') || isAnyAdmin()"
+                            v-if="can('inventory.moves.create') || isAnyAdmin()"
                             @click="showCreateModal = true"
                             type="button"
                             class="btn btn-primary shadow-sm hover:shadow transition-all text-sm font-semibold inline-flex items-center gap-2"
@@ -175,7 +175,7 @@
                                 $t('common.no_records_found')
                             "
                             :action-text="
-                                can('inventory.transfers.create') || isAnyAdmin()
+                                can('inventory.moves.create') || isAnyAdmin()
                                     ? $t('inventory.transfers.add')
                                     : ''
                             "
@@ -286,7 +286,7 @@
                             $t('inventory.transfers.empty_hint') || $t('common.no_records_found')
                         "
                         :empty-action-text="
-                            can('inventory.transfers.create') || isAnyAdmin()
+                            can('inventory.moves.create') || isAnyAdmin()
                                 ? $t('inventory.transfers.add')
                                 : ''
                         "

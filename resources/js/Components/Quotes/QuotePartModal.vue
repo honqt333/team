@@ -498,7 +498,7 @@
                     <button
                         type="button"
                         @click="$emit('close')"
-                        class="px-6 py-2.5 text-xs font-bold text-gray-500 hover:text-red-500 transition-all uppercase tracking-widest"
+                        class="px-5 py-2.5 text-xs font-bold text-text-secondary hover:bg-surface-secondary border border-border rounded-xl transition-colors cursor-pointer"
                     >
                         {{ isReadOnly ? $t('common.close') : $t('common.cancel') }}
                     </button>
@@ -537,7 +537,7 @@
                         (form.source !== 'warehouse' && !form.unit_id) ||
                         isPriceBelowMinimum
                     "
-                    class="px-10 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl font-black uppercase tracking-widest text-xs transition-all shadow-lg shadow-emerald-500/20 disabled:opacity-50 flex items-center gap-2"
+                    class="inline-flex items-center justify-center gap-2 px-6 py-2.5 text-xs font-bold text-white bg-action-primary hover:bg-action-primary-hover rounded-xl shadow-xs transition-all disabled:opacity-50 cursor-pointer"
                 >
                     <svg
                         v-if="form.processing"
@@ -632,6 +632,33 @@ const form = useForm({
 const stashedPrice = ref(0);
 const stashedDiscount = ref(0);
 
+function getRestorableUnitPrice() {
+    if (stashedPrice.value > 0) {
+        return stashedPrice.value;
+    }
+    if (form.source === 'warehouse' && selectedPart.value) {
+        if (activeBalance.value && parseFloat(activeBalance.value.sale_price) > 0) {
+            return parseFloat(activeBalance.value.sale_price);
+        }
+        if (parseFloat(selectedPart.value.default_sale_price) > 0) {
+            return parseFloat(selectedPart.value.default_sale_price);
+        }
+    }
+    return 0;
+}
+
+function restorePriceAndDiscount() {
+    if (Number(form.unit_price) === 0) {
+        const priceToRestore = getRestorableUnitPrice();
+        if (priceToRestore > 0) {
+            form.unit_price = priceToRestore;
+        }
+    }
+    if (Number(form.discount_value) === 0 && stashedDiscount.value > 0) {
+        form.discount_value = stashedDiscount.value;
+    }
+}
+
 watch(
     () => form.include_in_package,
     (newVal, oldVal) => {
@@ -655,11 +682,21 @@ watch(
             form.discount_value = 0;
         } else if (!newVal && oldVal && (form.quote_line_id || props.showToggles)) {
             // Restore values when untoggling
-            if (Number(form.unit_price) === 0 && stashedPrice.value > 0) {
-                form.unit_price = stashedPrice.value;
-            }
-            if (Number(form.discount_value) === 0 && stashedDiscount.value > 0) {
-                form.discount_value = stashedDiscount.value;
+            restorePriceAndDiscount();
+        }
+    }
+);
+
+watch(
+    () => form.quote_line_id,
+    (newVal) => {
+        if (isPopulating.value) return;
+        if (!newVal) {
+            // Service was unlinked or cleared
+            if (form.include_in_package) {
+                form.include_in_package = false;
+                form.hide_on_print = false;
+                restorePriceAndDiscount();
             }
         }
     }
@@ -848,6 +885,12 @@ function clearPartSelection() {
 function submitForm() {
     if (isReadOnly.value) return;
 
+    // If not linked to any service, ensure include_in_package and hide_on_print are false
+    if (!form.quote_line_id && !props.showToggles) {
+        form.include_in_package = false;
+        form.hide_on_print = false;
+    }
+
     // Flatten discount for backend
     form.discount = currentDiscountAmount.value * (parseFloat(toEnglish(form.qty)) || 0);
 
@@ -937,6 +980,22 @@ watch(
                 } else {
                     selectedPart.value = null;
                 }
+
+                // If part was already included in package, pre-initialize stashedPrice
+                stashedPrice.value = 0;
+                stashedDiscount.value = form.discount_value || 0;
+                if (form.include_in_package && (part.part || selectedPart.value)) {
+                    const p = part.part || selectedPart.value;
+                    const balances = p.inventory_balances || [];
+                    const balance = balances[0];
+                    if (activeBalance.value && parseFloat(activeBalance.value.sale_price) > 0) {
+                        stashedPrice.value = parseFloat(activeBalance.value.sale_price);
+                    } else if (balance && parseFloat(balance.sale_price) > 0) {
+                        stashedPrice.value = parseFloat(balance.sale_price);
+                    } else if (parseFloat(p.default_sale_price) > 0) {
+                        stashedPrice.value = parseFloat(p.default_sale_price);
+                    }
+                }
             } else {
                 // Reset for new part
                 form.reset();
@@ -951,6 +1010,8 @@ watch(
                 form.name = '';
                 form.part_id = null;
                 selectedPart.value = null;
+                stashedPrice.value = 0;
+                stashedDiscount.value = 0;
             }
 
             // Use timeout to ensure reactivity settles before re-enabling watchers

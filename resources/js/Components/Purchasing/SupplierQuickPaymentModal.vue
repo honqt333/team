@@ -238,11 +238,10 @@
                         {{ $t('payments.form.date') }}
                         <span class="text-red-500">*</span>
                     </label>
-                    <input
+                    <CustomDatePicker
                         v-model="form.payment_date"
-                        type="date"
-                        required
-                        class="w-full px-4 py-2.5 text-sm rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-focus-ring/20 focus:border-action-primary transition-all font-mono"
+                        :placeholder="$t('payments.form.date')"
+                        :required="true"
                     />
                 </div>
 
@@ -280,7 +279,7 @@
                 <button
                     type="button"
                     @click="$emit('close')"
-                    class="px-5 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 text-sm font-bold transition-all"
+                    class="px-5 py-2.5 text-xs font-bold text-text-secondary hover:bg-surface-secondary border border-border rounded-xl transition-colors cursor-pointer"
                 >
                     {{ $t('common.cancel') }}
                 </button>
@@ -294,7 +293,7 @@
                         maxAllowedAmount <= 0 ||
                         (allocationType === 'specific' && !form.purchase_invoice_id)
                     "
-                    class="px-6 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white text-sm font-bold hover:from-emerald-700 hover:to-teal-700 shadow-md shadow-emerald-500/25 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center gap-2"
+                    class="inline-flex items-center justify-center gap-2 px-6 py-2.5 text-xs font-bold text-white bg-action-primary hover:bg-action-primary-hover rounded-xl shadow-xs transition-all disabled:opacity-50 cursor-pointer"
                 >
                     <svg
                         v-if="submitting"
@@ -336,6 +335,7 @@ import { useI18n } from 'vue-i18n';
 import { useNumberFormat } from '@/Composables/useNumberFormat';
 import BaseModal from '@/Components/BaseModal.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
+import CustomDatePicker from '@/Components/CustomDatePicker.vue';
 
 const props = defineProps({
     show: Boolean,

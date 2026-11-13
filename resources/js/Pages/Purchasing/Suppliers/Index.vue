@@ -343,12 +343,23 @@
                                                     : 'text-content-primary',
                                             ]"
                                         >
-                                            {{ formatCurrency(supplier.balance) }}
+                                            {{
+                                                formatCurrency(
+                                                    supplier.balance < -0.01
+                                                        ? supplier.amount_due_from_supplier ||
+                                                              Math.abs(supplier.balance)
+                                                        : supplier.balance
+                                                )
+                                            }}
                                         </span>
                                         <span
                                             class="text-[9px] font-medium text-content-secondary uppercase"
                                         >
-                                            {{ $t('purchasing.suppliers.balance') }}
+                                            {{
+                                                supplier.balance < -0.01
+                                                    ? $t('suppliers.amount_due_from_supplier')
+                                                    : $t('purchasing.suppliers.balance')
+                                            }}
                                         </span>
                                     </div>
                                 </div>
@@ -495,15 +506,28 @@
                     </template>
 
                     <template #cell-balance="{ item }">
-                        <span
-                            dir="ltr"
-                            :class="[
-                                'text-sm font-bold',
-                                item.balance < -0.01 ? 'text-danger' : 'text-content-primary',
-                            ]"
-                        >
-                            {{ formatCurrency(item.balance) }}
-                        </span>
+                        <div class="flex flex-col items-end">
+                            <span
+                                dir="ltr"
+                                :class="[
+                                    'text-sm font-bold',
+                                    item.balance < -0.01 ? 'text-danger' : 'text-content-primary',
+                                ]"
+                            >
+                                {{ formatCurrency(item.balance) }}
+                            </span>
+                            <span
+                                v-if="item.balance < -0.01 || item.amount_due_from_supplier > 0.01"
+                                class="text-[10px] font-bold text-danger"
+                            >
+                                {{ $t('suppliers.amount_due_from_supplier') }}:
+                                {{
+                                    formatCurrency(
+                                        item.amount_due_from_supplier || Math.abs(item.balance)
+                                    )
+                                }}
+                            </span>
+                        </div>
                     </template>
 
                     <template #cell-purchase_orders_count="{ item }">

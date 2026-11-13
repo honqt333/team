@@ -7,6 +7,7 @@ namespace App\Http\Controllers\System;
 use App\Http\Controllers\Controller;
 use App\Models\AdminUser;
 use App\Models\User;
+use App\Services\System\SystemAuditService;
 use App\Services\TwoFactorService;
 use Exception;
 use Illuminate\Http\Request;
@@ -19,9 +20,12 @@ class TwoFactorController extends Controller
 {
     protected TwoFactorService $twoFactor;
 
-    public function __construct(TwoFactorService $twoFactor)
+    protected SystemAuditService $audit;
+
+    public function __construct(TwoFactorService $twoFactor, ?SystemAuditService $audit = null)
     {
         $this->twoFactor = $twoFactor;
+        $this->audit = $audit ?? app(SystemAuditService::class);
     }
 
     /**
@@ -132,6 +136,8 @@ class TwoFactorController extends Controller
             'two_factor_recovery_codes' => encrypt(json_encode($recoveryCodes)),
         ]);
 
+        $this->audit->log('two_factor_enabled', $user::class, $user->id, [], $request);
+
         return back()->with('success', __('messages.system.two_factor.enabled'));
     }
 
@@ -156,6 +162,8 @@ class TwoFactorController extends Controller
             'two_factor_confirmed_at' => null,
         ]);
 
+        $this->audit->log('two_factor_disabled', $user::class, $user->id, [], $request);
+
         return back()->with('success', __('messages.system.two_factor.disabled'));
     }
 
@@ -178,6 +186,8 @@ class TwoFactorController extends Controller
         $user->update([
             'two_factor_recovery_codes' => encrypt(json_encode($recoveryCodes)),
         ]);
+
+        $this->audit->log('two_factor_recovery_codes_regenerated', $user::class, $user->id, [], $request);
 
         return back()->with('success', __('messages.system.two_factor.codes_regenerated'));
     }
@@ -219,7 +229,9 @@ class TwoFactorController extends Controller
             ? AdminUser::find($userId)
             : User::find($userId);
 
-        if (! $user) {
+        if (! $user || ! $user->two_factor_secret) {
+            session()->forget(['2fa:user_id', '2fa:user_type']);
+
             return redirect()->route('login');
         }
 
@@ -233,6 +245,10 @@ class TwoFactorController extends Controller
         }
         // Verify recovery code
         elseif ($request->recovery_code) {
+            if (! $user->two_factor_recovery_codes) {
+                return back()->withErrors(['recovery_code' => __('messages.system.two_factor.invalid_recovery_code')]);
+            }
+
             $recoveryCodes = json_decode(decrypt($user->two_factor_recovery_codes), true);
 
             if (! $this->twoFactor->verifyRecoveryCode($request->recovery_code, $recoveryCodes)) {

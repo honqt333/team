@@ -41,13 +41,13 @@ export function useNumberFormat() {
     // ============================================
 
     function toEnglish(value) {
-        if (typeof value !== 'string') return value;
-
-        let result = value;
-        arabicNumerals.forEach((arabic, index) => {
-            result = result.replaceAll(arabic, englishNumerals[index]);
-        });
-        return result;
+        if (value === null || value === undefined) return '';
+        const str = String(value);
+        return str
+            .replace(/[\u0660-\u0669]/g, (c) => String.fromCharCode(c.charCodeAt(0) - 0x0660 + 48))
+            .replace(/[\u06F0-\u06F9]/g, (c) => String.fromCharCode(c.charCodeAt(0) - 0x06f0 + 48))
+            .replace(/\u066B/g, '.')
+            .replace(/\u066C/g, '');
     }
 
     function toArabic(value) {

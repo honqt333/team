@@ -171,13 +171,13 @@
             <div class="flex justify-end gap-3">
                 <button
                     @click="handleClose"
-                    class="px-4 py-2 text-gray-700 dark:text-gray-300 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 rounded-lg font-medium transition-colors"
+                    class="px-5 py-2.5 text-xs font-bold text-text-secondary hover:bg-surface-secondary border border-border rounded-xl transition-colors cursor-pointer"
                 >
                     {{ $t('common.cancel') }}
                 </button>
                 <button
                     @click="submit"
-                    class="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors"
+                    class="inline-flex items-center justify-center gap-2 px-6 py-2.5 text-xs font-bold text-white bg-action-primary hover:bg-action-primary-hover rounded-xl shadow-xs transition-all disabled:opacity-50 cursor-pointer"
                 >
                     {{ editRowData ? $t('common.update') : $t('common.add') }}
                 </button>
@@ -242,7 +242,7 @@ function toEnglish(str) {
 
 // Strip trailing decimal zeros: 5.00 → "5", 5.50 → "5.5"
 function trimNum(val) {
-    const n = parseFloat(val ?? 0);
+    const n = parseFloat(toEnglish(val) ?? 0);
     if (isNaN(n)) return '0';
     return parseFloat(n.toFixed(4)).toString();
 }

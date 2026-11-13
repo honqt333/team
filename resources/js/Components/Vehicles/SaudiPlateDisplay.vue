@@ -92,12 +92,15 @@
         class="px-2.5 py-1 text-sm font-bold bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-lg inline-block whitespace-nowrap"
         dir="ltr"
     >
-        {{ plateNumber || '-' }}
+        {{ toEnglish(plateNumber) || '-' }}
     </span>
 </template>
 
 <script setup>
 import { computed } from 'vue';
+import { useNumberFormat } from '@/Composables/useNumberFormat';
+
+const { toEnglish } = useNumberFormat();
 
 const props = defineProps({
     plateNumber: {
@@ -148,7 +151,8 @@ const getArabicNumeral = (num) => englishToArabicNums[num] || num;
 
 const parsed = computed(() => {
     if (!props.plateNumber) return null;
-    const match = props.plateNumber.trim().match(/^([a-zA-Z](?:\s*[a-zA-Z]){0,2})\s*(\d{1,4})$/);
+    const clean = toEnglish(props.plateNumber).trim();
+    const match = clean.match(/^([a-zA-Z](?:\s*[a-zA-Z]){0,2})\s*(\d{1,4})$/);
     if (match) {
         return {
             letters: match[1].replace(/\s+/g, '').toUpperCase(),

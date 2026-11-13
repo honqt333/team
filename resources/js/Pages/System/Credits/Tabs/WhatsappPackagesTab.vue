@@ -203,11 +203,13 @@
 <script setup>
 import AppToggle from '@/Components/Common/AppToggle.vue';
 import BaseModal from '@/Components/BaseModal.vue';
+import { useConfirm } from '@/Composables/useConfirm';
 import { ref } from 'vue';
 import { useForm, router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 
 const { t } = useI18n();
+const { confirm } = useConfirm();
 
 const props = defineProps({
     packages: { type: Array, default: () => [] },
@@ -264,8 +266,15 @@ const submitPackage = () => {
     }
 };
 
-const deletePackage = (pkg) => {
-    if (confirm(t('system.credits.delete_package', { name: pkg.name_ar }))) {
+const deletePackage = async (pkg) => {
+    const ok = await confirm({
+        title: t('common.delete'),
+        message: t('system.credits.delete_package', { name: pkg.name_ar }),
+        confirmText: t('common.delete'),
+        cancelText: t('common.cancel'),
+        type: 'danger',
+    });
+    if (ok) {
         router.delete(`/system/whatsapp/packages/${pkg.id}`);
     }
 };
